@@ -1,0 +1,36 @@
+<div class="layout-container">
+  <!-- Main Navigation -->
+  <mat-sidenav-container class="sidenav-container" autosize>
+    
+    <!-- Sidebar Navigation -->
+    <mat-sidenav
+      #drawer
+      class="sidenav"
+      [mode]="sidenavMode"
+      [opened]="sidenavOpened"
+      [fixedInViewport]="isHandset"
+      fixedTopGap="0"
+      (closedStart)="onSidenavClosed()">
+      
+      <app-sidebar (menuItemClick)="isHandset && drawer.close()"></app-sidebar>
+    </mat-sidenav>
+
+    <!-- Main Content Area -->
+    <mat-sidenav-content class="main-content">
+      
+      <!-- Header -->
+      <app-header 
+        [isHandset]="isHandset"
+        (menuToggle)="onMenuToggle()">
+      </app-header>
+
+      <!-- Page Content -->
+      <main class="page-content">
+        <div class="content-wrapper">
+          <router-outlet></router-outlet>
+        </div>
+      </main>
+
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

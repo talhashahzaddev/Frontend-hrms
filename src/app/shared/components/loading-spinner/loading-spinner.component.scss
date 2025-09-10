@@ -1,0 +1,174 @@
+// Loading Spinner Styles (Hubstaff-inspired)
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  text-align: center;
+  animation: slideInUp 0.4s ease;
+}
+
+.spinner-container {
+  position: relative;
+}
+
+// Custom Spinner (Hubstaff-inspired)
+.custom-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--gray-200);
+  border-radius: 50%;
+  border-top-color: transparent;
+  position: relative;
+  animation: spin 1s linear infinite;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    border-top: 3px solid var(--primary-600);
+    animation: spin 1.5s linear infinite reverse;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    border-top: 2px solid var(--purple-500);
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.loading-text {
+  max-width: 280px;
+  
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0 0 var(--spacing-sm);
+  }
+  
+  p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Dark theme support
+.dark-theme {
+  .loading-overlay {
+    background: rgba(17, 24, 39, 0.95);
+  }
+  
+  .custom-spinner {
+    border-color: var(--gray-600);
+    
+    &::before {
+      border-top-color: var(--primary-400);
+    }
+    
+    &::after {
+      border-top-color: var(--purple-400);
+    }
+  }
+  
+  .loading-text {
+    h3 {
+      color: var(--gray-100);
+    }
+    
+    p {
+      color: var(--gray-400);
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .loading-overlay,
+  .loading-content {
+    animation: none;
+  }
+  
+  .custom-spinner,
+  .custom-spinner::before,
+  .custom-spinner::after {
+    animation: none;
+  }
+  
+  .custom-spinner {
+    border-top-color: var(--primary-600);
+  }
+}
+
+// High contrast support
+@media (prefers-contrast: high) {
+  .loading-overlay {
+    background: rgba(255, 255, 255, 0.98);
+  }
+  
+  .custom-spinner {
+    border-color: var(--gray-800);
+    border-width: 4px;
+    
+    &::before,
+    &::after {
+      border-width: 4px;
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<!-- Main App Container -->
+<div class="app-container" [class.loading]="isLoading$ | async">
+  
+  <!-- Global Loading Spinner -->
+  <app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
+  
+  <!-- Main Layout Container -->
+  <div class="main-content" *ngIf="!(isLoading$ | async)">
+    
+    <!-- Authenticated Layout -->
+    <app-layout *ngIf="isAuthenticated$ | async">
+      <router-outlet></router-outlet>
+    </app-layout>
+    
+    <!-- Unauthenticated Routes (Login, Register, etc.) -->
+    <div class="auth-container" *ngIf="!(isAuthenticated$ | async)">
+      <div class="auth-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Toast Container for Notifications -->
+  <p-toast position="top-right" [life]="5000" [showTransitionOptions]="'300ms'" [hideTransitionOptions]="'300ms'">
+  </p-toast>
+  
+  <!-- Offline Indicator -->
+  <div class="offline-indicator" id="offline-indicator" style="display: none;">
+    <mat-icon>wifi_off</mat-icon>
+    <span>You're currently offline. Some features may not be available.</span>
+  </div>
+  
+</div>
+
+<!-- PWA Update Available Banner -->
+<div class="pwa-update-banner" id="pwa-update-banner" style="display: none;">
+  <div class="banner-content">
+    <mat-icon>system_update</mat-icon>
+    <span>A new version is available!</span>
+    <button mat-raised-button color="primary" onclick="window.location.reload()">
+      Update Now
+    </button>
+    <button mat-icon-button onclick="document.getElementById('pwa-update-banner').style.display = 'none'">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

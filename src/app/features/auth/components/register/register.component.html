@@ -1,0 +1,339 @@
+<!-- Registration Container -->
+<div class="register-container">
+  <div class="register-card mat-elevation-8">
+    
+    <!-- Header Section -->
+    <div class="register-header">
+      <div class="logo">
+        <mat-icon class="logo-icon">business</mat-icon>
+        <h1 class="brand-title">HRMS</h1>
+      </div>
+      <h2 class="register-title">Create Your Account</h2>
+      <p class="register-subtitle">Get started with your HRMS journey</p>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="register-form">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+        
+        <!-- Registration Stepper -->
+        <mat-stepper [linear]="isLinear" #stepper class="register-stepper">
+          
+          <!-- Step 1: Organization Information -->
+          <mat-step [stepControl]="organizationForm" label="Organization">
+            <ng-template matStepLabel>Organization Info</ng-template>
+            
+            <div class="step-content">
+              <div class="step-header">
+                <h3>Tell us about your organization</h3>
+                <p>This information helps us set up your account properly</p>
+              </div>
+
+              <div formGroupName="organization" class="form-grid">
+                
+                <!-- Company Name -->
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Company Name</mat-label>
+                  <mat-icon matPrefix>business</mat-icon>
+                  <input matInput formControlName="companyName" placeholder="Enter your company name">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'companyName')">
+                    {{ getErrorMessage(organizationForm, 'companyName') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Organization Type -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Organization Type</mat-label>
+                  <mat-icon matPrefix>category</mat-icon>
+                  <mat-select formControlName="organizationType">
+                    <mat-option *ngFor="let type of organizationTypes" [value]="type.value">
+                      {{ type.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'organizationType')">
+                    {{ getErrorMessage(organizationForm, 'organizationType') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Company Size -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Company Size</mat-label>
+                  <mat-icon matPrefix>groups</mat-icon>
+                  <mat-select formControlName="companySize">
+                    <mat-option *ngFor="let size of companySizes" [value]="size.value">
+                      {{ size.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'companySize')">
+                    {{ getErrorMessage(organizationForm, 'companySize') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Industry -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Industry</mat-label>
+                  <mat-icon matPrefix>work</mat-icon>
+                  <input matInput formControlName="industry" placeholder="e.g., Technology, Healthcare">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'industry')">
+                    {{ getErrorMessage(organizationForm, 'industry') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Address -->
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Address</mat-label>
+                  <mat-icon matPrefix>location_on</mat-icon>
+                  <input matInput formControlName="address" placeholder="Street address">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'address')">
+                    {{ getErrorMessage(organizationForm, 'address') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- City -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>City</mat-label>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <input matInput formControlName="city" placeholder="City">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'city')">
+                    {{ getErrorMessage(organizationForm, 'city') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- State -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>State/Province</mat-label>
+                  <mat-icon matPrefix>map</mat-icon>
+                  <input matInput formControlName="state" placeholder="State or Province">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'state')">
+                    {{ getErrorMessage(organizationForm, 'state') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Country -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Country</mat-label>
+                  <mat-icon matPrefix>public</mat-icon>
+                  <input matInput formControlName="country" placeholder="Country">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'country')">
+                    {{ getErrorMessage(organizationForm, 'country') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- ZIP Code -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>ZIP/Postal Code</mat-label>
+                  <mat-icon matPrefix>markunread_mailbox</mat-icon>
+                  <input matInput formControlName="zipCode" placeholder="ZIP or Postal Code">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'zipCode')">
+                    {{ getErrorMessage(organizationForm, 'zipCode') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Phone -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Phone</mat-label>
+                  <mat-icon matPrefix>phone</mat-icon>
+                  <input matInput formControlName="phone" placeholder="Company phone number">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'phone')">
+                    {{ getErrorMessage(organizationForm, 'phone') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Website -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Website</mat-label>
+                  <mat-icon matPrefix>language</mat-icon>
+                  <input matInput formControlName="website" placeholder="https://yourcompany.com">
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'website')">
+                    {{ getErrorMessage(organizationForm, 'website') }}
+                  </mat-error>
+                </mat-form-field>
+
+              </div>
+
+              <!-- Step Actions -->
+              <div class="step-actions">
+                <button mat-flat-button matStepperNext 
+                        [disabled]="organizationForm.invalid"
+                        class="next-button">
+                  Next: User Information
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-step>
+
+          <!-- Step 2: User Information -->
+          <mat-step [stepControl]="userForm" label="User">
+            <ng-template matStepLabel>User Info</ng-template>
+            
+            <div class="step-content">
+              <div class="step-header">
+                <h3>Create your admin account</h3>
+                <p>This will be your primary administrator account</p>
+              </div>
+
+              <div formGroupName="user" class="form-grid">
+                
+                <!-- First Name -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>First Name</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="firstName" placeholder="Enter your first name">
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'firstName')">
+                    {{ getErrorMessage(userForm, 'firstName') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Last Name -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Last Name</mat-label>
+                  <mat-icon matPrefix>person_outline</mat-icon>
+                  <input matInput formControlName="lastName" placeholder="Enter your last name">
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'lastName')">
+                    {{ getErrorMessage(userForm, 'lastName') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Email -->
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Email Address</mat-label>
+                  <mat-icon matPrefix>email</mat-icon>
+                  <input matInput formControlName="email" type="email" placeholder="admin@yourcompany.com">
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'email')">
+                    {{ getErrorMessage(userForm, 'email') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Phone -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Phone Number</mat-label>
+                  <mat-icon matPrefix>phone</mat-icon>
+                  <input matInput formControlName="phone" placeholder="Your phone number">
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'phone')">
+                    {{ getErrorMessage(userForm, 'phone') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Job Title -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Job Title</mat-label>
+                  <mat-icon matPrefix>work</mat-icon>
+                  <input matInput formControlName="jobTitle" placeholder="e.g., HR Manager">
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'jobTitle')">
+                    {{ getErrorMessage(userForm, 'jobTitle') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Department -->
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Department</mat-label>
+                  <mat-icon matPrefix>domain</mat-icon>
+                  <input matInput formControlName="department" placeholder="e.g., Human Resources">
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'department')">
+                    {{ getErrorMessage(userForm, 'department') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Password -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Password</mat-label>
+                  <mat-icon matPrefix>lock</mat-icon>
+                  <input matInput 
+                         formControlName="password"
+                         [type]="hidePassword ? 'password' : 'text'"
+                         placeholder="Create a strong password">
+                  <button mat-icon-button matSuffix 
+                          type="button"
+                          (click)="togglePasswordVisibility()"
+                          [attr.aria-label]="'Hide password'"
+                          [attr.aria-pressed]="hidePassword">
+                    <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'password')">
+                    {{ getErrorMessage(userForm, 'password') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Confirm Password -->
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Confirm Password</mat-label>
+                  <mat-icon matPrefix>lock_outline</mat-icon>
+                  <input matInput 
+                         formControlName="confirmPassword"
+                         [type]="hideConfirmPassword ? 'password' : 'text'"
+                         placeholder="Confirm your password">
+                  <button mat-icon-button matSuffix 
+                          type="button"
+                          (click)="toggleConfirmPasswordVisibility()"
+                          [attr.aria-label]="'Hide password'"
+                          [attr.aria-pressed]="hideConfirmPassword">
+                    <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  <mat-error *ngIf="isFieldInvalid(userForm, 'confirmPassword')">
+                    {{ getErrorMessage(userForm, 'confirmPassword') }}
+                  </mat-error>
+                </mat-form-field>
+
+              </div>
+
+              <!-- Terms Agreement -->
+              <div class="terms-section">
+                <mat-checkbox formControlName="agreeToTerms" class="terms-checkbox">
+                  I agree to the
+                  <a href="#" target="_blank" class="terms-link">Terms of Service</a>
+                  and
+                  <a href="#" target="_blank" class="terms-link">Privacy Policy</a>
+                </mat-checkbox>
+                <mat-error *ngIf="userForm.get('agreeToTerms')?.hasError('required') && userForm.get('agreeToTerms')?.touched">
+                  You must agree to the terms and conditions
+                </mat-error>
+              </div>
+
+              <!-- Step Actions -->
+              <div class="step-actions">
+                <button mat-stroked-button matStepperPrevious class="back-button">
+                  <mat-icon>arrow_back</mat-icon>
+                  Back
+                </button>
+
+                <button mat-flat-button 
+                        [disabled]="userForm.invalid || isLoading"
+                        type="submit"
+                        class="register-button">
+                  <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+                  {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+                </button>
+              </div>
+            </div>
+          </mat-step>
+
+        </mat-stepper>
+
+      </form>
+
+      <!-- Demo Data Section -->
+      <div class="demo-section">
+        <button mat-stroked-button 
+                type="button" 
+                (click)="fillDemoData()" 
+                class="demo-button">
+          <mat-icon>auto_fix_high</mat-icon>
+          Fill Demo Data
+        </button>
+        <p class="demo-note">
+          Click to auto-fill the form with demo data for testing
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="register-footer">
+        <p>
+          Already have an account? 
+          <a routerLink="/login" class="login-link">Sign in here</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>

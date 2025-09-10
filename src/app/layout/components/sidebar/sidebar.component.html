@@ -1,0 +1,90 @@
+<div class="sidebar-container">
+  
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="organization-info">
+      <div class="org-logo">
+        <mat-icon class="org-icon">business</mat-icon>
+      </div>
+      <div class="org-details" *ngIf="currentUser">
+        <div class="org-name">{{ currentUser.organizationName }}</div>
+        <div class="user-role">{{ currentUser.roleName }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <mat-nav-list class="nav-list">
+      
+      <!-- Menu Items -->
+      <ng-container *ngFor="let item of getFilteredMenuItems()">
+        
+        <!-- Single Menu Item (No Children) -->
+        <mat-list-item 
+          *ngIf="!item.children || item.children.length === 0"
+          class="nav-item"
+          [class.active]="isActiveRoute(item.route!)"
+          (click)="onMenuItemClick(item)"
+          role="menuitem">
+          
+          <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span matListItemTitle class="nav-label">{{ item.label }}</span>
+          
+          <span matListItemMeta *ngIf="item.badge && item.badge > 0" 
+                class="nav-badge">
+            {{ item.badge }}
+          </span>
+        </mat-list-item>
+
+        <!-- Expandable Menu Item (With Children) -->
+        <div *ngIf="item.children && item.children.length > 0" class="nav-group">
+          
+          <mat-expansion-panel 
+            class="nav-expansion-panel"
+            [expanded]="isParentActive(item)"
+            hideToggle>
+            
+            <mat-expansion-panel-header class="nav-group-header">
+              <mat-panel-title class="nav-group-title">
+                <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                <span class="nav-label">{{ item.label }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            
+            <!-- Sub Menu Items -->
+            <div class="nav-sub-items">
+              <mat-list class="sub-nav-list">
+                <mat-list-item
+                  *ngFor="let child of getFilteredChildren(item.children)"
+                  class="nav-sub-item"
+                  [class.active]="isActiveRoute(child.route!)"
+                  (click)="onMenuItemClick(child)"
+                  role="menuitem">
+                  
+                  <mat-icon matListItemIcon class="nav-sub-icon">{{ child.icon }}</mat-icon>
+                  <span matListItemTitle class="nav-sub-label">{{ child.label }}</span>
+                  
+                  <span matListItemMeta *ngIf="child.badge && child.badge > 0" 
+                        class="nav-badge">
+                    {{ child.badge }}
+                  </span>
+                </mat-list-item>
+              </mat-list>
+            </div>
+          </mat-expansion-panel>
+        </div>
+      </ng-container>
+    </mat-nav-list>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <div class="footer-content">
+      <div class="app-version">
+        <span class="version-text">v1.0.0</span>
+      </div>
+    </div>
+  </div>
+
+</div>

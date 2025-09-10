@@ -1,0 +1,288 @@
+// App Container Styles (Hubstaff-inspired)
+.app-container {
+  min-height: 100vh;
+  background: var(--gray-50);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  &.loading {
+    overflow: hidden;
+  }
+}
+
+.main-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Authentication Layout Styles
+.auth-container {
+  min-height: 100vh;
+  background: var(--gradient-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  position: relative;
+  
+  // Animated background pattern
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 480px;
+  z-index: 1;
+  position: relative;
+}
+
+// Offline Indicator
+.offline-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--warning);
+  color: white;
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: var(--shadow-lg);
+  
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// PWA Update Banner
+.pwa-update-banner {
+  position: fixed;
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--gray-200);
+  z-index: 9998;
+  max-width: 400px;
+  
+  .banner-content {
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    
+    mat-icon {
+      color: var(--primary-600);
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+    
+    span {
+      flex: 1;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+    
+    button {
+      &[mat-raised-button] {
+        background: var(--gradient-primary);
+        border-radius: var(--radius-lg);
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+      }
+      
+      &[mat-icon-button] {
+        color: var(--gray-400);
+        
+        &:hover {
+          color: var(--gray-600);
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Loading States
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  
+  .loading-content {
+    text-align: center;
+    
+    .spinner {
+      width: 2rem;
+      height: 2rem;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    h3 {
+      color: var(--gray-700);
+      margin-bottom: var(--spacing-sm);
+      font-weight: 600;
+    }
+    
+    p {
+      color: var(--gray-500);
+      font-size: 0.875rem;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .auth-container {
+    padding: var(--spacing-md);
+  }
+  
+  .pwa-update-banner {
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+    left: var(--spacing-md);
+    max-width: none;
+    
+    .banner-content {
+      padding: var(--spacing-md);
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      
+      span {
+        flex: 100%;
+        margin-bottom: var(--spacing-sm);
+      }
+      
+      button[mat-raised-button] {
+        flex: 1;
+        min-width: 120px;
+      }
+    }
+  }
+  
+  .offline-indicator {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.75rem;
+    
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-wrapper {
+    max-width: 100%;
+  }
+}
+
+// Dark mode support (future enhancement)
+@media (prefers-color-scheme: dark) {
+  .app-container {
+    background: var(--gray-900);
+    color: var(--gray-100);
+  }
+  
+  .pwa-update-banner {
+    background: var(--gray-800);
+    border-color: var(--gray-700);
+    
+    .banner-content {
+      span {
+        color: var(--gray-200);
+      }
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .auth-container::before {
+    display: none;
+  }
+  
+  .pwa-update-banner {
+    border: 2px solid var(--primary-600);
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .auth-container::before {
+    animation: none;
+  }
+  
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+// Print styles
+@media print {
+  .offline-indicator,
+  .pwa-update-banner {
+    display: none !important;
+  }
+}

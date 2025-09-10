@@ -1,0 +1,291 @@
+<!-- Attendance Dashboard Container -->
+<div class="attendance-dashboard-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>access_time</mat-icon>
+        Attendance Dashboard
+      </h1>
+      <div class="current-datetime">
+        <div class="current-time">{{ getCurrentTimeFormatted() }}</div>
+        <div class="current-date">{{ getCurrentDateFormatted() }}</div>
+      </div>
+    </div>
+    
+    <!-- Clock In/Out Section -->
+    <div class="clock-section">
+      <div class="clock-card" *ngIf="!isCurrentSession()">
+        <h3>Ready to start your day?</h3>
+        <button mat-flat-button 
+                (click)="clockIn()" 
+                [disabled]="isClockActionLoading"
+                class="clock-in-button">
+          <mat-spinner *ngIf="isClockActionLoading" diameter="20" class="button-spinner"></mat-spinner>
+          <mat-icon *ngIf="!isClockActionLoading">login</mat-icon>
+          {{ isClockActionLoading ? 'Clocking In...' : 'Clock In' }}
+        </button>
+      </div>
+      
+      <div class="clock-card active-session" *ngIf="isCurrentSession()">
+        <h3>You're clocked in!</h3>
+        <div class="session-info">
+          <div class="session-time">{{ getSessionDuration() }}</div>
+          <div class="session-label">Working time</div>
+        </div>
+        <button mat-flat-button 
+                (click)="clockOut()" 
+                [disabled]="isClockActionLoading"
+                class="clock-out-button">
+          <mat-spinner *ngIf="isClockActionLoading" diameter="20" class="button-spinner"></mat-spinner>
+          <mat-icon *ngIf="!isClockActionLoading">logout</mat-icon>
+          {{ isClockActionLoading ? 'Clocking Out...' : 'Clock Out' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats Grid -->
+  <div class="stats-grid">
+    <mat-card *ngFor="let stat of quickStats; trackBy: trackByFn" 
+              class="stat-card"
+              [class]="'stat-card-' + stat.color">
+      <div class="stat-content">
+        <div class="stat-icon">
+          <mat-icon>{{ stat.icon }}</mat-icon>
+        </div>
+        <div class="stat-details">
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="main-grid">
+    
+    <!-- Attendance Calendar -->
+    <mat-card class="calendar-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>calendar_month</mat-icon>
+          Attendance Calendar
+        </mat-card-title>
+        
+        <div class="calendar-controls">
+          <mat-form-field appearance="outline" class="month-picker">
+            <mat-label>Month</mat-label>
+            <input matInput 
+                   [matDatepicker]="monthPicker" 
+                   [formControl]="monthControl"
+                   readonly>
+            <mat-datepicker-toggle matIconSuffix [for]="monthPicker">
+              <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #monthPicker 
+                           startView="year" 
+                           (monthSelected)="monthControl.setValue($event); monthPicker.close()">
+            </mat-datepicker>
+          </mat-form-field>
+        </div>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="calendar-loading">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        
+        <!-- Calendar Grid -->
+        <div *ngIf="!isLoading" class="calendar-grid">
+          <!-- Week Day Headers -->
+          <div class="calendar-header">
+            <div *ngFor="let day of weekDays" class="calendar-header-day">
+              {{ day }}
+            </div>
+          </div>
+          
+          <!-- Calendar Weeks -->
+          <div class="calendar-body">
+            <div *ngFor="let week of calendarWeeks" class="calendar-week">
+              <div *ngFor="let day of week" 
+                   [class]="getCalendarDayClass(day)"
+                   [matTooltip]="day.date ? (day.status | titlecase) + ' - ' + day.totalHours + 'h' : ''"
+                   matTooltipPosition="above">
+                
+                <div class="day-number" *ngIf="day.date">{{ getDayNumber(day.date) }}</div>
+                <div class="day-status" *ngIf="day.date">
+                  <mat-chip [class]="'status-chip-' + getStatusColor(day.status)">
+                    {{ day.totalHours }}h
+                  </mat-chip>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Calendar Legend -->
+        <div class="calendar-legend">
+          <div class="legend-item">
+            <div class="legend-color status-present"></div>
+            <span>Present</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color status-absent"></div>
+            <span>Absent</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color status-late"></div>
+            <span>Late</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color status-half_day"></div>
+            <span>Half Day</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color status-on_leave"></div>
+            <span>On Leave</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color status-holiday"></div>
+            <span>Holiday</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Side Panel -->
+    <div class="side-panel">
+      
+      <!-- Daily Summary -->
+      <mat-card class="daily-summary-card" *ngIf="dailyStats">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>today</mat-icon>
+            Today's Summary
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="summary-stats">
+            <div class="summary-stat">
+              <div class="summary-icon present">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+              <div class="summary-info">
+                <div class="summary-value">{{ dailyStats.presentEmployees }}</div>
+                <div class="summary-label">Present</div>
+              </div>
+            </div>
+            
+            <div class="summary-stat">
+              <div class="summary-icon absent">
+                <mat-icon>cancel</mat-icon>
+              </div>
+              <div class="summary-info">
+                <div class="summary-value">{{ dailyStats.absentEmployees }}</div>
+                <div class="summary-label">Absent</div>
+              </div>
+            </div>
+            
+            <div class="summary-stat">
+              <div class="summary-icon late">
+                <mat-icon>schedule</mat-icon>
+              </div>
+              <div class="summary-info">
+                <div class="summary-value">{{ dailyStats.lateEmployees }}</div>
+                <div class="summary-label">Late</div>
+              </div>
+            </div>
+            
+            <div class="summary-stat">
+              <div class="summary-icon on-leave">
+                <mat-icon>event_busy</mat-icon>
+              </div>
+              <div class="summary-info">
+                <div class="summary-value">{{ dailyStats.onLeaveEmployees }}</div>
+                <div class="summary-label">On Leave</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="attendance-percentage">
+            <div class="percentage-label">Overall Attendance</div>
+            <div class="percentage-value">{{ dailyStats.attendancePercentage }}%</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Monthly Summary -->
+      <mat-card class="monthly-summary-card" *ngIf="attendanceSummary">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>calendar_month</mat-icon>
+            This Month
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="monthly-stats">
+            <div class="monthly-stat">
+              <div class="stat-label">Working Days</div>
+              <div class="stat-value">{{ attendanceSummary.totalWorkingDays }}</div>
+            </div>
+            
+            <div class="monthly-stat">
+              <div class="stat-label">Present Days</div>
+              <div class="stat-value">{{ attendanceSummary.presentDays }}</div>
+            </div>
+            
+            <div class="monthly-stat">
+              <div class="stat-label">Total Hours</div>
+              <div class="stat-value">{{ attendanceService.formatDuration(attendanceSummary.totalHours) }}</div>
+            </div>
+            
+            <div class="monthly-stat">
+              <div class="stat-label">Overtime Hours</div>
+              <div class="stat-value">{{ attendanceService.formatDuration(attendanceSummary.overtimeHours) }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Quick Actions -->
+      <mat-card class="quick-actions-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>flash_on</mat-icon>
+            Quick Actions
+          </mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="quick-actions">
+            <button mat-stroked-button 
+                    (click)="navigateToTimesheet()" 
+                    class="quick-action-btn">
+              <mat-icon>view_list</mat-icon>
+              View Timesheet
+            </button>
+            
+            <button mat-stroked-button 
+                    (click)="navigateToReports()" 
+                    class="quick-action-btn">
+              <mat-icon>assessment</mat-icon>
+              Generate Report
+            </button>
+            
+            <button mat-stroked-button 
+                    routerLink="/leave/apply" 
+                    class="quick-action-btn">
+              <mat-icon>event_available</mat-icon>
+              Apply for Leave
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

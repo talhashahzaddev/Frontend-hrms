@@ -1,0 +1,310 @@
+// Header Styles (Hubstaff-inspired)
+.header-toolbar {
+  background: white;
+  color: var(--gray-800);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  height: 64px;
+  padding: 0 var(--spacing-lg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  
+  @media (max-width: 768px) {
+    height: 56px;
+    padding: 0 var(--spacing-md);
+  }
+}
+
+// Menu Button
+.menu-button {
+  margin-right: var(--spacing-md);
+  color: var(--gray-700);
+  
+  &:hover {
+    background: var(--gray-100);
+  }
+}
+
+// Brand/Logo Section
+.brand {
+  display: flex;
+  align-items: center;
+  
+  &.mobile {
+    .brand-text {
+      display: none;
+    }
+  }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  
+  .logo-icon {
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--primary-600);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .brand-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    letter-spacing: -0.025em;
+    
+    &.hidden {
+      display: none;
+    }
+  }
+}
+
+// Spacer
+.spacer {
+  flex: 1;
+}
+
+// Header Actions
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.action-button {
+  color: var(--gray-600);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: var(--gray-100);
+    color: var(--gray-800);
+  }
+  
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// User Menu Button
+.user-menu-button {
+  margin-left: var(--spacing-sm);
+  padding: var(--spacing-xs);
+  
+  &:hover {
+    background: var(--gray-100);
+  }
+}
+
+.user-avatar {
+  .user-avatar-content {
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+// User Menu Styles
+::ng-deep .user-menu {
+  .mat-mdc-menu-content {
+    padding: 0;
+    min-width: 280px;
+  }
+}
+
+.user-menu-header {
+  padding: var(--spacing-lg);
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.user-avatar-large {
+  .user-avatar-large-content {
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 1.125rem !important;
+    width: 3rem !important;
+    height: 3rem !important;
+  }
+}
+
+.user-details {
+  flex: 1;
+  
+  .user-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+  
+  .user-email {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 2px;
+  }
+  
+  .user-role {
+    font-size: 0.75rem;
+    color: var(--primary-600);
+    background: var(--primary-100);
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-full);
+    display: inline-block;
+    font-weight: 500;
+  }
+}
+
+// Menu Items
+::ng-deep .user-menu {
+  .mat-mdc-menu-item {
+    height: auto;
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    
+    &:hover {
+      background: var(--gray-50);
+    }
+    
+    mat-icon {
+      color: var(--gray-500);
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+    
+    span {
+      font-size: 0.875rem;
+      color: var(--gray-700);
+    }
+  }
+  
+  .logout-item {
+    &:hover {
+      background: var(--error-light);
+      
+      mat-icon, span {
+        color: var(--error) !important;
+      }
+    }
+  }
+}
+
+// Badge Styles
+::ng-deep .mat-badge {
+  .mat-badge-content {
+    background: var(--error);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 600;
+    min-width: 16px;
+    height: 16px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .header-actions {
+    gap: 2px;
+  }
+  
+  .action-button {
+    width: 40px;
+    height: 40px;
+    
+    mat-icon {
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+  
+  .user-menu-header {
+    padding: var(--spacing-md);
+  }
+  
+  .user-info {
+    gap: var(--spacing-sm);
+  }
+}
+
+// Dark theme support
+.dark-theme {
+  .header-toolbar {
+    background: var(--gray-800);
+    color: var(--gray-200);
+    border-bottom-color: var(--gray-700);
+  }
+  
+  .brand .logo .brand-text {
+    color: var(--gray-200);
+  }
+  
+  .action-button {
+    color: var(--gray-400);
+    
+    &:hover {
+      background: var(--gray-700);
+      color: var(--gray-200);
+    }
+  }
+  
+  .user-menu-button:hover {
+    background: var(--gray-700);
+  }
+  
+  .user-menu-header {
+    background: var(--gray-700);
+    border-bottom-color: var(--gray-600);
+  }
+  
+  .user-details {
+    .user-name {
+      color: var(--gray-100);
+    }
+    
+    .user-email {
+      color: var(--gray-400);
+    }
+  }
+}
+
+// High contrast support
+@media (prefers-contrast: high) {
+  .header-toolbar {
+    border-bottom-width: 2px;
+  }
+  
+  .action-button {
+    border: 1px solid transparent;
+    
+    &:hover, &:focus {
+      border-color: var(--primary-600);
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .header-toolbar {
+    display: none;
+  }
+}

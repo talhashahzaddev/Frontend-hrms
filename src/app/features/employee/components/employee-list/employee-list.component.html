@@ -1,0 +1,307 @@
+<!-- Employee List Container -->
+<div class="employee-list-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>groups</mat-icon>
+        Employee Management
+      </h1>
+      <p class="page-subtitle">Manage and organize your workforce</p>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-flat-button 
+              routerLink="/employees/add" 
+              class="add-button">
+        <mat-icon>person_add</mat-icon>
+        Add Employee
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Search & Filters</h3>
+      <button mat-stroked-button 
+              (click)="clearFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content">
+      <!-- Search -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search employees...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput 
+               [formControl]="searchControl" 
+               placeholder="Name, email, or employee number">
+      </mat-form-field>
+      
+      <!-- Department Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Department</mat-label>
+        <mat-icon matPrefix>domain</mat-icon>
+        <mat-select [formControl]="departmentControl">
+          <mat-option value="">All Departments</mat-option>
+          <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+            {{ dept.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Position Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Position</mat-label>
+        <mat-icon matPrefix>work</mat-icon>
+        <mat-select [formControl]="positionControl">
+          <mat-option value="">All Positions</mat-option>
+          <mat-option *ngFor="let position of positions" [value]="position.positionId">
+            {{ position.title }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Status Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-icon matPrefix>check_circle</mat-icon>
+        <mat-select [formControl]="statusControl">
+          <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Employment Type Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Employment Type</mat-label>
+        <mat-icon matPrefix>schedule</mat-icon>
+        <mat-select [formControl]="employmentTypeControl">
+          <mat-option *ngFor="let type of employmentTypeOptions" [value]="type.value">
+            {{ type.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Bulk Actions -->
+  <div class="bulk-actions" *ngIf="selection.selected.length > 0">
+    <mat-card>
+      <div class="bulk-actions-content">
+        <span class="selection-info">
+          {{ selection.selected.length }} employee(s) selected
+        </span>
+        
+        <div class="bulk-buttons">
+          <button mat-stroked-button 
+                  (click)="bulkActivate()" 
+                  class="bulk-action-btn">
+            <mat-icon>check_circle</mat-icon>
+            Activate
+          </button>
+          
+          <button mat-stroked-button 
+                  (click)="bulkDeactivate()" 
+                  class="bulk-action-btn">
+            <mat-icon>block</mat-icon>
+            Deactivate
+          </button>
+          
+          <button mat-stroked-button 
+                  (click)="exportEmployees()" 
+                  class="bulk-action-btn">
+            <mat-icon>download</mat-icon>
+            Export Selected
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Employee Table -->
+  <mat-card class="table-card">
+    <div class="table-header">
+      <h3>Employees ({{ totalCount }})</h3>
+      <button mat-stroked-button 
+              (click)="exportEmployees()" 
+              class="export-btn">
+        <mat-icon>download</mat-icon>
+        Export All
+      </button>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading employees...</p>
+    </div>
+    
+    <!-- Employee Table -->
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="employees" class="employee-table">
+        
+        <!-- Checkbox Column -->
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox 
+              (change)="$event ? toggleAllRows() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              [aria-label]="checkboxLabel()">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let employee">
+            <mat-checkbox 
+              (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(employee) : null"
+              [checked]="selection.isSelected(employee)"
+              [aria-label]="checkboxLabel(employee)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+        
+        <!-- Employee Number Column -->
+        <ng-container matColumnDef="employeeNumber">
+          <th mat-header-cell *matHeaderCellDef>Employee #</th>
+          <td mat-cell *matCellDef="let employee">
+            <span class="employee-number">{{ employee.employeeNumber }}</span>
+          </td>
+        </ng-container>
+        
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let employee">
+            <div class="employee-info">
+              <div class="employee-avatar">
+                <mat-icon>person</mat-icon>
+              </div>
+              <div class="employee-details">
+                <div class="employee-name">{{ getEmployeeFullName(employee) }}</div>
+                <div class="employee-email">{{ employee.email }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+        
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let employee">{{ employee.email }}</td>
+        </ng-container>
+        
+        <!-- Department Column -->
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef>Department</th>
+          <td mat-cell *matCellDef="let employee">
+            <span class="department-name">
+              {{ employee.department?.name || 'Not Assigned' }}
+            </span>
+          </td>
+        </ng-container>
+        
+        <!-- Position Column -->
+        <ng-container matColumnDef="position">
+          <th mat-header-cell *matHeaderCellDef>Position</th>
+          <td mat-cell *matCellDef="let employee">
+            <span class="position-title">
+              {{ employee.position?.title || 'Not Assigned' }}
+            </span>
+          </td>
+        </ng-container>
+        
+        <!-- Hire Date Column -->
+        <ng-container matColumnDef="hireDate">
+          <th mat-header-cell *matHeaderCellDef>Hire Date</th>
+          <td mat-cell *matCellDef="let employee">
+            {{ formatDate(employee.hireDate) }}
+          </td>
+        </ng-container>
+        
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let employee">
+            <mat-chip [class]="getStatusChipClass(employee.employmentStatus)">
+              {{ employee.employmentStatus | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+        
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let employee">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewEmployee(employee)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              
+              <button mat-menu-item (click)="editEmployee(employee)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit Employee</span>
+              </button>
+              
+              <button mat-menu-item (click)="toggleEmployeeStatus(employee)">
+                <mat-icon>{{ employee.isActive ? 'block' : 'check_circle' }}</mat-icon>
+                <span>{{ employee.isActive ? 'Deactivate' : 'Activate' }}</span>
+              </button>
+              
+              <mat-divider></mat-divider>
+              
+              <button mat-menu-item 
+                      (click)="deleteEmployee(employee)" 
+                      class="danger-action">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+        
+        <!-- Table Headers and Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row 
+            *matRowDef="let employee; columns: displayedColumns;"
+            [class.selected-row]="selection.isSelected(employee)"
+            (click)="selection.toggle(employee)">
+        </tr>
+        
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="employees.length === 0" class="empty-state">
+        <mat-icon>groups</mat-icon>
+        <h3>No Employees Found</h3>
+        <p>No employees match your current filters.</p>
+        <button mat-flat-button routerLink="/employees/add" class="add-first-employee">
+          <mat-icon>person_add</mat-icon>
+          Add Your First Employee
+        </button>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <mat-paginator 
+      *ngIf="!isLoading && employees.length > 0"
+      [length]="totalCount"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
+</div>

@@ -1,0 +1,120 @@
+<mat-toolbar class="header-toolbar">
+  
+  <!-- Mobile Menu Button -->
+  <button 
+    mat-icon-button 
+    class="menu-button"
+    *ngIf="isHandset"
+    (click)="onMenuToggle()"
+    aria-label="Toggle navigation">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <!-- Logo/Brand -->
+  <div class="brand" [class.mobile]="isHandset">
+    <div class="logo">
+      <mat-icon class="logo-icon">business</mat-icon>
+      <span class="brand-text" [class.hidden]="isHandset">HRMS</span>
+    </div>
+  </div>
+
+  <!-- Spacer -->
+  <span class="spacer"></span>
+
+  <!-- Header Actions -->
+  <div class="header-actions">
+    
+    <!-- Search (Desktop only) -->
+    <button 
+      mat-icon-button 
+      class="action-button"
+      *ngIf="!isHandset"
+      matTooltip="Search"
+      aria-label="Search">
+      <mat-icon>search</mat-icon>
+    </button>
+
+    <!-- Theme Toggle -->
+    <button 
+      mat-icon-button 
+      class="action-button"
+      (click)="onThemeToggle()"
+      [matTooltip]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+      aria-label="Toggle theme">
+      <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+
+    <!-- Notifications -->
+    <button 
+      mat-icon-button 
+      class="action-button"
+      (click)="onNotificationsClick()"
+      matTooltip="Notifications"
+      aria-label="Notifications">
+      <mat-icon [matBadge]="notificationCount" 
+               [matBadgeHidden]="notificationCount === 0"
+               matBadgeColor="warn" 
+               matBadgeSize="small">
+        notifications
+      </mat-icon>
+    </button>
+
+    <!-- User Profile Menu -->
+    <button 
+      mat-icon-button 
+      class="user-menu-button"
+      [matMenuTriggerFor]="userMenu"
+      aria-label="User menu">
+      <div class="user-avatar">
+        <p-avatar 
+          [label]="getUserInitials()" 
+          size="normal" 
+          shape="circle"
+          styleClass="user-avatar-content">
+        </p-avatar>
+      </div>
+    </button>
+
+  </div>
+
+  <!-- User Menu -->
+  <mat-menu #userMenu="matMenu" class="user-menu">
+    <div class="user-menu-header">
+      <div class="user-info">
+        <div class="user-avatar-large">
+          <p-avatar 
+            [label]="getUserInitials()" 
+            size="large" 
+            shape="circle"
+            styleClass="user-avatar-large-content">
+          </p-avatar>
+        </div>
+        <div class="user-details">
+          <div class="user-name">{{ getUserDisplayName() }}</div>
+          <div class="user-email">{{ currentUser?.email }}</div>
+          <div class="user-role">{{ currentUser?.roleName }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <mat-divider></mat-divider>
+    
+    <button mat-menu-item (click)="onProfileClick()">
+      <mat-icon>person</mat-icon>
+      <span>My Profile</span>
+    </button>
+    
+    <button mat-menu-item (click)="onSettingsClick()">
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </button>
+    
+    <mat-divider></mat-divider>
+    
+    <button mat-menu-item class="logout-item" (click)="onLogout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+
+</mat-toolbar>

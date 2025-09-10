@@ -1,0 +1,427 @@
+// Sidebar Styles (Hubstaff-inspired)
+.sidebar-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  color: var(--gray-700);
+}
+
+// Sidebar Header
+.sidebar-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+
+.organization-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.org-logo {
+  .org-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: white;
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.org-details {
+  flex: 1;
+  
+  .org-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 2px;
+  }
+  
+  .user-role {
+    font-size: 0.75rem;
+    color: var(--primary-600);
+    background: var(--primary-100);
+    padding: 2px var(--spacing-sm);
+    border-radius: var(--radius-full);
+    display: inline-block;
+    font-weight: 500;
+  }
+}
+
+// Sidebar Navigation
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md) 0;
+  
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--gray-300);
+    border-radius: var(--radius-full);
+    
+    &:hover {
+      background: var(--gray-400);
+    }
+  }
+}
+
+// Navigation List
+.nav-list {
+  padding: 0;
+  
+  ::ng-deep .mat-mdc-list-base {
+    padding: 0;
+  }
+}
+
+// Navigation Items
+.nav-item {
+  margin: 0 var(--spacing-sm);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 44px;
+  
+  &:hover {
+    background: var(--gray-100);
+  }
+  
+  &.active {
+    background: var(--primary-100);
+    color: var(--primary-700);
+    
+    .nav-icon {
+      color: var(--primary-600);
+    }
+    
+    .nav-label {
+      font-weight: 600;
+    }
+  }
+  
+  .nav-icon {
+    color: var(--gray-500);
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: var(--spacing-md);
+  }
+  
+  .nav-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+  }
+  
+  .nav-badge {
+    background: var(--error);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Navigation Groups (Expandable)
+.nav-group {
+  margin: 0 var(--spacing-sm) var(--spacing-xs);
+  
+  ::ng-deep .mat-expansion-panel {
+    background: transparent;
+    box-shadow: none;
+    border-radius: var(--radius-lg);
+    
+    &:hover {
+      background: var(--gray-50);
+    }
+    
+    &.mat-expanded {
+      background: var(--gray-50);
+    }
+    
+    .mat-expansion-panel-header {
+      padding: 0 var(--spacing-md);
+      height: 44px;
+      border-radius: var(--radius-lg);
+      
+      &:hover {
+        background: transparent;
+      }
+      
+      .mat-content {
+        margin-right: 0;
+        align-items: center;
+      }
+    }
+    
+    .mat-expansion-panel-body {
+      padding: 0;
+    }
+    
+    .mat-expansion-indicator {
+      &::after {
+        color: var(--gray-400);
+      }
+    }
+  }
+}
+
+.nav-group-header {
+  .nav-group-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    
+    .nav-icon {
+      color: var(--gray-500);
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+    
+    .nav-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+  }
+}
+
+// Sub Navigation Items
+.nav-sub-items {
+  padding: var(--spacing-sm) 0 var(--spacing-md);
+  margin-left: var(--spacing-xl);
+  border-left: 1px solid var(--gray-200);
+}
+
+.sub-nav-list {
+  ::ng-deep .mat-mdc-list-base {
+    padding: 0;
+  }
+}
+
+.nav-sub-item {
+  margin: 0 0 2px;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 40px;
+  padding-left: var(--spacing-md);
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: transparent;
+    border-radius: 0 2px 2px 0;
+    transition: all 0.2s ease;
+  }
+  
+  &:hover {
+    background: var(--gray-100);
+    
+    &::before {
+      background: var(--primary-300);
+    }
+  }
+  
+  &.active {
+    background: var(--primary-50);
+    color: var(--primary-700);
+    
+    &::before {
+      background: var(--primary-600);
+    }
+    
+    .nav-sub-icon {
+      color: var(--primary-600);
+    }
+    
+    .nav-sub-label {
+      font-weight: 600;
+      color: var(--primary-700);
+    }
+  }
+  
+  .nav-sub-icon {
+    color: var(--gray-400);
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    margin-right: var(--spacing-md);
+  }
+  
+  .nav-sub-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+  
+  .nav-badge {
+    background: var(--error);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Sidebar Footer
+.sidebar-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+
+.footer-content {
+  text-align: center;
+}
+
+.app-version {
+  .version-text {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-weight: 500;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .sidebar-header {
+    padding: var(--spacing-md);
+  }
+  
+  .org-details {
+    .org-name {
+      font-size: 0.8125rem;
+    }
+    
+    .user-role {
+      font-size: 0.6875rem;
+    }
+  }
+  
+  .nav-item,
+  .nav-sub-item {
+    min-height: 40px;
+  }
+  
+  .nav-item .nav-label,
+  .nav-group-title .nav-label {
+    font-size: 0.8125rem;
+  }
+  
+  .nav-sub-item .nav-sub-label {
+    font-size: 0.75rem;
+  }
+}
+
+// Dark theme support
+.dark-theme {
+  .sidebar-container {
+    background: var(--gray-800);
+    color: var(--gray-300);
+  }
+  
+  .sidebar-header {
+    background: var(--gray-900);
+    border-bottom-color: var(--gray-700);
+  }
+  
+  .org-details {
+    .org-name {
+      color: var(--gray-100);
+    }
+  }
+  
+  .nav-item {
+    &:hover {
+      background: var(--gray-700);
+    }
+    
+    &.active {
+      background: var(--primary-900);
+      color: var(--primary-200);
+    }
+    
+    .nav-label {
+      color: var(--gray-300);
+    }
+    
+    .nav-icon {
+      color: var(--gray-400);
+    }
+  }
+  
+  .nav-sub-items {
+    border-left-color: var(--gray-700);
+  }
+  
+  .nav-sub-item {
+    &:hover {
+      background: var(--gray-700);
+    }
+    
+    &.active {
+      background: var(--primary-900);
+      color: var(--primary-200);
+    }
+    
+    .nav-sub-label {
+      color: var(--gray-400);
+    }
+    
+    .nav-sub-icon {
+      color: var(--gray-500);
+    }
+  }
+  
+  .sidebar-footer {
+    background: var(--gray-900);
+    border-top-color: var(--gray-700);
+  }
+  
+  .version-text {
+    color: var(--gray-400);
+  }
+}
+
+// Print styles
+@media print {
+  .sidebar-container {
+    display: none;
+  }
+}

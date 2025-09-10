@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HRMS - Human Resource Management System</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- Preconnect to external resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Meta tags for PWA -->
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="description" content="Modern Human Resource Management System with time tracking, payroll, and employee management.">
+  <meta name="keywords" content="HRMS, HR, Human Resources, Time Tracking, Payroll, Employee Management">
+  
+  <!-- Open Graph tags -->
+  <meta property="og:title" content="HRMS - Human Resource Management System">
+  <meta property="og:description" content="Modern Human Resource Management System with time tracking, payroll, and employee management.">
+  <meta property="og:type" content="website">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- iOS PWA tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="HRMS">
+  
+  <!-- Preload critical fonts -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"></noscript>
+</head>
+<body class="mat-typography">
+  <app-root>
+    <!-- Loading placeholder -->
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <div style="text-align: center; color: white;">
+        <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite; margin: 0 auto 16px;"></div>
+        <h3 style="margin: 0; font-family: 'Inter', sans-serif; font-weight: 600;">Loading HRMS...</h3>
+        <p style="margin: 8px 0 0; opacity: 0.8; font-family: 'Inter', sans-serif;">Please wait while we set up your workspace</p>
+      </div>
+    </div>
+    <style>
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </app-root>
+  
+  <noscript>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-family: 'Inter', sans-serif;">
+      <div>
+        <h2>JavaScript Required</h2>
+        <p>Please enable JavaScript in your browser to use the HRMS application.</p>
+      </div>
+    </div>
+  </noscript>
+</body>
+</html>
