@@ -6,16 +6,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-not-found',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule
-  ],
-  template: `
+    selector: 'app-not-found',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule
+    ],
+    template: `
     <div class="not-found-container">
       <div class="not-found-content">
         <mat-card class="error-card">
@@ -45,7 +44,7 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .not-found-container {
       display: flex;
       align-items: center;

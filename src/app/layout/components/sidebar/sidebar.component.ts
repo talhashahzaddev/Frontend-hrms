@@ -24,17 +24,16 @@ interface MenuItem {
 }
 
 @Component({
-  selector: 'app-sidebar',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatListModule,
-    MatIconModule,
-    MatExpansionModule,
-    MatTooltipModule
-  ],
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss']
+    selector: 'app-sidebar',
+    imports: [
+        CommonModule,
+        MatListModule,
+        MatIconModule,
+        MatExpansionModule,
+        MatTooltipModule
+    ],
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   @Output() menuItemClick = new EventEmitter<void>();

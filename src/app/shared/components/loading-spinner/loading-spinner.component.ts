@@ -3,13 +3,12 @@ import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-loading-spinner',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatProgressSpinnerModule
-  ],
-  template: `
+    selector: 'app-loading-spinner',
+    imports: [
+        CommonModule,
+        MatProgressSpinnerModule
+    ],
+    template: `
     <div class="loading-overlay">
       <div class="loading-content">
         <div class="spinner-container">
@@ -22,6 +21,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       </div>
     </div>
   `,
-  styleUrls: ['./loading-spinner.component.scss']
+    styleUrls: ['./loading-spinner.component.scss']
 })
 export class LoadingSpinnerComponent {}

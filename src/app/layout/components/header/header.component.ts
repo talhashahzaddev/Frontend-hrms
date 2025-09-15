@@ -22,21 +22,20 @@ import { NotificationService } from '@core/services/notification.service';
 import { User } from '@core/models/auth.models';
 
 @Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatBadgeModule,
-    MatTooltipModule,
-    MatDividerModule,
-    AvatarModule
-  ],
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+    selector: 'app-header',
+    imports: [
+        CommonModule,
+        MatToolbarModule,
+        MatButtonModule,
+        MatIconModule,
+        MatMenuModule,
+        MatBadgeModule,
+        MatTooltipModule,
+        MatDividerModule,
+        AvatarModule
+    ],
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isHandset = false;

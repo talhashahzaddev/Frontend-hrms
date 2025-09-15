@@ -7,17 +7,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
-  selector: 'app-server-error',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatExpansionModule
-  ],
-  template: `
+    selector: 'app-server-error',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatExpansionModule
+    ],
+    template: `
     <div class="server-error-container">
       <div class="server-error-content">
         <mat-card class="error-card">
@@ -99,7 +98,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .server-error-container {
       display: flex;
       align-items: center;

@@ -10,17 +10,16 @@ import { Subject, takeUntil } from 'rxjs';
 import { PayrollSummary, PayrollEntry, PayrollStatus } from '../../../../core/models/payroll.models';
 
 @Component({
-  selector: 'app-payroll-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule
-  ],
-  template: `
+    selector: 'app-payroll-dashboard',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressSpinnerModule
+    ],
+    template: `
     <!-- Payroll Dashboard Container -->
     <div class="payroll-dashboard-container">
       
@@ -143,7 +142,7 @@ import { PayrollSummary, PayrollEntry, PayrollStatus } from '../../../../core/mo
       </mat-card>
     </div>
   `,
-  styleUrls: ['./payroll-dashboard.component.scss']
+    styleUrls: ['./payroll-dashboard.component.scss']
 })
 export class PayrollDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

@@ -6,16 +6,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-forbidden',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule
-  ],
-  template: `
+    selector: 'app-forbidden',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule
+    ],
+    template: `
     <div class="forbidden-container">
       <div class="forbidden-content">
         <mat-card class="error-card">
@@ -56,7 +55,7 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .forbidden-container {
       display: flex;
       align-items: center;

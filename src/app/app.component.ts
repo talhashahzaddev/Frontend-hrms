@@ -25,24 +25,23 @@ import { LoadingService } from './core/services/loading.service';
 import { ThemeService } from './core/services/theme.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    MatToolbarModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatButtonModule,
-    MatListModule,
-    MatMenuModule,
-    MatBadgeModule,
-    ToastModule,
-    LayoutComponent,
-    LoadingSpinnerComponent
-  ],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    imports: [
+        CommonModule,
+        RouterOutlet,
+        MatToolbarModule,
+        MatSidenavModule,
+        MatIconModule,
+        MatButtonModule,
+        MatListModule,
+        MatMenuModule,
+        MatBadgeModule,
+        ToastModule,
+        LayoutComponent,
+        LoadingSpinnerComponent
+    ],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'HRMS - Human Resource Management System';
