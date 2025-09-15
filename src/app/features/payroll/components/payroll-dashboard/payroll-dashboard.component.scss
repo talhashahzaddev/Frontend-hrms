@@ -1,4 +1,4 @@
-@import '../../../../../styles.scss';
+@use '../../../../../styles.scss' as *;
 
 .payroll-dashboard-container {
   padding: 2rem;
