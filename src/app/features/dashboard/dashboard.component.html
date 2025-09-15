@@ -1,0 +1,214 @@
+<!-- Dashboard Container -->
+<div class="dashboard-container">
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Loading dashboard...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+
+    <!-- Welcome Header -->
+    <div class="dashboard-header">
+      <div class="welcome-section">
+        <h2 class="welcome-title">
+          👋 Welcome, {{ currentUser?.firstName || 'User' }}
+        </h2>
+        <p class="welcome-subtitle">Here’s your dashboard overview</p>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button class="period-button">
+          <mat-icon>calendar_today</mat-icon> This Month
+        </button>
+        <button mat-icon-button class="refresh-button" (click)="refreshDashboard()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="stats-grid">
+      <div *ngFor="let card of dashboardCards" class="stat-card stat-card-{{card.color}}">
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>{{ card.icon }}</mat-icon>
+          </div>
+          <div class="stat-details">
+            <p class="stat-title">{{ card.title }}</p>
+            <p class="stat-value">{{ card.value }}</p>
+            <div *ngIf="card.change" 
+                 class="stat-change" 
+                 [ngClass]="{
+                   'change-increase': card.changeType === 'increase',
+                   'change-decrease': card.changeType === 'decrease',
+                   'change-neutral': card.changeType === 'neutral'
+                 }">
+              <mat-icon>
+                {{ card.changeType === 'increase' ? 'arrow_upward' 
+                  : card.changeType === 'decrease' ? 'arrow_downward' : 'remove' }}
+              </mat-icon>
+              {{ card.change }}
+            </div>
+          </div>
+        </div>
+        <mat-icon class="nav-icon">chevron_right</mat-icon>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Left Column -->
+      <div class="left-column">
+
+        <!-- Attendance Chart -->
+        <div class="chart-card" *ngIf="attendanceChart">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>show_chart</mat-icon> Attendance Trends
+            </mat-card-title>
+          </mat-card-header>
+          <div class="chart-container">
+            <canvas baseChart
+                    [data]="attendanceChart.data"
+                    [options]="attendanceChart.options"
+                    [type]="attendanceChart.type">
+            </canvas>
+          </div>
+        </div>
+
+        <!-- Department Chart -->
+        <div class="chart-card" *ngIf="departmentChart">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>pie_chart</mat-icon> Department Distribution
+            </mat-card-title>
+          </mat-card-header>
+          <div class="chart-container">
+            <canvas baseChart
+                    [data]="departmentChart.data"
+                    [options]="departmentChart.options"
+                    [type]="departmentChart.type">
+            </canvas>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="activities-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>history</mat-icon> Recent Activities
+            </mat-card-title>
+          </mat-card-header>
+          <div class="activities-list">
+            <div *ngFor="let activity of recentActivities" class="activity-item">
+              <div class="activity-icon"><mat-icon>history</mat-icon></div>
+              <div class="activity-content">
+                <p class="activity-description">{{ activity.description }}</p>
+                <div class="activity-meta">
+                  <span class="activity-user">{{ activity.userName }}</span>
+                  <span class="activity-time">
+                    {{ formatDate(activity.timestamp) }} • {{ formatTime(activity.timestamp) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <p *ngIf="!recentActivities.length" class="empty-state">
+              <mat-icon>info</mat-icon> No recent activities
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>flash_on</mat-icon> Quick Actions
+            </mat-card-title>
+          </mat-card-header>
+          <div class="quick-actions-grid">
+            <button mat-stroked-button class="quick-action-button action-primary">
+              <mat-icon>person_add</mat-icon> Add Employee
+            </button>
+            <button mat-stroked-button class="quick-action-button action-accent">
+              <mat-icon>calendar_today</mat-icon> Schedule Leave
+            </button>
+            <button mat-stroked-button class="quick-action-button action-success">
+              <mat-icon>check_circle</mat-icon> Approvals
+            </button>
+            <button mat-stroked-button class="quick-action-button action-info">
+              <mat-icon>bar_chart</mat-icon> Reports
+            </button>
+          </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="events-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>event</mat-icon> Upcoming Events
+            </mat-card-title>
+          </mat-card-header>
+          <div class="events-list">
+            <div *ngFor="let event of upcomingEvents" class="event-item">
+              <div class="event-date">
+                <span class="date-day">{{ event.date | date:'d' }}</span>
+                <span class="date-month">{{ event.date | date:'MMM' }}</span>
+              </div>
+              <div class="event-content">
+                <p class="event-title">{{ event.title }}</p>
+                <p class="event-description">{{ event.description }}</p>
+                <mat-chip class="event-type-{{event.type}}">{{ event.type }}</mat-chip>
+              </div>
+            </div>
+            <p *ngIf="!upcomingEvents.length" class="empty-state">
+              <mat-icon>event_busy</mat-icon> No upcoming events
+            </p>
+          </div>
+        </div>
+
+        <!-- Performance Stats -->
+        <div class="performance-card" *ngIf="performanceStats">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>star</mat-icon> Performance Summary
+            </mat-card-title>
+          </mat-card-header>
+          <div class="performance-stats">
+            <div class="performance-stat">
+              <span class="stat-label">Average Rating</span>
+              <span class="stat-value">{{ performanceStats.averageRating }}</span>
+              <div class="rating-stars">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" 
+                          [ngClass]="{ 'filled': star <= performanceStats.averageRating }">
+                  star
+                </mat-icon>
+              </div>
+            </div>
+            <div class="performance-stat">
+              <span class="stat-label">Completed Reviews</span>
+              <span class="stat-value">{{ performanceStats.completedReviews }}</span>
+            </div>
+            <div class="performance-stat">
+              <span class="stat-label">Pending Reviews</span>
+              <span class="stat-value">{{ performanceStats.pendingReviews }}</span>
+            </div>
+            <div class="performance-stat">
+              <span class="stat-label">Top Performers</span>
+              <span class="stat-value">{{ performanceStats.topPerformers }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

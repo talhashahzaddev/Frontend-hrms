@@ -35,7 +35,7 @@ export const appRoutes: Routes = [
     path: 'dashboard',
     canActivate: [AuthGuard],
     loadComponent: () => 
-      import('./features/dashboard/components/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      import('../app/features/dashboard/dashboard.component').then(m => m.DashboardComponent),
     title: 'Dashboard - HRMS'
   },
   

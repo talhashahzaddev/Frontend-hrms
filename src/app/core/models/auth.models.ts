@@ -86,9 +86,9 @@ export interface ChangePasswordRequest {
 }
 
 export interface ApiResponse<T> {
+   data?: T;
   success: boolean;
   message: string;
-  data?: T;
   errors?: string[];
 }
 

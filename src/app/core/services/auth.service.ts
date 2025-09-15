@@ -20,7 +20,7 @@ import {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = `${environment.apiUrl}/auth`;
+  private readonly API_URL = `${environment.apiUrl}/Auth`;
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
@@ -239,10 +239,14 @@ export class AuthService {
       firstName: authResponse.firstName,
       lastName: authResponse.lastName,
       roleName: authResponse.roleName,
-      organizationName: authResponse.organizationName,
+      organizationName: authResponse.organizationName|| " " ,
       isActive: true,
       createdAt: new Date().toISOString()
     };
+
+
+
+    
 
     localStorage.setItem(this.TOKEN_KEY, authResponse.token);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, authResponse.refreshToken);

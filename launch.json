@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-chrome",   // ✅ use built-in debugger
+      "request": "launch",
+      "name": "Launch HRMS in Chrome",
+      "url": "http://localhost:4200",   // ✅ change this to your Angular port
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}
