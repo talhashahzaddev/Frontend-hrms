@@ -11,18 +11,17 @@ import { Subject, takeUntil } from 'rxjs';
 import { PerformanceSummary, PerformanceMetrics, DepartmentPerformance, SkillGap, EmployeeAppraisal, AppraisalStatus } from '../../../../core/models/performance.models';
 
 @Component({
-  selector: 'app-performance-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatProgressBarModule
-  ],
-  template: `
+    selector: 'app-performance-dashboard',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressSpinnerModule,
+        MatProgressBarModule
+    ],
+    template: `
     <!-- Performance Dashboard Container -->
     <div class="performance-dashboard-container">
       
@@ -240,7 +239,7 @@ import { PerformanceSummary, PerformanceMetrics, DepartmentPerformance, SkillGap
       </div>
     </div>
   `,
-  styleUrls: ['./performance-dashboard.component.scss']
+    styleUrls: ['./performance-dashboard.component.scss']
 })
 export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

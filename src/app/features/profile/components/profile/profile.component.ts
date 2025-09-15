@@ -17,22 +17,21 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { User, UpdateProfileRequest } from '../../../../core/models/auth.models';
 
 @Component({
-  selector: 'app-profile',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatDividerModule,
-    MatProgressSpinnerModule
-  ],
-  template: `
+    selector: 'app-profile',
+    imports: [
+        CommonModule,
+        RouterModule,
+        ReactiveFormsModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTabsModule,
+        MatDividerModule,
+        MatProgressSpinnerModule
+    ],
+    template: `
     <div class="profile-container">
       <div class="profile-content">
         
@@ -275,7 +274,7 @@ import { User, UpdateProfileRequest } from '../../../../core/models/auth.models'
       </div>
     </div>
   `,
-  styleUrls: ['./profile.component.scss']
+    styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

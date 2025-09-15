@@ -12,19 +12,18 @@ import { Subject, takeUntil } from 'rxjs';
 import { LeaveBalance, LeaveRequest, LeaveRequestStatus } from '../../../../core/models/leave.models';
 
 @Component({
-  selector: 'app-leave-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatTabsModule
-  ],
-  template: `
+    selector: 'app-leave-dashboard',
+    imports: [
+        CommonModule,
+        RouterModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatChipsModule,
+        MatProgressSpinnerModule,
+        MatTabsModule
+    ],
+    template: `
     <!-- Leave Dashboard Container -->
     <div class="leave-dashboard-container">
       
@@ -124,7 +123,7 @@ import { LeaveBalance, LeaveRequest, LeaveRequestStatus } from '../../../../core
       </div>
     </div>
   `,
-  styleUrls: ['./leave-dashboard.component.scss']
+    styleUrls: ['./leave-dashboard.component.scss']
 })
 export class LeaveDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

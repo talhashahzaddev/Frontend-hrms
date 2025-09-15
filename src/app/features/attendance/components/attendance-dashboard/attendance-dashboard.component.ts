@@ -30,26 +30,25 @@ import {
 import { User } from '../../../../core/models/auth.models';
 
 @Component({
-  selector: 'app-attendance-dashboard',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatChipsModule,
-    MatTooltipModule,
-    MatMenuModule
-  ],
-  templateUrl: './attendance-dashboard.component.html',
-  styleUrls: ['./attendance-dashboard.component.scss']
+    selector: 'app-attendance-dashboard',
+    imports: [
+        CommonModule,
+        RouterModule,
+        ReactiveFormsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTabsModule,
+        MatDatepickerModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
+        MatChipsModule,
+        MatTooltipModule,
+        MatMenuModule
+    ],
+    templateUrl: './attendance-dashboard.component.html',
+    styleUrls: ['./attendance-dashboard.component.scss']
 })
 export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

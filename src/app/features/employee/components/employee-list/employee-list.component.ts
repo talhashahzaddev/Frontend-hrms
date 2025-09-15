@@ -24,29 +24,28 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
 
 @Component({
-  selector: 'app-employee-list',
-  standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatMenuModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatCheckboxModule,
-    MatDividerModule
-  ],
-  templateUrl: './employee-list.component.html',
-  styleUrls: ['./employee-list.component.scss']
+    selector: 'app-employee-list',
+    imports: [
+        CommonModule,
+        RouterModule,
+        ReactiveFormsModule,
+        MatCardModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatMenuModule,
+        MatChipsModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatCheckboxModule,
+        MatDividerModule
+    ],
+    templateUrl: './employee-list.component.html',
+    styleUrls: ['./employee-list.component.scss']
 })
 export class EmployeeListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
