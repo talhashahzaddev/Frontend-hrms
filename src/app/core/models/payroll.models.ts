@@ -1,129 +1,155 @@
-export interface PayrollEntry {
-  payrollEntryId: string;
-  employeeId: string;
-  payrollPeriodId: string;
-  basicSalary: number;
-  allowances: number;
-  overtimePay: number;
-  bonuses: number;
-  deductions: number;
-  taxDeductions: number;
-  netPay: number;
-  status: PayrollStatus;
-  processedDate?: string;
-  processedBy?: string;
-  paidDate?: string;
-  
-  // Related data
-  employee?: {
-    employeeId: string;
-    firstName: string;
-    lastName: string;
-    employeeNumber: string;
-    department?: string;
-  };
-  payrollPeriod?: PayrollPeriod;
-}
-
 export interface PayrollPeriod {
-  payrollPeriodId: string;
-  name: string;
+  periodId: string;
+  periodName: string;
   startDate: string;
   endDate: string;
-  cutoffDate: string;
-  payDate: string;
-  status: PayrollPeriodStatus;
+  payDate?: string;
+  status: PayrollStatus;
   totalEmployees: number;
-  totalAmount: number;
+  totalGrossAmount: number;
+  totalTaxAmount: number;
+  totalNetAmount: number;
+  processedBy?: string;
+  processedAt?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export enum PayrollStatus {
   DRAFT = 'draft',
-  PROCESSED = 'processed',
+  CALCULATED = 'calculated',
   APPROVED = 'approved',
-  PAID = 'paid',
-  CANCELLED = 'cancelled'
+  PROCESSING = 'processing',
+  PROCESSED = 'processed',
+  PAID = 'paid'
 }
 
-export enum PayrollPeriodStatus {
-  OPEN = 'open',
-  PROCESSING = 'processing',
-  COMPLETED = 'completed',
-  CLOSED = 'closed'
+export interface PayrollEntry {
+  entryId: string;
+  periodId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  department: string;
+  position: string;
+  basicSalary: number;
+  allowances: { [key: string]: number };
+  deductions: { [key: string]: number };
+  overtimeAmount: number;
+  bonusAmount: number;
+  grossSalary: number;
+  taxAmount: number;
+  otherDeductions: number;
+  netSalary: number;
+  currency: string;
+  status: PayrollEntryStatus;
+  calculatedAt?: string;
+  paidAt?: string;
+  paymentMethod?: string;
+  paymentReference?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export enum PayrollEntryStatus {
+  DRAFT = 'draft',
+  CALCULATED = 'calculated',
+  APPROVED = 'approved',
+  PAID = 'paid'
+}
+
+export interface CreatePayrollPeriodRequest {
+  periodName: string;
+  startDate: string;
+  endDate: string;
+  payDate?: string;
+}
+
+export interface PayrollCalculationRequest {
+  periodId: string;
+  employeeIds?: string[];
+  includeAllowances: boolean;
+  includeDeductions: boolean;
+  includeOvertime: boolean;
 }
 
 export interface PayrollSummary {
   totalEmployees: number;
-  totalGrossPay: number;
+  totalGrossAmount: number;
+  totalNetAmount: number;
+  totalTaxAmount: number;
   totalDeductions: number;
-  totalNetPay: number;
-  averageSalary: number;
-  payrollPeriod: PayrollPeriod;
+  averageGrossSalary: number;
+  averageNetSalary: number;
+  departmentBreakdown: PayrollDepartmentSummary[];
 }
 
-export interface PayslipData {
-  employeeInfo: {
-    employeeNumber: string;
-    fullName: string;
-    department: string;
-    position: string;
-    joinDate: string;
-  };
-  payrollPeriod: {
-    periodName: string;
-    startDate: string;
-    endDate: string;
-    payDate: string;
-  };
-  earnings: {
-    basicSalary: number;
-    allowances: PayrollComponent[];
-    overtime: number;
-    bonuses: PayrollComponent[];
-    totalEarnings: number;
-  };
-  deductions: {
-    taxDeductions: PayrollComponent[];
-    otherDeductions: PayrollComponent[];
-    totalDeductions: number;
-  };
-  netPay: number;
-  ytdSummary: {
-    grossPay: number;
-    deductions: number;
-    netPay: number;
-  };
+export interface PayrollDepartmentSummary {
+  departmentId: string;
+  departmentName: string;
+  employeeCount: number;
+  totalGrossAmount: number;
+  totalNetAmount: number;
+  averageSalary: number;
+}
+
+export interface Payslip {
+  payslipId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  periodName: string;
+  payDate: string;
+  basicSalary: number;
+  allowances: PayrollComponent[];
+  deductions: PayrollComponent[];
+  grossSalary: number;
+  taxAmount: number;
+  netSalary: number;
+  currency: string;
+  companyDetails: CompanyDetails;
+  employeeDetails: EmployeePayrollDetails;
 }
 
 export interface PayrollComponent {
   name: string;
   amount: number;
-  isPercentage?: boolean;
-  percentage?: number;
+  type: 'allowance' | 'deduction';
+  isTaxable: boolean;
 }
 
-// DTOs for API requests
-export interface CreatePayrollPeriodRequest {
+export interface CompanyDetails {
   name: string;
-  startDate: string;
-  endDate: string;
-  cutoffDate: string;
-  payDate: string;
+  address: string;
+  taxId: string;
+  logo?: string;
 }
 
-export interface ProcessPayrollRequest {
-  payrollPeriodId: string;
-  employeeIds?: string[];
+export interface EmployeePayrollDetails {
+  employeeId: string;
+  fullName: string;
+  employeeCode: string;
+  department: string;
+  position: string;
+  bankAccount?: string;
+  taxId?: string;
+  joinDate: string;
+}
+
+export interface PayrollReport {
+  periodId: string;
+  periodName: string;
+  summary: PayrollSummary;
+  entries: PayrollEntry[];
+  generatedAt: string;
+  generatedBy: string;
 }
 
 export interface PayrollSearchRequest {
+  periodId?: string;
   employeeId?: string;
   departmentId?: string;
-  payrollPeriodId?: string;
-  status?: PayrollStatus;
-  startDate?: string;
-  endDate?: string;
+  status?: PayrollEntryStatus;
   page: number;
   pageSize: number;
   sortBy?: string;
@@ -131,7 +157,7 @@ export interface PayrollSearchRequest {
 }
 
 export interface PayrollListResponse {
-  payrollEntries: PayrollEntry[];
+  entries: PayrollEntry[];
   totalCount: number;
   page: number;
   pageSize: number;
@@ -140,22 +166,55 @@ export interface PayrollListResponse {
   hasPreviousPage: boolean;
 }
 
-export interface PayrollStatistics {
-  currentPeriod: PayrollSummary;
-  monthlyTrends: {
-    month: string;
-    totalPaid: number;
-    employeeCount: number;
-  }[];
-  departmentWise: {
-    department: string;
-    totalAmount: number;
-    employeeCount: number;
-    averageSalary: number;
-  }[];
-  topEarners: {
-    employeeName: string;
-    department: string;
-    grossPay: number;
-  }[];
+export interface TaxConfiguration {
+  taxId: string;
+  taxName: string;
+  taxType: 'percentage' | 'fixed';
+  rate: number;
+  minSalary?: number;
+  maxSalary?: number;
+  isActive: boolean;
+}
+
+export interface SalaryComponent {
+  componentId: string;
+  name: string;
+  type: 'allowance' | 'deduction';
+  calculationType: 'percentage' | 'fixed';
+  value: number;
+  isDefault: boolean;
+  isTaxable: boolean;
+  isActive: boolean;
+}
+
+export interface PayrollFilter {
+  payrollPeriodId?: string;
+  employeeId?: string;
+  department?: string;
+  status?: PayrollEntryStatus;
+  search?: string;
+}
+
+export interface PayrollReportFilter {
+  payrollPeriodId?: string;
+  startDate?: string;
+  endDate?: string;
+  department?: string;
+  status?: PayrollEntryStatus;
+}
+
+export interface UpdatePayrollPeriodRequest {
+  periodName?: string;
+  startDate?: string;
+  endDate?: string;
+  payDate?: string;
+  status?: PayrollStatus;
+}
+
+export interface ProcessPayrollRequest {
+  payrollPeriodId: string;
+  employeeIds?: string[];
+  includeAllowances: boolean;
+  includeDeductions: boolean;
+  includeOvertime: boolean;
 }

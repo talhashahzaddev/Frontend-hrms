@@ -100,6 +100,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     { value: 'year', label: 'This Year' }
   ];
 
+  starRatings = [1, 2, 3, 4, 5];
+
   constructor(
     private dashboardService: DashboardService,
     private authService: AuthService,
@@ -230,7 +232,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.departmentChart = {
         type: 'doughnut',
         data: {
-          labels: this.departmentStats.map(d => d.name),
+          labels: this.departmentStats.map(d => d.departmentName),
           datasets: [
             {
               data: this.departmentStats.map(d => d.employeeCount),

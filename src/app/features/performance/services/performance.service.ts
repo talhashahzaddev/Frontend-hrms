@@ -251,4 +251,21 @@ export class PerformanceService {
   refreshDashboardData(): void {
     this.refreshPerformanceSummary();
   }
+
+  // Additional methods for dashboard
+  getMyAppraisals(): Observable<ApiResponse<EmployeeAppraisal[]>> {
+    return this.http.get<ApiResponse<EmployeeAppraisal[]>>(`${this.apiUrl}/performance/appraisals/my-appraisals`);
+  }
+
+  getTeamPerformanceSummary(): Observable<ApiResponse<PerformanceSummary>> {
+    return this.http.get<ApiResponse<PerformanceSummary>>(`${this.apiUrl}/performance/team-summary`);
+  }
+
+  getMyPerformanceMetrics(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/performance/my-metrics`);
+  }
+
+  getMySkills(): Observable<ApiResponse<EmployeeSkill[]>> {
+    return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/my-skills`);
+  }
 }

@@ -3,66 +3,88 @@ export interface DashboardSummary {
   presentToday: number;
   onLeaveToday: number;
   pendingApprovals: number;
-  employeeGrowth?: number;
+  newHiresThisMonth: number;
+  attendanceRate: number;
+  employeeSatisfaction: number;
 }
 
 export interface AttendanceStats {
   dates: string[];
   presentCounts: number[];
   absentCounts: number[];
-  averagePresence: number;
+  attendanceRate: number;
+  totalWorkingDays: number;
+  totalPresentDays: number;
 }
 
 export interface LeaveStats {
-  totalRequests: number;
+  totalLeaveRequests: number;
   approvedRequests: number;
   pendingRequests: number;
   rejectedRequests: number;
-  leaveTypes: { [key: string]: number };
+  averageLeaveDays: number;
+  leaveTypeUsage: LeaveTypeUsage[];
+}
+
+export interface LeaveTypeUsage {
+  leaveTypeName: string;
+  requestCount: number;
+  totalDays: number;
 }
 
 export interface PayrollStats {
   totalPayroll: number;
   averageSalary: number;
-  payrollCosts: { month: string; amount: number }[];
+  processedEmployees: number;
+  totalTaxes: number;
+  totalDeductions: number;
+  currency: string;
 }
 
 export interface PerformanceStats {
   averageRating: number;
-  completedReviews: number;
-  pendingReviews: number;
-  topPerformers: { name: string; rating: number }[];
+  totalAppraisals: number;
+  completedAppraisals: number;
+  pendingAppraisals: number;
+  ratingDistribution: PerformanceRatingDistribution[];
+}
+
+export interface PerformanceRatingDistribution {
+  rating: string;
+  count: number;
+  percentage: number;
 }
 
 export interface RecentActivity {
-  id: string;
-  type: string;
-  title: string;
+  activityId: string;
+  activity: string;
   description: string;
-  icon: string;
   userName: string;
   timestamp: string;
+  activityType: string;
 }
 
 export interface EmployeeGrowth {
   months: string[];
   counts: number[];
   growthRate: number;
+  cumulativeEmployees: number[];
+  newEmployees: number[];
 }
 
 export interface DepartmentStats {
-  id: string;
-  name: string;
-  count: number;
+  departmentId: string;
+  departmentName: string;
   employeeCount: number;
-  percentage: number;
+  averageSalary: number;
+  managerName?: string;
 }
 
 export interface UpcomingEvents {
-  id: string;
+  eventId: string;
   title: string;
   description: string;
   date: string;
-  time: string;
-  type: string;
+  eventType: string;
+  priority: string;
 }

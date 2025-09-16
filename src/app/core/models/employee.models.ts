@@ -1,25 +1,23 @@
 export interface Employee {
   employeeId: string;
-  userId: string;
-  employeeNumber: string;
+  organizationId: string;
+  userId?: string;
+  employeeCode: string;
   firstName: string;
   lastName: string;
+  fullName?: string;
   email: string;
   phone?: string;
   dateOfBirth?: string;
   gender?: string;
+  nationality?: string;
   maritalStatus?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  zipCode?: string;
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
+  address?: any;
+  emergencyContact?: any;
   hireDate: string;
-  probationEndDate?: string;
-  employmentStatus: string;
-  isActive: boolean;
+  terminationDate?: string;
+  status: string;
+  profilePictureUrl?: string;
   createdAt: string;
   updatedAt: string;
   

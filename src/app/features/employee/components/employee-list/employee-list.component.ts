@@ -216,7 +216,7 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.employeeNumber}`;
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.employeeCode}`;
   }
 
   // Actions
@@ -246,8 +246,9 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   }
 
   toggleEmployeeStatus(employee: Employee): void {
-    const action = employee.isActive ? 'deactivate' : 'activate';
-    const actionCall = employee.isActive 
+    const isActive = employee.status === 'active';
+    const action = isActive ? 'deactivate' : 'activate';
+    const actionCall = isActive 
       ? this.employeeService.deactivateEmployee(employee.employeeId)
       : this.employeeService.activateEmployee(employee.employeeId);
 

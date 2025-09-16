@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
@@ -43,6 +44,7 @@ import { User } from '../../../../core/models/auth.models';
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,
+        MatProgressBarModule,
         MatChipsModule,
         MatTooltipModule,
         MatMenuModule
@@ -429,5 +431,49 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
 
   trackByFn(index: number, item: any): any {
     return item.id || index;
+  }
+
+  getTooltipText(day: AttendanceCalendarData): string {
+    if (!day.date) return '';
+    
+    let tooltip = `${new Date(day.date).toLocaleDateString()}\n`;
+    tooltip += `Status: ${day.status}\n`;
+    
+    if (day.checkIn) {
+      tooltip += `Check In: ${this.formatTime(day.checkIn)}\n`;
+    }
+    if (day.checkOut) {
+      tooltip += `Check Out: ${this.formatTime(day.checkOut)}\n`;
+    }
+    if (day.totalHours > 0) {
+      tooltip += `Total Hours: ${this.formatHours(day.totalHours)}`;
+    }
+    
+    return tooltip;
+  }
+
+  getStatusIcon(status: AttendanceStatus): string {
+    switch (status) {
+      case AttendanceStatus.PRESENT: return 'check_circle';
+      case AttendanceStatus.ABSENT: return 'cancel';
+      case AttendanceStatus.LATE: return 'schedule';
+      case AttendanceStatus.EARLY_DEPARTURE: return 'exit_to_app';
+      case AttendanceStatus.HALF_DAY: return 'schedule';
+      case AttendanceStatus.ON_LEAVE: return 'event_busy';
+      case AttendanceStatus.HOLIDAY: return 'celebration';
+      default: return 'help_outline';
+    }
+  }
+
+  formatHours(hours: number): string {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${h}h ${m}m`;
+  }
+
+  getProgressBarColor(percentage: number): 'primary' | 'accent' | 'warn' {
+    if (percentage >= 90) return 'primary';
+    if (percentage >= 75) return 'accent';
+    return 'warn';
   }
 }

@@ -106,6 +106,7 @@
             <div *ngFor="let activity of recentActivities" class="activity-item">
               <div class="activity-icon"><mat-icon>history</mat-icon></div>
               <div class="activity-content">
+                <p class="activity-title">{{ activity.activity }}</p>
                 <p class="activity-description">{{ activity.description }}</p>
                 <div class="activity-meta">
                   <span class="activity-user">{{ activity.userName }}</span>
@@ -165,7 +166,7 @@
               <div class="event-content">
                 <p class="event-title">{{ event.title }}</p>
                 <p class="event-description">{{ event.description }}</p>
-                <mat-chip class="event-type-{{event.type}}">{{ event.type }}</mat-chip>
+                <mat-chip class="event-type-{{event.eventType}}">{{ event.eventType }}</mat-chip>
               </div>
             </div>
             <p *ngIf="!upcomingEvents.length" class="empty-state">
@@ -186,7 +187,7 @@
               <span class="stat-label">Average Rating</span>
               <span class="stat-value">{{ performanceStats.averageRating }}</span>
               <div class="rating-stars">
-                <mat-icon *ngFor="let star of [1,2,3,4,5]" 
+                <mat-icon *ngFor="let star of starRatings" 
                           [ngClass]="{ 'filled': star <= performanceStats.averageRating }">
                   star
                 </mat-icon>
@@ -194,15 +195,15 @@
             </div>
             <div class="performance-stat">
               <span class="stat-label">Completed Reviews</span>
-              <span class="stat-value">{{ performanceStats.completedReviews }}</span>
+              <span class="stat-value">{{ performanceStats.completedAppraisals }}</span>
             </div>
             <div class="performance-stat">
               <span class="stat-label">Pending Reviews</span>
-              <span class="stat-value">{{ performanceStats.pendingReviews }}</span>
+              <span class="stat-value">{{ performanceStats.pendingAppraisals }}</span>
             </div>
             <div class="performance-stat">
-              <span class="stat-label">Top Performers</span>
-              <span class="stat-value">{{ performanceStats.topPerformers }}</span>
+              <span class="stat-label">Total Appraisals</span>
+              <span class="stat-value">{{ performanceStats.totalAppraisals }}</span>
             </div>
           </div>
         </div>
