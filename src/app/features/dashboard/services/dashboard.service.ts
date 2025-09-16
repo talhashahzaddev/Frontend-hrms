@@ -43,13 +43,13 @@ export class DashboardService {
     catchError(err => {
       console.error('Failed to load employee growth:', err);
       return of({
-        totalEmployees:0,
+        totalEmployees: 0,
         presentToday: 0,
         onLeaveToday: 0,
         pendingApprovals: 0,
-        employeeGrowth: 0
-      
-        
+        newHiresThisMonth: 0,
+        attendanceRate: 0,
+        employeeSatisfaction: 0
       } as DashboardSummary);
     })
   );

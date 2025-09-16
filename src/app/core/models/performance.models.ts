@@ -1,10 +1,9 @@
-// Performance Management Models
-
 export interface SkillSet {
-  skillSetId: string;
-  name: string;
+  skillId: string;
+  skillName: string;
+  category: string;
   description?: string;
-  category?: string;
+  skillLevelScale: number[];
   isActive: boolean;
   createdAt: string;
 }
@@ -12,195 +11,209 @@ export interface SkillSet {
 export interface EmployeeSkill {
   employeeSkillId: string;
   employeeId: string;
-  skillSetId: string;
-  proficiencyLevel: number; // 1-5 scale
-  certifiedDate?: string;
-  expiryDate?: string;
-  comments?: string;
-  skillSet?: SkillSet;
-  employee?: {
-    employeeId: string;
-    firstName: string;
-    lastName: string;
-    employeeNumber: string;
-    department?: string;
-  };
-}
-
-export enum AppraisalStatus {
-  DRAFT = 'draft',
-  IN_PROGRESS = 'in_progress',
-  SUBMITTED = 'submitted',
-  REVIEWED = 'reviewed',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  skillId: string;
+  skillName: string;
+  proficiencyLevel: number;
+  assessedBy?: string;
+  assessorName?: string;
+  lastAssessed?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface KRA {
   kraId: string;
-  title: string;
-  description: string;
-  weightage: number;
-  measurementCriteria: string;
-  targetValue: string;
-  organizationId: string;
+  positionId: string;
+  kraTitle: string;
+  description?: string;
+  weightPercentage: number;
+  measurementCriteria?: string;
   isActive: boolean;
   createdAt: string;
 }
 
 export interface AppraisalCycle {
-  appraisalCycleId: string;
-  name: string;
+  cycleId: string;
+  cycleName: string;
   description?: string;
   startDate: string;
   endDate: string;
-  reviewStartDate: string;
-  reviewEndDate: string;
-  status: AppraisalStatus;
-  organizationId: string;
-  totalEmployees: number;
-  completedAppraisals: number;
+  reviewPeriodStart?: string;
+  reviewPeriodEnd?: string;
+  status: AppraisalCycleStatus;
+  ratingScale: RatingScale;
+  selfReviewEnabled: boolean;
+  peerReviewEnabled: boolean;
+  managerReviewEnabled: boolean;
   createdAt: string;
 }
 
+export enum AppraisalCycleStatus {
+  ACTIVE = 'active',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
+
+export interface RatingScale {
+  type: string;
+  scale: number[];
+  descriptions?: { [key: number]: string };
+}
+
 export interface EmployeeAppraisal {
-  employeeAppraisalId: string;
+  appraisalId: string;
+  cycleId: string;
+  cycleName: string;
   employeeId: string;
-  appraisalCycleId: string;
-  kraId: string;
-  selfRating: number;
-  managerRating?: number;
-  achievements: string;
-  challenges: string;
-  developmentPlan: string;
-  managerComments?: string;
+  employeeName: string;
+  reviewerId: string;
+  reviewerName: string;
+  reviewType: ReviewType;
+  overallRating?: number;
+  kraRatings: { [kraId: string]: number };
+  skillRatings: { [skillId: string]: number };
+  goalsAchieved: Goal[];
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
   status: AppraisalStatus;
   submittedAt?: string;
   reviewedAt?: string;
-  employee?: {
-    employeeId: string;
-    firstName: string;
-    lastName: string;
-    employeeNumber: string;
-    department?: string;
-    managerId?: string;
-  };
-  appraisalCycle?: AppraisalCycle;
-  kra?: KRA;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface PerformanceMetrics {
-  averageRating: number;
-  totalAppraisals: number;
-  completionRate: number;
-  topPerformers: number;
-  improvementNeeded: number;
+export enum ReviewType {
+  SELF = 'self',
+  MANAGER = 'manager',
+  PEER = 'peer',
+  SUBORDINATE = 'subordinate'
 }
 
-export interface DepartmentPerformance {
-  department: string;
-  averageRating: number;
-  totalEmployees: number;
-  completedAppraisals: number;
-  completionRate: number;
+export enum AppraisalStatus {
+  DRAFT = 'draft',
+  SUBMITTED = 'submitted',
+  UNDER_REVIEW = 'under_review',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected'
 }
 
-export interface SkillGap {
-  skillName: string;
-  currentLevel: number;
-  targetLevel: number;
-  gap: number;
-  employeeCount: number;
+export interface Goal {
+  goalId: string;
+  title: string;
+  description?: string;
+  targetDate: string;
+  status: GoalStatus;
+  achievementPercentage: number;
+  comments?: string;
+}
+
+export enum GoalStatus {
+  NOT_STARTED = 'not_started',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
+
+export interface CreateAppraisal {
+  cycleId: string;
+  employeeId: string;
+  reviewType: ReviewType;
+  overallRating?: number;
+  kraRatings: { [kraId: string]: number };
+  skillRatings: { [skillId: string]: number };
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
 }
 
 export interface PerformanceSummary {
-  metrics: PerformanceMetrics;
-  departmentPerformance: DepartmentPerformance[];
-  skillGaps: SkillGap[];
-  recentAppraisals: EmployeeAppraisal[];
-  upcomingReviews: EmployeeAppraisal[];
+  averageRating: number;
+  totalAppraisals: number;
+  pendingAppraisals: number;
+  ratingDistribution: { [rating: number]: number };
+  topPerformers: TopPerformer[];
 }
 
-// DTOs for API requests
-export interface CreateSkillSetRequest {
-  name: string;
-  description?: string;
-  category?: string;
+export interface TopPerformer {
+  employeeName: string;
+  rating: number;
+  department: string;
+  position: string;
 }
 
-export interface UpdateSkillSetRequest {
-  name: string;
-  description?: string;
-  category?: string;
-  isActive: boolean;
+export interface PerformanceSearchRequest {
+  cycleId?: string;
+  employeeId?: string;
+  reviewerId?: string;
+  reviewType?: ReviewType;
+  status?: AppraisalStatus;
+  page: number;
+  pageSize: number;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
-export interface CreateEmployeeSkillRequest {
+export interface PerformanceListResponse {
+  appraisals: EmployeeAppraisal[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface PerformanceReport {
+  cycleId: string;
+  cycleName: string;
+  summary: PerformanceSummary;
+  departmentSummaries: DepartmentPerformanceSummary[];
+  employeePerformances: EmployeePerformanceDetail[];
+  generatedAt: string;
+  generatedBy: string;
+}
+
+export interface DepartmentPerformanceSummary {
+  departmentId: string;
+  departmentName: string;
+  averageRating: number;
+  employeeCount: number;
+  completedAppraisals: number;
+  pendingAppraisals: number;
+}
+
+export interface EmployeePerformanceDetail {
   employeeId: string;
-  skillSetId: string;
-  proficiencyLevel: number;
-  certifiedDate?: string;
-  expiryDate?: string;
-  comments?: string;
-}
-
-export interface UpdateEmployeeSkillRequest {
-  proficiencyLevel: number;
-  certifiedDate?: string;
-  expiryDate?: string;
-  comments?: string;
-}
-
-export interface CreateAppraisalCycleRequest {
-  name: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  reviewStartDate: string;
-  reviewEndDate: string;
-}
-
-export interface UpdateAppraisalCycleRequest {
-  name: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  reviewStartDate: string;
-  reviewEndDate: string;
-  status: AppraisalStatus;
-}
-
-export interface SubmitAppraisalRequest {
-  kraId: string;
-  selfRating: number;
-  achievements: string;
-  challenges: string;
+  employeeName: string;
+  department: string;
+  position: string;
+  overallRating: number;
+  kraAverage: number;
+  skillAverage: number;
+  goalsAchieved: number;
+  totalGoals: number;
+  feedback: string;
   developmentPlan: string;
 }
 
-export interface ReviewAppraisalRequest {
-  managerRating: number;
-  managerComments: string;
-}
-
 export interface CreateKRARequest {
-  title: string;
-  description: string;
-  weightage: number;
-  measurementCriteria: string;
-  targetValue: string;
+  positionId: string;
+  kraTitle: string;
+  description?: string;
+  weightPercentage: number;
+  measurementCriteria?: string;
 }
 
 export interface UpdateKRARequest {
-  title: string;
-  description: string;
-  weightage: number;
-  measurementCriteria: string;
-  targetValue: string;
-  isActive: boolean;
+  kraTitle?: string;
+  description?: string;
+  weightPercentage?: number;
+  measurementCriteria?: string;
+  isActive?: boolean;
 }
 
-// Search and filter models
 export interface SkillSetFilter {
   category?: string;
   isActive?: boolean;
@@ -225,9 +238,121 @@ export interface AppraisalFilter {
 }
 
 export interface PerformanceReportFilter {
+  appraisalCycleId?: string;
+  department?: string;
   startDate?: string;
   endDate?: string;
-  department?: string;
-  appraisalCycleId?: string;
   rating?: number;
+}
+
+export interface CreateSkillSetRequest {
+  skillName: string;
+  category: string;
+  description?: string;
+  skillLevelScale: number[];
+}
+
+export interface UpdateSkillSetRequest {
+  skillName?: string;
+  category?: string;
+  description?: string;
+  skillLevelScale?: number[];
+  isActive?: boolean;
+}
+
+export interface CreateEmployeeSkillRequest {
+  employeeId: string;
+  skillId: string;
+  proficiencyLevel: number;
+  assessedBy?: string;
+  notes?: string;
+}
+
+export interface UpdateEmployeeSkillRequest {
+  proficiencyLevel?: number;
+  assessedBy?: string;
+  notes?: string;
+  lastAssessed?: string;
+}
+
+export interface CreateAppraisalCycleRequest {
+  cycleName: string;
+  description?: string;
+  startDate: string;
+  endDate: string;
+  reviewPeriodStart?: string;
+  reviewPeriodEnd?: string;
+  ratingScale: RatingScale;
+  selfReviewEnabled: boolean;
+  peerReviewEnabled: boolean;
+  managerReviewEnabled: boolean;
+}
+
+export interface UpdateAppraisalCycleRequest {
+  cycleName?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  reviewPeriodStart?: string;
+  reviewPeriodEnd?: string;
+  status?: AppraisalCycleStatus;
+  ratingScale?: RatingScale;
+  selfReviewEnabled?: boolean;
+  peerReviewEnabled?: boolean;
+  managerReviewEnabled?: boolean;
+}
+
+export interface SubmitAppraisalRequest {
+  overallRating?: number;
+  kraRatings: { [kraId: string]: number };
+  skillRatings: { [skillId: string]: number };
+  goalsAchieved: Goal[];
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
+}
+
+export interface ReviewAppraisalRequest {
+  overallRating?: number;
+  kraRatings?: { [kraId: string]: number };
+  skillRatings?: { [skillId: string]: number };
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
+  status: AppraisalStatus;
+}
+
+export interface SkillAssessment {
+  assessmentId: string;
+  employeeId: string;
+  skillId: string;
+  skillName: string;
+  currentLevel: number;
+  targetLevel: number;
+  assessedBy: string;
+  assessmentDate: string;
+  notes?: string;
+  developmentPlan?: string;
+}
+
+export interface CreateSkillAssessment {
+  employeeId: string;
+  skillId: string;
+  proficiencyLevel: number;
+  notes?: string;
+}
+
+export interface PerformanceMetrics {
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  position: string;
+  currentRating: number;
+  previousRating?: number;
+  ratingTrend: 'up' | 'down' | 'stable';
+  skillsCount: number;
+  goalsCompleted: number;
+  totalGoals: number;
+  lastAppraisalDate?: string;
+  nextAppraisalDate?: string;
 }

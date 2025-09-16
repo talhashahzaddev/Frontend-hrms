@@ -1,0 +1,277 @@
+<div class="employee-form-container">
+  <mat-card class="employee-form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+        {{ isEditMode ? 'Edit Employee' : 'Add New Employee' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>person</mat-icon>
+            Basic Information
+          </h3>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Employee Code</mat-label>
+              <input matInput formControlName="employeeCode" placeholder="EMP001">
+              <mat-error *ngIf="employeeForm.get('employeeCode')?.hasError('required')">
+                Employee code is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email" placeholder="john.doe@company.com">
+              <mat-error *ngIf="employeeForm.get('email')?.hasError('required')">
+                Email is required
+              </mat-error>
+              <mat-error *ngIf="employeeForm.get('email')?.hasError('email')">
+                Please enter a valid email
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName" placeholder="John">
+              <mat-error *ngIf="employeeForm.get('firstName')?.hasError('required')">
+                First name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName" placeholder="Doe">
+              <mat-error *ngIf="employeeForm.get('lastName')?.hasError('required')">
+                Last name is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Phone</mat-label>
+              <input matInput formControlName="phone" placeholder="+1 (555) 123-4567">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Date of Birth</mat-label>
+              <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
+              <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dobPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Gender</mat-label>
+              <mat-select formControlName="gender">
+                <mat-option value="Male">Male</mat-option>
+                <mat-option value="Female">Female</mat-option>
+                <mat-option value="Other">Other</mat-option>
+                <mat-option value="Prefer not to say">Prefer not to say</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Marital Status</mat-label>
+              <mat-select formControlName="maritalStatus">
+                <mat-option value="Single">Single</mat-option>
+                <mat-option value="Married">Married</mat-option>
+                <mat-option value="Divorced">Divorced</mat-option>
+                <mat-option value="Widowed">Widowed</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Nationality</mat-label>
+              <input matInput formControlName="nationality" placeholder="American">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Hire Date</mat-label>
+              <input matInput [matDatepicker]="hirePicker" formControlName="hireDate">
+              <mat-datepicker-toggle matIconSuffix [for]="hirePicker"></mat-datepicker-toggle>
+              <mat-datepicker #hirePicker></mat-datepicker>
+              <mat-error *ngIf="employeeForm.get('hireDate')?.hasError('required')">
+                Hire date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Employment Details Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>work</mat-icon>
+            Employment Details
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Department</mat-label>
+              <mat-select formControlName="departmentId">
+                <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+                  {{ dept.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="employeeForm.get('departmentId')?.hasError('required')">
+                Department is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Position</mat-label>
+              <mat-select formControlName="positionId">
+                <mat-option *ngFor="let pos of positions" [value]="pos.positionId">
+                  {{ pos.title }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="employeeForm.get('positionId')?.hasError('required')">
+                Position is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Employment Type</mat-label>
+              <mat-select formControlName="employmentType">
+                <mat-option value="full_time">Full Time</mat-option>
+                <mat-option value="part_time">Part Time</mat-option>
+                <mat-option value="contract">Contract</mat-option>
+                <mat-option value="intern">Intern</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Basic Salary</mat-label>
+              <input matInput type="number" formControlName="basicSalary" placeholder="50000">
+              <span matTextPrefix>$</span>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Manager</mat-label>
+              <mat-select formControlName="reportingManagerId">
+                <mat-option value="">No Manager</mat-option>
+                <mat-option *ngFor="let manager of managers" [value]="manager.employeeId">
+                  {{ manager.firstName }} {{ manager.lastName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Work Location</mat-label>
+              <input matInput formControlName="workLocation" placeholder="New York Office">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Address Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>location_on</mat-icon>
+            Address Information
+          </h3>
+
+          <div formGroupName="address">
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Street Address</mat-label>
+                <input matInput formControlName="street" placeholder="123 Main Street">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" placeholder="New York">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>State</mat-label>
+                <input matInput formControlName="state" placeholder="NY">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>ZIP Code</mat-label>
+                <input matInput formControlName="zip" placeholder="10001">
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>contact_phone</mat-icon>
+            Emergency Contact
+          </h3>
+
+          <div formGroupName="emergencyContact">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Contact Name</mat-label>
+                <input matInput formControlName="name" placeholder="Jane Doe">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Contact Phone</mat-label>
+                <input matInput formControlName="phone" placeholder="+1 (555) 987-6543">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Relationship</mat-label>
+                <mat-select formControlName="relationship">
+                  <mat-option value="Spouse">Spouse</mat-option>
+                  <mat-option value="Parent">Parent</mat-option>
+                  <mat-option value="Sibling">Sibling</mat-option>
+                  <mat-option value="Child">Child</mat-option>
+                  <mat-option value="Friend">Friend</mat-option>
+                  <mat-option value="Other">Other</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Contact Email</mat-label>
+                <input matInput type="email" formControlName="email" placeholder="jane.doe@email.com">
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button mat-button type="button" (click)="onCancel()">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
+          
+          <button mat-raised-button 
+                  color="primary" 
+                  type="submit" 
+                  [disabled]="employeeForm.invalid || isSubmitting">
+            <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+            <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update' : 'Create' }} Employee</span>
+            <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Creating...' }}</span>
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

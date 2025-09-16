@@ -1,116 +1,84 @@
 export interface LeaveRequest {
-  leaveRequestId: string;
+  requestId: string;
   employeeId: string;
+  employeeName: string;
   leaveTypeId: string;
+  leaveTypeName: string;
   startDate: string;
   endDate: string;
-  totalDays: number;
-  reason: string;
-  status: LeaveRequestStatus;
-  appliedDate: string;
-  reviewedBy?: string;
-  reviewedDate?: string;
-  reviewerComments?: string;
-  attachments?: string[];
-  isEmergency: boolean;
-  contactDuringLeave?: string;
-  
-  // Related data
-  employee?: {
-    employeeId: string;
-    firstName: string;
-    lastName: string;
-    employeeNumber: string;
-    department?: string;
-  };
-  leaveType?: LeaveType;
-  reviewer?: {
-    userId: string;
-    firstName: string;
-    lastName: string;
-  };
+  daysRequested: number;
+  reason?: string;
+  attachmentUrl?: string;
+  status: LeaveStatus;
+  submittedAt: string;
+  approvedBy?: string;
+  approverName?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export enum LeaveRequestStatus {
+export enum LeaveStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
-  CANCELLED = 'cancelled',
-  WITHDRAWN = 'withdrawn'
+  CANCELLED = 'cancelled'
 }
 
 export interface LeaveType {
   leaveTypeId: string;
-  name: string;
+  typeName: string;
   description?: string;
   maxDaysPerYear: number;
-  carryForwardDays: number;
-  isCarryForwardAllowed: boolean;
+  isPaid: boolean;
+  carryForwardAllowed: boolean;
+  maxCarryForwardDays: number;
   requiresApproval: boolean;
-  approvalHierarchy: string[];
+  advanceNoticeDays: number;
+  color: string;
   isActive: boolean;
   createdAt: string;
 }
 
 export interface LeaveEntitlement {
-  leaveEntitlementId: string;
+  entitlementId: string;
   employeeId: string;
   leaveTypeId: string;
+  leaveTypeName: string;
   year: number;
   totalDays: number;
   usedDays: number;
-  availableDays: number;
+  remainingDays: number;
   carryForwardDays: number;
-  
-  // Related data
-  leaveType?: LeaveType;
-  employee?: {
-    employeeId: string;
-    firstName: string;
-    lastName: string;
-  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LeaveBalance {
-  leaveTypeId: string;
-  leaveTypeName: string;
-  totalDays: number;
-  usedDays: number;
-  availableDays: number;
-  pendingDays: number;
-  carryForwardDays: number;
+  entitlements: LeaveEntitlement[];
+  totalLeaveDays: number;
+  totalUsedDays: number;
+  totalRemainingDays: number;
 }
 
-// DTOs for API requests/responses
 export interface CreateLeaveRequest {
   leaveTypeId: string;
   startDate: string;
   endDate: string;
-  reason: string;
-  isEmergency: boolean;
-  contactDuringLeave?: string;
-  attachments?: File[];
+  reason?: string;
+  attachmentUrl?: string;
 }
 
-export interface UpdateLeaveRequest {
-  leaveTypeId: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  isEmergency: boolean;
-  contactDuringLeave?: string;
-}
-
-export interface ReviewLeaveRequest {
-  status: LeaveRequestStatus;
-  reviewerComments?: string;
+export interface UpdateLeaveRequestStatus {
+  status: LeaveStatus;
+  rejectionReason?: string;
 }
 
 export interface LeaveSearchRequest {
   employeeId?: string;
-  departmentId?: string;
   leaveTypeId?: string;
-  status?: LeaveRequestStatus;
+  status?: LeaveStatus;
   startDate?: string;
   endDate?: string;
   page: number;
@@ -129,46 +97,47 @@ export interface LeaveListResponse {
   hasPreviousPage: boolean;
 }
 
-export interface LeaveStatistics {
-  totalRequests: number;
-  pendingRequests: number;
-  approvedRequests: number;
-  rejectedRequests: number;
-  totalDaysTaken: number;
-  averageLeaveDuration: number;
-  popularLeaveTypes: { [key: string]: number };
-  monthlyTrends: { month: string; requests: number; days: number }[];
+export interface LeaveCalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  color: string;
+  employeeName: string;
+  leaveType: string;
+  status: LeaveStatus;
 }
 
-export interface TeamLeaveCalendar {
-  date: string;
-  employees: {
-    employeeId: string;
-    employeeName: string;
-    leaveType: string;
-    status: LeaveRequestStatus;
-  }[];
+export interface LeaveSummary {
+  totalRequests: number;
+  approvedRequests: number;
+  pendingRequests: number;
+  rejectedRequests: number;
+  totalDaysRequested: number;
+  totalDaysApproved: number;
+  leaveTypeBreakdown: { [leaveType: string]: number };
 }
 
 export interface LeavePolicy {
   policyId: string;
   name: string;
   description?: string;
-  minAdvanceNoticeDays: number;
-  maxConsecutiveDays: number;
-  blackoutPeriods: {
-    startDate: string;
-    endDate: string;
-    description: string;
-  }[];
-  approvalWorkflow: {
-    level: number;
-    approverRole: string;
-    isRequired: boolean;
-  }[];
-  autoApprovalRules: {
-    condition: string;
-    maxDays: number;
-  }[];
+  leaveTypes: LeaveType[];
+  carryForwardPolicy: string;
+  accrualPolicy: string;
+  approvalWorkflow: string[];
   isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HolidayCalendar {
+  holidayId: string;
+  name: string;
+  date: string;
+  description?: string;
+  isRecurring: boolean;
+  isOptional: boolean;
+  applicableRegions: string[];
+  createdAt: string;
 }

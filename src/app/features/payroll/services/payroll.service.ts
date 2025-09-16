@@ -11,7 +11,8 @@ import {
   UpdatePayrollPeriodRequest,
   ProcessPayrollRequest,
   PayrollFilter,
-  PayrollReportFilter
+  PayrollReportFilter,
+  Payslip
 } from '../../../core/models/payroll.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
 
@@ -218,6 +219,11 @@ export class PayrollService {
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payroll/periods/${payrollPeriodId}/deduction-summary`);
   }
 
+  // Employee-specific endpoints
+  getMyLatestPayslip(): Observable<ApiResponse<Payslip>> {
+    return this.http.get<ApiResponse<Payslip>>(`${this.apiUrl}/payroll/my-payslip/latest`);
+  }
+
   // Dashboard Refresh
   refreshDashboardData(): void {
     this.refreshPayrollSummary();
@@ -225,9 +231,13 @@ export class PayrollService {
 
   // Utility Methods
   calculateNetPay(entry: PayrollEntry): number {
-    const grossPay = entry.basicSalary + entry.allowances + entry.overtimePay + entry.bonuses;
-    const totalDeductions = entry.deductions + entry.taxDeductions;
+    const grossPay = entry.basicSalary + this.sumObjectValues(entry.allowances) + entry.overtimeAmount + entry.bonusAmount;
+    const totalDeductions = this.sumObjectValues(entry.deductions) + entry.taxAmount + entry.otherDeductions;
     return grossPay - totalDeductions;
+  }
+
+  private sumObjectValues(obj: { [key: string]: number }): number {
+    return Object.values(obj || {}).reduce((sum, value) => sum + (value || 0), 0);
   }
 
   formatCurrency(amount: number, currency: string = 'USD'): string {
