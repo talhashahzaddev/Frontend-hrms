@@ -20,9 +20,9 @@ import { ApiResponse, PagedResult } from '../../../core/models/auth.models';
   providedIn: 'root'
 })
 export class EmployeeService {
-  private readonly apiUrl = `${environment.apiUrl}/employees`;
-  private readonly departmentUrl = `${environment.apiUrl}/departments`;
-  private readonly positionUrl = `${environment.apiUrl}/positions`;
+  private readonly apiUrl = `${environment.apiUrl}/Employee`
+  private readonly departmentUrl = `${environment.apiUrl}/department`;
+  private readonly positionUrl = `${environment.apiUrl}/position`;
 
   constructor(private http: HttpClient) { }
 
@@ -138,17 +138,29 @@ export class EmployeeService {
 
   // Department Operations
   getDepartments(): Observable<Department[]> {
-    return this.http.get<ApiResponse<Department[]>>(`${this.departmentUrl}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch departments');
-          }
-          return response.data!;
-        })
-      );
-  }
-
+  return this.http.get<ApiResponse<any[]>>(`${this.departmentUrl}`).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch departments');
+      }
+      return response.data!.map(d => {
+        const mapped: Department = {
+          departmentId: d.departmentId,
+          name: d.departmentName,         // ✅ map correctly
+          description: d.description,
+          managerId: d.managerId,
+          parentDepartmentId: undefined,  // ✅ API doesn’t send, default to undefined
+          isActive: d.isActive,
+          createdAt: d.createdAt,
+          manager: undefined,             // ✅ not returned, default
+          employeeCount: d.employeeCount,
+          subDepartments: []              // ✅ not returned, default empty array
+        };
+        return mapped;
+      });
+    })
+  );
+}
   getDepartment(departmentId: string): Observable<Department> {
     return this.http.get<ApiResponse<Department>>(`${this.departmentUrl}/${departmentId}`)
       .pipe(
@@ -162,17 +174,32 @@ export class EmployeeService {
   }
 
   // Position Operations  
-  getPositions(): Observable<Position[]> {
-    return this.http.get<ApiResponse<Position[]>>(`${this.positionUrl}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch positions');
-          }
-          return response.data!;
-        })
-      );
-  }
+ getPositions(): Observable<Position[]> {
+  return this.http.get<ApiResponse<any[]>>(`${this.positionUrl}`).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch positions');
+      }
+      return response.data!.map(p => {
+        const mapped: Position = {
+          positionId: p.positionId,
+          title: p.positionTitle,      // ✅ map to match model
+          description: p.description,
+          departmentId: p.departmentId,
+          level: 0,                    // ✅ default number
+          minSalary: undefined,        // ✅ matches model (number | undefined)
+          maxSalary: undefined,        // ✅ same
+          requiredSkills: [],          // ✅ empty array
+          responsibilities: [],        // ✅ empty array
+          qualifications: [],          // ✅ empty array
+          isActive: p.isActive,
+          createdAt: p.createdAt
+        };
+        return mapped;
+      });
+    })
+  );
+}
 
   getPosition(positionId: string): Observable<Position> {
     return this.http.get<ApiResponse<Position>>(`${this.positionUrl}/${positionId}`)
@@ -202,7 +229,7 @@ export class EmployeeService {
   // Search and Filter helpers
   getManagers(): Observable<Employee[]> {
     const params = new HttpParams().set('role', 'manager').set('isActive', 'true');
-    return this.http.get<ApiResponse<Employee[]>>(`${this.apiUrl}/managers`, { params })
+    return this.http.get<ApiResponse<Employee[]>>(`${this.apiUrl}/managers`)
       .pipe(
         map(response => {
           if (!response.success) {
