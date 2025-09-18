@@ -55,8 +55,8 @@ import { Employee } from '../../../../core/models/employee.models';
             
             <div class="employee-info">
               <h1 class="employee-name">{{ employee.firstName }} {{ employee.lastName }}</h1>
-              <p class="employee-title">{{ employee.position?.title }}</p>
-              <p class="employee-department">{{ employee.department?.name }}</p>
+              <p class="employee-title">{{ employee.position?.positionTitle }}</p>
+              <p class="employee-department">{{ employee.department?.departmentName }}</p>
               <div class="employee-status">
                 <mat-chip [color]="getStatusColor(employee.status)">
                   {{ employee.status | titlecase }}
@@ -173,11 +173,11 @@ import { Employee } from '../../../../core/models/employee.models';
                 <div class="info-grid">
                   <div class="info-item">
                     <label>Department</label>
-                    <span>{{ employee.department?.name || 'Not assigned' }}</span>
+                    <span>{{ employee.department?.departmentName || 'Not assigned' }}</span>
                   </div>
                   <div class="info-item">
                     <label>Position</label>
-                    <span>{{ employee.position?.title || 'Not assigned' }}</span>
+                    <span>{{ employee.position?.positionTitle || 'Not assigned' }}</span>
                   </div>
                   <div class="info-item">
                     <label>Employment Type</label>

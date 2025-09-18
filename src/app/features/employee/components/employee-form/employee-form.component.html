@@ -122,7 +122,7 @@
               <mat-label>Department</mat-label>
               <mat-select formControlName="departmentId">
                 <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-                  {{ dept.name }}
+                  {{ dept.departmentName }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="employeeForm.get('departmentId')?.hasError('required')">
@@ -134,7 +134,7 @@
               <mat-label>Position</mat-label>
               <mat-select formControlName="positionId">
                 <mat-option *ngFor="let pos of positions" [value]="pos.positionId">
-                  {{ pos.title }}
+                  {{ pos.positionTitle }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="employeeForm.get('positionId')?.hasError('required')">

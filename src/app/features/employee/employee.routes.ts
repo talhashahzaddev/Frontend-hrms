@@ -21,5 +21,13 @@ export const employeeRoutes: Routes = [
   {
     path: 'view/:id',
     loadComponent: () => import('./components/employee-detail/employee-detail.component').then(m => m.EmployeeDetailComponent)
+  },
+  {
+    path: 'departments',
+    loadComponent: () => import('./components/department-list/department-list.component').then(m => m.DepartmentListComponent)
+  },
+  {
+    path: 'positions',
+    loadComponent: () => import('./components/position-list/position-list.component').then(m => m.PositionListComponent)
   }
 ];

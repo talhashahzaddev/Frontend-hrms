@@ -1,0 +1,75 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>work</mat-icon>
+    {{ data.mode === 'create' ? 'Create New Position' : 'Edit Position' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="positionForm" class="position-form">
+    
+    <!-- Position Title -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Position Title *</mat-label>
+      <input matInput 
+             formControlName="positionTitle" 
+             placeholder="Enter position title"
+             maxlength="100">
+      <mat-hint>Required field</mat-hint>
+      <mat-error *ngIf="positionForm.get('positionTitle')?.hasError('required')">
+        Position title is required
+      </mat-error>
+      <mat-error *ngIf="positionForm.get('positionTitle')?.hasError('maxlength')">
+        Position title cannot exceed 100 characters
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Department -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Department</mat-label>
+      <mat-select formControlName="departmentId" placeholder="Select a department (optional)">
+        <mat-option value="">No Department</mat-option>
+        <mat-option *ngFor="let department of data.departments" [value]="department.departmentId">
+          {{ department.departmentName }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Optional - Select the department for this position</mat-hint>
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput 
+                formControlName="description" 
+                placeholder="Enter position description (optional)"
+                rows="4"
+                maxlength="1000"></textarea>
+      <mat-hint>Optional - Brief description of the position responsibilities</mat-hint>
+      <mat-error *ngIf="positionForm.get('description')?.hasError('maxlength')">
+        Description cannot exceed 1000 characters
+      </mat-error>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close type="button">
+    Cancel
+  </button>
+  <button mat-flat-button 
+          [disabled]="positionForm.invalid || isSubmitting"
+          (click)="onSubmit()"
+          class="submit-button">
+    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <span *ngIf="!isSubmitting">
+      {{ data.mode === 'create' ? 'Create Position' : 'Update Position' }}
+    </span>
+    <span *ngIf="isSubmitting">
+      {{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}
+    </span>
+  </button>
+</mat-dialog-actions>
