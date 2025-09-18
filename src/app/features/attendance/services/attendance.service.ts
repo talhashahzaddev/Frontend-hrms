@@ -32,7 +32,7 @@ export class AttendanceService {
 
   // Clock In/Out Operations
   checkIn(request: CheckInRequest): Observable<ClockResponse> {
-    return this.http.post<ApiResponse<ClockResponse>>(`${this.apiUrl}/check-in`, request)
+    return this.http.post<ApiResponse<ClockResponse>>(`${this.apiUrl}/clock-in`, request)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -44,7 +44,7 @@ export class AttendanceService {
   }
 
   checkOut(request: CheckOutRequest): Observable<ClockResponse> {
-    return this.http.post<ApiResponse<ClockResponse>>(`${this.apiUrl}/check-out`, request)
+    return this.http.post<ApiResponse<ClockResponse>>(`${this.apiUrl}/clock-out`, request)
       .pipe(
         map(response => {
           if (!response.success) {

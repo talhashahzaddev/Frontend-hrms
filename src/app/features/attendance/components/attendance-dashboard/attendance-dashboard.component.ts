@@ -14,7 +14,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
-import { Subject, takeUntil, interval, startWith } from 'rxjs';
+import { Subject, takeUntil, interval, startWith, switchMap } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -109,6 +109,7 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
+        
       });
   }
 
@@ -196,7 +197,7 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (session) => {
           this.currentSession = session;
-        },
+        },      
         error: (error) => {
           console.error('Failed to check current session:', error);
         }
@@ -306,15 +307,22 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   clockIn(): void {
     this.isClockActionLoading = true;
     const request: CheckInRequest = {
-      location: 'Office', // You could get this from geolocation
-      notes: ''
+       "action": "clock-in",
+  "location": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  }
     };
 
     this.attendanceService.checkIn(request)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$),
+      switchMap(()=>this.attendanceService.getCurrentSession())
+    
+    )
       .subscribe({
         next: (response) => {
-          this.currentSession = response.currentSession || null;
+          this.currentSession = response || null;
           this.notificationService.showSuccess('Checked in successfully!');
           this.loadDashboardData();
           this.isClockActionLoading = false;
@@ -329,8 +337,12 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   clockOut(): void {
     this.isClockActionLoading = true;
     const request: CheckOutRequest = {
-      location: 'Office',
-      notes: ''
+       "action": "clock-in",
+  "location": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+    },
     };
 
     this.attendanceService.checkOut(request)
@@ -375,9 +387,9 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   getSessionDuration(): string {
-    if (!this.currentSession || !this.currentSession.startTime) return '0h 0m';
+    if (!this.currentSession || !this.currentSession.checkInTime) return '0h 0m';
     
-    const start = new Date(this.currentSession.startTime);
+    const start = new Date(this.currentSession.checkInTime);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - start.getTime()) / (1000 * 60));
     
@@ -418,7 +430,8 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   isCurrentSession(): boolean {
-    return !!this.currentSession && this.currentSession.status === 'active';
+    return !!this.currentSession && this.currentSession.status?.toLowerCase() === 'active';
+    console.log(this.currentSession?.status);
   }
 
   navigateToReports(): void {
