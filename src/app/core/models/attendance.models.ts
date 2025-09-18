@@ -64,13 +64,21 @@ export interface AttendanceRecord {
 
 // DTOs for API requests/responses
 export interface CheckInRequest {
-  location?: string;
-  notes?: string;
+ "action": string,
+  "location": {
+    "additionalProp1": string,
+    "additionalProp2": string,
+    "additionalProp3": string
+  }
 }
 
 export interface CheckOutRequest {
-  location?: string;
-  notes?: string;
+  "action": string,
+  "location": {
+    "additionalProp1": string,
+    "additionalProp2": string,
+    "additionalProp3": string
+  }
 }
 
 export interface ManualAttendanceRequest {
@@ -142,21 +150,35 @@ export interface AttendanceReport {
   }[];
 }
 
+// export interface TimeTrackingSession {
+//   sessionId: string;
+//   employeeId: string;
+//   startTime: string;
+//   endTime?: string;
+//   totalDuration: number; // in minutes
+//   status: 'active' | 'paused' | 'completed';
+//   location?: string;
+//   description?: string;
+//   breaks: {
+//     startTime: string;
+//     endTime?: string;
+//     duration: number;
+//   }[];
+// }
+
+
 export interface TimeTrackingSession {
   sessionId: string;
   employeeId: string;
-  startTime: string;
-  endTime?: string;
-  totalDuration: number; // in minutes
-  status: 'active' | 'paused' | 'completed';
-  location?: string;
-  description?: string;
-  breaks: {
-    startTime: string;
-    endTime?: string;
-    duration: number;
-  }[];
+  checkInTime: string;   // backend sends this instead of startTime
+  checkOutTime?: string; // backend sends this instead of endTime
+  isActive: boolean;     // backend provides this flag
+  elapsedHours: number;  // backend sends in hours
+  elapsedTime: string;   // formatted string "HH:mm:ss"
+  status: 'active' | 'paused' | 'completed' | 'inactive'; 
+  currentLocation?: string;
 }
+
 
 // Clock-in/out response
 export interface ClockResponse {
