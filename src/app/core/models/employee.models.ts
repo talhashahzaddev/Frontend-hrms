@@ -52,31 +52,25 @@ export interface EmploymentDetail {
 
 export interface Department {
   departmentId: string;
-  name: string;
+  organizationId: string;
+  departmentName: string;
   description?: string;
   managerId?: string;
-  parentDepartmentId?: string;
+  managerName?: string;
   isActive: boolean;
+  employeeCount: number;
   createdAt: string;
-  
-  // Related data
-  manager?: Employee;
-  employeeCount?: number;
-  subDepartments?: Department[];
 }
 
 export interface Position {
   positionId: string;
-  title: string;
-  description?: string;
+  organizationId: string;
+  positionTitle: string;
   departmentId?: string;
-  level: number;
-  minSalary?: number;
-  maxSalary?: number;
-  requiredSkills?: string[];
-  responsibilities?: string[];
-  qualifications?: string[];
+  departmentName?: string;
+  description?: string;
   isActive: boolean;
+  employeeCount: number;
   createdAt: string;
 }
 
@@ -189,4 +183,30 @@ export interface EmployeeStatistics {
   employeesByPosition: { [key: string]: number };
   averageTenure: number;
   turnoverRate: number;
+}
+
+// Department DTOs
+export interface CreateDepartmentRequest {
+  departmentName: string;
+  description?: string;
+  managerId?: string;
+}
+
+export interface UpdateDepartmentRequest {
+  departmentName: string;
+  description?: string;
+  managerId?: string;
+}
+
+// Position DTOs
+export interface CreatePositionRequest {
+  positionTitle: string;
+  description?: string;
+  departmentId?: string;
+}
+
+export interface UpdatePositionRequest {
+  positionTitle: string;
+  description?: string;
+  departmentId?: string;
 }

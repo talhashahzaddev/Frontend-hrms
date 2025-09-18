@@ -12,7 +12,11 @@ import {
   UpdateEmployeeRequest,
   EmployeeSearchRequest,
   EmployeeListResponse,
-  EmployeeStatistics
+  EmployeeStatistics,
+  CreateDepartmentRequest,
+  UpdateDepartmentRequest,
+  CreatePositionRequest,
+  UpdatePositionRequest
 } from '../../../core/models/employee.models';
 import { ApiResponse, PagedResult } from '../../../core/models/auth.models';
 
@@ -20,9 +24,7 @@ import { ApiResponse, PagedResult } from '../../../core/models/auth.models';
   providedIn: 'root'
 })
 export class EmployeeService {
-  private readonly apiUrl = `${environment.apiUrl}/Employee`
-  private readonly departmentUrl = `${environment.apiUrl}/department`;
-  private readonly positionUrl = `${environment.apiUrl}/position`;
+  private readonly apiUrl = `${environment.apiUrl}/Employee`;
 
   constructor(private http: HttpClient) { }
 
@@ -138,31 +140,19 @@ export class EmployeeService {
 
   // Department Operations
   getDepartments(): Observable<Department[]> {
-  return this.http.get<ApiResponse<any[]>>(`${this.departmentUrl}`).pipe(
-    map(response => {
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to fetch departments');
-      }
-      return response.data!.map(d => {
-        const mapped: Department = {
-          departmentId: d.departmentId,
-          name: d.departmentName,         // ✅ map correctly
-          description: d.description,
-          managerId: d.managerId,
-          parentDepartmentId: undefined,  // ✅ API doesn’t send, default to undefined
-          isActive: d.isActive,
-          createdAt: d.createdAt,
-          manager: undefined,             // ✅ not returned, default
-          employeeCount: d.employeeCount,
-          subDepartments: []              // ✅ not returned, default empty array
-        };
-        return mapped;
-      });
-    })
-  );
-}
+    return this.http.get<ApiResponse<Department[]>>(`${this.apiUrl}/departments`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch departments');
+          }
+          return response.data!;
+        })
+      );
+  }
+
   getDepartment(departmentId: string): Observable<Department> {
-    return this.http.get<ApiResponse<Department>>(`${this.departmentUrl}/${departmentId}`)
+    return this.http.get<ApiResponse<Department>>(`${this.apiUrl}/departments/${departmentId}`)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -173,42 +163,102 @@ export class EmployeeService {
       );
   }
 
+  createDepartment(request: CreateDepartmentRequest): Observable<Department> {
+    return this.http.post<ApiResponse<Department>>(`${this.apiUrl}/departments`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create department');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  updateDepartment(departmentId: string, request: UpdateDepartmentRequest): Observable<Department> {
+    return this.http.put<ApiResponse<Department>>(`${this.apiUrl}/departments/${departmentId}`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to update department');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  deleteDepartment(departmentId: string): Observable<void> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/departments/${departmentId}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to delete department');
+          }
+        })
+      );
+  }
+
   // Position Operations  
- getPositions(): Observable<Position[]> {
-  return this.http.get<ApiResponse<any[]>>(`${this.positionUrl}`).pipe(
-    map(response => {
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to fetch positions');
-      }
-      return response.data!.map(p => {
-        const mapped: Position = {
-          positionId: p.positionId,
-          title: p.positionTitle,      // ✅ map to match model
-          description: p.description,
-          departmentId: p.departmentId,
-          level: 0,                    // ✅ default number
-          minSalary: undefined,        // ✅ matches model (number | undefined)
-          maxSalary: undefined,        // ✅ same
-          requiredSkills: [],          // ✅ empty array
-          responsibilities: [],        // ✅ empty array
-          qualifications: [],          // ✅ empty array
-          isActive: p.isActive,
-          createdAt: p.createdAt
-        };
-        return mapped;
-      });
-    })
-  );
-}
+  getPositions(departmentId?: string): Observable<Position[]> {
+    let params = new HttpParams();
+    if (departmentId) {
+      params = params.set('departmentId', departmentId);
+    }
+
+    return this.http.get<ApiResponse<Position[]>>(`${this.apiUrl}/positions`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch positions');
+          }
+          return response.data!;
+        })
+      );
+  }
 
   getPosition(positionId: string): Observable<Position> {
-    return this.http.get<ApiResponse<Position>>(`${this.positionUrl}/${positionId}`)
+    return this.http.get<ApiResponse<Position>>(`${this.apiUrl}/positions/${positionId}`)
       .pipe(
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch position');
           }
           return response.data!;
+        })
+      );
+  }
+
+  createPosition(request: CreatePositionRequest): Observable<Position> {
+    return this.http.post<ApiResponse<Position>>(`${this.apiUrl}/positions`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create position');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  updatePosition(positionId: string, request: UpdatePositionRequest): Observable<Position> {
+    return this.http.put<ApiResponse<Position>>(`${this.apiUrl}/positions/${positionId}`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to update position');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  deletePosition(positionId: string): Observable<void> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/positions/${positionId}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to delete position');
+          }
         })
       );
   }

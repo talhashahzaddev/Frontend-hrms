@@ -50,7 +50,7 @@
         <mat-select [formControl]="departmentControl">
           <mat-option value="">All Departments</mat-option>
           <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-            {{ dept.name }}
+            {{ dept.departmentName }}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -62,7 +62,7 @@
         <mat-select [formControl]="positionControl">
           <mat-option value="">All Positions</mat-option>
           <mat-option *ngFor="let position of positions" [value]="position.positionId">
-            {{ position.title }}
+            {{ position.positionTitle }}
           </mat-option>
         </mat-select>
       </mat-form-field>

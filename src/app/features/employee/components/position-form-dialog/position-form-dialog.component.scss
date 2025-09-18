@@ -1,0 +1,270 @@
+// Position Form Dialog Styles - Professional Theme
+:host {
+  display: block;
+}
+
+::ng-deep .mat-mdc-dialog-container {
+  --mdc-dialog-container-color: #ffffff;
+  --mdc-dialog-supporting-text-color: #374151;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  margin: -24px -24px 0 -24px;
+  
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    padding: 16px 0;
+    
+    mat-icon {
+      color: white;
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+  
+  .close-button {
+    color: rgba(255, 255, 255, 0.8);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+  }
+}
+
+.dialog-content {
+  padding: 32px 24px 24px !important;
+  background: #ffffff;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.position-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 500px;
+  
+  @media (max-width: 600px) {
+    min-width: auto;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Form Field Styling - Light Theme
+::ng-deep .mat-mdc-form-field {
+  &.mat-form-field-appearance-outline {
+    .mat-mdc-form-field-outline {
+      border-radius: 12px;
+      border-color: #d1d5db !important;
+    }
+    
+    .mat-mdc-form-field-outline-thick {
+      border-color: #667eea !important;
+    }
+    
+    &:not(.mat-form-field-disabled) {
+      .mat-mdc-form-field-outline {
+        color: #d1d5db;
+      }
+      
+      &.mat-focused .mat-mdc-form-field-outline-thick {
+        color: #667eea !important;
+        border-color: #667eea !important;
+      }
+      
+      &:hover .mat-mdc-form-field-outline {
+        color: #9ca3af;
+        border-color: #9ca3af !important;
+      }
+    }
+    
+    .mat-mdc-form-field-label {
+      color: #6b7280 !important;
+    }
+    
+    &.mat-focused .mat-mdc-form-field-label {
+      color: #667eea !important;
+    }
+  }
+  
+  .mat-mdc-form-field-hint {
+    color: #9ca3af !important;
+    font-size: 0.75rem;
+  }
+  
+  .mat-mdc-form-field-error {
+    color: #ef4444 !important;
+    font-size: 0.75rem;
+  }
+}
+
+// Input and Textarea Styling - Light Theme
+::ng-deep .mat-mdc-input-element,
+::ng-deep .mat-mdc-select-value {
+  color: #1f2937 !important;
+  background: transparent !important;
+  
+  &::placeholder {
+    color: #9ca3af !important;
+  }
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  background: #ffffff !important;
+  
+  &:hover {
+    background: #f9fafb !important;
+  }
+}
+
+::ng-deep .mat-mdc-form-field-infix {
+  background: transparent !important;
+}
+
+// Select Dropdown Styling
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid #e5e7eb !important;
+  max-height: 300px;
+  background: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-option {
+  color: #374151 !important;
+  
+  &:hover {
+    background: #f3f4f6 !important;
+  }
+  
+  &.mat-mdc-option-active {
+    background: #ede9fe !important;
+    color: #667eea !important;
+  }
+}
+
+// Dialog Actions
+.dialog-actions {
+  padding: 0 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+  margin: 0 -24px -24px -24px;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+// Button Styling - Professional Theme
+::ng-deep .mat-mdc-stroked-button {
+  border: 2px solid #d1d5db !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  min-width: 100px;
+  
+  &:hover {
+    border-color: #9ca3af !important;
+    background: #f9fafb !important;
+  }
+}
+
+.submit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 10px 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 140px;
+  border: none !important;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  &:disabled {
+    background: #d1d5db !important;
+    color: #9ca3af !important;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+  
+  mat-spinner {
+    margin-right: 8px;
+  }
+}
+
+// Loading State
+::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: white !important;
+}
+
+// Responsive Design
+@media (max-width: 600px) {
+  .dialog-header {
+    padding: 16px 16px 0;
+    
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .dialog-content {
+    padding: 24px 16px 16px !important;
+  }
+  
+  .dialog-actions {
+    padding: 0 16px 16px;
+    flex-direction: column-reverse;
+    margin: 0 -16px -16px -16px;
+    
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .position-form {
+    gap: 16px;
+    min-width: auto;
+  }
+}
+
+// Focus and Active States
+::ng-deep .mat-mdc-form-field.mat-focused {
+  .mat-mdc-form-field-outline-thick {
+    border-width: 2px !important;
+  }
+}
+
+// Textarea specific styling
+::ng-deep textarea.mat-mdc-input-element {
+  resize: vertical;
+  min-height: 120px;
+}

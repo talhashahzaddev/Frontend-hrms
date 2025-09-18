@@ -1,0 +1,194 @@
+<!-- Department List Container -->
+<div class="department-list-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>apartment</mat-icon>
+        Department Management
+      </h1>
+      <p class="page-subtitle">Manage and organize your departments</p>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-flat-button 
+              (click)="openCreateDialog()" 
+              class="add-button">
+        <mat-icon>add</mat-icon>
+        Add Department
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Search & Filters</h3>
+      <button mat-stroked-button 
+              (click)="clearFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content">
+      <!-- Search -->
+      <mat-form-field class="search-field">
+        <mat-label>Search departments</mat-label>
+        <input matInput 
+               [formControl]="searchControl" 
+               placeholder="Search by name or description...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Status Filter -->
+      <mat-form-field>
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusControl">
+          <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Manager Filter -->
+      <mat-form-field>
+        <mat-label>Manager</mat-label>
+        <mat-select [formControl]="managerControl">
+          <mat-option value="">All Managers</mat-option>
+          <mat-option *ngFor="let manager of managers" [value]="manager.employeeId">
+            {{ manager.fullName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Department Table -->
+  <mat-card class="table-card">
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading departments...</p>
+    </div>
+
+    <!-- Table Content -->
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="departments" class="department-table">
+        
+        <!-- Department Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Department</th>
+          <td mat-cell *matCellDef="let department" class="department-info">
+            <div class="department-details">
+              <div class="department-name">{{ department.departmentName }}</div>
+              <div class="department-description" *ngIf="department.description">
+                {{ department.description }}
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Manager Column -->
+        <ng-container matColumnDef="manager">
+          <th mat-header-cell *matHeaderCellDef>Manager</th>
+          <td mat-cell *matCellDef="let department">
+            <span *ngIf="department.managerName" class="manager-name">
+              {{ department.managerName }}
+            </span>
+            <span *ngIf="!department.managerName" class="no-manager">
+              No Manager Assigned
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Employee Count Column -->
+        <ng-container matColumnDef="employeeCount">
+          <th mat-header-cell *matHeaderCellDef>Employees</th>
+          <td mat-cell *matCellDef="let department">
+            <span class="employee-count">{{ department.employeeCount }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let department">
+            <mat-chip-set>
+              <mat-chip [class]="department.isActive ? 'status-active' : 'status-inactive'">
+                {{ department.isActive ? 'Active' : 'Inactive' }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <!-- Created Date Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let department">
+            {{ department.createdAt | date:'MMM d, y' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let department">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewDepartment(department)">
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+              <button mat-menu-item (click)="editDepartment(department)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item 
+                      *ngIf="department.isActive"
+                      (click)="toggleDepartmentStatus(department, false)"
+                      class="warning-action">
+                <mat-icon>block</mat-icon>
+                Deactivate
+              </button>
+              <button mat-menu-item 
+                      *ngIf="!department.isActive"
+                      (click)="toggleDepartmentStatus(department, true)"
+                      class="success-action">
+                <mat-icon>check_circle</mat-icon>
+                Activate
+              </button>
+              <button mat-menu-item 
+                      (click)="deleteDepartment(department)"
+                      class="danger-action"
+                      *ngIf="department.employeeCount === 0">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let department; columns: displayedColumns;"></tr>
+        
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="departments.length === 0" class="empty-state">
+        <mat-icon>apartment</mat-icon>
+        <h3>No Departments Found</h3>
+        <p>No departments match your current filters.</p>
+        <button mat-flat-button (click)="openCreateDialog()" class="add-first-department">
+          <mat-icon>add</mat-icon>
+          Add Your First Department
+        </button>
+      </div>
+    </div>
+  </mat-card>
+</div>
