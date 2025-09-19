@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,47 +10,52 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu';
-import { Subject, takeUntil, interval, startWith, switchMap } from 'rxjs';
+import { MatNativeDateModule } from '@angular/material/core';
+import { Subject, takeUntil, interval } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { NotificationService } from '../../../../core/services/notification.service';
 import {
   TimeTrackingSession,
   AttendanceSummary,
-  DailyAttendanceStats,
   AttendanceCalendarData,
-  AttendanceStatus,
-  CheckInRequest,
-  CheckOutRequest
+  Attendance
 } from '../../../../core/models/attendance.models';
 import { User } from '../../../../core/models/auth.models';
 
+interface CalendarDay {
+  date: Date;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  isWeekend: boolean;
+  isHoliday: boolean;
+  isWorkingDay: boolean;
+  isPast: boolean;
+  attendance?: AttendanceCalendarData;
+}
+
 @Component({
-    selector: 'app-attendance-dashboard',
-    imports: [
-        CommonModule,
-        RouterModule,
-        ReactiveFormsModule,
-        MatCardModule,
-        MatButtonModule,
-        MatIconModule,
-        MatTabsModule,
-        MatDatepickerModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatProgressSpinnerModule,
-        MatProgressBarModule,
-        MatChipsModule,
-        MatTooltipModule,
-        MatMenuModule
-    ],
-    templateUrl: './attendance-dashboard.component.html',
-    styleUrls: ['./attendance-dashboard.component.scss']
+  selector: 'app-attendance-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTabsModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatNativeDateModule
+  ],
+  templateUrl: './attendance-dashboard.component.html',
+  styleUrls: ['./attendance-dashboard.component.scss']
 })
 export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -62,41 +67,41 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   
   // Loading states
   isLoading = false;
-  isClockActionLoading = false;
+  isLoadingList = false;
   
   // Dashboard data
   attendanceSummary: AttendanceSummary | null = null;
-  dailyStats: DailyAttendanceStats | null = null;
   calendarData: AttendanceCalendarData[] = [];
+  myAttendanceList: Attendance[] = [];
   
   // Date controls
   selectedMonth = new Date();
-  monthControl = new FormControl(new Date());
+  listStartDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
+  listEndDateControl = new FormControl(new Date());
   
   // Quick stats
   quickStats = [
-    { label: 'Present Today', value: 0, icon: 'check_circle', color: 'success' },
+    { label: 'Present Today', value: '0', icon: 'check_circle', color: 'success' },
     { label: 'Total Hours', value: '0h 0m', icon: 'schedule', color: 'primary' },
     { label: 'This Month', value: '0h 0m', icon: 'calendar_today', color: 'info' },
     { label: 'Attendance Rate', value: '0%', icon: 'trending_up', color: 'warning' }
   ];
   
   // Calendar view
-  calendarWeeks: AttendanceCalendarData[][] = [];
+  calendarWeeks: CalendarDay[][] = [];
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
   constructor(
     public attendanceService: AttendanceService,
-    private authService: AuthService,
-    private notificationService: NotificationService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.getCurrentUser();
     this.setupTimeUpdater();
-    this.setupMonthWatcher();
-    this.loadDashboardData();
-    this.checkCurrentSession();
+    this.loadCurrentSession();
+    this.loadAttendanceSummary();
+    this.generateCalendar();
   }
 
   ngOnDestroy(): void {
@@ -105,11 +110,10 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   private getCurrentUser(): void {
-    this.authService.getCurrentUser()
+    this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
-        
       });
   }
 
@@ -121,372 +125,197 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private setupMonthWatcher(): void {
-    this.monthControl.valueChanges
-      .pipe(
-        startWith(this.monthControl.value),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(date => {
-        if (date) {
-          this.selectedMonth = date;
-          this.loadCalendarData();
-        }
-      });
-  }
-
-  private loadDashboardData(): void {
-    this.isLoading = true;
-    
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    
-    // Load attendance summary for current month
-    this.attendanceService.getMyAttendanceSummary(
-      this.formatDate(startOfMonth),
-      this.formatDate(endOfMonth)
-    ).pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (summary) => {
-        this.attendanceSummary = summary;
-        this.updateQuickStats();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Failed to load attendance summary:', error);
-        this.isLoading = false;
-      }
-    });
-
-    // Load daily stats
-    this.attendanceService.getDailyAttendanceStats()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (stats) => {
-          this.dailyStats = stats;
-        },
-        error: (error) => {
-          console.error('Failed to load daily stats:', error);
-        }
-      });
-
-    this.loadCalendarData();
-  }
-
-  private loadCalendarData(): void {
-    const year = this.selectedMonth.getFullYear();
-    const month = this.selectedMonth.getMonth() + 1;
-    
-    this.attendanceService.getAttendanceCalendar('', year, month)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.calendarData = data;
-          this.buildCalendarWeeks();
-        },
-        error: (error) => {
-          console.error('Failed to load calendar data:', error);
-        }
-      });
-  }
-
-  private checkCurrentSession(): void {
+  private loadCurrentSession(): void {
     this.attendanceService.getCurrentSession()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (session) => {
           this.currentSession = session;
-        },      
+        },
         error: (error) => {
-          console.error('Failed to check current session:', error);
+          console.error('Error loading current session:', error);
         }
       });
   }
 
-  private updateQuickStats(): void {
-    if (!this.attendanceSummary) return;
+  private loadAttendanceSummary(): void {
+    const startDate = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth(), 1);
+    const endDate = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 0);
     
+    this.attendanceService.getMyAttendanceSummary(
+      startDate.toISOString().split('T')[0],
+      endDate.toISOString().split('T')[0]
+    )
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (summary) => {
+        this.attendanceSummary = summary;
+        this.updateQuickStats(summary);
+      },
+      error: (error) => {
+        console.error('Error loading attendance summary:', error);
+      }
+    });
+  }
+
+  private updateQuickStats(summary: AttendanceSummary): void {
     this.quickStats = [
-      {
-        label: 'Present Days',
-        value: this.attendanceSummary.presentDays,
-        icon: 'check_circle',
-        color: 'success'
+      { 
+        label: 'Present Days', 
+        value: (summary.presentDays || 0).toString(), 
+        icon: 'check_circle', 
+        color: 'success' 
       },
-      {
-        label: 'Total Hours',
-        value: this.attendanceService.formatDuration(this.attendanceSummary.totalHours),
-        icon: 'schedule',
-        color: 'primary'
+      { 
+        label: 'Total Hours', 
+        value: this.formatHours(summary.totalHours || 0), 
+        icon: 'schedule', 
+        color: 'primary' 
       },
-      {
-        label: 'Average Hours',
-        value: this.attendanceService.formatDuration(this.attendanceSummary.averageHoursPerDay),
-        icon: 'calendar_today',
-        color: 'info'
+      { 
+        label: 'Overtime Hours', 
+        value: this.formatHours(summary.overtimeHours || 0), 
+        icon: 'access_time', 
+        color: 'info' 
       },
-      {
-        label: 'Attendance Rate',
-        value: `${Math.round(this.attendanceSummary.attendancePercentage)}%`,
-        icon: 'trending_up',
-        color: 'warning'
+      { 
+        label: 'Average/Day', 
+        value: this.formatHours(summary.averageHoursPerDay || 0), 
+        icon: 'trending_up', 
+        color: 'warning' 
       }
     ];
+  }
+
+  generateCalendar(): void {
+    const year = this.selectedMonth.getFullYear();
+    const month = this.selectedMonth.getMonth();
+    
+    // Load calendar data
+    this.attendanceService.getAttendanceCalendar(undefined, year, month + 1)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (calendarData) => {
+          this.calendarData = calendarData;
+          this.buildCalendarWeeks();
+        },
+        error: (error) => {
+          console.error('Error loading calendar data:', error);
+          this.buildCalendarWeeks(); // Build empty calendar
+        }
+      });
   }
 
   private buildCalendarWeeks(): void {
     const year = this.selectedMonth.getFullYear();
     const month = this.selectedMonth.getMonth();
     
-    // Get first day of month and number of days
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    // Get first day of the month and first day of the calendar grid
+    const firstDayOfMonth = new Date(year, month, 1);
+    const firstDayOfCalendar = new Date(firstDayOfMonth);
+    firstDayOfCalendar.setDate(firstDayOfCalendar.getDate() - firstDayOfMonth.getDay());
     
-    // Create calendar grid
-    const weeks: AttendanceCalendarData[][] = [];
-    let currentWeek: AttendanceCalendarData[] = [];
+    const weeks: CalendarDay[][] = [];
+    let currentWeek: CalendarDay[] = [];
+    let currentDate = new Date(firstDayOfCalendar);
     
-    // Add empty cells for days before month starts
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      currentWeek.push(this.createEmptyCalendarData());
-    }
-    
-    // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateStr = this.formatDate(new Date(year, month, day));
-      const attendanceData = this.calendarData.find(d => d.date === dateStr) || 
-        this.createDefaultCalendarData(dateStr);
+    // Generate 6 weeks (42 days)
+    for (let day = 0; day < 42; day++) {
+      const calendarDay: CalendarDay = {
+        date: new Date(currentDate),
+        dayNumber: currentDate.getDate(),
+        isCurrentMonth: currentDate.getMonth() === month,
+        isToday: this.isToday(currentDate),
+        isWeekend: currentDate.getDay() === 0 || currentDate.getDay() === 6,
+        isHoliday: false, // TODO: Implement holiday logic
+        isWorkingDay: this.isWorkingDay(currentDate),
+        isPast: currentDate < new Date(),
+        attendance: this.getAttendanceForDate(currentDate)
+      };
       
-      currentWeek.push(attendanceData);
+      currentWeek.push(calendarDay);
       
-      // Start new week on Sunday
       if (currentWeek.length === 7) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
-    }
-    
-    // Fill remaining cells in last week
-    while (currentWeek.length < 7) {
-      currentWeek.push(this.createEmptyCalendarData());
-    }
-    if (currentWeek.length > 0) {
-      weeks.push(currentWeek);
+      
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     this.calendarWeeks = weeks;
   }
 
-  private createEmptyCalendarData(): AttendanceCalendarData {
-    return {
-      date: '',
-      status: AttendanceStatus.ABSENT,
-      totalHours: 0,
-      isHoliday: false,
-      isWeekend: false
-    };
+  private isToday(date: Date): boolean {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
   }
 
-  private createDefaultCalendarData(date: string): AttendanceCalendarData {
-    const dayOfWeek = new Date(date).getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  private isWorkingDay(date: Date): boolean {
+    const day = date.getDay();
+    return day >= 1 && day <= 5; // Monday to Friday
+  }
+
+  private getAttendanceForDate(date: Date): AttendanceCalendarData | undefined {
+    const dateStr = date.toISOString().split('T')[0];
+    return this.calendarData.find(a => a.date.split('T')[0] === dateStr);
+  }
+
+  previousMonth(): void {
+    this.selectedMonth = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() - 1, 1);
+    this.generateCalendar();
+    this.loadAttendanceSummary();
+  }
+
+  nextMonth(): void {
+    this.selectedMonth = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 1);
+    this.generateCalendar();
+    this.loadAttendanceSummary();
+  }
+
+  goToCurrentMonth(): void {
+    this.selectedMonth = new Date();
+    this.generateCalendar();
+    this.loadAttendanceSummary();
+  }
+
+  loadListData(): void {
+    this.isLoadingList = true;
     
-    return {
-      date,
-      status: isWeekend ? AttendanceStatus.HOLIDAY : AttendanceStatus.ABSENT,
-      totalHours: 0,
-      isHoliday: false,
-      isWeekend
-    };
-  }
+    const startDate = this.listStartDateControl.value?.toISOString().split('T')[0] || '';
+    const endDate = this.listEndDateControl.value?.toISOString().split('T')[0] || '';
 
-  // Clock In/Out Actions
-  clockIn(): void {
-    this.isClockActionLoading = true;
-    const request: CheckInRequest = {
-       "action": "clock-in",
-  "location": {
-    "additionalProp1": "string",
-    "additionalProp2": "string",
-    "additionalProp3": "string"
-  }
-    };
-
-    this.attendanceService.checkIn(request)
-      .pipe(takeUntil(this.destroy$),
-      switchMap(()=>this.attendanceService.getCurrentSession())
-    
-    )
-      .subscribe({
-        next: (response) => {
-          this.currentSession = response || null;
-          this.notificationService.showSuccess('Checked in successfully!');
-          this.loadDashboardData();
-          this.isClockActionLoading = false;
-        },
-        error: (error) => {
-          this.notificationService.showError(error.message || 'Failed to check in');
-          this.isClockActionLoading = false;
-        }
-      });
-  }
-
-  clockOut(): void {
-    this.isClockActionLoading = true;
-    const request: CheckOutRequest = {
-       "action": "clock-in",
-  "location": {
-    "additionalProp1": "string",
-    "additionalProp2": "string",
-    "additionalProp3": "string"
-    },
-    };
-
-    this.attendanceService.checkOut(request)
+    this.attendanceService.getMyAttendance(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
-          this.currentSession = null;
-          this.notificationService.showSuccess('Checked out successfully!');
-          this.loadDashboardData();
-          this.isClockActionLoading = false;
+        next: (attendances) => {
+          this.myAttendanceList = attendances;
+          this.isLoadingList = false;
         },
         error: (error) => {
-          this.notificationService.showError(error.message || 'Failed to check out');
-          this.isClockActionLoading = false;
+          console.error('Error loading attendance list:', error);
+          this.isLoadingList = false;
         }
       });
   }
 
-  // Utility methods
-  formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
-  }
-
-  formatTime(time: string): string {
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  getCurrentTimeFormatted(): string {
-    return this.currentTime.toLocaleTimeString();
-  }
-
-  getCurrentDateFormatted(): string {
-    return this.currentTime.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-
-  getSessionDuration(): string {
-    if (!this.currentSession || !this.currentSession.checkInTime) return '0h 0m';
-    
-    const start = new Date(this.currentSession.checkInTime);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - start.getTime()) / (1000 * 60));
-    
-    const hours = Math.floor(diffInMinutes / 60);
-    const minutes = diffInMinutes % 60;
-    
-    return `${hours}h ${minutes}m`;
-  }
-
-  getStatusColor(status: AttendanceStatus): string {
-    return this.attendanceService.getAttendanceStatusColor(status);
-  }
-
-  getCalendarDayClass(day: AttendanceCalendarData): string[] {
-    const classes = ['calendar-day'];
-    
-    if (!day.date) {
-      classes.push('empty-day');
-      return classes;
-    }
-    
-    if (day.isWeekend) classes.push('weekend');
-    if (day.isHoliday) classes.push('holiday');
-    
-    classes.push(`status-${day.status}`);
-    
-    // Highlight today
-    const today = new Date().toISOString().split('T')[0];
-    if (day.date === today) {
-      classes.push('today');
-    }
-    
-    return classes;
-  }
-
-  getDayNumber(date: string): number {
-    return date ? new Date(date).getDate() : 0;
-  }
-
-  isCurrentSession(): boolean {
-    return !!this.currentSession && this.currentSession.status?.toLowerCase() === 'active';
-    console.log(this.currentSession?.status);
-  }
-
-  navigateToReports(): void {
-    // Navigate to detailed reports
-  }
-
-  navigateToTimesheet(): void {
-    // Navigate to timesheet view
-  }
-
-  trackByFn(index: number, item: any): any {
-    return item.id || index;
-  }
-
-  getTooltipText(day: AttendanceCalendarData): string {
-    if (!day.date) return '';
-    
-    let tooltip = `${new Date(day.date).toLocaleDateString()}\n`;
-    tooltip += `Status: ${day.status}\n`;
-    
-    if (day.checkIn) {
-      tooltip += `Check In: ${this.formatTime(day.checkIn)}\n`;
-    }
-    if (day.checkOut) {
-      tooltip += `Check Out: ${this.formatTime(day.checkOut)}\n`;
-    }
-    if (day.totalHours > 0) {
-      tooltip += `Total Hours: ${this.formatHours(day.totalHours)}`;
-    }
-    
-    return tooltip;
-  }
-
-  getStatusIcon(status: AttendanceStatus): string {
+  getStatusIcon(status: string): string {
     switch (status) {
-      case AttendanceStatus.PRESENT: return 'check_circle';
-      case AttendanceStatus.ABSENT: return 'cancel';
-      case AttendanceStatus.LATE: return 'schedule';
-      case AttendanceStatus.EARLY_DEPARTURE: return 'exit_to_app';
-      case AttendanceStatus.HALF_DAY: return 'schedule';
-      case AttendanceStatus.ON_LEAVE: return 'event_busy';
-      case AttendanceStatus.HOLIDAY: return 'celebration';
+      case 'present': return 'check_circle';
+      case 'absent': return 'cancel';
+      case 'late': return 'schedule';
+      case 'early_departure': return 'exit_to_app';
+      case 'half_day': return 'schedule';
+      case 'on_leave': return 'event_available';
+      case 'holiday': return 'celebration';
       default: return 'help_outline';
     }
   }
 
   formatHours(hours: number): string {
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
-    return `${h}h ${m}m`;
-  }
-
-  getProgressBarColor(percentage: number): 'primary' | 'accent' | 'warn' {
-    if (percentage >= 90) return 'primary';
-    if (percentage >= 75) return 'accent';
-    return 'warn';
+    if (hours === 0) return '0h 0m';
+    const hrs = Math.floor(hours);
+    const mins = Math.round((hours - hrs) * 60);
+    return `${hrs}h ${mins}m`;
   }
 }

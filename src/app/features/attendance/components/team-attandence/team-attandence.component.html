@@ -1,1 +1,273 @@
-<p>team-attandence works!</p>
+<!-- Team Attendance Container -->
+<div class="team-attendance-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>groups</mat-icon>
+        Team Attendance
+      </h1>
+      <p class="page-subtitle">Monitor and manage your team's attendance</p>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-flat-button 
+              (click)="exportReport()" 
+              class="export-button"
+              [disabled]="isLoading">
+        <mat-icon>download</mat-icon>
+        Export Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Filters & Search</h3>
+      <button mat-stroked-button 
+              (click)="clearFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content">
+      <!-- Date Range -->
+      <mat-form-field class="date-field">
+        <mat-label>Start Date</mat-label>
+        <input matInput 
+               [matDatepicker]="startPicker" 
+               [formControl]="startDateControl"
+               placeholder="Select start date">
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field class="date-field">
+        <mat-label>End Date</mat-label>
+        <input matInput 
+               [matDatepicker]="endPicker" 
+               [formControl]="endDateControl"
+               placeholder="Select end date">
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Department Filter -->
+      <mat-form-field>
+        <mat-label>Department</mat-label>
+        <mat-select [formControl]="departmentControl">
+          <mat-option value="">All Departments</mat-option>
+          <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+            {{ dept.departmentName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Status Filter -->
+      <mat-form-field>
+        <mat-label>Status</mat-label>
+        <mat-select [formControl]="statusControl">
+          <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <!-- Daily Stats Card -->
+  <mat-card class="stats-card" *ngIf="dailyStats">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>today</mat-icon>
+        Today's Overview
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-icon success">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ dailyStats.presentEmployees }}</div>
+            <div class="stat-label">Present</div>
+          </div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon danger">
+            <mat-icon>cancel</mat-icon>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ dailyStats.absentEmployees }}</div>
+            <div class="stat-label">Absent</div>
+          </div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon warning">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ dailyStats.lateEmployees }}</div>
+            <div class="stat-label">Late</div>
+          </div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon info">
+            <mat-icon>event_available</mat-icon>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ dailyStats.onLeaveEmployees }}</div>
+            <div class="stat-label">On Leave</div>
+          </div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-icon primary">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="stat-details">
+            <div class="stat-value">{{ dailyStats.attendancePercentage | number:'1.1-1' }}%</div>
+            <div class="stat-label">Attendance Rate</div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Attendance Table -->
+  <mat-card class="table-card">
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading team attendance...</p>
+    </div>
+
+    <!-- Table Content -->
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="filteredAttendance" class="attendance-table">
+        
+        <!-- Employee Column -->
+        <ng-container matColumnDef="employee">
+          <th mat-header-cell *matHeaderCellDef>Employee</th>
+          <td mat-cell *matCellDef="let attendance" class="employee-info">
+            <div class="employee-details">
+              <div class="employee-name">{{ attendance.employeeName }}</div>
+              <div class="employee-id">{{ attendance.employeeId }}</div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let attendance">
+            {{ attendance.workDate | date:'MMM d, y' }}
+          </td>
+        </ng-container>
+
+        <!-- Check In Column -->
+        <ng-container matColumnDef="checkIn">
+          <th mat-header-cell *matHeaderCellDef>Check In</th>
+          <td mat-cell *matCellDef="let attendance">
+            <span *ngIf="attendance.checkInTime" class="time-value">
+              {{ attendance.checkInTime | date:'HH:mm' }}
+            </span>
+            <span *ngIf="!attendance.checkInTime" class="no-time">--:--</span>
+          </td>
+        </ng-container>
+
+        <!-- Check Out Column -->
+        <ng-container matColumnDef="checkOut">
+          <th mat-header-cell *matHeaderCellDef>Check Out</th>
+          <td mat-cell *matCellDef="let attendance">
+            <span *ngIf="attendance.checkOutTime" class="time-value">
+              {{ attendance.checkOutTime | date:'HH:mm' }}
+            </span>
+            <span *ngIf="!attendance.checkOutTime" class="no-time">--:--</span>
+          </td>
+        </ng-container>
+
+        <!-- Total Hours Column -->
+        <ng-container matColumnDef="totalHours">
+          <th mat-header-cell *matHeaderCellDef>Total Hours</th>
+          <td mat-cell *matCellDef="let attendance">
+            <span class="hours-value">{{ formatHours(attendance.totalHours) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let attendance">
+            <mat-chip [class]="'status-' + attendance.status">
+              {{ attendance.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Notes Column -->
+        <ng-container matColumnDef="notes">
+          <th mat-header-cell *matHeaderCellDef>Notes</th>
+          <td mat-cell *matCellDef="let attendance">
+            <span *ngIf="attendance.notes" class="notes-text">{{ attendance.notes }}</span>
+            <span *ngIf="!attendance.notes" class="no-notes">--</span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let attendance">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewAttendanceDetails(attendance)">
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+              <button mat-menu-item (click)="editAttendance(attendance)">
+                <mat-icon>edit</mat-icon>
+                Edit Record
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item 
+                      (click)="approveAttendance(attendance)"
+                      class="success-action"
+                      *ngIf="attendance.status === 'pending_approval'">
+                <mat-icon>check_circle</mat-icon>
+                Approve
+              </button>
+              <button mat-menu-item 
+                      (click)="rejectAttendance(attendance)"
+                      class="danger-action"
+                      *ngIf="attendance.status === 'pending_approval'">
+                <mat-icon>cancel</mat-icon>
+                Reject
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let attendance; columns: displayedColumns;"></tr>
+        
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="filteredAttendance.length === 0" class="empty-state">
+        <mat-icon>groups</mat-icon>
+        <h3>No Attendance Records Found</h3>
+        <p>No attendance records match your current filters.</p>
+      </div>
+    </div>
+  </mat-card>
+</div>

@@ -1,1 +1,182 @@
-<p>time-tracker works!</p>
+<!-- Time Tracker Container -->
+<div class="time-tracker-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>timer</mat-icon>
+        Time Tracker
+      </h1>
+      <p class="page-subtitle">Track your working hours and manage your time</p>
+    </div>
+    
+    <div class="current-time">
+      <div class="time-display">{{ currentTime | date:'HH:mm:ss' }}</div>
+      <div class="date-display">{{ currentTime | date:'EEEE, MMMM d, y' }}</div>
+    </div>
+  </div>
+
+  <!-- Clock In/Out Section -->
+  <mat-card class="clock-card">
+    <mat-card-content>
+      <div class="clock-section">
+        <div class="clock-status">
+          <div class="status-indicator" [class.active]="currentSession?.isActive">
+            <mat-icon>{{ currentSession?.isActive ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
+          </div>
+          <div class="status-text">
+            <h3>{{ currentSession?.isActive ? 'Currently Working' : 'Not Clocked In' }}</h3>
+            <p *ngIf="currentSession?.isActive && currentSession?.checkInTime">
+              Started at: {{ currentSession?.checkInTime | date:'HH:mm' }}
+            </p>
+            <p *ngIf="currentSession?.isActive">
+              Duration: {{ formatElapsedTime(currentSession?.elapsedHours || 0) }}
+            </p>
+            <p *ngIf="!currentSession?.isActive">Ready to start your workday?</p>
+          </div>
+        </div>
+
+        <div class="clock-actions">
+          <button mat-flat-button 
+                  (click)="clockIn()" 
+                  [disabled]="currentSession?.isActive || isClockActionLoading"
+                  class="clock-in-button">
+            <mat-spinner *ngIf="isClockActionLoading && !currentSession?.isActive" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isClockActionLoading">login</mat-icon>
+            Clock In
+          </button>
+          
+          <button mat-flat-button 
+                  (click)="clockOut()" 
+                  [disabled]="!currentSession?.isActive || isClockActionLoading"
+                  class="clock-out-button">
+            <mat-spinner *ngIf="isClockActionLoading && currentSession?.isActive" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isClockActionLoading">logout</mat-icon>
+            Clock Out
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Today's Summary -->
+  <mat-card class="summary-card" *ngIf="todayAttendance">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>today</mat-icon>
+        Today's Summary
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Check In</div>
+          <div class="summary-value">
+            {{ todayAttendance.checkInTime ? (todayAttendance.checkInTime | date:'HH:mm') : '--:--' }}
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Check Out</div>
+          <div class="summary-value">
+            {{ todayAttendance.checkOutTime ? (todayAttendance.checkOutTime | date:'HH:mm') : '--:--' }}
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Total Hours</div>
+          <div class="summary-value">{{ formatHours(todayAttendance.totalHours) }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Status</div>
+          <div class="summary-value">
+            <mat-chip [class]="'status-' + todayAttendance.status">
+              {{ todayAttendance.status | titlecase }}
+            </mat-chip>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions-grid">
+    <mat-card class="action-card" routerLink="/attendance/dashboard">
+      <mat-card-content>
+        <div class="action-content">
+          <mat-icon>calendar_today</mat-icon>
+          <h3>My Attendance</h3>
+          <p>View your attendance history and calendar</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="action-card" routerLink="/attendance/reports">
+      <mat-card-content>
+        <div class="action-content">
+          <mat-icon>assessment</mat-icon>
+          <h3>Reports</h3>
+          <p>Generate and export attendance reports</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="action-card" routerLink="/attendance/team-attendance" *ngIf="canViewTeamAttendance">
+      <mat-card-content>
+        <div class="action-content">
+          <mat-icon>groups</mat-icon>
+          <h3>Team Attendance</h3>
+          <p>Monitor your team's attendance</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Recent Activity -->
+  <mat-card class="recent-activity-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>history</mat-icon>
+        Recent Activity
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Loading recent activity...</p>
+      </div>
+
+      <div *ngIf="!isLoading && recentAttendance.length > 0" class="activity-list">
+        <div class="activity-item" *ngFor="let record of recentAttendance">
+          <div class="activity-date">
+            <div class="day">{{ record.workDate | date:'d' }}</div>
+            <div class="month">{{ record.workDate | date:'MMM' }}</div>
+          </div>
+          <div class="activity-details">
+            <div class="activity-time">
+              <span class="check-in">
+                <mat-icon>login</mat-icon>
+                {{ record.checkInTime ? (record.checkInTime | date:'HH:mm') : '--:--' }}
+              </span>
+              <span class="separator">→</span>
+              <span class="check-out">
+                <mat-icon>logout</mat-icon>
+                {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : '--:--' }}
+              </span>
+            </div>
+            <div class="activity-summary">
+              <span class="hours">{{ formatHours(record.totalHours) }}</span>
+              <mat-chip [class]="'status-' + record.status" class="status-chip">
+                {{ record.status | titlecase }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoading && recentAttendance.length === 0" class="empty-state">
+        <mat-icon>schedule</mat-icon>
+        <p>No recent attendance records found</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

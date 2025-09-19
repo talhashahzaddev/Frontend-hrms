@@ -261,3 +261,4 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     });
   }
 }
+

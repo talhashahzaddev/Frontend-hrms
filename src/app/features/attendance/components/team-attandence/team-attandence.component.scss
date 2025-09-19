@@ -1,0 +1,503 @@
+// Team Attendance Component Styles
+.team-attendance-container {
+  padding: var(--spacing-lg);
+  min-height: calc(100vh - 64px);
+  background: var(--gray-50);
+}
+
+// Page Header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-lg);
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin: 0 0 var(--spacing-sm);
+  letter-spacing: -0.025em;
+  
+  mat-icon {
+    color: var(--primary-600);
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.page-subtitle {
+  font-size: 1.125rem;
+  color: var(--gray-600);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.export-button {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+// Filters Card
+.filters-card {
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  
+  ::ng-deep .mat-mdc-card-content {
+    padding: var(--spacing-xl);
+  }
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+  }
+}
+
+.clear-filters-btn {
+  border: 2px solid var(--gray-300);
+  color: var(--gray-700);
+  font-weight: 500;
+  border-radius: var(--radius-lg);
+  
+  &:hover {
+    border-color: var(--gray-400);
+    background: var(--gray-25);
+  }
+  
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    margin-right: var(--spacing-xs);
+  }
+}
+
+.filters-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--spacing-lg);
+  align-items: end;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+.date-field {
+  ::ng-deep .mat-mdc-form-field-flex {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    
+    &:hover {
+      border-color: var(--primary-300);
+    }
+  }
+}
+
+// Stats Card
+.stats-card {
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  
+  ::ng-deep .mat-mdc-card-header {
+    padding: var(--spacing-lg) var(--spacing-lg) 0;
+  }
+  
+  ::ng-deep .mat-mdc-card-content {
+    padding: var(--spacing-lg);
+  }
+  
+  ::ng-deep .mat-mdc-card-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    
+    mat-icon {
+      color: var(--primary-600);
+    }
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--gray-25);
+  border-radius: var(--radius-lg);
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  
+  mat-icon {
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  &.success {
+    background: var(--success-100);
+    color: var(--success-600);
+  }
+  
+  &.danger {
+    background: var(--error-100);
+    color: var(--error-600);
+  }
+  
+  &.warning {
+    background: var(--warning-100);
+    color: var(--warning-600);
+  }
+  
+  &.info {
+    background: var(--blue-100);
+    color: var(--blue-600);
+  }
+  
+  &.primary {
+    background: var(--primary-100);
+    color: var(--primary-600);
+  }
+}
+
+.stat-details {
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1;
+  }
+  
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-top: var(--spacing-xs);
+  }
+}
+
+// Table Card
+.table-card {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  
+  ::ng-deep .mat-mdc-card-content {
+    padding: 0;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  gap: var(--spacing-lg);
+  
+  p {
+    color: var(--gray-600);
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+// Attendance Table
+.attendance-table {
+  width: 100%;
+  
+  ::ng-deep {
+    .mat-mdc-header-row {
+      background: var(--gray-50);
+      
+      .mat-mdc-header-cell {
+        font-weight: 600;
+        color: var(--gray-700);
+        border-bottom: 1px solid var(--gray-200);
+      }
+    }
+    
+    .mat-mdc-row {
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background: var(--gray-25);
+      }
+      
+      .mat-mdc-cell {
+        padding: var(--spacing-lg) var(--spacing-md);
+        border-bottom: 1px solid var(--gray-100);
+      }
+    }
+  }
+}
+
+.employee-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.employee-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.employee-name {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.employee-id {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  font-family: monospace;
+}
+
+.time-value {
+  font-weight: 600;
+  color: var(--gray-900);
+  font-family: monospace;
+}
+
+.no-time {
+  color: var(--gray-400);
+  font-style: italic;
+}
+
+.hours-value {
+  font-weight: 600;
+  color: var(--primary-600);
+  background: var(--primary-50);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.notes-text {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--gray-700);
+}
+
+.no-notes {
+  color: var(--gray-400);
+  font-style: italic;
+}
+
+// Status Chips
+::ng-deep .mat-mdc-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  
+  &.status-present {
+    background: var(--success-100);
+    color: var(--success-800);
+  }
+  
+  &.status-absent {
+    background: var(--error-100);
+    color: var(--error-800);
+  }
+  
+  &.status-late {
+    background: var(--warning-100);
+    color: var(--warning-800);
+  }
+  
+  &.status-early_departure {
+    background: var(--warning-100);
+    color: var(--warning-800);
+  }
+  
+  &.status-half_day {
+    background: var(--blue-100);
+    color: var(--blue-800);
+  }
+  
+  &.status-on_leave {
+    background: var(--purple-100);
+    color: var(--purple-800);
+  }
+  
+  &.status-pending_approval {
+    background: var(--yellow-100);
+    color: var(--yellow-800);
+  }
+}
+
+// Action Menu
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--gray-200);
+}
+
+::ng-deep .mat-mdc-menu-item {
+  &.success-action {
+    color: var(--success-600);
+    
+    &:hover {
+      background: var(--success-25);
+    }
+  }
+  
+  &.danger-action {
+    color: var(--error-600);
+    
+    &:hover {
+      background: var(--error-25);
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  text-align: center;
+  
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--gray-400);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-sm);
+  }
+  
+  p {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .team-attendance-container {
+    padding: var(--spacing-md);
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+  }
+  
+  .header-actions {
+    justify-content: stretch;
+  }
+  
+  .export-button {
+    justify-content: center;
+  }
+  
+  .filters-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .stat-item {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+  
+  .attendance-table {
+    font-size: 0.875rem;
+    
+    ::ng-deep {
+      .mat-mdc-cell,
+      .mat-mdc-header-cell {
+        padding: var(--spacing-md) var(--spacing-sm);
+      }
+    }
+  }
+}
