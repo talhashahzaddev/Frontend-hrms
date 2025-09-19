@@ -10,9 +10,7 @@ import {
   AttendanceSummary,
   AttendanceReport,
   AttendanceCalendarData,
-  CheckInRequest,
-  CheckOutRequest,
-  ClockResponse,
+  ClockInOutRequest,
   ManualAttendanceRequest,
   TimeTrackingSession,
   DailyAttendanceStats,
@@ -25,14 +23,13 @@ import { ApiResponse } from '../../../core/models/auth.models';
   providedIn: 'root'
 })
 export class AttendanceService {
-  private readonly apiUrl = `${environment.apiUrl}/attendance`;
-  private readonly shiftsUrl = `${environment.apiUrl}/shifts`;
+  private readonly apiUrl = `${environment.apiUrl}/Attendance`;
 
   constructor(private http: HttpClient) { }
 
   // Clock In/Out Operations
-  checkIn(request: CheckInRequest): Observable<ClockResponse> {
-    return this.http.post<ApiResponse<ClockResponse>>(`${this.apiUrl}/clock-in`, request)
+  checkIn(request: ClockInOutRequest): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/clock-in`, request)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -43,8 +40,8 @@ export class AttendanceService {
       );
   }
 
-  checkOut(request: CheckOutRequest): Observable<ClockResponse> {
-    return this.http.post<ApiResponse<ClockResponse>>(`${this.apiUrl}/clock-out`, request)
+  checkOut(request: ClockInOutRequest): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/clock-out`, request)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -199,10 +196,10 @@ export class AttendanceService {
   }
 
   // Calendar and Dashboard data
-  getAttendanceCalendar(employeeId: string, year: number, month: number): Observable<AttendanceCalendarData[]> {
-    const params = new HttpParams()
-      .set('year', year.toString())
-      .set('month', month.toString());
+  getAttendanceCalendar(employeeId?: string, year?: number, month?: number): Observable<AttendanceCalendarData[]> {
+    let params = new HttpParams();
+    if (year) params = params.set('year', year.toString());
+    if (month) params = params.set('month', month.toString());
 
     const url = employeeId 
       ? `${this.apiUrl}/calendar/employee/${employeeId}`
@@ -267,25 +264,15 @@ export class AttendanceService {
     });
   }
 
-  // Shift Management
-  getShifts(): Observable<Shift[]> {
-    return this.http.get<ApiResponse<Shift[]>>(`${this.shiftsUrl}`)
+  // Department Attendance (for managers)
+  getDepartmentAttendance(departmentId: string, date?: string): Observable<Attendance[]> {
+    const params = date ? new HttpParams().set('date', date) : new HttpParams();
+    
+    return this.http.get<ApiResponse<Attendance[]>>(`${this.apiUrl}/department/${departmentId}`, { params })
       .pipe(
         map(response => {
           if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch shifts');
-          }
-          return response.data!;
-        })
-      );
-  }
-
-  getShift(shiftId: string): Observable<Shift> {
-    return this.http.get<ApiResponse<Shift>>(`${this.shiftsUrl}/${shiftId}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch shift');
+            throw new Error(response.message || 'Failed to fetch department attendance');
           }
           return response.data!;
         })

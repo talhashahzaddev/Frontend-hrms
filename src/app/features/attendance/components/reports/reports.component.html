@@ -1,1 +1,261 @@
-<p>reports works!</p>
+<!-- Reports Container -->
+<div class="reports-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>assessment</mat-icon>
+        Attendance Reports
+      </h1>
+      <p class="page-subtitle">Generate comprehensive attendance reports and analytics</p>
+    </div>
+    
+    <div class="header-actions">
+      <button mat-flat-button 
+              (click)="generateReport()" 
+              class="generate-button"
+              [disabled]="isLoading">
+        <mat-icon>play_arrow</mat-icon>
+        Generate Report
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Report Configuration</h3>
+    </div>
+    
+    <div class="filters-content">
+      <!-- Date Range -->
+      <div class="date-range-section">
+        <h4>Date Range</h4>
+        <div class="date-inputs">
+          <mat-form-field class="date-field">
+            <mat-label>Start Date</mat-label>
+            <input matInput 
+                   [matDatepicker]="startPicker" 
+                   [formControl]="startDateControl"
+                   placeholder="Select start date">
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field class="date-field">
+            <mat-label>End Date</mat-label>
+            <input matInput 
+                   [matDatepicker]="endPicker" 
+                   [formControl]="endDateControl"
+                   placeholder="Select end date">
+            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        
+        <!-- Quick Date Buttons -->
+        <div class="quick-dates">
+          <button mat-stroked-button (click)="setDateRange('today')">Today</button>
+          <button mat-stroked-button (click)="setDateRange('week')">This Week</button>
+          <button mat-stroked-button (click)="setDateRange('month')">This Month</button>
+          <button mat-stroked-button (click)="setDateRange('quarter')">This Quarter</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-section">
+        <h4>Filters</h4>
+        <div class="filter-inputs">
+          <mat-form-field>
+            <mat-label>Department</mat-label>
+            <mat-select [formControl]="departmentControl">
+              <mat-option value="">All Departments</mat-option>
+              <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+                {{ dept.departmentName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Employee</mat-label>
+            <mat-select [formControl]="employeeControl">
+              <mat-option value="">All Employees</mat-option>
+              <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                {{ emp.fullName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Status</mat-label>
+            <mat-select [formControl]="statusControl">
+              <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Report Summary -->
+  <mat-card class="summary-card" *ngIf="reportData">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>summarize</mat-icon>
+        Report Summary
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ startDateControl.value | date:'MMM d, y' }} - {{ endDateControl.value | date:'MMM d, y' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Total Work Days</div>
+          <div class="summary-value">{{ reportData.totalWorkDays }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Total Employees</div>
+          <div class="summary-value">{{ reportData.totalEmployees }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Present Days</div>
+          <div class="summary-value present">{{ reportData.totalPresentDays }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Absent Days</div>
+          <div class="summary-value absent">{{ reportData.totalAbsentDays }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Attendance Rate</div>
+          <div class="summary-value rate">{{ reportData.averageAttendanceRate | number:'1.1-1' }}%</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Attendance Records Table -->
+  <mat-card class="table-card" *ngIf="reportData">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>table_view</mat-icon>
+        Attendance Records
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ reportData.records.length }} records found
+      </mat-card-subtitle>
+      
+      <div class="header-actions">
+        <button mat-icon-button (click)="exportToCSV()" matTooltip="Export to CSV">
+          <mat-icon>file_download</mat-icon>
+        </button>
+        <button mat-icon-button (click)="exportToExcel()" matTooltip="Export to Excel">
+          <mat-icon>description</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Generating report...</p>
+      </div>
+
+      <!-- Table Content -->
+      <div *ngIf="!isLoading" class="table-container">
+        <table mat-table [dataSource]="reportData.records" class="reports-table">
+          
+          <!-- Employee Column -->
+          <ng-container matColumnDef="employee">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let record" class="employee-info">
+              <div class="employee-details">
+                <div class="employee-name">{{ record.employeeName }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Date Column -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let record">
+              {{ record.workDate | date:'MMM d, y' }}
+            </td>
+          </ng-container>
+
+          <!-- Check In Column -->
+          <ng-container matColumnDef="checkIn">
+            <th mat-header-cell *matHeaderCellDef>Check In</th>
+            <td mat-cell *matCellDef="let record">
+              <span *ngIf="record.checkInTime" class="time-value">
+                {{ record.checkInTime | date:'HH:mm' }}
+              </span>
+              <span *ngIf="!record.checkInTime" class="no-time">--:--</span>
+            </td>
+          </ng-container>
+
+          <!-- Check Out Column -->
+          <ng-container matColumnDef="checkOut">
+            <th mat-header-cell *matHeaderCellDef>Check Out</th>
+            <td mat-cell *matCellDef="let record">
+              <span *ngIf="record.checkOutTime" class="time-value">
+                {{ record.checkOutTime | date:'HH:mm' }}
+              </span>
+              <span *ngIf="!record.checkOutTime" class="no-time">--:--</span>
+            </td>
+          </ng-container>
+
+          <!-- Total Hours Column -->
+          <ng-container matColumnDef="totalHours">
+            <th mat-header-cell *matHeaderCellDef>Total Hours</th>
+            <td mat-cell *matCellDef="let record">
+              <span class="hours-value">{{ formatHours(record.totalHours) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let record">
+              <mat-chip [class]="'status-' + record.status">
+                {{ record.status | titlecase }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let record; columns: displayedColumns;"></tr>
+          
+        </table>
+        
+        <!-- Empty State -->
+        <div *ngIf="reportData.records.length === 0" class="empty-state">
+          <mat-icon>assessment</mat-icon>
+          <h3>No Records Found</h3>
+          <p>No attendance records found for the selected criteria.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- No Report Generated State -->
+  <mat-card class="no-report-card" *ngIf="!reportData && !isLoading">
+    <mat-card-content>
+      <div class="no-report-content">
+        <mat-icon>assessment</mat-icon>
+        <h3>Generate Your First Report</h3>
+        <p>Select your date range and filters above, then click "Generate Report" to create comprehensive attendance analytics.</p>
+        <button mat-flat-button 
+                (click)="generateReport()" 
+                class="generate-cta-button">
+          <mat-icon>play_arrow</mat-icon>
+          Generate Report
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

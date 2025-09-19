@@ -1,32 +1,17 @@
 export interface Attendance {
   attendanceId: string;
   employeeId: string;
+  employeeName: string;
+  workDate: string;
   date: string;
   checkInTime?: string;
   checkOutTime?: string;
-  breakStartTime?: string;
-  breakEndTime?: string;
+  checkInLocation?: string;
+  checkOutLocation?: string;
   totalHours: number;
-  regularHours: number;
   overtimeHours: number;
-  status: AttendanceStatus;
+  status: string;
   notes?: string;
-  location?: string;
-  isManualEntry: boolean;
-  approvedBy?: string;
-  approvedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-  
-  // Related data
-  employee?: {
-    employeeId: string;
-    firstName: string;
-    lastName: string;
-    employeeNumber: string;
-    department?: string;
-  };
-  shift?: Shift;
 }
 
 export enum AttendanceStatus {
@@ -64,32 +49,31 @@ export interface AttendanceRecord {
 
 // DTOs for API requests/responses
 export interface CheckInRequest {
- "action": string,
-  "location": {
-    "additionalProp1": string,
-    "additionalProp2": string,
-    "additionalProp3": string
-  }
+  action: string;
+  location?: { [key: string]: any };
 }
 
 export interface CheckOutRequest {
-  "action": string,
-  "location": {
-    "additionalProp1": string,
-    "additionalProp2": string,
-    "additionalProp3": string
-  }
+  action: string;
+  location?: { [key: string]: any };
+}
+
+export interface ClockInOutRequest {
+  action: string;
+  location?: { [key: string]: any };
 }
 
 export interface ManualAttendanceRequest {
   employeeId: string;
+  workDate: string;
   date: string;
   checkInTime: string;
   checkOutTime?: string;
-  breakStartTime?: string;
-  breakEndTime?: string;
+  checkInLocation?: string;
+  checkOutLocation?: string;
+  status?: string;
   notes?: string;
-  location?: string;
+  reason?: string;
 }
 
 export interface AttendanceSearchRequest {
@@ -97,7 +81,7 @@ export interface AttendanceSearchRequest {
   departmentId?: string;
   startDate: string;
   endDate: string;
-  status?: AttendanceStatus;
+  status?: string;
   page: number;
   pageSize: number;
   sortBy?: string;
@@ -115,16 +99,13 @@ export interface AttendanceListResponse {
 }
 
 export interface AttendanceSummary {
-  totalWorkingDays: number;
-  presentDays: number;
-  absentDays: number;
-  lateDays: number;
-  halfDays: number;
-  totalHours: number;
-  regularHours: number;
-  overtimeHours: number;
-  averageHoursPerDay: number;
-  attendancePercentage: number;
+  totalWorkDays?: number;
+  presentDays?: number;
+  absentDays?: number;
+  lateDays?: number;
+  totalHours?: number;
+  overtimeHours?: number;
+  averageHoursPerDay?: number;
 }
 
 export interface DailyAttendanceStats {
@@ -133,21 +114,25 @@ export interface DailyAttendanceStats {
   presentEmployees: number;
   absentEmployees: number;
   lateEmployees: number;
+  earlyLeavers: number;
   onLeaveEmployees: number;
   attendancePercentage: number;
+  averageCheckInTime?: string;
+  averageCheckOutTime?: string;
 }
 
 export interface AttendanceReport {
+  startDate: string;
+  endDate: string;
+  totalWorkDays: number;
+  totalEmployees: number;
+  totalPresentDays: number;
+  totalAbsentDays: number;
+  averageAttendanceRate: number;
+  records: Attendance[];
   summary: AttendanceSummary;
   dailyStats: DailyAttendanceStats[];
-  departmentWiseStats: { [department: string]: AttendanceSummary };
-  employeeAttendance: {
-    employeeId: string;
-    employeeName: string;
-    department: string;
-    summary: AttendanceSummary;
-    records: AttendanceRecord[];
-  }[];
+  departmentStats: any[];
 }
 
 // export interface TimeTrackingSession {
@@ -168,14 +153,14 @@ export interface AttendanceReport {
 
 
 export interface TimeTrackingSession {
-  sessionId: string;
+  sessionId?: string;
   employeeId: string;
-  checkInTime: string;   // backend sends this instead of startTime
-  checkOutTime?: string; // backend sends this instead of endTime
-  isActive: boolean;     // backend provides this flag
-  elapsedHours: number;  // backend sends in hours
-  elapsedTime: string;   // formatted string "HH:mm:ss"
-  status: 'active' | 'paused' | 'completed' | 'inactive'; 
+  checkInTime?: string;
+  checkOutTime?: string;
+  isActive: boolean;
+  elapsedHours: number;
+  elapsedTime?: string;
+  status: string;
   currentLocation?: string;
 }
 
@@ -191,13 +176,12 @@ export interface ClockResponse {
 // Attendance calendar data
 export interface AttendanceCalendarData {
   date: string;
-  status: AttendanceStatus;
-  checkIn?: string;
-  checkOut?: string;
+  status: string;
+  checkInTime?: string;
+  checkOutTime?: string;
   totalHours: number;
+  isWorkingDay: boolean;
   isHoliday: boolean;
-  isWeekend: boolean;
-  notes?: string;
 }
 
 export interface AttendancePolicy {
