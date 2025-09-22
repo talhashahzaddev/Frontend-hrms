@@ -41,19 +41,6 @@
                   </mat-error>
                 </mat-form-field>
 
-                <!-- Organization Type -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Organization Type</mat-label>
-                  <mat-icon matPrefix>category</mat-icon>
-                  <mat-select formControlName="organizationType">
-                    <mat-option *ngFor="let type of organizationTypes" [value]="type.value">
-                      {{ type.label }}
-                    </mat-option>
-                  </mat-select>
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'organizationType')">
-                    {{ getErrorMessage(organizationForm, 'organizationType') }}
-                  </mat-error>
-                </mat-form-field>
 
                 <!-- Company Size -->
                 <mat-form-field appearance="outline" class="form-field">
@@ -69,79 +56,16 @@
                   </mat-error>
                 </mat-form-field>
 
-                <!-- Industry -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Industry</mat-label>
-                  <mat-icon matPrefix>work</mat-icon>
-                  <input matInput formControlName="industry" placeholder="e.g., Technology, Healthcare">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'industry')">
-                    {{ getErrorMessage(organizationForm, 'industry') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- Address -->
-                <mat-form-field appearance="outline" class="form-field full-width">
-                  <mat-label>Address</mat-label>
-                  <mat-icon matPrefix>location_on</mat-icon>
-                  <input matInput formControlName="address" placeholder="Street address">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'address')">
-                    {{ getErrorMessage(organizationForm, 'address') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- City -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>City</mat-label>
-                  <mat-icon matPrefix>location_city</mat-icon>
-                  <input matInput formControlName="city" placeholder="City">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'city')">
-                    {{ getErrorMessage(organizationForm, 'city') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- State -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>State/Province</mat-label>
-                  <mat-icon matPrefix>map</mat-icon>
-                  <input matInput formControlName="state" placeholder="State or Province">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'state')">
-                    {{ getErrorMessage(organizationForm, 'state') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- Country -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Country</mat-label>
-                  <mat-icon matPrefix>public</mat-icon>
-                  <input matInput formControlName="country" placeholder="Country">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'country')">
-                    {{ getErrorMessage(organizationForm, 'country') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- ZIP Code -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>ZIP/Postal Code</mat-label>
-                  <mat-icon matPrefix>markunread_mailbox</mat-icon>
-                  <input matInput formControlName="zipCode" placeholder="ZIP or Postal Code">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'zipCode')">
-                    {{ getErrorMessage(organizationForm, 'zipCode') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- Phone -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Phone</mat-label>
-                  <mat-icon matPrefix>phone</mat-icon>
-                  <input matInput formControlName="phone" placeholder="Company phone number">
-                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'phone')">
-                    {{ getErrorMessage(organizationForm, 'phone') }}
-                  </mat-error>
-                </mat-form-field>
 
                 <!-- Website -->
                 <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Website</mat-label>
+                  <mat-label>Website (Optional)</mat-label>
                   <mat-icon matPrefix>language</mat-icon>
                   <input matInput formControlName="website" placeholder="https://yourcompany.com">
                   <mat-error *ngIf="isFieldInvalid(organizationForm, 'website')">
@@ -205,35 +129,8 @@
                   </mat-error>
                 </mat-form-field>
 
-                <!-- Phone -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Phone Number</mat-label>
-                  <mat-icon matPrefix>phone</mat-icon>
-                  <input matInput formControlName="phone" placeholder="Your phone number">
-                  <mat-error *ngIf="isFieldInvalid(userForm, 'phone')">
-                    {{ getErrorMessage(userForm, 'phone') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- Job Title -->
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Job Title</mat-label>
-                  <mat-icon matPrefix>work</mat-icon>
-                  <input matInput formControlName="jobTitle" placeholder="e.g., HR Manager">
-                  <mat-error *ngIf="isFieldInvalid(userForm, 'jobTitle')">
-                    {{ getErrorMessage(userForm, 'jobTitle') }}
-                  </mat-error>
-                </mat-form-field>
 
-                <!-- Department -->
-                <mat-form-field appearance="outline" class="form-field full-width">
-                  <mat-label>Department</mat-label>
-                  <mat-icon matPrefix>domain</mat-icon>
-                  <input matInput formControlName="department" placeholder="e.g., Human Resources">
-                  <mat-error *ngIf="isFieldInvalid(userForm, 'department')">
-                    {{ getErrorMessage(userForm, 'department') }}
-                  </mat-error>
-                </mat-form-field>
 
                 <!-- Password -->
                 <mat-form-field appearance="outline" class="form-field">
