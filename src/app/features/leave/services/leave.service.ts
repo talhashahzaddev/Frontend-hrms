@@ -137,7 +137,7 @@ export class LeaveService {
 
   // Leave Balance and Entitlements
   getMyLeaveBalance(): Observable<LeaveBalance> {
-    return this.http.get<ApiResponse<LeaveBalance>>(`${this.apiUrl}/my-balance`)
+    return this.http.get<ApiResponse<LeaveBalance>>(`${this.apiUrl}/balance`)
       .pipe(
         map(response => {
           if (!response.success) {
