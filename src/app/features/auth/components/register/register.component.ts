@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AuthService } from '../../../../core/services/auth.service';
@@ -30,7 +31,8 @@ import { ValidationService } from '../../../../shared/services/validation.servic
         MatSelectModule,
         MatIconModule,
         MatProgressSpinnerModule,
-        MatStepperModule
+        MatStepperModule,
+        MatCheckboxModule
     ],
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.scss']
@@ -47,24 +49,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   // Form steps
   organizationForm!: FormGroup;
   userForm!: FormGroup;
-  
-  // Organization types for selection
-  organizationTypes = [
-    { value: 'startup', label: 'Startup' },
-    { value: 'small_business', label: 'Small Business' },
-    { value: 'medium_business', label: 'Medium Business' },
-    { value: 'enterprise', label: 'Enterprise' },
-    { value: 'non_profit', label: 'Non-Profit' },
-    { value: 'government', label: 'Government' },
-    { value: 'educational', label: 'Educational' },
-    { value: 'healthcare', label: 'Healthcare' },
-    { value: 'technology', label: 'Technology' },
-    { value: 'retail', label: 'Retail' },
-    { value: 'manufacturing', label: 'Manufacturing' },
-    { value: 'services', label: 'Services' }
-  ];
 
-  // Company sizes
+  // Company sizes - used to determine subscription type
   companySizes = [
     { value: '1-10', label: '1-10 employees' },
     { value: '11-50', label: '11-50 employees' },
@@ -91,29 +77,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   private initializeForms(): void {
-    // Organization Form
+    // Organization Form - simplified to match database schema
     this.organizationForm = this.formBuilder.group({
       companyName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      organizationType: ['', Validators.required],
       companySize: ['', Validators.required],
-      industry: ['', [Validators.maxLength(100)]],
-      address: ['', [Validators.maxLength(255)]],
-      city: ['', [Validators.maxLength(50)]],
-      state: ['', [Validators.maxLength(50)]],
-      country: ['', [Validators.required, Validators.maxLength(50)]],
-      zipCode: ['', [Validators.maxLength(20)]],
-      phone: ['', [Validators.maxLength(20)]],
       website: ['', [this.validationService.urlValidator()]]
     });
 
-    // User Form
+    // User Form - simplified to match database schema
     this.userForm = this.formBuilder.group({
       firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
-      phone: ['', [Validators.maxLength(20)]],
-      jobTitle: ['', [Validators.maxLength(100)]],
-      department: ['', [Validators.maxLength(100)]],
       password: ['', [
         Validators.required,
         Validators.minLength(8),
@@ -151,24 +126,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
       const registerRequest: RegisterRequest = {
         // Organization data
         companyName: organizationData.companyName,
-        organizationType: organizationData.organizationType,
         companySize: organizationData.companySize,
-        industry: organizationData.industry,
-        address: organizationData.address,
-        city: organizationData.city,
-        state: organizationData.state,
-        country: organizationData.country,
-        zipCode: organizationData.zipCode,
-        companyPhone: organizationData.phone,
         website: organizationData.website,
         
         // User data
         firstName: userData.firstName,
         lastName: userData.lastName,
         email: userData.email,
-        phone: userData.phone,
-        jobTitle: userData.jobTitle,
-        department: userData.department,
         password: userData.password
       };
 
@@ -178,8 +142,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
           next: (response) => {
             this.isLoading = false;
             this.notificationService.showSuccess(
-              'Registration successful! Please check your email to verify your account.'
+              'Registration successful! Welcome to your new HRMS system.'
             );
+            // User will be automatically logged in due to the tokens in the response
           },
           error: (error) => {
             this.isLoading = false;
@@ -236,21 +201,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private getFieldDisplayName(fieldName: string): string {
     const fieldNames: { [key: string]: string } = {
       companyName: 'Company Name',
-      organizationType: 'Organization Type',
       companySize: 'Company Size',
-      industry: 'Industry',
-      address: 'Address',
-      city: 'City',
-      state: 'State',
-      country: 'Country',
-      zipCode: 'ZIP Code',
-      phone: 'Phone',
       website: 'Website',
       firstName: 'First Name',
       lastName: 'Last Name',
       email: 'Email',
-      jobTitle: 'Job Title',
-      department: 'Department',
       password: 'Password',
       confirmPassword: 'Confirm Password'
     };
@@ -275,15 +230,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   fillDemoData(): void {
     this.organizationForm.patchValue({
       companyName: 'Demo Company Inc.',
-      organizationType: 'technology',
       companySize: '51-200',
-      industry: 'Software Development',
-      address: '123 Tech Street',
-      city: 'San Francisco',
-      state: 'CA',
-      country: 'United States',
-      zipCode: '94105',
-      phone: '+1-555-123-4567',
       website: 'https://democompany.com'
     });
 
@@ -291,9 +238,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
       firstName: 'Admin',
       lastName: 'User',
       email: 'admin@democompany.com',
-      phone: '+1-555-987-6543',
-      jobTitle: 'System Administrator',
-      department: 'IT',
       password: 'Admin123!',
       confirmPassword: 'Admin123!',
       agreeToTerms: true

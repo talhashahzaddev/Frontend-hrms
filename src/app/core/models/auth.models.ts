@@ -44,26 +44,15 @@ export interface CreateUserRequest {
 }
 
 export interface RegisterRequest {
-  // Organization data
+  // Organization data (maps to auth.organizations table)
   companyName: string;
-  organizationType: string;
-  companySize: string;
-  industry?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country: string;
-  zipCode?: string;
-  companyPhone?: string;
   website?: string;
+  companySize: string; // Used to determine subscription type
   
-  // User data
+  // User data (maps to auth.users table)
   firstName: string;
   lastName: string;
   email: string;
-  phone?: string;
-  jobTitle?: string;
-  department?: string;
   password: string;
 }
 
