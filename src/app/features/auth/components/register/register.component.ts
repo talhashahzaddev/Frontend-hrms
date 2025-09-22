@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, takeUntil } from 'rxjs';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -45,7 +46,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   hidePassword = true;
   hideConfirmPassword = true;
   isLinear = false;
-
+submitted=false;
   // Form steps
   organizationForm!: FormGroup;
   userForm!: FormGroup;
@@ -64,7 +65,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
-    private validationService: ValidationService
+    private validationService: ValidationService,
+    private router: Router 
   ) {}
 
   ngOnInit(): void {
@@ -145,6 +147,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
               'Registration successful! Welcome to your new HRMS system.'
             );
             // User will be automatically logged in due to the tokens in the response
+            const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
+              sessionStorage.removeItem('redirectUrl');
+              this.router.navigate([redirectUrl]);
           },
           error: (error) => {
             this.isLoading = false;
@@ -223,7 +228,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   isFieldInvalid(formGroup: FormGroup, fieldName: string): boolean {
     const control = formGroup.get(fieldName);
-    return !!(control && control.invalid && (control.dirty || control.touched));
+    // return !!(control && control.invalid && (control.dirty || control.touched));
+     return !!(control && control.invalid && this.submitted);
   }
 
   // Quick fill demo data
