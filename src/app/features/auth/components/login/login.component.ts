@@ -89,6 +89,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   onForgotPassword(): void {
     this.router.navigate(['/forgot-password']);
   }
+  onsignup():void{
+    this.router.navigate(['/register']);
+  }
 
   togglePasswordVisibility(): void {
     this.hidePassword = !this.hidePassword;

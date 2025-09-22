@@ -69,7 +69,11 @@
           Forgot Password?
         </button>
       </div>
-
+ 
+    <p class="create_account">
+  Don’t have an account? 
+  <button (click)="onsignup()" class="link-button">Register here</button>
+</p>
       <!-- Login Button -->
       <button
         type="submit"
@@ -88,8 +92,8 @@
         <span *ngIf="isLoading">Signing In...</span>
       </button>
     </form>
-
-   
-  
+  <!-- <p class="create_account">Don’t have an account? <a (click)="onSignup()">Register here</a></p>
+    -->
+ 
 
 </div>
