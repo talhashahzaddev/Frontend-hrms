@@ -172,9 +172,8 @@
                   </mat-error>
                 </mat-form-field>
 
-              </div>
 
-              <!-- Terms Agreement -->
+                 <!-- Terms Agreement -->
               <div class="terms-section">
                 <mat-checkbox formControlName="agreeToTerms" class="terms-checkbox">
                   I agree to the
@@ -182,10 +181,14 @@
                   and
                   <a href="#" target="_blank" class="terms-link">Privacy Policy</a>
                 </mat-checkbox>
-                <mat-error *ngIf="userForm.get('agreeToTerms')?.hasError('required') && userForm.get('agreeToTerms')?.touched">
+                <mat-error *ngIf="userForm.get('agreeToTerms')?.invalid">
                   You must agree to the terms and conditions
                 </mat-error>
               </div>
+
+              </div>
+
+             
 
               <!-- Step Actions -->
               <div class="step-actions">
@@ -195,7 +198,7 @@
                 </button>
 
                 <button mat-flat-button 
-                        [disabled]="userForm.invalid || isLoading"
+                        [disabled]="!userForm.valid || !userForm.get('agreeToTerms')?.value || isLoading"
                         type="submit"
                         class="register-button">
                   <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
