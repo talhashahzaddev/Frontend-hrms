@@ -10,13 +10,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 
-import { Position, Department, CreatePositionRequest, UpdatePositionRequest } from '../../../../core/models/employee.models';
+import { Position, Department, Role, CreatePositionRequest, UpdatePositionRequest } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 
 export interface PositionDialogData {
   mode: 'create' | 'edit';
   position?: Position;
   departments: Department[];
+  roles: Role[];
 }
 
 @Component({
@@ -64,6 +65,7 @@ export class PositionFormDialogComponent implements OnDestroy {
     return this.fb.group({
       positionTitle: ['', [Validators.required, Validators.maxLength(100)]],
       departmentId: [''],
+      roleId: ['', [Validators.required]], // Make role required
       description: ['', [Validators.maxLength(1000)]]
     });
   }
@@ -72,6 +74,7 @@ export class PositionFormDialogComponent implements OnDestroy {
     this.positionForm.patchValue({
       positionTitle: position.positionTitle,
       departmentId: position.departmentId || '',
+      roleId: position.roleId || '',
       description: position.description || ''
     });
   }
@@ -96,6 +99,7 @@ export class PositionFormDialogComponent implements OnDestroy {
     const request: CreatePositionRequest = {
       positionTitle: formValue.positionTitle.trim(),
       departmentId: formValue.departmentId || undefined,
+      roleId: formValue.roleId || undefined,
       description: formValue.description?.trim() || undefined
     };
 
@@ -119,6 +123,7 @@ export class PositionFormDialogComponent implements OnDestroy {
     const request: UpdatePositionRequest = {
       positionTitle: formValue.positionTitle.trim(),
       departmentId: formValue.departmentId || undefined,
+      roleId: formValue.roleId || undefined,
       description: formValue.description?.trim() || undefined
     };
 

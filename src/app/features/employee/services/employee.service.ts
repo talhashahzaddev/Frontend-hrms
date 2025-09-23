@@ -7,6 +7,7 @@ import {
   Employee,
   Department,
   Position,
+  Role,
   SkillSet,
   CreateEmployeeRequest,
   UpdateEmployeeRequest,
@@ -259,6 +260,19 @@ export class EmployeeService {
           if (!response.success) {
             throw new Error(response.message || 'Failed to delete position');
           }
+        })
+      );
+  }
+
+  // Role Operations
+  getRoles(): Observable<Role[]> {
+    return this.http.get<ApiResponse<Role[]>>(`${environment.apiUrl}/Position/roles`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch roles');
+          }
+          return response.data!;
         })
       );
   }

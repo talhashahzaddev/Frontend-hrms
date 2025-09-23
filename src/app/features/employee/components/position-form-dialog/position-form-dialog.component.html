@@ -39,6 +39,20 @@
       <mat-hint>Optional - Select the department for this position</mat-hint>
     </mat-form-field>
 
+    <!-- Role -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Role *</mat-label>
+      <mat-select formControlName="roleId" placeholder="Select a role">
+        <mat-option *ngFor="let role of data.roles" [value]="role.roleId">
+          {{ role.roleName }}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Required - Select the role for this position</mat-hint>
+      <mat-error *ngIf="positionForm.get('roleId')?.hasError('required')">
+        Role is required
+      </mat-error>
+    </mat-form-field>
+
     <!-- Description -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Description</mat-label>

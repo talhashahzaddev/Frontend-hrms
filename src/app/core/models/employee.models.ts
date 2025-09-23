@@ -69,8 +69,20 @@ export interface Position {
   departmentId?: string;
   departmentName?: string;
   description?: string;
+  roleId?: string;
+  roleName?: string;
   isActive: boolean;
   employeeCount: number;
+  createdAt: string;
+}
+
+export interface Role {
+  roleId: string;
+  organizationId: string;
+  roleName: string;
+  description?: string;
+  permissions?: { [key: string]: any };
+  isSystemRole: boolean;
   createdAt: string;
 }
 
@@ -203,10 +215,12 @@ export interface CreatePositionRequest {
   positionTitle: string;
   description?: string;
   departmentId?: string;
+  roleId?: string;
 }
 
 export interface UpdatePositionRequest {
   positionTitle: string;
   description?: string;
   departmentId?: string;
+  roleId?: string;
 }
