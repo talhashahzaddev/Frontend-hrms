@@ -46,7 +46,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   hidePassword = true;
   hideConfirmPassword = true;
   isLinear = false;
-submitted=false;
+   submitted=false;
   // Form steps
   organizationForm!: FormGroup;
   userForm!: FormGroup;
@@ -107,6 +107,10 @@ submitted=false;
     });
   }
 
+  get canCreate(): boolean {
+  // Checks only userForm + terms checkbox
+   return this.userForm.valid && this.userForm.get('agreeToTerms')!.value;
+}
   private passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
@@ -202,6 +206,13 @@ submitted=false;
     }
     return '';
   }
+onTermsClick(): void {
+  const agreeCtrl = this.userForm.get('agreeToTerms');
+  setTimeout(() => {
+    agreeCtrl?.markAsTouched();
+    agreeCtrl?.updateValueAndValidity();
+  }, 0);
+}
 
   private getFieldDisplayName(fieldName: string): string {
     const fieldNames: { [key: string]: string } = {
@@ -227,9 +238,19 @@ submitted=false;
   }
 
   isFieldInvalid(formGroup: FormGroup, fieldName: string): boolean {
-    const control = formGroup.get(fieldName);
-    // return !!(control && control.invalid && (control.dirty || control.touched));
-     return !!(control && control.invalid && this.submitted);
+  //   const control = formGroup.get(fieldName);
+  // return !!(control && control.invalid && (control.dirty || control.touched || this.submitted));
+
+  const control = formGroup.get(fieldName);
+  if (!control) return false;
+
+  const showError = control.dirty || this.submitted; // remove touched
+
+  if (fieldName === 'confirmPassword' && formGroup.hasError('passwordMismatch')) {
+    return showError;
+  }
+
+  return control.invalid && showError;
   }
 
   // Quick fill demo data
