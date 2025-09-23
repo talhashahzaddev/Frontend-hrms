@@ -345,6 +345,6 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   }
 
   getEmployeeFullName(employee: Employee): string {
-    return `${employee.firstName} ${employee.lastName}`;
+    return `${employee.fullName}`;
   }
 }
