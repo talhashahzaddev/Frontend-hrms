@@ -17,7 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 
-import { Position, Department } from '../../../../core/models/employee.models';
+import { Position, Department, Role } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 import { PositionFormDialogComponent } from '../position-form-dialog/position-form-dialog.component';
 
@@ -50,11 +50,13 @@ export class PositionListComponent implements OnInit, OnDestroy {
   positions: Position[] = [];
   filteredPositions: Position[] = [];
   departments: Department[] = [];
+  roles: Role[] = [];
   
   // Table configuration
   displayedColumns: string[] = [
     'title',
     'department',
+    'role',
     'employeeCount',
     'status',
     'createdAt',
@@ -97,19 +99,21 @@ export class PositionListComponent implements OnInit, OnDestroy {
     
     combineLatest([
       this.employeeService.getPositions(),
-      this.employeeService.getDepartments()
+      this.employeeService.getDepartments(),
+      this.employeeService.getRoles()
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe({
-      next: ([positions, departments]) => {
+      next: ([positions, departments, roles]) => {
         this.positions = positions;
         this.departments = departments;
+        this.roles = roles;
         this.applyFilters();
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading positions:', error);
-        this.showError('Failed to load positions');
+        console.error('Error loading data:', error);
+        this.showError('Failed to load data');
         this.isLoading = false;
       }
     });
@@ -168,7 +172,8 @@ export class PositionListComponent implements OnInit, OnDestroy {
       width: '600px',
       data: { 
         mode: 'create',
-        departments: this.departments
+        departments: this.departments,
+        roles: this.roles
       }
     });
 
@@ -191,7 +196,8 @@ export class PositionListComponent implements OnInit, OnDestroy {
       data: { 
         mode: 'edit',
         position: position,
-        departments: this.departments
+        departments: this.departments,
+        roles: this.roles
       }
     });
 
@@ -212,7 +218,8 @@ export class PositionListComponent implements OnInit, OnDestroy {
       this.employeeService.updatePosition(position.positionId, {
         positionTitle: position.positionTitle,
         description: position.description,
-        departmentId: position.departmentId
+        departmentId: position.departmentId,
+        roleId: position.roleId
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
