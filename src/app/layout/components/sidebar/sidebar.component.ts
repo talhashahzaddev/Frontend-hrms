@@ -73,7 +73,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Leave Management',
       icon: 'event_available',
       children: [
-        { label: 'My Leaves', icon: 'event', route: '/leave/my' },
+        { label: 'My Leaves', icon: 'event', route: '/leave/dashboard' },
         { label: 'Apply for Leave', icon: 'add_circle', route: '/leave/apply' },
         { label: 'Team Leaves', icon: 'group_work', route: '/leave/team', roles: ['Super Admin', 'HR Manager', 'Manager'] },
         { label: 'Leave Calendar', icon: 'calendar_month', route: '/leave/calendar' },

@@ -181,7 +181,7 @@ export class LeaveService {
 
   // My Leave Requests
   getMyLeaveRequests(): Observable<LeaveRequest[]> {
-    return this.http.get<ApiResponse<LeaveRequest[]>>(`${this.apiUrl}/my-requests`)
+    return this.http.get<ApiResponse<LeaveRequest[]>>(`${this.apiUrl}/requests`)
       .pipe(
         map(response => {
           if (!response.success) {

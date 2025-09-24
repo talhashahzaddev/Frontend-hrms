@@ -75,6 +75,7 @@
                     [data]="attendanceChart.data"
                     [options]="attendanceChart.options"
                     [type]="attendanceChart.type">
+
             </canvas>
           </div>
         </div>
@@ -135,7 +136,7 @@
             </mat-card-title>
           </mat-card-header>
           <div class="quick-actions-grid">
-            <button mat-stroked-button class="quick-action-button action-primary">
+            <button mat-stroked-button class="quick-action-button action-primary" (click)="quickemployee()">
               <mat-icon>person_add</mat-icon> Add Employee
             </button>
             <button mat-stroked-button class="quick-action-button action-accent">
@@ -144,7 +145,7 @@
             <button mat-stroked-button class="quick-action-button action-success">
               <mat-icon>check_circle</mat-icon> Approvals
             </button>
-            <button mat-stroked-button class="quick-action-button action-info">
+            <button mat-stroked-button class="quick-action-button action-info" (click)="quickreports()">
               <mat-icon>bar_chart</mat-icon> Reports
             </button>
           </div>
@@ -195,15 +196,15 @@
             </div>
             <div class="performance-stat">
               <span class="stat-label">Completed Reviews</span>
-              <span class="stat-value">{{ performanceStats.completedAppraisals }}</span>
+              <span class="stat-value">{{ performanceStats.completedReviews }}</span>
             </div>
             <div class="performance-stat">
               <span class="stat-label">Pending Reviews</span>
-              <span class="stat-value">{{ performanceStats.pendingAppraisals }}</span>
+              <span class="stat-value">{{ performanceStats.pendingReviews }}</span>
             </div>
             <div class="performance-stat">
               <span class="stat-label">Total Appraisals</span>
-              <span class="stat-value">{{ performanceStats.totalAppraisals }}</span>
+              <span class="stat-value">{{performanceStats.completedReviews + performanceStats.pendingReviews }}</span>
             </div>
           </div>
         </div>

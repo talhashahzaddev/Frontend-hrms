@@ -41,12 +41,17 @@ export interface PayrollStats {
   currency: string;
 }
 
+export interface TopPerformer {
+  employeeId: number;   // or whatever ID your backend uses
+  name: string;         // employee name
+  rating: number;       // rating score
+}
 export interface PerformanceStats {
   averageRating: number;
-  totalAppraisals: number;
-  completedAppraisals: number;
-  pendingAppraisals: number;
-  ratingDistribution: PerformanceRatingDistribution[];
+  completedReviews: number;
+  pendingReviews: number;
+  topPerformers: TopPerformer[];
+  totalAppraisals?: number; // we’ll compute this
 }
 
 export interface PerformanceRatingDistribution {
