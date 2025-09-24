@@ -16,7 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { Subject, takeUntil, forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { NgChartsModule } from 'ng2-charts';
-
+import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -82,6 +82,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   leaveStats: LeaveStats | null = null;
   payrollStats: PayrollStats | null = null;
   performanceStats: PerformanceStats | null = null;
+  
   recentActivities: RecentActivity[] = [];
   employeeGrowth: number | null = null;
   departmentStats: DepartmentStats[] = [];
@@ -105,7 +106,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router:Router
   ) {}
 
   ngOnInit(): void {
@@ -146,6 +148,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.leaveStats = data.leaveStats;
         this.payrollStats = data.payrollStats;
         this.performanceStats = data.performanceStats;
+        
         this.recentActivities = data.recentActivities;
         this.employeeGrowth = (data.employeeGrowth as any)?.growthRate ?? null;
         this.departmentStats = data.departmentStats;
@@ -162,6 +165,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  
   private prepareDashboardCards(): void {
     if (!this.dashboardSummary) return;
 
@@ -200,6 +204,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     ];
   }
+
+  quickemployee():void{
+    this.router.navigate(['/employees/add'])
+  }
+  quickreports():void{
+    this.router.navigate(['/attendance/reports'])
+  }
+
+
 
   private prepareChartConfigurations(): void {
     if (this.attendanceStats) {

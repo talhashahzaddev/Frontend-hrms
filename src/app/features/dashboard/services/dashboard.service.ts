@@ -111,30 +111,7 @@ getPerformanceStats(): Observable<PerformanceStats> {
       map(res => res.data)
     );
   }
-  /**
-   * Get employee growth data
-   */
-  // getEmployeeGrowth(period: string = '12m'): Observable<ServiceResponse<EmployeeGrowth>> {
-  //   const params = new HttpParams().set('period', period);
-  //   return this.http.get<ServiceResponse<EmployeeGrowth>>(`${this.apiUrl}/employee-growth`, { params });
-
-  //    map(res => res.data),  // extract the actual EmployeeGrowth object
-  //   catchError(err => {
-  //     console.error('Failed to load employee growth:', err);
-  //     return of({
-  //       months: [],
-  //       counts: [],
-  //       growthRate: 0,
-  //       cumulativeEmployees: [],
-  //       newEmployees: []
-  //     } as EmployeeGrowth);
-  //   })
-
-
-
-
-  // }
-
+ 
 
 /**
  * Get employee growth data
