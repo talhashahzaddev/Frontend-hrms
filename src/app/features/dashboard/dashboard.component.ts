@@ -224,6 +224,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             {
               label: 'Present',
               data: this.attendanceStats.presentCounts || [],
+              
               borderColor: 'rgb(59, 130, 246)',
               backgroundColor: 'rgba(59, 130, 246, 0.1)',
               tension: 0.4

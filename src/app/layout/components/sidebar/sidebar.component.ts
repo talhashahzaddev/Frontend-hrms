@@ -95,7 +95,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Performance',
       icon: 'trending_up',
       children: [
-        { label: 'My Performance', icon: 'person_outline', route: '/performance/my' },
+        { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard' },
         { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals' },
         { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills' },
         { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals' },
