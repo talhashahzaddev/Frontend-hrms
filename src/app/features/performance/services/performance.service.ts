@@ -266,6 +266,6 @@ export class PerformanceService {
   }
 
   getMySkills(): Observable<ApiResponse<EmployeeSkill[]>> {
-    return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/my-skills`);
+    return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/skills`);
   }
 }
