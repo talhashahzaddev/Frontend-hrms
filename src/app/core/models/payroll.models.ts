@@ -9,7 +9,7 @@ export interface PayrollPeriod {
   totalGrossAmount: number;
   totalTaxAmount: number;
   totalNetAmount: number;
-  processedBy?: string;
+  processorName?: string;
   processedAt?: string;
   createdAt: string;
   updatedAt: string;

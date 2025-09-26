@@ -1,0 +1,236 @@
+<div class="employee-salary-history-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>history</mat-icon>
+      Salary History
+    </h1>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="exportToExcel()" [disabled]="loading">
+        <mat-icon>download</mat-icon>
+        Export to Excel
+      </button>
+      <button mat-stroked-button (click)="refreshData()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="primary">account_balance_wallet</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Current Salary</h3>
+          <p class="summary-value">{{ currentSalary | currency:'INR':'symbol':'1.2-2' }}</p>
+          <p class="summary-subtitle">As of {{ currentPeriod }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="accent">trending_up</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Average Salary</h3>
+          <p class="summary-value">{{ averageSalary | currency:'INR':'symbol':'1.2-2' }}</p>
+          <p class="summary-subtitle">Last 12 months</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="warn">payments</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Total Earnings</h3>
+          <p class="summary-value">{{ totalEarnings | currency:'INR':'symbol':'1.2-2' }}</p>
+          <p class="summary-subtitle">YTD {{ currentYear }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="primary">receipt_long</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Payslips</h3>
+          <p class="summary-value">{{ payslipCount }}</p>
+          <p class="summary-subtitle">Total Generated</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filter Card -->
+  <mat-card class="filter-card">
+    <mat-card-header>
+      <mat-card-title>Filters</mat-card-title>
+      <mat-card-subtitle>Filter your salary history by period, date range, or search</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filter-form">
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="period-filter">
+            <mat-label>Payroll Period</mat-label>
+            <mat-select formControlName="periodId" placeholder="All Periods">
+              <mat-option value="">All Periods</mat-option>
+              <mat-option *ngFor="let period of availablePeriods" [value]="period.periodId">
+                {{ period.periodName }} ({{ period.startDate | date:'MMM yyyy' }})
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="date-range-filter">
+            <mat-label>Date Range</mat-label>
+            <mat-date-range-input [rangePicker]="dateRangePicker">
+              <input matStartDate formControlName="startDate" placeholder="Start Date">
+              <input matEndDate formControlName="endDate" placeholder="End Date">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="dateRangePicker"></mat-datepicker-toggle>
+            <mat-date-range-picker #dateRangePicker></mat-date-range-picker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="search-filter">
+            <mat-label>Search</mat-label>
+            <input matInput formControlName="search" placeholder="Search by period name or description">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <div class="filter-actions">
+            <button mat-raised-button color="primary" (click)="applyFilters()" [disabled]="loading">
+              Apply Filters
+            </button>
+            <button mat-stroked-button (click)="clearFilters()" [disabled]="loading">
+              Clear
+            </button>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- History Card -->
+  <mat-card class="history-card">
+    <mat-card-header>
+      <mat-card-title>Salary History</mat-card-title>
+      <mat-card-subtitle>Detailed breakdown of your salary and payslips</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading salary history...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && salaryHistory.length === 0" class="empty-state">
+        <mat-icon>history</mat-icon>
+        <h3>No Salary History Found</h3>
+        <p>Your salary history will appear here once payroll periods are processed.</p>
+      </div>
+
+      <!-- Salary History Accordion -->
+      <mat-accordion *ngIf="!loading && salaryHistory.length > 0" class="history-accordion" multi>
+        <mat-expansion-panel class="salary-panel" *ngFor="let entry of salaryHistory">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="panel-title">
+              <div>
+                <div class="period-name">Period Entry</div>
+                <div class="period-dates">
+                  {{ entry.createdAt | date:'MMM dd, yyyy' }}
+                </div>
+              </div>
+            </mat-panel-title>
+            <mat-panel-description class="panel-summary">
+              <mat-chip-listbox>
+                <mat-chip [color]="getStatusColor(entry.status)" class="status-chip">
+                  {{ entry.status }}
+                </mat-chip>
+              </mat-chip-listbox>
+              <span class="net-salary">{{ entry.netSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <!-- Salary Details -->
+          <div class="details-section">
+            <h4>Salary Breakdown</h4>
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="label">Basic Salary</span>
+                <span class="value">{{ entry.basicSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Gross Salary</span>
+                <span class="value">{{ entry.grossSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Tax Amount</span>
+                <span class="value">{{ entry.taxAmount | currency:'INR':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Net Salary</span>
+                <span class="value highlight">{{ entry.netSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Allowances -->
+          <div class="details-section" *ngIf="entry.allowances && hasKeys(entry.allowances)">
+            <h4>Allowances</h4>
+            <mat-list>
+              <mat-list-item *ngFor="let allowance of entry.allowances | keyvalue">
+                <span class="allowance-name">{{ allowance.key }}</span>
+                <span class="allowance-amount">{{ allowance.value | currency:'INR':'symbol':'1.2-2' }}</span>
+              </mat-list-item>
+            </mat-list>
+          </div>
+
+          <!-- Deductions -->
+          <div class="details-section" *ngIf="entry.deductions && hasKeys(entry.deductions)">
+            <h4>Deductions</h4>
+            <mat-list>
+              <mat-list-item *ngFor="let deduction of entry.deductions | keyvalue">
+                <span class="deduction-name">{{ deduction.key }}</span>
+                <span class="deduction-amount">{{ deduction.value | currency:'INR':'symbol':'1.2-2' }}</span>
+              </mat-list-item>
+            </mat-list>
+          </div>
+
+          <!-- Actions -->
+          <div class="actions-section">
+            <button mat-stroked-button (click)="viewPayslip(entry.entryId)" [disabled]="entry.status !== 'paid'">
+              <mat-icon>visibility</mat-icon>
+              View Payslip
+            </button>
+            <button mat-raised-button color="primary" (click)="downloadPayslip(entry.entryId)" [disabled]="entry.status !== 'paid'">
+              <mat-icon>download</mat-icon>
+              Download Payslip
+            </button>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <!-- Pagination -->
+      <mat-paginator 
+        *ngIf="!loading && salaryHistory.length > 0"
+        [length]="totalRecords"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        [pageIndex]="pageIndex"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

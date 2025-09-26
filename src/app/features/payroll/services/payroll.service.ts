@@ -14,7 +14,7 @@ import {
   PayrollReportFilter,
   Payslip
 } from '../../../core/models/payroll.models';
-import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
+import { ApiResponse, PaginatedResponse, PagedResult } from '../../../core/models/common.models';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +46,7 @@ export class PayrollService {
   }
 
   // Payroll Periods Management
-  getPayrollPeriods(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<PaginatedResponse<PayrollPeriod>>> {
+  getPayrollPeriods(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<PayrollPeriod[]>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
@@ -55,7 +55,7 @@ export class PayrollService {
       params = params.set('search', search);
     }
 
-    return this.http.get<ApiResponse<PaginatedResponse<PayrollPeriod>>>(`${this.apiUrl}/payroll/periods`, { params });
+    return this.http.get<ApiResponse<PayrollPeriod[]>>(`${this.apiUrl}/payroll/periods`, { params });
   }
 
   getCurrentPayrollPeriod(): Observable<ApiResponse<PayrollPeriod>> {
@@ -79,7 +79,7 @@ export class PayrollService {
   }
 
   // Payroll Entries Management
-  getPayrollEntries(filter?: PayrollFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<PayrollEntry>>> {
+  getPayrollEntries(filter?: PayrollFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PagedResult<PayrollEntry>>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
@@ -92,15 +92,15 @@ export class PayrollService {
       if (filter.search) params = params.set('search', filter.search);
     }
 
-    return this.http.get<ApiResponse<PaginatedResponse<PayrollEntry>>>(`${this.apiUrl}/payroll/entries`, { params });
+    return this.http.get<ApiResponse<PagedResult<PayrollEntry>>>(`${this.apiUrl}/payroll/entries`, { params });
   }
 
-  getPayrollEntriesByEmployee(employeeId: string, page: number = 1, limit: number = 10): Observable<ApiResponse<PaginatedResponse<PayrollEntry>>> {
+  getPayrollEntriesByEmployee(employeeId: string, page: number = 1, limit: number = 10): Observable<ApiResponse<PagedResult<PayrollEntry>>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    return this.http.get<ApiResponse<PaginatedResponse<PayrollEntry>>>(`${this.apiUrl}/payroll/employees/${employeeId}/entries`, { params });
+    return this.http.get<ApiResponse<PagedResult<PayrollEntry>>>(`${this.apiUrl}/payroll/employees/${employeeId}/entries`, { params });
   }
 
   getPayrollEntryById(id: string): Observable<ApiResponse<PayrollEntry>> {
