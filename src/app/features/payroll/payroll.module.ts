@@ -32,30 +32,12 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { NgChartsModule } from 'ng2-charts';
 
-import { PayrollDashboardComponent } from './components/payroll-dashboard/payroll-dashboard.component';
-import { PayrollPeriodsComponent } from './components/payroll-periods/payroll-periods.component';
-import { PayrollEntriesComponent } from './components/payroll-entries/payroll-entries.component';
-import { PayrollProcessingComponent } from './components/payroll-processing/payroll-processing.component';
-import { PayrollReportsComponent } from './components/payroll-reports/payroll-reports.component';
-import { PayslipManagementComponent } from './components/payslip-management/payslip-management.component';
-import { CreatePayrollPeriodDialogComponent } from './components/create-payroll-period-dialog/create-payroll-period-dialog.component';
-import { EmployeePayslipComponent } from './components/employee-payslip/employee-payslip.component';
-import { EmployeeSalaryHistoryComponent } from './components/employee-salary-history/employee-salary-history.component';
-import { SuperadminPayrollDashboardComponent } from './components/superadmin-payroll-dashboard/superadmin-payroll-dashboard.component';
+// All components are now standalone - no need to import them here
 import { payrollRoutes } from './payroll.routes';
 
 @NgModule({
   declarations: [
-    PayrollDashboardComponent,
-    PayrollPeriodsComponent,
-    PayrollEntriesComponent,
-    PayrollProcessingComponent,
-    PayrollReportsComponent,
-    PayslipManagementComponent,
-    CreatePayrollPeriodDialogComponent,
-    EmployeePayslipComponent,
-    EmployeeSalaryHistoryComponent,
-    SuperadminPayrollDashboardComponent
+    // All components are now standalone
   ],
   imports: [
     CommonModule,

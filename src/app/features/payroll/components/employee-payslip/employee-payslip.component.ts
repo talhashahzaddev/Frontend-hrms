@@ -34,6 +34,7 @@ import { User } from '../../../../core/models/auth.models';
 
 @Component({
   selector: 'app-employee-payslip',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

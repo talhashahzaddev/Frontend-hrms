@@ -27,6 +27,26 @@ import {
 
 @Component({
   selector: 'app-payroll-reports',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatTabsModule,
+    NgChartsModule
+  ],
   templateUrl: './payroll-reports.component.html',
   styleUrls: ['./payroll-reports.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

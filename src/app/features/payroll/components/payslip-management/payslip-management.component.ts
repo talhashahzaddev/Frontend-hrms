@@ -29,6 +29,25 @@ import { PagedResult } from '../../../../core/models/common.models';
 
 @Component({
   selector: 'app-payslip-management',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatCheckboxModule,
+    MatDialogModule
+  ],
   template: `
     <div class="payslip-management-container">
       

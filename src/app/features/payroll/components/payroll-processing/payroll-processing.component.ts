@@ -24,6 +24,22 @@ import {
 
 @Component({
   selector: 'app-payroll-processing',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatStepperModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatChipsModule
+  ],
   templateUrl: './payroll-processing.component.html',
   styleUrls: ['./payroll-processing.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

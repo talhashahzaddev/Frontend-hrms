@@ -36,6 +36,7 @@ import { User } from '../../../../core/models/auth.models';
 
 @Component({
   selector: 'app-payroll-dashboard',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

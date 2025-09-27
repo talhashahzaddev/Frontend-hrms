@@ -30,6 +30,26 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
 
 @Component({
   selector: 'app-payroll-entries',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatDividerModule
+  ],
   template: `
     <div class="payroll-entries-container">
       

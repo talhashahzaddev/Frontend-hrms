@@ -21,6 +21,19 @@ export interface CreatePayrollPeriodDialogData {
 
 @Component({
   selector: 'app-create-payroll-period-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
   template: `
     <div class="dialog-container">
       

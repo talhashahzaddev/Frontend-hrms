@@ -32,6 +32,27 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
 
 @Component({
   selector: 'app-payroll-periods',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatMenuModule,
+    MatDialogModule,
+    MatDividerModule
+  ],
   template: `
     <div class="payroll-periods-container">
       
