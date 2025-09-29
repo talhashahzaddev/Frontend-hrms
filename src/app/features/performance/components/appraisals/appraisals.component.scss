@@ -1,0 +1,70 @@
+/* Card styling */
+.appraisal-card {
+  max-width: 700px;          // Restrict max width
+  margin: 40px auto;          // Center horizontally
+  padding: 25px 30px;         // Inner padding
+  border-radius: 12px;        // Rounded corners
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1); // Soft shadow
+  background-color: #ffffff;  // White background
+
+  /* Title styling */
+  mat-card-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1976d2; // Primary Material color
+    margin-bottom: 20px;
+  }
+
+  /* Card content layout */
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; // spacing between form fields
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      textarea.mat-input-element {
+        min-height: 80px; // make textareas taller
+      }
+    }
+
+    /* Submit button styling */
+    button[type="submit"] {
+      margin-top: 10px;
+      align-self: flex-end;
+      min-width: 150px;
+      font-weight: 500;
+      background-color: #1976d2;
+      color: #fff;
+
+      &:hover {
+        background-color: #115293;
+      }
+
+      &:disabled {
+        background-color: #90caf9;
+        color: #e0e0e0;
+      }
+    }
+  }
+}
+
+/* Responsive for mobile */
+@media (max-width: 650px) {
+  .appraisal-card {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  mat-card-content {
+    button[type="submit"] {
+      width: 100%;
+      align-self: stretch;
+    }
+  }
+}

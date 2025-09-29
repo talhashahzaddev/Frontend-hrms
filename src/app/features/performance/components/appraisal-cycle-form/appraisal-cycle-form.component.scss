@@ -1,0 +1,79 @@
+/* Center card and give it a modern look */
+.cycle-form-card {
+  max-width: 600px;              // Restrict max width
+  margin: 40px auto;             // Center horizontally with top/bottom margin
+  padding: 25px 30px;            // Inner padding
+  border-radius: 12px;           // Rounded corners
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1); // Soft shadow
+  background-color: #ffffff;     // Card background
+
+  /* Header styling */
+  mat-card-header {
+    padding-bottom: 15px;
+
+    mat-card-title {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #1976d2; // Primary Material blue
+    }
+  }
+
+  /* Card content styling */
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; // spacing between form fields
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    textarea.mat-input-element {
+      min-height: 80px; // Make description box taller
+    }
+  }
+
+  /* Form action buttons */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 15px;
+
+    button {
+      min-width: 100px;
+      font-weight: 500;
+    }
+
+    button[color="primary"] {
+      background-color: #1976d2;
+      color: #ffffff;
+
+      &:hover {
+        background-color: #115293;
+      }
+    }
+
+    button[mat-button] {
+      color: #1976d2;
+    }
+  }
+}
+
+/* Responsive for mobile */
+@media (max-width: 650px) {
+  .cycle-form-card {
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 10px;
+  }
+}

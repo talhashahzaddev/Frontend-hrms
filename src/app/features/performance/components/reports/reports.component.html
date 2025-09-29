@@ -1,1 +1,46 @@
-<p>reports works!</p>
+<form [formGroup]="reportForm">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Select Appraisal Cycle</mat-label>
+    <mat-select formControlName="cycleId">
+      <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+        {{ cycle.cycleName }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
+<!-- Summary -->
+<div *ngIf="!reportForm.get('cycleId')?.value" class="no-selection">
+<p>Select Cycle to load Smmary  </p>
+</div>
+
+<div *ngIf="summary" class="summary-section">
+  <h3>Performance Summary</h3>
+
+  <div class="summary-grid">
+    <div class="summary-item">
+      <div class="summary-label">Average Rating</div>
+      <div class="summary-value">{{ summary.averageRating }}</div>
+    </div>
+
+    <div class="summary-item">
+      <div class="summary-label">Total Appraisals</div>
+      <div class="summary-value">{{ summary.totalAppraisals }}</div>
+    </div>
+
+    <div class="summary-item">
+      <div class="summary-label">Pending Appraisals</div>
+      <div class="summary-value">{{ summary.pendingAppraisals }}</div>
+    </div>
+
+    <div class="summary-item">
+      <div class="summary-label">Rating Distribution</div>
+      <div class="summary-value">{{ summary.ratingDistribution }}</div>
+    </div>
+
+    <div class="summary-item" style="grid-column: span 2;">
+      <div class="summary-label">Top Performers</div>
+      <div class="summary-value">{{ summary.topPerformers }}</div>
+    </div>
+  </div>
+</div>
