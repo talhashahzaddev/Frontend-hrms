@@ -22,7 +22,8 @@ import {
   SkillSetFilter,
   EmployeeSkillFilter,
   AppraisalFilter,
-  PerformanceReportFilter
+  PerformanceReportFilter,
+  CreateAppraisal
 } from '../../../core/models/performance.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
 
@@ -38,12 +39,12 @@ export class PerformanceService {
   constructor(private http: HttpClient) {}
 
   // Performance Dashboard
-  getPerformanceSummary(): Observable<ApiResponse<PerformanceSummary>> {
-    return this.http.get<ApiResponse<PerformanceSummary>>(`${this.apiUrl}/performance/summary`);
+  getPerformanceSummary(cycleId:string): Observable<ApiResponse<PerformanceSummary>> {
+    return this.http.get<ApiResponse<PerformanceSummary>>(`${this.apiUrl}/performance/summary/?cycleId=${cycleId}`);
   }
 
-  refreshPerformanceSummary(): void {
-    this.getPerformanceSummary().subscribe({
+  refreshPerformanceSummary(cycleId:string): void {
+    this.getPerformanceSummary(cycleId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.performanceSummarySubject.next(response.data);
@@ -153,24 +154,25 @@ export class PerformanceService {
   }
 
   // Appraisal Cycles Management
-  getAppraisalCycles(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<PaginatedResponse<AppraisalCycle>>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+ getAppraisalCycles(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<AppraisalCycle[]>> {
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('limit', limit.toString());
 
-    if (search) {
-      params = params.set('search', search);
-    }
-
-    return this.http.get<ApiResponse<PaginatedResponse<AppraisalCycle>>>(`${this.apiUrl}/performance/appraisal-cycles`, { params });
+  if (search) {
+    params = params.set('search', search);
   }
+
+  return this.http.get<ApiResponse<AppraisalCycle[]>>(`${this.apiUrl}/performance/cycles`, { params });
+}
+
 
   getAppraisalCycleById(id: string): Observable<ApiResponse<AppraisalCycle>> {
     return this.http.get<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/performance/appraisal-cycles/${id}`);
   }
-
+//appraisal Cycle
   createAppraisalCycle(request: CreateAppraisalCycleRequest): Observable<ApiResponse<AppraisalCycle>> {
-    return this.http.post<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/performance/appraisal-cycles`, request);
+    return this.http.post<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/performance/cycles`, request);
   }
 
   updateAppraisalCycle(id: string, request: UpdateAppraisalCycleRequest): Observable<ApiResponse<AppraisalCycle>> {
@@ -180,6 +182,16 @@ export class PerformanceService {
   deleteAppraisalCycle(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/performance/appraisal-cycles/${id}`);
   }
+
+// Create Employee Appraisal
+createAppraisal(request: CreateAppraisal): Observable<ApiResponse<EmployeeAppraisal>> {
+  return this.http.post<ApiResponse<EmployeeAppraisal>>(
+    `${this.apiUrl}/Performance/appraisals`,
+    request
+  );
+}
+
+
 
   // Employee Appraisals Management
   getEmployeeAppraisals(filter?: AppraisalFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<EmployeeAppraisal>>> {
@@ -215,6 +227,11 @@ export class PerformanceService {
     return this.http.put<ApiResponse<EmployeeAppraisal>>(`${this.apiUrl}/performance/appraisals/${appraisalId}/review`, request);
   }
 
+
+
+
+ 
+
   // Performance Reports
   generatePerformanceReport(filter?: PerformanceReportFilter): Observable<ApiResponse<any>> {
     let params = new HttpParams();
@@ -248,8 +265,8 @@ export class PerformanceService {
   }
 
   // Dashboard Refresh
-  refreshDashboardData(): void {
-    this.refreshPerformanceSummary();
+  refreshDashboardData(cycleId:string): void {
+    this.refreshPerformanceSummary(cycleId);
   }
 
   // Additional methods for dashboard

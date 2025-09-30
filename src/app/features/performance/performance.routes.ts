@@ -25,5 +25,9 @@ export const performanceRoutes: Routes = [
    {
     path: 'reports',
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
+  },
+   {
+    path: 'cycles',
+    loadComponent: () => import('./components/appraisal-cycle-form/appraisal-cycle-form.component').then(m => m.AppraisalCycleFormComponent)
   }
 ];

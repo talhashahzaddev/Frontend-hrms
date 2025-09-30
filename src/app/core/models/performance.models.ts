@@ -275,18 +275,30 @@ export interface UpdateEmployeeSkillRequest {
   lastAssessed?: string;
 }
 
+// export interface CreateAppraisalCycleRequest {
+//   cycleName: string;
+//   description?: string;
+//   startDate: string;
+//   endDate: string;
+//   reviewPeriodStart?: string;
+//   reviewPeriodEnd?: string;
+//   ratingScale: RatingScale;
+//   selfReviewEnabled: boolean;
+//   peerReviewEnabled: boolean;
+//   managerReviewEnabled: boolean;
+// }
+
 export interface CreateAppraisalCycleRequest {
   cycleName: string;
   description?: string;
   startDate: string;
   endDate: string;
-  reviewPeriodStart?: string;
-  reviewPeriodEnd?: string;
-  ratingScale: RatingScale;
-  selfReviewEnabled: boolean;
-  peerReviewEnabled: boolean;
-  managerReviewEnabled: boolean;
 }
+
+
+
+
+
 
 export interface UpdateAppraisalCycleRequest {
   cycleName?: string;
