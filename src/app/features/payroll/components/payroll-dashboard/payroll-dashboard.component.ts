@@ -118,10 +118,16 @@ import { User } from '../../../../core/models/auth.models';
             <div class="period-actions" *ngIf="hasHRRole()">
               <button mat-raised-button 
                       color="primary" 
-                      (click)="calculatePayroll()"
+                      (click)="navigateToCalculation()"
                       [disabled]="currentPeriod.status !== 'draft'">
                 <mat-icon>calculate</mat-icon>
                 Calculate Payroll
+              </button>
+              <button mat-stroked-button 
+                      (click)="calculatePayroll()"
+                      [disabled]="currentPeriod.status !== 'draft'">
+                <mat-icon>speed</mat-icon>
+                Quick Calculate
               </button>
               <button mat-stroked-button 
                       (click)="processPayroll()"
@@ -376,25 +382,37 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
     this.notificationService.showInfo('Create payroll period dialog will be implemented');
   }
 
+  navigateToCalculation(): void {
+    window.location.href = '/payroll/calculate';
+  }
+
   calculatePayroll(periodId?: string): void {
     const targetPeriodId = periodId || this.currentPeriod?.periodId;
     if (!targetPeriodId) return;
 
-    this.payrollService.processPayroll({
-      payrollPeriodId: targetPeriodId,
-      includeAllowances: true,
-      includeDeductions: true,
-      includeOvertime: true
-    })
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    this.payrollService.calculatePayroll(targetPeriodId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Payroll calculated successfully');
-          this.loadInitialData();
+        next: (response) => {
+          this.isLoading = false;
+          if (response.success && response.data) {
+            this.notificationService.showSuccess(
+              `Payroll calculated successfully! ${response.data.entriesCreated} entries created.`
+            );
+            this.loadInitialData();
+          } else {
+            this.notificationService.showError(response.message || 'Failed to calculate payroll');
+          }
+          this.cdr.markForCheck();
         },
-        error: (error: any) => {
+        error: (error) => {
+          this.isLoading = false;
           console.error('Error calculating payroll:', error);
           this.notificationService.showError('Failed to calculate payroll');
+          this.cdr.markForCheck();
         }
       });
   }

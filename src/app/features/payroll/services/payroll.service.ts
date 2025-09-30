@@ -12,7 +12,8 @@ import {
   ProcessPayrollRequest,
   PayrollFilter,
   PayrollReportFilter,
-  Payslip
+  Payslip,
+  PayrollCalculationResult
 } from '../../../core/models/payroll.models';
 import { ApiResponse, PaginatedResponse, PagedResult } from '../../../core/models/common.models';
 
@@ -108,6 +109,10 @@ export class PayrollService {
   }
 
   // Payroll Processing
+  calculatePayroll(periodId: string): Observable<ApiResponse<PayrollCalculationResult>> {
+    return this.http.post<ApiResponse<PayrollCalculationResult>>(`${this.apiUrl}/payroll/periods/${periodId}/calculate`, {});
+  }
+
   processPayroll(request: ProcessPayrollRequest): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/payroll/process`, request);
   }

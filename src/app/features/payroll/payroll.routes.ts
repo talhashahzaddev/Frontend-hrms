@@ -3,6 +3,7 @@ import { PayrollDashboardComponent } from './components/payroll-dashboard/payrol
 import { PayrollPeriodsComponent } from './components/payroll-periods/payroll-periods.component';
 import { PayrollEntriesComponent } from './components/payroll-entries/payroll-entries.component';
 import { PayrollProcessingComponent } from './components/payroll-processing/payroll-processing.component';
+import { PayrollCalculationComponent } from './components/payroll-calculation/payroll-calculation.component';
 import { PayrollReportsComponent } from './components/payroll-reports/payroll-reports.component';
 import { PayslipManagementComponent } from './components/payslip-management/payslip-management.component';
 import { EmployeePayslipComponent } from './components/employee-payslip/employee-payslip.component';
@@ -15,6 +16,7 @@ export const payrollRoutes: Routes = [
   { path: 'periods', component: PayrollPeriodsComponent },
   { path: 'entries', component: PayrollEntriesComponent },
   { path: 'process', component: PayrollProcessingComponent },
+  { path: 'calculate', component: PayrollCalculationComponent },
   { path: 'reports', component: PayrollReportsComponent },
   { path: 'slips', component: PayslipManagementComponent },
   { path: 'employee/payslips', component: EmployeePayslipComponent },

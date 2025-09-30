@@ -218,3 +218,13 @@ export interface ProcessPayrollRequest {
   includeDeductions: boolean;
   includeOvertime: boolean;
 }
+
+export interface PayrollCalculationResult {
+  entriesCreated: number;
+  periodId: string;
+  totalEmployees: number;
+  totalGrossAmount: number;
+  totalTaxAmount: number;
+  totalNetAmount: number;
+  calculatedAt: string;
+}

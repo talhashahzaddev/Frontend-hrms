@@ -189,29 +189,28 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     if (!this.selectedPeriodDetails) return;
 
     // Call actual API
-    this.payrollService.processPayroll({
-      payrollPeriodId: this.selectedPeriodDetails.periodId,
-      includeOvertime: this.settingsForm.get('includeOvertime')?.value,
-      includeAllowances: this.settingsForm.get('includeAllowances')?.value,
-      includeDeductions: this.settingsForm.get('includeDeductions')?.value
-    })
+    this.payrollService.calculatePayroll(this.selectedPeriodDetails.periodId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.isProcessing = false;
           this.processingComplete = true;
-          this.processingResults = {
-            entriesCreated: response.data || this.selectedPeriodDetails?.totalEmployees || 0,
-            totalGross: this.selectedPeriodDetails?.totalGrossAmount || 0,
-            totalNet: this.selectedPeriodDetails?.totalNetAmount || 0
-          };
-          this.notificationService.showSuccess('Payroll processed successfully!');
+          if (response.success && response.data) {
+            this.processingResults = {
+              entriesCreated: response.data.entriesCreated,
+              totalGross: response.data.totalGrossAmount,
+              totalNet: response.data.totalNetAmount
+            };
+            this.notificationService.showSuccess('Payroll calculated successfully!');
+          } else {
+            this.notificationService.showError(response.message || 'Failed to calculate payroll');
+          }
           this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Processing error:', error);
           this.isProcessing = false;
-          this.notificationService.showError('Failed to process payroll');
+          this.notificationService.showError('Failed to calculate payroll');
           this.cdr.markForCheck();
         }
       });
