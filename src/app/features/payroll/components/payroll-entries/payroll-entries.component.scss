@@ -1,0 +1,311 @@
+.payroll-entries-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1976d2;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+
+    .filters-form {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+
+      mat-form-field {
+        min-width: 200px;
+      }
+
+      .filter-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+    }
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .summary-card {
+      .stat-item {
+        text-align: center;
+
+        .stat-value {
+          font-size: 24px;
+          font-weight: 600;
+          color: #1976d2;
+          margin-bottom: 4px;
+        }
+
+        .stat-label {
+          font-size: 14px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+
+  .table-card {
+    .table-container {
+      .payroll-entries-table {
+        width: 100%;
+
+        .mat-mdc-header-cell {
+          font-weight: 600;
+          color: #1976d2;
+        }
+
+        .clickable-row {
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background-color: #f5f5f5;
+          }
+        }
+
+        .employee-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          strong {
+            font-weight: 500;
+          }
+
+          small {
+            color: #666;
+            font-size: 12px;
+          }
+        }
+
+        .allowances-info,
+        .deductions-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .amount {
+            font-weight: 500;
+          }
+
+          small {
+            color: #666;
+            font-size: 12px;
+          }
+        }
+
+        .allowances-info .amount {
+          color: #4caf50;
+        }
+
+        .deductions-info .amount {
+          color: #f44336;
+        }
+
+        .gross-salary {
+          font-weight: 600;
+          color: #2196f3;
+          font-size: 16px;
+        }
+
+        .net-salary {
+          font-weight: 700;
+          color: #4caf50;
+          font-size: 16px;
+        }
+
+        mat-chip {
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .mat-column-select {
+          width: 60px;
+        }
+
+        .mat-column-employee {
+          min-width: 180px;
+        }
+
+        .mat-column-basicSalary,
+        .mat-column-allowances,
+        .mat-column-deductions {
+          width: 120px;
+          text-align: right;
+        }
+
+        .mat-column-grossSalary,
+        .mat-column-netSalary {
+          width: 140px;
+          text-align: right;
+        }
+
+        .mat-column-status {
+          width: 120px;
+        }
+
+        .mat-column-actions {
+          width: 80px;
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 64px 32px;
+        color: #666;
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #ccc;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 16px 0 8px 0;
+          font-weight: 500;
+        }
+
+        p {
+          margin: 8px 0 24px 0;
+          color: #999;
+        }
+      }
+
+      mat-paginator {
+        border-top: 1px solid #e0e0e0;
+        margin-top: 16px;
+      }
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px;
+    color: #666;
+
+    mat-spinner {
+      margin-bottom: 16px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .payroll-entries-container {
+    .summary-cards {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .payroll-entries-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      .page-title {
+        font-size: 24px;
+      }
+    }
+
+    .filters-card .filters-form {
+      flex-direction: column;
+      align-items: stretch;
+
+      mat-form-field {
+        min-width: auto;
+        width: 100%;
+      }
+
+      .filter-actions {
+        margin-top: 16px;
+        justify-content: stretch;
+
+        button {
+          flex: 1;
+        }
+      }
+    }
+
+    .summary-cards {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+
+      .summary-card .stat-item {
+        .stat-value {
+          font-size: 20px;
+        }
+
+        .stat-label {
+          font-size: 12px;
+        }
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+
+      .payroll-entries-table {
+        min-width: 1000px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .payroll-entries-container {
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+}

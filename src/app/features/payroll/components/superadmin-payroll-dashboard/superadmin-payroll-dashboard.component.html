@@ -1,0 +1,369 @@
+<div class="superadmin-payroll-dashboard-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>dashboard</mat-icon>
+      Payroll Dashboard
+    </h1>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="createPayrollPeriod()">
+        <mat-icon>add</mat-icon>
+        Create Period
+      </button>
+      <button mat-stroked-button (click)="generateReport()">
+        <mat-icon>assessment</mat-icon>
+        Generate Report
+      </button>
+      <button mat-stroked-button (click)="exportData()">
+        <mat-icon>download</mat-icon>
+        Export Data
+      </button>
+      <button mat-icon-button (click)="refreshData()" matTooltip="Refresh Data">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="primary">people</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Total Employees</h3>
+          <p class="summary-value">{{ totalEmployees }}</p>
+          <p class="summary-subtitle">Across all departments</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="accent">account_balance_wallet</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Total Payroll</h3>
+          <p class="summary-value">{{ totalPayrollAmount | currency:'INR':'symbol':'1.0-0' }}</p>
+          <p class="summary-subtitle">Current month</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="warn">pending_actions</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Pending Approvals</h3>
+          <p class="summary-value">{{ pendingApprovals }}</p>
+          <p class="summary-subtitle">Awaiting review</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon color="primary">check_circle</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3 class="summary-title">Completed Payrolls</h3>
+          <p class="summary-value">{{ completedPayrolls }}</p>
+          <p class="summary-subtitle">This year</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Dashboard Tabs -->
+  <mat-card class="dashboard-tabs">
+    <mat-tab-group [(selectedIndex)]="activeTab">
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="overview-section">
+          <!-- Charts Grid -->
+          <div class="charts-grid">
+            <!-- Payroll Trend Chart -->
+            <mat-card class="chart-card">
+              <mat-card-header>
+                <mat-card-title>Payroll Trend</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="chart-placeholder" *ngIf="payrollTrendData.length === 0">
+                  <mat-icon>show_chart</mat-icon>
+                  <h3>No Data Available</h3>
+                  <p>Payroll trend data will appear here once available.</p>
+                </div>
+                <!-- Chart component would go here -->
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Department Breakdown Chart -->
+            <mat-card class="chart-card">
+              <mat-card-header>
+                <mat-card-title>Department Breakdown</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="chart-placeholder" *ngIf="departmentChartData.length === 0">
+                  <mat-icon>pie_chart</mat-icon>
+                  <h3>No Data Available</h3>
+                  <p>Department breakdown will appear here once available.</p>
+                </div>
+                <!-- Chart component would go here -->
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- Filter Card -->
+          <mat-card class="filter-card">
+            <mat-card-header>
+              <mat-card-title>Filters</mat-card-title>
+              <mat-card-subtitle>Filter dashboard data by period, department, or status</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="filterForm" class="filter-form">
+                <div class="filter-row">
+                  <mat-form-field appearance="outline" class="period-filter">
+                    <mat-label>Payroll Period</mat-label>
+                    <mat-select formControlName="periodId">
+                      <mat-option value="">All Periods</mat-option>
+                      <mat-option *ngFor="let period of payrollPeriods" [value]="period.periodId">
+                        {{ period.periodName }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="department-filter">
+                    <mat-label>Department</mat-label>
+                    <mat-select formControlName="departmentId">
+                      <mat-option value="">All Departments</mat-option>
+                      <mat-option *ngFor="let dept of departmentBreakdown" [value]="dept.departmentId">
+                        {{ dept.departmentName }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="status-filter">
+                    <mat-label>Status</mat-label>
+                    <mat-select formControlName="status">
+                      <mat-option value="">All Status</mat-option>
+                      <mat-option value="Pending">Pending</mat-option>
+                      <mat-option value="Approved">Approved</mat-option>
+                      <mat-option value="Paid">Paid</mat-option>
+                      <mat-option value="Rejected">Rejected</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <div class="filter-actions">
+                    <button mat-raised-button color="primary" (click)="applyFilters()" [disabled]="loading">
+                      Apply Filters
+                    </button>
+                    <button mat-stroked-button (click)="clearFilters()" [disabled]="loading">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Payroll Periods Tab -->
+      <mat-tab label="Payroll Periods">
+        <div class="periods-section">
+          <mat-card class="section-card">
+            <mat-card-header>
+              <mat-card-title>Payroll Periods</mat-card-title>
+              <mat-card-subtitle>Manage and review payroll periods</mat-card-subtitle>
+              <div class="header-actions">
+                <button mat-raised-button color="primary" (click)="createPayrollPeriod()">
+                  <mat-icon>add</mat-icon>
+                  New Period
+                </button>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <!-- Loading State -->
+              <div *ngIf="loading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading payroll periods...</p>
+              </div>
+
+              <!-- Empty State -->
+              <div *ngIf="!loading && payrollPeriods.length === 0" class="empty-state">
+                <mat-icon>event</mat-icon>
+                <h3>No Payroll Periods Found</h3>
+                <p>Create your first payroll period to get started.</p>
+              </div>
+
+              <!-- Periods Table -->
+              <table *ngIf="!loading && payrollPeriods.length > 0" mat-table [dataSource]="payrollPeriods" class="periods-table">
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef> Period Name </th>
+                  <td mat-cell *matCellDef="let period"> {{ period.periodName }} </td>
+                </ng-container>
+
+                <!-- Date Range Column -->
+                <ng-container matColumnDef="dateRange">
+                  <th mat-header-cell *matHeaderCellDef> Date Range </th>
+                  <td mat-cell *matCellDef="let period"> 
+                    {{ period.startDate | date:'MMM dd, yyyy' }} - {{ period.endDate | date:'MMM dd, yyyy' }}
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef> Status </th>
+                  <td mat-cell *matCellDef="let period">
+                    <mat-chip [color]="getStatusColor(period.status)" class="status-chip">
+                      {{ period.status }}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Total Amount Column -->
+                <ng-container matColumnDef="totalAmount">
+                  <th mat-header-cell *matHeaderCellDef> Total Amount </th>
+                  <td mat-cell *matCellDef="let period"> 
+                    {{ period.totalAmount | currency:'INR':'symbol':'1.0-0' }}
+                  </td>
+                </ng-container>
+
+                <!-- Employee Count Column -->
+                <ng-container matColumnDef="employeeCount">
+                  <th mat-header-cell *matHeaderCellDef> Employees </th>
+                  <td mat-cell *matCellDef="let period"> {{ period.employeeCount }} </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef> Actions </th>
+                  <td mat-cell *matCellDef="let period" class="action-buttons">
+                    <button mat-icon-button 
+                            color="primary" 
+                            (click)="viewPeriodDetails(period.periodId)"
+                            matTooltip="View Details">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            color="accent" 
+                            (click)="processPayroll(period.periodId)"
+                            matTooltip="Process Payroll"
+                            [disabled]="period.status !== 'Open'">
+                      <mat-icon>payment</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['name', 'dateRange', 'status', 'totalAmount', 'employeeCount', 'actions']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['name', 'dateRange', 'status', 'totalAmount', 'employeeCount', 'actions'];"></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Recent Entries Tab -->
+      <mat-tab label="Recent Entries">
+        <div class="entries-section">
+          <mat-card class="section-card">
+            <mat-card-header>
+              <mat-card-title>Recent Payroll Entries</mat-card-title>
+              <mat-card-subtitle>Pending approvals and recent entries</mat-card-subtitle>
+              <div class="header-actions">
+                <button mat-raised-button color="primary" (click)="processPayroll('')">
+                  <mat-icon>payment</mat-icon>
+                  Process All
+                </button>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <!-- Loading State -->
+              <div *ngIf="loading" class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading payroll entries...</p>
+              </div>
+
+              <!-- Empty State -->
+              <div *ngIf="!loading && recentEntries.length === 0" class="empty-state">
+                <mat-icon>receipt_long</mat-icon>
+                <h3>No Recent Entries</h3>
+                <p>No payroll entries are available for review.</p>
+              </div>
+
+              <!-- Entries Table -->
+              <table *ngIf="!loading && recentEntries.length > 0" mat-table [dataSource]="recentEntries" class="entries-table">
+                <!-- Employee Name Column -->
+                <ng-container matColumnDef="employeeName">
+                  <th mat-header-cell *matHeaderCellDef> Employee </th>
+                  <td mat-cell *matCellDef="let entry"> {{ entry.employeeName }} </td>
+                </ng-container>
+
+                <!-- Period Column -->
+                <ng-container matColumnDef="periodName">
+                  <th mat-header-cell *matHeaderCellDef> Period </th>
+                  <td mat-cell *matCellDef="let entry"> {{ entry.payrollPeriodName }} </td>
+                </ng-container>
+
+                <!-- Net Salary Column -->
+                <ng-container matColumnDef="netSalary">
+                  <th mat-header-cell *matHeaderCellDef> Net Salary </th>
+                  <td mat-cell *matCellDef="let entry"> 
+                    {{ entry.netSalary | currency:'INR':'symbol':'1.0-0' }}
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef> Status </th>
+                  <td mat-cell *matCellDef="let entry">
+                    <mat-chip [color]="getStatusColor(entry.status)" class="status-chip">
+                      <mat-icon>{{ getStatusIcon(entry.status) }}</mat-icon>
+                      {{ entry.status }}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef> Actions </th>
+                  <td mat-cell *matCellDef="let entry" class="action-buttons">
+                    <button mat-icon-button 
+                            color="primary" 
+                            (click)="approveEntry(entry.id)"
+                            matTooltip="Approve"
+                            [disabled]="entry.status !== 'Pending'">
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            color="warn" 
+                            (click)="rejectEntry(entry.id)"
+                            matTooltip="Reject"
+                            [disabled]="entry.status !== 'Pending'">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                    <button mat-icon-button 
+                            color="accent" 
+                            (click)="viewEntryDetails(entry.id)"
+                            matTooltip="View Details">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['employeeName', 'periodName', 'netSalary', 'status', 'actions']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['employeeName', 'periodName', 'netSalary', 'status', 'actions'];"></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>

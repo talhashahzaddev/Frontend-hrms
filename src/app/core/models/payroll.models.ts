@@ -9,7 +9,7 @@ export interface PayrollPeriod {
   totalGrossAmount: number;
   totalTaxAmount: number;
   totalNetAmount: number;
-  processedBy?: string;
+  processorName?: string;
   processedAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -217,4 +217,14 @@ export interface ProcessPayrollRequest {
   includeAllowances: boolean;
   includeDeductions: boolean;
   includeOvertime: boolean;
+}
+
+export interface PayrollCalculationResult {
+  entriesCreated: number;
+  periodId: string;
+  totalEmployees: number;
+  totalGrossAmount: number;
+  totalTaxAmount: number;
+  totalNetAmount: number;
+  calculatedAt: string;
 }

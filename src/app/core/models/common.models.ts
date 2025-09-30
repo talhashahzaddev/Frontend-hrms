@@ -15,6 +15,16 @@ export interface PaginatedResponse<T> {
   hasPreviousPage: boolean;
 }
 
+export interface PagedResult<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface BaseEntity {
   id: string;
   createdAt: string;
