@@ -1,0 +1,346 @@
+.payroll-processing-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .page-header {
+    margin-bottom: 24px;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 500;
+      color: #1976d2;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 16px;
+    }
+  }
+
+  .processing-card {
+    margin-bottom: 24px;
+
+    .step-content {
+      padding: 24px 0;
+
+      .full-width {
+        width: 100%;
+      }
+
+      .period-details {
+        margin: 24px 0;
+        padding: 16px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+
+        h4 {
+          margin: 0 0 16px 0;
+          color: #1976d2;
+        }
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+
+          .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            label {
+              font-weight: 500;
+              color: #666;
+              font-size: 14px;
+            }
+
+            span {
+              font-size: 16px;
+            }
+          }
+        }
+      }
+
+      .settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .step-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+      }
+    }
+
+    .ready-to-process {
+      text-align: center;
+      padding: 32px;
+
+      h4 {
+        margin: 0 0 16px 0;
+        color: #1976d2;
+      }
+
+      p {
+        margin: 0 0 24px 0;
+        color: #666;
+      }
+
+      .process-summary {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin: 24px 0;
+        flex-wrap: wrap;
+
+        .summary-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 16px;
+          background-color: #f5f5f5;
+          border-radius: 8px;
+
+          mat-icon {
+            color: #1976d2;
+          }
+        }
+      }
+
+      .process-button {
+        font-size: 16px;
+        padding: 12px 32px;
+      }
+    }
+
+    .processing-status {
+      text-align: center;
+      padding: 32px;
+
+      h4 {
+        margin: 0 0 24px 0;
+        color: #1976d2;
+      }
+
+      .processing-message {
+        margin: 16px 0;
+        color: #666;
+        font-style: italic;
+      }
+
+      .processing-steps {
+        margin-top: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+
+        .processing-step {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px;
+          border-radius: 8px;
+          background-color: #f5f5f5;
+          transition: all 0.3s ease;
+
+          &.completed {
+            background-color: #e8f5e8;
+            
+            mat-icon {
+              color: #4caf50;
+            }
+          }
+
+          mat-icon {
+            color: #666;
+          }
+
+          span {
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .processing-complete {
+      text-align: center;
+      padding: 32px;
+
+      .success-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #4caf50;
+        margin-bottom: 16px;
+      }
+
+      h4 {
+        margin: 0 0 16px 0;
+        color: #4caf50;
+      }
+
+      p {
+        margin: 0 0 24px 0;
+        color: #666;
+      }
+
+      .results-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin: 24px 0;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+
+        .result-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 16px;
+          background-color: #f5f5f5;
+          border-radius: 8px;
+
+          label {
+            font-weight: 500;
+            color: #666;
+            font-size: 14px;
+          }
+
+          span {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1976d2;
+          }
+        }
+      }
+
+      .completion-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    }
+  }
+
+  .history-card {
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .history-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #fafafa;
+
+        .history-info {
+          flex: 1;
+
+          h5 {
+            margin: 0 0 4px 0;
+            font-weight: 500;
+          }
+
+          p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+          }
+        }
+
+        .history-stats {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          text-align: right;
+
+          .stat {
+            font-size: 14px;
+            color: #666;
+          }
+        }
+
+        mat-chip {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .payroll-processing-container {
+    padding: 16px;
+
+    .page-header .page-title {
+      font-size: 24px;
+    }
+
+    .processing-card .step-content {
+      .period-details .details-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .step-actions {
+        justify-content: stretch;
+
+        button {
+          flex: 1;
+        }
+      }
+    }
+
+    .ready-to-process .process-summary {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .processing-complete .completion-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .history-card .history-list .history-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+
+      .history-stats {
+        align-self: stretch;
+        text-align: left;
+      }
+    }
+  }
+}

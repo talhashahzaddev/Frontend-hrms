@@ -8,7 +8,9 @@
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Cycle Name</mat-label>
         <input matInput formControlName="cycleName" placeholder="Enter cycle name">
-        <mat-error *ngIf="cycleForm.get('cycleName')?.hasError('required')">
+        <mat-error *ngIf="cycleForm.get('cycleName')?.hasError('required')
+         && (cycleForm.get('cycleName')?.touched || cycleForm.get('cycleName')?.dirty)
+        ">
           Cycle Name is required
         </mat-error>
       </mat-form-field>

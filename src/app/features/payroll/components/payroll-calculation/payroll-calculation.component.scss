@@ -1,0 +1,338 @@
+.payroll-calculation-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  .calculation-header {
+    text-align: center;
+    margin-bottom: 32px;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 0 0 8px 0;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: #1a1a1a;
+
+      mat-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: #1976d2;
+      }
+    }
+
+    .page-subtitle {
+      margin: 0;
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+
+  .period-selection-card,
+  .calculation-progress-card,
+  .calculation-results-card {
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .full-width {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    .period-status {
+      float: right;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+
+      &.status-draft {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+
+      &.status-calculated {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+    }
+
+    .period-details {
+      margin-top: 24px;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+
+      h4 {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+
+        .detail-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          label {
+            font-weight: 500;
+            color: #666;
+            font-size: 0.9rem;
+          }
+
+          span {
+            color: #333;
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+  }
+
+  .calculation-progress-card {
+    .progress-container {
+      margin-bottom: 32px;
+
+      .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+
+      .progress-text {
+        text-align: center;
+        font-weight: 500;
+        color: #1976d2;
+        margin: 0;
+      }
+    }
+
+    .steps-container {
+      .step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 16px 0;
+        border-bottom: 1px solid #e0e0e0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &.completed {
+          .step-icon {
+            color: #4caf50;
+          }
+        }
+
+        &.in-progress {
+          .step-icon {
+            color: #1976d2;
+          }
+        }
+
+        &.error {
+          .step-icon {
+            color: #f44336;
+          }
+        }
+
+        .step-icon {
+          flex-shrink: 0;
+          margin-top: 2px;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+        }
+
+        .step-content {
+          flex: 1;
+
+          h4 {
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #333;
+          }
+
+          p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+
+            &.error-message {
+              color: #f44336;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .calculation-results-card {
+    .summary-section {
+      margin-bottom: 24px;
+
+      h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+
+        .summary-item {
+          text-align: center;
+          padding: 16px;
+          background-color: #f8f9fa;
+          border-radius: 8px;
+          border: 1px solid #e9ecef;
+
+          .summary-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 4px;
+          }
+
+          .summary-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .breakdown-section {
+      margin-bottom: 24px;
+
+      h3 {
+        margin: 0 0 16px 0;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .department-panel {
+        margin-bottom: 8px;
+
+        .department-details {
+          padding: 16px 0;
+
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            span:first-child {
+              font-weight: 500;
+              color: #666;
+            }
+
+            span:last-child {
+              color: #333;
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+
+    p {
+      margin-top: 16px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .payroll-calculation-container {
+    padding: 16px;
+
+    .calculation-header {
+      .page-title {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      align-items: stretch;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Animation for progress
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.step-item.in-progress {
+  animation: pulse 1.5s ease-in-out infinite;
+}

@@ -87,55 +87,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     this.currentUser = this.authService.getCurrentUserValue();
   }
 
-  // private loadInitialData(): void {
-  //   this.isLoading = true;
-
-  //   const requests: any[] = [
-  //     this.performanceService.getMyAppraisals(),
-  //     this.performanceService.getMyPerformanceMetrics(),
-  //     this.performanceService.getMySkills(),
-      
-  //   ];
-
-  //   if (this.hasManagerRole()) {
-  //     requests.push(this.performanceService.getTeamPerformanceSummary());
-  //   }
-
-  //   if (this.hasHRRole()) {
-  //     requests.push(this.performanceService.getAppraisalCycles(),
-  // );
-  //   }
-
-  //   forkJoin(requests)
-  //     .pipe(takeUntil(this.destroy$))
-  //     .subscribe({
-  //       next: (results: any[]) => {
-  //         this.myPerformanceMetrics = results[0] || null;
-  //         this.mySkills = results[1] || [];
-  //         this.myAppraisals = results[2] || [];
-
-
-          
-          
-  //         if (this.hasManagerRole() && results[3]) {
-  //           this.teamPerformanceSummary = results[3];
-  //         }
-          
-         
-
-  //         this.isLoading = false;
-  //         this.cdr.markForCheck();
-  //       },
-  //       error: (error) => {
-  //         console.error('Error loading performance data:', error);
-  //         this.notificationService.showError('Failed to load performance data');
-  //         this.isLoading = false;
-  //         this.cdr.markForCheck();
-  //       }
-  //     });
-       
-    
-  // }
 
 
 private loadInitialData(): void {

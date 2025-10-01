@@ -1,0 +1,242 @@
+<div class="payroll-processing-container">
+  
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>settings</mat-icon>
+      Process Payroll
+    </h1>
+    <p class="page-subtitle">Calculate and process payroll for selected periods</p>
+  </div>
+
+  <!-- Processing Steps -->
+  <mat-card class="processing-card">
+    <mat-card-header>
+      <mat-card-title>Payroll Processing Workflow</mat-card-title>
+      <mat-card-subtitle>Follow these steps to process payroll</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      
+      <mat-stepper [linear]="true" #stepper>
+        
+        <!-- Step 1: Select Period -->
+        <mat-step [stepControl]="selectionForm">
+          <form [formGroup]="selectionForm">
+            <ng-template matStepLabel>Select Payroll Period</ng-template>
+            
+            <div class="step-content">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Payroll Period</mat-label>
+                <mat-select formControlName="selectedPeriod" required>
+                  <mat-option value="">Select a payroll period</mat-option>
+                  <mat-option *ngFor="let period of availablePeriods" [value]="period.periodId">
+                    {{ period.periodName }} ({{ period.startDate | date:'mediumDate' }} - {{ period.endDate | date:'mediumDate' }})
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div *ngIf="selectedPeriodDetails" class="period-details">
+                <h4>Selected Period Details</h4>
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <label>Period Name:</label>
+                    <span>{{ selectedPeriodDetails.periodName }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Status:</label>
+                    <mat-chip [color]="getStatusColor(selectedPeriodDetails.status)">
+                      {{ selectedPeriodDetails.status | titlecase }}
+                    </mat-chip>
+                  </div>
+                  <div class="detail-item">
+                    <label>Total Employees:</label>
+                    <span>{{ selectedPeriodDetails.totalEmployees }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <label>Pay Date:</label>
+                    <span>{{ (selectedPeriodDetails.payDate | date:'mediumDate') || 'Not set' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-actions">
+                <button mat-raised-button color="primary" matStepperNext 
+                        [disabled]="!selectionForm.valid">
+                  Next: Review Settings
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 2: Review Settings -->
+        <mat-step [stepControl]="settingsForm">
+          <form [formGroup]="settingsForm">
+            <ng-template matStepLabel>Review Processing Settings</ng-template>
+            
+            <div class="step-content">
+              <h4>Processing Options</h4>
+              
+              <div class="settings-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Include Overtime</mat-label>
+                  <mat-select formControlName="includeOvertime">
+                    <mat-option [value]="true">Yes</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Include Allowances</mat-label>
+                  <mat-select formControlName="includeAllowances">
+                    <mat-option [value]="true">Yes</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Include Deductions</mat-label>
+                  <mat-select formControlName="includeDeductions">
+                    <mat-option [value]="true">Yes</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="step-actions">
+                <button mat-stroked-button matStepperPrevious>
+                  Back
+                </button>
+                <button mat-raised-button color="primary" matStepperNext>
+                  Next: Process
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-step>
+
+        <!-- Step 3: Processing -->
+        <mat-step>
+          <ng-template matStepLabel>Processing Payroll</ng-template>
+          
+          <div class="step-content">
+            <div *ngIf="!isProcessing && !processingComplete" class="ready-to-process">
+              <h4>Ready to Process</h4>
+              <p>Click the button below to start processing payroll for the selected period.</p>
+              
+              <div class="process-summary">
+                <div class="summary-item">
+                  <mat-icon>schedule</mat-icon>
+                  <span>Period: {{ selectedPeriodDetails?.periodName }}</span>
+                </div>
+                <div class="summary-item">
+                  <mat-icon>people</mat-icon>
+                  <span>Employees: {{ selectedPeriodDetails?.totalEmployees }}</span>
+                </div>
+                <div class="summary-item">
+                  <mat-icon>settings</mat-icon>
+                  <span>Settings: Configured</span>
+                </div>
+              </div>
+
+              <button mat-raised-button color="primary" (click)="startProcessing()" class="process-button">
+                <mat-icon>play_arrow</mat-icon>
+                Start Processing
+              </button>
+            </div>
+
+            <div *ngIf="isProcessing" class="processing-status">
+              <h4>Processing Payroll...</h4>
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              <p class="processing-message">{{ processingMessage }}</p>
+              
+              <div class="processing-steps">
+                <div class="processing-step" [class.completed]="currentStep > 1">
+                  <mat-icon>{{ currentStep > 1 ? 'check_circle' : 'schedule' }}</mat-icon>
+                  <span>Calculating salaries...</span>
+                </div>
+                <div class="processing-step" [class.completed]="currentStep > 2">
+                  <mat-icon>{{ currentStep > 2 ? 'check_circle' : 'schedule' }}</mat-icon>
+                  <span>Applying deductions...</span>
+                </div>
+                <div class="processing-step" [class.completed]="currentStep > 3">
+                  <mat-icon>{{ currentStep > 3 ? 'check_circle' : 'schedule' }}</mat-icon>
+                  <span>Generating payroll entries...</span>
+                </div>
+                <div class="processing-step" [class.completed]="currentStep > 4">
+                  <mat-icon>{{ currentStep > 4 ? 'check_circle' : 'schedule' }}</mat-icon>
+                  <span>Finalizing...</span>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="processingComplete" class="processing-complete">
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              <h4>Processing Complete!</h4>
+              <p>Payroll has been successfully processed for {{ selectedPeriodDetails?.periodName }}</p>
+              
+              <div class="results-summary" *ngIf="processingResults">
+                <div class="result-item">
+                  <label>Entries Created:</label>
+                  <span>{{ processingResults.entriesCreated }}</span>
+                </div>
+                <div class="result-item">
+                  <label>Total Gross Amount:</label>
+                  <span>{{ processingResults.totalGross | currency }}</span>
+                </div>
+                <div class="result-item">
+                  <label>Total Net Amount:</label>
+                  <span>{{ processingResults.totalNet | currency }}</span>
+                </div>
+              </div>
+
+              <div class="completion-actions">
+                <button mat-raised-button color="primary" (click)="viewPayrollEntries()">
+                  <mat-icon>visibility</mat-icon>
+                  View Payroll Entries
+                </button>
+                <button mat-stroked-button (click)="resetProcessing()">
+                  <mat-icon>refresh</mat-icon>
+                  Process Another Period
+                </button>
+              </div>
+            </div>
+
+            <div class="step-actions" *ngIf="!isProcessing && !processingComplete">
+              <button mat-stroked-button matStepperPrevious>
+                Back
+              </button>
+            </div>
+          </div>
+        </mat-step>
+
+      </mat-stepper>
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Recent Processing History -->
+  <mat-card class="history-card" *ngIf="recentProcessing.length > 0">
+    <mat-card-header>
+      <mat-card-title>Recent Processing History</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="history-list">
+        <div *ngFor="let item of recentProcessing" class="history-item">
+          <div class="history-info">
+            <h5>{{ item.periodName }}</h5>
+            <p>{{ item.processedAt | date:'medium' }}</p>
+          </div>
+          <div class="history-stats">
+            <span class="stat">{{ item.entriesCreated }} entries</span>
+            <span class="stat">{{ item.totalAmount | currency }}</span>
+          </div>
+          <mat-chip [color]="getStatusColor(item.status)">
+            {{ item.status | titlecase }}
+          </mat-chip>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</div>

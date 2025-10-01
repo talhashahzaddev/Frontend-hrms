@@ -60,7 +60,18 @@ export class AppraisalCycleFormComponent {
           next: (res) => {
             console.log('Cycle created:', res);
             this.isSaving = false;
-            this.cycleForm.reset();
+            this.cycleForm.reset(
+
+              {
+  cycleName: '',
+  description: '',
+  startDate: '',
+  endDate: ''
+}
+
+            );
+            this.cycleForm.markAsPristine();
+this.cycleForm.markAsUntouched();
            
           },
           error: (err) => {

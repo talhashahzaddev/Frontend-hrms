@@ -100,9 +100,6 @@ private notificaionService:NotificationService
         }
       });
   }
-
-
-
-  
+ 
 
 }
