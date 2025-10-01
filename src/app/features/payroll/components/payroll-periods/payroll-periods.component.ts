@@ -369,23 +369,25 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
 
   calculatePayroll(period: PayrollPeriod): void {
     if (confirm(`Calculate payroll for ${period.periodName}? This will process all employee salaries for this period.`)) {
-      this.payrollService.processPayroll({
-        payrollPeriodId: period.periodId,
-        includeAllowances: true,
-        includeDeductions: true,
-        includeOvertime: true
-      })
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Payroll calculated successfully');
-            this.loadPayrollPeriods();
-          },
-          error: (error) => {
-            console.error('Error calculating payroll:', error);
-            this.notificationService.showError('Failed to calculate payroll');
-          }
-        });
+     
+      this.payrollService.calculatePayroll(period.periodId)
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: (response) => {
+      if (response.success && response.data) {
+        this.notificationService.showSuccess('Payroll calculated successfully');
+        this.loadPayrollPeriods();
+      } else {
+        this.notificationService.showError(response.message || 'Failed to calculate payroll');
+      }
+    },
+    error: (error) => {
+      console.error('Error calculating payroll:', error);
+      this.notificationService.showError('Failed to calculate payroll');
+    }
+  });
+
+
     }
   }
 
