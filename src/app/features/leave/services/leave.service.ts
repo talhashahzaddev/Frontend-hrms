@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   LeaveRequest,
@@ -31,34 +31,25 @@ export class LeaveService {
     let params = new HttpParams();
     
     if (searchRequest) {
-      if (searchRequest.employeeId) params = params.set('employeeId', searchRequest.employeeId);
-      if (searchRequest.leaveTypeId) params = params.set('leaveTypeId', searchRequest.leaveTypeId);
-      if (searchRequest.status) params = params.set('status', searchRequest.status);
-      if (searchRequest.startDate) params = params.set('startDate', searchRequest.startDate);
-      if (searchRequest.endDate) params = params.set('endDate', searchRequest.endDate);
-      if (searchRequest.sortBy) params = params.set('sortBy', searchRequest.sortBy);
-      if (searchRequest.sortDirection) params = params.set('sortDirection', searchRequest.sortDirection);
+      if (searchRequest.employeeId) params = params.set('EmployeeId', searchRequest.employeeId);
+      if (searchRequest.leaveTypeId) params = params.set('LeaveTypeId', searchRequest.leaveTypeId);
+      if (searchRequest.status) params = params.set('Status', searchRequest.status);
+      if (searchRequest.startDate) params = params.set('StartDate', searchRequest.startDate);
+      if (searchRequest.endDate) params = params.set('EndDate', searchRequest.endDate);
+      if (searchRequest.sortBy) params = params.set('SortBy', searchRequest.sortBy);
+      if (searchRequest.sortDirection) params = params.set('SortDirection', searchRequest.sortDirection);
       
-      params = params.set('page', searchRequest.page.toString());
-      params = params.set('pageSize', searchRequest.pageSize.toString());
+      if (searchRequest.page) params = params.set('Page', searchRequest.page.toString());
+      if (searchRequest.pageSize) params = params.set('PageSize', searchRequest.pageSize.toString());
     }
 
-    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/requests`, { params })
+    return this.http.get<ApiResponse<LeaveListResponse>>(`${this.apiUrl}/requests`, { params })
       .pipe(
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch leave requests');
           }
-          const data = response.data!;
-          return {
-            leaveRequests: data.data,
-            totalCount: data.totalCount,
-            page: data.page,
-            pageSize: data.pageSize,
-            totalPages: data.totalPages,
-            hasNextPage: data.hasNextPage,
-            hasPreviousPage: data.hasPreviousPage
-          };
+          return response.data!;
         })
       );
   }
@@ -87,16 +78,51 @@ export class LeaveService {
       );
   }
 
-  updateLeaveRequestStatus(requestId: string, status: UpdateLeaveRequestStatus): Observable<LeaveRequest> {
-    return this.http.put<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests/${requestId}/status`, status)
+  // Updated: Using separate endpoints for approve/reject
+  approveLeaveRequest(requestId: string): Observable<boolean> {
+    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/requests/${requestId}/approve`, {})
       .pipe(
         map(response => {
           if (!response.success) {
-            throw new Error(response.message || 'Failed to update leave request status');
+            throw new Error(response.message || 'Failed to approve leave request');
           }
           return response.data!;
         })
       );
+  }
+
+  rejectLeaveRequest(requestId: string, rejectionReason?: string): Observable<boolean> {
+    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/requests/${requestId}/reject`, 
+      { rejectionReason })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to reject leave request');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  // Generic status update (if needed)
+  updateLeaveRequestStatus(requestId: string, status: UpdateLeaveRequestStatus): Observable<LeaveRequest> {
+    const endpoint = status.status === LeaveStatus.APPROVED 
+      ? `${this.apiUrl}/requests/${requestId}/approve`
+      : `${this.apiUrl}/requests/${requestId}/reject`;
+    
+    const body = status.status === LeaveStatus.REJECTED 
+      ? { rejectionReason: status.rejectionReason }
+      : {};
+
+    return this.http.put<ApiResponse<LeaveRequest>>(endpoint, body).pipe(
+      switchMap(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to update leave request status');
+        }
+        // now switchMap flattens the inner Observable<LeaveRequest>
+        return this.getLeaveRequest(requestId);
+      })
+    );
   }
 
   cancelLeaveRequest(requestId: string): Observable<void> {
@@ -135,9 +161,9 @@ export class LeaveService {
       );
   }
 
-  // Leave Balance and Entitlements
-  getMyLeaveBalance(): Observable<LeaveBalance> {
-    return this.http.get<ApiResponse<LeaveBalance>>(`${this.apiUrl}/balance`)
+  // Leave Balance - Updated to match API response structure
+  getMyLeaveBalance(): Observable<LeaveBalance[]> {
+    return this.http.get<ApiResponse<LeaveBalance[]>>(`${this.apiUrl}/balance`)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -148,8 +174,10 @@ export class LeaveService {
       );
   }
 
-  getEmployeeLeaveBalance(employeeId: string): Observable<LeaveBalance> {
-    return this.http.get<ApiResponse<LeaveBalance>>(`${this.apiUrl}/employee/${employeeId}/balance`)
+  getEmployeeLeaveBalance(employeeId: string): Observable<LeaveBalance[]> {
+    let params = new HttpParams().set('employeeId', employeeId);
+    
+    return this.http.get<ApiResponse<LeaveBalance[]>>(`${this.apiUrl}/balance`, { params })
       .pipe(
         map(response => {
           if (!response.success) {
@@ -160,15 +188,13 @@ export class LeaveService {
       );
   }
 
+  // Leave Entitlements - Updated endpoint
   getLeaveEntitlements(employeeId?: string, year?: number): Observable<LeaveEntitlement[]> {
     let params = new HttpParams();
+    if (employeeId) params = params.set('employeeId', employeeId);
     if (year) params = params.set('year', year.toString());
 
-    const url = employeeId 
-      ? `${this.apiUrl}/employee/${employeeId}/entitlements`
-      : `${this.apiUrl}/my-entitlements`;
-
-    return this.http.get<ApiResponse<LeaveEntitlement[]>>(url, { params })
+    return this.http.get<ApiResponse<LeaveEntitlement[]>>(`${this.apiUrl}/entitlements`, { params })
       .pipe(
         map(response => {
           if (!response.success) {
@@ -179,41 +205,37 @@ export class LeaveService {
       );
   }
 
-  // My Leave Requests
-  getMyLeaveRequests(): Observable<LeaveRequest[]> {
-    return this.http.get<ApiResponse<LeaveRequest[]>>(`${this.apiUrl}/requests`)
+  // My Leave Requests - Uses the filtered endpoint
+  getMyLeaveRequests(employeeId?: string): Observable<LeaveRequest[]> {
+    let params = new HttpParams();
+    if (employeeId) {
+      params = params.set('EmployeeId', employeeId);
+    }
+
+    return this.http.get<ApiResponse<LeaveListResponse>>(`${this.apiUrl}/requests`, { params })
       .pipe(
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch my leave requests');
           }
-          return response.data!;
+          return response.data!.data;
         })
       );
   }
 
   // Pending Approvals (for managers)
   getPendingApprovals(): Observable<LeaveRequest[]> {
-    return this.http.get<ApiResponse<LeaveRequest[]>>(`${this.apiUrl}/pending-approvals`)
+    let params = new HttpParams().set('Status', 'pending');
+
+    return this.http.get<ApiResponse<LeaveListResponse>>(`${this.apiUrl}/requests`, { params })
       .pipe(
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch pending approvals');
           }
-          return response.data!;
+          return response.data!.data;
         })
       );
-  }
-
-  approveLeaveRequest(requestId: string): Observable<LeaveRequest> {
-    return this.updateLeaveRequestStatus(requestId, { status: LeaveStatus.APPROVED });
-  }
-
-  rejectLeaveRequest(requestId: string, rejectionReason: string): Observable<LeaveRequest> {
-    return this.updateLeaveRequestStatus(requestId, { 
-      status: LeaveStatus.REJECTED, 
-      rejectionReason 
-    });
   }
 
   // Calendar and Reports
@@ -274,49 +296,54 @@ export class LeaveService {
     const end = new Date(endDate);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1; // Include both start and end dates
+    return diffDays + 1;
   }
 
-  getStatusColor(status: LeaveStatus): 'primary' | 'accent' | 'warn' | undefined {
-    switch (status) {
-      case LeaveStatus.APPROVED:
+  getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
+    switch (status.toLowerCase()) {
+      case 'approved':
         return 'primary';
-      case LeaveStatus.PENDING:
+      case 'pending':
         return 'accent';
-      case LeaveStatus.REJECTED:
-      case LeaveStatus.CANCELLED:
+      case 'rejected':
+      case 'cancelled':
         return 'warn';
       default:
         return undefined;
     }
   }
 
-  getStatusIcon(status: LeaveStatus): string {
-    switch (status) {
-      case LeaveStatus.APPROVED:
+  getStatusIcon(status: string): string {
+    switch (status.toLowerCase()) {
+      case 'approved':
         return 'check_circle';
-      case LeaveStatus.PENDING:
+      case 'pending':
         return 'schedule';
-      case LeaveStatus.REJECTED:
+      case 'rejected':
         return 'cancel';
-      case LeaveStatus.CANCELLED:
+      case 'cancelled':
         return 'block';
       default:
         return 'help_outline';
     }
   }
 
+  getStatusLabel(status: string): string {
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  }
+
   isLeaveRequestEditable(request: LeaveRequest): boolean {
-    return request.status === LeaveStatus.PENDING && 
+    return request.status.toLowerCase() === 'pending' && 
            new Date(request.startDate) > new Date();
   }
 
   isLeaveRequestCancellable(request: LeaveRequest): boolean {
-    return (request.status === LeaveStatus.APPROVED || request.status === LeaveStatus.PENDING) &&
+    const statusLower = request.status.toLowerCase();
+    return (statusLower === 'approved' || statusLower === 'pending') &&
            new Date(request.startDate) > new Date();
   }
 
-  validateLeaveRequest(request: CreateLeaveRequest, entitlements: LeaveEntitlement[]): string[] {
+  validateLeaveRequest(request: CreateLeaveRequest, balances: LeaveBalance[]): string[] {
     const errors: string[] = [];
     
     // Check if start date is in the future
@@ -330,15 +357,27 @@ export class LeaveService {
     }
 
     // Check leave balance
-    const entitlement = entitlements.find(e => e.leaveTypeId === request.leaveTypeId);
-    if (entitlement) {
+    const balance = balances.find(b => 
+      b.leaveTypeName && request.leaveTypeId
+    );
+    
+    if (balance) {
       const requestedDays = this.calculateLeaveDays(request.startDate, request.endDate);
-      if (requestedDays > entitlement.remainingDays) {
-        errors.push(`Insufficient leave balance. Available: ${entitlement.remainingDays} days, Requested: ${requestedDays} days`);
+      if (requestedDays > balance.remainingDays) {
+        errors.push(`Insufficient leave balance. Available: ${balance.remainingDays} days, Requested: ${requestedDays} days`);
       }
     }
 
     return errors;
   }
-}
 
+  // Helper to convert dates to ISO format for API
+  formatDateForApi(date: Date): string {
+    return date.toISOString();
+  }
+
+  // Helper to parse API date strings
+  parseApiDate(dateString: string): Date {
+    return new Date(dateString);
+  }
+}

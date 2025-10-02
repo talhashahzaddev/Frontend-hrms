@@ -1,67 +1,132 @@
-// Leave Dashboard Component Styles (Hubstaff-inspired)
+// Enhanced Leave Dashboard Styles
 .leave-dashboard-container {
   padding: var(--spacing-lg);
   min-height: calc(100vh - 64px);
   background: var(--gray-50);
 }
 
-// Page Header
-.page-header {
+// Dashboard Header
+.dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: var(--spacing-2xl);
-}
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
 
-.header-content {
-  .page-title {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin: 0 0 var(--spacing-sm);
-    
-    mat-icon {
-      color: var(--primary-600);
+  .header-content {
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
       font-size: 2rem;
-      width: 2rem;
-      height: 2rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin: 0 0 var(--spacing-sm);
+
+      mat-icon {
+        color: var(--primary-600);
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: var(--gray-600);
+      margin: 0;
     }
   }
-  
-  .page-subtitle {
-    font-size: 1.125rem;
-    color: var(--gray-600);
-    margin: 0;
+
+  .header-actions {
+    button {
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md) var(--spacing-xl);
+    }
   }
 }
 
-.apply-leave-button {
-  background: var(--gradient-primary);
-  color: white;
-  font-weight: 600;
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-// Balances Section
-.balances-section {
+// Quick Navigation Cards
+.quick-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
   margin-bottom: var(--spacing-2xl);
-  
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--gray-900);
-    margin: 0 0 var(--spacing-lg);
+
+  .nav-card {
+    position: relative;
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--gray-200);
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--primary-300);
+    }
+
+    .nav-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-bottom: var(--spacing-md);
+    }
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0 0 var(--spacing-xs);
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: var(--gray-600);
+      margin: 0;
+    }
+
+    .count-badge {
+      position: absolute;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      font-weight: 700;
+    }
   }
 }
 
-.balances-grid {
+// Balance Section
+.balance-section {
+  margin-bottom: var(--spacing-2xl);
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin: 0;
+    }
+
+    .year-badge {
+      padding: var(--spacing-xs) var(--spacing-md);
+      background: var(--primary-100);
+      color: var(--primary-800);
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+  }
+}
+
+.balance-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--spacing-lg);
@@ -72,200 +137,305 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
-  
+
   ::ng-deep .mat-mdc-card-content {
-    padding: 0;
+    padding: var(--spacing-xl);
+  }
+
+  .balance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+
+    .type-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+
+      .type-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin: 0;
+      }
+    }
+
+    .balance-count {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+
+      .available {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-600);
+        line-height: 1;
+      }
+
+      .total {
+        font-size: 1.125rem;
+        color: var(--gray-500);
+        font-weight: 500;
+      }
+    }
+  }
+
+  .balance-progress {
+    .progress-details {
+      display: flex;
+      justify-content: space-between;
+      margin-top: var(--spacing-sm);
+      font-size: 0.875rem;
+
+      .used {
+        color: var(--gray-600);
+      }
+
+      .remaining {
+        color: var(--gray-900);
+        font-weight: 600;
+      }
+    }
   }
 }
 
-.balance-content {
+// Main Content Card
+.main-content-card {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-lg);
+
+  ::ng-deep {
+    .mat-mdc-card-content {
+      padding: 0;
+    }
+
+    .mat-mdc-tab-group {
+      .mat-mdc-tab-header {
+        border-bottom: 1px solid var(--gray-200);
+        padding: 0 var(--spacing-lg);
+      }
+
+      .mat-mdc-tab-labels {
+        .mat-mdc-tab-label {
+          font-weight: 600;
+          font-size: 1rem;
+          min-width: 160px;
+        }
+      }
+    }
+  }
+}
+
+.tab-content {
   padding: var(--spacing-xl);
 }
 
-.balance-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-lg);
-  
-  h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--gray-900);
-    margin: 0;
-  }
-  
-  .balance-available {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--primary-600);
-    line-height: 1;
-  }
+// Requests Table
+.table-container {
+  overflow-x: auto;
 }
 
-.balance-details {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-}
+.leave-requests-table {
+  width: 100%;
 
-.balance-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
-  .label {
+  .leave-type-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+
+    .type-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+  }
+
+  .dates-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     font-size: 0.875rem;
-    color: var(--gray-600);
-    font-weight: 500;
-  }
-  
-  .value {
-    font-size: 0.875rem;
-    color: var(--gray-900);
-    font-weight: 600;
-  }
-}
 
-.balance-progress {
-  .progress-bar {
-    width: 100%;
-    height: 8px;
-    background: var(--gray-200);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    
-    .progress-fill {
-      height: 100%;
-      background: var(--gradient-primary);
-      transition: width 0.3s ease;
+    .date-separator {
+      color: var(--gray-500);
+      font-size: 0.75rem;
+    }
+
+    .days-count {
+      color: var(--primary-600);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  ::ng-deep {
+    .mat-mdc-header-row {
+      background: var(--gray-50);
+    }
+
+    .mat-mdc-row {
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--primary-25);
+      }
+    }
+
+    .mat-mdc-chip {
+      ::ng-deep .mat-mdc-chip-action-label {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+      }
     }
   }
 }
 
-// Requests Section
-.requests-section {
-  .requests-card {
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    
-    ::ng-deep {
-      .mat-mdc-card-header {
-        padding: var(--spacing-xl);
-        border-bottom: 1px solid var(--gray-200);
+.delete-action {
+  color: var(--danger-600);
+
+  mat-icon {
+    color: var(--danger-600);
+  }
+}
+
+// Pending Approvals Section
+.pending-approvals-section {
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-xl);
+  }
+}
+
+.approval-card {
+  padding: var(--spacing-xl);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+  margin-bottom: var(--spacing-lg);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-300);
+  }
+
+  .approval-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+
+    .employee-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+
+      .employee-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--primary-100);
+        color: var(--primary-700);
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        
-        .mat-mdc-card-title {
-          font-size: 1.25rem;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.125rem;
+      }
+
+      .employee-details {
+        h4 {
+          font-size: 1.125rem;
           font-weight: 600;
           color: var(--gray-900);
+          margin: 0 0 4px;
+        }
+
+        p {
+          font-size: 0.875rem;
+          color: var(--gray-600);
           margin: 0;
         }
       }
-      
-      .mat-mdc-card-content {
-        padding: var(--spacing-xl);
+    }
+
+    .leave-dates {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: 0.875rem;
+      color: var(--gray-700);
+
+      .separator {
+        color: var(--gray-500);
+      }
+
+      .days-badge {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background: var(--primary-100);
+        color: var(--primary-800);
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        margin-left: var(--spacing-xs);
       }
     }
   }
-}
 
-.card-actions {
-  button {
-    border: 2px solid var(--gray-300);
+  .leave-reason {
+    padding: var(--spacing-md);
+    background: var(--gray-50);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    font-size: 0.875rem;
     color: var(--gray-700);
-    font-weight: 500;
-    border-radius: var(--radius-lg);
-    
-    &:hover {
-      border-color: var(--primary-300);
-      background: var(--primary-50);
-      color: var(--primary-700);
+    line-height: 1.5;
+
+    strong {
+      color: var(--gray-900);
+    }
+  }
+
+  .approval-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+
+    button {
+      font-weight: 600;
+      border-radius: var(--radius-lg);
     }
   }
 }
 
-.requests-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.request-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: var(--spacing-lg);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  transition: all 0.2s ease;
-  
-  &:hover {
-    border-color: var(--primary-300);
-    background: var(--primary-25);
-  }
-}
-
-.request-info {
-  flex: 1;
-  
-  .request-type {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--gray-900);
-    margin-bottom: var(--spacing-xs);
-  }
-  
-  .request-dates {
-    font-size: 0.875rem;
-    color: var(--gray-600);
-    margin-bottom: var(--spacing-xs);
-  }
-  
-  .request-reason {
-    font-size: 0.875rem;
-    color: var(--gray-600);
-    font-style: italic;
-  }
-}
-
-.request-status {
-  flex-shrink: 0;
-  
-  ::ng-deep .mat-mdc-chip {
-    font-size: 0.75rem;
-    font-weight: 600;
-    
-    &.status-pending {
-      background: var(--warning-100);
-      color: var(--warning-800);
-    }
-    
-    &.status-approved {
-      background: var(--success-100);
-      color: var(--success-800);
-    }
-    
-    &.status-rejected {
-      background: var(--danger-100);
-      color: var(--danger-800);
-    }
-  }
-}
-
+// Empty State
 .empty-state {
   text-align: center;
   padding: var(--spacing-4xl);
-  
+
   mat-icon {
     font-size: 4rem;
     width: 4rem;
@@ -273,20 +443,20 @@
     color: var(--gray-400);
     margin-bottom: var(--spacing-lg);
   }
-  
+
   h3 {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--gray-900);
     margin: 0 0 var(--spacing-md);
   }
-  
+
   p {
     font-size: 1rem;
     color: var(--gray-600);
     margin: 0 0 var(--spacing-xl);
   }
-  
+
   button {
     background: var(--gradient-primary);
     color: white;
@@ -296,30 +466,117 @@
   }
 }
 
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl);
+  gap: var(--spacing-lg);
+
+  p {
+    color: var(--gray-600);
+    font-size: 1rem;
+  }
+}
+
 // Responsive Design
+@media (max-width: 1024px) {
+  .quick-nav-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .balance-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .leave-dashboard-container {
     padding: var(--spacing-md);
   }
-  
-  .page-header {
+
+  .dashboard-header {
     flex-direction: column;
-    gap: var(--spacing-lg);
+    align-items: stretch;
+
+    .header-actions button {
+      width: 100%;
+    }
   }
-  
-  .balances-grid {
+
+  .quick-nav-grid {
     grid-template-columns: 1fr;
     gap: var(--spacing-md);
   }
-  
-  .balance-content {
-    padding: var(--spacing-lg);
-  }
-  
-  .request-item {
-    flex-direction: column;
+
+  .balance-grid {
     gap: var(--spacing-md);
-    align-items: stretch;
+  }
+
+  .approval-card {
+    padding: var(--spacing-lg);
+
+    .approval-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .approval-actions {
+      width: 100%;
+
+      button {
+        flex: 1;
+      }
+    }
+  }
+
+  .table-container {
+    .leave-requests-table {
+      font-size: 0.875rem;
+
+      ::ng-deep {
+        .mat-mdc-header-cell,
+        .mat-mdc-cell {
+          padding: var(--spacing-sm);
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    .header-content {
+      .page-title {
+        font-size: 1.5rem;
+
+        mat-icon {
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+
+      .page-subtitle {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .balance-card {
+    .balance-header {
+      .balance-count {
+        .available {
+          font-size: 1.5rem;
+        }
+
+        .total {
+          font-size: 1rem;
+        }
+      }
+    }
   }
 }
 
@@ -328,40 +585,45 @@
   .leave-dashboard-container {
     background: var(--gray-900);
   }
-  
-  .page-title {
+
+  .page-title,
+  .section-title {
     color: var(--gray-100);
   }
-  
+
   .page-subtitle {
     color: var(--gray-400);
   }
-  
-  .balances-section h2 {
-    color: var(--gray-100);
-  }
-  
+
+  .nav-card,
   .balance-card,
-  .requests-card {
+  .main-content-card,
+  .approval-card {
     background: var(--gray-800);
     border-color: var(--gray-700);
-  }
-  
-  .balance-header h3 {
-    color: var(--gray-100);
-  }
-  
-  .request-item {
-    background: var(--gray-800);
-    border-color: var(--gray-700);
-    
+
     &:hover {
-      background: var(--gray-750);
       border-color: var(--primary-500);
     }
   }
-  
-  .request-type {
-    color: var(--gray-100);
+
+  .empty-state {
+    background: var(--gray-800);
+    border-color: var(--gray-700);
+  }
+}
+
+// Print Styles
+@media print {
+  .dashboard-header .header-actions,
+  .quick-nav-grid,
+  .approval-actions,
+  mat-menu,
+  button {
+    display: none !important;
+  }
+
+  .leave-dashboard-container {
+    background: white;
   }
 }

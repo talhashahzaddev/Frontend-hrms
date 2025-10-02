@@ -1,115 +1,143 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { ApplyLeaveComponent } from '../apply-leave/apply-leave.component';
 import { 
   LeaveRequest, 
   LeaveType, 
-  LeaveBalance, 
-  LeaveEntitlement,
-  CreateLeaveRequest,
+  LeaveBalance,
   LeaveStatus
 } from '../../../../core/models/leave.models';
 import { User } from '../../../../core/models/auth.models';
 
 @Component({
   selector: 'app-leave-dashboard',
+  standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
+    RouterModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatMenuModule,
-    MatDialogModule,
     MatTabsModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatDialogModule
   ],
   template: `
     <div class="leave-dashboard-container">
       
       <!-- Header -->
       <div class="dashboard-header">
-        <h1 class="page-title">
-          <mat-icon>event_busy</mat-icon>
-          Leave Management
-        </h1>
-        <button mat-raised-button color="primary" (click)="openLeaveRequestDialog()">
-          <mat-icon>add</mat-icon>
-          Request Leave
-        </button>
+        <div class="header-content">
+          <h1 class="page-title">
+            <mat-icon>event_busy</mat-icon>
+            Leave Management
+          </h1>
+          <p class="page-subtitle">Manage your time off requests and balances</p>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" (click)="openLeaveRequestDialog()">
+            <mat-icon>add</mat-icon>
+            Request Leave
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Navigation Cards -->
+      <div class="quick-nav-grid">
+        <mat-card class="nav-card" routerLink="/leave/apply">
+          <mat-icon class="nav-icon" style="color: var(--primary-600)">add_circle</mat-icon>
+          <h3>Apply for Leave</h3>
+          <p>Submit a new leave request</p>
+        </mat-card>
+
+        <mat-card class="nav-card" routerLink="/leave/calendar">
+          <mat-icon class="nav-icon" style="color: var(--success-600)">calendar_month</mat-icon>
+          <h3>Leave Calendar</h3>
+          <p>View team leave schedule</p>
+        </mat-card>
+
+        <mat-card class="nav-card" routerLink="/leave/team" *ngIf="hasManagerRole()">
+          <mat-icon class="nav-icon" style="color: var(--warning-600)">pending_actions</mat-icon>
+          <h3>Team Requests</h3>
+          <p>Approve/reject team leaves</p>
+          <mat-chip *ngIf="pendingCount > 0" color="warn" class="count-badge">
+            {{ pendingCount }}
+          </mat-chip>
+        </mat-card>
+
+        <mat-card class="nav-card" routerLink="/leave/types" *ngIf="hasAdminRole()">
+          <mat-icon class="nav-icon" style="color: var(--purple-600)">category</mat-icon>
+          <h3>Leave Types</h3>
+          <p>Configure leave policies</p>
+        </mat-card>
       </div>
 
       <!-- Leave Balance Section -->
-      <div class="balance-section" *ngIf="leaveBalance">
-        <h2 class="section-title">Your Leave Balance</h2>
+      <div class="balance-section" *ngIf="leaveBalances.length > 0">
+        <div class="section-header">
+          <h2 class="section-title">Your Leave Balance</h2>
+          <span class="year-badge">{{ currentYear }}</span>
+        </div>
+        
         <div class="balance-grid">
-          <mat-card *ngFor="let entitlement of leaveBalance.entitlements" class="balance-card">
-            <mat-card-content>
-              <div class="balance-header">
-                <h3>{{ entitlement.leaveTypeName }}</h3>
-                <mat-chip [style.background-color]="getLeaveTypeColor(entitlement.leaveTypeId)">
-                  {{ entitlement.remainingDays }} days left
-                </mat-chip>
+          <mat-card *ngFor="let balance of leaveBalances" class="balance-card">
+            <div class="balance-header">
+              <div class="type-info">
+                <div class="type-indicator" [style.background-color]="balance.color"></div>
+                <h3>{{ balance.leaveTypeName }}</h3>
               </div>
-              
-              <div class="balance-progress">
-                <mat-progress-bar 
-                  mode="determinate" 
-                  [value]="getUsagePercentage(entitlement)"
-                  [color]="getProgressColor(entitlement)">
-                </mat-progress-bar>
-                <div class="progress-labels">
-                  <span>Used: {{ entitlement.usedDays }}</span>
-                  <span>Total: {{ entitlement.totalDays }}</span>
-                </div>
+              <div class="balance-count">
+                <span class="available">{{ balance.remainingDays }}</span>
+                <span class="total">/ {{ balance.totalDays }}</span>
               </div>
-            </mat-card-content>
+            </div>
+            
+            <div class="balance-progress">
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="getUsagePercentage(balance)"
+                [color]="getProgressColor(balance)">
+              </mat-progress-bar>
+              <div class="progress-details">
+                <span class="used">Used: {{ balance.usedDays }}</span>
+                <span class="remaining">{{ balance.remainingDays }} days left</span>
+              </div>
+            </div>
           </mat-card>
         </div>
       </div>
 
       <!-- Main Content Tabs -->
       <mat-card class="main-content-card">
-        <mat-tab-group>
+        <mat-tab-group [(selectedIndex)]="selectedTab">
           
           <!-- My Requests Tab -->
           <mat-tab label="My Requests">
             <div class="tab-content">
               
-              <!-- Requests Table -->
-              <div class="table-container">
+              <div class="table-container" *ngIf="!isLoading">
                 <mat-table [dataSource]="myLeaveRequests" class="leave-requests-table">
                   
                   <ng-container matColumnDef="leaveType">
@@ -123,7 +151,7 @@ import { User } from '../../../../core/models/auth.models';
                   </ng-container>
 
                   <ng-container matColumnDef="dates">
-                    <mat-header-cell *matHeaderCellDef>Dates</mat-header-cell>
+                    <mat-header-cell *matHeaderCellDef>Duration</mat-header-cell>
                     <mat-cell *matCellDef="let request">
                       <div class="dates-cell">
                         <div>{{ request.startDate | date:'mediumDate' }}</div>
@@ -139,7 +167,7 @@ import { User } from '../../../../core/models/auth.models';
                     <mat-cell *matCellDef="let request">
                       <mat-chip [color]="leaveService.getStatusColor(request.status)">
                         <mat-icon>{{ leaveService.getStatusIcon(request.status) }}</mat-icon>
-                        {{ request.status | titlecase }}
+                        {{ leaveService.getStatusLabel(request.status) }}
                       </mat-chip>
                     </mat-cell>
                   </ng-container>
@@ -183,8 +211,7 @@ import { User } from '../../../../core/models/auth.models';
                   <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
                 </mat-table>
 
-                <!-- Empty State -->
-                <div *ngIf="!myLeaveRequests.length && !isLoading" class="empty-state">
+                <div *ngIf="myLeaveRequests.length === 0" class="empty-state">
                   <mat-icon>event_busy</mat-icon>
                   <h3>No Leave Requests</h3>
                   <p>You haven't submitted any leave requests yet.</p>
@@ -201,43 +228,44 @@ import { User } from '../../../../core/models/auth.models';
           <mat-tab label="Team Requests" *ngIf="hasManagerRole()">
             <div class="tab-content">
               <div class="pending-approvals-section">
-                <h3>Pending Approvals</h3>
+                <h3>Pending Approvals ({{ pendingApprovals.length }})</h3>
                 
                 <div *ngFor="let request of pendingApprovals" class="approval-card">
-                  <mat-card>
-                    <mat-card-content>
-                      <div class="approval-header">
-                        <div class="employee-info">
-                          <h4>{{ request.employeeName }}</h4>
-                          <p>{{ request.leaveTypeName }}</p>
-                        </div>
-                        <div class="leave-dates">
-                          <span>{{ request.startDate | date:'mediumDate' }}</span>
-                          <span>to</span>
-                          <span>{{ request.endDate | date:'mediumDate' }}</span>
-                          <span class="days-badge">({{ request.daysRequested }} days)</span>
-                        </div>
+                  <div class="approval-header">
+                    <div class="employee-info">
+                      <div class="employee-avatar">
+                        {{ getInitials(request.employeeName) }}
                       </div>
-                      
-                      <div class="leave-reason" *ngIf="request.reason">
-                        <strong>Reason:</strong> {{ request.reason }}
+                      <div class="employee-details">
+                        <h4>{{ request.employeeName }}</h4>
+                        <p>{{ request.leaveTypeName }}</p>
                       </div>
-                      
-                      <div class="approval-actions">
-                        <button mat-raised-button color="primary" (click)="approveRequest(request)">
-                          <mat-icon>check</mat-icon>
-                          Approve
-                        </button>
-                        <button mat-stroked-button color="warn" (click)="rejectRequest(request)">
-                          <mat-icon>close</mat-icon>
-                          Reject
-                        </button>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
+                    </div>
+                    <div class="leave-dates">
+                      <span>{{ request.startDate | date:'mediumDate' }}</span>
+                      <span class="separator">to</span>
+                      <span>{{ request.endDate | date:'mediumDate' }}</span>
+                      <span class="days-badge">({{ request.daysRequested }} days)</span>
+                    </div>
+                  </div>
+                  
+                  <div class="leave-reason" *ngIf="request.reason">
+                    <strong>Reason:</strong> {{ request.reason }}
+                  </div>
+                  
+                  <div class="approval-actions">
+                    <button mat-stroked-button color="warn" (click)="rejectRequest(request)">
+                      <mat-icon>close</mat-icon>
+                      Reject
+                    </button>
+                    <button mat-raised-button color="primary" (click)="approveRequest(request)">
+                      <mat-icon>check</mat-icon>
+                      Approve
+                    </button>
+                  </div>
                 </div>
 
-                <div *ngIf="!pendingApprovals.length" class="empty-state">
+                <div *ngIf="pendingApprovals.length === 0" class="empty-state">
                   <mat-icon>check_circle</mat-icon>
                   <h3>No Pending Approvals</h3>
                   <p>All leave requests have been processed.</p>
@@ -264,32 +292,25 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
 
-  // Data properties
   currentUser: User | null = null;
-  leaveBalance: LeaveBalance | null = null;
+  leaveBalances: LeaveBalance[] = []; // Changed from single object to array
   leaveTypes: LeaveType[] = [];
   myLeaveRequests: LeaveRequest[] = [];
   pendingApprovals: LeaveRequest[] = [];
 
-  // UI state
   isLoading = false;
   selectedTab = 0;
+  currentYear = new Date().getFullYear();
+  pendingCount = 0;
 
-  // Table configuration
   displayedColumns: string[] = ['leaveType', 'dates', 'status', 'submitted', 'actions'];
 
-  // Forms
-  leaveRequestForm!: FormGroup;
-
   constructor(
-    private fb: FormBuilder,
     public leaveService: LeaveService,
     private authService: AuthService,
     private notificationService: NotificationService,
     private dialog: MatDialog
-  ) {
-    this.initializeForm();
-  }
+  ) {}
 
   ngOnInit(): void {
     this.loadCurrentUser();
@@ -301,15 +322,6 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private initializeForm(): void {
-    this.leaveRequestForm = this.fb.group({
-      leaveTypeId: ['', [Validators.required]],
-      startDate: ['', [Validators.required]],
-      endDate: ['', [Validators.required]],
-      reason: ['']
-    });
-  }
-
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
   }
@@ -317,43 +329,80 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   private loadInitialData(): void {
     this.isLoading = true;
 
-    forkJoin({
+    const requests: any = {
       leaveBalance: this.leaveService.getMyLeaveBalance(),
       leaveTypes: this.leaveService.getLeaveTypes(),
-      myRequests: this.leaveService.getMyLeaveRequests(),
-      pendingApprovals: this.hasManagerRole() ? this.leaveService.getPendingApprovals() : []
-    }).pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data) => {
-        this.leaveBalance = data.leaveBalance;
-        this.leaveTypes = data.leaveTypes;
-        this.myLeaveRequests = data.myRequests;
-        this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error loading leave data:', error);
-        this.notificationService.showError('Failed to load leave data');
-        this.isLoading = false;
-        this.cdr.markForCheck();
+      myRequests: this.leaveService.getMyLeaveRequests(this.currentUser?.userId)
+    };
+
+    if (this.hasManagerRole()) {
+      requests.pendingApprovals = this.leaveService.getPendingApprovals();
+    }
+
+    forkJoin(requests)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data: any) => {
+          // API returns array of balances directly
+          this.leaveBalances = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
+          this.leaveTypes = data.leaveTypes || [];
+          this.myLeaveRequests = Array.isArray(data.myRequests) ? data.myRequests : [];
+          
+          if (data.pendingApprovals) {
+            this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+            this.pendingCount = this.pendingApprovals.length;
+          }
+          
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading leave data:', error);
+          this.notificationService.showError('Failed to load leave data');
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  openLeaveRequestDialog(): void {
+    const dialogRef = this.dialog.open(ApplyLeaveComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: false,
+      data: { 
+        leaveTypes: this.leaveTypes,
+        leaveBalances: this.leaveBalances 
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadInitialData();
       }
     });
   }
 
-  openLeaveRequestDialog(): void {
-    // Open dialog for creating leave request
-    this.notificationService.showInfo('Leave request dialog will be implemented');
-  }
-
   viewRequest(request: LeaveRequest): void {
-    // Open dialog to view request details
     this.notificationService.showInfo('View request details will be implemented');
   }
 
   editRequest(request: LeaveRequest): void {
-    // Open dialog to edit request
-    this.notificationService.showInfo('Edit request will be implemented');
+    const dialogRef = this.dialog.open(ApplyLeaveComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: { 
+        request,
+        leaveTypes: this.leaveTypes,
+        leaveBalances: this.leaveBalances
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadInitialData();
+      }
+    });
   }
 
   cancelRequest(request: LeaveRequest): void {
@@ -410,19 +459,34 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
   }
 
+  hasAdminRole(): boolean {
+    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
   getLeaveTypeColor(leaveTypeId: string): string {
     const leaveType = this.leaveTypes.find(lt => lt.leaveTypeId === leaveTypeId);
     return leaveType?.color || '#2196F3';
   }
 
-  getUsagePercentage(entitlement: LeaveEntitlement): number {
-    return entitlement.totalDays > 0 ? (entitlement.usedDays / entitlement.totalDays) * 100 : 0;
+  // Updated to work with LeaveBalance instead of LeaveEntitlement
+  getUsagePercentage(balance: LeaveBalance): number {
+    return balance.totalDays > 0 ? (balance.usedDays / balance.totalDays) * 100 : 0;
   }
 
-  getProgressColor(entitlement: LeaveEntitlement): 'primary' | 'accent' | 'warn' {
-    const percentage = this.getUsagePercentage(entitlement);
+  getProgressColor(balance: LeaveBalance): 'primary' | 'accent' | 'warn' {
+    const percentage = this.getUsagePercentage(balance);
     if (percentage >= 90) return 'warn';
     if (percentage >= 70) return 'accent';
     return 'primary';
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '??';
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   }
 }
