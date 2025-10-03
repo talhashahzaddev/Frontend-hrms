@@ -65,6 +65,17 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
     this.isEditMode = !!this.employeeId;
     this.loadInitialData();
+    
+    // Debug: Watch for changes in reportingManagerId
+    this.employeeForm.get('reportingManagerId')?.valueChanges.subscribe(value => {
+      console.log('Reporting Manager ID changed to:', value);
+    });
+    
+    // Debug: Check if the form control exists
+    const reportingManagerControl = this.employeeForm.get('reportingManagerId');
+    console.log('Reporting Manager control exists:', !!reportingManagerControl);
+    console.log('Reporting Manager control value:', reportingManagerControl?.value);
+    console.log('Reporting Manager control status:', reportingManagerControl?.status);
   }
 
   ngOnDestroy(): void {
@@ -73,6 +84,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   private initializeForm(): void {
+    console.log('Initializing form...');
     this.employeeForm = this.fb.group({
       employeeCode: ['', [Validators.required]],
       firstName: ['', [Validators.required]],
@@ -103,6 +115,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         email: ['']
       })
     });
+    console.log('Form initialized. Reporting Manager control:', this.employeeForm.get('reportingManagerId'));
   }
 
   private loadInitialData(): void {
@@ -123,6 +136,19 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
           this.departments = results[0];
           this.positions = results[1];
           this.managers = results[2];
+          
+          // Debug logging for managers
+          console.log('Managers loaded:', this.managers);
+          if (this.managers.length > 0) {
+            console.log('First manager:', this.managers[0]);
+            console.log('First manager employeeId:', this.managers[0].employeeId);
+            console.log('First manager employeeId type:', typeof this.managers[0].employeeId);
+          }
+          
+          // Debug: Check form control after managers are loaded
+          const reportingManagerControl = this.employeeForm.get('reportingManagerId');
+          console.log('After managers loaded - Reporting Manager control:', reportingManagerControl);
+          console.log('After managers loaded - Control value:', reportingManagerControl?.value);
 
           if (this.isEditMode && results[3]) {
             this.populateForm(results[3]);
@@ -166,6 +192,12 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       this.isSubmitting = true;
       const formValue = this.employeeForm.value;
 
+      // Debug logging
+      console.log('Form values:', formValue);
+      console.log('Reporting Manager ID:', formValue.reportingManagerId);
+      console.log('Basic Salary:', formValue.basicSalary);
+      console.log('Work Location:', formValue.workLocation);
+
       const request: CreateEmployeeRequest | UpdateEmployeeRequest = {
         employeeNumber: formValue.employeeCode,
         firstName: formValue.firstName,
@@ -178,8 +210,10 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         hireDate: formValue.hireDate.toISOString().split('T')[0],
         departmentId: formValue.departmentId,
         positionId: formValue.positionId,
+        reportingManagerId: formValue.reportingManagerId || undefined,
+        workLocation: formValue.workLocation,
         employmentType: formValue.employmentType,
-        baseSalary: formValue.basicSalary ? parseFloat(formValue.basicSalary) : 0,
+        basicSalary: formValue.basicSalary ? parseFloat(formValue.basicSalary) : 0,
         currency: 'USD',
         payFrequency: 'monthly',
         overtimeEligible: false,
@@ -189,6 +223,10 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         effectiveDate: formValue.hireDate.toISOString().split('T')[0],
         employmentStatus: 'active'
       };
+
+      // Debug: Log the final request
+      console.log('Final request object:', request);
+      console.log('Final reportingManagerId in request:', request.reportingManagerId);
 
       const operation = this.isEditMode
         ? this.employeeService.updateEmployee(this.employeeId!, request as UpdateEmployeeRequest)
