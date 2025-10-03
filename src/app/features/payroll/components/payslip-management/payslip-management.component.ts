@@ -19,12 +19,14 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { 
   PayrollPeriod,
   PayrollEntry,
   PayrollFilter
 } from '../../../../core/models/payroll.models';
+import { Department } from '../../../../core/models/employee.models';
 import { PagedResult } from '../../../../core/models/common.models';
 
 @Component({
@@ -106,11 +108,9 @@ import { PagedResult } from '../../../../core/models/common.models';
               <mat-label>Department</mat-label>
               <mat-select formControlName="department">
                 <mat-option value="">All Departments</mat-option>
-                <mat-option value="Engineering">Engineering</mat-option>
-                <mat-option value="Sales">Sales</mat-option>
-                <mat-option value="Marketing">Marketing</mat-option>
-                <mat-option value="HR">HR</mat-option>
-                <mat-option value="Finance">Finance</mat-option>
+                <mat-option *ngFor="let department of departments" [value]="department.departmentName">
+                  {{ department.departmentName }}
+                </mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -359,6 +359,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   // Data properties
   payrollEntries: PayrollEntry[] = [];
   availablePeriods: PayrollPeriod[] = [];
+  departments: Department[] = [];
   totalCount = 0;
   currentPage = 1;
   pageSize = 25;
@@ -380,6 +381,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private payrollService: PayrollService,
+    private employeeService: EmployeeService,
     private notificationService: NotificationService
   ) {
     this.filterForm = this.fb.group({
@@ -392,6 +394,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAvailablePeriods();
+    this.loadDepartments();
     this.loadPayrollEntries();
     this.setupFormSubscriptions();
   }
@@ -413,6 +416,20 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading periods:', error);
+        }
+      });
+  }
+
+  private loadDepartments(): void {
+    this.employeeService.getDepartments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => {
+          this.departments = departments;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading departments:', error);
         }
       });
   }
