@@ -35,96 +35,107 @@ export interface CreatePayrollPeriodDialogData {
     MatProgressSpinnerModule
   ],
   template: `
-    <div class="dialog-container">
-      
+    <div class="dialog-header">
       <h2 mat-dialog-title>
-        <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
-        {{ data.mode === 'create' ? 'Create New' : 'Edit' }} Payroll Period
+        <mat-icon>payments</mat-icon>
+        {{ data.mode === 'create' ? 'Create New Payroll Period' : 'Edit Payroll Period' }}
       </h2>
+      <button mat-icon-button mat-dialog-close class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-      <mat-dialog-content>
-        <form [formGroup]="periodForm" class="period-form">
-          
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Period Name</mat-label>
-            <input matInput formControlName="periodName" 
-                   placeholder="e.g., March 2024, Q1 2024">
-            <mat-error *ngIf="periodForm.get('periodName')?.hasError('required')">
-              Period name is required
-            </mat-error>
-            <mat-error *ngIf="periodForm.get('periodName')?.hasError('minlength')">
-              Period name must be at least 3 characters
+    <mat-dialog-content class="dialog-content">
+      <form [formGroup]="periodForm" class="period-form">
+        
+        <!-- Period Name -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Period Name *</mat-label>
+          <input matInput 
+                 formControlName="periodName" 
+                 placeholder="e.g., March 2024, Q1 2024"
+                 maxlength="100">
+          <mat-hint>Required field</mat-hint>
+          <mat-error *ngIf="periodForm.get('periodName')?.hasError('required')">
+            Period name is required
+          </mat-error>
+          <mat-error *ngIf="periodForm.get('periodName')?.hasError('minlength')">
+            Period name must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Date Range -->
+        <div class="date-row">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Start Date *</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-hint>Required field</mat-hint>
+            <mat-error *ngIf="periodForm.get('startDate')?.hasError('required')">
+              Start date is required
             </mat-error>
           </mat-form-field>
 
-          <div class="date-row">
-            <mat-form-field appearance="outline" class="date-field">
-              <mat-label>Start Date</mat-label>
-              <input matInput [matDatepicker]="startPicker" formControlName="startDate">
-              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-              <mat-datepicker #startPicker></mat-datepicker>
-              <mat-error *ngIf="periodForm.get('startDate')?.hasError('required')">
-                Start date is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="date-field">
-              <mat-label>End Date</mat-label>
-              <input matInput [matDatepicker]="endPicker" formControlName="endDate">
-              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-              <mat-datepicker #endPicker></mat-datepicker>
-              <mat-error *ngIf="periodForm.get('endDate')?.hasError('required')">
-                End date is required
-              </mat-error>
-              <mat-error *ngIf="periodForm.get('endDate')?.hasError('dateRange')">
-                End date must be after start date
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Pay Date (Optional)</mat-label>
-            <input matInput [matDatepicker]="payPicker" formControlName="payDate">
-            <mat-datepicker-toggle matSuffix [for]="payPicker"></mat-datepicker-toggle>
-            <mat-datepicker #payPicker></mat-datepicker>
-            <mat-hint>When employees will receive their pay</mat-hint>
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>End Date *</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            <mat-hint>Required field</mat-hint>
+            <mat-error *ngIf="periodForm.get('endDate')?.hasError('required')">
+              End date is required
+            </mat-error>
+            <mat-error *ngIf="periodForm.get('endDate')?.hasError('dateRange')">
+              End date must be after start date
+            </mat-error>
           </mat-form-field>
+        </div>
 
-          <!-- Period Preview -->
-          <div class="period-preview" *ngIf="periodForm.valid">
-            <h4>Period Preview</h4>
-            <div class="preview-details">
-              <div class="preview-item">
-                <mat-icon>schedule</mat-icon>
-                <span>{{ getPeriodDuration() }} days</span>
-              </div>
-              <div class="preview-item">
-                <mat-icon>calendar_month</mat-icon>
-                <span>{{ getFormattedDateRange() }}</span>
-              </div>
-              <div class="preview-item" *ngIf="periodForm.get('payDate')?.value">
-                <mat-icon>payments</mat-icon>
-                <span>Pay Date: {{ periodForm.get('payDate')?.value | date:'mediumDate' }}</span>
-              </div>
+        <!-- Pay Date -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Pay Date</mat-label>
+          <input matInput [matDatepicker]="payPicker" formControlName="payDate">
+          <mat-datepicker-toggle matSuffix [for]="payPicker"></mat-datepicker-toggle>
+          <mat-datepicker #payPicker></mat-datepicker>
+          <mat-hint>Optional - When employees will receive their pay</mat-hint>
+        </mat-form-field>
+
+        <!-- Period Preview -->
+        <div class="period-preview" *ngIf="periodForm.valid">
+          <h4>Period Preview</h4>
+          <div class="preview-details">
+            <div class="preview-item">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ getPeriodDuration() }} days</span>
+            </div>
+            <div class="preview-item">
+              <mat-icon>calendar_month</mat-icon>
+              <span>{{ getFormattedDateRange() }}</span>
+            </div>
+            <div class="preview-item" *ngIf="periodForm.get('payDate')?.value">
+              <mat-icon>payments</mat-icon>
+              <span>Pay Date: {{ periodForm.get('payDate')?.value | date:'mediumDate' }}</span>
             </div>
           </div>
+        </div>
 
-        </form>
-      </mat-dialog-content>
+      </form>
+    </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="onCancel()" [disabled]="isSubmitting">
-          Cancel
-        </button>
-        <button mat-raised-button color="primary" 
-                (click)="onSubmit()" 
-                [disabled]="!periodForm.valid || isSubmitting">
-          <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
-          <mat-icon *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'add' : 'save' }}</mat-icon>
-          {{ data.mode === 'create' ? 'Create Period' : 'Update Period' }}
-        </button>
-      </mat-dialog-actions>
-
+    <div class="dialog-actions">
+      <button mat-stroked-button (click)="onCancel()" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button mat-raised-button 
+              color="primary" 
+              class="submit-button"
+              (click)="onSubmit()" 
+              [disabled]="!periodForm.valid || isSubmitting">
+        <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+        <mat-icon *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'add' : 'save' }}</mat-icon>
+        {{ data.mode === 'create' ? 'Create Period' : 'Update Period' }}
+      </button>
     </div>
   `,
   styleUrls: ['./create-payroll-period-dialog.component.scss'],
