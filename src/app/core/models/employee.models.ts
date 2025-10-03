@@ -117,13 +117,9 @@ export interface CreateEmployeeRequest {
   dateOfBirth?: string;
   gender?: string;
   maritalStatus?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  zipCode?: string;
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
+  nationality?: string;
+  address?: any;
+  emergencyContact?: any;
   hireDate: string;
   probationEndDate?: string;
   employmentStatus: string;
@@ -131,18 +127,18 @@ export interface CreateEmployeeRequest {
   // Employment details
   departmentId?: string;
   positionId?: string;
-  managerId?: string;
+  reportingManagerId?: string;
   workLocation?: string;
-  employmentType: string;
+  employmentType?: string;
   workSchedule?: string;
-  baseSalary: number;
-  currency: string;
-  payFrequency: string;
-  overtimeEligible: boolean;
-  benefitsEligible: boolean;
-  vacationDaysPerYear: number;
-  sickDaysPerYear: number;
-  effectiveDate: string;
+  basicSalary?: number;
+  currency?: string;
+  payFrequency?: string;
+  overtimeEligible?: boolean;
+  benefitsEligible?: boolean;
+  vacationDaysPerYear?: number;
+  sickDaysPerYear?: number;
+  effectiveDate?: string;
 }
 
 export interface UpdateEmployeeRequest {
