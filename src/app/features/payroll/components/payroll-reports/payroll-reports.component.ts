@@ -19,11 +19,13 @@ import { Subject, takeUntil } from 'rxjs';
 import { ChartConfiguration, ChartType } from 'chart.js';
 
 import { PayrollService } from '../../services/payroll.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { 
   PayrollPeriod,
   PayrollReportFilter
 } from '../../../../core/models/payroll.models';
+import { Department } from '../../../../core/models/employee.models';
 
 @Component({
   selector: 'app-payroll-reports',
@@ -60,6 +62,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   // Data
   availablePeriods: PayrollPeriod[] = [];
+  departments: Department[] = [];
   reportData: any = null;
   statisticsData: any = null;
   departmentData: any[] = [];
@@ -149,6 +152,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private payrollService: PayrollService,
+    private employeeService: EmployeeService,
     private notificationService: NotificationService
   ) {
     this.filterForm = this.fb.group({
@@ -161,6 +165,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAvailablePeriods();
+    this.loadDepartments();
     this.generateDefaultReport();
   }
 
@@ -181,6 +186,20 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading periods:', error);
+        }
+      });
+  }
+
+  private loadDepartments(): void {
+    this.employeeService.getDepartments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => {
+          this.departments = departments;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading departments:', error);
         }
       });
   }
