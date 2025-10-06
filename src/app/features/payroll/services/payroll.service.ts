@@ -13,7 +13,8 @@ import {
   PayrollFilter,
   PayrollReportFilter,
   Payslip,
-  PayrollCalculationResult
+  PayrollCalculationResult,
+  PayrollProcessingHistory
 } from '../../../core/models/payroll.models';
 import { ApiResponse, PaginatedResponse, PagedResult } from '../../../core/models/common.models';
 
@@ -243,6 +244,12 @@ export class PayrollService {
 
   private sumObjectValues(obj: { [key: string]: number }): number {
     return Object.values(obj || {}).reduce((sum, value) => sum + (value || 0), 0);
+  }
+
+  // Processing History
+  getProcessingHistory(limit: number = 10): Observable<ApiResponse<PayrollProcessingHistory[]>> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<ApiResponse<PayrollProcessingHistory[]>>(`${this.apiUrl}/payroll/processing-history`, { params });
   }
 
   formatCurrency(amount: number, currency: string = 'USD'): string {

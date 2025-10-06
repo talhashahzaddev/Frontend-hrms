@@ -226,10 +226,12 @@
           <div class="history-info">
             <h5>{{ item.periodName }}</h5>
             <p>{{ item.processedAt | date:'medium' }}</p>
+            <small class="processed-by">Processed by: {{ item.processedBy }}</small>
           </div>
           <div class="history-stats">
             <span class="stat">{{ item.entriesCreated }} entries</span>
-            <span class="stat">{{ item.totalAmount | currency }}</span>
+            <span class="stat">{{ item.totalGrossAmount | currency }}</span>
+            <span class="stat net-amount">Net: {{ item.totalNetAmount | currency }}</span>
           </div>
           <mat-chip [color]="getStatusColor(item.status)">
             {{ item.status | titlecase }}

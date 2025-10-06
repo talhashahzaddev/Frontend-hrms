@@ -19,7 +19,8 @@ import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { 
   PayrollPeriod, 
-  PayrollStatus
+  PayrollStatus,
+  PayrollProcessingHistory
 } from '../../../../core/models/payroll.models';
 
 @Component({
@@ -55,7 +56,7 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   // Data
   availablePeriods: PayrollPeriod[] = [];
   selectedPeriodDetails: PayrollPeriod | null = null;
-  recentProcessing: any[] = [];
+  recentProcessing: PayrollProcessingHistory[] = [];
 
   // Processing state
   isProcessing = false;
@@ -123,23 +124,20 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   }
 
   private loadRecentProcessing(): void {
-    // Mock data - in real implementation, this would come from API
-    this.recentProcessing = [
-      {
-        periodName: 'March 2024',
-        processedAt: new Date(2024, 2, 31),
-        entriesCreated: 150,
-        totalAmount: 1250000,
-        status: 'completed'
-      },
-      {
-        periodName: 'February 2024',
-        processedAt: new Date(2024, 1, 29),
-        entriesCreated: 148,
-        totalAmount: 1200000,
-        status: 'completed'
-      }
-    ];
+    this.payrollService.getProcessingHistory(5)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.recentProcessing = response.data;
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading processing history:', error);
+          this.notificationService.showError('Failed to load processing history');
+        }
+      });
   }
 
   startProcessing(): void {
