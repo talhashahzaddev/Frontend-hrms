@@ -228,3 +228,14 @@ export interface PayrollCalculationResult {
   totalNetAmount: number;
   calculatedAt: string;
 }
+
+export interface PayrollProcessingHistory {
+  periodId: string;
+  periodName: string;
+  processedAt: string;
+  entriesCreated: number;
+  totalGrossAmount: number;
+  totalNetAmount: number;
+  status: string;
+  processedBy: string;
+}
