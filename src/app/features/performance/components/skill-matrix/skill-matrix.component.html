@@ -1,1 +1,30 @@
-<p>skill-matrix works!</p>
+<div *ngIf="loading" class="loading-spinner">
+	Loading skills...
+</div>
+<div *ngIf="!loading">
+	<h2>Skill Matrix</h2>
+	<div *ngFor="let category of groupedSkills | keyvalue">
+		<h3>{{ category.key }}</h3>
+		<table class="skill-table">
+			<thead>
+				<tr>
+					<th>Skill Name</th>
+					<th>Description</th>
+					<th>Level Scale</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let skill of category.value">
+					<td>{{ skill.skillName }}</td>
+					<td>{{ skill.description }}</td>
+					<td>
+						<ng-container *ngFor="let level of skill.skillLevelScale; let i = index">
+							<span class="level">{{ level }}</span>
+							<span *ngIf="i < skill.skillLevelScale.length - 1">, </span>
+						</ng-container>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
