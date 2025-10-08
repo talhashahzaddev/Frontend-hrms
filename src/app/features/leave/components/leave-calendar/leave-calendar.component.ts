@@ -70,6 +70,10 @@ interface CalendarDay {
             <span>Pending</span>
           </div>
           <div class="legend-item">
+            <div class="legend-indicator rejected"></div>
+            <span>Rejected</span>
+          </div>
+          <div class="legend-item">
             <div class="legend-indicator current-day"></div>
             <span>Today</span>
           </div>
@@ -97,10 +101,11 @@ interface CalendarDay {
               
               <div class="day-events" *ngIf="day.events.length > 0">
                 <div *ngFor="let event of day.events | slice:0:3" 
-                     class="event-item"
-                     [class.approved]="event.status === 'Approved'"
-                     [class.pending]="event.status === 'Pending'"
-                     [matTooltip]="getEventTooltip(event)">
+                  class="event-item"
+                  [class.approved]="event.status === 'approved'"
+                  [class.pending]="event.status === 'pending'"
+                  [class.rejected]="event.status === 'rejected'"
+                  [matTooltip]="getEventTooltip(event)">
                   <div class="event-dot" [style.background-color]="event.leaveTypeColor || '#2196F3'"></div>
                   <span class="event-name">{{ event.employeeName }}</span>
                 </div>
@@ -138,9 +143,11 @@ interface CalendarDay {
                 <span class="duration">{{ event.startDate | date:'mediumDate' }} - {{ event.endDate | date:'mediumDate' }}</span>
               </div>
               <div class="upcoming-status">
-                <mat-icon [class.approved]="event.status === 'Approved'" 
-                          [class.pending]="event.status === 'Pending'">
-                  {{ event.status === 'Approved' ? 'check_circle' : 'schedule' }}
+                <mat-icon 
+                  [class.approved]="event.status === 'approved'" 
+                  [class.pending]="event.status === 'pending'" 
+                  [class.rejected]="event.status === 'rejected'">
+                  {{ event.status === 'approved' ? 'check_circle' : event.status === 'pending' ? 'schedule' : 'cancel' }}
                 </mat-icon>
               </div>
             </div>
@@ -229,11 +236,15 @@ interface CalendarDay {
             border-radius: var(--radius-sm);
 
             &.approved {
-              background: var(--success-500);
+              background: #16a34a;
             }
 
             &.pending {
-              background: var(--warning-500);
+              background: #ffc107;
+            }
+
+            &.rejected {
+              background: #dc2626;
             }
 
             &.current-day {
@@ -346,24 +357,6 @@ interface CalendarDay {
             cursor: pointer;
             transition: all 0.2s ease;
 
-            &.approved {
-              background: var(--success-100);
-              border-left: 3px solid var(--success-500);
-
-              &:hover {
-                background: var(--success-200);
-              }
-            }
-
-            &.pending {
-              background: var(--warning-100);
-              border-left: 3px solid var(--warning-500);
-
-              &:hover {
-                background: var(--warning-200);
-              }
-            }
-
             .event-dot {
               width: 6px;
               height: 6px;
@@ -377,6 +370,21 @@ interface CalendarDay {
               text-overflow: ellipsis;
               flex: 1;
               font-weight: 500;
+            }
+
+            &.approved {
+              background: #e6f4ea;
+              border-left: 3px solid #16a34a;
+            }
+
+            &.pending {
+              background: #fff8e1;
+              border-left: 3px solid #ffc107;
+            }
+
+            &.rejected {
+              background: #fee2e2;
+              border-left: 3px solid #dc2626;
             }
           }
 
@@ -489,11 +497,15 @@ interface CalendarDay {
             height: 1.5rem;
 
             &.approved {
-              color: var(--success-500);
+              color: #16a34a;
             }
 
             &.pending {
-              color: var(--warning-500);
+              color: #ffc107;
+            }
+
+            &.rejected {
+              color: #dc2626;
             }
           }
         }
@@ -649,8 +661,13 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
     this.leaveService.getLeaveCalendar(startDate, endDate)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (events) => {
-          this.calendarEvents = events;
+        next: (response) => {
+          this.calendarEvents = response.map(event => ({
+            ...event,
+            status: event.status.toLowerCase(),
+            leaveTypeColor: this.getStatusColor(event.status)
+          }));
+
           this.distributeEventsToCalendar();
           this.loadUpcomingLeaves();
           this.isLoading = false;
@@ -663,6 +680,20 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         }
       });
+  }
+
+  private getStatusColor(status: string): string {
+    const normalizedStatus = status.toLowerCase();
+    switch (normalizedStatus) {
+      case 'approved':
+        return '#16a34a'; // green-600
+      case 'pending':
+        return '#ffc107'; // yellow/amber
+      case 'rejected':
+        return '#dc2626'; // red-600
+      default:
+        return '#2196F3'; // blue (fallback)
+    }
   }
 
   private distributeEventsToCalendar(): void {
