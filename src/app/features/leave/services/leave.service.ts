@@ -14,7 +14,8 @@ import {
   LeaveListResponse,
   LeaveCalendarEvent,
   LeaveSummary,
-  LeaveStatus
+  LeaveStatus,
+  CreateLeaveTypeRequest
 } from '../../../core/models/leave.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -255,6 +256,37 @@ export class LeaveService {
           return response.data!;
         })
       );
+  }
+
+  // 1️⃣ Fetch all leave requests for the currently logged-in employee
+  getMyLeaveRequestsByToken(): Observable<LeaveRequest[]> {
+  return this.http.get<ApiResponse<LeaveRequest[]>>(
+    `${this.apiUrl}/getleaverequestbyemployeeid`
+  ).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch logged-in user leave requests');
+      }
+      return response.data!;
+    })
+  );
+}
+
+
+  // 2️⃣ Create a new custom leave type (Super Admin / Manager only)
+  createCustomLeaveType(request: CreateLeaveTypeRequest): Observable<string> {
+    return this.http.post<ApiResponse<string>>(
+      `${this.apiUrl}/types`,
+      request
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create leave type');
+        }
+        // API returns leaveTypeId as string
+        return response.data!;
+      })
+    );
   }
 
   getLeaveSummary(startDate: string, endDate: string, departmentId?: string): Observable<LeaveSummary> {

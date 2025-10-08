@@ -293,7 +293,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   currentUser: User | null = null;
-  leaveBalances: LeaveBalance[] = []; // Changed from single object to array
+  leaveBalances: LeaveBalance[] = [];
   leaveTypes: LeaveType[] = [];
   myLeaveRequests: LeaveRequest[] = [];
   pendingApprovals: LeaveRequest[] = [];
@@ -332,7 +332,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     const requests: any = {
       leaveBalance: this.leaveService.getMyLeaveBalance(),
       leaveTypes: this.leaveService.getLeaveTypes(),
-      myRequests: this.leaveService.getMyLeaveRequests(this.currentUser?.userId)
+      myRequests: this.leaveService.getMyLeaveRequestsByToken()
     };
 
     if (this.hasManagerRole()) {
@@ -468,7 +468,6 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     return leaveType?.color || '#2196F3';
   }
 
-  // Updated to work with LeaveBalance instead of LeaveEntitlement
   getUsagePercentage(balance: LeaveBalance): number {
     return balance.totalDays > 0 ? (balance.usedDays / balance.totalDays) * 100 : 0;
   }
