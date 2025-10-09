@@ -13,7 +13,8 @@ import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CreateAppraisal,AppraisalCycle } from '../../../../core/models/performance.models';
 import { User } from '@/app/core/models/auth.models';
-
+import { EmployeeService } from '@/app/features/employee/services/employee.service';
+import { Employee } from '@/app/core/models/employee.models';
 
 
 @Component({
@@ -37,8 +38,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   appraisalForm!: FormGroup;
   isSubmitting = false;
   // appraisalCycles: any[] = []; // store cycles from backend
-
-  public appraisalCycles: AppraisalCycle[] = [];
+employees: Employee[] = [];
+public appraisalCycles: AppraisalCycle[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -52,7 +53,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private performanceService: PerformanceService,
      private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private employeeService: EmployeeService
   ) {
     this.initializeForm();
   }
@@ -60,6 +62,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAppraisalCycles();
      this.getCurrentUser();
+     this.loadEmployees();
   }
 
   ngOnDestroy(): void {
@@ -78,11 +81,23 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   }
 
 
+  private loadEmployees(): void {
+  this.employeeService.getEmployees()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (res) => {
+        this.employees = res.employees || [];
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load employees');
+      }
+    });
+}
 
   private initializeForm(): void {
     this.appraisalForm = this.fb.group({
       cycleId: ['', Validators.required], // make cycle required
-      // employeeId: ['', Validators.required],
+      employeeId: ['', Validators.required],
       reviewType: ['', Validators.required],
       overallRating: [null],
       feedback: [''],
@@ -120,7 +135,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
       const request: CreateAppraisal = {
         cycleId: formValue.cycleId,
-        employeeId: this.currentUser.userId,
+        employeeId: formValue.employeeId,
         reviewType: formValue.reviewType,
         overallRating: formValue.overallRating,
         kraRatings: {}, // map dynamic fields later if needed

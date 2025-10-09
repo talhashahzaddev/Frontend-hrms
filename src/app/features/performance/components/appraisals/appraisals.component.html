@@ -4,10 +4,16 @@
     <form [formGroup]="appraisalForm" (ngSubmit)="onSubmit()">
 
       <!-- Employee ID -->
-      <!-- <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Employee ID</mat-label>
-        <input matInput formControlName="employeeId" placeholder="Enter employee ID">
-      </mat-form-field> -->
+    <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Select Employee</mat-label>
+  <mat-select formControlName="employeeId" required>
+    <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+     {{ emp.fullName }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
 
       <!-- Appraisal Cycle -->
       <mat-form-field appearance="outline" class="full-width">

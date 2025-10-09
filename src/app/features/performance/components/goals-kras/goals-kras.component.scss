@@ -1,0 +1,176 @@
+
+
+
+
+/* Container styles */
+.goal-card {
+  margin-bottom: 20px;              // space between cards
+  padding: 16px;                     // internal card padding
+  border-radius: 12px;               // rounded corners
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); // soft shadow
+
+  mat-card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;                      // space between form fields or table + texts
+  }
+}
+
+/* Form fields */
+mat-form-field.full-width {
+  width: 100%;                       // full width inputs
+}
+
+/* Textarea adjustment */
+textarea.mat-input-element {
+  min-height: 80px;                  // compact but not too small
+  resize: vertical;
+}
+
+/* Button row */
+.button-row {
+  display: flex;
+  justify-content: flex-end;         // align button to right
+  margin-top: 12px;
+}
+
+.goal-card {
+  ::ng-deep table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+
+    th.mat-header-cell {
+      background-color: #f5f7fa;
+      color: #333;
+      font-weight: 600;
+      padding: 12px 16px;
+    }
+
+    td.mat-cell {
+      background-color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+    }
+
+    tr.mat-row:hover td.mat-cell {
+      background-color: #f0f4f8;
+      transform: scale(1.01);
+    }
+
+    button {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 4px 12px;
+      transition: all 0.2s ease;
+    }
+
+    button[color='primary'] { background-color: #1976d2; color: #fff; }
+    button[color='accent'] { background-color: #43a047; color: #fff; }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.goal-card {
+  ::ng-deep table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    font-family: 'Roboto', sans-serif;
+
+    /* Header Styling */
+    th.mat-header-cell {
+      background: linear-gradient(90deg, #1976d2, #42a5f5);
+      color: #fff;
+      font-weight: 700;
+      padding: 14px 16px;
+      text-align: left;
+      border-radius: 8px 8px 0 0;
+      letter-spacing: 0.5px;
+    }
+
+    /* Table Cells */
+    td.mat-cell {
+      background-color: #fff;
+      padding: 14px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      vertical-align: middle;
+    }
+
+    /* Hover effect for rows */
+    tr.mat-row:hover td.mat-cell {
+      background-color: #f0f4f8;
+      transform: scale(1.02);
+    }
+
+    /* Alternate row colors */
+    tr.mat-row:nth-child(even) td.mat-cell {
+      background-color: #f9f9f9;
+    }
+
+    /* Buttons inside table */
+    button {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 4px 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button[color='primary'] {
+      background-color: #1976d2;
+      color: #fff;
+
+      &:hover {
+        background-color: #115293;
+        transform: scale(1.05);
+      }
+    }
+
+    button[color='accent'] {
+      background-color: #43a047;
+      color: #fff;
+
+      &:hover {
+        background-color: #357a38;
+        transform: scale(1.05);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      th.mat-header-cell,
+      td.mat-cell {
+        padding: 10px 8px;
+        font-size: 0.85rem;
+      }
+
+      button {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+      }
+    }
+  }
+}

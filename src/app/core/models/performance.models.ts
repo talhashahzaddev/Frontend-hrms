@@ -109,6 +109,27 @@ export interface Goal {
   comments?: string;
 }
 
+export interface CreateGoalRequest {
+  employeeId: string;
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  // status?: string;
+}
+
+export interface Goal {
+  goalId: string;
+  employeeId: string;
+   employee_name:string,
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  status: GoalStatus;
+  createdAt: string;
+  updatedAt: string;
+}
 export enum GoalStatus {
   NOT_STARTED = 'not_started',
   IN_PROGRESS = 'in_progress',
