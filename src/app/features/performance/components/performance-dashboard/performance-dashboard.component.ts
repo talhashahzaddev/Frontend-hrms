@@ -25,17 +25,12 @@ import {
   PerformanceMetrics
 } from '../../../../core/models/performance.models';
 import { User } from '../../../../core/models/auth.models';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-
 
 @Component({
   selector: 'app-performance-dashboard',
    standalone: true,
   imports: [
     CommonModule,
-    MatFormFieldModule,
-    MatSelectModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -65,7 +60,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   teamPerformanceSummary: PerformanceSummary | null = null;
   appraisalCycles: AppraisalCycle[] = [];
   selectedCycleId: string | null = null;
-  employeeAppraisals: EmployeeAppraisal[] = [];
+
   // UI state
   isLoading = false;
   selectedTab = 0;
@@ -90,47 +85,57 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
-    console.log('CurrentUser',this.currentUser);
   }
 
+  // private loadInitialData(): void {
+  //   this.isLoading = true;
 
-onCycleChange(cycleId: string): void {
-  this.selectedCycleId = cycleId;
+  //   const requests: any[] = [
+  //     this.performanceService.getMyAppraisals(),
+  //     this.performanceService.getMyPerformanceMetrics(),
+  //     this.performanceService.getMySkills(),
+      
+  //   ];
 
-  if (!cycleId || !this.currentUser?.userId) {
-    return;
-  }
+  //   if (this.hasManagerRole()) {
+  //     requests.push(this.performanceService.getTeamPerformanceSummary());
+  //   }
 
-  this.isLoading = true;
+  //   if (this.hasHRRole()) {
+  //     requests.push(this.performanceService.getAppraisalCycles(),
+  // );
+  //   }
 
- this.performanceService.getEmployeeAppraisalsByCycle(cycleId, this.currentUser.userId)
-  .pipe(takeUntil(this.destroy$))
-  .subscribe({
-    next: (res) => {
-      if (res.success) {
-        this.employeeAppraisals = res.data;
-        console.log('Employee Appraisal',this.employeeAppraisals);
-      } else {
-        this.employeeAppraisals = [];
-        
-      }
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    },
-    error: (err) => {
-      console.error('Error fetching appraisals by cycle:', err);
-      this.employeeAppraisals = [];
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    }
-  });
+  //   forkJoin(requests)
+  //     .pipe(takeUntil(this.destroy$))
+  //     .subscribe({
+  //       next: (results: any[]) => {
+  //         this.myPerformanceMetrics = results[0] || null;
+  //         this.mySkills = results[1] || [];
+  //         this.myAppraisals = results[2] || [];
 
 
-}
+          
+          
+  //         if (this.hasManagerRole() && results[3]) {
+  //           this.teamPerformanceSummary = results[3];
+  //         }
+          
+         
 
-
-
-
+  //         this.isLoading = false;
+  //         this.cdr.markForCheck();
+  //       },
+  //       error: (error) => {
+  //         console.error('Error loading performance data:', error);
+  //         this.notificationService.showError('Failed to load performance data');
+  //         this.isLoading = false;
+  //         this.cdr.markForCheck();
+  //       }
+  //     });
+       
+    
+  // }
 
 
 private loadInitialData(): void {
@@ -168,7 +173,7 @@ private loadInitialData(): void {
     );
   }
 
- {
+  if (this.hasHRRole()) {
     requests.push(
       this.performanceService.getAppraisalCycles().pipe(
         catchError((err) => {
@@ -191,7 +196,7 @@ private loadInitialData(): void {
           this.teamPerformanceSummary = results[3] || null;
         }
 
-       {
+        if (this.hasHRRole()) {
           // Last result will be appraisal cycles
           this.appraisalCycles = (results[results.length - 1]?.data) || [];
           console.log("Appraisal Cycles:", this.appraisalCycles);

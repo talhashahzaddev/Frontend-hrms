@@ -23,14 +23,9 @@ import {
   EmployeeSkillFilter,
   AppraisalFilter,
   PerformanceReportFilter,
-  CreateAppraisal,
-  CreateGoalRequest,
-  Goal
+  CreateAppraisal
 } from '../../../core/models/performance.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
-
-
-
 
 @Injectable({
   providedIn: 'root'
@@ -195,15 +190,6 @@ createAppraisal(request: CreateAppraisal): Observable<ApiResponse<EmployeeApprai
     request
   );
 }
-//get appraisal by id
-
-// Get employee appraisals by cycle
-getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<ApiResponse<EmployeeAppraisal[]>> {
-  return this.http.get<ApiResponse<EmployeeAppraisal[]>>(
-    `${this.apiUrl}/Performance/cycles/${cycleId}/appraisals?employeeId=${employeeId}`
-  );
-}
-
 
 
 
@@ -283,43 +269,6 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     this.refreshPerformanceSummary(cycleId);
   }
 
-//Goals 
-
-createGoal(request: CreateGoalRequest): Observable<ApiResponse<Goal>> {
-  return this.http.post<ApiResponse<Goal>>(`${this.apiUrl}/performance/goals`, request);
-}
-
-//get all goals
-
-// Get all goals (for manager)
-getAllGoals(): Observable<ApiResponse<Goal[]>> {
-  return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/performance/goals`);
-}
-
-//Get api by id
-
-/** Get goals by employee ID */
-getGoalsByEmployeeId(employeeId: string): Observable<ApiResponse<Goal[]>> {
-  return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/performance/goals/employee/${employeeId}`);
-}
-
-// Get goal Completed
-
-// Mark a goal as completed
-completeGoal(goalId: string): Observable<ApiResponse<any>> {
-  return this.http.put<ApiResponse<any>>(
-    `${this.apiUrl}/Performance/Goals/${goalId}/complete`,
-    {}
-  );
-}
-
-
-
-
-
-
-
-
   // Additional methods for dashboard
   getMyAppraisals(): Observable<ApiResponse<EmployeeAppraisal[]>> {
     return this.http.get<ApiResponse<EmployeeAppraisal[]>>(`${this.apiUrl}/performance/appraisals/my-appraisals`);
@@ -335,10 +284,5 @@ completeGoal(goalId: string): Observable<ApiResponse<any>> {
 
   getMySkills(): Observable<ApiResponse<EmployeeSkill[]>> {
     return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/skills`);
-  }
-
-  // Skills Matrix
-  getSkillsMatrix(): Observable<{ data: SkillSet[]; success: boolean; message: string; errors: any }> {
-    return this.http.get<{ data: SkillSet[]; success: boolean; message: string; errors: any }>(`${this.apiUrl}/Performance/skills`);
   }
 }
