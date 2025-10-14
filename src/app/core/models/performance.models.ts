@@ -257,7 +257,13 @@ export interface AppraisalFilter {
   managerId?: string;
   search?: string;
 }
-
+export interface CreateSkillSetRequest {
+  skillName: string;
+  category: string;
+  description?: string;
+  skillLevelScale: number[];
+  isActive: boolean;
+}
 export interface PerformanceReportFilter {
   appraisalCycleId?: string;
   department?: string;
