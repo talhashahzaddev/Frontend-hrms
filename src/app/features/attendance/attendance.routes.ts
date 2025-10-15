@@ -21,5 +21,10 @@ export const attendanceRoutes: Routes = [
   {
     path: 'reports',
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
+  },
+  { 
+    path: 'calendar',
+    loadComponent: () => import('./components/attendancce-calendar/attendance-calendar').then(m => m.AttendanceCalendarComponent)
   }
+  
 ];
