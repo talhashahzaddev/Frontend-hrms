@@ -3,6 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { catchError } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
 import {
   LeaveRequest,
   LeaveType,
@@ -67,17 +70,41 @@ export class LeaveService {
       );
   }
 
-  createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
-    return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to create leave request');
-          }
-          return response.data!;
-        })
-      );
-  }
+  // createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
+  //   return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to create leave request');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
+
+createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
+  return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create leave request');
+        }
+        return response.data!;
+      }),
+      // ✅ catch backend error responses
+      catchError((error: HttpErrorResponse) => {
+        const backendMessage = error.error?.message || 'Something went wrong on the server';
+        return throwError(() => new Error(backendMessage));
+      })
+    );
+}
+
+
+
+
+
+
+
 
   // Updated: Using separate endpoints for approve/reject
   approveLeaveRequest(requestId: string): Observable<boolean> {

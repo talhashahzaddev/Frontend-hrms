@@ -138,13 +138,15 @@
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
 
+    padding: 12px;
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
   }
 
   ::ng-deep .mat-mdc-card-content {
-    padding: var(--spacing-xl);
+    // padding: var(--spacing-xl);
+    padding: 0;
   }
 
   .balance-header {

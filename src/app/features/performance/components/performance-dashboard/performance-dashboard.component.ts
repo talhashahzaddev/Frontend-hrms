@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -28,6 +26,10 @@ import {
 import { User } from '../../../../core/models/auth.models';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatMenu } from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu';
+
+
 
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
 @Component({
@@ -36,6 +38,7 @@ import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-c
   imports: [
     CommonModule,
     MatFormFieldModule,
+    MatMenu,
     MatSelectModule,
     MatCardModule,
     MatButtonModule,
@@ -45,7 +48,8 @@ import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-c
     MatProgressSpinnerModule,
     MatTabsModule,
     MatProgressBarModule,
-    NgChartsModule
+    NgChartsModule,
+    MatMenuModule
   ],
   templateUrl: `./performance-dashboard.component.html`,
   styleUrls: ['./performance-dashboard.component.scss'],
@@ -271,11 +275,11 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/performance/cycles']);
   }
 
-  viewCycleDetails(cycle: AppraisalCycle): void {
+  editCycle(cycle: AppraisalCycle): void {
     this.notificationService.showInfo('Cycle details view will be implemented');
   }
 
-  manageCycle(cycle: AppraisalCycle): void {
+  deleteCycle(cycle: AppraisalCycle): void {
     this.notificationService.showInfo('Cycle management will be implemented');
   }
 
