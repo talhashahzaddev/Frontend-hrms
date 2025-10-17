@@ -1,4 +1,3 @@
-
 <div class="performance-dashboard-container">
 
   <!-- Loading State -->
@@ -29,7 +28,7 @@
           </mat-card-header>
           <mat-card-content>
             <div class="performance-summary" *ngIf="myPerformanceMetrics">
-              
+
               <!-- Rating Display -->
               <div class="rating-display flex justify-between items-center mb-4">
                 <div class="current-rating flex items-center gap-2">
@@ -37,8 +36,8 @@
                     {{ myPerformanceMetrics.currentRating | number:'1.1-1' }}
                   </span>
                   <div class="rating-stars flex">
-                    <mat-icon *ngFor="let star of starRatings" 
-                              [ngClass]="{ 'filled text-yellow-500': star <= myPerformanceMetrics.currentRating }">
+                    <mat-icon *ngFor="let star of starRatings"
+                      [ngClass]="{ 'filled text-yellow-500': star <= myPerformanceMetrics.currentRating }">
                       star
                     </mat-icon>
                   </div>
@@ -117,9 +116,7 @@
                   <span class="skill-name font-medium">{{ skill.skillName }}</span>
                   <span class="skill-level text-gray-500">Level {{ skill.proficiencyLevel }}/5</span>
                 </div>
-                <mat-progress-bar 
-                  mode="determinate" 
-                  [value]="(skill.proficiencyLevel / 5) * 100"
+                <mat-progress-bar mode="determinate" [value]="(skill.proficiencyLevel / 5) * 100"
                   [color]="getSkillLevelColor(skill.proficiencyLevel)">
                 </mat-progress-bar>
               </div>
@@ -189,11 +186,12 @@
           <div class="tab-content p-4">
             <div class="team-performance-section">
               <h3 class="text-xl font-semibold mb-4">Team Performance Overview</h3>
-              
+
               <div *ngIf="teamPerformanceSummary">
                 <div class="summary-stats grid grid-cols-3 gap-4 mb-6 text-center">
                   <div class="stat-card border rounded-lg p-4">
-                    <div class="stat-value text-2xl font-semibold">{{ teamPerformanceSummary.averageRating | number:'1.1-1' }}</div>
+                    <div class="stat-value text-2xl font-semibold">{{ teamPerformanceSummary.averageRating |
+                      number:'1.1-1' }}</div>
                     <div class="stat-label text-gray-500 text-sm">Average Rating</div>
                   </div>
                   <div class="stat-card border rounded-lg p-4">
@@ -209,7 +207,8 @@
                 <div class="top-performers" *ngIf="teamPerformanceSummary.topPerformers.length > 0">
                   <h4 class="text-lg font-medium mb-2">Top Performers</h4>
                   <div class="performers-list divide-y">
-                    <div *ngFor="let performer of teamPerformanceSummary.topPerformers" class="performer-item flex justify-between items-center py-2">
+                    <div *ngFor="let performer of teamPerformanceSummary.topPerformers"
+                      class="performer-item flex justify-between items-center py-2">
                       <div>
                         <span class="font-medium">{{ performer.employeeName }}</span>
                         <span class="text-gray-500 text-sm ml-2">{{ performer.department }}</span>
@@ -217,7 +216,8 @@
                       <div class="flex items-center gap-2">
                         <span>{{ performer.rating | number:'1.1-1' }}</span>
                         <div class="rating-stars flex">
-                          <mat-icon *ngFor="let star of starRatings" [ngClass]="{ 'filled text-yellow-500': star <= performer.rating }">
+                          <mat-icon *ngFor="let star of starRatings"
+                            [ngClass]="{ 'filled text-yellow-500': star <= performer.rating }">
                             star
                           </mat-icon>
                         </div>
@@ -250,8 +250,8 @@
             <div class="cycles-section">
               <div class="section-header flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold">Appraisal Cycles</h3>
-                <button mat-raised-button color="primary" (click)="openCreateCycleDialog()">
-                  <mat-icon>add</mat-icon>
+                <button class="Cycle-button" mat-raised-button color="primary" (click)="openCreateCycleDialog()">
+                  <mat-icon class="cycle-icon">add</mat-icon>
                   New Cycle
                 </button>
               </div>
@@ -276,7 +276,7 @@
                         {{ cycle.status | titlecase }}
                       </mat-chip>
                     </td>
-                    <td>
+                    <!-- <td>
                       <button mat-stroked-button (click)="viewCycleDetails(cycle)">
                         <mat-icon>visibility</mat-icon>
                         View
@@ -285,6 +285,23 @@
                         <mat-icon>settings</mat-icon>
                         Manage
                       </button>
+                    </td> -->
+
+                    <td class="actions-cell text-center">
+                      <button mat-icon-button [matMenuTriggerFor]="cycleMenu" aria-label="Cycle actions">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+
+                      <mat-menu #cycleMenu="matMenu">
+                        <button mat-menu-item (click)="editCycle(cycle)">
+                          <mat-icon>edit</mat-icon>
+                          <span>Edit</span>
+                        </button>
+                        <button mat-menu-item (click)="deleteCycle(cycle)">
+                          <mat-icon color="warn">delete</mat-icon>
+                          <span>Delete</span>
+                        </button>
+                      </mat-menu>
                     </td>
                   </tr>
                 </tbody>
@@ -309,4 +326,3 @@
   </div>
 
 </div>
-
