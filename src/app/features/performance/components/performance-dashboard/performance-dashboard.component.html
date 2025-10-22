@@ -132,54 +132,63 @@
       </div>
     </div>
 
-    <!-- Main Content Tabs -->
-    <mat-card class="main-content-card rounded-2xl shadow-lg">
-      <mat-tab-group>
+  <!-- Main Content Tabs -->
+  <mat-card class="main-content-card">
+    <mat-tab-group>
+      
 
-        <!-- My Appraisals -->
-        <mat-tab label="My Appraisals">
-          <div class="tab-content p-4">
+<!-- My Appraisals Tab -->
+<mat-tab label="My Appraisals">
+  <div class="tab-content">
 
-            <mat-form-field appearance="outline" class="full-width mb-4">
-              <mat-label>Select Appraisal Cycle</mat-label>
-              <mat-select formControlName="cycleId" (selectionChange)="onCycleChange($event.value)">
-                <mat-option [value]="null">All Cycles</mat-option>
-                <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-                  {{ cycle.cycleName }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+    <!-- Select Appraisal Cycle -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Select Appraisal Cycle</mat-label>
+      <mat-select 
+        formControlName="cycleId" 
+        (selectionChange)="onCycleChange($event.value)">
+        <mat-option [value]="null">All Cycles</mat-option>
+        <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+          {{ cycle.cycleName }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-            <div class="appraisals-section">
-              <table class="appraisals-table w-full border rounded-lg" *ngIf="employeeAppraisals.length > 0">
-                <thead class="bg-gray-100">
-                  <tr>
-                    <th>Cycle Name</th>
-                    <th>Review Type</th>
-                    <th>Reviewer</th>
-                    <th>Feedback</th>
-                    <th>Improvement Areas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let appraisal of employeeAppraisals">
-                    <td>{{ appraisal.cycleName }}</td>
-                    <td>{{ appraisal.reviewType | titlecase }}</td>
-                    <td>{{ appraisal.reviewerName || 'N/A' }}</td>
-                    <td>{{ appraisal.feedback || 'N/A' }}</td>
-                    <td>{{ appraisal.improvementAreas || 'N/A' }}</td>
-                  </tr>
-                </tbody>
-              </table>
+    <div class="appraisals-section">
 
-              <div *ngIf="!employeeAppraisals.length" class="empty-state text-center mt-6">
-                <mat-icon>assessment</mat-icon>
-                <h3>No Appraisals</h3>
-                <p>You don't have any performance appraisals yet.</p>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
+      <!-- ✅ Table showing appraisals -->
+      <table class="appraisals-table" *ngIf="employeeAppraisals.length > 0">
+        <thead>
+          <tr>
+            <th>Cycle Name</th>
+            <th>Review Type</th>
+            <th>Reviewer</th>
+            <th>Feedback</th>
+            <th>Improvement Areas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let appraisal of employeeAppraisals">
+            <td>{{ appraisal.cycleName }}</td>
+            <td>{{ appraisal.reviewType | titlecase }}</td>
+            <td>{{ appraisal.reviewerName || 'N/A' }}</td>
+            <td>{{ appraisal.feedback || 'N/A' }}</td>
+            <td>{{ appraisal.improvementAreas || 'N/A' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- ✅ Empty state -->
+      <div *ngIf="!employeeAppraisals.length && !isLoading" class="empty-state">
+        <mat-icon>assessment</mat-icon>
+        <h3>No Appraisals</h3>
+        <p>You don't have any performance appraisals yet.</p>
+      </div>
+
+    </div>
+  </div>
+</mat-tab>
+
 
         <!-- Team Performance (only for Managers) -->
         <mat-tab label="Team Performance" *ngIf="hasManagerRole()">
@@ -226,71 +235,82 @@
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div *ngIf="!teamPerformanceSummary" class="empty-state text-center mt-6">
-                <mat-icon>group</mat-icon>
-                <h3>No Team Data</h3>
-                <p>No team performance data available.</p>
-              </div>
+            <div *ngIf="!teamPerformanceSummary && !isLoading" class="empty-state">
+              <mat-icon>group</mat-icon>
+              <h3>No Team Data</h3>
+              <p>No team performance data available.</p>
             </div>
           </div>
-        </mat-tab>
+        </div>
+      </mat-tab>
 
-      </mat-tab-group>
-    </mat-card>
+      <!-- Appraisal Cycles Tab -->
+      <mat-tab label="Appraisal Cycles" *ngIf="hasHRRole()">
+        <div class="tab-content">
+          <div class="cycles-section">
+            <!-- Header -->
+            <div class="section-header">
+              <h3>Appraisal Cycles</h3>
+              <button mat-raised-button color="primary" (click)="createAppraisalCycle()">
+                <mat-icon>add</mat-icon>
+                New Cycle
+              </button>
+            </div>
 
-  </div>
+            <!-- Table Layout -->
+            <table class="cycles-table" *ngIf="appraisalCycles.length > 0; else emptyState">
+              <thead>
+                <tr>
+                  <th>Cycle Name</th>
+                  <th>Description</th>
+                  <th>Dates</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cycle of appraisalCycles">
+                  <td class="cycle-name">{{ cycle.cycleName }}</td>
+                  <td>{{ cycle.description }}</td>
+                  <td class="cycle-dates">
+                    {{ cycle.startDate | date:'mediumDate' }} - {{ cycle.endDate | date:'mediumDate' }}
+                  </td>
+                  <td>
+                    <mat-chip [color]="getCycleStatusColor(cycle.status)">
+                      {{ cycle.status | titlecase }}
+                    </mat-chip>
+                  </td>
+                  <td class="cycle-actions">
+                    <button mat-stroked-button (click)="viewCycleDetails(cycle)">
+                      <mat-icon>visibility</mat-icon>
+                      View Details
+                    </button>
+                    <button mat-stroked-button (click)="manageCycle(cycle)">
+                      <mat-icon>settings</mat-icon>
+                      Manage
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
 
-  <!-- Appraisal Cycles (visible only to HR/Admin) -->
-  <div *ngIf="hasHRRole() && !isLoading">
-    <mat-card class="main-content-card rounded-2xl shadow-lg">
-      <mat-tab-group>
-        <mat-tab label="Appraisal Cycles">
-          <div class="tab-content p-4">
-            <div class="cycles-section">
-              <div class="section-header flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold">Appraisal Cycles</h3>
-                <button class="Cycle-button" mat-raised-button color="primary" (click)="openCreateCycleDialog()">
-                  <mat-icon class="cycle-icon">add</mat-icon>
-                  New Cycle
+            <!-- Empty State -->
+            <ng-template #emptyState>
+              <div class="empty-state">
+                <mat-icon>event</mat-icon>
+                <h3>No Appraisal Cycles</h3>
+                <p>No appraisal cycles have been created yet.</p>
+                <button mat-raised-button color="primary" (click)="createAppraisalCycle()">
+                  <mat-icon>add</mat-icon>
+                  Create First Cycle
                 </button>
               </div>
-
-              <table class="cycles-table w-full border rounded-lg" *ngIf="appraisalCycles.length > 0; else emptyState">
-                <thead class="bg-gray-100">
-                  <tr>
-                    <th>Cycle Name</th>
-                    <th>Description</th>
-                    <th>Dates</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let cycle of appraisalCycles">
-                    <td>{{ cycle.cycleName }}</td>
-                    <td>{{ cycle.description }}</td>
-                    <td>{{ cycle.startDate | date:'mediumDate' }} - {{ cycle.endDate | date:'mediumDate' }}</td>
-                    <td>
-                      <mat-chip [color]="getCycleStatusColor(cycle.status)">
-                        {{ cycle.status | titlecase }}
-                      </mat-chip>
-                    </td>
-                    <!-- <td>
-                      <button mat-stroked-button (click)="viewCycleDetails(cycle)">
-                        <mat-icon>visibility</mat-icon>
-                        View
-                      </button>
-                      <button mat-stroked-button (click)="manageCycle(cycle)">
-                        <mat-icon>settings</mat-icon>
-                        Manage
-                      </button>
-                    </td> -->
-
-                    <td class="actions-cell text-center">
-                      <button mat-icon-button [matMenuTriggerFor]="cycleMenu" aria-label="Cycle actions">
-                        <mat-icon>more_vert</mat-icon>
-                      </button>
+            </ng-template>
+          </div>
+        </div>
+      </mat-tab>
 
                       <mat-menu #cycleMenu="matMenu">
                         <button mat-menu-item (click)="editCycle(cycle)">

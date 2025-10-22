@@ -17,6 +17,7 @@ import { User } from '@/app/core/models/auth.models';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Employee } from '@/app/core/models/employee.models';
 
+
 @Component({
   selector: 'app-appraisals',
   standalone: true,
@@ -37,8 +38,10 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   appraisalForm!: FormGroup;
   isSubmitting = false;
-  employees: Employee[] = [];
-  public appraisalCycles: AppraisalCycle[] = [];
+  // appraisalCycles: any[] = []; // store cycles from backend
+employees: Employee[] = [];
+public appraisalCycles: AppraisalCycle[] = [];
+
   private destroy$ = new Subject<void>();
 
   reviewTypes = [
@@ -50,7 +53,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private performanceService: PerformanceService,
-    private authService: AuthService,
+     private authService: AuthService,
     private notificationService: NotificationService,
     private employeeService: EmployeeService
   ) {
@@ -59,8 +62,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadAppraisalCycles();
-    this.getCurrentUser();
-    this.loadEmployees();
+     this.getCurrentUser();
+     this.loadEmployees();
   }
 
   ngOnDestroy(): void {
@@ -77,22 +80,23 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       });
   }
 
+
   private loadEmployees(): void {
-    this.employeeService.getEmployees()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          this.employees = res.employees || [];
-        },
-        error: () => {
-          this.notificationService.showError('Failed to load employees');
-        }
-      });
-  }
+  this.employeeService.getEmployees()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (res) => {
+        this.employees = res.employees || [];
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load employees');
+      }
+    });
+}
 
   private initializeForm(): void {
     this.appraisalForm = this.fb.group({
-      cycleId: ['', Validators.required],
+      cycleId: ['', Validators.required], // make cycle required
       employeeId: ['', Validators.required],
       reviewType: ['', Validators.required],
       overallRating: [null, [Validators.min(0), Validators.max(5)]],

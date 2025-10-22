@@ -1,4 +1,4 @@
-<!-- <div *ngIf="loading" class="loading-spinner">
+<div *ngIf="loading" class="loading-spinner">
 	Loading skills...
 </div>
 <div *ngIf="!loading">
@@ -27,76 +27,4 @@
 			</tbody>
 		</table>
 	</div>
-</div> -->
-
-<!-- Add Skill Form -->
-<form #skillForm="ngForm" (ngSubmit)="onCreateSkill()" class="skill-form">
-  <h2>Add New Skill</h2>
-  <div class="form-row">
-    <input
-      name="skillName"
-      [(ngModel)]="newSkill.skillName"
-      placeholder="Skill Name"
-      required
-    />
-    <input
-      name="category"
-      [(ngModel)]="newSkill.category"
-      placeholder="Category"
-      required
-    />
-  </div>
-
-  <div class="form-row">
-    <input
-      name="description"
-      [(ngModel)]="newSkill.description"
-      placeholder="Description"
-      required
-    />
-    <input
-      name="skillLevelScale"
-      [(ngModel)]="skillLevelScaleInput"
-      placeholder="Level Scale (comma separated)"
-    />
-  </div>
-
-  <div class="form-actions">
-    <label class="checkbox">
-      <input type="checkbox" [(ngModel)]="newSkill.isActive" name="isActive" />
-      Active
-    </label>
-    <button type="submit" class="btn-primary">Add Skill</button>
-  </div>
-</form>
-
-<!-- Skill Table -->
-<div *ngIf="loading" class="loading-spinner">Loading skills...</div>
-
-<div *ngIf="!loading" class="skills-container">
-  <h2>Skill Matrix</h2>
-  <div *ngFor="let category of groupedSkills | keyvalue" class="category-card">
-    <h3>{{ category.key }}</h3>
-    <table class="skill-table">
-      <thead>
-        <tr>
-          <th>Skill Name</th>
-          <th>Description</th>
-          <th>Level Scale</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let skill of category.value">
-          <td>{{ skill.skillName }}</td>
-          <td>{{ skill.description }}</td>
-          <td>
-            <ng-container *ngFor="let level of skill.skillLevelScale; let i = index">
-              <span class="level">{{ level }}</span>
-              <span *ngIf="i < skill.skillLevelScale.length - 1">, </span>
-            </ng-container>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
 </div>

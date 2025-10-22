@@ -4,10 +4,22 @@
   <mat-card-content>
     <form [formGroup]="appraisalForm" (ngSubmit)="onSubmit()">
 
-      <!-- Cycle Selection -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Select Cycle</mat-label>
-        <mat-select formControlName="cycleId" required>
+      <!-- Employee ID -->
+    <mat-form-field appearance="outline" class="full-width">
+  <mat-label>Select Employee</mat-label>
+  <mat-select formControlName="employeeId" required>
+    <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+     {{ emp.fullName }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
+
+      <!-- Appraisal Cycle -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Select Appraisal Cycle</mat-label>
+        <mat-select formControlName="cycleId">
           <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
             {{ cycle.cycleName }}
           </mat-option>

@@ -1,11 +1,10 @@
-
 <!-- Create Goal Form (only for Manager / HR / Super Admin) -->
 <mat-card class="goal-card" *ngIf="hasManagerRole() || hasHRRole()">
   <mat-card-title>Create New Goal</mat-card-title>
   <mat-card-content>
     <form [formGroup]="goalForm" (ngSubmit)="onSubmit()">
 
-      <!-- Employee -->
+      <!-- Employee Selection -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Select Employee</mat-label>
         <mat-select formControlName="employeeId" required>
@@ -36,7 +35,7 @@
       <!-- Start Date -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="Choose a start date" />
         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
       </mat-form-field>
@@ -44,7 +43,7 @@
       <!-- End Date -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate" placeholder="Choose an end date" />
         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
       </mat-form-field>
@@ -58,62 +57,64 @@
   </mat-card-content>
 </mat-card>
 
-<!-- View All or Own Goals -->
+<!-- All Goals Table -->
 <mat-card class="goal-card" style="margin-top: 20px;">
-  <mat-card-title>
-    {{ hasManagerRole() || hasHRRole() ? 'All Goals' : 'My Goals' }}
-  </mat-card-title>
+  <mat-card-title>All Goals</mat-card-title>
   <mat-card-content>
     <table mat-table [dataSource]="allGoals" class="mat-elevation-z8 full-width">
 
-      <ng-container matColumnDef="employee" *ngIf="hasManagerRole() || hasHRRole()">
+      <!-- Employee Column -->
+      <ng-container matColumnDef="employee">
         <th mat-header-cell *matHeaderCellDef> Employee </th>
         <td mat-cell *matCellDef="let goal"> {{ goal.employee_name }} </td>
       </ng-container>
 
+      <!-- Title Column -->
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef> Title </th>
         <td mat-cell *matCellDef="let goal"> {{ goal.title }} </td>
       </ng-container>
 
+      <!-- Description Column -->
       <ng-container matColumnDef="description">
         <th mat-header-cell *matHeaderCellDef> Description </th>
         <td mat-cell *matCellDef="let goal"> {{ goal.description }} </td>
       </ng-container>
 
+      <!-- Start Date Column -->
       <ng-container matColumnDef="startDate">
         <th mat-header-cell *matHeaderCellDef> Start Date </th>
         <td mat-cell *matCellDef="let goal"> {{ goal.startDate | date:'mediumDate' }} </td>
       </ng-container>
 
+      <!-- End Date Column -->
       <ng-container matColumnDef="endDate">
         <th mat-header-cell *matHeaderCellDef> End Date </th>
         <td mat-cell *matCellDef="let goal"> {{ goal.endDate | date:'mediumDate' }} </td>
       </ng-container>
 
+      <!-- Status Column -->
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef> Status </th>
-        <td mat-cell *matCellDef="let goal">
-          {{ goal.status }}
+  <th mat-header-cell *matHeaderCellDef> Status </th>
+  <td mat-cell *matCellDef="let goal">
+    {{ goal.status }}
 
-          <ng-container *ngIf="!hasManagerRole() && !hasHRRole()">
-            <button mat-mini-button color="primary" (click)="onSubmitStatus(goal, 'IN_PROGRESS')">
-              In Progress
-            </button>
-            <button mat-mini-button color="accent" (click)="onSubmitStatus(goal, 'COMPLETED')"
-                    [disabled]="goal.status === 'COMPLETED'">
-              Completed
-            </button>
-          </ng-container>
-        </td>
-      </ng-container>
+    <!-- Buttons for employee to click -->
+    <button mat-mini-button color="primary" (click)="onSubmitStatus(goal, 'IN_PROGRESS')">
+      In Progress
+    </button>
+    <button mat-mini-button color="accent" (click)="onSubmitStatus(goal, 'COMPLETED')"
+                                         [disabled]="goal.status === 'COMPLETED'">
+      Completed
+    </button>
+  </td>
+</ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="hasManagerRole() || hasHRRole() ? ['employee','title','description','startDate','endDate','status'] : ['title','description','startDate','endDate','status']"></tr>
-      <tr mat-row *matRowDef="let row; columns: hasManagerRole() || hasHRRole() ? ['employee','title','description','startDate','endDate','status'] : ['title','description','startDate','endDate','status']"></tr>
+      <tr mat-header-row *matHeaderRowDef="['employee','title','description','startDate','endDate','status']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['employee','title','description','startDate','endDate','status']"></tr>
     </table>
 
-    <p *ngIf="!allGoals?.length && !isLoadingGoals" class="no-data">No goals found.</p>
-    <p *ngIf="isLoadingGoals" class="loading">Loading goals...</p>
+    <p *ngIf="!allGoals?.length && !isLoadingGoals" style="text-align:center; margin-top: 10px;">No goals found.</p>
+    <p *ngIf="isLoadingGoals" style="text-align:center; margin-top: 10px;">Loading goals...</p>
   </mat-card-content>
 </mat-card>
-
