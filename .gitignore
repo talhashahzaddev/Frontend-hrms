@@ -1,12 +1,11 @@
 dist/
-.env
 *.log
 # Angular build output
 /dist
 /out-tsc
 
 # Node dependencies
-/node_modules
+/node_modulesgit
 
 # IDE files
 /.idea
