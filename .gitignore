@@ -17,7 +17,7 @@ dist/
 *.sln
 *.sw?
 
-# Environment files
+# Environment
 /src/environments/*.ts
 .angular/cache/
 dist/
