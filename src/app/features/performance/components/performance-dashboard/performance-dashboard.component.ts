@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +27,8 @@ import { User } from '../../../../core/models/auth.models';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
+
+
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
 @Component({
   selector: 'app-performance-dashboard',
@@ -45,7 +45,8 @@ import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-c
     MatProgressSpinnerModule,
     MatTabsModule,
     MatProgressBarModule,
-    NgChartsModule
+    NgChartsModule,
+    MatMenuModule
   ],
   templateUrl: `./performance-dashboard.component.html`,
   styleUrls: ['./performance-dashboard.component.scss'],
@@ -68,14 +69,10 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   appraisalCycles: AppraisalCycle[] = [];
   employeeAppraisals: EmployeeAppraisal[] = [];
   selectedCycleId: string | null = null;
-
-  // ⭐ For Goal Summary Card
-  totalGoals: number = 0;
-  achievedGoals: number = 0;
-  overallRating: number = 0;
-
-  // ⭐ For rating stars
-  starRatings = [1, 2, 3, 4, 5];
+  employeeAppraisals: EmployeeAppraisal[] = [];
+  // UI state
+  isLoading = false;
+  selectedTab = 0;
 
   constructor(
     private performanceService: PerformanceService,
@@ -97,15 +94,76 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
-    console.log('CurrentUser:', this.currentUser);
+    console.log('CurrentUser',this.currentUser);
   }
 
-  // ✅ Load all data initially
-  private loadInitialData(): void {
-    this.isLoading = true;
 
-    const requests: any[] = [
-      this.performanceService.getMyAppraisals().pipe(
+onCycleChange(cycleId: string): void {
+  this.selectedCycleId = cycleId;
+
+  if (!cycleId || !this.currentUser?.userId) {
+    return;
+  }
+
+  this.isLoading = true;
+
+ this.performanceService.getEmployeeAppraisalsByCycle(cycleId, this.currentUser.userId)
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: (res) => {
+      if (res.success) {
+        this.employeeAppraisals = res.data;
+        console.log('Employee Appraisal',this.employeeAppraisals);
+      } else {
+        this.employeeAppraisals = [];
+        
+      }
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    },
+    error: (err) => {
+      console.error('Error fetching appraisals by cycle:', err);
+      this.employeeAppraisals = [];
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  });
+
+
+}
+
+
+
+
+
+
+private loadInitialData(): void {
+  this.isLoading = true;
+
+  const requests: any[] = [
+    this.performanceService.getMyAppraisals().pipe(
+      catchError((err) => {
+        console.error('getMyAppraisals failed:', err);
+        return of([]); // fallback
+      })
+    ),
+    this.performanceService.getMyPerformanceMetrics().pipe(
+      catchError((err) => {
+        console.error('getMyPerformanceMetrics failed:', err);
+        return of(null); // fallback
+      })
+    ),
+    this.performanceService.getMySkills().pipe(
+      catchError((err) => {
+        console.error('getMySkills failed:', err);
+        return of([]); // fallback
+      })
+    ),
+  ];
+
+  if (this.hasManagerRole()) {
+    requests.push(
+      this.performanceService.getTeamPerformanceSummary().pipe(
         catchError((err) => {
           console.error('getMyAppraisals failed:', err);
           return of([]);
@@ -136,6 +194,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     //   );
     // }
 
+ {
     requests.push(
       this.performanceService.getAppraisalCycles().pipe(
         catchError((err) => {
@@ -157,6 +216,8 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
             this.teamPerformanceSummary = results[3] || null;
           }
 
+       {
+          // Last result will be appraisal cycles
           this.appraisalCycles = (results[results.length - 1]?.data) || [];
 
           // ✅ Automatically select the latest active or first cycle
@@ -271,11 +332,11 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/performance/cycles']);
   }
 
-  viewCycleDetails(cycle: AppraisalCycle): void {
+  editCycle(cycle: AppraisalCycle): void {
     this.notificationService.showInfo('Cycle details view will be implemented');
   }
 
-  manageCycle(cycle: AppraisalCycle): void {
+  deleteCycle(cycle: AppraisalCycle): void {
     this.notificationService.showInfo('Cycle management will be implemented');
   }
 
