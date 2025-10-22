@@ -1,0 +1,64 @@
+<div class="calendar-container">
+  <!-- Header -->
+  <div
+    class="calendar-header"
+    style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 760px; margin: 0 auto 12px;"
+  >
+    <div>
+      <button mat-icon-button color="primary" (click)="previousMonth()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-icon-button color="primary" (click)="nextMonth()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <!-- <h3 style="margin: 0;">
+      {{ (new Date(currentYear, currentMonth)).toLocaleString(undefined, { month: 'long', year: 'numeric' }) }}
+    </h3> -->
+
+    <h3 style="margin: 0;">
+  {{ currentMonthYear }}
+    </h3>
+
+    <div>
+      <button mat-stroked-button color="primary" (click)="goToCurrentMonth()">
+        <mat-icon>today</mat-icon>
+        Current Month
+      </button>
+    </div>
+  </div>
+
+  <!-- Weekday Row -->
+  <div class="weekday-row">
+    <div class="weekday" *ngFor="let dayName of weekDays">{{ dayName }}</div>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="calendar-grid">
+    <div
+      *ngFor="let cell of daysGrid"
+      class="calendar-cell"
+      [ngClass]="getDateClass(cell)"
+      [matTooltip]="getTooltip(cell)"
+      matTooltipPosition="above"
+    >
+      <div
+        class="date-number"
+        [style.opacity]="cell.inCurrentMonth ? '1' : '0.4'"
+      >
+        {{ cell.date.getDate() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="calendar-legend" style="margin-top: 16px;">
+    <div class="legend-item"><div class="legend-color present"></div> Present</div>
+    <div class="legend-item"><div class="legend-color absent"></div> Absent</div>
+    <div class="legend-item"><div class="legend-color half-day"></div> Half Day</div>
+    <div class="legend-item"><div class="legend-color leave"></div> On Leave</div>
+    <div class="legend-item"><div class="legend-color weekend"></div> Weekend</div>
+    <div class="legend-item"><div class="legend-color late"></div> Late</div>
+  </div>
+</div>

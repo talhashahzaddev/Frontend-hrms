@@ -14,6 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatNativeDateModule } from '@angular/material/core';
 import { Subject, takeUntil, interval } from 'rxjs';
 
+import { AttendanceCalendarComponent } from '../attendancce-calendar/attendance-calendar';
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
@@ -43,6 +44,7 @@ interface CalendarDay {
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    AttendanceCalendarComponent,
     MatCardModule,
     MatButtonModule,
     MatIconModule,

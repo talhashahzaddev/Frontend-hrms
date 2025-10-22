@@ -3,6 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { catchError } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
 import {
   LeaveRequest,
   LeaveType,
@@ -14,7 +17,8 @@ import {
   LeaveListResponse,
   LeaveCalendarEvent,
   LeaveSummary,
-  LeaveStatus
+  LeaveStatus,
+  CreateLeaveTypeRequest
 } from '../../../core/models/leave.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -66,17 +70,41 @@ export class LeaveService {
       );
   }
 
-  createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
-    return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to create leave request');
-          }
-          return response.data!;
-        })
-      );
-  }
+  // createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
+  //   return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to create leave request');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
+
+createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
+  return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create leave request');
+        }
+        return response.data!;
+      }),
+      // ✅ catch backend error responses
+      catchError((error: HttpErrorResponse) => {
+        const backendMessage = error.error?.message || 'Something went wrong on the server';
+        return throwError(() => new Error(backendMessage));
+      })
+    );
+}
+
+
+
+
+
+
+
 
   // Updated: Using separate endpoints for approve/reject
   approveLeaveRequest(requestId: string): Observable<boolean> {
@@ -255,6 +283,37 @@ export class LeaveService {
           return response.data!;
         })
       );
+  }
+
+  // 1️⃣ Fetch all leave requests for the currently logged-in employee
+  getMyLeaveRequestsByToken(): Observable<LeaveRequest[]> {
+  return this.http.get<ApiResponse<LeaveRequest[]>>(
+    `${this.apiUrl}/getleaverequestbyemployeeid`
+  ).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch logged-in user leave requests');
+      }
+      return response.data!;
+    })
+  );
+}
+
+
+  // 2️⃣ Create a new custom leave type (Super Admin / Manager only)
+  createCustomLeaveType(request: CreateLeaveTypeRequest): Observable<string> {
+    return this.http.post<ApiResponse<string>>(
+      `${this.apiUrl}/types`,
+      request
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create leave type');
+        }
+        // API returns leaveTypeId as string
+        return response.data!;
+      })
+    );
   }
 
   getLeaveSummary(startDate: string, endDate: string, departmentId?: string): Observable<LeaveSummary> {

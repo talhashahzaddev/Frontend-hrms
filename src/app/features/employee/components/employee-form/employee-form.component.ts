@@ -221,7 +221,13 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         vacationDaysPerYear: 20,
         sickDaysPerYear: 10,
         effectiveDate: formValue.hireDate.toISOString().split('T')[0],
-        employmentStatus: 'active'
+        employmentStatus: 'active',
+//  Add these two:
+        address: formValue.address,
+  emergencyContact: formValue.emergencyContact,
+  nationality: formValue.nationality,
+
+
       };
 
       // Debug: Log the final request

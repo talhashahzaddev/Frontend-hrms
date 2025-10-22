@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,7 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@/app/core/services/auth.service';
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { CreateAppraisal,AppraisalCycle } from '../../../../core/models/performance.models';
+import { CreateAppraisal, AppraisalCycle } from '../../../../core/models/performance.models';
 import { User } from '@/app/core/models/auth.models';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Employee } from '@/app/core/models/employee.models';
@@ -44,9 +45,9 @@ public appraisalCycles: AppraisalCycle[] = [];
   private destroy$ = new Subject<void>();
 
   reviewTypes = [
-    { value: 'self', label: 'Self Review' },
+    { value: 'HR', label: 'Self HR' },
     { value: 'manager', label: 'Manager Review' },
-    { value: 'peer', label: 'Peer Review' }
+    { value: 'Super Admin', label: 'Super Admin' }
   ];
 
   constructor(
@@ -72,12 +73,11 @@ public appraisalCycles: AppraisalCycle[] = [];
 
   private getCurrentUser(): void {
     this.authService.currentUser$
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(user=>
-      this.currentUser=user,
-     error=>console.error('Error while getting current user in Appraise',error)
-    )
-
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (user) => (this.currentUser = user),
+        error: (err) => console.error('Error while getting current user in Appraise', err)
+      });
   }
 
 
@@ -99,35 +99,48 @@ public appraisalCycles: AppraisalCycle[] = [];
       cycleId: ['', Validators.required], // make cycle required
       employeeId: ['', Validators.required],
       reviewType: ['', Validators.required],
-      overallRating: [null],
+      overallRating: [null, [Validators.min(0), Validators.max(5)]],
+
+      // 🚫 Commented-out sections for now
+      /*
+      kraRatings: this.fb.group({
+        'Goal Achievement': new FormControl(null),
+        'Teamwork': new FormControl(null),
+        'Leadership': new FormControl(null)
+      }),
+      skillRatings: this.fb.group({
+        'Technical Knowledge': new FormControl(null),
+        'Communication': new FormControl(null),
+        'Decision Making': new FormControl(null)
+      }),
+      */
+
       feedback: [''],
       improvementAreas: [''],
       developmentPlan: ['']
     });
   }
 
-
   private loadAppraisalCycles(): void {
-  this.performanceService.getAppraisalCycles(1, 50)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (response) => {
-        this.appraisalCycles = response.data || []; // now it's an array
-        console.log('Loaded cycles:', this.appraisalCycles);
-      },
-      error: (err) => {
-        console.error('Failed to load cycles', err);
-        this.notificationService.showError('Failed to load appraisal cycles');
-      }
-    });
-}
+    this.performanceService.getAppraisalCycles(1, 50)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.appraisalCycles = response.data || [];
+          console.log('Loaded cycles:', this.appraisalCycles);
+        },
+        error: (err) => {
+          console.error('Failed to load cycles', err);
+          this.notificationService.showError('Failed to load appraisal cycles');
+        }
+      });
+  }
 
   onSubmit(): void {
     if (!this.currentUser) {
-    this.notificationService.showError('Current user not found.');
-    return;
-  }
-
+      this.notificationService.showError('Current user not found.');
+      return;
+    }
 
     if (this.appraisalForm.valid) {
       this.isSubmitting = true;
@@ -138,8 +151,8 @@ public appraisalCycles: AppraisalCycle[] = [];
         employeeId: formValue.employeeId,
         reviewType: formValue.reviewType,
         overallRating: formValue.overallRating,
-        kraRatings: {}, // map dynamic fields later if needed
-        skillRatings: {},
+        kraRatings: formValue.kraRatings || {}, // 🚫 commented
+        skillRatings: formValue.skillRatings || {}, // 🚫 commented
         feedback: formValue.feedback,
         improvementAreas: formValue.improvementAreas,
         developmentPlan: formValue.developmentPlan
@@ -148,7 +161,7 @@ public appraisalCycles: AppraisalCycle[] = [];
       this.performanceService.createAppraisal(request)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (response) => {
+          next: () => {
             this.notificationService.showSuccess('Appraisal created successfully');
             this.appraisalForm.reset();
             this.isSubmitting = false;
@@ -175,3 +188,4 @@ public appraisalCycles: AppraisalCycle[] = [];
     });
   }
 }
+

@@ -72,16 +72,36 @@
 }
 
 // Filters Card
+// .filters-card {
+//   margin-bottom: var(--spacing-lg);
+//   border: 1px solid var(--gray-200);
+//   border-radius: var(--radius-xl);
+//   box-shadow: var(--shadow-sm);
+  
+//   ::ng-deep .mat-mdc-card-content {
+//     padding: var(--spacing-xl);
+//   }
+// }
+
+
 .filters-card {
   margin-bottom: var(--spacing-lg);
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
   
+  // ✅ Added padding so inner elements don’t touch the card border
+  padding: var(--spacing-xl);
+
   ::ng-deep .mat-mdc-card-content {
-    padding: var(--spacing-xl);
+    padding: 0; // prevent double padding if Material adds its own
   }
 }
+
+
+
+
+
 
 .filters-header {
   display: flex;

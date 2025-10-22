@@ -80,9 +80,9 @@ export class PerformanceService {
     return this.http.get<ApiResponse<SkillSet>>(`${this.apiUrl}/performance/skillsets/${id}`);
   }
 
-  createSkillSet(request: CreateSkillSetRequest): Observable<ApiResponse<SkillSet>> {
-    return this.http.post<ApiResponse<SkillSet>>(`${this.apiUrl}/performance/skillsets`, request);
-  }
+  // createSkillSet(request: CreateSkillSetRequest): Observable<ApiResponse<SkillSet>> {
+  //   return this.http.post<ApiResponse<SkillSet>>(`${this.apiUrl}/performance/skillsets`, request);
+  // }
 
   updateSkillSet(id: string, request: UpdateSkillSetRequest): Observable<ApiResponse<SkillSet>> {
     return this.http.put<ApiResponse<SkillSet>>(`${this.apiUrl}/performance/skillsets/${id}`, request);

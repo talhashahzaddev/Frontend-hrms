@@ -123,8 +123,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private createForm(): void {
     this.loginForm = this.formBuilder.group({
-      email: ['admin@demo.company.com', [Validators.required, Validators.email]],
-      password: ['password123', [Validators.required, Validators.minLength(6)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
   }
