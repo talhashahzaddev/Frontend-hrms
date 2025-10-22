@@ -18,7 +18,6 @@ dist/
 *.sw?
 
 # Environment files
-/src/environments/*.ts
 .angular/cache/
 dist/
 node_modules/
