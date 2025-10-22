@@ -338,18 +338,7 @@ completeGoal(goalId: string): Observable<ApiResponse<any>> {
   }
 
   // Skills Matrix
-  // getSkillsMatrix(): Observable<{ data: SkillSet[]; success: boolean; message: string; errors: any }> {
-  //   return this.http.get<{ data: SkillSet[]; success: boolean; message: string; errors: any }>(`${this.apiUrl}/Performance/skills`);
-  // }
   getSkillsMatrix(): Observable<{ data: SkillSet[]; success: boolean; message: string; errors: any }> {
-  return this.http.get<{ data: SkillSet[]; success: boolean; message: string; errors: any }>(`${this.apiUrl}/Performance/skills`);
-}
-
-  
-  createSkillSet(request: CreateSkillSetRequest): Observable<{ data: SkillSet; success: boolean; message: string; errors: any }> {
-  return this.http.post<{ data: SkillSet; success: boolean; message: string; errors: any }>(
-    `${this.apiUrl}/Performance/skills`,
-    request
-  );
-}
+    return this.http.get<{ data: SkillSet[]; success: boolean; message: string; errors: any }>(`${this.apiUrl}/Performance/skills`);
+  }
 }
