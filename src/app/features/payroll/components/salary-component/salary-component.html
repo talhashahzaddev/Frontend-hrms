@@ -1,0 +1,295 @@
+<div class="salary-component-container">
+  <div class="page-header">
+    <h1>Salary Management</h1>
+    <p>Manage salary components and rules for payroll calculations</p>
+  </div>
+  
+  <mat-tab-group>
+    <mat-tab label="Salary Components">
+      <div class="tab-content">
+
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ selectedComponent ? 'Edit' : 'Add' }} Salary Component</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="componentForm" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Component Name</mat-label>
+            <input matInput formControlName="name" placeholder="Enter component name">
+            <mat-error *ngIf="componentForm.get('name')?.hasError('required')">Name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="allowance">Allowance</mat-option>
+              <mat-option value="deduction">Deduction</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Calculation Type</mat-label>
+            <mat-select formControlName="calculationType">
+              <mat-option value="fixed">Fixed Amount</mat-option>
+              <mat-option value="percentage">Percentage</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Value</mat-label>
+            <input matInput type="number" formControlName="value" min="0">
+            <span matSuffix *ngIf="componentForm.get('calculationType')?.value === 'percentage'">%</span>
+            <mat-error *ngIf="componentForm.get('value')?.hasError('required')">Value is required</mat-error>
+            <mat-error *ngIf="componentForm.get('value')?.hasError('min')">Value must be positive</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row checkbox-row">
+          <mat-checkbox formControlName="isDefault">Default Component</mat-checkbox>
+          <mat-checkbox formControlName="isTaxable">Taxable</mat-checkbox>
+          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" mat-button (click)="resetForm()">Cancel</button>
+          <button type="submit" mat-raised-button color="primary" [disabled]="componentForm.invalid || loading">
+            {{ selectedComponent ? 'Update' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="components-list">
+    <h2>Salary Components List</h2>
+    
+    <div class="loading-spinner" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <table mat-table [dataSource]="salaryComponents" class="mat-elevation-z2" *ngIf="!loading">
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let component">{{ component.name }}</td>
+      </ng-container>
+
+      <!-- Type Column -->
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let component">
+          <span class="badge" [ngClass]="component.type === 'allowance' ? 'badge-success' : 'badge-warning'">
+            {{ component.type | titlecase }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Calculation Type Column -->
+      <ng-container matColumnDef="calculationType">
+        <th mat-header-cell *matHeaderCellDef>Calculation</th>
+        <td mat-cell *matCellDef="let component">{{ component.calculationType | titlecase }}</td>
+      </ng-container>
+
+      <!-- Value Column -->
+      <ng-container matColumnDef="value">
+        <th mat-header-cell *matHeaderCellDef>Value</th>
+        <td mat-cell *matCellDef="let component">
+          {{ component.value }}{{ component.calculationType === 'percentage' ? '%' : '' }}
+        </td>
+      </ng-container>
+
+      <!-- Default Column -->
+      <ng-container matColumnDef="isDefault">
+        <th mat-header-cell *matHeaderCellDef>Default</th>
+        <td mat-cell *matCellDef="let component">
+          <mat-icon *ngIf="component.isDefault" color="primary">check_circle</mat-icon>
+          <mat-icon *ngIf="!component.isDefault" color="warn">cancel</mat-icon>
+        </td>
+      </ng-container>
+
+      <!-- Taxable Column -->
+      <ng-container matColumnDef="isTaxable">
+        <th mat-header-cell *matHeaderCellDef>Taxable</th>
+        <td mat-cell *matCellDef="let component">
+          <mat-icon *ngIf="component.isTaxable" color="primary">check_circle</mat-icon>
+          <mat-icon *ngIf="!component.isTaxable" color="warn">cancel</mat-icon>
+        </td>
+      </ng-container>
+
+      <!-- Active Column -->
+      <ng-container matColumnDef="isActive">
+        <th mat-header-cell *matHeaderCellDef>Active</th>
+        <td mat-cell *matCellDef="let component">
+          <mat-icon *ngIf="component.isActive" color="primary">check_circle</mat-icon>
+          <mat-icon *ngIf="!component.isActive" color="warn">cancel</mat-icon>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let component">
+          <button mat-icon-button color="primary" (click)="editComponent(component)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteComponent(component)" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <div class="no-data" *ngIf="salaryComponents.length === 0 && !loading">
+        <p>No salary components found. Create one using the form above.</p>
+      </div>
+    </div>
+      </div>
+    </mat-tab>
+    
+    <mat-tab label="Salary Rules">
+      <div class="tab-content">
+        <mat-card class="form-card">
+          <mat-card-header>
+            <mat-card-title>{{ selectedRule ? 'Edit' : 'Add' }} Salary Rule</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="ruleForm" (ngSubmit)="onRuleSubmit()">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Rule Name</mat-label>
+                  <input matInput formControlName="name" placeholder="Enter rule name">
+                  <mat-error *ngIf="ruleForm.get('name')?.hasError('required')">Name is required</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="3"></textarea>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Component</mat-label>
+                  <mat-select formControlName="componentId">
+                    <mat-option *ngFor="let component of salaryComponents" [value]="component.componentId">
+                      {{ component.name }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="ruleForm.get('componentId')?.hasError('required')">Component is required</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Condition</mat-label>
+                  <input matInput formControlName="condition" placeholder="e.g. position == 'Manager'">
+                  <mat-error *ngIf="ruleForm.get('condition')?.hasError('required')">Condition is required</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Value</mat-label>
+                  <input matInput type="number" formControlName="value" min="0">
+                  <mat-error *ngIf="ruleForm.get('value')?.hasError('required')">Value is required</mat-error>
+                  <mat-error *ngIf="ruleForm.get('value')?.hasError('min')">Value must be positive</mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row checkbox-row">
+                <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" mat-button (click)="resetRuleForm()">Cancel</button>
+                <button type="submit" mat-raised-button color="primary" [disabled]="ruleForm.invalid || loading">
+                  {{ selectedRule ? 'Update' : 'Create' }}
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="components-list">
+          <h2>Salary Rules List</h2>
+          
+          <div class="loading-spinner" *ngIf="loading">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+
+          <table mat-table [dataSource]="salaryRules" class="mat-elevation-z2" *ngIf="!loading">
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Name</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.name }}</td>
+            </ng-container>
+
+            <!-- Description Column -->
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Description</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.description }}</td>
+            </ng-container>
+
+            <!-- Component Column -->
+            <ng-container matColumnDef="componentName">
+              <th mat-header-cell *matHeaderCellDef>Component</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.componentName }}</td>
+            </ng-container>
+
+            <!-- Condition Column -->
+            <ng-container matColumnDef="condition">
+              <th mat-header-cell *matHeaderCellDef>Condition</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.condition }}</td>
+            </ng-container>
+
+            <!-- Value Column -->
+            <ng-container matColumnDef="value">
+              <th mat-header-cell *matHeaderCellDef>Value</th>
+              <td mat-cell *matCellDef="let rule">{{ rule.value }}</td>
+            </ng-container>
+
+            <!-- Active Column -->
+            <ng-container matColumnDef="isActive">
+              <th mat-header-cell *matHeaderCellDef>Active</th>
+              <td mat-cell *matCellDef="let rule">
+                <mat-icon *ngIf="rule.isActive" color="primary">check_circle</mat-icon>
+                <mat-icon *ngIf="!rule.isActive" color="warn">cancel</mat-icon>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let rule">
+                <button mat-icon-button color="primary" (click)="editRule(rule)" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteRule(rule)" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="ruleDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: ruleDisplayedColumns;"></tr>
+          </table>
+
+          <div class="no-data" *ngIf="salaryRules.length === 0 && !loading">
+            <p>No salary rules found. Create one using the form above.</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+  </div>

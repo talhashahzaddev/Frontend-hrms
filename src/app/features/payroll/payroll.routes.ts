@@ -9,6 +9,7 @@ import { PayslipManagementComponent } from './components/payslip-management/pays
 import { EmployeePayslipComponent } from './components/employee-payslip/employee-payslip.component';
 import { EmployeeSalaryHistoryComponent } from './components/employee-salary-history/employee-salary-history.component';
 import { SuperadminPayrollDashboardComponent } from './components/superadmin-payroll-dashboard/superadmin-payroll-dashboard.component';
+import { SalaryComponent } from './components/salary-component/salary-component';
 
 export const payrollRoutes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -21,5 +22,6 @@ export const payrollRoutes: Routes = [
   { path: 'slips', component: PayslipManagementComponent },
   { path: 'employee/payslips', component: EmployeePayslipComponent },
   { path: 'employee/salary-history', component: EmployeeSalaryHistoryComponent },
-  { path: 'superadmin/dashboard', component: SuperadminPayrollDashboardComponent }
+  { path: 'superadmin/dashboard', component: SuperadminPayrollDashboardComponent },
+  {path:   'salary-component',    component:SalaryComponent}
 ];
