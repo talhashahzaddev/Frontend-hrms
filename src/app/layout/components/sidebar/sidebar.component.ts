@@ -87,6 +87,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods' },
         { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process' },
+        { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component' },
         { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports' },
         { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips' }
       ]
