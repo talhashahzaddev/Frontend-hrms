@@ -166,8 +166,8 @@
               <div class="form-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Rule Name</mat-label>
-                  <input matInput formControlName="name" placeholder="Enter rule name">
-                  <mat-error *ngIf="ruleForm.get('name')?.hasError('required')">Name is required</mat-error>
+                  <input matInput formControlName="rulename" placeholder="Enter rule name">
+                  <mat-error *ngIf="ruleForm.get('rulename')?.hasError('required')">Name is required</mat-error>
                 </mat-form-field>
               </div>
 
@@ -189,12 +189,29 @@
                   <mat-error *ngIf="ruleForm.get('componentId')?.hasError('required')">Component is required</mat-error>
                 </mat-form-field>
               </div>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Department</mat-label>
+                  <mat-select formControlName="departmentId">
+                    <mat-option value="">All Departments</mat-option>
+                    <mat-option *ngFor="let department of departments" [value]="department.departmentId">
+                      {{ department.departmentName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="ruleForm.get('departmentId')?.hasError('required')">Department is required</mat-error>
+                </mat-form-field>
+              </div>
 
               <div class="form-row">
                 <mat-form-field appearance="outline">
-                  <mat-label>Condition</mat-label>
-                  <input matInput formControlName="condition" placeholder="e.g. position == 'Manager'">
-                  <mat-error *ngIf="ruleForm.get('condition')?.hasError('required')">Condition is required</mat-error>
+                  <mat-label>Position</mat-label>
+                  <mat-select formControlName="positionId">
+                    <mat-option value="">All Positions</mat-option>
+                    <mat-option *ngFor="let position of positions" [value]="position.positionId">
+                      {{ position.positionTitle }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="ruleForm.get('positionId')?.hasError('required')">Position is required</mat-error>
                 </mat-form-field>
               </div>
 
@@ -232,14 +249,10 @@
             <!-- Name Column -->
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let rule">{{ rule.name }}</td>
+              <td mat-cell *matCellDef="let rule">{{ rule.ruleName }}</td>
             </ng-container>
 
-            <!-- Description Column -->
-            <ng-container matColumnDef="description">
-              <th mat-header-cell *matHeaderCellDef>Description</th>
-              <td mat-cell *matCellDef="let rule">{{ rule.description }}</td>
-            </ng-container>
+
 
             <!-- Component Column -->
             <ng-container matColumnDef="componentName">
@@ -247,16 +260,30 @@
               <td mat-cell *matCellDef="let rule">{{ rule.componentName }}</td>
             </ng-container>
 
-            <!-- Condition Column -->
-            <ng-container matColumnDef="condition">
-              <th mat-header-cell *matHeaderCellDef>Condition</th>
-              <td mat-cell *matCellDef="let rule">{{ rule.condition }}</td>
+
+
+            <!-- Department Column -->
+            <ng-container matColumnDef="department">
+              <th mat-header-cell *matHeaderCellDef>Department</th>
+              <td mat-cell *matCellDef="let rule">
+                <span *ngIf="rule.departmentName">{{ rule.departmentName }}</span>
+                <span *ngIf="!rule.departmentName" class="text-muted">All Departments</span>
+              </td>
+            </ng-container>
+
+            <!-- Position Column -->
+            <ng-container matColumnDef="position">
+              <th mat-header-cell *matHeaderCellDef>Position</th>
+              <td mat-cell *matCellDef="let rule">
+                <span *ngIf="rule.positionTitle">{{ rule.positionTitle }}</span>
+                <span *ngIf="!rule.positionTitle" class="text-muted">All Positions</span>
+              </td>
             </ng-container>
 
             <!-- Value Column -->
             <ng-container matColumnDef="value">
               <th mat-header-cell *matHeaderCellDef>Value</th>
-              <td mat-cell *matCellDef="let rule">{{ rule.value }}</td>
+              <td mat-cell *matCellDef="let rule">{{ rule.valueOverride }}</td>
             </ng-container>
 
             <!-- Active Column -->

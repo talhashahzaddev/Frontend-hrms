@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { PayrollService } from '../../services/payroll.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
 import { 
   SalaryComponent as SalaryComponentModel, 
   SalaryRule, 
@@ -22,6 +23,7 @@ import {
   CreateSalaryRuleRequest,
   UpdateSalaryRuleRequest
 } from '../../../../core/models/payroll.models';
+import { Department, Position } from '../../../../core/models/employee.models';
 
 @Component({
   selector: 'app-salary-component',
@@ -49,16 +51,19 @@ import {
 export class SalaryComponent implements OnInit {
   salaryComponents: SalaryComponentModel[] = [];
   salaryRules: SalaryRule[] = [];
+  departments: Department[] = [];
+  positions: Position[] = [];
   loading = false;
   componentForm: FormGroup;
   ruleForm: FormGroup;
   selectedComponent: SalaryComponentModel | null = null;
   selectedRule: SalaryRule | null = null;
   displayedColumns: string[] = ['name', 'type', 'calculationType', 'value', 'isDefault', 'isTaxable', 'isActive', 'actions'];
-  ruleDisplayedColumns: string[] = ['name', 'description', 'componentName', 'condition', 'value', 'isActive', 'actions'];
+  ruleDisplayedColumns: string[] = ['name', 'componentName', 'value', 'department', 'position', 'isActive', 'actions'];
   
   constructor(
     private payrollService: PayrollService,
+    private employeeService: EmployeeService,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
@@ -74,11 +79,13 @@ export class SalaryComponent implements OnInit {
     });
     
     this.ruleForm = this.fb.group({
-      name: ['', [Validators.required]],
+      rulename: ['', [Validators.required]],
       description: [''],
       componentId: ['', [Validators.required]],
-      condition: ['', [Validators.required]],
+      // condition: ['', [Validators.required]],
       value: [0, [Validators.required, Validators.min(0)]],
+      departmentId: ['',[Validators.required]],
+      positionId: ['',[Validators.required]],
       isActive: [true]
     });
   }
@@ -86,6 +93,8 @@ export class SalaryComponent implements OnInit {
   ngOnInit(): void {
     this.loadSalaryComponents();
     this.loadSalaryRules();
+    this.loadDepartments();
+    this.loadPositions();
   }
 
   loadSalaryComponents(): void {
@@ -109,6 +118,28 @@ export class SalaryComponent implements OnInit {
       },
       error => {
         this.snackBar.open('Failed to load salary rules', 'Close', { duration: 3000 });
+      }
+    );
+  }
+
+  loadDepartments(): void {
+    this.employeeService.getDepartments().subscribe(
+      departments => {
+        this.departments = departments;
+      },
+      error => {
+        this.snackBar.open('Failed to load departments', 'Close', { duration: 3000 });
+      }
+    );
+  }
+
+  loadPositions(): void {
+    this.employeeService.getPositions().subscribe(
+      positions => {
+        this.positions = positions;
+      },
+      error => {
+        this.snackBar.open('Failed to load positions', 'Close', { duration: 3000 });
       }
     );
   }
@@ -200,6 +231,15 @@ export class SalaryComponent implements OnInit {
 
     this.loading = true;
     const formData = this.ruleForm.value as CreateSalaryRuleRequest;
+    
+    // Only include departmentId if it's not empty
+    if (!formData.departmentId) {
+      delete formData.departmentId;
+    }
+    // Only include positionId if it's not empty
+    if (!formData.positionId) {
+      delete formData.positionId;
+    }
 
     if (this.selectedRule) {
       // Update existing rule
@@ -233,17 +273,19 @@ export class SalaryComponent implements OnInit {
   editRule(rule: SalaryRule): void {
     this.selectedRule = rule;
     this.ruleForm.patchValue({
-      name: rule.name,
+      name: rule.rulename,
       description: rule.description,
       componentId: rule.componentId,
-      condition: rule.condition,
+      // condition: rule.condition,
       value: rule.value,
+      departmentId: (rule as any).departmentId || '',
+      positionId: (rule as any).positionId || '',
       isActive: rule.isActive
     });
   }
 
   deleteRule(rule: SalaryRule): void {
-    if (confirm(`Are you sure you want to delete ${rule.name}?`)) {
+    if (confirm(`Are you sure you want to delete ${rule.rulename}?`)) {
       this.loading = true;
       this.payrollService.deleteSalaryRule(rule.ruleId).subscribe(
         response => {
@@ -261,9 +303,15 @@ export class SalaryComponent implements OnInit {
   resetRuleForm(): void {
     this.selectedRule = null;
     this.ruleForm.reset({
+      ruleId: '',
+      name: '',
       description: '',
+      componentId: '',
+      condition: '',
       value: 0,
-      isActive: true
+      isActive: true,
+      departmentId: '',
+      positionId: ''
     });
     this.loading = false;
   }

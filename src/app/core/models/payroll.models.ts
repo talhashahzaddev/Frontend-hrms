@@ -242,11 +242,11 @@ export interface PayrollProcessingHistory {
 
 export interface SalaryRule {
   ruleId: string;
-  name: string;
+  rulename: string;
   description: string;
   componentId: string;
   componentName: string;
-  condition: string;
+  // condition: string;
   value: number;
   isActive: boolean;
 }
@@ -272,19 +272,23 @@ export interface UpdateSalaryComponentRequest {
 }
 
 export interface CreateSalaryRuleRequest {
-  name: string;
+  rulename: string;
   description: string;
   componentId: string;
-  condition: string;
+  // condition: string;
   value: number;
   isActive: boolean;
+  departmentId?: string;
+  positionId?: string;
 }
 
 export interface UpdateSalaryRuleRequest {
-  name?: string;
+  rulename?: string;
   description?: string;
   componentId?: string;
-  condition?: string;
+  // condition?: string;
   value?: number;
   isActive?: boolean;
+  departmentId?: string;
+  positionId?: string;
 }
