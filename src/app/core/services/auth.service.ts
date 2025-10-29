@@ -75,6 +75,27 @@ export class AuthService {
       );
   }
 
+
+  //Added here Reset Password Function 
+
+  resetPassword(token: string, password: string): Observable<ApiResponse<boolean>> {
+  return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/reset-password`, {
+    token,
+    password
+  }).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to reset password');
+      }
+      return response;
+    }),
+    catchError(this.handleError)
+  );
+}
+
+
+
+
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
@@ -198,26 +219,50 @@ export class AuthService {
       );
   }
 
-  updateProfile(request: UpdateProfileRequest): Observable<User> {
-    return this.http.put<ApiResponse<User>>(`${this.API_URL}/profile`, request)
-      .pipe(
-        tap(response => {
-          if (response.success && response.data) {
-            // Update the current user in the subject
-            this.currentUserSubject.next(response.data);
-            // Update stored user data
-            localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
-          }
-        }),
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Profile update failed');
-          }
-          return response.data!;
-        }),
-        catchError(this.handleError)
-      );
-  }
+  // updateProfile(request: UpdateProfileRequest): Observable<User> {
+  //   return this.http.put<ApiResponse<User>>(`${this.API_URL}/profile`, request)
+  //     .pipe(
+  //       tap(response => {
+  //         if (response.success && response.data) {
+  //           // Update the current user in the subject
+  //           this.currentUserSubject.next(response.data);
+  //           // Update stored user data
+  //           localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
+  //         }
+  //       }),
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Profile update failed');
+  //         }
+  //         return response.data!;
+  //       }),
+  //       catchError(this.handleError)
+  //     );
+  // }
+updateProfile(formData: FormData): Observable<User> {
+  return this.http.put<ApiResponse<User>>(`${this.API_URL}/profile`, formData)
+    .pipe(
+      tap(response => {
+        if (response.success && response.data) {
+          // ✅ Update the current user observable and local storage
+          this.currentUserSubject.next(response.data);
+          localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
+        }
+      }),
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Profile update failed');
+        }
+        return response.data!;
+      }),
+      catchError(this.handleError)
+    );
+}
+
+
+
+
+
 
   changePassword(request: ChangePasswordRequest): Observable<ApiResponse<boolean>> {
     return this.http.put<ApiResponse<boolean>>(`${this.API_URL}/change-password`, request)

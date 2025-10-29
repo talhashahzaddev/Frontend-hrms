@@ -29,6 +29,18 @@ export const appRoutes: Routes = [
     loadComponent: () => 
       import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
   },
+
+
+
+ {
+    path: 'reset-password',
+    canActivate: [NoAuthGuard],
+    loadComponent: () => 
+      import('./features/auth/components/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+  },
+
+
+
   
   // Protected Routes (require authentication)
   {
