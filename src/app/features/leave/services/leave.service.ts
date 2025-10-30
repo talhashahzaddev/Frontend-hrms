@@ -58,17 +58,17 @@ export class LeaveService {
       );
   }
 
-  getLeaveRequest(requestId: string): Observable<LeaveRequest> {
-    return this.http.get<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests/${requestId}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch leave request');
-          }
-          return response.data!;
-        })
-      );
-  }
+  // getLeaveRequest(requestId: string): Observable<LeaveRequest> {
+  //   return this.http.get<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests/${requestId}`)
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to fetch leave request');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
 
   // createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   //   return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
@@ -99,13 +99,6 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
     );
 }
 
-
-
-
-
-
-
-
   // Updated: Using separate endpoints for approve/reject
   approveLeaveRequest(requestId: string): Observable<boolean> {
     return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/requests/${requestId}/approve`, {})
@@ -133,36 +126,36 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   }
 
   // Generic status update (if needed)
-  updateLeaveRequestStatus(requestId: string, status: UpdateLeaveRequestStatus): Observable<LeaveRequest> {
-    const endpoint = status.status === LeaveStatus.APPROVED 
-      ? `${this.apiUrl}/requests/${requestId}/approve`
-      : `${this.apiUrl}/requests/${requestId}/reject`;
+  // updateLeaveRequestStatus(requestId: string, status: UpdateLeaveRequestStatus): Observable<LeaveRequest> {
+  //   const endpoint = status.status === LeaveStatus.APPROVED 
+  //     ? `${this.apiUrl}/requests/${requestId}/approve`
+  //     : `${this.apiUrl}/requests/${requestId}/reject`;
     
-    const body = status.status === LeaveStatus.REJECTED 
-      ? { rejectionReason: status.rejectionReason }
-      : {};
+  //   const body = status.status === LeaveStatus.REJECTED 
+  //     ? { rejectionReason: status.rejectionReason }
+  //     : {};
 
-    return this.http.put<ApiResponse<LeaveRequest>>(endpoint, body).pipe(
-      switchMap(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to update leave request status');
-        }
-        // now switchMap flattens the inner Observable<LeaveRequest>
-        return this.getLeaveRequest(requestId);
-      })
-    );
-  }
+  //   return this.http.put<ApiResponse<LeaveRequest>>(endpoint, body).pipe(
+  //     switchMap(response => {
+  //       if (!response.success) {
+  //         throw new Error(response.message || 'Failed to update leave request status');
+  //       }
+  //       // now switchMap flattens the inner Observable<LeaveRequest>
+  //       return this.getLeaveRequest(requestId);
+  //     })
+  //   );
+  // }
 
-  cancelLeaveRequest(requestId: string): Observable<void> {
-    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/requests/${requestId}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to cancel leave request');
-          }
-        })
-      );
-  }
+  // cancelLeaveRequest(requestId: string): Observable<void> {
+  //   return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/requests/${requestId}`)
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to cancel leave request');
+  //         }
+  //       })
+  //     );
+  // }
 
   // Leave Types
   getLeaveTypes(): Observable<LeaveType[]> {
@@ -177,17 +170,17 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
       );
   }
 
-  getLeaveType(leaveTypeId: string): Observable<LeaveType> {
-    return this.http.get<ApiResponse<LeaveType>>(`${this.apiUrl}/types/${leaveTypeId}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch leave type');
-          }
-          return response.data!;
-        })
-      );
-  }
+  // getLeaveType(leaveTypeId: string): Observable<LeaveType> {
+  //   return this.http.get<ApiResponse<LeaveType>>(`${this.apiUrl}/types/${leaveTypeId}`)
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to fetch leave type');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
 
   // Leave Balance - Updated to match API response structure
   getMyLeaveBalance(): Observable<LeaveBalance[]> {
@@ -202,54 +195,54 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
       );
   }
 
-  getEmployeeLeaveBalance(employeeId: string): Observable<LeaveBalance[]> {
-    let params = new HttpParams().set('employeeId', employeeId);
+  // getEmployeeLeaveBalance(employeeId: string): Observable<LeaveBalance[]> {
+  //   let params = new HttpParams().set('employeeId', employeeId);
     
-    return this.http.get<ApiResponse<LeaveBalance[]>>(`${this.apiUrl}/balance`, { params })
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch employee leave balance');
-          }
-          return response.data!;
-        })
-      );
-  }
+  //   return this.http.get<ApiResponse<LeaveBalance[]>>(`${this.apiUrl}/balance`, { params })
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to fetch employee leave balance');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
 
   // Leave Entitlements - Updated endpoint
-  getLeaveEntitlements(employeeId?: string, year?: number): Observable<LeaveEntitlement[]> {
-    let params = new HttpParams();
-    if (employeeId) params = params.set('employeeId', employeeId);
-    if (year) params = params.set('year', year.toString());
+  // getLeaveEntitlements(employeeId?: string, year?: number): Observable<LeaveEntitlement[]> {
+  //   let params = new HttpParams();
+  //   if (employeeId) params = params.set('employeeId', employeeId);
+  //   if (year) params = params.set('year', year.toString());
 
-    return this.http.get<ApiResponse<LeaveEntitlement[]>>(`${this.apiUrl}/entitlements`, { params })
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch leave entitlements');
-          }
-          return response.data!;
-        })
-      );
-  }
+  //   return this.http.get<ApiResponse<LeaveEntitlement[]>>(`${this.apiUrl}/entitlements`, { params })
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to fetch leave entitlements');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
 
   // My Leave Requests - Uses the filtered endpoint
-  getMyLeaveRequests(employeeId?: string): Observable<LeaveRequest[]> {
-    let params = new HttpParams();
-    if (employeeId) {
-      params = params.set('EmployeeId', employeeId);
-    }
+  // getMyLeaveRequests(employeeId?: string): Observable<LeaveRequest[]> {
+  //   let params = new HttpParams();
+  //   if (employeeId) {
+  //     params = params.set('EmployeeId', employeeId);
+  //   }
 
-    return this.http.get<ApiResponse<LeaveListResponse>>(`${this.apiUrl}/requests`, { params })
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch my leave requests');
-          }
-          return response.data!.data;
-        })
-      );
-  }
+  //   return this.http.get<ApiResponse<LeaveListResponse>>(`${this.apiUrl}/requests`, { params })
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to fetch my leave requests');
+  //         }
+  //         return response.data!.data;
+  //       })
+  //     );
+  // }
 
   // Pending Approvals (for managers)
   getPendingApprovals(): Observable<LeaveRequest[]> {
@@ -267,13 +260,10 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   }
 
   // Calendar and Reports
-  getLeaveCalendar(startDate: string, endDate: string, departmentId?: string): Observable<LeaveCalendarEvent[]> {
+  getLeaveCalendar(startDate: string, endDate: string): Observable<LeaveCalendarEvent[]> {
     let params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate);
-
-    if (departmentId) params = params.set('departmentId', departmentId);
-
     return this.http.get<ApiResponse<LeaveCalendarEvent[]>>(`${this.apiUrl}/calendar`, { params })
       .pipe(
         map(response => {
@@ -316,23 +306,23 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
     );
   }
 
-  getLeaveSummary(startDate: string, endDate: string, departmentId?: string): Observable<LeaveSummary> {
-    let params = new HttpParams()
-      .set('startDate', startDate)
-      .set('endDate', endDate);
+  // getLeaveSummary(startDate: string, endDate: string, departmentId?: string): Observable<LeaveSummary> {
+  //   let params = new HttpParams()
+  //     .set('startDate', startDate)
+  //     .set('endDate', endDate);
 
-    if (departmentId) params = params.set('departmentId', departmentId);
+  //   if (departmentId) params = params.set('departmentId', departmentId);
 
-    return this.http.get<ApiResponse<LeaveSummary>>(`${this.apiUrl}/summary`, { params })
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to fetch leave summary');
-          }
-          return response.data!;
-        })
-      );
-  }
+  //   return this.http.get<ApiResponse<LeaveSummary>>(`${this.apiUrl}/summary`, { params })
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to fetch leave summary');
+  //         }
+  //         return response.data!;
+  //       })
+  //     );
+  // }
 
   // Export Operations
   exportLeaveReport(startDate: string, endDate: string, format: 'csv' | 'xlsx' = 'xlsx', employeeId?: string): Observable<Blob> {
