@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
   PayrollSummary,
@@ -91,7 +92,25 @@ export class PayrollService {
 
   // Salary Rules
   getSalaryRules(): Observable<ApiResponse<SalaryRule[]>> {
-    return this.http.get<ApiResponse<SalaryRule[]>>(`${this.apiUrl}/payroll/rules`);
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/payroll/rules`).pipe(
+      map(res => ({
+        ...res,
+        data: (res.data || []).map((r: any) => ({
+          ruleId: r.ruleId ?? r.RuleId,
+          rulename: r.rulename ?? r.ruleName ?? r.RuleName ?? '',
+          description: r.description ?? '',
+          componentId: r.componentId ?? r.ComponentId,
+          componentName: r.componentName ?? r.ComponentName ?? '',
+          value: r.value ?? r.componentValue ?? r.ComponentValue ?? r.valueOverride ?? 0,
+          valueOverride: r.valueOverride ?? null,
+          departmentId: r.departmentId ?? r.DepartmentId ?? null,
+          departmentName: r.departmentName ?? r.DepartmentName ?? null,
+          positionId: r.positionId ?? r.PositionId ?? null,
+          positionTitle: r.positionTitle ?? r.PositionTitle ?? null,
+          isActive: r.isActive ?? true
+        })) as SalaryRule[]
+      }))
+    );
   }
 
   getSalaryRuleById(id: string): Observable<ApiResponse<SalaryRule>> {
@@ -175,8 +194,12 @@ export class PayrollService {
   }
 
   // Payroll Processing
-  calculatePayroll(periodId: string): Observable<ApiResponse<PayrollCalculationResult>> {
-    return this.http.post<ApiResponse<PayrollCalculationResult>>(`${this.apiUrl}/payroll/periods/${periodId}/calculate`, {});
+  calculatePayroll(periodId: string, ruleId?: string): Observable<ApiResponse<PayrollCalculationResult>> {
+    const body: any = {};
+    if (ruleId) {
+      body.ruleId = ruleId;
+    }
+    return this.http.post<ApiResponse<PayrollCalculationResult>>(`${this.apiUrl}/payroll/periods/${periodId}/calculate`, body);
   }
 
   processPayroll(request: ProcessPayrollRequest): Observable<ApiResponse<any>> {
