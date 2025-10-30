@@ -33,6 +33,8 @@ export interface User {
   isActive: boolean;
   lastLoginAt?: string;
   createdAt: string;
+ profilePictureUrl?: string;
+
 }
 
 export interface CreateUserRequest {

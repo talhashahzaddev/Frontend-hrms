@@ -1,8 +1,13 @@
 export interface Employee {
   employeeId: string;
   organizationId: string;
+  departmentId?:String;
+  positionId?:string;
+  reportingManagerId?:string;
+  roleId?:string;
   userId?: string;
   employeeCode: string;
+  employeeNumber:string;
   firstName: string;
   lastName: string;
   fullName?: string;
@@ -14,13 +19,16 @@ export interface Employee {
   maritalStatus?: string;
   address?: any;
   emergencyContact?: any;
+  maritalstatus?:string;
+ emergencycontact?:any;
   hireDate: string;
   terminationDate?: string;
   status: string;
   profilePictureUrl?: string;
   createdAt: string;
   updatedAt: string;
-  
+  workLocation:string;
+  basicSalary:number;
   // Related data
   employmentDetails?: EmploymentDetail;
   department?: Department;
