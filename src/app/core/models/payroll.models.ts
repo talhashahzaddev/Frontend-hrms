@@ -239,3 +239,56 @@ export interface PayrollProcessingHistory {
   status: string;
   processedBy: string;
 }
+
+export interface SalaryRule {
+  ruleId: string;
+  rulename: string;
+  description: string;
+  componentId: string;
+  componentName: string;
+  // condition: string;
+  value: number;
+  isActive: boolean;
+}
+
+export interface CreateSalaryComponentRequest {
+  name: string;
+  type: 'allowance' | 'deduction';
+  calculationType: 'percentage' | 'fixed';
+  value: number;
+  isDefault: boolean;
+  isTaxable: boolean;
+  isActive: boolean;
+}
+
+export interface UpdateSalaryComponentRequest {
+  name?: string;
+  type?: 'allowance' | 'deduction';
+  calculationType?: 'percentage' | 'fixed';
+  value?: number;
+  isDefault?: boolean;
+  isTaxable?: boolean;
+  isActive?: boolean;
+}
+
+export interface CreateSalaryRuleRequest {
+  rulename: string;
+  description: string;
+  componentId: string;
+  // condition: string;
+  value: number;
+  isActive: boolean;
+  departmentId?: string;
+  positionId?: string;
+}
+
+export interface UpdateSalaryRuleRequest {
+  rulename?: string;
+  description?: string;
+  componentId?: string;
+  // condition?: string;
+  value?: number;
+  isActive?: boolean;
+  departmentId?: string;
+  positionId?: string;
+}

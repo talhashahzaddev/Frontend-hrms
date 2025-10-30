@@ -1,0 +1,432 @@
+
+<div class="profile-container">
+      <div class="profile-content">
+        
+        <div class="profile-header">
+          <h1 class="profile-title">My Profile</h1>
+          <p class="profile-subtitle">Manage your personal information and account settings</p>
+        </div>
+
+        <mat-card class="profile-card">
+          
+
+<div class="profile-avatar-section">
+  <div class="avatar-container">
+    <div class="avatar-circle">
+      <!-- Show uploaded/previewed image or default icon -->
+      <img 
+        *ngIf="profilePreviewUrl || currentUser?.profilePictureUrl; else defaultAvatar" 
+        [src]="profilePreviewUrl || currentUser?.profilePictureUrl" 
+        alt="Profile" 
+        class="profile-image"
+      />
+      <ng-template #defaultAvatar>
+        <mat-icon>person</mat-icon>
+      </ng-template>
+    </div>
+
+    <!-- Hidden file input for image upload -->
+    <input
+      type="file"
+      accept="image/*"
+      hidden
+      #fileInput
+      (change)="onFileSelected($event)"
+    />
+
+    <!-- Upload button -->
+    <button 
+      mat-stroked-button 
+      class="change-avatar-btn" 
+      (click)="fileInput.click()">
+      <mat-icon>camera_alt</mat-icon>
+      Change Photo
+    </button>
+  </div>
+
+  <!-- User Info Section -->
+  <div class="user-info">
+    <h2 class="user-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</h2>
+    <p class="user-email">{{ currentUser?.email }}</p>
+    <p class="user-role">{{ currentUser?.role }}</p>
+  </div>
+</div>
+
+
+<mat-divider></mat-divider>
+
+
+
+
+          <!-- Profile Tabs -->
+          <mat-tab-group class="profile-tabs">
+            
+
+
+<!-- Personal Information Tab -->
+<mat-tab label="Personal Information">
+  <div class="tab-content">
+    <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()" novalidate>
+      
+      <div class="form-grid">
+
+        <!-- Employee Number -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Employee Number</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+         <input matInput formControlName="employeeNumber" placeholder="Enter employee code">
+        </mat-form-field>
+
+        <!-- First Name -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>First Name</mat-label>
+          <mat-icon matPrefix>person</mat-icon>
+          <input matInput formControlName="firstName" placeholder="Enter first name">
+          <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
+            First name is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Last Name -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Last Name</mat-label>
+          <mat-icon matPrefix>person_outline</mat-icon>
+          <input matInput formControlName="lastName" placeholder="Enter last name">
+          <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
+            Last name is required
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Email -->
+        <mat-form-field appearance="outline" class="form-field full-width">
+          <mat-label>Email</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput formControlName="email" placeholder="Enter email">
+          <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+            Email is required
+          </mat-error>
+          <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+            Invalid email format
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Phone -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Phone</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="phone" placeholder="Enter phone number">
+        </mat-form-field>
+
+        <!-- Department -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Department</mat-label>
+          <mat-icon matPrefix>domain</mat-icon>
+          <mat-select formControlName="departmentId">
+            <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+              {{ dept.departmentName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+     
+
+        <mat-form-field appearance="outline" class="form-field">
+  <mat-label>Position</mat-label>
+  <mat-icon matPrefix>work</mat-icon>
+  <mat-select formControlName="position" (selectionChange)="onPositionChange($event.value)">
+    <mat-option *ngFor="let pos of positions" [value]="pos">
+      {{ pos.positionTitle }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
+        <!-- Reporting Manager -->
+        <!-- <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Manager</mat-label>
+          <mat-icon matPrefix>supervisor_account</mat-icon>
+          <mat-select formControlName="reportingManagerId">
+            <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeid">
+              {{ mgr.firstname }} {{ mgr.lastname }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field> -->
+
+
+
+        <!-- Reporting Manager -->
+<mat-form-field appearance="outline" class="form-field">
+  <mat-label>Manager</mat-label>
+  <mat-icon matPrefix>supervisor_account</mat-icon>
+  <mat-select formControlName="reportingManagerId">
+    <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
+      {{ mgr.firstName }} {{ mgr.lastName }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
+
+
+        <!-- Basic Salary -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Basic Salary</mat-label>
+          <mat-icon matPrefix>payments</mat-icon>
+          <input matInput type="number" formControlName="basicSalary" placeholder="Enter basic salary">
+        </mat-form-field>
+
+        <!-- Work Location -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Work Location</mat-label>
+          <mat-icon matPrefix>location_on</mat-icon>
+          <input matInput formControlName="workLocation" placeholder="Enter work location">
+        </mat-form-field>
+
+        <!-- Gender -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Gender</mat-label>
+          <mat-select formControlName="gender">
+            <mat-option value="Male">Male</mat-option>
+            <mat-option value="Female">Female</mat-option>
+            <mat-option value="Other">Other</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Marital Status -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Marital Status</mat-label>
+          <mat-select formControlName="maritalStatus">
+            <mat-option value="Single">Single</mat-option>
+            <mat-option value="Married">Married</mat-option>
+            <mat-option value="Divorced">Divorced</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Nationality -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Nationality</mat-label>
+          <input matInput formControlName="nationality" placeholder="Enter nationality">
+        </mat-form-field>
+
+        <!-- Date of Birth -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Date of Birth</mat-label>
+          <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" placeholder="Choose a date">
+          <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+          <mat-datepicker #dobPicker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Hire Date -->
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Hire Date</mat-label>
+          <input matInput [matDatepicker]="hirePicker" formControlName="hireDate" placeholder="Choose a date">
+          <mat-datepicker-toggle matSuffix [for]="hirePicker"></mat-datepicker-toggle>
+          <mat-datepicker #hirePicker></mat-datepicker>
+        </mat-form-field>
+
+      </div>
+
+      <!-- Address Section -->
+      <div formGroupName="address" class="form-section">
+        <h3>Address</h3>
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Street</mat-label>
+            <input matInput formControlName="street">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>State</mat-label>
+            <input matInput formControlName="state">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>ZIP Code</mat-label>
+            <input matInput formControlName="zip">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Emergency Contact Section -->
+      <div formGroupName="emergencyContact" class="form-section">
+        <h3>Emergency Contact</h3>
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Phone</mat-label>
+            <input matInput formControlName="phone">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Relationship</mat-label>
+            <input matInput formControlName="relationship">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button mat-flat-button 
+                type="submit" 
+                [disabled]="profileForm.invalid || isLoading"
+                class="save-button">
+          <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+          {{ isLoading ? 'Saving...' : 'Save Changes' }}
+        </button>
+
+        <button mat-stroked-button 
+                type="button" 
+                (click)="resetForm()"
+                [disabled]="isLoading"
+                class="reset-button">
+          Reset
+        </button>
+      </div>
+
+    </form>
+  </div>
+</mat-tab>
+
+
+  
+
+
+
+            <!-- Security Tab -->
+            <mat-tab label="Security">
+              <div class="tab-content">
+                <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" novalidate>
+                  
+                  <div class="security-section">
+                    <h3>Change Password</h3>
+                    <p>Ensure your account is using a long, random password to stay secure.</p>
+                  </div>
+
+                  <div class="form-grid">
+                    <!-- Current Password -->
+                    <mat-form-field appearance="outline" class="form-field full-width">
+                      <mat-label>Current Password</mat-label>
+                      <mat-icon matPrefix>lock</mat-icon>
+                      <input matInput 
+                             formControlName="currentPassword"
+                             [type]="hideCurrentPassword ? 'password' : 'text'"
+                             placeholder="Enter your current password">
+                      <button mat-icon-button matSuffix 
+                              type="button"
+                              (click)="hideCurrentPassword = !hideCurrentPassword">
+                        <mat-icon>{{ hideCurrentPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                      </button>
+                      <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                        Current password is required
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- New Password -->
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>New Password</mat-label>
+                      <mat-icon matPrefix>lock_outline</mat-icon>
+                      <input matInput 
+                             formControlName="newPassword"
+                             [type]="hideNewPassword ? 'password' : 'text'"
+                             placeholder="Enter new password">
+                      <button mat-icon-button matSuffix 
+                              type="button"
+                              (click)="hideNewPassword = !hideNewPassword">
+                        <mat-icon>{{ hideNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                      </button>
+                      <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                        New password is required
+                      </mat-error>
+                      <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                        Password must be at least 8 characters long
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Confirm New Password -->
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Confirm New Password</mat-label>
+                      <mat-icon matPrefix>lock_reset</mat-icon>
+                      <input matInput 
+                             formControlName="confirmPassword"
+                             [type]="hideConfirmPassword ? 'password' : 'text'"
+                             placeholder="Confirm new password">
+                      <button mat-icon-button matSuffix 
+                              type="button"
+                              (click)="hideConfirmPassword = !hideConfirmPassword">
+                        <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                      </button>
+                      <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                        Please confirm your password
+                      </mat-error>
+                      <mat-error *ngIf="passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched">
+                        Passwords do not match
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-actions">
+                    <button mat-flat-button 
+                            type="submit" 
+                            [disabled]="passwordForm.invalid || isPasswordLoading"
+                            class="save-button">
+                      <mat-spinner *ngIf="isPasswordLoading" diameter="20" class="button-spinner"></mat-spinner>
+                      {{ isPasswordLoading ? 'Updating...' : 'Update Password' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </mat-tab>
+
+            <!-- Preferences Tab -->
+            <mat-tab label="Preferences">
+              <div class="tab-content">
+                <div class="preferences-section">
+                  <h3>Account Preferences</h3>
+                  <p>Customize your experience and notification settings.</p>
+                  
+                  <div class="preference-item">
+                    <mat-icon>notifications</mat-icon>
+                    <div class="preference-content">
+                      <h4>Email Notifications</h4>
+                      <p>Receive email notifications for important updates</p>
+                    </div>
+                    <button mat-slide-toggle></button>
+                  </div>
+
+                  <div class="preference-item">
+                    <mat-icon>dark_mode</mat-icon>
+                    <div class="preference-content">
+                      <h4>Dark Mode</h4>
+                      <p>Switch between light and dark theme</p>
+                    </div>
+                    <button mat-slide-toggle></button>
+                  </div>
+
+                  <div class="preference-item">
+                    <mat-icon>language</mat-icon>
+                    <div class="preference-content">
+                      <h4>Language</h4>
+                      <p>Choose your preferred language</p>
+                    </div>
+                    <button mat-stroked-button>English</button>
+                  </div>
+                </div>
+              </div>
+            </mat-tab>
+
+          </mat-tab-group>
+        </mat-card>
+      </div>
+    </div>

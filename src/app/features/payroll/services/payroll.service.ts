@@ -14,7 +14,13 @@ import {
   PayrollReportFilter,
   Payslip,
   PayrollCalculationResult,
-  PayrollProcessingHistory
+  PayrollProcessingHistory,
+  SalaryComponent,
+  SalaryRule,
+  CreateSalaryComponentRequest,
+  UpdateSalaryComponentRequest,
+  CreateSalaryRuleRequest,
+  UpdateSalaryRuleRequest
 } from '../../../core/models/payroll.models';
 import { ApiResponse, PaginatedResponse, PagedResult } from '../../../core/models/common.models';
 
@@ -34,6 +40,19 @@ export class PayrollService {
     return this.http.get<ApiResponse<PayrollSummary>>(`${this.apiUrl}/payroll/summary`);
   }
 
+  getPayrollTrend(startDate?: string, endDate?: string): Observable<ApiResponse<any>> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payroll/trend`, { params });
+  }
+
+  getDepartmentBreakdown(payrollPeriodId?: string): Observable<ApiResponse<any>> {
+    let params = new HttpParams();
+    if (payrollPeriodId) params = params.set('payrollPeriodId', payrollPeriodId);
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payroll/department-breakdown`, { params });
+  }
+
   refreshPayrollSummary(): void {
     this.getPayrollSummary().subscribe({
       next: (response) => {
@@ -48,6 +67,48 @@ export class PayrollService {
   }
 
   // Payroll Periods Management
+  
+  // Salary Components
+  getSalaryComponents(): Observable<ApiResponse<SalaryComponent[]>> {
+    return this.http.get<ApiResponse<SalaryComponent[]>>(`${this.apiUrl}/payroll/components`);
+  }
+
+  getSalaryComponentById(id: string): Observable<ApiResponse<SalaryComponent>> {
+    return this.http.get<ApiResponse<SalaryComponent>>(`${this.apiUrl}/payroll/components/${id}`);
+  }
+
+  createSalaryComponent(request: CreateSalaryComponentRequest): Observable<ApiResponse<SalaryComponent>> {
+    return this.http.post<ApiResponse<SalaryComponent>>(`${this.apiUrl}/payroll/components`, request);
+  }
+
+  updateSalaryComponent(id: string, request: UpdateSalaryComponentRequest): Observable<ApiResponse<SalaryComponent>> {
+    return this.http.put<ApiResponse<SalaryComponent>>(`${this.apiUrl}/payroll/components/${id}`, request);
+  }
+
+  deleteSalaryComponent(id: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/payroll/components/${id}`);
+  }
+
+  // Salary Rules
+  getSalaryRules(): Observable<ApiResponse<SalaryRule[]>> {
+    return this.http.get<ApiResponse<SalaryRule[]>>(`${this.apiUrl}/payroll/rules`);
+  }
+
+  getSalaryRuleById(id: string): Observable<ApiResponse<SalaryRule>> {
+    return this.http.get<ApiResponse<SalaryRule>>(`${this.apiUrl}/payroll/rules/${id}`);
+  }
+
+  createSalaryRule(request: CreateSalaryRuleRequest): Observable<ApiResponse<SalaryRule>> {
+    return this.http.post<ApiResponse<SalaryRule>>(`${this.apiUrl}/payroll/rules`, request);
+  }
+
+  updateSalaryRule(id: string, request: UpdateSalaryRuleRequest): Observable<ApiResponse<SalaryRule>> {
+    return this.http.put<ApiResponse<SalaryRule>>(`${this.apiUrl}/payroll/rules/${id}`, request);
+  }
+
+  deleteSalaryRule(id: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/payroll/rules/${id}`);
+  }
   getPayrollPeriods(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<PayrollPeriod[]>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -95,6 +156,10 @@ export class PayrollService {
     }
 
     return this.http.get<ApiResponse<PagedResult<PayrollEntry>>>(`${this.apiUrl}/payroll/entries`, { params });
+  }
+
+  getRecentPayrollEntries(limit: number = 10): Observable<ApiResponse<PagedResult<PayrollEntry>>> {
+    return this.getPayrollEntries(undefined, 1, limit);
   }
 
   getPayrollEntriesByEmployee(employeeId: string, page: number = 1, limit: number = 10): Observable<ApiResponse<PagedResult<PayrollEntry>>> {
@@ -151,6 +216,23 @@ export class PayrollService {
     }
 
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payroll/reports`, { params });
+  }
+
+  exportPayrollData(filter?: PayrollReportFilter): Observable<Blob> {
+    let params = new HttpParams();
+
+    if (filter) {
+      if (filter.payrollPeriodId) params = params.set('payrollPeriodId', filter.payrollPeriodId);
+      if (filter.startDate) params = params.set('startDate', filter.startDate);
+      if (filter.endDate) params = params.set('endDate', filter.endDate);
+      if (filter.department) params = params.set('department', filter.department);
+      if (filter.status) params = params.set('status', filter.status);
+    }
+
+    return this.http.get(`${this.apiUrl}/payroll/export`, {
+      params,
+      responseType: 'blob'
+    });
   }
 
   exportPayrollReport(filter?: PayrollReportFilter, format: 'pdf' | 'excel' = 'pdf'): Observable<Blob> {

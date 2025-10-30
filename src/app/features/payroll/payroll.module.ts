@@ -34,10 +34,12 @@ import { NgChartsModule } from 'ng2-charts';
 
 // All components are now standalone - no need to import them here
 import { payrollRoutes } from './payroll.routes';
+import { SalaryComponent } from './components/salary-component/salary-component';
 
 @NgModule({
   declarations: [
     // All components are now standalone
+    SalaryComponent
   ],
   imports: [
     CommonModule,
