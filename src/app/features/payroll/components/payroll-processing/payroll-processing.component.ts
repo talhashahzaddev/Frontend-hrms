@@ -20,7 +20,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { 
   PayrollPeriod, 
   PayrollStatus,
-  PayrollProcessingHistory
+  PayrollProcessingHistory,
+  SalaryRule
 } from '../../../../core/models/payroll.models';
 
 @Component({
@@ -57,6 +58,7 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   availablePeriods: PayrollPeriod[] = [];
   selectedPeriodDetails: PayrollPeriod | null = null;
   recentProcessing: PayrollProcessingHistory[] = [];
+  salaryRules: SalaryRule[] = [];
 
   // Processing state
   isProcessing = false;
@@ -75,9 +77,7 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     });
 
     this.settingsForm = this.fb.group({
-      includeOvertime: [true],
-      includeAllowances: [true],
-      includeDeductions: [true]
+      selectedRuleId: ['', Validators.required]
     });
   }
 
@@ -85,6 +85,7 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     this.loadAvailablePeriods();
     this.setupFormSubscriptions();
     this.loadRecentProcessing();
+    this.loadSalaryRules();
   }
 
   ngOnDestroy(): void {
@@ -140,6 +141,23 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadSalaryRules(): void {
+    this.payrollService.getSalaryRules()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.salaryRules = response.data;
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading salary rules:', error);
+          this.notificationService.showError('Failed to load salary rules');
+        }
+      });
+  }
+
   startProcessing(): void {
     if (!this.selectedPeriodDetails) return;
 
@@ -185,9 +203,10 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
 
   private completeProcessing(): void {
     if (!this.selectedPeriodDetails) return;
+    const ruleId = this.settingsForm.get('selectedRuleId')?.value as string;
 
     // Call actual API
-    this.payrollService.calculatePayroll(this.selectedPeriodDetails.periodId)
+    this.payrollService.calculatePayroll(this.selectedPeriodDetails.periodId, ruleId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -227,9 +246,7 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     this.processingResults = null;
     this.selectionForm.reset();
     this.settingsForm.reset({
-      includeOvertime: true,
-      includeAllowances: true,
-      includeDeductions: true
+      selectedRuleId: ''
     });
     this.cdr.markForCheck();
   }
