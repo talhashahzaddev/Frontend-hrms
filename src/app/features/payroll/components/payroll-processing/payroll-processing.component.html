@@ -75,30 +75,16 @@
             <ng-template matStepLabel>Review Processing Settings</ng-template>
             
             <div class="step-content">
-              <h4>Processing Options</h4>
-              
+              <h4>Select Salary Rule</h4>
+
               <div class="settings-grid">
-                <mat-form-field appearance="outline">
-                  <mat-label>Include Overtime</mat-label>
-                  <mat-select formControlName="includeOvertime">
-                    <mat-option [value]="true">Yes</mat-option>
-                    <mat-option [value]="false">No</mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Include Allowances</mat-label>
-                  <mat-select formControlName="includeAllowances">
-                    <mat-option [value]="true">Yes</mat-option>
-                    <mat-option [value]="false">No</mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Include Deductions</mat-label>
-                  <mat-select formControlName="includeDeductions">
-                    <mat-option [value]="true">Yes</mat-option>
-                    <mat-option [value]="false">No</mat-option>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Salary Rule</mat-label>
+                  <mat-select formControlName="selectedRuleId" required>
+                    <mat-option value="">Select a rule</mat-option>
+                    <mat-option *ngFor="let rule of salaryRules" [value]="rule.ruleId">
+                      {{ rule.rulename }}
+                    </mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
@@ -107,7 +93,7 @@
                 <button mat-stroked-button matStepperPrevious>
                   Back
                 </button>
-                <button mat-raised-button color="primary" matStepperNext>
+                <button mat-raised-button color="primary" matStepperNext [disabled]="!settingsForm.valid">
                   Next: Process
                 </button>
               </div>
