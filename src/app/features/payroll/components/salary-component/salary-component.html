@@ -1,65 +1,73 @@
 <div class="salary-component-container">
-  <div class="page-header">
-    <h1>Salary Management</h1>
-    <p>Manage salary components and rules for payroll calculations</p>
-  </div>
-  
   <mat-tab-group>
     <mat-tab label="Salary Components">
       <div class="tab-content">
 
-  <mat-card class="form-card">
+  <mat-card class="form-card enhanced">
     <mat-card-header>
-      <mat-card-title>{{ selectedComponent ? 'Edit' : 'Add' }} Salary Component</mat-card-title>
+      <mat-card-title>
+        <mat-icon>{{ selectedComponent ? 'edit' : 'add_circle' }}</mat-icon>
+        {{ selectedComponent ? 'Edit Salary Component' : 'Add Salary Component' }}
+      </mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <form [formGroup]="componentForm" (ngSubmit)="onSubmit()">
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Component Name</mat-label>
-            <input matInput formControlName="name" placeholder="Enter component name">
-            <mat-error *ngIf="componentForm.get('name')?.hasError('required')">Name is required</mat-error>
-          </mat-form-field>
-        </div>
+      <form [formGroup]="componentForm" (ngSubmit)="onSubmit()" class="component-form">
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type">
-              <mat-option value="allowance">Allowance</mat-option>
-              <mat-option value="deduction">Deduction</mat-option>
-            </mat-select>
-          </mat-form-field>
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>tune</mat-icon>
+            Component Details
+          </h3>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Calculation Type</mat-label>
-            <mat-select formControlName="calculationType">
-              <mat-option value="fixed">Fixed Amount</mat-option>
-              <mat-option value="percentage">Percentage</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Component Name</mat-label>
+              <input matInput formControlName="name" placeholder="Enter component name">
+              <mat-error *ngIf="componentForm.get('name')?.hasError('required')">Name is required</mat-error>
+            </mat-form-field>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Value</mat-label>
-            <input matInput type="number" formControlName="value" min="0">
-            <span matSuffix *ngIf="componentForm.get('calculationType')?.value === 'percentage'">%</span>
-            <mat-error *ngIf="componentForm.get('value')?.hasError('required')">Value is required</mat-error>
-            <mat-error *ngIf="componentForm.get('value')?.hasError('min')">Value must be positive</mat-error>
-          </mat-form-field>
-        </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Calculation Type</mat-label>
+              <mat-select formControlName="calculationType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-        <div class="form-row checkbox-row">
-          <mat-checkbox formControlName="isDefault">Default Component</mat-checkbox>
-          <mat-checkbox formControlName="isTaxable">Taxable</mat-checkbox>
-          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="allowance">Allowance</mat-option>
+                <mat-option value="deduction">Deduction</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput type="number" formControlName="value" min="0">
+              <span matTextSuffix *ngIf="componentForm.get('calculationType')?.value === 'percentage'">%</span>
+              <mat-error *ngIf="componentForm.get('value')?.hasError('required')">Value is required</mat-error>
+              <mat-error *ngIf="componentForm.get('value')?.hasError('min')">Value must be positive</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row checkbox-row single-column">
+            <mat-checkbox formControlName="isDefault">Default Component</mat-checkbox>
+            <mat-checkbox formControlName="isTaxable">Taxable</mat-checkbox>
+            <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+          </div>
         </div>
 
         <div class="form-actions">
-          <button type="button" mat-button (click)="resetForm()">Cancel</button>
+          <button type="button" mat-button (click)="resetForm()">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
           <button type="submit" mat-raised-button color="primary" [disabled]="componentForm.invalid || loading">
-            {{ selectedComponent ? 'Update' : 'Create' }}
+            <mat-icon>{{ selectedComponent ? 'save' : 'add' }}</mat-icon>
+            {{ selectedComponent ? 'Update Component' : 'Create Component' }}
           </button>
         </div>
       </form>
@@ -67,7 +75,7 @@
   </mat-card>
 
   <div class="components-list">
-    <h2>Salary Components List</h2>
+    <h2>Salary Components</h2>
     
     <div class="loading-spinner" *ngIf="loading">
       <mat-spinner diameter="40"></mat-spinner>
@@ -149,20 +157,30 @@
     </table>
 
     <div class="no-data" *ngIf="salaryComponents.length === 0 && !loading">
-        <p>No salary components found. Create one using the form above.</p>
-      </div>
+      <p>No salary components found. Create one using the form above.</p>
+    </div>
     </div>
       </div>
     </mat-tab>
     
     <mat-tab label="Salary Rules">
       <div class="tab-content">
-        <mat-card class="form-card">
+        <mat-card class="form-card enhanced">
           <mat-card-header>
-            <mat-card-title>{{ selectedRule ? 'Edit' : 'Add' }} Salary Rule</mat-card-title>
+            <mat-card-title>
+              <mat-icon>{{ selectedRule ? 'edit' : 'add_circle' }}</mat-icon>
+              {{ selectedRule ? 'Edit Salary Rule' : 'Add Salary Rule' }}
+            </mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <form [formGroup]="ruleForm" (ngSubmit)="onRuleSubmit()">
+            <form [formGroup]="ruleForm" (ngSubmit)="onRuleSubmit()" class="rule-form">
+
+              <div class="form-section">
+                <h3 class="section-title">
+                  <mat-icon>rule</mat-icon>
+                  Rule Details
+                </h3>
+
               <div class="form-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Rule Name</mat-label>
@@ -188,7 +206,15 @@
                   </mat-select>
                   <mat-error *ngIf="ruleForm.get('componentId')?.hasError('required')">Component is required</mat-error>
                 </mat-form-field>
+                
+                <mat-form-field appearance="outline">
+                  <mat-label>Value Override</mat-label>
+                  <input matInput type="number" formControlName="value" min="0">
+                  <mat-error *ngIf="ruleForm.get('value')?.hasError('required')">Value is required</mat-error>
+                  <mat-error *ngIf="ruleForm.get('value')?.hasError('min')">Value must be positive</mat-error>
+                </mat-form-field>
               </div>
+
               <div class="form-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Department</mat-label>
@@ -198,11 +224,8 @@
                       {{ department.departmentName }}
                     </mat-option>
                   </mat-select>
-                  <mat-error *ngIf="ruleForm.get('departmentId')?.hasError('required')">Department is required</mat-error>
                 </mat-form-field>
-              </div>
-
-              <div class="form-row">
+                
                 <mat-form-field appearance="outline">
                   <mat-label>Position</mat-label>
                   <mat-select formControlName="positionId">
@@ -211,27 +234,23 @@
                       {{ position.positionTitle }}
                     </mat-option>
                   </mat-select>
-                  <mat-error *ngIf="ruleForm.get('positionId')?.hasError('required')">Position is required</mat-error>
                 </mat-form-field>
               </div>
 
-              <div class="form-row">
-                <mat-form-field appearance="outline">
-                  <mat-label>Value</mat-label>
-                  <input matInput type="number" formControlName="value" min="0">
-                  <mat-error *ngIf="ruleForm.get('value')?.hasError('required')">Value is required</mat-error>
-                  <mat-error *ngIf="ruleForm.get('value')?.hasError('min')">Value must be positive</mat-error>
-                </mat-form-field>
-              </div>
-
-              <div class="form-row checkbox-row">
+              <div class="form-row checkbox-row single-column">
                 <mat-checkbox formControlName="isActive">Active</mat-checkbox>
               </div>
 
+              </div>
+
               <div class="form-actions">
-                <button type="button" mat-button (click)="resetRuleForm()">Cancel</button>
+                <button type="button" mat-button (click)="resetRuleForm()">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel
+                </button>
                 <button type="submit" mat-raised-button color="primary" [disabled]="ruleForm.invalid || loading">
-                  {{ selectedRule ? 'Update' : 'Create' }}
+                  <mat-icon>{{ selectedRule ? 'save' : 'add' }}</mat-icon>
+                  {{ selectedRule ? 'Update Rule' : 'Create Rule' }}
                 </button>
               </div>
             </form>
@@ -239,7 +258,7 @@
         </mat-card>
 
         <div class="components-list">
-          <h2>Salary Rules List</h2>
+          <h2>Salary Rules</h2>
           
           <div class="loading-spinner" *ngIf="loading">
             <mat-spinner diameter="40"></mat-spinner>
@@ -249,7 +268,7 @@
             <!-- Name Column -->
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
-              <td mat-cell *matCellDef="let rule">{{ rule.ruleName }}</td>
+              <td mat-cell *matCellDef="let rule">{{ rule.rulename }}</td>
             </ng-container>
 
 

@@ -101,7 +101,12 @@ export class PayrollService {
           description: r.description ?? '',
           componentId: r.componentId ?? r.ComponentId,
           componentName: r.componentName ?? r.ComponentName ?? '',
-          value: r.value ?? r.componentValue ?? r.ComponentValue ?? 0,
+          value: r.value ?? r.componentValue ?? r.ComponentValue ?? r.valueOverride ?? 0,
+          valueOverride: r.valueOverride ?? null,
+          departmentId: r.departmentId ?? r.DepartmentId ?? null,
+          departmentName: r.departmentName ?? r.DepartmentName ?? null,
+          positionId: r.positionId ?? r.PositionId ?? null,
+          positionTitle: r.positionTitle ?? r.PositionTitle ?? null,
           isActive: r.isActive ?? true
         })) as SalaryRule[]
       }))

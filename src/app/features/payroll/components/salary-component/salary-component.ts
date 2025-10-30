@@ -273,11 +273,11 @@ export class SalaryComponent implements OnInit {
   editRule(rule: SalaryRule): void {
     this.selectedRule = rule;
     this.ruleForm.patchValue({
-      name: rule.rulename,
+      rulename: rule.rulename,
       description: rule.description,
       componentId: rule.componentId,
       // condition: rule.condition,
-      value: rule.value,
+      value: (rule as any).valueOverride ?? rule.value,
       departmentId: (rule as any).departmentId || '',
       positionId: (rule as any).positionId || '',
       isActive: rule.isActive
@@ -303,11 +303,9 @@ export class SalaryComponent implements OnInit {
   resetRuleForm(): void {
     this.selectedRule = null;
     this.ruleForm.reset({
-      ruleId: '',
-      name: '',
+      rulename: '',
       description: '',
       componentId: '',
-      condition: '',
       value: 0,
       isActive: true,
       departmentId: '',
