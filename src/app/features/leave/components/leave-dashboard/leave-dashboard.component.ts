@@ -13,6 +13,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { of, catchError } from 'rxjs';
 
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -196,13 +197,13 @@ import { User } from '../../../../core/models/auth.models';
                           <mat-icon>edit</mat-icon>
                           Edit Request
                         </button>
-                        <button mat-menu-item 
+                        <!-- <button mat-menu-item 
                                 (click)="cancelRequest(request)"
                                 [disabled]="!leaveService.isLeaveRequestCancellable(request)"
                                 class="delete-action">
                           <mat-icon>cancel</mat-icon>
                           Cancel Request
-                        </button>
+                        </button> -->
                       </mat-menu>
                     </mat-cell>
                   </ng-container>
@@ -327,43 +328,47 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   }
 
   private loadInitialData(): void {
-    this.isLoading = true;
+  this.isLoading = true;
 
-    const requests: any = {
-      leaveBalance: this.leaveService.getMyLeaveBalance(),
-      leaveTypes: this.leaveService.getLeaveTypes(),
-      myRequests: this.leaveService.getMyLeaveRequestsByToken()
-    };
+  const requests: any = {
+    leaveBalance: this.leaveService.getMyLeaveBalance().pipe(
+      catchError(() => of([]))
+    ),
+    leaveTypes: this.leaveService.getLeaveTypes().pipe(
+      catchError(() => of([]))
+    ),
+    myRequests: this.leaveService.getMyLeaveRequestsByToken().pipe(
+      catchError(() => of([]))
+    )
+  };
 
-    if (this.hasManagerRole()) {
-      requests.pendingApprovals = this.leaveService.getPendingApprovals();
-    }
-
-    forkJoin(requests)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data: any) => {
-          // API returns array of balances directly
-          this.leaveBalances = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
-          this.leaveTypes = data.leaveTypes || [];
-          this.myLeaveRequests = Array.isArray(data.myRequests) ? data.myRequests : [];
-          
-          if (data.pendingApprovals) {
-            this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
-            this.pendingCount = this.pendingApprovals.length;
-          }
-          
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error loading leave data:', error);
-          this.notificationService.showError('Failed to load leave data');
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }
-      });
+  if (this.hasManagerRole()) {
+    requests.pendingApprovals = this.leaveService.getPendingApprovals().pipe(
+      catchError(() => of([]))
+    );
   }
+
+  forkJoin(requests)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data: any) => {
+        this.leaveBalances = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
+        this.leaveTypes = data.leaveTypes || [];
+        this.myLeaveRequests = Array.isArray(data.myRequests) ? data.myRequests : [];
+        this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+        this.pendingCount = this.pendingApprovals.length;
+
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading leave data:', error);
+        this.notificationService.showError('Failed to load leave data');
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
+}
 
   openLeaveRequestDialog(): void {
     const dialogRef = this.dialog.open(ApplyLeaveComponent, {
@@ -405,22 +410,22 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelRequest(request: LeaveRequest): void {
-    if (confirm('Are you sure you want to cancel this leave request?')) {
-      this.leaveService.cancelLeaveRequest(request.requestId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave request cancelled successfully');
-            this.loadInitialData();
-          },
-          error: (error) => {
-            console.error('Error cancelling request:', error);
-            this.notificationService.showError('Failed to cancel leave request');
-          }
-        });
-    }
-  }
+  // cancelRequest(request: LeaveRequest): void {
+  //   if (confirm('Are you sure you want to cancel this leave request?')) {
+  //     this.leaveService.cancelLeaveRequest(request.requestId)
+  //       .pipe(takeUntil(this.destroy$))
+  //       .subscribe({
+  //         next: () => {
+  //           this.notificationService.showSuccess('Leave request cancelled successfully');
+  //           this.loadInitialData();
+  //         },
+  //         error: (error) => {
+  //           console.error('Error cancelling request:', error);
+  //           this.notificationService.showError('Failed to cancel leave request');
+  //         }
+  //       });
+  //   }
+  // }
 
   approveRequest(request: LeaveRequest): void {
     this.leaveService.approveLeaveRequest(request.requestId)
