@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -48,7 +49,8 @@ import { PagedResult } from '../../../../core/models/common.models';
     MatTooltipModule,
     MatMenuModule,
     MatCheckboxModule,
-    MatDialogModule
+    MatDialogModule,
+    MatExpansionModule
   ],
   template: `
     <div class="payslip-management-container">
@@ -179,122 +181,145 @@ import { PagedResult } from '../../../../core/models/common.models';
         </mat-card>
       </div>
 
-      <!-- Payslips Table -->
+      <!-- Payslips Table - Grouped by Period -->
       <mat-card class="table-card">
         <mat-card-content>
           <div class="table-container">
-            <mat-table [dataSource]="payrollEntries" class="payslips-table">
-              
-              <!-- Selection Column -->
-              <ng-container matColumnDef="select">
-                <mat-header-cell *matHeaderCellDef>
-                  <mat-checkbox (change)="$event ? masterToggle() : null"
-                                [checked]="selection.hasValue() && isAllSelected()"
-                                [indeterminate]="selection.hasValue() && !isAllSelected()">
-                  </mat-checkbox>
-                </mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <mat-checkbox (click)="$event.stopPropagation()"
-                                (change)="$event ? selection.toggle(entry) : null"
-                                [checked]="selection.isSelected(entry)"
-                                [disabled]="entry.status === 'draft'">
-                  </mat-checkbox>
-                </mat-cell>
-              </ng-container>
-
-              <!-- Employee Column -->
-              <ng-container matColumnDef="employee">
-                <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <div class="employee-info">
-                    <strong>{{ entry.employeeName }}</strong>
-                    <small>{{ entry.employeeCode }} • {{ entry.department }}</small>
-                  </div>
-                </mat-cell>
-              </ng-container>
-
-              <!-- Period Column -->
-              <ng-container matColumnDef="period">
-                <mat-header-cell *matHeaderCellDef>Period</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <div class="period-info">
-                    <span>{{ getPeriodName(entry.periodId) }}</span>
-                    <small>{{ entry.calculatedAt | date:'mediumDate' }}</small>
-                  </div>
-                </mat-cell>
-              </ng-container>
-
-              <!-- Salary Details Column -->
-              <ng-container matColumnDef="salaryDetails">
-                <mat-header-cell *matHeaderCellDef>Salary Details</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <div class="salary-details">
-                    <div class="salary-item">
-                      <span class="label">Gross:</span>
-                      <span class="value">{{ entry.grossSalary | currency }}</span>
+            <!-- Period Groups -->
+            <div class="period-groups" *ngIf="periodGroups.length > 0">
+              <div *ngFor="let group of periodGroups" class="period-group">
+                <!-- Period Header - Expandable -->
+                <div class="period-header" (click)="togglePeriod(group.periodId)">
+                  <div class="period-header-content">
+                    <mat-icon class="expand-icon" [class.expanded]="isPeriodExpanded(group.periodId)">
+                      {{ isPeriodExpanded(group.periodId) ? 'expand_more' : 'chevron_right' }}
+                    </mat-icon>
+                    <div class="period-info-main">
+                      <h3 class="period-name">{{ group.periodName }}</h3>
+                      <span class="period-date">{{ group.dateRange }}</span>
                     </div>
-                    <div class="salary-item">
-                      <span class="label">Net:</span>
-                      <span class="value net-amount">{{ entry.netSalary | currency }}</span>
+                    <div class="period-stats">
+                      <span class="stat-item">
+                        <mat-icon>people</mat-icon>
+                        {{ getPeriodEntriesCount(group.periodId) }} employees
+                      </span>
+                      <span class="stat-item">
+                        <mat-icon>attach_money</mat-icon>
+                        Gross: {{ getPeriodTotalGross(group.periodId) | currency }}
+                      </span>
+                      <span class="stat-item net-stat">
+                        Net: {{ getPeriodTotalNet(group.periodId) | currency }}
+                      </span>
                     </div>
                   </div>
-                </mat-cell>
-              </ng-container>
+                </div>
 
-              <!-- Payslip Status Column -->
-              <ng-container matColumnDef="payslipStatus">
-                <mat-header-cell *matHeaderCellDef>Payslip Status</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <div class="payslip-status">
-                    <mat-chip [color]="getPayslipStatusColor(entry)">
-                      {{ getPayslipStatus(entry) | titlecase }}
-                    </mat-chip>
-                    <small *ngIf="entry.paidAt">
-                      Paid: {{ entry.paidAt | date:'mediumDate' }}
-                    </small>
-                  </div>
-                </mat-cell>
-              </ng-container>
+                <!-- Period Entries Table - Collapsible -->
+                <div class="period-entries" *ngIf="isPeriodExpanded(group.periodId)">
+                  <mat-table [dataSource]="group.entries" class="payslips-table">
+                    
+                    <!-- Selection Column -->
+                    <ng-container matColumnDef="select">
+                      <mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox (change)="$event ? masterTogglePeriod(group.periodId) : null"
+                                      [checked]="isPeriodAllSelected(group.periodId)"
+                                      [indeterminate]="isPeriodIndeterminate(group.periodId)">
+                        </mat-checkbox>
+                      </mat-header-cell>
+                      <mat-cell *matCellDef="let entry">
+                        <mat-checkbox (click)="$event.stopPropagation()"
+                                      (change)="$event ? selection.toggle(entry) : null"
+                                      [checked]="selection.isSelected(entry)"
+                                      [disabled]="entry.status === 'draft'">
+                        </mat-checkbox>
+                      </mat-cell>
+                    </ng-container>
 
-              <!-- Actions Column -->
-              <ng-container matColumnDef="actions">
-                <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <button mat-icon-button [matMenuTriggerFor]="payslipMenu">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #payslipMenu="matMenu">
-                    <button mat-menu-item (click)="previewPayslip(entry)">
-                      <mat-icon>visibility</mat-icon>
-                      Preview Payslip
-                    </button>
-                    <button mat-menu-item (click)="downloadPayslip(entry)" 
-                            [disabled]="entry.status !== 'paid'">
-                      <mat-icon>download</mat-icon>
-                      Download PDF
-                    </button>
-                    <button mat-menu-item (click)="emailSinglePayslip(entry)" 
-                            [disabled]="entry.status !== 'paid'">
-                      <mat-icon>email</mat-icon>
-                      Email Payslip
-                    </button>
-                    <button mat-menu-item (click)="regeneratePayslip(entry)" 
-                            [disabled]="entry.status !== 'paid'">
-                      <mat-icon>refresh</mat-icon>
-                      Regenerate
-                    </button>
-                  </mat-menu>
-                </mat-cell>
-              </ng-container>
+                    <!-- Employee Column -->
+                    <ng-container matColumnDef="employee">
+                      <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
+                      <mat-cell *matCellDef="let entry">
+                        <div class="employee-info">
+                          <strong>{{ entry.employeeName }}</strong>
+                          <small>{{ entry.employeeCode }} • {{ entry.department }}</small>
+                        </div>
+                      </mat-cell>
+                    </ng-container>
 
-              <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: displayedColumns;" 
-                       (click)="previewPayslip(row)" 
-                       class="clickable-row"></mat-row>
-            </mat-table>
+                    <!-- Salary Details Column -->
+                    <ng-container matColumnDef="salaryDetails">
+                      <mat-header-cell *matHeaderCellDef>Salary Details</mat-header-cell>
+                      <mat-cell *matCellDef="let entry">
+                        <div class="salary-details">
+                          <div class="salary-item">
+                            <span class="label">Gross:</span>
+                            <span class="value">{{ entry.grossSalary | currency }}</span>
+                          </div>
+                          <div class="salary-item">
+                            <span class="label">Net:</span>
+                            <span class="value net-amount">{{ entry.netSalary | currency }}</span>
+                          </div>
+                        </div>
+                      </mat-cell>
+                    </ng-container>
+
+                    <!-- Payslip Status Column -->
+                    <ng-container matColumnDef="payslipStatus">
+                      <mat-header-cell *matHeaderCellDef>Payslip Status</mat-header-cell>
+                      <mat-cell *matCellDef="let entry">
+                        <div class="payslip-status">
+                          <mat-chip [color]="getPayslipStatusColor(entry)">
+                            {{ getPayslipStatus(entry) | titlecase }}
+                          </mat-chip>
+                          <small *ngIf="entry.paidAt">
+                            Paid: {{ entry.paidAt | date:'mediumDate' }}
+                          </small>
+                        </div>
+                      </mat-cell>
+                    </ng-container>
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                      <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                      <mat-cell *matCellDef="let entry">
+                        <button mat-icon-button (click)="$event.stopPropagation()" [matMenuTriggerFor]="payslipMenu">
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #payslipMenu="matMenu">
+                          <button mat-menu-item (click)="previewPayslip(entry)">
+                            <mat-icon>visibility</mat-icon>
+                            Preview Payslip
+                          </button>
+                          <button mat-menu-item (click)="downloadPayslip(entry)" 
+                                  [disabled]="entry.status !== 'paid'">
+                            <mat-icon>download</mat-icon>
+                            Download PDF
+                          </button>
+                          <button mat-menu-item (click)="emailSinglePayslip(entry)" 
+                                  [disabled]="entry.status !== 'paid'">
+                            <mat-icon>email</mat-icon>
+                            Email Payslip
+                          </button>
+                          <button mat-menu-item (click)="regeneratePayslip(entry)" 
+                                  [disabled]="entry.status !== 'paid'">
+                            <mat-icon>refresh</mat-icon>
+                            Regenerate
+                          </button>
+                        </mat-menu>
+                      </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;" 
+                             (click)="previewPayslip(row)" 
+                             class="clickable-row"></mat-row>
+                  </mat-table>
+                </div>
+              </div>
+            </div>
 
             <!-- Empty State -->
-            <div *ngIf="payrollEntries.length === 0 && !isLoading" class="empty-state">
+            <div *ngIf="periodGroups.length === 0 && !isLoading" class="empty-state">
               <mat-icon>receipt_long</mat-icon>
               <h3>No Payslips Found</h3>
               <p>No payslips match your current filters.</p>
@@ -358,12 +383,15 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
 
   // Data properties
   payrollEntries: PayrollEntry[] = [];
+  groupedEntries: Map<string, PayrollEntry[]> = new Map();
+  periodGroups: Array<{ periodId: string; periodName: string; dateRange: string; entries: PayrollEntry[] }> = [];
   availablePeriods: PayrollPeriod[] = [];
   departments: Department[] = [];
   totalCount = 0;
   currentPage = 1;
   pageSize = 25;
   selection = new SelectionModel<PayrollEntry>(true, []);
+  expandedPeriods = new Set<string>();
 
   // Summary stats
   totalPayslips = 0;
@@ -376,7 +404,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   filterForm: FormGroup;
 
   // Table configuration
-  displayedColumns: string[] = ['select', 'employee', 'period', 'salaryDetails', 'payslipStatus', 'actions'];
+  displayedColumns: string[] = ['select', 'employee', 'salaryDetails', 'payslipStatus', 'actions'];
 
   constructor(
     private fb: FormBuilder,
@@ -459,6 +487,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
           if (response.success && response.data) {
             this.payrollEntries = response.data.data || [];
             this.totalCount = response.data.totalCount || 0;
+            this.groupEntriesByPeriod();
             this.selection.clear();
             this.updateSummaryStats();
           }
@@ -512,6 +541,31 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       this.payrollEntries
         .filter(entry => entry.status !== 'draft')
         .forEach(entry => this.selection.select(entry));
+    }
+  }
+
+  isPeriodAllSelected(periodId: string): boolean {
+    const periodEntries = this.groupedEntries.get(periodId) || [];
+    const selectableEntries = periodEntries.filter(e => e.status !== 'draft');
+    return selectableEntries.length > 0 && 
+           selectableEntries.every(entry => this.selection.isSelected(entry));
+  }
+
+  isPeriodIndeterminate(periodId: string): boolean {
+    const periodEntries = this.groupedEntries.get(periodId) || [];
+    const selectableEntries = periodEntries.filter(e => e.status !== 'draft');
+    const selectedCount = selectableEntries.filter(e => this.selection.isSelected(e)).length;
+    return selectedCount > 0 && selectedCount < selectableEntries.length;
+  }
+
+  masterTogglePeriod(periodId: string): void {
+    const periodEntries = this.groupedEntries.get(periodId) || [];
+    const selectableEntries = periodEntries.filter(e => e.status !== 'draft');
+    
+    if (this.isPeriodAllSelected(periodId)) {
+      selectableEntries.forEach(entry => this.selection.deselect(entry));
+    } else {
+      selectableEntries.forEach(entry => this.selection.select(entry));
     }
   }
 
@@ -658,5 +712,76 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       default:
         return 'warn';
     }
+  }
+
+  // Group entries by period
+  private groupEntriesByPeriod(): void {
+    this.groupedEntries.clear();
+    this.periodGroups = [];
+
+    // Group entries by periodId
+    this.payrollEntries.forEach(entry => {
+      if (!this.groupedEntries.has(entry.periodId)) {
+        this.groupedEntries.set(entry.periodId, []);
+      }
+      this.groupedEntries.get(entry.periodId)!.push(entry);
+    });
+
+    // Create period groups with metadata
+    this.groupedEntries.forEach((entries, periodId) => {
+      const period = this.availablePeriods.find(p => p.periodId === periodId);
+      const periodName = period ? period.periodName : 'Unknown Period';
+      const dateRange = period 
+        ? `${this.formatDate(period.startDate)} - ${this.formatDate(period.endDate)}`
+        : '';
+      
+      this.periodGroups.push({
+        periodId,
+        periodName,
+        dateRange,
+        entries: entries.sort((a, b) => a.employeeName.localeCompare(b.employeeName))
+      });
+    });
+
+    // Sort periods by date (most recent first)
+    this.periodGroups.sort((a, b) => {
+      const periodA = this.availablePeriods.find(p => p.periodId === a.periodId);
+      const periodB = this.availablePeriods.find(p => p.periodId === b.periodId);
+      if (!periodA || !periodB) return 0;
+      return new Date(periodB.endDate).getTime() - new Date(periodA.endDate).getTime();
+    });
+  }
+
+  togglePeriod(periodId: string): void {
+    if (this.expandedPeriods.has(periodId)) {
+      this.expandedPeriods.delete(periodId);
+    } else {
+      this.expandedPeriods.add(periodId);
+    }
+    this.cdr.markForCheck();
+  }
+
+  isPeriodExpanded(periodId: string): boolean {
+    return this.expandedPeriods.has(periodId);
+  }
+
+  getPeriodEntriesCount(periodId: string): number {
+    return this.groupedEntries.get(periodId)?.length || 0;
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  getPeriodTotalGross(periodId: string): number {
+    const entries = this.groupedEntries.get(periodId) || [];
+    return entries.reduce((sum, entry) => sum + entry.grossSalary, 0);
+  }
+
+  getPeriodTotalNet(periodId: string): number {
+    const entries = this.groupedEntries.get(periodId) || [];
+    return entries.reduce((sum, entry) => sum + entry.netSalary, 0);
   }
 }
