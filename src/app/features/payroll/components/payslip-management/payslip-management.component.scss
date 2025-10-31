@@ -93,6 +93,123 @@
 
   .table-card {
     .table-container {
+      .period-groups {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .period-group {
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          overflow: hidden;
+          background: white;
+          transition: box-shadow 0.2s ease;
+
+          &:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .period-header {
+            background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+            border-bottom: 2px solid #e0e0e0;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+              background: linear-gradient(135deg, #e8f0f8 0%, #f5f7fa 100%);
+            }
+
+            .period-header-content {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              padding: 20px 24px;
+
+              .expand-icon {
+                font-size: 28px;
+                width: 28px;
+                height: 28px;
+                color: #1976d2;
+                transition: transform 0.3s ease;
+
+                &.expanded {
+                  transform: rotate(90deg);
+                }
+              }
+
+              .period-info-main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .period-name {
+                  margin: 0;
+                  font-size: 18px;
+                  font-weight: 600;
+                  color: #1976d2;
+                }
+
+                .period-date {
+                  font-size: 14px;
+                  color: #666;
+                  font-weight: 400;
+                }
+              }
+
+              .period-stats {
+                display: flex;
+                gap: 24px;
+                align-items: center;
+                flex-wrap: wrap;
+
+                .stat-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: #666;
+                  font-weight: 500;
+
+                  mat-icon {
+                    font-size: 18px;
+                    width: 18px;
+                    height: 18px;
+                    color: #1976d2;
+                  }
+
+                  &.net-stat {
+                    color: #4caf50;
+                    font-weight: 600;
+                  }
+                }
+              }
+            }
+          }
+
+          .period-entries {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            animation: slideDown 0.3s ease-out;
+
+            @keyframes slideDown {
+              from {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+              }
+              to {
+                opacity: 1;
+                max-height: 1000px;
+                transform: translateY(0);
+              }
+            }
+          }
+        }
+      }
+
       .payslips-table {
         width: 100%;
 
@@ -192,9 +309,6 @@
           min-width: 180px;
         }
 
-        .mat-column-period {
-          width: 150px;
-        }
 
         .mat-column-salaryDetails {
           width: 160px;
@@ -362,8 +476,25 @@
     .table-container {
       overflow-x: auto;
 
+      .period-groups {
+        .period-group {
+          .period-header {
+            .period-header-content {
+              flex-wrap: wrap;
+              gap: 12px;
+
+              .period-stats {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 16px;
+              }
+            }
+          }
+        }
+      }
+
       .payslips-table {
-        min-width: 1000px;
+        min-width: 800px;
       }
     }
 

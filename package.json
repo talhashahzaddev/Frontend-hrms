@@ -26,6 +26,8 @@
     "@primeuix/utils": "^0.6.1",
     "chart.js": "^4.5.0",
     "date-fns": "^2.30.0",
+    "jspdf": "^3.0.3",
+    "jspdf-autotable": "^5.0.2",
     "ng2-charts": "^5.0.4",
     "ngx-spinner": "^17.0.0",
     "ngx-toastr": "^18.0.0",

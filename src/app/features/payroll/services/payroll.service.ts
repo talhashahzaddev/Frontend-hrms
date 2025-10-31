@@ -174,7 +174,19 @@ export class PayrollService {
       if (filter.search) params = params.set('search', filter.search);
     }
 
-    return this.http.get<ApiResponse<PagedResult<PayrollEntry>>>(`${this.apiUrl}/payroll/entries`, { params });
+    return this.http.get<ApiResponse<PagedResult<any>>>(`${this.apiUrl}/payroll/entries`, { params }).pipe(
+      map(response => {
+        if (response.success && response.data) {
+          // Map backend fields to frontend model
+          response.data.data = response.data.data.map((entry: any) => ({
+            ...entry,
+            department: entry.departmentName || entry.department || '',
+            position: entry.positionTitle || entry.position || ''
+          }));
+        }
+        return response as ApiResponse<PagedResult<PayrollEntry>>;
+      })
+    );
   }
 
   getRecentPayrollEntries(limit: number = 10): Observable<ApiResponse<PagedResult<PayrollEntry>>> {
