@@ -14,14 +14,15 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { PayslipPreviewDialogComponent } from './payslip-preview-dialog.component';
 import { 
   PayrollPeriod,
   PayrollEntry,
@@ -291,17 +292,17 @@ import { PagedResult } from '../../../../core/models/common.models';
                             Preview Payslip
                           </button>
                           <button mat-menu-item (click)="downloadPayslip(entry)" 
-                                  [disabled]="entry.status !== 'paid'">
+                                  [disabled]="entry.status === 'draft'">
                             <mat-icon>download</mat-icon>
                             Download PDF
                           </button>
                           <button mat-menu-item (click)="emailSinglePayslip(entry)" 
-                                  [disabled]="entry.status !== 'paid'">
+                                  [disabled]="entry.status === 'draft' || entry.status === 'calculated'">
                             <mat-icon>email</mat-icon>
                             Email Payslip
                           </button>
                           <button mat-menu-item (click)="regeneratePayslip(entry)" 
-                                  [disabled]="entry.status !== 'paid'">
+                                  [disabled]="entry.status === 'draft'">
                             <mat-icon>refresh</mat-icon>
                             Regenerate
                           </button>
@@ -410,7 +411,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private payrollService: PayrollService,
     private employeeService: EmployeeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dialog: MatDialog
   ) {
     this.filterForm = this.fb.group({
       payrollPeriodId: [''],
@@ -575,7 +577,21 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
 
   // Payslip actions
   previewPayslip(entry: PayrollEntry): void {
-    this.notificationService.showInfo('Payslip preview will be implemented');
+    const period = this.availablePeriods.find(p => p.periodId === entry.periodId);
+    
+    this.dialog.open(PayslipPreviewDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      data: {
+        entry: entry,
+        period: period,
+        onDownload: () => {
+          this.downloadPayslip(entry);
+        }
+      },
+      disableClose: false
+    });
   }
 
   downloadPayslip(entry: PayrollEntry): void {
@@ -583,19 +599,215 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `payslip-${entry.employeeCode}.pdf`;
-          link.click();
-          window.URL.revokeObjectURL(url);
-          this.notificationService.showSuccess('Payslip downloaded successfully');
+          // Check if blob is valid
+          if (blob && blob.size > 0) {
+            // Check if it's a valid PDF (starts with PDF header) or text blob from mock
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const arrayBuffer = e.target?.result as ArrayBuffer;
+              const bytes = new Uint8Array(arrayBuffer);
+              
+              // Check if it's a valid PDF (PDF files start with %PDF)
+              const isPdf = bytes.length >= 4 && 
+                           String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) === '%PDF';
+              
+              if (!isPdf) {
+                // Backend returned mock data, generate PDF on frontend instead
+                this.generatePdfFromEntry(entry);
+                return;
+              }
+              
+              // Valid PDF, proceed with download
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `payslip-${entry.employeeCode}-${entry.periodId}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+              this.notificationService.showSuccess('Payslip downloaded successfully');
+            };
+            reader.readAsArrayBuffer(blob.slice(0, 1024)); // Read first 1KB to check header
+          } else {
+            this.notificationService.showError('Payslip file is empty or unavailable');
+          }
         },
         error: (error) => {
           console.error('Download error:', error);
-          this.notificationService.showError('Failed to download payslip');
+          // If download fails, try to generate PDF from entry data
+          this.generatePdfFromEntry(entry);
         }
       });
+  }
+
+  private generatePdfFromEntry(entry: PayrollEntry): void {
+    this.notificationService.showInfo('Generating payslip PDF...');
+    
+    // Dynamically import jsPDF and autoTable
+    Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable')
+    ]).then((modules) => {
+      const { jsPDF } = modules[0];
+      const autoTable = (modules[1] as any).default || (modules[1] as any);
+      const doc = new jsPDF();
+      const period = this.availablePeriods.find(p => p.periodId === entry.periodId);
+      
+      // Helper functions
+      const formatDate = (date?: string): string => {
+        if (!date) return 'N/A';
+        return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      };
+
+      const formatCurrency = (amount: number): string => {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: entry.currency || 'USD' }).format(amount);
+      };
+
+      let yPos = 20;
+
+      // Header
+      doc.setFontSize(24);
+      doc.setTextColor(25, 118, 210);
+      doc.text('PAYSLIP', 105, yPos, { align: 'center' });
+      
+      yPos += 10;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Period: ${period?.periodName || 'N/A'}`, 105, yPos, { align: 'center' });
+      yPos += 6;
+      doc.text(`Date Range: ${formatDate(period?.startDate)} - ${formatDate(period?.endDate)}`, 105, yPos, { align: 'center' });
+      
+      yPos += 15;
+      doc.setDrawColor(25, 118, 210);
+      doc.setLineWidth(0.5);
+      doc.line(20, yPos, 190, yPos);
+
+      // Employee Information
+      yPos += 10;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Employee Information', 20, yPos);
+      yPos += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.text(`Name: ${entry.employeeName}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Code: ${entry.employeeCode}`, 20, yPos);
+      yPos += 6;
+      doc.text(`Department: ${entry.department || 'N/A'}`, 20, yPos);
+
+      // Earnings Section
+      yPos += 12;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Earnings', 20, yPos);
+      yPos += 8;
+
+      // Earnings table
+      const earningsData: any[][] = [
+        ['Description', 'Amount']
+      ];
+
+      earningsData.push(['Basic Salary', formatCurrency(entry.basicSalary)]);
+      if (entry.overtimeAmount > 0) {
+        earningsData.push(['Overtime', formatCurrency(entry.overtimeAmount)]);
+      }
+      if (entry.bonusAmount > 0) {
+        earningsData.push(['Bonus', formatCurrency(entry.bonusAmount)]);
+      }
+      Object.entries(entry.allowances || {}).forEach(([name, amount]) => {
+        earningsData.push([name, formatCurrency(Number(amount))]);
+      });
+      earningsData.push(['Gross Salary', formatCurrency(entry.grossSalary)]);
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [earningsData[0]],
+        body: earningsData.slice(1),
+        theme: 'striped',
+        headStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold' },
+        styles: { fontSize: 10 },
+        columnStyles: { 
+          0: { cellWidth: 140 },
+          1: { cellWidth: 50, halign: 'right' }
+        },
+        margin: { left: 20, right: 20 }
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+
+      // Deductions Section
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Deductions', 20, yPos);
+      yPos += 8;
+
+      const deductionsData: any[][] = [
+        ['Description', 'Amount']
+      ];
+
+      if (entry.taxAmount > 0) {
+        deductionsData.push(['Tax', formatCurrency(entry.taxAmount)]);
+      }
+      Object.entries(entry.deductions || {}).forEach(([name, amount]) => {
+        deductionsData.push([name, formatCurrency(Number(amount))]);
+      });
+      if (entry.otherDeductions > 0) {
+        deductionsData.push(['Other Deductions', formatCurrency(entry.otherDeductions)]);
+      }
+
+      const totalDeductions = entry.taxAmount + 
+        Object.values(entry.deductions || {}).reduce((sum: number, val) => sum + Number(val), 0) + 
+        entry.otherDeductions;
+      deductionsData.push(['Total Deductions', formatCurrency(totalDeductions)]);
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [deductionsData[0]],
+        body: deductionsData.slice(1),
+        theme: 'striped',
+        headStyles: { fillColor: [245, 245, 245], textColor: 0, fontStyle: 'bold' },
+        styles: { fontSize: 10 },
+        columnStyles: { 
+          0: { cellWidth: 140 },
+          1: { cellWidth: 50, halign: 'right' }
+        },
+        margin: { left: 20, right: 20 }
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      // Net Salary Box
+      doc.setFillColor(25, 118, 210);
+      doc.rect(20, yPos, 170, 25, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.text('Net Salary', 105, yPos + 10, { align: 'center' });
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(formatCurrency(entry.netSalary), 105, yPos + 20, { align: 'center' });
+
+      // Footer
+      yPos += 35;
+      doc.setTextColor(100, 100, 100);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${formatDate(entry.calculatedAt)}`, 105, yPos, { align: 'center' });
+      if (entry.paidAt) {
+        yPos += 5;
+        doc.text(`Paid on: ${formatDate(entry.paidAt)}`, 105, yPos, { align: 'center' });
+      }
+      yPos += 5;
+      doc.text(`Status: ${entry.status.toUpperCase()}`, 105, yPos, { align: 'center' });
+
+      // Save the PDF
+      doc.save(`payslip-${entry.employeeCode}-${entry.periodId}.pdf`);
+      this.notificationService.showSuccess('Payslip downloaded as PDF successfully');
+    }).catch((error) => {
+      console.error('Error loading jsPDF:', error);
+      this.notificationService.showError('Failed to generate PDF. Please ensure jspdf and jspdf-autotable are installed.');
+    });
   }
 
   emailSinglePayslip(entry: PayrollEntry): void {
@@ -630,7 +842,13 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   // Bulk actions
   generatePayslips(): void {
     const selectedEntries = this.selection.selected;
-    if (selectedEntries.length === 0) return;
+    if (selectedEntries.length === 0) {
+      this.notificationService.showWarning('Please select at least one payslip to generate');
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
 
     // Group by period
     const periodGroups = new Map<string, string[]>();
@@ -641,26 +859,36 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       periodGroups.get(entry.periodId)!.push(entry.employeeId);
     });
 
-    // Generate payslips for each period
+    // Generate payslips for each period using firstValueFrom
     const promises = Array.from(periodGroups.entries()).map(([periodId, employeeIds]) => 
-      this.payrollService.generatePayslips(periodId, employeeIds).toPromise()
+      firstValueFrom(this.payrollService.generatePayslips(periodId, employeeIds))
     );
 
     Promise.all(promises)
       .then(() => {
-        this.notificationService.showSuccess(`Generated ${selectedEntries.length} payslips successfully`);
+        this.notificationService.showSuccess(`Generated ${selectedEntries.length} payslip(s) successfully`);
         this.selection.clear();
         this.loadPayrollEntries();
+        this.isLoading = false;
+        this.cdr.markForCheck();
       })
       .catch(error => {
         console.error('Bulk generation error:', error);
-        this.notificationService.showError('Failed to generate some payslips');
+        this.notificationService.showError(error?.error?.message || 'Failed to generate some payslips. Please try again.');
+        this.isLoading = false;
+        this.cdr.markForCheck();
       });
   }
 
   emailPayslips(): void {
     const selectedEntries = this.selection.selected;
-    if (selectedEntries.length === 0) return;
+    if (selectedEntries.length === 0) {
+      this.notificationService.showWarning('Please select at least one payslip to email');
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
 
     // Group by period
     const periodGroups = new Map<string, string[]>();
@@ -671,19 +899,23 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       periodGroups.get(entry.periodId)!.push(entry.employeeId);
     });
 
-    // Email payslips for each period
+    // Email payslips for each period using firstValueFrom
     const promises = Array.from(periodGroups.entries()).map(([periodId, employeeIds]) => 
-      this.payrollService.emailPayslips(periodId, employeeIds).toPromise()
+      firstValueFrom(this.payrollService.emailPayslips(periodId, employeeIds))
     );
 
     Promise.all(promises)
       .then(() => {
-        this.notificationService.showSuccess(`Emailed ${selectedEntries.length} payslips successfully`);
+        this.notificationService.showSuccess(`Emailed ${selectedEntries.length} payslip(s) successfully`);
         this.selection.clear();
+        this.isLoading = false;
+        this.cdr.markForCheck();
       })
       .catch(error => {
         console.error('Bulk email error:', error);
-        this.notificationService.showError('Failed to email some payslips');
+        this.notificationService.showError(error?.error?.message || 'Failed to email some payslips. Please try again.');
+        this.isLoading = false;
+        this.cdr.markForCheck();
       });
   }
 
