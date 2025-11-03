@@ -13,10 +13,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Subject, takeUntil, interval, takeWhile } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
+import { Department } from '../../../../core/models/employee.models';
 import { 
   PayrollPeriod, 
   PayrollStatus,
@@ -40,7 +43,8 @@ import {
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    MatCheckboxModule
   ],
   templateUrl: './payroll-processing.component.html',
   styleUrls: ['./payroll-processing.component.scss'],
@@ -59,6 +63,7 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   selectedPeriodDetails: PayrollPeriod | null = null;
   recentProcessing: PayrollProcessingHistory[] = [];
   salaryRules: SalaryRule[] = [];
+  departments: Department[] = [];
 
   // Processing state
   isProcessing = false;
@@ -70,14 +75,17 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private payrollService: PayrollService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private employeeService: EmployeeService
   ) {
     this.selectionForm = this.fb.group({
       selectedPeriod: ['', Validators.required]
     });
 
     this.settingsForm = this.fb.group({
-      selectedRuleId: ['', Validators.required]
+      selectedRuleId: ['', Validators.required],
+      selectedDepartmentIds: [[]],
+      includeTax: [false]
     });
   }
 
@@ -86,6 +94,8 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     this.setupFormSubscriptions();
     this.loadRecentProcessing();
     this.loadSalaryRules();
+    this.loadDepartments();
+    this.setupSettingsFormValidation();
   }
 
   ngOnDestroy(): void {
@@ -158,6 +168,60 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadDepartments(): void {
+    this.employeeService.getDepartments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => {
+          this.departments = departments;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading departments:', error);
+          this.notificationService.showError('Failed to load departments');
+        }
+      });
+  }
+
+  private setupSettingsFormValidation(): void {
+    // Watch for changes in selectedRuleId and includeTax to validate
+    this.settingsForm.get('selectedRuleId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.validateTaxAndRuleConflict();
+      });
+
+    this.settingsForm.get('includeTax')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.validateTaxAndRuleConflict();
+      });
+  }
+
+  private validateTaxAndRuleConflict(): void {
+    const selectedRuleId = this.settingsForm.get('selectedRuleId')?.value;
+    const includeTax = this.settingsForm.get('includeTax')?.value;
+    
+    if (selectedRuleId && includeTax) {
+      const selectedRule = this.salaryRules.find(r => r.ruleId === selectedRuleId);
+      
+      if (selectedRule) {
+        // Check if the rule's component type is 'deduction'
+        // Note: 'earning' in backend means allowance, 'deduction' means deduction
+        const componentType = selectedRule.componentType?.toLowerCase();
+        
+        if (componentType === 'deduction') {
+          // Clear tax checkbox and show warning
+          this.settingsForm.patchValue({ includeTax: false }, { emitEvent: false });
+          this.notificationService.showWarning(
+            'Tax cannot be included with a deduction-type salary rule. The rule already includes deductions.'
+          );
+          this.cdr.markForCheck();
+        }
+      }
+    }
+  }
+
   startProcessing(): void {
     if (!this.selectedPeriodDetails) return;
 
@@ -203,10 +267,39 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
 
   private completeProcessing(): void {
     if (!this.selectedPeriodDetails) return;
+    
     const ruleId = this.settingsForm.get('selectedRuleId')?.value as string;
+    const departmentIds = this.settingsForm.get('selectedDepartmentIds')?.value as string[];
+    const includeTax = this.settingsForm.get('includeTax')?.value as boolean;
+
+    // Validate tax and rule conflict one more time before processing
+    if (includeTax && ruleId) {
+      const selectedRule = this.salaryRules.find(r => r.ruleId === ruleId);
+      const componentType = selectedRule?.componentType?.toLowerCase();
+      
+      // Check if the selected rule is a deduction type
+      if (componentType === 'deduction') {
+        this.notificationService.showError(
+          'Cannot process payroll: Tax cannot be included with a deduction-type salary rule. Please uncheck "Include Tax" or select an allowance-type rule.'
+        );
+        this.isProcessing = false;
+        this.cdr.markForCheck();
+        return;
+      }
+    }
+
+    // Filter out empty department IDs if any
+    const validDepartmentIds = departmentIds && departmentIds.length > 0 
+      ? departmentIds.filter(id => id && id.trim() !== '') 
+      : undefined;
 
     // Call actual API
-    this.payrollService.calculatePayroll(this.selectedPeriodDetails.periodId, ruleId)
+    this.payrollService.calculatePayroll(
+      this.selectedPeriodDetails.periodId, 
+      ruleId, 
+      validDepartmentIds, 
+      includeTax
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -246,7 +339,9 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     this.processingResults = null;
     this.selectionForm.reset();
     this.settingsForm.reset({
-      selectedRuleId: ''
+      selectedRuleId: '',
+      selectedDepartmentIds: [],
+      includeTax: false
     });
     this.cdr.markForCheck();
   }
