@@ -86,6 +86,9 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
                   <td>{{ allowance.name }}</td>
                   <td class="text-right">{{ allowance.amount | currency:entry.currency }}</td>
                 </tr>
+                <tr *ngIf="getAllowances().length === 0 && hasNoAllowances()">
+                  <td colspan="2" class="text-center" style="color: #999; font-style: italic;">No allowances</td>
+                </tr>
                 <tr class="total-row">
                   <td><strong>Gross Salary</strong></td>
                   <td class="text-right"><strong>{{ entry.grossSalary | currency:entry.currency }}</strong></td>
@@ -443,12 +446,26 @@ export class PayslipPreviewDialogComponent {
 
   getAllowances(): Array<{ name: string; amount: number }> {
     if (!this.entry.allowances) return [];
-    return Object.entries(this.entry.allowances).map(([name, amount]) => ({ name, amount }));
+    return Object.entries(this.entry.allowances)
+      .map(([name, amount]) => ({ 
+        name, 
+        amount: typeof amount === 'number' ? amount : (typeof amount === 'string' ? parseFloat(amount) || 0 : 0) 
+      }))
+      .filter(item => item.amount > 0); // Only show allowances with positive amounts
+  }
+
+  hasNoAllowances(): boolean {
+    return !this.entry.allowances || Object.keys(this.entry.allowances).length === 0;
   }
 
   getDeductions(): Array<{ name: string; amount: number }> {
     if (!this.entry.deductions) return [];
-    return Object.entries(this.entry.deductions).map(([name, amount]) => ({ name, amount }));
+    return Object.entries(this.entry.deductions)
+      .map(([name, amount]) => ({ 
+        name, 
+        amount: typeof amount === 'number' ? amount : (typeof amount === 'string' ? parseFloat(amount) || 0 : 0) 
+      }))
+      .filter(item => item.amount > 0); // Only show deductions with positive amounts
   }
 
   getTotalDeductions(): number {

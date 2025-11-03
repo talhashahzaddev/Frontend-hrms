@@ -101,6 +101,7 @@ export class PayrollService {
           description: r.description ?? '',
           componentId: r.componentId ?? r.ComponentId,
           componentName: r.componentName ?? r.ComponentName ?? '',
+          componentType: (r.componentType ?? r.ComponentType ?? (r.type ?? r.Type ?? 'allowance')).toLowerCase() === 'deduction' ? 'deduction' : 'allowance',
           value: r.value ?? r.componentValue ?? r.ComponentValue ?? r.valueOverride ?? 0,
           valueOverride: r.valueOverride ?? null,
           departmentId: r.departmentId ?? r.DepartmentId ?? null,
@@ -206,10 +207,15 @@ export class PayrollService {
   }
 
   // Payroll Processing
-  calculatePayroll(periodId: string, ruleId?: string): Observable<ApiResponse<PayrollCalculationResult>> {
-    const body: any = {};
+  calculatePayroll(periodId: string, ruleId?: string, departmentIds?: string[], includeTax: boolean = false): Observable<ApiResponse<PayrollCalculationResult>> {
+    const body: any = {
+      includeTax: includeTax
+    };
     if (ruleId) {
       body.ruleId = ruleId;
+    }
+    if (departmentIds && departmentIds.length > 0) {
+      body.departmentIds = departmentIds;
     }
     return this.http.post<ApiResponse<PayrollCalculationResult>>(`${this.apiUrl}/payroll/periods/${periodId}/calculate`, body);
   }

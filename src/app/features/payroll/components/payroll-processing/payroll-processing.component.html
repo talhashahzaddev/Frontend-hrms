@@ -75,7 +75,7 @@
             <ng-template matStepLabel>Review Processing Settings</ng-template>
             
             <div class="step-content">
-              <h4>Select Salary Rule</h4>
+              <h4>Review Processing Settings</h4>
 
               <div class="settings-grid">
                 <mat-form-field appearance="outline" class="full-width">
@@ -84,9 +84,36 @@
                     <mat-option value="">Select a rule</mat-option>
                     <mat-option *ngFor="let rule of salaryRules" [value]="rule.ruleId">
                       {{ rule.rulename }}
+                      <span *ngIf="rule.componentType" class="rule-type-badge">
+                        ({{ rule.componentType === 'allowance' ? 'Allowance' : 'Deduction' }})
+                      </span>
                     </mat-option>
                   </mat-select>
+                  <mat-hint>Select a salary rule to apply during payroll processing</mat-hint>
                 </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Departments</mat-label>
+                  <mat-select formControlName="selectedDepartmentIds" multiple>
+                    <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+                      {{ dept.departmentName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Select specific departments or leave empty for all departments</mat-hint>
+                </mat-form-field>
+
+                <div class="checkbox-container full-width">
+                  <mat-checkbox formControlName="includeTax">
+                    Include Tax
+                  </mat-checkbox>
+                  <mat-hint>Apply tax deductions on every position of selected departments</mat-hint>
+                  <div *ngIf="settingsForm.get('includeTax')?.value && settingsForm.get('selectedRuleId')?.value" class="tax-warning">
+                    <small class="warning-text">
+                      <mat-icon>info</mat-icon>
+                      Tax will be calculated after allowances are applied. If no allowances, tax will be calculated on basic salary.
+                    </small>
+                  </div>
+                </div>
               </div>
 
               <div class="step-actions">
