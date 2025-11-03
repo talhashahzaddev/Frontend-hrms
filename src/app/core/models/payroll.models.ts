@@ -246,6 +246,7 @@ export interface SalaryRule {
   description: string;
   componentId: string;
   componentName: string;
+  componentType?: 'allowance' | 'deduction' | 'earning';
   // condition: string;
   value: number;
   isActive: boolean;
