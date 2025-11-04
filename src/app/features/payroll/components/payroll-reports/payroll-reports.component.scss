@@ -97,17 +97,334 @@
       }
 
       .department-breakdown {
+        margin-top: 32px;
+        margin-bottom: 32px;
+
         h3 {
-          margin: 0 0 16px 0;
+          margin: 0 0 20px 0;
+          font-size: 20px;
+          font-weight: 600;
           color: #1976d2;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          &::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+          }
         }
 
         .department-table {
           width: 100%;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
           .mat-mdc-header-cell {
             font-weight: 600;
             color: #1976d2;
+            background-color: #f9fafb;
+          }
+
+          .mat-mdc-cell {
+            padding: 16px 12px;
+          }
+        }
+      }
+
+      .statistics-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+
+        .stat-card {
+          border-radius: 16px;
+          overflow: hidden;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          border: none;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+          }
+
+          mat-card-content {
+            padding: 24px !important;
+          }
+
+          .stat-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            position: relative;
+
+            .stat-icon-wrapper {
+              width: 64px;
+              height: 64px;
+              border-radius: 16px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+              position: relative;
+              overflow: hidden;
+
+              &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+                border-radius: 16px;
+              }
+
+              .stat-icon {
+                font-size: 32px;
+                width: 32px;
+                height: 32px;
+                position: relative;
+                z-index: 1;
+                color: white;
+              }
+            }
+
+            .stat-details {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+
+              .stat-label {
+                font-size: 13px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: rgba(0, 0, 0, 0.6);
+                margin-bottom: 4px;
+              }
+
+              .stat-value {
+                font-size: 28px;
+                font-weight: 700;
+                line-height: 1.2;
+                color: #1f2937;
+                margin: 4px 0;
+                font-family: 'Inter', sans-serif;
+              }
+
+              .stat-footer {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                margin-top: 8px;
+                padding-top: 12px;
+                border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+                .stat-indicator {
+                  font-size: 16px;
+                  width: 16px;
+                  height: 16px;
+                  color: rgba(0, 0, 0, 0.5);
+                }
+
+                span {
+                  font-size: 12px;
+                  font-weight: 500;
+                  color: rgba(0, 0, 0, 0.6);
+                  text-transform: uppercase;
+                  letter-spacing: 0.3px;
+                }
+              }
+            }
+          }
+
+          // Employee Card (Total Employees)
+          &.stat-card-employee {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+
+            .stat-item {
+              .stat-icon-wrapper {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+              }
+
+              .stat-details {
+                .stat-label,
+                .stat-value {
+                  color: white;
+                }
+
+                .stat-footer {
+                  border-top-color: rgba(255, 255, 255, 0.2);
+
+                  .stat-indicator,
+                  span {
+                    color: rgba(255, 255, 255, 0.9);
+                  }
+                }
+              }
+            }
+          }
+
+          // Primary Card (Total Payroll)
+          &.stat-card-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+
+            .stat-item {
+              .stat-icon-wrapper {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+              }
+
+              .stat-details {
+                .stat-label,
+                .stat-value {
+                  color: white;
+                }
+
+                .stat-footer {
+                  border-top-color: rgba(255, 255, 255, 0.2);
+
+                  .stat-indicator,
+                  span {
+                    color: rgba(255, 255, 255, 0.9);
+                  }
+                }
+              }
+            }
+          }
+
+          // Success Card (Average Salary)
+          &.stat-card-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+
+            .stat-item {
+              .stat-icon-wrapper {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+              }
+
+              .stat-details {
+                .stat-label,
+                .stat-value {
+                  color: white;
+                }
+
+                .stat-footer {
+                  border-top-color: rgba(255, 255, 255, 0.2);
+
+                  .stat-indicator,
+                  span {
+                    color: rgba(255, 255, 255, 0.9);
+                  }
+                }
+              }
+            }
+          }
+
+          // Warning Card (Total Deductions)
+          &.stat-card-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+
+            .stat-item {
+              .stat-icon-wrapper {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+              }
+
+              .stat-details {
+                .stat-label,
+                .stat-value {
+                  color: white;
+                }
+
+                .stat-footer {
+                  border-top-color: rgba(255, 255, 255, 0.2);
+
+                  .stat-indicator,
+                  span {
+                    color: rgba(255, 255, 255, 0.9);
+                  }
+                }
+              }
+            }
+          }
+
+          // Info Card (Total Allowances)
+          &.stat-card-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+
+            .stat-item {
+              .stat-icon-wrapper {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+              }
+
+              .stat-details {
+                .stat-label,
+                .stat-value {
+                  color: white;
+                }
+
+                .stat-footer {
+                  border-top-color: rgba(255, 255, 255, 0.2);
+
+                  .stat-indicator,
+                  span {
+                    color: rgba(255, 255, 255, 0.9);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .trends-section {
+        margin-top: 32px;
+
+        h3 {
+          margin: 0 0 20px 0;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1976d2;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          &::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+          }
+        }
+
+        .trends-table {
+          width: 100%;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+          .mat-mdc-header-cell {
+            font-weight: 600;
+            color: #1976d2;
+            background-color: #f9fafb;
           }
 
           .mat-mdc-cell {
@@ -144,6 +461,121 @@
 
         mat-form-field {
           width: 300px;
+        }
+      }
+
+      .period-groups {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+
+        .period-group {
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          overflow: hidden;
+          background: white;
+          transition: box-shadow 0.2s ease;
+
+          &:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .period-header {
+            background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+            border-bottom: 2px solid #e0e0e0;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+
+            &:hover {
+              background: linear-gradient(135deg, #e8f0f8 0%, #f5f7fa 100%);
+            }
+
+            .period-header-content {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              padding: 20px 24px;
+
+              .expand-icon {
+                font-size: 28px;
+                width: 28px;
+                height: 28px;
+                color: #1976d2;
+                transition: transform 0.3s ease;
+
+                &.expanded {
+                  transform: rotate(90deg);
+                }
+              }
+
+              .period-info-main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+
+                .period-name {
+                  margin: 0;
+                  font-size: 18px;
+                  font-weight: 600;
+                  color: #1976d2;
+                }
+
+                .period-date {
+                  font-size: 14px;
+                  color: #666;
+                  font-weight: 400;
+                }
+              }
+
+              .period-stats {
+                display: flex;
+                gap: 24px;
+                align-items: center;
+                flex-wrap: wrap;
+
+                .stat-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                  font-size: 14px;
+                  color: #666;
+                  font-weight: 500;
+
+                  mat-icon {
+                    font-size: 18px;
+                    width: 18px;
+                    height: 18px;
+                    color: #1976d2;
+                  }
+
+                  &.net-stat {
+                    color: #4caf50;
+                    font-weight: 600;
+                  }
+                }
+              }
+            }
+          }
+
+          .period-entries {
+            padding: 16px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            animation: slideDown 0.3s ease-out;
+
+            @keyframes slideDown {
+              from {
+                opacity: 0;
+                max-height: 0;
+              }
+              to {
+                opacity: 1;
+                max-height: 1000px;
+              }
+            }
+          }
         }
       }
 
@@ -265,6 +697,36 @@
         .summary-card .stat-item {
           .stat-details .stat-value {
             font-size: 20px;
+          }
+        }
+      }
+
+      .statistics-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+
+        .stat-card {
+          .stat-item {
+            .stat-icon-wrapper {
+              width: 56px;
+              height: 56px;
+
+              .stat-icon {
+                font-size: 28px;
+                width: 28px;
+                height: 28px;
+              }
+            }
+
+            .stat-details {
+              .stat-value {
+                font-size: 24px;
+              }
+
+              .stat-label {
+                font-size: 12px;
+              }
+            }
           }
         }
       }
