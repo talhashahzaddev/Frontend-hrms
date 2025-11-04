@@ -102,6 +102,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       hireDate: [''],
       gender: [''],
       maritalStatus: [''],
+      basicSalary:[''],
       nationality: [''],
       emergencyContact: this.formBuilder.group({
         name: [''],
