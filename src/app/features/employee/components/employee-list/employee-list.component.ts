@@ -16,12 +16,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith, combineLatest } from 'rxjs';
 
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
     selector: 'app-employee-list',
@@ -42,7 +44,8 @@ import { Employee, Department, Position, EmployeeSearchRequest } from '../../../
         MatProgressSpinnerModule,
         MatTooltipModule,
         MatCheckboxModule,
-        MatDividerModule
+        MatDividerModule,
+        MatDialogModule
     ],
     templateUrl: './employee-list.component.html',
     styleUrls: ['./employee-list.component.scss']
@@ -106,7 +109,8 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
 
   constructor(
     private employeeService: EmployeeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -229,20 +233,34 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   }
 
   deleteEmployee(employee: Employee): void {
-    if (confirm(`Are you sure you want to delete employee ${employee.firstName} ${employee.lastName}?`)) {
-      this.employeeService.deleteEmployee(employee.employeeId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Employee deleted successfully');
-            this.loadEmployees();
-          },
-          error: (error) => {
-            console.error('Failed to delete employee:', error);
-            this.notificationService.showError('Failed to delete employee');
-          }
-        });
-    }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Employee',
+      message: 'Are you sure you want to delete this employee?',
+      itemName: `${employee.firstName} ${employee.lastName}`
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.employeeService.deleteEmployee(employee.employeeId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Employee deleted successfully');
+              this.loadEmployees();
+            },
+            error: (error) => {
+              console.error('Failed to delete employee:', error);
+              this.notificationService.showError('Failed to delete employee');
+            }
+          });
+      }
+    });
   }
 
   toggleEmployeeStatus(employee: Employee): void {
