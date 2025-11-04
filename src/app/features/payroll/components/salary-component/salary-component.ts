@@ -24,6 +24,7 @@ import {
   UpdateSalaryRuleRequest
 } from '../../../../core/models/payroll.models';
 import { Department, Position } from '../../../../core/models/employee.models';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-salary-component',
@@ -195,19 +196,33 @@ export class SalaryComponent implements OnInit {
   }
 
   deleteComponent(component: SalaryComponentModel): void {
-    if (confirm(`Are you sure you want to delete ${component.name}?`)) {
-      this.loading = true;
-      this.payrollService.deleteSalaryComponent(component.componentId).subscribe(
-        response => {
-          this.snackBar.open('Salary component deleted successfully', 'Close', { duration: 3000 });
-          this.loadSalaryComponents();
-        },
-        error => {
-          this.snackBar.open('Failed to delete salary component', 'Close', { duration: 3000 });
-          this.loading = false;
-        }
-      );
-    }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Salary Component',
+      message: 'Are you sure you want to delete this salary component?',
+      itemName: component.name
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading = true;
+        this.payrollService.deleteSalaryComponent(component.componentId).subscribe(
+          response => {
+            this.snackBar.open('Salary component deleted successfully', 'Close', { duration: 3000 });
+            this.loadSalaryComponents();
+          },
+          error => {
+            this.snackBar.open('Failed to delete salary component', 'Close', { duration: 3000 });
+            this.loading = false;
+          }
+        );
+      }
+    });
   }
 
   resetForm(): void {
@@ -285,19 +300,33 @@ export class SalaryComponent implements OnInit {
   }
 
   deleteRule(rule: SalaryRule): void {
-    if (confirm(`Are you sure you want to delete ${rule.rulename}?`)) {
-      this.loading = true;
-      this.payrollService.deleteSalaryRule(rule.ruleId).subscribe(
-        response => {
-          this.snackBar.open('Salary rule deleted successfully', 'Close', { duration: 3000 });
-          this.loadSalaryRules();
-        },
-        error => {
-          this.snackBar.open('Failed to delete salary rule', 'Close', { duration: 3000 });
-          this.loading = false;
-        }
-      );
-    }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Salary Rule',
+      message: 'Are you sure you want to delete this salary rule?',
+      itemName: rule.rulename
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading = true;
+        this.payrollService.deleteSalaryRule(rule.ruleId).subscribe(
+          response => {
+            this.snackBar.open('Salary rule deleted successfully', 'Close', { duration: 3000 });
+            this.loadSalaryRules();
+          },
+          error => {
+            this.snackBar.open('Failed to delete salary rule', 'Close', { duration: 3000 });
+            this.loading = false;
+          }
+        );
+      }
+    });
   }
 
   resetRuleForm(): void {

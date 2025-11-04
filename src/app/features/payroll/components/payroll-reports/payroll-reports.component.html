@@ -74,55 +74,99 @@
   <mat-card class="reports-card">
     <mat-tab-group>
       
-      <!-- Summary Report -->
-      <mat-tab label="Summary Report">
+      <!-- Statistics Tab -->
+      <mat-tab label="Statistics">
         <div class="tab-content">
           
-          <!-- Summary Cards -->
-          <div class="summary-cards" *ngIf="reportData">
-            <mat-card class="summary-card">
+          <!-- Statistics Cards -->
+          <div class="statistics-cards">
+            <!-- Total Employees Card -->
+            <mat-card class="stat-card stat-card-employee" *ngIf="reportData">
               <mat-card-content>
                 <div class="stat-item">
-                  <mat-icon>people</mat-icon>
+                  <div class="stat-icon-wrapper">
+                    <mat-icon class="stat-icon">people</mat-icon>
+                  </div>
                   <div class="stat-details">
-                    <div class="stat-value">{{ reportData.totalEmployees }}</div>
                     <div class="stat-label">Total Employees</div>
+                    <div class="stat-value">{{ reportData.totalEmployees }}</div>
+                    <div class="stat-footer">
+                      <mat-icon class="stat-indicator">group</mat-icon>
+                      <span>Active Staff</span>
+                    </div>
                   </div>
                 </div>
               </mat-card-content>
             </mat-card>
 
-            <mat-card class="summary-card">
+            <!-- Statistics Data Cards -->
+            <mat-card class="stat-card stat-card-primary" *ngIf="statisticsData">
               <mat-card-content>
                 <div class="stat-item">
-                  <mat-icon>attach_money</mat-icon>
+                  <div class="stat-icon-wrapper">
+                    <mat-icon class="stat-icon">trending_up</mat-icon>
+                  </div>
                   <div class="stat-details">
-                    <div class="stat-value">{{ reportData.totalGrossSalary | currency }}</div>
-                    <div class="stat-label">Total Gross Pay</div>
+                    <div class="stat-label">Total Payroll</div>
+                    <div class="stat-value">{{ statisticsData.totalPayroll | currency }}</div>
+                    <div class="stat-footer">
+                      <mat-icon class="stat-indicator">arrow_upward</mat-icon>
+                      <span>Overall Total</span>
+                    </div>
                   </div>
                 </div>
               </mat-card-content>
             </mat-card>
 
-            <mat-card class="summary-card">
+            <mat-card class="stat-card stat-card-success" *ngIf="statisticsData">
               <mat-card-content>
                 <div class="stat-item">
-                  <mat-icon>remove_circle</mat-icon>
+                  <div class="stat-icon-wrapper">
+                    <mat-icon class="stat-icon">calculate</mat-icon>
+                  </div>
                   <div class="stat-details">
-                    <div class="stat-value">{{ reportData.totalTax | currency }}</div>
+                    <div class="stat-label">Average Salary</div>
+                    <div class="stat-value">{{ statisticsData.averagePayroll | currency }}</div>
+                    <div class="stat-footer">
+                      <mat-icon class="stat-indicator">bar_chart</mat-icon>
+                      <span>Per Employee</span>
+                    </div>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card stat-card-warning" *ngIf="statisticsData">
+              <mat-card-content>
+                <div class="stat-item">
+                  <div class="stat-icon-wrapper">
+                    <mat-icon class="stat-icon">remove_circle</mat-icon>
+                  </div>
+                  <div class="stat-details">
                     <div class="stat-label">Total Deductions</div>
+                    <div class="stat-value">{{ statisticsData.totalDeductions | currency }}</div>
+                    <div class="stat-footer">
+                      <mat-icon class="stat-indicator">trending_down</mat-icon>
+                      <span>Deductions</span>
+                    </div>
                   </div>
                 </div>
               </mat-card-content>
             </mat-card>
 
-            <mat-card class="summary-card">
+            <mat-card class="stat-card stat-card-info" *ngIf="statisticsData">
               <mat-card-content>
                 <div class="stat-item">
-                  <mat-icon>account_balance</mat-icon>
+                  <div class="stat-icon-wrapper">
+                    <mat-icon class="stat-icon">add_circle</mat-icon>
+                  </div>
                   <div class="stat-details">
-                    <div class="stat-value">{{ reportData.totalNetSalary | currency }}</div>
-                    <div class="stat-label">Total Net Pay</div>
+                    <div class="stat-label">Total Allowances</div>
+                    <div class="stat-value">{{ statisticsData.totalAllowances | currency }}</div>
+                    <div class="stat-footer">
+                      <mat-icon class="stat-indicator">arrow_upward</mat-icon>
+                      <span>Benefits</span>
+                    </div>
                   </div>
                 </div>
               </mat-card-content>
@@ -162,63 +206,6 @@
               <mat-header-row *matHeaderRowDef="departmentColumns"></mat-header-row>
               <mat-row *matRowDef="let row; columns: departmentColumns;"></mat-row>
             </mat-table>
-          </div>
-
-        </div>
-      </mat-tab>
-
-      <!-- Statistics Tab -->
-      <mat-tab label="Statistics">
-        <div class="tab-content">
-          
-          <div class="statistics-cards" *ngIf="statisticsData">
-            <mat-card class="stat-card">
-              <mat-card-content>
-                <div class="stat-item">
-                  <mat-icon>trending_up</mat-icon>
-                  <div class="stat-details">
-                    <div class="stat-value">{{ statisticsData.totalPayroll | currency }}</div>
-                    <div class="stat-label">Total Payroll</div>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-
-            <mat-card class="stat-card">
-              <mat-card-content>
-                <div class="stat-item">
-                  <mat-icon>calculate</mat-icon>
-                  <div class="stat-details">
-                    <div class="stat-value">{{ statisticsData.averagePayroll | currency }}</div>
-                    <div class="stat-label">Average Salary</div>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-
-            <mat-card class="stat-card">
-              <mat-card-content>
-                <div class="stat-item">
-                  <mat-icon>remove</mat-icon>
-                  <div class="stat-details">
-                    <div class="stat-value">{{ statisticsData.totalDeductions | currency }}</div>
-                    <div class="stat-label">Total Deductions</div>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-
-            <mat-card class="stat-card">
-              <mat-card-content>
-                <div class="stat-item">
-                  <mat-icon>add</mat-icon>
-                  <div class="stat-details">
-                    <div class="stat-value">{{ statisticsData.totalAllowances | currency }}</div>
-                    <div class="stat-label">Total Allowances</div>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
           </div>
 
           <!-- Monthly Trends -->
@@ -261,52 +248,84 @@
             </mat-form-field>
           </div>
 
-          <div class="detailed-table" *ngIf="detailedData && detailedData.length > 0">
-            <mat-table [dataSource]="filteredDetailedData" class="detailed-payroll-table">
-              
-              <ng-container matColumnDef="employee">
-                <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <div class="employee-info">
-                    <strong>{{ entry.employeeName }}</strong>
-                    <small>{{ entry.employeeCode }}</small>
+          <!-- Period Groups -->
+          <div class="period-groups" *ngIf="periodGroups.length > 0">
+            <div *ngFor="let group of periodGroups" class="period-group">
+              <!-- Period Header - Expandable -->
+              <div class="period-header" (click)="togglePeriod(group.periodId)">
+                <div class="period-header-content">
+                  <mat-icon class="expand-icon" [class.expanded]="isPeriodExpanded(group.periodId)">
+                    {{ isPeriodExpanded(group.periodId) ? 'expand_more' : 'chevron_right' }}
+                  </mat-icon>
+                  <div class="period-info-main">
+                    <h3 class="period-name">{{ group.periodName }}</h3>
+                    <span class="period-date">{{ group.dateRange }}</span>
                   </div>
-                </mat-cell>
-              </ng-container>
+                  <div class="period-stats">
+                    <span class="stat-item">
+                      <mat-icon>people</mat-icon>
+                      {{ getPeriodEntriesCount(group.periodId) }} employees
+                    </span>
+                    <span class="stat-item">
+                      <mat-icon>attach_money</mat-icon>
+                      Gross: {{ getPeriodTotalGross(group.periodId) | currency }}
+                    </span>
+                    <span class="stat-item net-stat">
+                      Net: {{ getPeriodTotalNet(group.periodId) | currency }}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-              <ng-container matColumnDef="basicSalary">
-                <mat-header-cell *matHeaderCellDef>Basic Salary</mat-header-cell>
-                <mat-cell *matCellDef="let entry">{{ entry.basicSalary | currency }}</mat-cell>
-              </ng-container>
+              <!-- Period Entries Table - Collapsible -->
+              <div class="period-entries" *ngIf="isPeriodExpanded(group.periodId)">
+                <mat-table [dataSource]="group.entries" class="detailed-payroll-table">
+                  
+                  <ng-container matColumnDef="employee">
+                    <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">
+                      <div class="employee-info">
+                        <strong>{{ entry.employeeName }}</strong>
+                        <small> ({{ entry.employeeCode }})</small>
+                      </div>
+                    </mat-cell>
+                  </ng-container>
 
-              <ng-container matColumnDef="allowances">
-                <mat-header-cell *matHeaderCellDef>Allowances</mat-header-cell>
-                <mat-cell *matCellDef="let entry">{{ getTotalAllowances(entry) | currency }}</mat-cell>
-              </ng-container>
+                  <ng-container matColumnDef="basicSalary">
+                    <mat-header-cell *matHeaderCellDef>Basic Salary</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">{{ entry.basicSalary | currency }}</mat-cell>
+                  </ng-container>
 
-              <ng-container matColumnDef="deductions">
-                <mat-header-cell *matHeaderCellDef>Deductions</mat-header-cell>
-                <mat-cell *matCellDef="let entry">{{ getTotalDeductions(entry) | currency }}</mat-cell>
-              </ng-container>
+                  <ng-container matColumnDef="allowances">
+                    <mat-header-cell *matHeaderCellDef>Allowances</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">{{ getTotalAllowances(entry) | currency }}</mat-cell>
+                  </ng-container>
 
-              <ng-container matColumnDef="grossSalary">
-                <mat-header-cell *matHeaderCellDef>Gross Salary</mat-header-cell>
-                <mat-cell *matCellDef="let entry">{{ entry.grossSalary | currency }}</mat-cell>
-              </ng-container>
+                  <ng-container matColumnDef="deductions">
+                    <mat-header-cell *matHeaderCellDef>Deductions</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">{{ getTotalDeductions(entry) | currency }}</mat-cell>
+                  </ng-container>
 
-              <ng-container matColumnDef="netSalary">
-                <mat-header-cell *matHeaderCellDef>Net Salary</mat-header-cell>
-                <mat-cell *matCellDef="let entry">
-                  <span class="net-salary">{{ entry.netSalary | currency }}</span>
-                </mat-cell>
-              </ng-container>
+                  <ng-container matColumnDef="grossSalary">
+                    <mat-header-cell *matHeaderCellDef>Gross Salary</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">{{ entry.grossSalary | currency }}</mat-cell>
+                  </ng-container>
 
-              <mat-header-row *matHeaderRowDef="detailedColumns"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: detailedColumns;"></mat-row>
-            </mat-table>
+                  <ng-container matColumnDef="netSalary">
+                    <mat-header-cell *matHeaderCellDef>Net Salary</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">
+                      <span class="net-salary">{{ entry.netSalary | currency }}</span>
+                    </mat-cell>
+                  </ng-container>
+
+                  <mat-header-row *matHeaderRowDef="detailedColumns"></mat-header-row>
+                  <mat-row *matRowDef="let row; columns: detailedColumns;"></mat-row>
+                </mat-table>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!detailedData || detailedData.length === 0" class="empty-state">
+          <div *ngIf="(!periodGroups || periodGroups.length === 0) && !isLoading" class="empty-state">
             <mat-icon>assessment</mat-icon>
             <h3>No Detailed Data Available</h3>
             <p>Select filters and generate a report to view detailed payroll data.</p>

@@ -112,10 +112,10 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
                   <td>Tax</td>
                   <td class="text-right">{{ entry.taxAmount | currency:entry.currency }}</td>
                 </tr>
-                <tr *ngFor="let deduction of getDeductions()">
+                <!-- <tr *ngFor="let deduction of getDeductions()">
                   <td>{{ deduction.name }}</td>
                   <td class="text-right">{{ deduction.amount | currency:entry.currency }}</td>
-                </tr>
+                </tr> -->
                 <tr *ngIf="entry.otherDeductions > 0">
                   <td>Other Deductions</td>
                   <td class="text-right">{{ entry.otherDeductions | currency:entry.currency }}</td>

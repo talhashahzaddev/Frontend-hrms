@@ -69,6 +69,9 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
   detailedData: any[] = [];
   filteredDetailedData: any[] = [];
   searchTerm = '';
+  groupedEntries: Map<string, any[]> = new Map();
+  periodGroups: Array<{ periodId: string; periodName: string; dateRange: string; entries: any[] }> = [];
+  expandedPeriods = new Set<string>();
 
   // UI state
   isLoading = false;
@@ -269,7 +272,85 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         entry.employeeCode.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
+    this.groupEntriesByPeriod();
     this.cdr.markForCheck();
+  }
+
+  // Group entries by period
+  private groupEntriesByPeriod(): void {
+    this.groupedEntries.clear();
+    this.periodGroups = [];
+
+    // Filter entries based on search term
+    const entriesToGroup = this.searchTerm 
+      ? this.filteredDetailedData 
+      : this.detailedData;
+
+    // Group entries by periodId
+    entriesToGroup.forEach(entry => {
+      const periodId = entry.periodId || entry.payrollPeriodId || 'unknown';
+      if (!this.groupedEntries.has(periodId)) {
+        this.groupedEntries.set(periodId, []);
+      }
+      this.groupedEntries.get(periodId)!.push(entry);
+    });
+
+    // Create period groups with metadata
+    this.groupedEntries.forEach((entries, periodId) => {
+      const period = this.availablePeriods.find(p => p.periodId === periodId);
+      const periodName = period ? period.periodName : 'Unknown Period';
+      const dateRange = period 
+        ? `${this.formatDate(period.startDate)} - ${this.formatDate(period.endDate)}`
+        : '';
+      
+      this.periodGroups.push({
+        periodId,
+        periodName,
+        dateRange,
+        entries: entries.sort((a, b) => a.employeeName?.localeCompare(b.employeeName) || 0)
+      });
+    });
+
+    // Sort periods by date (most recent first)
+    this.periodGroups.sort((a, b) => {
+      const periodA = this.availablePeriods.find(p => p.periodId === a.periodId);
+      const periodB = this.availablePeriods.find(p => p.periodId === b.periodId);
+      if (!periodA || !periodB) return 0;
+      return new Date(periodB.endDate).getTime() - new Date(periodA.endDate).getTime();
+    });
+  }
+
+  togglePeriod(periodId: string): void {
+    if (this.expandedPeriods.has(periodId)) {
+      this.expandedPeriods.delete(periodId);
+    } else {
+      this.expandedPeriods.add(periodId);
+    }
+    this.cdr.markForCheck();
+  }
+
+  isPeriodExpanded(periodId: string): boolean {
+    return this.expandedPeriods.has(periodId);
+  }
+
+  getPeriodEntriesCount(periodId: string): number {
+    return this.groupedEntries.get(periodId)?.length || 0;
+  }
+
+  formatDate(dateString: string | Date): string {
+    if (!dateString) return '';
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  getPeriodTotalGross(periodId: string): number {
+    const entries = this.groupedEntries.get(periodId) || [];
+    return entries.reduce((sum, entry) => sum + (entry.grossSalary || 0), 0);
+  }
+
+  getPeriodTotalNet(periodId: string): number {
+    const entries = this.groupedEntries.get(periodId) || [];
+    return entries.reduce((sum, entry) => sum + (entry.netSalary || 0), 0);
   }
 
   getTotalAllowances(entry: any): number {
@@ -292,6 +373,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
             this.departmentData = response.data.departmentBreakdown || [];
             this.detailedData = response.data.entries || [];
             this.filteredDetailedData = [...this.detailedData];
+            this.groupEntriesByPeriod();
           }
           this.isLoading = false;
           this.cdr.markForCheck();

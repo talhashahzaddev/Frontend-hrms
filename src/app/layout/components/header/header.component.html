@@ -59,21 +59,26 @@
       </mat-icon>
     </button>
 
-    <!-- User Profile Menu -->
-    <button 
-      mat-icon-button 
-      class="user-menu-button"
-      [matMenuTriggerFor]="userMenu"
-      aria-label="User menu">
-      <div class="user-avatar">
-        <p-avatar 
-          [label]="getUserInitials()" 
-          size="normal" 
-          shape="circle"
-          styleClass="user-avatar-content">
-        </p-avatar>
-      </div>
-    </button>
+
+<button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
+  <div class="user-avatar-pic">
+    <p-avatar
+      *ngIf="profilePreviewUrl; else initials"
+      [image]="profilePreviewUrl"
+      shape="circle"
+      styleClass="user-avatar-large-content">
+    </p-avatar>
+
+    <ng-template #initials>
+      <p-avatar
+        [label]="getUserInitials()"
+        shape="circle"
+        styleClass="user-avatar-large-content">
+      </p-avatar>
+    </ng-template>
+  </div>
+</button>
+
 
   </div>
 
@@ -82,12 +87,22 @@
     <div class="user-menu-header">
       <div class="user-info">
         <div class="user-avatar-large">
-          <p-avatar 
-            [label]="getUserInitials()" 
-            size="large" 
-            shape="circle"
-            styleClass="user-avatar-large-content">
-          </p-avatar>
+         <p-avatar 
+    *ngIf="profilePreviewUrl; else initialsLarge"
+    [image]="profilePreviewUrl"
+    size="large"
+    shape="circle"
+    styleClass="user-avatar-large-content">
+  </p-avatar>
+
+  <ng-template #initialsLarge>
+    <p-avatar 
+      [label]="getUserInitials()" 
+      size="large"
+      shape="circle"
+      styleClass="user-avatar-large-content">
+    </p-avatar>
+  </ng-template>
         </div>
         <div class="user-details">
           <div class="user-name">{{ getUserDisplayName() }}</div>
