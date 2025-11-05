@@ -23,6 +23,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { 
   PayrollPeriod, 
   PayrollEntry, 
@@ -106,11 +107,11 @@ import { User } from '../../../../core/models/auth.models';
                 <div class="stat-label">Employees</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value">{{ currentPeriod.totalGrossAmount | currency }}</div>
+                <div class="stat-value">{{ currentPeriod.totalGrossAmount | currency:organizationCurrency }}</div>
                 <div class="stat-label">Gross Amount</div>
               </div>
               <div class="stat-item">
-                <div class="stat-value">{{ currentPeriod.totalNetAmount | currency }}</div>
+                <div class="stat-value">{{ currentPeriod.totalNetAmount | currency:organizationCurrency }}</div>
                 <div class="stat-label">Net Amount</div>
               </div>
             </div>
@@ -169,15 +170,15 @@ import { User } from '../../../../core/models/auth.models';
                           <h5>Earnings</h5>
                           <div class="component-item">
                             <span>Basic Salary</span>
-                            <span>{{ latestPayslip.basicSalary | currency }}</span>
+                            <span>{{ latestPayslip.basicSalary | currency:(latestPayslip.currency || organizationCurrency) }}</span>
                           </div>
                           <div *ngFor="let allowance of latestPayslip.allowances" class="component-item">
                             <span>{{ allowance.name }}</span>
-                            <span>{{ allowance.amount | currency }}</span>
+                            <span>{{ allowance.amount | currency:(latestPayslip.currency || organizationCurrency) }}</span>
                           </div>
                           <div class="total-item">
                             <span><strong>Gross Salary</strong></span>
-                            <span><strong>{{ latestPayslip.grossSalary | currency }}</strong></span>
+                            <span><strong>{{ latestPayslip.grossSalary | currency:(latestPayslip.currency || organizationCurrency) }}</strong></span>
                           </div>
                         </div>
 
@@ -185,18 +186,18 @@ import { User } from '../../../../core/models/auth.models';
                           <h5>Deductions</h5>
                           <div class="component-item">
                             <span>Tax</span>
-                            <span>{{ latestPayslip.taxAmount | currency }}</span>
+                            <span>{{ latestPayslip.taxAmount | currency:(latestPayslip.currency || organizationCurrency) }}</span>
                           </div>
                           <div *ngFor="let deduction of latestPayslip.deductions" class="component-item">
                             <span>{{ deduction.name }}</span>
-                            <span>{{ deduction.amount | currency }}</span>
+                            <span>{{ deduction.amount | currency:(latestPayslip.currency || organizationCurrency) }}</span>
                           </div>
                         </div>
 
                         <div class="net-salary-section">
                           <div class="net-salary">
                             <span><strong>Net Salary</strong></span>
-                            <span><strong>{{ latestPayslip.netSalary | currency }}</strong></span>
+                            <span><strong>{{ latestPayslip.netSalary | currency:(latestPayslip.currency || organizationCurrency) }}</strong></span>
                           </div>
                         </div>
                       </div>
@@ -247,7 +248,7 @@ import { User } from '../../../../core/models/auth.models';
 
                     <ng-container matColumnDef="totalAmount">
                       <mat-header-cell *matHeaderCellDef>Total Amount</mat-header-cell>
-                      <mat-cell *matCellDef="let period">{{ period.totalNetAmount | currency }}</mat-cell>
+                      <mat-cell *matCellDef="let period">{{ period.totalNetAmount | currency:organizationCurrency }}</mat-cell>
                     </ng-container>
 
                     <ng-container matColumnDef="status">
@@ -317,6 +318,9 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
   // UI state
   isLoading = false;
   selectedTab = 0;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
 
   // Table configuration
   periodsDisplayedColumns: string[] = ['periodName', 'dates', 'employees', 'totalAmount', 'status', 'actions'];
@@ -326,12 +330,29 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
     private payrollService: PayrollService,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private settingsService: SettingsService,
     private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadCurrentUser();
     this.loadInitialData();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
+      });
   }
 
   ngOnDestroy(): void {

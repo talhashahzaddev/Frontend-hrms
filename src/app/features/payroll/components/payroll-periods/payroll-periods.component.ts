@@ -21,6 +21,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { CreatePayrollPeriodDialogComponent } from '../create-payroll-period-dialog/create-payroll-period-dialog.component';
 import { 
   PayrollPeriod, 
@@ -154,8 +155,8 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
                 <mat-header-cell *matHeaderCellDef>Amounts</mat-header-cell>
                 <mat-cell *matCellDef="let period">
                   <div class="amounts-info">
-                    <div class="gross-amount">Gross: {{ period.totalGrossAmount | currency }}</div>
-                    <div class="net-amount">Net: {{ period.totalNetAmount | currency }}</div>
+                    <div class="gross-amount">Gross: {{ period.totalGrossAmount | currency:organizationCurrency }}</div>
+                    <div class="net-amount">Net: {{ period.totalNetAmount | currency:organizationCurrency }}</div>
                   </div>
                 </mat-cell>
               </ng-container>
@@ -262,6 +263,9 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
   // UI state
   isLoading = false;
   filterForm: FormGroup;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
 
   // Table configuration
   displayedColumns: string[] = ['periodName', 'dates', 'payDate', 'employees', 'amounts', 'status', 'actions'];
@@ -270,6 +274,7 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private payrollService: PayrollService,
     private notificationService: NotificationService,
+    private settingsService: SettingsService,
     private dialog: MatDialog
   ) {
     this.filterForm = this.fb.group({
@@ -279,6 +284,7 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadPayrollPeriods();
     
     // Auto-apply filters on form changes with debounce
@@ -286,6 +292,21 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.applyFilters();
+      });
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
       });
   }
 

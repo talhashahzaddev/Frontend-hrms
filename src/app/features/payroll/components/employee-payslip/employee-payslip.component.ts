@@ -22,6 +22,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { 
   PayrollEntry, 
   PayrollEntryStatus,
@@ -161,15 +162,15 @@ import { User } from '../../../../core/models/auth.models';
                   <div class="salary-details">
                     <div class="detail-item">
                       <span class="label">Basic:</span>
-                      <span class="value">{{ payslip.basicSalary | currency:payslip.currency }}</span>
+                      <span class="value">{{ payslip.basicSalary | currency:(payslip.currency || organizationCurrency) }}</span>
                     </div>
                     <div class="detail-item">
                       <span class="label">Gross:</span>
-                      <span class="value">{{ payslip.grossSalary | currency:payslip.currency }}</span>
+                      <span class="value">{{ payslip.grossSalary | currency:(payslip.currency || organizationCurrency) }}</span>
                     </div>
                     <div class="detail-item">
                       <span class="label">Net:</span>
-                      <span class="value">{{ payslip.netSalary | currency:payslip.currency }}</span>
+                      <span class="value">{{ payslip.netSalary | currency:(payslip.currency || organizationCurrency) }}</span>
                     </div>
                   </div>
                 </mat-cell>
@@ -181,7 +182,7 @@ import { User } from '../../../../core/models/auth.models';
                 <mat-cell *matCellDef="let payslip">
                   <div class="components-list">
                     <div *ngFor="let allowance of payslip.allowances | keyvalue" class="component-item">
-                       {{ allowance.key }}: {{ getNumberValue(allowance.value) | currency:payslip.currency }}
+                       {{ allowance.key }}: {{ getNumberValue(allowance.value) | currency:(payslip.currency || organizationCurrency) }}
                      </div>
                      <div *ngIf="hasKeys(payslip.allowances) === false" class="no-components">
                        No allowances
@@ -196,7 +197,7 @@ import { User } from '../../../../core/models/auth.models';
                 <mat-cell *matCellDef="let payslip">
                   <div class="components-list">
                     <div *ngFor="let deduction of payslip.deductions | keyvalue" class="component-item">
-                       {{ deduction.key }}: {{ getNumberValue(deduction.value) | currency:payslip.currency }}
+                       {{ deduction.key }}: {{ getNumberValue(deduction.value) | currency:(payslip.currency || organizationCurrency) }}
                      </div>
                      <div *ngIf="hasKeys(payslip.deductions) === false" class="no-components">
                        No deductions
@@ -278,6 +279,9 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
 
   // UI state
   isLoading = false;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
 
   // Form
   searchForm: FormGroup;
@@ -289,7 +293,8 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private payrollService: PayrollService,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private settingsService: SettingsService
   ) {
     this.searchForm = this.fb.group({
       payrollPeriodId: [''],
@@ -299,9 +304,25 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadCurrentUser();
     this.loadAvailablePeriods();
     this.loadPayslips();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
+      });
   }
 
   ngOnDestroy(): void {

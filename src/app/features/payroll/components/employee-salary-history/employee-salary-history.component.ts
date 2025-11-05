@@ -22,6 +22,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.models';
 import { User } from '../../../../core/models/auth.models';
 
@@ -72,6 +73,9 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
   pageSize = 10;
   totalRecords = 0;
   
+  // Currency
+  organizationCurrency: string = 'USD';
+  
   // Filter form
   filterForm: FormGroup;
   
@@ -80,6 +84,7 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
   constructor(
     private payrollService: PayrollService,
     private authService: AuthService,
+    private settingsService: SettingsService,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
@@ -94,12 +99,27 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.authService.getCurrentUser().subscribe(user => {
       this.currentUser = user;
     });
     this.loadAvailablePeriods();
     this.loadSalaryHistory();
     this.setupFilterListeners();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
+      });
   }
 
   ngOnDestroy(): void {

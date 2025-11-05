@@ -22,6 +22,7 @@ import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { PayslipPreviewDialogComponent } from './payslip-preview-dialog.component';
 import { 
   PayrollPeriod,
@@ -205,11 +206,11 @@ import { PagedResult } from '../../../../core/models/common.models';
                         {{ getPeriodEntriesCount(group.periodId) }} employees
                       </span>
                       <span class="stat-item">
-                        <mat-icon>attach_money</mat-icon>
-                        Gross: {{ getPeriodTotalGross(group.periodId) | currency }}
+                        <!-- <mat-icon>attach_money</mat-icon> -->
+                        Gross: {{ getPeriodTotalGross(group.periodId) | currency:(organizationCurrency || 'USD') }}
                       </span>
                       <span class="stat-item net-stat">
-                        Net: {{ getPeriodTotalNet(group.periodId) | currency }}
+                        Net: {{ getPeriodTotalNet(group.periodId) | currency:(organizationCurrency || 'USD') }}
                       </span>
                     </div>
                   </div>
@@ -254,11 +255,11 @@ import { PagedResult } from '../../../../core/models/common.models';
                         <div class="salary-details">
                           <div class="salary-item">
                             <span class="label">Gross:</span>
-                            <span class="value">{{ entry.grossSalary | currency }}</span>
+                            <span class="value">{{ entry.grossSalary | currency:getCurrencyCode(entry) }}</span>
                           </div>
                           <div class="salary-item">
                             <span class="label">Net:</span>
-                            <span class="value net-amount">{{ entry.netSalary | currency }}</span>
+                            <span class="value net-amount">{{ entry.netSalary | currency:getCurrencyCode(entry) }}</span>
                           </div>
                         </div>
                       </mat-cell>
@@ -403,6 +404,9 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   // UI state
   isLoading = false;
   filterForm: FormGroup;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
 
   // Table configuration
   displayedColumns: string[] = ['select', 'employee', 'salaryDetails', 'payslipStatus', 'actions'];
@@ -412,6 +416,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
     private payrollService: PayrollService,
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
+    private settingsService: SettingsService,
     private dialog: MatDialog
   ) {
     this.filterForm = this.fb.group({
@@ -420,13 +425,53 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       status: [''],
       department: ['']
     });
+    // Get currency synchronously first (from BehaviorSubject if already loaded)
+    const initialCurrency = this.settingsService.getOrganizationCurrencyCode();
+    this.organizationCurrency = initialCurrency ? initialCurrency.trim().toUpperCase() : 'USD';
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadAvailablePeriods();
     this.loadDepartments();
     this.loadPayrollEntries();
     this.setupFormSubscriptions();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          if (currency && currency.trim() !== '') {
+            // Ensure currency is stored in uppercase
+            this.organizationCurrency = currency.trim().toUpperCase();
+            console.log('Payslip Management - Organization currency loaded:', this.organizationCurrency);
+          } else {
+            console.warn('Payslip Management - Organization currency is empty, using default:', this.organizationCurrency);
+          }
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD'; // Default to USD on error
+          this.cdr.markForCheck();
+        }
+      });
+    
+    // Also subscribe to the BehaviorSubject for immediate updates
+    this.settingsService.organizationCurrency$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          if (currency && currency.trim() !== '') {
+            // Ensure currency is stored in uppercase
+            this.organizationCurrency = currency.trim().toUpperCase();
+            console.log('Payslip Management - Currency updated from BehaviorSubject:', this.organizationCurrency);
+            this.cdr.markForCheck();
+          }
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -586,6 +631,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       data: {
         entry: entry,
         period: period,
+        organizationCurrency: this.organizationCurrency,
         onDownload: () => {
           this.downloadPayslip(entry);
         }
@@ -644,6 +690,11 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   private generatePdfFromEntry(entry: PayrollEntry): void {
     this.notificationService.showInfo('Generating payslip PDF...');
     
+    // Use the same currency logic as the template
+    const currentCurrency = this.getCurrencyCode(entry);
+    
+    console.log('PDF Generation - entry.currency:', entry.currency, 'organizationCurrency:', this.organizationCurrency, 'using:', currentCurrency);
+    
     // Dynamically import jsPDF and autoTable
     Promise.all([
       import('jspdf'),
@@ -661,7 +712,7 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       };
 
       const formatCurrency = (amount: number): string => {
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: entry.currency || 'USD' }).format(amount);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: currentCurrency }).format(amount);
       };
 
       let yPos = 20;
@@ -1015,5 +1066,24 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
   getPeriodTotalNet(periodId: string): number {
     const entries = this.groupedEntries.get(periodId) || [];
     return entries.reduce((sum, entry) => sum + entry.netSalary, 0);
+  }
+
+  getCurrencyCode(entry: PayrollEntry): string {
+    // First check if entry has a valid currency (not empty, not USD default)
+    const entryCurrency = entry.currency?.trim().toUpperCase();
+    if (entryCurrency && entryCurrency !== '' && entryCurrency.length === 3 && entryCurrency !== 'USD') {
+      return entryCurrency;
+    }
+    // Prefer organization currency over entry currency (especially if entry currency is USD default)
+    const orgCurrency = this.organizationCurrency?.trim().toUpperCase();
+    if (orgCurrency && orgCurrency !== '' && orgCurrency.length === 3) {
+      return orgCurrency;
+    }
+    // If entry has a valid currency (even if USD), use it
+    if (entryCurrency && entryCurrency !== '' && entryCurrency.length === 3) {
+      return entryCurrency;
+    }
+    // Default fallback to USD
+    return 'USD';
   }
 }

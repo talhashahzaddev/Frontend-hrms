@@ -311,6 +311,8 @@
     background: var(--gradient-primary);
     color: white;
     transition: all 0.2s ease;
+    width: 11.9rem;
+    height: 3rem;
     
     &:hover:not(:disabled) {
       transform: translateY(-1px);
@@ -342,6 +344,8 @@
     color: var(--gray-700);
     background: white;
     transition: all 0.2s ease;
+    width: 11.9rem;
+    height: 3rem;
     
     &:hover:not(:disabled) {
       background: var(--gray-50);

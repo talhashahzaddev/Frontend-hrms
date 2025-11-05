@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -20,8 +20,14 @@ export interface UpdateCurrencyRequest {
 })
 export class SettingsService {
   private readonly apiUrl = `${environment.apiUrl}/Settings`;
+  private currencyCache$: Observable<string> | null = null;
+  private currencySubject = new BehaviorSubject<string>('USD');
+  public organizationCurrency$ = this.currencySubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    // Load currency on service initialization
+    this.loadOrganizationCurrency();
+  }
 
   getOrganizationSettings(): Observable<OrganizationSettings> {
     return this.http.get<ApiResponse<OrganizationSettings>>(`${this.apiUrl}/organization`)
@@ -31,8 +37,47 @@ export class SettingsService {
             throw new Error(response.message || 'Failed to fetch organization settings');
           }
           return response.data!;
+        }),
+        tap(settings => {
+          // Cache the currency when settings are loaded
+          if (settings.currency) {
+            this.currencySubject.next(settings.currency);
+          }
         })
       );
+  }
+
+  getOrganizationCurrency(): Observable<string> {
+    if (!this.currencyCache$) {
+      this.currencyCache$ = this.getOrganizationSettings().pipe(
+        map(settings => settings.currency || 'USD'),
+        shareReplay(1)
+      );
+    }
+    return this.currencyCache$;
+  }
+
+  getOrganizationCurrencyCode(): string {
+    return this.currencySubject.value;
+  }
+
+  getCurrencySymbol(currencyCode?: string): string {
+    const code = currencyCode || this.currencySubject.value;
+    const currency = this.getAvailableCurrencies().find(c => c.code === code);
+    return currency?.symbol || '$';
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.getOrganizationCurrency().subscribe({
+      next: (currency) => {
+        this.currencySubject.next(currency);
+      },
+      error: (error) => {
+        console.error('Error loading organization currency:', error);
+        // Default to USD on error
+        this.currencySubject.next('USD');
+      }
+    });
   }
 
   updateCurrency(currency: string): Observable<boolean> {
