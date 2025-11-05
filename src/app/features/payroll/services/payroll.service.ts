@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { SettingsService } from '../../settings/services/settings.service';
 import {
   PayrollSummary,
   PayrollPeriod,
@@ -34,7 +35,10 @@ export class PayrollService {
 
   public payrollSummary$ = this.payrollSummarySubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private settingsService: SettingsService
+  ) {}
 
   // Payroll Dashboard
   getPayrollSummary(): Observable<ApiResponse<PayrollSummary>> {
@@ -375,11 +379,20 @@ export class PayrollService {
     return this.http.get<ApiResponse<PayrollProcessingHistory[]>>(`${this.apiUrl}/payroll/processing-history`, { params });
   }
 
-  formatCurrency(amount: number, currency: string = 'USD'): string {
+  formatCurrency(amount: number, currency?: string): string {
+    const currencyCode = currency || this.settingsService.getOrganizationCurrencyCode();
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency
+      currency: currencyCode
     }).format(amount);
+  }
+
+  getCurrencySymbol(): string {
+    return this.settingsService.getCurrencySymbol();
+  }
+
+  getCurrencyCode(): string {
+    return this.settingsService.getOrganizationCurrencyCode();
   }
 
   getPayrollStatusColor(status: PayrollStatus): string {

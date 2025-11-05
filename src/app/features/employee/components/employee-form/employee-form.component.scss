@@ -242,3 +242,190 @@ mat-card-title {
   }
 }
 
+// Salary Field with Currency Symbol
+.salary-field {
+  .currency-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    
+    .currency-symbol-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 52px;
+      height: 40px;
+      padding: 0 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 1.125rem;
+      font-weight: 600;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      user-select: none;
+      z-index: 1;
+      position: relative;
+      
+      &:hover {
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.35);
+        transform: translateY(-1px);
+      }
+    }
+    
+    .salary-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #1f2937;
+      padding: 0;
+      margin: 0;
+      min-width: 0;
+      
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
+      
+      &:focus {
+        outline: none;
+      }
+      
+      // Remove number input spinner
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      
+      &[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+    }
+  }
+  
+  // Adjust form field styling for custom wrapper
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    padding: 0;
+    background: transparent;
+  }
+  
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: 0 16px !important;
+    border-top: none !important;
+    min-height: 56px !important;
+    display: flex;
+    align-items: center;
+  }
+  
+  ::ng-deep .mat-mdc-form-field-flex {
+    align-items: center;
+    min-height: 56px;
+  }
+  
+  // Ensure outline doesn't interfere
+  ::ng-deep .mat-mdc-form-field-outline {
+    top: 0;
+    bottom: 0;
+  }
+  
+  // Adjust label positioning to avoid overlap with currency badge
+  // When label is not floating (field is empty and not focused)
+  ::ng-deep .mat-mdc-form-field-label-wrapper {
+    padding-left: 0;
+  }
+  
+  ::ng-deep .mat-mdc-form-field-label {
+    transform-origin: left top;
+    
+    &:not(.mdc-floating-label--float-above) {
+      left: 68px !important; // Account for currency badge width (52px) + gap (12px) + padding (4px)
+      right: auto !important;
+    }
+    
+    &.mdc-floating-label--float-above {
+      left: 16px !important; // When floating, align with left padding
+      right: auto !important;
+    }
+  }
+  
+  // When field has value or is focused, ensure label floats properly
+  &.mat-focused,
+  &:has(.salary-input:not(:placeholder-shown)),
+  &:has(.salary-input:focus) {
+    ::ng-deep .mat-mdc-form-field-label {
+      left: 16px !important;
+      right: auto !important;
+    }
+  }
+  
+  // Ensure label doesn't overlap when field has value
+  &.mat-form-field-has-value {
+    ::ng-deep .mat-mdc-form-field-label {
+      left: 16px !important;
+      right: auto !important;
+    }
+  }
+  
+  // Focus state
+  &.mat-focused {
+    .currency-symbol-badge {
+      box-shadow: 0 4px 14px rgba(102, 126, 234, 0.45);
+      transform: scale(1.03);
+    }
+  }
+  
+  // Error state
+  &.mat-form-field-invalid {
+    .currency-symbol-badge {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+  }
+  /* Fix label overlap with currency badge */
+::ng-deep .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+  position: relative;
+}
+
+/* Move label right when not floating */
+::ng-deep .mdc-text-field--outlined:not(.mdc-text-field--focused)
+  .mdc-floating-label:not(.mdc-floating-label--float-above) {
+  left: 68px !important; // badge width (52px) + gap (12px) + 4px buffer
+}
+
+/* When floating (focused or has value), reset to default */
+::ng-deep
+  .mdc-floating-label.mdc-floating-label--float-above {
+  left: 16px !important;
+}
+
+}
+
+// Responsive adjustments for salary field
+@media (max-width: 768px) {
+  .salary-field {
+    .currency-input-wrapper {
+      gap: 8px;
+      
+      .currency-symbol-badge {
+        min-width: 44px;
+        height: 36px;
+        padding: 0 10px;
+        font-size: 1rem;
+      }
+      
+      .salary-input {
+        font-size: 0.9375rem;
+      }
+    }
+  }
+}
+

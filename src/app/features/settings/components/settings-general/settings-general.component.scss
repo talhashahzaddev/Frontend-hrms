@@ -1,0 +1,430 @@
+// Settings General Component Styles (Hubstaff-inspired)
+.settings-general-container {
+  padding: var(--spacing-xl);
+  min-height: calc(100vh - 64px);
+  background: var(--gray-50);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Header Section
+.settings-header {
+  margin-bottom: var(--spacing-2xl);
+  
+  .settings-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-sm);
+    letter-spacing: -0.025em;
+  }
+  
+  .settings-subtitle {
+    font-size: 1.125rem;
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Access Denied
+.access-denied {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: white;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+  
+  .access-denied-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--gray-400);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-md);
+  }
+  
+  p {
+    font-size: 1rem;
+    color: var(--gray-600);
+    margin: 0;
+  }
+}
+
+// Settings Content
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+// Settings Card
+.settings-card {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  background: white;
+  padding: 1rem;
+  ::ng-deep .mat-mdc-card-content {
+    padding: 0;
+  }
+}
+
+// Card Header
+.card-header {
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--purple-50) 100%);
+  border-bottom: 1px solid var(--gray-200);
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    
+    .header-icon {
+      font-size: 2.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--primary-600);
+    }
+    
+    .header-text {
+      flex: 1;
+      
+      .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin: 0 0 var(--spacing-xs);
+      }
+      
+      .card-subtitle {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Card Content
+.card-content {
+  padding: var(--spacing-xl);
+}
+
+// Currency Section
+.currency-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+// Current Currency Display
+.current-currency-display {
+  padding: var(--spacing-lg);
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--gray-200);
+  
+  .currency-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    
+    .currency-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .currency-value {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      
+      .currency-symbol {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-600);
+      }
+      
+      .currency-code {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--gray-300);
+      }
+      
+      .currency-name {
+        font-size: 1rem;
+        color: var(--gray-700);
+      }
+      
+      &.no-currency {
+        .no-currency-text {
+          font-size: 1rem;
+          color: var(--gray-500);
+          font-style: italic;
+        }
+      }
+    }
+  }
+}
+
+// Currency Form
+.currency-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+// Form Field Styling
+::ng-deep .currency-field {
+  width: 100%;
+  
+  .mat-mdc-form-field {
+    &.mat-form-field-appearance-outline {
+      .mat-mdc-form-field-outline {
+        border-radius: var(--radius-lg);
+        border-color: var(--gray-300) !important;
+      }
+      
+      .mat-mdc-form-field-outline-thick {
+        border-color: var(--primary-600) !important;
+      }
+      
+      &:not(.mat-form-field-disabled) {
+        .mat-mdc-form-field-outline {
+          color: var(--gray-300);
+        }
+        
+        &.mat-focused .mat-mdc-form-field-outline-thick {
+          color: var(--primary-600) !important;
+          border-color: var(--primary-600) !important;
+        }
+        
+        &:hover .mat-mdc-form-field-outline {
+          color: var(--gray-400);
+          border-color: var(--gray-400) !important;
+        }
+      }
+      
+      .mat-mdc-form-field-label {
+        color: var(--gray-600) !important;
+      }
+      
+      &.mat-focused .mat-mdc-form-field-label {
+        color: var(--primary-600) !important;
+      }
+    }
+    
+    .mat-mdc-form-field-hint {
+      color: var(--gray-500) !important;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Currency Option in Dropdown
+::ng-deep .currency-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xs) 0;
+  
+  .currency-option-symbol {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-600);
+    min-width: 2rem;
+  }
+  
+  .currency-option-code {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    min-width: 3rem;
+  }
+  
+  .currency-option-name {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    flex: 1;
+  }
+}
+
+// Select Dropdown Styling
+::ng-deep .mat-mdc-select-panel {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xl) !important;
+  border: 1px solid var(--gray-200) !important;
+  max-height: 400px !important;
+  background: white !important;
+  margin-top: var(--spacing-xs) !important;
+}
+
+::ng-deep .mat-mdc-option {
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  min-height: 56px !important;
+  
+  &:hover {
+    background: var(--gray-50) !important;
+  }
+  
+  &.mdc-list-item--selected {
+    background: var(--primary-50) !important;
+    
+    .mdc-list-item__primary-text {
+      color: var(--primary-700) !important;
+    }
+  }
+}
+
+// Form Actions
+.form-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--gray-200);
+  
+  .save-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-weight: 500;
+    border-radius: var(--radius-lg);
+    background: var(--gradient-primary);
+    color: white;
+    transition: all 0.2s ease;
+    width: 11.9rem;
+    height: 3rem;
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .button-spinner {
+      display: inline-block;
+    }
+    
+    mat-icon {
+      margin-right: 0;
+    }
+  }
+  
+  .cancel-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-weight: 500;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    background: white;
+    transition: all 0.2s ease;
+    width: 11.9rem;
+    height: 3rem;
+    
+    &:hover:not(:disabled) {
+      background: var(--gray-50);
+      border-color: var(--gray-400);
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Loading Container
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  min-height: 400px;
+  
+  .loading-text {
+    margin-top: var(--spacing-lg);
+    color: var(--gray-600);
+    font-size: 1rem;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .settings-general-container {
+    padding: var(--spacing-lg);
+  }
+  
+  .settings-header {
+    .settings-title {
+      font-size: 1.5rem;
+    }
+    
+    .settings-subtitle {
+      font-size: 1rem;
+    }
+  }
+  
+  .card-header {
+    padding: var(--spacing-lg);
+    
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+      
+      .header-icon {
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+  }
+  
+  .card-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    
+    .save-button,
+    .cancel-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .currency-value {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+}
+
