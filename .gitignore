@@ -17,6 +17,8 @@ dist/
 *.sw?
 
 # Environment
+environment.ts
+environment.prod.ts
 /src/environments/*.ts
 .angular/cache/
 dist/

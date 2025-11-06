@@ -830,6 +830,27 @@
   }
 }
 
+/* Currency Option in Dropdown */
+::ng-deep .currency-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  
+  .currency-option-code {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    min-width: 3rem;
+  }
+  
+  .currency-option-name {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    flex: 1;
+  }
+}
+
 /* ----- Responsive Tweaks ----- */
 @media (max-width: 480px) {
   .register-card {
