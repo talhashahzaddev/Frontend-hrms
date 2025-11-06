@@ -73,6 +73,24 @@
                   </mat-error>
                 </mat-form-field>
 
+                <!-- Currency -->
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Currency</mat-label>
+                  <mat-icon matPrefix>currency_exchange</mat-icon>
+                  <mat-select formControlName="currency">
+                    <mat-option *ngFor="let currency of availableCurrencies" [value]="currency.code">
+                      <div class="currency-option">
+                        <!-- <span class="currency-option-code">{{ currency.code }}</span> -->
+                        <span class="currency-option-name">{{ currency.name }}</span>
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Select your organization's default currency</mat-hint>
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'currency')">
+                    {{ getErrorMessage(organizationForm, 'currency') }}
+                  </mat-error>
+                </mat-form-field>
+
               </div>
 
               <!-- Step Actions -->
