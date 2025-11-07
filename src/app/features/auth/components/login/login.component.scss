@@ -1,556 +1,231 @@
-// // Login Component Styles (Hubstaff-inspired)
-// .login-container {
-//   max-height: 90vh;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   justify-content: center;
-//   padding: var(--spacing-lg);
-//   position: relative;
-// }
-
-// .login-card {
-//   width: 90%;
-//   max-width: 480px;
-//   padding: 0;
-//   border-radius: var(--radius-2xl);
-//   box-shadow: var(--shadow-xl);
-//   border: 1px solid var(--gray-200);
-//   background: white;
-//   overflow: hidden;
-//   animation: slideInUp 0.6s ease;
-// }
-
-// // Header Section
-// .login-header {
-//   padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-xl);
-//   text-align: center;
-//   background: linear-gradient(135deg, var(--primary-50) 0%, var(--purple-50) 100%);
-//   border-bottom: 1px solid var(--gray-100);
-// }
-
-// .logo {
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   gap: var(--spacing-sm);
-//   margin-bottom: var(--spacing-lg);
-  
-//   .logo-icon {
-//     font-size: 2.5rem;
-//     width: 2.5rem;
-//     height: 2.5rem;
-//     background: var(--gradient-primary);
-//     -webkit-background-clip: text;
-//     -webkit-text-fill-color: transparent;
-//     background-clip: text;
-//   }
-  
-//   .brand-title {
-//     font-size: 2rem;
-//     font-weight: 800;
-//     background: var(--gradient-primary);
-//     -webkit-background-clip: text;
-//     -webkit-text-fill-color: transparent;
-//     background-clip: text;
-//     letter-spacing: -0.025em;
-//   }
-// }
-
-// .login-title {
-//   font-size: 1.875rem;
-//   font-weight: 700;
-//   color: var(--gray-900);
-//   margin-bottom: var(--spacing-sm);
-//   letter-spacing: -0.025em;
-// }
-
-// .login-subtitle {
-//   font-size: 1rem;
-//   color: var(--gray-600);
-//   margin: 0;
-//   font-weight: 400;
-// }
-
-// // Form Section
-// .login-form {
-//   padding: var(--spacing-2xl);
-// }
-
-// .form-field {
-//   width: 100%;
-//   margin-bottom: var(--spacing-lg);
-  
-//   ::ng-deep {
-//     .mat-mdc-form-field-subscript-wrapper {
-//       margin-top: var(--spacing-xs);
-//     }
-    
-//     .mat-mdc-text-field-wrapper {
-//       border-radius: var(--radius-lg);
-//     }
-    
-//     .mdc-notched-outline {
-//       .mdc-notched-outline__leading,
-//       .mdc-notched-outline__notch,
-//       .mdc-notched-outline__trailing {
-//         border-color: var(--gray-300);
-//         border-width: 1px;
-//       }
-//     }
-    
-//     &.mat-focused .mdc-notched-outline {
-//       .mdc-notched-outline__leading,
-//       .mdc-notched-outline__notch,
-//       .mdc-notched-outline__trailing {
-//         border-color: var(--primary-500);
-//         border-width: 2px;
-//       }
-//     }
-    
-//     .mat-mdc-form-field-icon-prefix {
-//       color: var(--gray-500);
-//       margin-right: var(--spacing-sm);
-//     }
-    
-//     .mat-mdc-form-field-icon-suffix {
-//       color: var(--gray-500);
-//     }
-    
-//     .mdc-text-field--filled {
-//       background: transparent;
-//     }
-    
-//     input {
-//       padding: 1rem 0.75rem;
-//       font-size: 1rem;
-//     }
-//   }
-// }
-
-// // Form Options
-// .form-options {
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-//   margin-bottom: var(--spacing-xl);
-// }
-
-// .remember-checkbox {
-//   ::ng-deep {
-//     .mdc-form-field {
-//       font-size: 0.875rem;
-//       color: var(--gray-700);
-//     }
-    
-//     .mdc-checkbox {
-//       .mdc-checkbox__ripple {
-//         display: none;
-//       }
-//     }
-//   }
-// }
-
-// .forgot-password-link {
-//   font-size: 0.875rem;
-//   color: var(--primary-600);
-//   font-weight: 500;
-  
-//   &:hover {
-//     color: var(--primary-700);
-//     background: var(--primary-50);
-//   }
-// }
-
-// // Login Button
-// .login-button {
-//   width: 100%;
-//   height: 48px;
-//   font-size: 1rem;
-//   font-weight: 600;
-//   border-radius: var(--radius-lg);
-//   background: var(--gradient-primary);
-//   color: white;
-//   box-shadow: var(--shadow-sm);
-//   border: none;
-//   transition: all 0.2s ease;
-  
-//   &:not(:disabled):hover {
-//     transform: translateY(-1px);
-//     box-shadow: var(--shadow-lg);
-//   }
-  
-//   &:disabled {
-//     opacity: 0.7;
-//     cursor: not-allowed;
-//     transform: none;
-//   }
-  
-//   .button-spinner {
-//     margin-right: var(--spacing-sm);
-    
-//     ::ng-deep circle {
-//       stroke: white;
-//     }
-//   }
-// }
-
-// // Demo Credentials Section
-// .demo-credentials {
-//   margin-top: var(--spacing-xl);
-//   padding: var(--spacing-lg);
-//   background: var(--gray-50);
-//   border-radius: var(--radius-lg);
-//   border: 1px solid var(--gray-200);
-  
-//   h4 {
-//     font-size: 0.875rem;
-//     font-weight: 600;
-//     color: var(--gray-800);
-//     margin: 0 0 var(--spacing-md);
-//   }
-  
-//   .demo-accounts {
-//     display: flex;
-//     flex-direction: column;
-//     gap: var(--spacing-xs);
-//   }
-  
-//   .demo-account {
-//     font-size: 0.75rem;
-//     color: var(--gray-600);
-//     line-height: 1.4;
-    
-//     strong {
-//       color: var(--gray-800);
-//       font-weight: 600;
-//     }
-//   }
-// }
-
-// // Footer
-// .login-footer {
-//   margin-top: var(--spacing-xl);
-//   text-align: center;
-  
-//   p {
-//     font-size: 0.875rem;
-//     color: var(--gray-500);
-//     margin: 0;
-//   }
-// }
-
-// // Animations
-// @keyframes slideInUp {
-//   from {
-//     transform: translateY(30px);
-//     opacity: 0;
-//   }
-//   to {
-//     transform: translateY(0);
-//     opacity: 1;
-//   }
-// }
-
-// // Responsive Design
-// @media (max-width: 640px) {
-//   .login-container {
-//     padding: var(--spacing-md);
-//   }
-  
-//   .login-card {
-//     max-width: 100%;
-//   }
-  
-//   .login-header {
-//     padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
-//   }
-  
-//   .login-form {
-//     padding: var(--spacing-lg);
-//   }
-  
-//   .login-title {
-//     font-size: 1.5rem;
-//   }
-  
-//   .login-subtitle {
-//     font-size: 0.875rem;
-//   }
-  
-//   .logo {
-//     .logo-icon {
-//       font-size: 2rem;
-//       width: 2rem;
-//       height: 2rem;
-//     }
-    
-//     .brand-title {
-//       font-size: 1.75rem;
-//     }
-//   }
-  
-//   .form-options {
-//     flex-direction: column;
-//     align-items: flex-start;
-//     gap: var(--spacing-sm);
-//   }
-  
-//   .demo-credentials {
-//     .demo-accounts {
-//       gap: var(--spacing-sm);
-//     }
-    
-//     .demo-account {
-//       font-size: 0.6875rem;
-//     }
-//   }
-// }
-
-// @media (max-width: 480px) {
-//   .login-container {
-//     padding: var(--spacing-sm);
-//   }
-  
-//   .login-header {
-//     padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
-//   }
-  
-//   .login-form {
-//     padding: var(--spacing-md);
-//   }
-// }
-
-// // Dark theme support
-// .dark-theme {
-//   .login-card {
-//     background: var(--gray-800);
-//     border-color: var(--gray-700);
-//   }
-  
-//   .login-header {
-//     background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%);
-//     border-bottom-color: var(--gray-600);
-//   }
-  
-//   .login-title {
-//     color: var(--gray-100);
-//   }
-  
-//   .login-subtitle {
-//     color: var(--gray-400);
-//   }
-  
-//   .demo-credentials {
-//     background: var(--gray-700);
-//     border-color: var(--gray-600);
-    
-//     h4 {
-//       color: var(--gray-200);
-//     }
-    
-//     .demo-account {
-//       color: var(--gray-400);
-      
-//       strong {
-//         color: var(--gray-200);
-//       }
-//     }
-//   }
-  
-//   .login-footer p {
-//     color: var(--gray-400);
-//   }
-// }
-
-// // High contrast support
-// @media (prefers-contrast: high) {
-//   .login-card {
-//     border-width: 2px;
-//   }
-  
-//   .login-button {
-//     border: 2px solid var(--primary-600);
-//   }
-// }
-
-// // Reduced motion support
-// @media (prefers-reduced-motion: reduce) {
-//   .login-card {
-//     animation: none;
-//   }
-  
-//   .login-button {
-//     transition: none;
-    
-//     &:hover {
-//       transform: none;
-//     }
-//   }
-// }
-
-
-
 /* Login Container */
 .login-container {
-  min-height: 90vh;
-  display: grid;
+  min-height: 100vh;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background: var(--gray-50);
+  padding: 2rem 1.5rem;
+  background: linear-gradient(140deg, rgba(79, 70, 229, 0.08) 0%, rgba(59, 130, 246, 0.08) 35%, var(--gray-50) 100%);
 }
 
-/* Login Card */
 .login-card {
   width: 100%;
-  max-width: 400px;
-  height: auto;
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--gray-200);
+  // max-width: 420px;
+  border-radius: 1.5rem;
   background: white;
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 24px 60px -24px rgba(30, 64, 175, 0.35);
   overflow: hidden;
-  animation: slideInUp 0.5s ease;
+  animation: slideInUp 0.45s ease;
 }
 
-.login-header .login-title,
-.login-header .login-subtitle {
-  color: var(--gray-700); /* or any color you prefer */
-}
-
-/* Header */
 .login-header {
   text-align: center;
-  padding: 1rem 1.5rem;
+  padding: 1.75rem 2rem 1.5rem;
   background: linear-gradient(135deg, var(--primary-50), var(--purple-50));
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.15);
 }
 
 .logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .logo-icon {
-  font-size: 2rem;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 2.25rem;
+  color: var(--primary-600);
+  filter: drop-shadow(0 4px 10px rgba(37, 99, 235, 0.16));
 }
 
 .brand-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+  color: var(--primary-700);
 }
 
 .login-title {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--gray-900);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
 }
 
 .login-subtitle {
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   color: var(--gray-600);
   margin: 0;
 }
 
-/* Form */
 .login-form {
-  padding: 1rem 1.5rem;
+  padding: 1.75rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .form-field {
   width: 100%;
-  margin-bottom: 0.75rem;
-
 }
 
-
-/* Options */
 .form-options {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
-/* Button */
 .login-button {
   width: 100%;
-  height: 44px;
-  font-size: 0.95rem;
+  height: 48px;
+  font-size: 1rem;
   font-weight: 600;
-  border-radius: var(--radius-lg);
-  background: var(--gradient-primary);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #2563eb, #6366f1);
   color: white;
-  box-shadow: var(--shadow-sm);
   border: none;
+  box-shadow: 0 4px 14px -2px rgba(59, 130, 246, 0.6);
   transition: all 0.2s ease;
 }
 
 .login-button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 18px -2px rgba(59, 130, 246, 0.75);
 }
 
-/* Demo Section */
-.demo-credentials {
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  background: var(--gray-50);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--gray-200);
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.demo-account {
-  font-size: 0.75rem;
+.create-account {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
   color: var(--gray-600);
 }
 
-/* Footer */
-.login-footer {
-  margin-top: 0.75rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--gray-500);
-}
-
-/* Animations */
-@keyframes slideInUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .login-card { max-width: 100%; }
-  .login-header, .login-form { padding: 0.75rem 1rem; }
-  .login-title { font-size: 1.25rem; }
-  .login-subtitle { font-size: 0.75rem; }
-  .logo-icon { font-size: 1.75rem; }
-  .brand-title { font-size: 1.25rem; }
-}
-
 .link-button {
+  margin-left: 0.25rem;
   background: none;
   border: none;
-  color: var(--primary-600); /* or use your theme color */
+  color: var(--primary-600);
+  font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
   padding: 0;
-  font: inherit; /* inherit font style from parent */
 }
 
 .link-button:hover {
-  color: var(--primary-800); /* darker shade on hover */
-  text-decoration: underline;
+  color: var(--primary-700);
+}
+
+.forgot-password-link {
+  font-weight: 600;
+  color: var(--primary-600);
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}
+
+.forgot-password-link:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary-700);
+}
+
+:host ::ng-deep .form-field .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 0.4rem;
+}
+
+:host ::ng-deep .form-field .mat-mdc-text-field-wrapper {
+  border-radius: 0.95rem;
+  padding: 0 0.35rem;
+  background: white;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+:host ::ng-deep .form-field .mdc-notched-outline__leading,
+:host ::ng-deep .form-field .mdc-notched-outline__notch,
+:host ::ng-deep .form-field .mdc-notched-outline__trailing {
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+:host ::ng-deep .form-field.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+:host ::ng-deep .form-field.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+:host ::ng-deep .form-field.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: rgba(79, 70, 229, 0.8);
+  border-width: 2px;
+}
+
+:host ::ng-deep .form-field input.mat-mdc-input-element {
+  padding: 0.9rem 0.75rem 0.95rem;
+  font-size: 0.98rem;
+  color: var(--gray-800);
+}
+
+:host ::ng-deep .form-field .mat-mdc-form-field-icon-prefix mat-icon {
+  color: var(--primary-600);
+  background: rgba(59, 130, 246, 0.12);
+  border-radius: 0.75rem;
+  padding: 0.35rem;
+  font-size: 1.35rem;
+  margin-right: 0.5rem;
+}
+
+:host ::ng-deep .form-field .mat-mdc-form-field-icon-suffix mat-icon,
+:host ::ng-deep .form-field button[mat-icon-button] mat-icon {
+  color: var(--gray-500);
+  font-size: 1.25rem;
+}
+
+:host ::ng-deep .remember-checkbox .mdc-form-field {
+  color: var(--gray-600);
+}
+
+:host ::ng-deep .remember-checkbox .mdc-checkbox__background {
+  border-radius: 0.4rem;
+}
+
+.button-spinner {
+  margin-right: 0.5rem;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(22px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .login-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .login-card {
+    border-radius: 1.25rem;
+  }
+
+  .login-header,
+  .login-form {
+    padding: 1.25rem 1.4rem 1.4rem;
+  }
+
+  .logo-icon {
+    font-size: 2rem;
+  }
+
+  .brand-title {
+    font-size: 1.6rem;
+  }
+
+  .login-title {
+    font-size: 1.5rem;
+  }
 }
