@@ -1,8 +1,5 @@
-<div class="login-container">
-  
-  <!-- Login Card -->
-  
-    
+<!-- <div class="login-container"> -->
+  <div class="login-card">
     <!-- Header -->
     <div class="login-header">
       <div class="logo">
@@ -15,17 +12,16 @@
 
     <!-- Login Form -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" novalidate>
-      
       <!-- Email Field -->
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Email Address</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
         <input
           matInput
           type="email"
           formControlName="email"
           placeholder="Enter your email"
-          autocomplete="email">
-        <mat-icon matPrefix>email</mat-icon>
+          autocomplete="email" />
         <mat-error *ngIf="isFieldInvalid('email')">
           {{ getErrorMessage('email') }}
         </mat-error>
@@ -34,13 +30,13 @@
       <!-- Password Field -->
       <mat-form-field appearance="outline" class="form-field">
         <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
         <input
           matInput
           [type]="hidePassword ? 'password' : 'text'"
           formControlName="password"
           placeholder="Enter your password"
-          autocomplete="current-password">
-        <mat-icon matPrefix>lock</mat-icon>
+          autocomplete="current-password" />
         <button
           mat-icon-button
           matSuffix
@@ -60,7 +56,7 @@
         <mat-checkbox formControlName="rememberMe" class="remember-checkbox">
           Remember me
         </mat-checkbox>
-        
+
         <button
           type="button"
           mat-button
@@ -69,15 +65,6 @@
           Forgot Password?
         </button>
       </div>
- 
-  
-<p class="create_account">
-  Don’t have an account? 
-  <button type="button" (click)="onsignup()" class="link-button">Register here</button>
-</p>
-
-
-
 
       <!-- Login Button -->
       <button
@@ -86,19 +73,20 @@
         class="login-button"
         [disabled]="isLoading"
         color="primary">
-        
         <mat-spinner
           *ngIf="isLoading"
           diameter="20"
           class="button-spinner">
         </mat-spinner>
-        
+
         <span *ngIf="!isLoading">Sign In</span>
         <span *ngIf="isLoading">Signing In...</span>
       </button>
-    </form>
-  <!-- <p class="create_account">Don’t have an account? <a (click)="onSignup()">Register here</a></p>
-    -->
- 
 
-</div>
+      <p class="create-account">
+        Don’t have an account?
+        <button type="button" (click)="onsignup()" class="link-button">Register here</button>
+      </p>
+    </form>
+  </div>
+<!-- </div> -->
