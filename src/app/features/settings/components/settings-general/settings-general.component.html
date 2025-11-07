@@ -1,0 +1,92 @@
+<div class="settings-general-container">
+  <div class="settings-header">
+    <h1 class="settings-title">General Settings</h1>
+    <p class="settings-subtitle">Manage your organization's general configuration</p>
+  </div>
+
+  <div *ngIf="!isSuperAdmin" class="access-denied">
+    <mat-icon class="access-denied-icon">lock</mat-icon>
+    <h2>Access Restricted</h2>
+    <p>Only Super Administrators can access and modify organization settings.</p>
+  </div>
+
+  <div *ngIf="isSuperAdmin && !isLoading" class="settings-content">
+    <mat-card class="settings-card">
+      <mat-card-header class="card-header">
+        <div class="header-content">
+          <mat-icon class="header-icon">currency_exchange</mat-icon>
+          <div class="header-text">
+            <h2 class="card-title">Currency Settings</h2>
+            <p class="card-subtitle">Set the default currency for your organization</p>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="card-content">
+        <div class="currency-section">
+          <div class="current-currency-display">
+            <div class="currency-info">
+              <span class="currency-label">Current Currency:</span>
+              <div class="currency-value" *ngIf="currentCurrency">
+                <span class="currency-symbol">{{ getCurrencySymbol(currentCurrency) }}</span>
+                <span class="currency-code">{{ currentCurrency }}</span>
+                <span class="currency-name">{{ getCurrencyDisplay(currentCurrency) }}</span>
+              </div>
+              <div class="currency-value no-currency" *ngIf="!currentCurrency">
+                <span class="no-currency-text">No currency set</span>
+              </div>
+            </div>
+          </div>
+
+          <form [formGroup]="settingsForm" (ngSubmit)="onSave()" class="currency-form">
+            <mat-form-field appearance="outline" class="currency-field">
+              <mat-label>Select Currency</mat-label>
+              <mat-select formControlName="currency" (openedChange)="isDropdownOpen = $event">
+                <mat-option *ngFor="let currency of availableCurrencies" [value]="currency.code">
+                  <div class="currency-option">
+                    <!-- <span class="currency-option-symbol">{{ currency.symbol }} </span> -->
+                    <span class="currency-option-code">{{ currency.code }} </span>
+                    <span class="currency-option-name">{{ currency.name }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <!-- <mat-icon matPrefix>attach_money</mat-icon> -->
+              <mat-hint>Choose your organization's default currency</mat-hint>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button 
+                mat-raised-button 
+                color="primary" 
+                type="submit"
+                [disabled]="settingsForm.invalid || isSaving || settingsForm.get('currency')?.value === currentCurrency"
+                class="save-button">
+                <mat-icon *ngIf="!isSaving">save</mat-icon>
+                <mat-spinner *ngIf="isSaving" diameter="20" class="button-spinner"></mat-spinner>
+                <span>{{ isSaving ? 'Saving...' : 'Save Changes' }}</span>
+              </button>
+              <button 
+                mat-stroked-button 
+                type="button"
+                (click)="loadSettings()"
+                [disabled]="isSaving"
+                class="cancel-button">
+                <mat-icon>refresh</mat-icon>
+                <span>Reset</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="isSuperAdmin && isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">Loading settings...</p>
+  </div>
+</div>
+
+
+
+

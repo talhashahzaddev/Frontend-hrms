@@ -1,8 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Subject, takeUntil } from 'rxjs';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.models';
 
 @Component({
@@ -72,26 +74,26 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
               <tbody>
                 <tr>
                   <td>Basic Salary</td>
-                  <td class="text-right">{{ entry.basicSalary | currency:entry.currency }}</td>
+                  <td class="text-right">{{ entry.basicSalary | currency:getCurrencyCode(entry) }}</td>
                 </tr>
                 <tr *ngIf="entry.overtimeAmount > 0">
                   <td>Overtime</td>
-                  <td class="text-right">{{ entry.overtimeAmount | currency:entry.currency }}</td>
+                  <td class="text-right">{{ entry.overtimeAmount | currency:getCurrencyCode(entry) }}</td>
                 </tr>
                 <tr *ngIf="entry.bonusAmount > 0">
                   <td>Bonus</td>
-                  <td class="text-right">{{ entry.bonusAmount | currency:entry.currency }}</td>
+                  <td class="text-right">{{ entry.bonusAmount | currency:getCurrencyCode(entry) }}</td>
                 </tr>
                 <tr *ngFor="let allowance of getAllowances()">
                   <td>{{ allowance.name }}</td>
-                  <td class="text-right">{{ allowance.amount | currency:entry.currency }}</td>
+                  <td class="text-right">{{ allowance.amount | currency:getCurrencyCode(entry) }}</td>
                 </tr>
                 <tr *ngIf="getAllowances().length === 0 && hasNoAllowances()">
                   <td colspan="2" class="text-center" style="color: #999; font-style: italic;">No allowances</td>
                 </tr>
                 <tr class="total-row">
                   <td><strong>Gross Salary</strong></td>
-                  <td class="text-right"><strong>{{ entry.grossSalary | currency:entry.currency }}</strong></td>
+                  <td class="text-right"><strong>{{ entry.grossSalary | currency:getCurrencyCode(entry) }}</strong></td>
                 </tr>
               </tbody>
             </table>
@@ -110,19 +112,19 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
               <tbody>
                 <tr *ngIf="entry.taxAmount > 0">
                   <td>Tax</td>
-                  <td class="text-right">{{ entry.taxAmount | currency:entry.currency }}</td>
+                  <td class="text-right">{{ entry.taxAmount | currency:getCurrencyCode(entry) }}</td>
                 </tr>
                 <!-- <tr *ngFor="let deduction of getDeductions()">
                   <td>{{ deduction.name }}</td>
-                  <td class="text-right">{{ deduction.amount | currency:entry.currency }}</td>
+                  <td class="text-right">{{ deduction.amount | currency:getCurrencyCode(entry) }}</td>
                 </tr> -->
                 <tr *ngIf="entry.otherDeductions > 0">
                   <td>Other Deductions</td>
-                  <td class="text-right">{{ entry.otherDeductions | currency:entry.currency }}</td>
+                  <td class="text-right">{{ entry.otherDeductions | currency:getCurrencyCode(entry) }}</td>
                 </tr>
                 <tr class="total-row">
                   <td><strong>Total Deductions</strong></td>
-                  <td class="text-right"><strong>{{ getTotalDeductions() | currency:entry.currency }}</strong></td>
+                  <td class="text-right"><strong>{{ getTotalDeductions() | currency:getCurrencyCode(entry) }}</strong></td>
                 </tr>
               </tbody>
             </table>
@@ -132,7 +134,7 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
           <div class="net-salary-section">
             <div class="net-salary-box">
               <div class="net-label">Net Salary</div>
-              <div class="net-amount">{{ entry.netSalary | currency:entry.currency }}</div>
+              <div class="net-amount">{{ entry.netSalary | currency:getCurrencyCode(entry) }}</div>
             </div>
           </div>
 
@@ -430,18 +432,78 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
     }
   `]
 })
-export class PayslipPreviewDialogComponent {
+export class PayslipPreviewDialogComponent implements OnInit, OnDestroy {
   entry: PayrollEntry;
   period?: PayrollPeriod;
   onDownload?: () => void;
+  organizationCurrency: string = 'USD';
+  
+  private destroy$ = new Subject<void>();
 
   constructor(
     public dialogRef: MatDialogRef<PayslipPreviewDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { entry: PayrollEntry; period?: PayrollPeriod; onDownload?: () => void }
+    @Inject(MAT_DIALOG_DATA) public data: { entry: PayrollEntry; period?: PayrollPeriod; organizationCurrency?: string; onDownload?: () => void },
+    private settingsService: SettingsService
   ) {
     this.entry = data.entry;
     this.period = data.period;
     this.onDownload = data.onDownload;
+    // Use currency from parent if provided, otherwise load it
+    if (data.organizationCurrency && data.organizationCurrency.trim() !== '') {
+      this.organizationCurrency = data.organizationCurrency.trim().toUpperCase();
+      console.log('Preview dialog currency from parent:', this.organizationCurrency);
+    } else {
+      // Try to get synchronously
+      const initialCurrency = this.settingsService.getOrganizationCurrencyCode();
+      this.organizationCurrency = initialCurrency ? initialCurrency.trim().toUpperCase() : 'USD';
+    }
+  }
+
+  ngOnInit(): void {
+    if (!this.data.organizationCurrency) {
+      this.loadOrganizationCurrency();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadOrganizationCurrency(): void {
+    // If currency wasn't provided from parent, load it
+    if (!this.data.organizationCurrency || this.data.organizationCurrency.trim() === '') {
+      this.settingsService.getOrganizationCurrency()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (currency) => {
+            if (currency && currency.trim() !== '') {
+              // Ensure currency is stored in uppercase
+              this.organizationCurrency = currency.trim().toUpperCase();
+              console.log('Preview Dialog - Organization currency loaded:', this.organizationCurrency);
+            } else {
+              console.warn('Preview Dialog - Organization currency is empty, using default:', this.organizationCurrency);
+            }
+          },
+          error: (error) => {
+            console.error('Error loading organization currency:', error);
+            this.organizationCurrency = 'USD'; // Default to USD on error
+          }
+        });
+      
+      // Also subscribe to the BehaviorSubject for immediate updates
+      this.settingsService.organizationCurrency$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (currency) => {
+            if (currency && currency.trim() !== '') {
+              // Ensure currency is stored in uppercase
+              this.organizationCurrency = currency.trim().toUpperCase();
+              console.log('Preview Dialog - Currency updated from BehaviorSubject:', this.organizationCurrency);
+            }
+          }
+        });
+    }
   }
 
   getAllowances(): Array<{ name: string; amount: number }> {
@@ -491,6 +553,25 @@ export class PayslipPreviewDialogComponent {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  getCurrencyCode(entry: PayrollEntry): string {
+    // First check if entry has a valid currency (not empty, not USD default)
+    const entryCurrency = entry.currency?.trim().toUpperCase();
+    if (entryCurrency && entryCurrency !== '' && entryCurrency.length === 3 && entryCurrency !== 'USD') {
+      return entryCurrency;
+    }
+    // Prefer organization currency over entry currency (especially if entry currency is USD default)
+    const orgCurrency = this.organizationCurrency?.trim().toUpperCase();
+    if (orgCurrency && orgCurrency !== '' && orgCurrency.length === 3) {
+      return orgCurrency;
+    }
+    // If entry has a valid currency (even if USD), use it
+    if (entryCurrency && entryCurrency !== '' && entryCurrency.length === 3) {
+      return entryCurrency;
+    }
+    // Default fallback to USD
+    return 'USD';
   }
 
   downloadPayslip(): void {

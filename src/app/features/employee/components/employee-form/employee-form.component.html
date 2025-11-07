@@ -154,10 +154,12 @@
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" class="salary-field">
               <mat-label>Basic Salary</mat-label>
-              <input matInput type="number" formControlName="basicSalary" placeholder="50000">
-              <span matTextPrefix>$</span>
+              <div class="currency-input-wrapper">
+                <span class="currency-symbol-badge">{{ currencySymbol }}</span>
+                <input matInput type="number" formControlName="basicSalary" placeholder="50000" class="salary-input">
+              </div>
             </mat-form-field>
           </div>
 

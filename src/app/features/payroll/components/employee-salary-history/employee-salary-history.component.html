@@ -26,7 +26,7 @@
         </div>
         <div class="summary-content">
           <h3 class="summary-title">Current Salary</h3>
-          <p class="summary-value">{{ currentSalary | currency:'INR':'symbol':'1.2-2' }}</p>
+          <p class="summary-value">{{ currentSalary | currency:organizationCurrency:'symbol':'1.2-2' }}</p>
           <p class="summary-subtitle">As of {{ currentPeriod }}</p>
         </div>
       </mat-card-content>
@@ -39,7 +39,7 @@
         </div>
         <div class="summary-content">
           <h3 class="summary-title">Average Salary</h3>
-          <p class="summary-value">{{ averageSalary | currency:'INR':'symbol':'1.2-2' }}</p>
+          <p class="summary-value">{{ averageSalary | currency:organizationCurrency:'symbol':'1.2-2' }}</p>
           <p class="summary-subtitle">Last 12 months</p>
         </div>
       </mat-card-content>
@@ -52,7 +52,7 @@
         </div>
         <div class="summary-content">
           <h3 class="summary-title">Total Earnings</h3>
-          <p class="summary-value">{{ totalEarnings | currency:'INR':'symbol':'1.2-2' }}</p>
+          <p class="summary-value">{{ totalEarnings | currency:organizationCurrency:'symbol':'1.2-2' }}</p>
           <p class="summary-subtitle">YTD {{ currentYear }}</p>
         </div>
       </mat-card-content>
@@ -158,7 +158,7 @@
                   {{ entry.status }}
                 </mat-chip>
               </mat-chip-listbox>
-              <span class="net-salary">{{ entry.netSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+              <span class="net-salary">{{ entry.netSalary | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
             </mat-panel-description>
           </mat-expansion-panel-header>
 
@@ -168,19 +168,19 @@
             <div class="details-grid">
               <div class="detail-item">
                 <span class="label">Basic Salary</span>
-                <span class="value">{{ entry.basicSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+                <span class="value">{{ entry.basicSalary | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Gross Salary</span>
-                <span class="value">{{ entry.grossSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+                <span class="value">{{ entry.grossSalary | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Tax Amount</span>
-                <span class="value">{{ entry.taxAmount | currency:'INR':'symbol':'1.2-2' }}</span>
+                <span class="value">{{ entry.taxAmount | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Net Salary</span>
-                <span class="value highlight">{{ entry.netSalary | currency:'INR':'symbol':'1.2-2' }}</span>
+                <span class="value highlight">{{ entry.netSalary | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
               </div>
             </div>
           </div>
@@ -191,7 +191,7 @@
             <mat-list>
               <mat-list-item *ngFor="let allowance of entry.allowances | keyvalue">
                 <span class="allowance-name">{{ allowance.key }}</span>
-                <span class="allowance-amount">{{ allowance.value | currency:'INR':'symbol':'1.2-2' }}</span>
+                <span class="allowance-amount">{{ allowance.value | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
               </mat-list-item>
             </mat-list>
           </div>
@@ -202,7 +202,7 @@
             <mat-list>
               <mat-list-item *ngFor="let deduction of entry.deductions | keyvalue">
                 <span class="deduction-name">{{ deduction.key }}</span>
-                <span class="deduction-amount">{{ deduction.value | currency:'INR':'symbol':'1.2-2' }}</span>
+                <span class="deduction-amount">{{ deduction.value | currency:(entry.currency || organizationCurrency):'symbol':'1.2-2' }}</span>
               </mat-list-item>
             </mat-list>
           </div>

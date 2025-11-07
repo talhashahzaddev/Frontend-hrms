@@ -195,11 +195,11 @@
                 </div>
                 <div class="result-item">
                   <label>Total Gross Amount:</label>
-                  <span>{{ processingResults.totalGross | currency }}</span>
+                  <span>{{ processingResults.totalGross | currency:organizationCurrency }}</span>
                 </div>
                 <div class="result-item">
                   <label>Total Net Amount:</label>
-                  <span>{{ processingResults.totalNet | currency }}</span>
+                  <span>{{ processingResults.totalNet | currency:organizationCurrency }}</span>
                 </div>
               </div>
 
@@ -243,8 +243,8 @@
           </div>
           <div class="history-stats">
             <span class="stat">{{ item.entriesCreated }} entries</span>
-            <span class="stat">{{ item.totalGrossAmount | currency }}</span>
-            <span class="stat net-amount">Net: {{ item.totalNetAmount | currency }}</span>
+            <span class="stat">{{ item.totalGrossAmount | currency:organizationCurrency }}</span>
+            <span class="stat net-amount">Net: {{ item.totalNetAmount | currency:organizationCurrency }}</span>
           </div>
           <mat-chip [color]="getStatusColor(item.status)">
             {{ item.status | titlecase }}

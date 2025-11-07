@@ -46,7 +46,7 @@
         </div>
         <div class="summary-content">
           <h3 class="summary-title">Total Payroll</h3>
-          <p class="summary-value">{{ totalPayrollAmount | currency:'INR':'symbol':'1.0-0' }}</p>
+          <p class="summary-value">{{ totalPayrollAmount | currency:organizationCurrency:'symbol':'1.0-0' }}</p>
           <p class="summary-subtitle">Current month</p>
         </div>
       </mat-card-content>
@@ -231,7 +231,7 @@
                 <ng-container matColumnDef="totalAmount">
                   <th mat-header-cell *matHeaderCellDef> Total Amount </th>
                   <td mat-cell *matCellDef="let period"> 
-                    {{ period.totalAmount | currency:'INR':'symbol':'1.0-0' }}
+                    {{ period.totalAmount | currency:organizationCurrency:'symbol':'1.0-0' }}
                   </td>
                 </ng-container>
 
@@ -315,7 +315,7 @@
                 <ng-container matColumnDef="netSalary">
                   <th mat-header-cell *matHeaderCellDef> Net Salary </th>
                   <td mat-cell *matCellDef="let entry"> 
-                    {{ entry.netSalary | currency:'INR':'symbol':'1.0-0' }}
+                    {{ entry.netSalary | currency:(entry.currency || organizationCurrency):'symbol':'1.0-0' }}
                   </td>
                 </ng-container>
 

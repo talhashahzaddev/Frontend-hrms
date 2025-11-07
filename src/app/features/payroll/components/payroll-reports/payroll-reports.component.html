@@ -108,7 +108,7 @@
                   </div>
                   <div class="stat-details">
                     <div class="stat-label">Total Payroll</div>
-                    <div class="stat-value">{{ statisticsData.totalPayroll | currency }}</div>
+                    <div class="stat-value">{{ statisticsData.totalPayroll | currency:organizationCurrency }}</div>
                     <div class="stat-footer">
                       <mat-icon class="stat-indicator">arrow_upward</mat-icon>
                       <span>Overall Total</span>
@@ -126,7 +126,7 @@
                   </div>
                   <div class="stat-details">
                     <div class="stat-label">Average Salary</div>
-                    <div class="stat-value">{{ statisticsData.averagePayroll | currency }}</div>
+                    <div class="stat-value">{{ statisticsData.averagePayroll | currency:organizationCurrency }}</div>
                     <div class="stat-footer">
                       <mat-icon class="stat-indicator">bar_chart</mat-icon>
                       <span>Per Employee</span>
@@ -144,7 +144,7 @@
                   </div>
                   <div class="stat-details">
                     <div class="stat-label">Total Deductions</div>
-                    <div class="stat-value">{{ statisticsData.totalDeductions | currency }}</div>
+                    <div class="stat-value">{{ statisticsData.totalDeductions | currency:organizationCurrency }}</div>
                     <div class="stat-footer">
                       <mat-icon class="stat-indicator">trending_down</mat-icon>
                       <span>Deductions</span>
@@ -162,7 +162,7 @@
                   </div>
                   <div class="stat-details">
                     <div class="stat-label">Total Allowances</div>
-                    <div class="stat-value">{{ statisticsData.totalAllowances | currency }}</div>
+                    <div class="stat-value">{{ statisticsData.totalAllowances | currency:organizationCurrency }}</div>
                     <div class="stat-footer">
                       <mat-icon class="stat-indicator">arrow_upward</mat-icon>
                       <span>Benefits</span>
@@ -190,12 +190,12 @@
 
               <ng-container matColumnDef="totalAmount">
                 <mat-header-cell *matHeaderCellDef>Total Amount</mat-header-cell>
-                <mat-cell *matCellDef="let dept">{{ dept.totalAmount | currency }}</mat-cell>
+                <mat-cell *matCellDef="let dept">{{ dept.totalAmount | currency:organizationCurrency }}</mat-cell>
               </ng-container>
 
               <ng-container matColumnDef="averageAmount">
                 <mat-header-cell *matHeaderCellDef>Average Amount</mat-header-cell>
-                <mat-cell *matCellDef="let dept">{{ dept.averageAmount | currency }}</mat-cell>
+                <mat-cell *matCellDef="let dept">{{ dept.averageAmount | currency:organizationCurrency }}</mat-cell>
               </ng-container>
 
               <ng-container matColumnDef="percentage">
@@ -220,7 +220,7 @@
 
               <ng-container matColumnDef="amount">
                 <mat-header-cell *matHeaderCellDef>Total Amount</mat-header-cell>
-                <mat-cell *matCellDef="let trend">{{ trend.amount | currency }}</mat-cell>
+                <mat-cell *matCellDef="let trend">{{ trend.amount | currency:organizationCurrency }}</mat-cell>
               </ng-container>
 
               <ng-container matColumnDef="employeeCount">
@@ -267,11 +267,11 @@
                       {{ getPeriodEntriesCount(group.periodId) }} employees
                     </span>
                     <span class="stat-item">
-                      <mat-icon>attach_money</mat-icon>
-                      Gross: {{ getPeriodTotalGross(group.periodId) | currency }}
+                      <!-- <mat-icon>attach_money</mat-icon> -->
+                      Gross: {{ getPeriodTotalGross(group.periodId) | currency:organizationCurrency }}
                     </span>
                     <span class="stat-item net-stat">
-                      Net: {{ getPeriodTotalNet(group.periodId) | currency }}
+                      Net: {{ getPeriodTotalNet(group.periodId) | currency:organizationCurrency }}
                     </span>
                   </div>
                 </div>
@@ -293,28 +293,28 @@
 
                   <ng-container matColumnDef="basicSalary">
                     <mat-header-cell *matHeaderCellDef>Basic Salary</mat-header-cell>
-                    <mat-cell *matCellDef="let entry">{{ entry.basicSalary | currency }}</mat-cell>
+                    <mat-cell *matCellDef="let entry">{{ entry.basicSalary | currency:organizationCurrency }}</mat-cell>
                   </ng-container>
 
                   <ng-container matColumnDef="allowances">
                     <mat-header-cell *matHeaderCellDef>Allowances</mat-header-cell>
-                    <mat-cell *matCellDef="let entry">{{ getTotalAllowances(entry) | currency }}</mat-cell>
+                    <mat-cell *matCellDef="let entry">{{ getTotalAllowances(entry) | currency:organizationCurrency }}</mat-cell>
                   </ng-container>
 
                   <ng-container matColumnDef="deductions">
                     <mat-header-cell *matHeaderCellDef>Deductions</mat-header-cell>
-                    <mat-cell *matCellDef="let entry">{{ getTotalDeductions(entry) | currency }}</mat-cell>
+                    <mat-cell *matCellDef="let entry">{{ getTotalDeductions(entry) | currency:organizationCurrency }}</mat-cell>
                   </ng-container>
 
                   <ng-container matColumnDef="grossSalary">
                     <mat-header-cell *matHeaderCellDef>Gross Salary</mat-header-cell>
-                    <mat-cell *matCellDef="let entry">{{ entry.grossSalary | currency }}</mat-cell>
+                    <mat-cell *matCellDef="let entry">{{ entry.grossSalary | currency:organizationCurrency }}</mat-cell>
                   </ng-container>
 
                   <ng-container matColumnDef="netSalary">
                     <mat-header-cell *matHeaderCellDef>Net Salary</mat-header-cell>
                     <mat-cell *matCellDef="let entry">
-                      <span class="net-salary">{{ entry.netSalary | currency }}</span>
+                      <span class="net-salary">{{ entry.netSalary | currency:organizationCurrency }}</span>
                     </mat-cell>
                   </ng-container>
 

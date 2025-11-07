@@ -14,6 +14,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { Employee, Department, Position, CreateEmployeeRequest, UpdateEmployeeRequest } from '../../../../core/models/employee.models';
 
 @Component({
@@ -44,6 +45,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   departments: Department[] = [];
   positions: Position[] = [];
   managers: Employee[] = [];
+  organizationCurrency: string = 'USD';
+  currencySymbol: string = '$';
 
   private destroy$ = new Subject<void>();
 
@@ -51,6 +54,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
+    private settingsService: SettingsService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -119,6 +123,23 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   private loadInitialData(): void {
+    // Load organization currency first
+    this.settingsService.getOrganizationSettings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (settings) => {
+          this.organizationCurrency = settings.currency || 'USD';
+          const currency = this.settingsService.getAvailableCurrencies().find(c => c.code === this.organizationCurrency);
+          this.currencySymbol = currency?.symbol || '$';
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          // Default to USD if error
+          this.organizationCurrency = 'USD';
+          this.currencySymbol = '$';
+        }
+      });
+
     const requests: any[] = [
       this.employeeService.getDepartments(),
       this.employeeService.getPositions(),

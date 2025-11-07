@@ -19,6 +19,7 @@ import { Subject, takeUntil, interval, takeWhile } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { Department } from '../../../../core/models/employee.models';
 import { 
   PayrollPeriod, 
@@ -71,12 +72,16 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   processingMessage = '';
   currentStep = 1;
   processingResults: any = null;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
 
   constructor(
     private fb: FormBuilder,
     private payrollService: PayrollService,
     private notificationService: NotificationService,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private settingsService: SettingsService
   ) {
     this.selectionForm = this.fb.group({
       selectedPeriod: ['', Validators.required]
@@ -90,12 +95,28 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadAvailablePeriods();
     this.setupFormSubscriptions();
     this.loadRecentProcessing();
     this.loadSalaryRules();
     this.loadDepartments();
     this.setupSettingsFormValidation();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
+      });
   }
 
   ngOnDestroy(): void {

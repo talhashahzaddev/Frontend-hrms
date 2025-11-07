@@ -21,6 +21,7 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { 
   PayrollPeriod,
   PayrollReportFilter
@@ -75,6 +76,10 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   // UI state
   isLoading = false;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
+  currencySymbol: string = '$';
 
   // Table columns
   departmentColumns = ['department', 'employees', 'totalAmount', 'averageAmount', 'percentage'];
@@ -121,12 +126,13 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function(value) {
-            return '$' + value.toLocaleString();
+          callback: (value: any) => {
+            const symbol = this.currencySymbol || '$';
+            return symbol + value.toLocaleString();
           }
         }
       }
-    }
+    } as any
   };
 
   barChartType: ChartType = 'bar';
@@ -156,7 +162,8 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private payrollService: PayrollService,
     private employeeService: EmployeeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private settingsService: SettingsService
   ) {
     this.filterForm = this.fb.group({
       payrollPeriodId: [''],
@@ -167,9 +174,37 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadAvailablePeriods();
     this.loadDepartments();
     this.generateDefaultReport();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+          this.currencySymbol = this.settingsService.getCurrencySymbol(currency);
+          this.updateChartCurrency();
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+          this.currencySymbol = '$';
+        }
+      });
+  }
+
+  private updateChartCurrency(): void {
+    // Update chart options with currency symbol
+    if (this.lineChartOptions?.scales?.['y']?.ticks) {
+      this.lineChartOptions.scales['y'].ticks.callback = (value: any) => {
+        return this.currencySymbol + value.toLocaleString();
+      };
+    }
   }
 
   ngOnDestroy(): void {
@@ -500,7 +535,8 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
     };
 
     // Update bar chart (salary distribution)
-    const salaryRanges = ['< $5K', '$5K-$8K', '$8K-$12K', '$12K-$15K', '> $15K'];
+    const symbol = this.currencySymbol;
+    const salaryRanges = [`< ${symbol}5K`, `${symbol}5K-${symbol}8K`, `${symbol}8K-${symbol}12K`, `${symbol}12K-${symbol}15K`, `> ${symbol}15K`];
     const distribution = [10, 45, 60, 25, 10];
     
     this.barChartData = {

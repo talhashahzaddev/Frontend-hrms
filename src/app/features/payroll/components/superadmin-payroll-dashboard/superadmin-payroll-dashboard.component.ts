@@ -29,6 +29,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollPeriod, PayrollEntry, PayrollStatus, PayrollEntryStatus } from '../../../../core/models/payroll.models';
 import { User } from '../../../../core/models/auth.models';
 
@@ -87,6 +88,9 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
   pendingApprovals = 0;
   completedPayrolls = 0;
   
+  // Currency
+  organizationCurrency: string = 'USD';
+  
   // Charts data
   payrollTrendData: any[] = [];
   departmentChartData: any[] = [];
@@ -96,6 +100,7 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private payrollService: PayrollService,
     private authService: AuthService,
+    private settingsService: SettingsService,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
@@ -110,6 +115,7 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.authService.getCurrentUser().subscribe({
       next: (user) => {
         this.currentUser = user;
@@ -121,6 +127,20 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         this.showNotification('Failed to load user information.', 'error');
       }
     });
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
+      });
   }
 
   ngOnDestroy(): void {

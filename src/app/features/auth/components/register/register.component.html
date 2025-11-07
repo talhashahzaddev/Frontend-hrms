@@ -1,5 +1,5 @@
 <!-- Registration Container -->
-
+<!-- <div class="register-container"> -->
   <div class="register-card mat-elevation-8">
     
     <!-- Header Section -->
@@ -70,6 +70,24 @@
                   <input matInput formControlName="website" placeholder="https://yourcompany.com">
                   <mat-error *ngIf="isFieldInvalid(organizationForm, 'website')">
                     {{ getErrorMessage(organizationForm, 'website') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <!-- Currency -->
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Currency</mat-label>
+                  <mat-icon matPrefix>currency_exchange</mat-icon>
+                  <mat-select formControlName="currency">
+                    <mat-option *ngFor="let currency of availableCurrencies" [value]="currency.code">
+                      <div class="currency-option">
+                        <!-- <span class="currency-option-code">{{ currency.code }}</span> -->
+                        <span class="currency-option-name">{{ currency.name }}</span>
+                      </div>
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Select your organization's default currency</mat-hint>
+                  <mat-error *ngIf="isFieldInvalid(organizationForm, 'currency')">
+                    {{ getErrorMessage(organizationForm, 'currency') }}
                   </mat-error>
                 </mat-form-field>
 
@@ -217,11 +235,13 @@
       <!-- Footer -->
       <div class="register-footer">
         <p>
-          Already have an account? 
-          <a routerLink="/login" class="login-link">Sign in here</a>
+          Already have an account?
+          <a routerLink="/login" class="login-link">Login here</a>
         </p>
       </div>
 
     </div>
   </div>
+
+<!-- </div> -->
 

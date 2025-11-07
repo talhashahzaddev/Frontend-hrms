@@ -18,6 +18,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { RegisterRequest } from '../../../../core/models/auth.models';
 import { ValidationService } from '../../../../shared/services/validation.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 
 @Component({
     selector: 'app-register',
@@ -61,15 +62,20 @@ export class RegisterComponent implements OnInit, OnDestroy {
     { value: '1000+', label: '1000+ employees' }
   ];
 
+  // Available currencies
+  availableCurrencies: Array<{ code: string; name: string; symbol: string }> = [];
+
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
     private validationService: ValidationService,
-    private router: Router 
+    private router: Router,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
+    this.availableCurrencies = this.settingsService.getAvailableCurrencies();
     this.initializeForms();
   }
 
@@ -83,7 +89,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.organizationForm = this.formBuilder.group({
       companyName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       companySize: ['', Validators.required],
-      website: ['', [this.validationService.urlValidator()]]
+      website: ['', [this.validationService.urlValidator()]],
+      currency: ['USD', Validators.required] // Default to USD
     });
 
     // User Form - simplified to match database schema
@@ -184,6 +191,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       companyName: organizationData.companyName,
       companySize: organizationData.companySize,
       website: organizationData.website,
+      currency: organizationData.currency || 'USD', // Include currency, default to USD
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
@@ -268,6 +276,7 @@ onTermsClick(): void {
       companyName: 'Company Name',
       companySize: 'Company Size',
       website: 'Website',
+      currency: 'Currency',
       firstName: 'First Name',
       lastName: 'Last Name',
       email: 'Email',
@@ -307,7 +316,8 @@ onTermsClick(): void {
     this.organizationForm.patchValue({
       companyName: 'Demo Company Inc.',
       companySize: '51-200',
-      website: 'https://democompany.com'
+      website: 'https://democompany.com',
+      currency: 'USD'
     });
 
     this.userForm.patchValue({

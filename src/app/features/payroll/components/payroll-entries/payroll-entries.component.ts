@@ -21,6 +21,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { 
   PayrollEntry, 
   PayrollEntryStatus,
@@ -133,7 +134,7 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
         <mat-card class="summary-card">
           <mat-card-content>
             <div class="stat-item">
-              <div class="stat-value">{{ summaryStats.totalGrossAmount | currency }}</div>
+              <div class="stat-value">{{ summaryStats.totalGrossAmount | currency:organizationCurrency }}</div>
               <div class="stat-label">Total Gross</div>
             </div>
           </mat-card-content>
@@ -142,7 +143,7 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
         <mat-card class="summary-card">
           <mat-card-content>
             <div class="stat-item">
-              <div class="stat-value">{{ summaryStats.totalNetAmount | currency }}</div>
+              <div class="stat-value">{{ summaryStats.totalNetAmount | currency:organizationCurrency }}</div>
               <div class="stat-label">Total Net</div>
             </div>
           </mat-card-content>
@@ -196,7 +197,7 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
               <ng-container matColumnDef="basicSalary">
                 <mat-header-cell *matHeaderCellDef>Basic Salary</mat-header-cell>
                 <mat-cell *matCellDef="let entry">
-                  {{ entry.basicSalary | currency }}
+                  {{ entry.basicSalary | currency:(entry.currency || organizationCurrency) }}
                 </mat-cell>
               </ng-container>
 
@@ -205,7 +206,7 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
                 <mat-header-cell *matHeaderCellDef>Allowances</mat-header-cell>
                 <mat-cell *matCellDef="let entry">
                   <div class="allowances-info">
-                    <div class="amount">{{ getTotalAllowances(entry) | currency }}</div>
+                    <div class="amount">{{ getTotalAllowances(entry) | currency:(entry.currency || organizationCurrency) }}</div>
                     <small *ngIf="hasAllowances(entry)" 
                            [matTooltip]="getAllowancesTooltip(entry)">
                       {{ getAllowancesCount(entry) }} item(s)
@@ -219,8 +220,8 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
                 <mat-header-cell *matHeaderCellDef>Deductions</mat-header-cell>
                 <mat-cell *matCellDef="let entry">
                   <div class="deductions-info">
-                    <div class="amount">{{ getTotalDeductions(entry) | currency }}</div>
-                    <small>Tax: {{ entry.taxAmount | currency }}</small>
+                    <div class="amount">{{ getTotalDeductions(entry) | currency:(entry.currency || organizationCurrency) }}</div>
+                    <small>Tax: {{ entry.taxAmount | currency:(entry.currency || organizationCurrency) }}</small>
                   </div>
                 </mat-cell>
               </ng-container>
@@ -229,7 +230,7 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
               <ng-container matColumnDef="grossSalary">
                 <mat-header-cell *matHeaderCellDef>Gross Salary</mat-header-cell>
                 <mat-cell *matCellDef="let entry">
-                  <div class="gross-salary">{{ entry.grossSalary | currency }}</div>
+                  <div class="gross-salary">{{ entry.grossSalary | currency:(entry.currency || organizationCurrency) }}</div>
                 </mat-cell>
               </ng-container>
 
@@ -237,7 +238,7 @@ import { PaginatedResponse, PagedResult } from '../../../../core/models/common.m
               <ng-container matColumnDef="netSalary">
                 <mat-header-cell *matHeaderCellDef>Net Salary</mat-header-cell>
                 <mat-cell *matCellDef="let entry">
-                  <div class="net-salary">{{ entry.netSalary | currency }}</div>
+                  <div class="net-salary">{{ entry.netSalary | currency:(entry.currency || organizationCurrency) }}</div>
                 </mat-cell>
               </ng-container>
 
@@ -341,6 +342,9 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
   isLoading = false;
   filterForm: FormGroup;
   summaryStats: any = null;
+  
+  // Currency
+  organizationCurrency: string = 'USD';
 
   // Table configuration
   displayedColumns: string[] = ['select', 'employee', 'basicSalary', 'allowances', 'deductions', 'grossSalary', 'netSalary', 'status', 'actions'];
@@ -348,7 +352,8 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private payrollService: PayrollService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private settingsService: SettingsService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -358,6 +363,7 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadPayrollEntries();
     this.loadSummaryStats();
     
@@ -366,6 +372,21 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.applyFilters();
+      });
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => {
+          this.organizationCurrency = currency;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          this.organizationCurrency = 'USD';
+        }
       });
   }
 

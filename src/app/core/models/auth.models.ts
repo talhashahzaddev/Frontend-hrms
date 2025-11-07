@@ -50,6 +50,7 @@ export interface RegisterRequest {
   companyName: string;
   website?: string;
   companySize: string; // Used to determine subscription type
+  currency?: string; // Organization currency code (e.g., USD, PKR, EUR)
   
   // User data (maps to auth.users table)
   firstName: string;
