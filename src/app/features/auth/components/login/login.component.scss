@@ -36,7 +36,10 @@
 
 .logo-icon {
   font-size: 2.25rem;
-  color: var(--primary-600);
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   filter: drop-shadow(0 4px 10px rgba(37, 99, 235, 0.16));
 }
 
@@ -44,7 +47,10 @@
   font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--primary-700);
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .login-title {
@@ -84,7 +90,7 @@
   font-size: 1rem;
   font-weight: 600;
   border-radius: 0.75rem;
-  background: linear-gradient(135deg, #2563eb, #6366f1);
+  background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
   color: white;
   border: none;
   box-shadow: 0 4px 14px -2px rgba(59, 130, 246, 0.6);
