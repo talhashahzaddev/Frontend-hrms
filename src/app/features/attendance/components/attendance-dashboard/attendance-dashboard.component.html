@@ -153,8 +153,9 @@
           
           <!-- Date Range Filter -->
           <div class="list-filters">
-            <mat-form-field class="date-field">
+            <mat-form-field appearance="outline" class="date-field">
               <mat-label>Start Date</mat-label>
+              <mat-icon matPrefix>event</mat-icon>
               <input matInput 
                      [matDatepicker]="listStartPicker" 
                      [formControl]="listStartDateControl"
@@ -163,8 +164,9 @@
               <mat-datepicker #listStartPicker></mat-datepicker>
             </mat-form-field>
 
-            <mat-form-field class="date-field">
+            <mat-form-field appearance="outline" class="date-field">
               <mat-label>End Date</mat-label>
+              <mat-icon matPrefix>event</mat-icon>
               <input matInput 
                      [matDatepicker]="listEndPicker" 
                      [formControl]="listEndDateControl"
@@ -175,7 +177,7 @@
 
             <button mat-flat-button (click)="loadListData()" class="load-button">
               <mat-icon>refresh</mat-icon>
-              Load Data
+              <span>Load Data</span>
             </button>
           </div>
 
