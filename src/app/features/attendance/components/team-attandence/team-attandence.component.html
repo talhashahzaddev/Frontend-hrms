@@ -36,7 +36,7 @@
     
     <div class="filters-content">
       <!-- Date Range -->
-      <mat-form-field class="date-field">
+      <mat-form-field appearance="outline" class="date-field">
         <mat-label>Start Date</mat-label>
         <input matInput 
                [matDatepicker]="startPicker" 
@@ -46,7 +46,7 @@
         <mat-datepicker #startPicker></mat-datepicker>
       </mat-form-field>
 
-      <mat-form-field class="date-field">
+      <mat-form-field appearance="outline" class="date-field">
         <mat-label>End Date</mat-label>
         <input matInput 
                [matDatepicker]="endPicker" 
@@ -57,8 +57,9 @@
       </mat-form-field>
 
       <!-- Department Filter -->
-      <mat-form-field>
+      <mat-form-field appearance="outline">
         <mat-label>Department</mat-label>
+        <mat-icon matPrefix>domain</mat-icon>
         <mat-select [formControl]="departmentControl">
           <mat-option value="">All Departments</mat-option>
           <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
@@ -68,8 +69,9 @@
       </mat-form-field>
 
       <!-- Status Filter -->
-      <mat-form-field>
+      <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>
+        <mat-icon matPrefix>check_circle</mat-icon>
         <mat-select [formControl]="statusControl">
           <mat-option *ngFor="let status of statusOptions" [value]="status.value">
             {{ status.label }}
@@ -79,68 +81,103 @@
     </div>
   </mat-card>
 
-  <!-- Daily Stats Card -->
-  <mat-card class="stats-card" *ngIf="dailyStats">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>today</mat-icon>
-        Today's Overview
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="stats-grid">
+  <!-- Daily Stats Cards - Dashboard Style -->
+  <div class="statistics-cards" *ngIf="dailyStats">
+    <!-- Present Employees Card -->
+    <mat-card class="stat-card stat-card-success">
+      <mat-card-content>
         <div class="stat-item">
-          <div class="stat-icon success">
-            <mat-icon>check_circle</mat-icon>
+          <div class="stat-icon-wrapper">
+            <mat-icon class="stat-icon">check_circle</mat-icon>
           </div>
           <div class="stat-details">
+            <div class="stat-label">Present Employees</div>
             <div class="stat-value">{{ dailyStats.presentEmployees }}</div>
-            <div class="stat-label">Present</div>
+            <div class="stat-footer">
+              <mat-icon class="stat-indicator">people</mat-icon>
+              <span>Active Today</span>
+            </div>
           </div>
         </div>
-        
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Absent Employees Card -->
+    <mat-card class="stat-card stat-card-danger">
+      <mat-card-content>
         <div class="stat-item">
-          <div class="stat-icon danger">
-            <mat-icon>cancel</mat-icon>
+          <div class="stat-icon-wrapper">
+            <mat-icon class="stat-icon">cancel</mat-icon>
           </div>
           <div class="stat-details">
+            <div class="stat-label">Absent Employees</div>
             <div class="stat-value">{{ dailyStats.absentEmployees }}</div>
-            <div class="stat-label">Absent</div>
+            <div class="stat-footer">
+              <mat-icon class="stat-indicator">person_off</mat-icon>
+              <span>Not Present</span>
+            </div>
           </div>
         </div>
-        
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Late Employees Card -->
+    <mat-card class="stat-card stat-card-warning">
+      <mat-card-content>
         <div class="stat-item">
-          <div class="stat-icon warning">
-            <mat-icon>schedule</mat-icon>
+          <div class="stat-icon-wrapper">
+            <mat-icon class="stat-icon">schedule</mat-icon>
           </div>
           <div class="stat-details">
+            <div class="stat-label">Late Arrivals</div>
             <div class="stat-value">{{ dailyStats.lateEmployees }}</div>
-            <div class="stat-label">Late</div>
+            <div class="stat-footer">
+              <mat-icon class="stat-indicator">access_time</mat-icon>
+              <span>Delayed</span>
+            </div>
           </div>
         </div>
-        
+      </mat-card-content>
+    </mat-card>
+
+    <!-- On Leave Employees Card -->
+    <mat-card class="stat-card stat-card-info">
+      <mat-card-content>
         <div class="stat-item">
-          <div class="stat-icon info">
-            <mat-icon>event_available</mat-icon>
+          <div class="stat-icon-wrapper">
+            <mat-icon class="stat-icon">event_available</mat-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-value">{{ dailyStats.onLeaveEmployees }}</div>
             <div class="stat-label">On Leave</div>
+            <div class="stat-value">{{ dailyStats.onLeaveEmployees }}</div>
+            <div class="stat-footer">
+              <mat-icon class="stat-indicator">beach_access</mat-icon>
+              <span>Leave Today</span>
+            </div>
           </div>
         </div>
-        
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Attendance Rate Card -->
+    <mat-card class="stat-card stat-card-primary">
+      <mat-card-content>
         <div class="stat-item">
-          <div class="stat-icon primary">
-            <mat-icon>trending_up</mat-icon>
+          <div class="stat-icon-wrapper">
+            <mat-icon class="stat-icon">trending_up</mat-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-value">{{ dailyStats.attendancePercentage | number:'1.1-1' }}%</div>
             <div class="stat-label">Attendance Rate</div>
+            <div class="stat-value">{{ dailyStats.attendancePercentage | number:'1.1-1' }}%</div>
+            <div class="stat-footer">
+              <mat-icon class="stat-indicator">analytics</mat-icon>
+              <span>Overall Rate</span>
+            </div>
           </div>
         </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
   <!-- Attendance Table -->
   <mat-card class="table-card">
@@ -160,7 +197,7 @@
           <td mat-cell *matCellDef="let attendance" class="employee-info">
             <div class="employee-details">
               <div class="employee-name">{{ attendance.employeeName }}</div>
-              <div class="employee-id">{{ attendance.employeeId }}</div>
+              <!-- <div class="employee-id">{{ attendance.employeeId }}</div> -->
             </div>
           </td>
         </ng-container>

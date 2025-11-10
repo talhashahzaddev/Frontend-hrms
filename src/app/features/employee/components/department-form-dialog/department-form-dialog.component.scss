@@ -1,270 +1,276 @@
-// Department Form Dialog Styles - Professional Theme
-:host {
-  display: block;
-}
-
+// Department Form Dialog - Professional & Beautiful Styling
 ::ng-deep .mat-mdc-dialog-container {
-  --mdc-dialog-container-color: #ffffff;
-  --mdc-dialog-supporting-text-color: #374151;
   border-radius: 16px !important;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
+// Dialog Header
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
   color: white;
-  border-radius: 16px 16px 0 0;
-  margin: -24px -24px 0 -24px;
-  
+
   h2 {
     display: flex;
     align-items: center;
     gap: 12px;
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 22px;
+    font-weight: 700;
     color: white;
-    padding: 16px 0;
-    
+
     mat-icon {
-      color: white;
-      font-size: 1.5rem;
-      width: 1.5rem;
-      height: 1.5rem;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
     }
   }
-  
+
   .close-button {
-    color: rgba(255, 255, 255, 0.8);
-    
+    color: white;
+    transition: all 0.2s ease;
+
     &:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
     }
   }
 }
 
+// Dialog Content
 .dialog-content {
-  padding: 32px 24px 24px !important;
-  background: #ffffff;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.department-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  padding: 28px !important;
   min-width: 500px;
-  
-  @media (max-width: 600px) {
-    min-width: auto;
-  }
-}
+  max-width: 600px;
 
-.full-width {
-  width: 100%;
-}
+  .department-form {
+    .full-width {
+      width: 100%;
+      margin-bottom: 20px;
 
-// Form Field Styling - Light Theme
-::ng-deep .mat-mdc-form-field {
-  &.mat-form-field-appearance-outline {
-    .mat-mdc-form-field-outline {
-      border-radius: 12px;
-      border-color: #d1d5db !important;
-    }
-    
-    .mat-mdc-form-field-outline-thick {
-      border-color: #667eea !important;
-    }
-    
-    &:not(.mat-form-field-disabled) {
-      .mat-mdc-form-field-outline {
-        color: #d1d5db;
-      }
-      
-      &.mat-focused .mat-mdc-form-field-outline-thick {
-        color: #667eea !important;
-        border-color: #667eea !important;
-      }
-      
-      &:hover .mat-mdc-form-field-outline {
-        color: #9ca3af;
-        border-color: #9ca3af !important;
+      &:last-child {
+        margin-bottom: 0;
       }
     }
-    
-    .mat-mdc-form-field-label {
-      color: #6b7280 !important;
+
+    ::ng-deep mat-form-field {
+      &.mat-form-field-appearance-outline {
+        .mat-mdc-text-field-wrapper {
+          background: #f9fafb;
+          border-radius: 12px;
+          transition: all 0.3s ease;
+        }
+
+        .mat-mdc-form-field-flex {
+          padding: 0 16px;
+        }
+
+        .mat-mdc-notch-piece {
+          border-color: #e5e7eb !important;
+          transition: border-color 0.3s ease;
+        }
+
+        &:hover .mat-mdc-text-field-wrapper {
+          background: white;
+        }
+
+        &:hover .mat-mdc-notch-piece {
+          border-color: #8b5cf6 !important;
+        }
+
+        &.mat-focused {
+          .mat-mdc-text-field-wrapper {
+            background: white;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+          }
+
+          .mat-mdc-notch-piece {
+            border-color: #8b5cf6 !important;
+            border-width: 2px !important;
+          }
+        }
+
+        .mat-mdc-form-field-label {
+          color: #6b7280;
+          font-weight: 500;
+        }
+
+        &.mat-focused .mat-mdc-form-field-label {
+          color: #8b5cf6;
+        }
+
+        // Input & Textarea styling
+        input,
+        textarea,
+        .mat-mdc-select-value {
+          color: #1f2937;
+          font-weight: 500;
+        }
+
+        textarea {
+          resize: vertical;
+        }
+
+        // Error state
+        &.mat-form-field-invalid {
+          .mat-mdc-notch-piece {
+            border-color: #dc2626 !important;
+          }
+
+          .mat-mdc-form-field-label {
+            color: #dc2626;
+          }
+        }
+
+        // Hints
+        .mat-mdc-form-field-hint {
+          color: #9ca3af;
+          font-size: 12px;
+          font-weight: 500;
+        }
+      }
     }
-    
-    &.mat-focused .mat-mdc-form-field-label {
-      color: #667eea !important;
-    }
-  }
-  
-  .mat-mdc-form-field-hint {
-    color: #9ca3af !important;
-    font-size: 0.75rem;
-  }
-  
-  .mat-mdc-form-field-error {
-    color: #ef4444 !important;
-    font-size: 0.75rem;
-  }
-}
-
-// Input and Textarea Styling - Light Theme
-::ng-deep .mat-mdc-input-element,
-::ng-deep .mat-mdc-select-value {
-  color: #1f2937 !important;
-  background: transparent !important;
-  
-  &::placeholder {
-    color: #9ca3af !important;
-  }
-}
-
-::ng-deep .mat-mdc-text-field-wrapper {
-  background: #ffffff !important;
-  
-  &:hover {
-    background: #f9fafb !important;
-  }
-}
-
-::ng-deep .mat-mdc-form-field-infix {
-  background: transparent !important;
-}
-
-// Select Dropdown Styling
-::ng-deep .mat-mdc-select-panel {
-  border-radius: 12px !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-  border: 1px solid #e5e7eb !important;
-  max-height: 300px;
-  background: #ffffff !important;
-}
-
-::ng-deep .mat-mdc-option {
-  color: #374151 !important;
-  
-  &:hover {
-    background: #f3f4f6 !important;
-  }
-  
-  &.mat-mdc-option-active {
-    background: #ede9fe !important;
-    color: #667eea !important;
   }
 }
 
 // Dialog Actions
 .dialog-actions {
-  padding: 0 24px 24px;
+  padding: 20px 28px !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 1px solid #e5e7eb;
   display: flex;
-  gap: 12px;
   justify-content: flex-end;
-  background: #ffffff;
-  border-top: 1px solid #f3f4f6;
-  margin: 0 -24px -24px -24px;
-  padding-top: 20px;
-  margin-top: 20px;
+  gap: 12px;
+
+  button {
+    height: 44px;
+    padding: 0 28px !important;
+    border-radius: 12px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+    // Cancel Button
+    &[mat-stroked-button] {
+      background: white !important;
+      color: #6b7280 !important;
+      border: 2px solid #e5e7eb !important;
+
+      &:hover {
+        background: #f9fafb !important;
+        border-color: #cbd5e1 !important;
+        color: #374151 !important;
+      }
+    }
+
+    // Submit Button
+    &.submit-button:not([disabled]) {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+      color: white !important;
+      border: none !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+
+        &::before {
+          left: 100%;
+        }
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      mat-spinner {
+        display: inline-block;
+        margin-right: 8px;
+
+        ::ng-deep circle {
+          stroke: white !important;
+        }
+      }
+    }
+
+    // Disabled State
+    &[disabled] {
+      background: #f3f4f6 !important;
+      color: #9ca3af !important;
+      border: 1px solid #e5e7eb !important;
+      cursor: not-allowed;
+      box-shadow: none !important;
+
+      &:hover {
+        transform: none !important;
+      }
+    }
+  }
 }
 
-// Button Styling - Professional Theme
-::ng-deep .mat-mdc-stroked-button {
-  border: 2px solid #d1d5db !important;
-  color: #6b7280 !important;
-  font-weight: 500 !important;
-  border-radius: 8px !important;
-  padding: 10px 20px !important;
-  min-width: 100px;
-  
-  &:hover {
-    border-color: #9ca3af !important;
-    background: #f9fafb !important;
+// Select Panel Styling
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  margin-top: 8px;
+
+  .mat-mdc-option {
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
+    padding: 12px 16px !important;
+
+    &:hover {
+      background: rgba(139, 92, 246, 0.1) !important;
+    }
+
+    &.mat-mdc-option-active,
+    &.mat-selected {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
+      color: #8b5cf6 !important;
+    }
   }
 }
 
-.submit-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
-  padding: 10px 24px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  min-width: 140px;
-  border: none !important;
-  
-  &:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-  }
-  
-  &:disabled {
-    background: #d1d5db !important;
-    color: #9ca3af !important;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-  
-  mat-spinner {
-    margin-right: 8px;
-  }
-}
-
-// Loading State
-::ng-deep .mat-mdc-progress-spinner circle {
-  stroke: white !important;
+// Error Messages
+::ng-deep mat-error {
+  font-size: 13px;
+  font-weight: 500;
+  color: #dc2626;
+  margin-top: 4px;
 }
 
 // Responsive Design
 @media (max-width: 600px) {
-  .dialog-header {
-    padding: 16px 16px 0;
-    
-    h2 {
-      font-size: 1.25rem;
-    }
-  }
-  
   .dialog-content {
-    padding: 24px 16px 16px !important;
+    min-width: unset;
+    padding: 20px !important;
   }
-  
+
   .dialog-actions {
-    padding: 0 16px 16px;
-    flex-direction: column-reverse;
-    margin: 0 -16px -16px -16px;
-    
+    flex-direction: column;
+    gap: 12px;
+
     button {
       width: 100%;
-      justify-content: center;
     }
   }
-  
-  .department-form {
-    gap: 16px;
-    min-width: auto;
-  }
-}
-
-// Focus and Active States
-::ng-deep .mat-mdc-form-field.mat-focused {
-  .mat-mdc-form-field-outline-thick {
-    border-width: 2px !important;
-  }
-}
-
-// Textarea specific styling
-::ng-deep textarea.mat-mdc-input-element {
-  resize: vertical;
-  min-height: 80px;
 }
