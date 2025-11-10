@@ -1,0 +1,85 @@
+.dialog-header {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  h2 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 600;
+
+    mat-icon {
+      font-size: 22px;
+      color: white;
+    }
+  }
+
+  .close-button {
+    color: white;
+  }
+}
+
+.dialog-content {
+  padding: 24px;
+  background-color: #fff;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+
+  button {
+    min-width: 100px;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+
+  .submit-button {
+    margin-left: 12px;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: #fff;
+
+    &:hover {
+      background: linear-gradient(135deg, #5c0eb0 0%, #1e63d4 100%);
+    }
+  }
+}
+
+::ng-deep ngx-material-timepicker-dialog {
+  z-index: 2000 !important; /* Material Dialog is ~1000 */
+}
+
+
+.period-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.date-row {
+  display: flex;
+  gap: 16px;
+}
+
+.date-field {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}

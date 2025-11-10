@@ -1,0 +1,44 @@
+
+<div class="dialog-header">
+  <h2>
+    <mat-icon>assignment_ind</mat-icon>
+    Assign Shift
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="dialog-content">
+  <form [formGroup]="assignShiftForm" class="period-form">
+
+    <!-- Employee Dropdown -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Employee</mat-label>
+      <mat-select formControlName="employeeId">
+        <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+          {{ emp.fullName }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Shift Dropdown -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Shift</mat-label>
+      <mat-select formControlName="shiftId">
+        <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
+          {{ shift.shiftName }} ({{ shift.startTime }} - {{ shift.endTime }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </form>
+</div>
+
+<div class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" [disabled]="assignShiftForm.invalid || isSubmitting" (click)="onSubmit()">
+    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+    <span *ngIf="!isSubmitting">Assign Shift</span>
+  </button>
+</div>

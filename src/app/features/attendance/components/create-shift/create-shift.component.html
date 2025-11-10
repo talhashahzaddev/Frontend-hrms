@@ -1,0 +1,81 @@
+<!-- Create Shift Dialog -->
+<div class="dialog-header">
+  <h2>
+    <mat-icon>schedule</mat-icon>
+    Create Shift
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="dialog-content">
+  <form [formGroup]="shiftForm" class="period-form">
+    <!-- Shift Name -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Shift Name</mat-label>
+      <input matInput placeholder="e.g. Morning Shift" formControlName="shiftName" />
+      <mat-error *ngIf="shiftForm.get('shiftName')?.hasError('required')">
+        Shift name is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Start & End Time -->
+
+<div class="date-row">
+  <mat-form-field appearance="outline" class="date-field">
+    <mat-label>Start Time</mat-label>
+    <input matInput type="time" formControlName="startTime" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="date-field">
+    <mat-label>End Time</mat-label>
+    <input matInput type="time" formControlName="endTime" />
+  </mat-form-field>
+</div>
+
+
+
+
+    <!-- Break Duration & Time Zone -->
+    <div class="date-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Break Duration (Minutes)</mat-label>
+        <input matInput type="number" formControlName="breakDuration" min="0" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Time Zone</mat-label>
+        <mat-select formControlName="timezone">
+          <mat-option *ngFor="let tz of timezone" [value]="tz.value">
+            {{ tz.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Days of Week -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Days of Week</mat-label>
+      <mat-select formControlName="daysofWeek" multiple>
+        <mat-option *ngFor="let day of days" [value]="day.value">
+          {{ day.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</div>
+
+<div class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close>Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    class="submit-button"
+    [disabled]="shiftForm.invalid || isSubmitting"
+    (click)="onSubmit()"
+  >
+    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+    <span *ngIf="!isSubmitting">Create Shift</span>
+  </button>
+</div>
