@@ -31,9 +31,9 @@
     <div class="filters-content">
       <!-- Date Range -->
       <div class="date-range-section">
-        <h4>Date Range</h4>
+        <h4><mat-icon>date_range</mat-icon> Date Range</h4>
         <div class="date-inputs">
-          <mat-form-field class="date-field">
+          <mat-form-field appearance="outline" class="date-field">
             <mat-label>Start Date</mat-label>
             <input matInput 
                    [matDatepicker]="startPicker" 
@@ -43,7 +43,7 @@
             <mat-datepicker #startPicker></mat-datepicker>
           </mat-form-field>
 
-          <mat-form-field class="date-field">
+          <mat-form-field appearance="outline" class="date-field">
             <mat-label>End Date</mat-label>
             <input matInput 
                    [matDatepicker]="endPicker" 
@@ -56,19 +56,32 @@
         
         <!-- Quick Date Buttons -->
         <div class="quick-dates">
-          <button mat-stroked-button (click)="setDateRange('today')">Today</button>
-          <button mat-stroked-button (click)="setDateRange('week')">This Week</button>
-          <button mat-stroked-button (click)="setDateRange('month')">This Month</button>
-          <button mat-stroked-button (click)="setDateRange('quarter')">This Quarter</button>
+          <button mat-stroked-button (click)="setDateRange('today')">
+            <mat-icon>today</mat-icon>
+            Today
+          </button>
+          <button mat-stroked-button (click)="setDateRange('week')">
+            <mat-icon>view_week</mat-icon>
+            This Week
+          </button>
+          <button mat-stroked-button (click)="setDateRange('month')">
+            <mat-icon>calendar_month</mat-icon>
+            This Month
+          </button>
+          <button mat-stroked-button (click)="setDateRange('quarter')">
+            <mat-icon>calendar_view_month</mat-icon>
+            This Quarter
+          </button>
         </div>
       </div>
 
       <!-- Filters -->
       <div class="filter-section">
-        <h4>Filters</h4>
+        <h4><mat-icon>filter_list</mat-icon> Filters</h4>
         <div class="filter-inputs">
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Department</mat-label>
+            <mat-icon matPrefix>domain</mat-icon>
             <mat-select [formControl]="departmentControl">
               <mat-option value="">All Departments</mat-option>
               <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
@@ -77,8 +90,9 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Employee</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
             <mat-select [formControl]="employeeControl">
               <mat-option value="">All Employees</mat-option>
               <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
@@ -87,8 +101,9 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Status</mat-label>
+            <mat-icon matPrefix>check_circle</mat-icon>
             <mat-select [formControl]="statusControl">
               <mat-option *ngFor="let status of statusOptions" [value]="status.value">
                 {{ status.label }}
@@ -96,6 +111,17 @@
             </mat-select>
           </mat-form-field>
         </div>
+        
+        <!-- Generate Report Button -->
+        <!-- <div class="filter-actions">
+          <button mat-flat-button 
+                  (click)="generateReport()" 
+                  class="generate-report-btn"
+                  [disabled]="isLoading">
+            <mat-icon>play_arrow</mat-icon>
+            <span>Generate Report</span>
+          </button>
+        </div> -->
       </div>
     </div>
   </mat-card>
@@ -249,12 +275,12 @@
         <mat-icon>assessment</mat-icon>
         <h3>Generate Your First Report</h3>
         <p>Select your date range and filters above, then click "Generate Report" to create comprehensive attendance analytics.</p>
-        <button mat-flat-button 
+        <!-- <button mat-flat-button 
                 (click)="generateReport()" 
                 class="generate-cta-button">
           <mat-icon>play_arrow</mat-icon>
           Generate Report
-        </button>
+        </button> -->
       </div>
     </mat-card-content>
   </mat-card>
