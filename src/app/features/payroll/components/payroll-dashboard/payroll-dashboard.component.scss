@@ -1,108 +1,59 @@
-@use '../../../../../styles.scss' as *;
-
+// Payroll Dashboard Component - Professional & Beautiful Styling
 .payroll-dashboard-container {
-  padding: 2rem;
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-  animation: fadeIn 0.6s ease-out;
 
-  // Page Header
-  .page-header {
+  // Dashboard Header
+  .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
-    padding: 1.5rem 0;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-    .header-content {
-      .page-title {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin: 0 0 0.5rem 0;
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      letter-spacing: -0.5px;
 
-        mat-icon {
-          font-size: 2.25rem;
-          width: 2.25rem;
-          height: 2.25rem;
-          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-      }
-
-      .page-subtitle {
-        color: var(--text-secondary);
-        font-size: 1.125rem;
-        margin: 0;
-        font-weight: 400;
+      mat-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        color: #667eea;
       }
     }
 
     .header-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-
-      .action-btn {
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-        &:hover {
-          border-color: var(--primary-color);
-          color: var(--primary-color);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
-        }
+      button {
+        height: 48px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 
         mat-icon {
-          margin-right: 0.5rem;
+          margin-right: 8px;
         }
-      }
-
-      .process-btn {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        border: none;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
-        }
-
-        mat-icon {
-          margin-right: 0.5rem;
-        }
-      }
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 1.5rem;
-      align-items: stretch;
-
-      .header-content .page-title {
-        font-size: 1.875rem;
-      }
-
-      .header-actions {
-        justify-content: stretch;
-        
-        button {
-          flex: 1;
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
         }
       }
     }
@@ -110,377 +61,531 @@
 
   // Current Period Card
   .current-period-card {
-    margin-bottom: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--border-color);
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
     overflow: hidden;
-    background: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
 
-    &:hover {
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
-    }
+    ::ng-deep mat-card-header {
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
-    mat-card-header {
-      background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-
-      mat-card-title {
-        color: var(--primary-color);
+      .mat-mdc-card-title {
+        font-size: 18px;
         font-weight: 600;
-        font-size: 1.25rem;
+        color: #1f2937;
         margin: 0;
       }
 
-      mat-card-subtitle {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        margin: 0.25rem 0 0 0;
+      .mat-mdc-card-subtitle {
+        color: #667eea;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 4px;
       }
     }
 
-    mat-card-content {
-      padding: 2rem 1.5rem;
+    ::ng-deep mat-card-content {
+      padding: 24px !important;
     }
 
-    .period-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-
-      @media (max-width: 768px) {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-      }
-
-      @media (max-width: 480px) {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .summary-stat {
+    .period-overview {
       display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      border-radius: 12px;
-      background: #fafbfc;
-      border: 1px solid var(--border-light);
-      transition: all 0.3s ease;
+      flex-direction: column;
+      gap: 24px;
 
-      &:hover {
-        background: white;
-        border-color: var(--border-color);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      }
+      .period-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
 
-      .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
+        .info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 16px;
+          background: white;
+          border-radius: 12px;
+          border: 1px solid #e5e7eb;
 
-        mat-icon {
-          color: white;
-          font-size: 1.5rem;
-          width: 1.5rem;
-          height: 1.5rem;
-        }
+          label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+          }
 
-        &.primary {
-          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        }
+          span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+          }
 
-        &.success {
-          background: linear-gradient(135deg, #10b981, #059669);
-        }
-
-        &.warning {
-          background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-
-        &.info {
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
-        }
-      }
-
-      .stat-info {
-        min-width: 0;
-
-        .stat-value {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--text-primary);
-          line-height: 1.2;
-          margin-bottom: 0.25rem;
-        }
-
-        .stat-label {
-          color: var(--text-secondary);
-          font-size: 0.875rem;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.025em;
-        }
-      }
-
-      @media (max-width: 480px) {
-        padding: 0.75rem;
-        gap: 0.75rem;
-
-        .stat-icon {
-          width: 40px;
-          height: 40px;
-
-          mat-icon {
-            font-size: 1.25rem;
-            width: 1.25rem;
-            height: 1.25rem;
+          mat-chip {
+            align-self: flex-start;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            height: 28px !important;
+            border-radius: 14px !important;
           }
         }
+      }
 
-        .stat-info .stat-value {
-          font-size: 1.25rem;
+      .period-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+
+        .stat-item {
+          text-align: center;
+          padding: 20px;
+          background: white;
+          border-radius: 12px;
+          border: 1px solid #e5e7eb;
+          transition: all 0.3s ease;
+
+          &:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+          }
+
+          .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-family: 'Inter', sans-serif;
+          }
+
+          .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+          }
+        }
+      }
+
+      .period-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+
+        button {
+          height: 44px;
+          border-radius: 12px !important;
+          font-size: 14px !important;
+          font-weight: 600 !important;
+          text-transform: none !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+          mat-icon {
+            margin-right: 8px;
+          }
+
+          &[color="primary"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+
+            &:hover:not([disabled]) {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+            }
+          }
+
+          &[mat-stroked-button] {
+            background: white !important;
+            color: #667eea !important;
+            border: 2px solid rgba(102, 126, 234, 0.3) !important;
+
+            &:hover:not([disabled]) {
+              background: rgba(102, 126, 234, 0.1) !important;
+              border-color: rgba(102, 126, 234, 0.5) !important;
+            }
+          }
+
+          &[disabled] {
+            background: #f3f4f6 !important;
+            color: #9ca3af !important;
+            border-color: #e5e7eb !important;
+            box-shadow: none !important;
+            opacity: 0.6;
+          }
         }
       }
     }
   }
 
-  // Recent Entries Card
-  .recent-entries-card {
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--border-color);
-    background: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  // Main Content Card
+  .main-content-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
 
-    &:hover {
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
-    }
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-bottom: 2px solid #e5e7eb;
 
-    mat-card-header {
-      background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      mat-card-title {
-        color: var(--primary-color);
-        font-weight: 600;
-        font-size: 1.25rem;
-        margin: 0;
-      }
-
-      .card-actions {
-        button {
-          border: 2px solid var(--border-color);
-          border-radius: 8px;
-          padding: 0.5rem 1rem;
+        .mat-mdc-tab {
           font-weight: 600;
-          color: var(--text-primary);
-          transition: all 0.3s ease;
+          color: #6b7280;
+          min-width: 160px;
 
-          &:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
+          &.mdc-tab--active {
+            color: #667eea;
+
+            .mdc-tab-indicator__content--underline {
+              border-color: #667eea;
+              border-width: 3px;
+            }
           }
+        }
+
+        .mdc-tab-indicator__content--underline {
+          border-radius: 3px 3px 0 0;
         }
       }
     }
 
-    mat-card-content {
-      padding: 0;
-    }
+    .tab-content {
+      padding: 24px;
+      min-height: 500px;
 
-    .entries-list {
-      .entry-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-light);
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: #fafbfc;
-        }
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        .employee-info {
+      // Payslip Section
+      .payslip-section {
+        .payslip-header {
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 1rem;
-          flex: 1;
-          min-width: 0;
+          margin-bottom: 24px;
 
-          .employee-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-
-            mat-icon {
-              color: white;
-              font-size: 1.25rem;
-            }
-          }
-
-          .employee-details {
-            min-width: 0;
-
-            .employee-name {
-              font-weight: 600;
-              color: var(--text-primary);
-              font-size: 0.95rem;
-              margin-bottom: 0.25rem;
-            }
-
-            .employee-number {
-              font-size: 0.875rem;
-              color: var(--text-secondary);
-            }
-          }
-        }
-
-        .payroll-info {
-          text-align: right;
-          margin-right: 1.5rem;
-
-          .pay-amount {
-            font-weight: 700;
-            font-size: 1.125rem;
-            color: var(--success-color);
-            margin-bottom: 0.25rem;
-          }
-
-          .pay-period {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-          }
-        }
-
-        .entry-status {
-          .status-indicator {
-            padding: 0.375rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
+          h3 {
+            margin: 0;
+            font-size: 20px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
+            color: #1f2937;
+          }
 
-            &.draft {
-              background: #f3f4f6;
-              color: #6b7280;
-            }
+          button {
+            border-radius: 8px !important;
+            font-weight: 500 !important;
+            color: #667eea !important;
+            border-color: rgba(102, 126, 234, 0.3) !important;
 
-            &.processing {
-              background: #fef3c7;
-              color: #d97706;
-            }
-
-            &.processed {
-              background: #d1fae5;
-              color: #059669;
-            }
-
-            &.approved {
-              background: #dbeafe;
-              color: #2563eb;
-            }
-
-            &.paid {
-              background: #dcfce7;
-              color: #16a34a;
+            &:hover {
+              background: rgba(102, 126, 234, 0.1) !important;
+              border-color: rgba(102, 126, 234, 0.5) !important;
             }
           }
         }
 
-        @media (max-width: 768px) {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 1rem;
-          padding: 1rem;
+        .payslip-container {
+          .payslip-card {
+            border-radius: 12px !important;
+            border: 1px solid #e5e7eb !important;
 
-          .employee-info {
-            justify-content: flex-start;
-          }
+            ::ng-deep mat-card-content {
+              padding: 24px !important;
+            }
 
-          .payroll-info {
-            text-align: left;
-            margin-right: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
+            .payslip-header-info {
+              text-align: center;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #e5e7eb;
+              margin-bottom: 24px;
 
-          .entry-status {
-            align-self: flex-start;
+              h4 {
+                margin: 0 0 8px;
+                font-size: 20px;
+                font-weight: 700;
+                color: #1f2937;
+              }
+
+              p {
+                margin: 0;
+                font-size: 14px;
+                color: #6b7280;
+              }
+            }
+
+            .payslip-details {
+              .earnings-section,
+              .deductions-section {
+                margin-bottom: 24px;
+
+                h5 {
+                  margin: 0 0 16px;
+                  font-size: 15px;
+                  font-weight: 600;
+                  color: #1f2937;
+                  padding-bottom: 8px;
+                  border-bottom: 1px solid #e5e7eb;
+                }
+
+                .component-item {
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 10px 0;
+                  font-size: 14px;
+                  color: #6b7280;
+
+                  &:not(:last-child) {
+                    border-bottom: 1px solid #f3f4f6;
+                  }
+                }
+
+                .total-item {
+                  display: flex;
+                  justify-content: space-between;
+                  padding: 12px 0;
+                  margin-top: 12px;
+                  border-top: 2px solid #e5e7eb;
+                  font-size: 15px;
+                  color: #1f2937;
+                }
+              }
+
+              .net-salary-section {
+                padding: 20px;
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+                border-radius: 12px;
+                border: 1px solid rgba(102, 126, 234, 0.2);
+
+                .net-salary {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  font-size: 18px;
+                  font-weight: 700;
+                  color: #667eea;
+                }
+              }
+            }
           }
         }
       }
-    }
 
-    .empty-state {
-      text-align: center;
-      padding: 3rem 2rem;
-      color: var(--text-secondary);
+      // Periods Section
+      .periods-section {
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+
+          h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+          }
+
+          button {
+            height: 44px;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+            }
+          }
+        }
+
+        .periods-table {
+          border-radius: 12px;
+          overflow: hidden;
+
+          .payroll-periods-table {
+            width: 100%;
+
+            ::ng-deep {
+              .mat-mdc-header-row {
+                background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+                .mat-mdc-header-cell {
+                  font-weight: 600;
+                  color: #1f2937;
+                  font-size: 13px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  border-bottom: 2px solid #e5e7eb;
+                  padding: 16px 12px;
+                }
+              }
+
+              .mat-mdc-row {
+                transition: all 0.2s ease;
+
+                &:hover {
+                  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+                }
+
+                .mat-mdc-cell {
+                  padding: 20px 12px;
+                  border-bottom: 1px solid #f3f4f6;
+                  font-size: 14px;
+                  color: #374151;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Empty State
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 2px dashed #e5e7eb;
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+          opacity: 0.6;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: #6b7280;
+        }
+      }
+    }
+  }
+
+  // Loading Container
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    gap: 20px;
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+  }
+}
+
+// Status Chips
+::ng-deep mat-chip {
+  &[color="primary"] {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+    color: #667eea !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+  }
+
+  &[color="accent"] {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+    color: #059669 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  }
+
+  &[color="warn"] {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
+    color: #d97706 !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  }
+}
+
+// Menu Actions
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+
+  .mat-mdc-menu-content {
+    padding: 8px !important;
+
+    .mat-mdc-menu-item {
+      border-radius: 8px !important;
+      margin: 2px 0 !important;
+      height: 44px !important;
+
+      &:hover {
+        background: rgba(102, 126, 234, 0.1) !important;
+      }
 
       mat-icon {
-        font-size: 4rem;
-        width: 4rem;
-        height: 4rem;
-        color: var(--text-light);
-        margin-bottom: 1rem;
-      }
-
-      h3 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        margin: 0 0 0.5rem 0;
-      }
-
-      p {
-        margin: 0 0 1.5rem 0;
-        color: var(--text-light);
-      }
-
-      button {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        border: none;
+        margin-right: 12px;
+        color: #667eea;
       }
     }
   }
 }
 
-// Animations
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+// Spinner Styling
+::ng-deep mat-spinner circle {
+  stroke: #667eea !important;
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .payroll-dashboard-container {
+    .current-period-card {
+      .period-overview {
+        .period-info,
+        .period-stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .payroll-dashboard-container {
+    padding: 16px;
+
+    .dashboard-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+
+    .current-period-card .period-overview .period-actions {
+      flex-direction: column;
+
+      button {
+        width: 100%;
+      }
+    }
   }
 }
