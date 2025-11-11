@@ -59,50 +59,55 @@ import { LeaveType } from '../../../../core/models/leave.models';
       </div>
 
       <div class="types-grid" *ngIf="!isLoading">
-        <mat-card *ngFor="let type of leaveTypes" class="type-card">
-          <div class="card-header">
-            <div class="type-icon" [style.background-color]="type.color + '20'">
-              <mat-icon [style.color]="type.color">category</mat-icon>
-            </div>
-            <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="editLeaveType(type)">
-                <mat-icon>edit</mat-icon>
-                Edit
-              </button>
-              <button mat-menu-item (click)="deleteLeaveType(type)" class="delete-action">
-                <mat-icon>delete</mat-icon>
-                Delete
-              </button>
-            </mat-menu>
-          </div>
-
+        <mat-card *ngFor="let type of leaveTypes; let i = index" 
+                  class="stat-card" 
+                  [ngClass]="'stat-card-' + getCardColorClass(i)">
           <mat-card-content>
-            <h3 class="type-name">{{ type.typeName }}</h3>
-            <p class="type-description">{{ type.description || 'No description provided' }}</p>
-
-            <div class="type-details">
-              <div class="detail-item">
-                <mat-icon>event</mat-icon>
-                <div class="detail-content">
-                  <span class="detail-label">Max Days Per Year</span>
-                  <span class="detail-value">{{ type.maxDaysPerYear }} days/year</span>
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <mat-icon class="stat-icon">category</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-label">{{ type.typeName }}</div>
+                <div class="stat-value">{{ type.maxDaysPerYear }}</div>
+                <div class="stat-footer">
+                  <mat-icon class="stat-indicator">event</mat-icon>
+                  <span>Days per year</span>
                 </div>
+              </div>
+              <div class="card-actions">
+                <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="editLeaveType(type)">
+                    <mat-icon>edit</mat-icon>
+                    Edit
+                  </button>
+                  <button mat-menu-item (click)="deleteLeaveType(type)" class="delete-action">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                </mat-menu>
               </div>
             </div>
 
+            <!-- Type Description -->
+            <div class="type-description" *ngIf="type.description">
+              <p>{{ type.description }}</p>
+            </div>
+
+            <!-- Type Flags -->
             <div class="type-flags">
-              <mat-chip *ngIf="type.isPaid" color="primary" class="flag-chip">
+              <mat-chip *ngIf="type.isPaid" class="flag-chip flag-paid">
                 <mat-icon>attach_money</mat-icon>
-                Paid Leave
+                Paid
               </mat-chip>
-              <mat-chip *ngIf="type.carryForwardAllowed" class="flag-chip">
+              <mat-chip *ngIf="type.carryForwardAllowed" class="flag-chip flag-carry">
                 <mat-icon>arrow_forward</mat-icon>
                 Carry Forward
               </mat-chip>
-              <mat-chip *ngIf="!type.isActive" color="warn" class="flag-chip">
+              <mat-chip *ngIf="!type.isActive" class="flag-chip flag-inactive">
                 <mat-icon>block</mat-icon>
                 Inactive
               </mat-chip>
@@ -127,261 +132,7 @@ import { LeaveType } from '../../../../core/models/leave.models';
       </div>
     </div>
   `,
-  styles: [`
-  .leave-types-container {
-    padding: var(--spacing-lg);
-    min-height: calc(100vh - 64px);
-    background: var(--gray-50);
-  }
-
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-2xl);
-    flex-wrap: wrap;
-    gap: var(--spacing-lg);
-
-    .header-content {
-      .page-title {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--gray-900);
-        margin: 0 0 var(--spacing-sm);
-
-        mat-icon {
-          color: var(--primary-600);
-          font-size: 2rem;
-          width: 2rem;
-          height: 2rem;
-        }
-      }
-
-      .page-subtitle {
-        font-size: 1.125rem;
-        color: var(--gray-600);
-        margin: 0;
-      }
-    }
-
-    button {
-      font-weight: 600;
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-md) var(--spacing-xl);
-    }
-  }
-
-  .types-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--spacing-xl);
-  }
-
-  .type-card {
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--gray-200);
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-xl);
-      border-color: var(--primary-300);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--spacing-lg) var(--spacing-lg) 0;
-
-      .type-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: var(--radius-xl);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        mat-icon {
-          font-size: 2rem;
-          width: 2rem;
-          height: 2rem;
-        }
-      }
-
-      .menu-button {
-        mat-icon {
-          color: var(--gray-600);
-        }
-      }
-    }
-
-    ::ng-deep .mat-mdc-card-content {
-      padding: var(--spacing-lg);
-    }
-
-    .type-name {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      margin: 0 0 var(--spacing-sm);
-    }
-
-    .type-description {
-      font-size: 0.875rem;
-      color: var(--gray-600);
-      line-height: 1.5;
-      margin: 0 0 var(--spacing-lg);
-      min-height: 40px;
-    }
-
-    .type-details {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
-
-      .detail-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-        padding: var(--spacing-sm);
-        background: var(--gray-50);
-        border-radius: var(--radius-md);
-
-        mat-icon {
-          color: var(--primary-600);
-          font-size: 1.25rem;
-          width: 1.25rem;
-          height: 1.25rem;
-        }
-
-        .detail-content {
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-
-          .detail-label {
-            font-size: 0.75rem;
-            color: var(--gray-600);
-            font-weight: 500;
-          }
-
-          .detail-value {
-            font-size: 0.875rem;
-            color: var(--gray-900);
-            font-weight: 600;
-          }
-        }
-      }
-    }
-
-    .type-flags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-
-      .flag-chip {
-        font-size: 0.75rem;
-        height: 28px;
-
-        ::ng-deep {
-          .mat-mdc-chip-action-label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-          }
-
-          mat-icon {
-            font-size: 0.875rem;
-            width: 0.875rem;
-            height: 0.875rem;
-            margin: 0;
-          }
-        }
-      }
-    }
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: var(--spacing-4xl);
-    background: white;
-    border-radius: var(--radius-xl);
-    border: 2px dashed var(--gray-300);
-
-    mat-icon {
-      font-size: 5rem;
-      width: 5rem;
-      height: 5rem;
-      color: var(--gray-400);
-      margin-bottom: var(--spacing-xl);
-    }
-
-    h3 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      margin: 0 0 var(--spacing-md);
-    }
-
-    p {
-      font-size: 1.125rem;
-      color: var(--gray-600);
-      margin: 0 0 var(--spacing-2xl);
-    }
-
-    button {
-      font-weight: 600;
-      border-radius: var(--radius-lg);
-      padding: var(--spacing-md) var(--spacing-xl);
-    }
-  }
-
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-4xl);
-    gap: var(--spacing-lg);
-
-    p {
-      color: var(--gray-600);
-    }
-  }
-
-  .delete-action {
-    color: var(--danger-600);
-
-    mat-icon {
-      color: var(--danger-600);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .leave-types-container {
-      padding: var(--spacing-md);
-    }
-
-    .page-header {
-      flex-direction: column;
-      align-items: stretch;
-
-      button {
-        width: 100%;
-      }
-    }
-
-    .types-grid {
-      grid-template-columns: 1fr;
-      gap: var(--spacing-lg);
-    }
-  }
-`]
+  styleUrls: ['./leave-types.component.scss']
 })
 export class LeaveTypesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -455,6 +206,11 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
       this.notificationService.showWarning('Delete functionality will be implemented');
     }
   }
+
+  getCardColorClass(index: number): string {
+    const colors = ['primary', 'success', 'warning', 'info', 'employee'];
+    return colors[index % colors.length];
+  }
 }
 
 /* ------------------------------------------------------------------
@@ -466,16 +222,16 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   template: `
     <div class="dialog-header">
       <h2 mat-dialog-title>
-        <mat-icon>add_circle</mat-icon>
+        <mat-icon>category</mat-icon>
         Create New Leave Type
       </h2>
-      <button mat-icon-button mat-dialog-close>
+      <button mat-icon-button mat-dialog-close class="close-button">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <mat-dialog-content>
+      <mat-dialog-content class="dialog-content">
         
         <!-- Basic Information Section -->
         <div class="form-section">
@@ -587,54 +343,70 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
 
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-button type="button" mat-dialog-close>
+      <div class="dialog-actions">
+        <button mat-stroked-button type="button" mat-dialog-close [disabled]="isSubmitting">
           Cancel
         </button>
         <button 
           mat-raised-button 
           color="primary" 
+          class="submit-button"
           type="submit"
-          [disabled]="form.invalid">
-          <mat-icon>check</mat-icon>
+          [disabled]="form.invalid || isSubmitting">
+          <mat-icon *ngIf="!isSubmitting">add</mat-icon>
           Create Leave Type
         </button>
-      </mat-dialog-actions>
+      </div>
     </form>
   `,
   styles: [`
+    ::ng-deep .mat-mdc-dialog-container {
+      border-radius: 16px !important;
+      padding: 0 !important;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    }
+
     .dialog-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 24px 0;
-      margin-bottom: 8px;
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
 
       h2 {
         display: flex;
         align-items: center;
         gap: 12px;
         margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--gray-900);
+        font-size: 22px;
+        font-weight: 700;
+        color: white;
 
         mat-icon {
-          color: var(--primary-600);
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+          color: white;
         }
       }
 
-      button {
-        mat-icon {
-          color: var(--gray-600);
+      .close-button {
+        color: white;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: rotate(90deg);
         }
       }
     }
 
-    ::ng-deep .mat-mdc-dialog-content {
-      padding: 0 24px !important;
-      max-height: 70vh;
-      overflow-y: auto;
+    .dialog-content {
+      padding: 28px !important;
+      min-width: 550px;
+      max-width: 700px;
     }
 
     .form-section {
@@ -674,15 +446,81 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
 
     mat-form-field {
       ::ng-deep {
-        .mat-mdc-text-field-wrapper {
-          background: var(--gray-50);
-        }
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper {
+            background: #f9fafb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+          }
 
-        .mat-mdc-form-field-icon-prefix {
-          padding-right: 8px;
-          
-          mat-icon {
-            color: var(--gray-600);
+          .mat-mdc-form-field-flex {
+            padding: 0 16px;
+          }
+
+          .mat-mdc-notch-piece {
+            border-color: #e5e7eb !important;
+            transition: border-color 0.3s ease;
+          }
+
+          &:hover .mat-mdc-text-field-wrapper {
+            background: white;
+          }
+
+          &:hover .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+          }
+
+          &.mat-focused {
+            .mat-mdc-text-field-wrapper {
+              background: white;
+              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .mat-mdc-notch-piece {
+              border-color: #667eea !important;
+              border-width: 2px !important;
+            }
+          }
+
+          .mat-mdc-form-field-label {
+            color: #6b7280;
+            font-weight: 500;
+          }
+
+          &.mat-focused .mat-mdc-form-field-label {
+            color: #667eea;
+          }
+
+          input,
+          textarea {
+            color: #1f2937;
+            font-weight: 500;
+          }
+
+          // Error state
+          &.mat-form-field-invalid {
+            .mat-mdc-notch-piece {
+              border-color: #dc2626 !important;
+            }
+
+            .mat-mdc-form-field-label {
+              color: #dc2626;
+            }
+          }
+
+          // Hints
+          .mat-mdc-form-field-hint {
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 500;
+          }
+
+          .mat-mdc-form-field-icon-prefix {
+            padding-right: 8px;
+            
+            mat-icon {
+              color: #667eea;
+            }
           }
         }
       }
@@ -767,19 +605,96 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
       margin: 8px 0;
     }
 
-    ::ng-deep .mat-mdc-dialog-actions {
-      padding: 16px 24px 20px;
+    // Dialog Actions (Payroll Period Style)
+    .dialog-actions {
+      padding: 20px 28px !important;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
       gap: 12px;
 
       button {
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 0 24px;
+        height: 44px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 
-        mat-icon {
-          margin-right: 4px;
+        // Cancel Button
+        &[mat-stroked-button] {
+          background: white !important;
+          color: #6b7280 !important;
+          border: 2px solid #e5e7eb !important;
+
+          &:hover:not([disabled]) {
+            background: #f9fafb !important;
+            border-color: #cbd5e1 !important;
+            color: #374151 !important;
+          }
+        }
+
+        // Submit Button (Auth Style with Shimmer)
+        &.submit-button:not([disabled]) {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          position: relative;
+          overflow: hidden;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+
+            &::before {
+              left: 100%;
+            }
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+
+        // Disabled State
+        &[disabled] {
+          background: #f3f4f6 !important;
+          color: #9ca3af !important;
+          border: 1px solid #e5e7eb !important;
+          cursor: not-allowed;
+          box-shadow: none !important;
+
+          &:hover {
+            transform: none !important;
+          }
         }
       }
+    }
+
+    // Error Messages
+    ::ng-deep mat-error {
+      font-size: 13px;
+      font-weight: 500;
+      color: #dc2626;
+      margin-top: 4px;
     }
 
     @media (max-width: 600px) {
@@ -802,6 +717,8 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   ]
 })
 export class AddLeaveTypeDialogTemplate {
+  isSubmitting = false;
+
   readonly form = inject(FormBuilder).group({
     typeName: ['', Validators.required],
     description: [''],
@@ -838,3 +755,4 @@ export class AddLeaveTypeDialogTemplate {
     }
   }
 }
+
