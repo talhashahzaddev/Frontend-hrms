@@ -1,239 +1,552 @@
+// Payroll Periods Component - Professional & Beautiful Styling
 .payroll-periods-container {
   padding: 24px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
 
+  // Page Header
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
     .page-title {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       margin: 0;
-      font-size: 28px;
-      font-weight: 500;
-      color: #1976d2;
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      letter-spacing: -0.5px;
 
       mat-icon {
-        font-size: 32px;
-        width: 32px;
-        height: 32px;
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        color: #667eea;
       }
     }
 
     .header-actions {
-      display: flex;
-      gap: 12px;
+      button {
+        height: 48px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+        mat-icon {
+          margin-right: 8px;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+      }
     }
   }
 
+  // Filters Card
   .filters-card {
     margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    ::ng-deep mat-card-content {
+      padding: 24px !important;
+    }
 
     .filters-form {
-      display: flex;
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
       gap: 16px;
       align-items: flex-start;
-      flex-wrap: wrap;
 
-      mat-form-field {
-        min-width: 200px;
+      ::ng-deep mat-form-field {
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper {
+            background: white;
+            border-radius: 12px;
+          }
+
+          .mat-mdc-form-field-flex {
+            padding: 0 16px;
+          }
+
+          .mat-mdc-notch-piece {
+            border-color: #e5e7eb !important;
+          }
+
+          &:hover .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+          }
+
+          &.mat-focused {
+            .mat-mdc-text-field-wrapper {
+              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .mat-mdc-notch-piece {
+              border-color: #667eea !important;
+              border-width: 2px !important;
+            }
+          }
+
+          .mat-mdc-form-field-label {
+            color: #6b7280;
+            font-weight: 500;
+          }
+
+          &.mat-focused .mat-mdc-form-field-label {
+            color: #667eea;
+          }
+
+          mat-icon {
+            &[matsuffix] {
+              color: #667eea !important;
+              font-size: 22px;
+              width: 22px;
+              height: 22px;
+            }
+          }
+
+          .mat-mdc-select-arrow {
+            color: #667eea !important;
+          }
+
+          input,
+          .mat-mdc-select-value {
+            color: #1f2937;
+            font-weight: 500;
+          }
+        }
       }
 
       .filter-actions {
         display: flex;
-        gap: 8px;
-        align-items: center;
-        margin-top: 8px;
-      }
-    }
-  }
-
-  .table-card {
-    .table-container {
-      .payroll-periods-table {
-        width: 100%;
-
-        .mat-mdc-header-cell {
-          font-weight: 600;
-          color: #1976d2;
-        }
-
-        .clickable-row {
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-
-          &:hover {
-            background-color: #f5f5f5;
-          }
-        }
-
-        .period-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-
-          strong {
-            font-weight: 500;
-          }
-
-          small {
-            color: #666;
-            font-size: 12px;
-          }
-        }
-
-        .date-range {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 14px;
-
-          .date-separator {
-            font-size: 16px;
-            color: #666;
-          }
-        }
-
-        .employee-count {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-            color: #666;
-          }
-        }
-
-        .amounts-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          font-size: 14px;
-
-          .gross-amount {
-            color: #4caf50;
-            font-weight: 500;
-          }
-
-          .net-amount {
-            color: #2196f3;
-            font-weight: 500;
-          }
-        }
-
-        mat-chip {
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .mat-mdc-menu-item {
-          &.export-action {
-            color: #2196f3;
-          }
-
-          &.delete-action {
-            color: #f44336;
-          }
-        }
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 64px 32px;
-        color: #666;
-
-        mat-icon {
-          font-size: 64px;
-          width: 64px;
-          height: 64px;
-          color: #ccc;
-          margin-bottom: 16px;
-        }
-
-        h3 {
-          margin: 16px 0 8px 0;
-          font-weight: 500;
-        }
-
-        p {
-          margin: 8px 0 24px 0;
-          color: #999;
-        }
-      }
-
-      mat-paginator {
-        border-top: 1px solid #e0e0e0;
-        margin-top: 16px;
-      }
-    }
-  }
-
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 64px;
-    color: #666;
-
-    mat-spinner {
-      margin-bottom: 16px;
-    }
-
-    p {
-      margin: 0;
-      font-size: 16px;
-    }
-  }
-}
-
-// Responsive Design
-@media (max-width: 768px) {
-  .payroll-periods-container {
-    padding: 16px;
-
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-
-      .page-title {
-        font-size: 24px;
-      }
-    }
-
-    .filters-card .filters-form {
-      flex-direction: column;
-      align-items: stretch;
-
-      mat-form-field {
-        min-width: auto;
-        width: 100%;
-      }
-
-      .filter-actions {
-        margin-top: 16px;
-        justify-content: stretch;
+        gap: 12px;
+        align-items: flex-start;
 
         button {
-          flex: 1;
+          height: 56px;
+          border-radius: 12px !important;
+          font-size: 14px !important;
+          font-weight: 600 !important;
+          text-transform: none !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+          mat-icon {
+            margin-right: 6px;
+          }
+
+          &[color="primary"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+            }
+          }
+
+          &[mat-stroked-button] {
+            background: white !important;
+            color: #667eea !important;
+            border: 2px solid rgba(102, 126, 234, 0.3) !important;
+
+            &:hover {
+              background: rgba(102, 126, 234, 0.1) !important;
+              border-color: rgba(102, 126, 234, 0.5) !important;
+            }
+          }
         }
       }
+    }
+  }
+
+  // Table Card
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    ::ng-deep mat-card-content {
+      padding: 0 !important;
     }
 
     .table-container {
       overflow-x: auto;
 
       .payroll-periods-table {
-        min-width: 800px;
+        width: 100%;
+
+        ::ng-deep {
+          // Table Headers
+          .mat-mdc-header-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+            .mat-mdc-header-cell {
+              font-weight: 600;
+              color: #1f2937;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              border-bottom: 2px solid #e5e7eb;
+              padding: 16px 12px;
+            }
+          }
+
+          // Table Rows
+          .mat-mdc-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+
+            &:hover {
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+            }
+
+            &.clickable-row {
+              cursor: pointer;
+            }
+
+            .mat-mdc-cell {
+              padding: 20px 12px;
+              border-bottom: 1px solid #f3f4f6;
+              font-size: 14px;
+              color: #374151;
+            }
+          }
+        }
+
+        // Period Info
+        .period-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          strong {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 15px;
+          }
+
+          small {
+            font-size: 12px;
+            color: #9ca3af;
+          }
+        }
+
+        // Date Range
+        .date-range {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          color: #6b7280;
+
+          .date-separator {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            color: #667eea;
+          }
+        }
+
+        // Employee Count
+        .employee-count {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          border-radius: 8px;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+          color: #667eea;
+          font-weight: 600;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+
+        // Amounts Info
+        .amounts-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          .gross-amount {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+          }
+
+          .net-amount {
+            font-size: 14px;
+            color: #1f2937;
+            font-weight: 700;
+          }
+        }
+
+        // Status Chip
+        ::ng-deep mat-chip {
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          height: 28px !important;
+          border-radius: 14px !important;
+          padding: 0 12px !important;
+
+          &[color="primary"] {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+            color: #667eea !important;
+            border: 1px solid rgba(102, 126, 234, 0.3) !important;
+          }
+
+          &[color="accent"] {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+            color: #059669 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+          }
+
+          &[color="warn"] {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
+            color: #d97706 !important;
+            border: 1px solid rgba(245, 158, 11, 0.3) !important;
+          }
+        }
+      }
+
+      // Empty State
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0 0 24px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        button {
+          height: 44px;
+          padding: 0 24px !important;
+          border-radius: 12px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+
+      // Pagination
+      ::ng-deep mat-paginator {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-top: 1px solid #e5e7eb;
+
+        .mat-mdc-paginator-container {
+          padding: 16px 24px;
+        }
+
+        .mat-mdc-paginator-page-size-label,
+        .mat-mdc-paginator-range-label {
+          color: #6b7280;
+          font-weight: 500;
+        }
+
+        .mat-mdc-select-value {
+          color: #1f2937;
+          font-weight: 500;
+        }
+
+        button {
+          &:not([disabled]) {
+            color: #667eea;
+
+            &:hover {
+              background: rgba(102, 126, 234, 0.1);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Loading Container
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    gap: 20px;
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+  }
+
+  // Menu Actions
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+
+    .mat-mdc-menu-content {
+      padding: 8px !important;
+
+      .mat-mdc-menu-item {
+        border-radius: 8px !important;
+        margin: 2px 0 !important;
+        height: 44px !important;
+
+        &:hover:not([disabled]) {
+          background: rgba(102, 126, 234, 0.1) !important;
+        }
+
+        mat-icon {
+          margin-right: 12px;
+          color: #667eea;
+        }
+
+        &.delete-action {
+          color: #dc2626 !important;
+
+          mat-icon {
+            color: #dc2626 !important;
+          }
+
+          &:hover:not([disabled]) {
+            background: rgba(220, 38, 38, 0.1) !important;
+          }
+        }
+
+        &.export-action {
+          mat-icon {
+            color: #10b981;
+          }
+
+          &:hover:not([disabled]) {
+            background: rgba(16, 185, 129, 0.1) !important;
+          }
+        }
+
+        &[disabled] {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// Spinner Styling
+::ng-deep mat-spinner circle {
+  stroke: #667eea !important;
+}
+
+// Select Panel Styling
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  margin-top: 8px;
+
+  .mat-mdc-option {
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
+    padding: 12px 16px !important;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.1) !important;
+    }
+
+    &.mat-mdc-option-active,
+    &.mat-selected {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+      color: #667eea !important;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .payroll-periods-container {
+    .filters-card .filters-form {
+      grid-template-columns: 1fr 1fr;
+
+      .filter-actions {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .payroll-periods-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+
+    .filters-card .filters-form {
+      grid-template-columns: 1fr;
+
+      .filter-actions {
+        flex-direction: column;
+
+        button {
+          width: 100%;
+        }
       }
     }
   }
