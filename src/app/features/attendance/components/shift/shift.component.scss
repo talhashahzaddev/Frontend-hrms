@@ -1,0 +1,455 @@
+
+/* =======================================================
+   Shift Dashboard Container
+======================================================= */
+.shift-dashboard-container {
+  padding: var(--spacing-lg);
+  min-height: calc(100vh - 64px);
+  background: var(--gray-50);
+}
+
+/* =======================================================
+   Dashboard Header
+======================================================= */
+.dashboard-header {
+  display: flex;
+  flex-direction: column; /* stack header & actions vertically */
+  align-items: flex-start;
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
+
+  .header-content {
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin: 0 0 var(--spacing-sm);
+
+      mat-icon {
+        color: var(--primary-600);
+        font-size: 2rem;
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+
+    .page-subtitle {
+      font-size: 1.125rem;
+      color: var(--gray-600);
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    width: 100%; /* full width on mobile */
+    button {
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md) var(--spacing-xl);
+    }
+  }
+}
+
+/* =======================================================
+   Current Shift Card (Employee View)
+======================================================= */
+
+.current-shift-card {
+  background: #f0f4f8; /* light soft color */
+  padding: 20px 24px;
+  border: 1.5px solid #cbd5e1; 
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* lighter shadow */
+  width: 100%;
+  margin: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1f2937; /* dark text for contrast */
+      margin: 0;
+    }
+
+    .status-chip {
+      background-color: #3b82f6; /* soft blue */
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 16px;
+      text-transform: uppercase;
+    }
+  }
+
+  .card-body {
+    p {
+      margin: 4px 0;
+      font-size: 14px;
+      color: #4b5563; /* medium gray text */
+
+      strong {
+        color: #111827; /* dark for strong */
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .current-shift-card {
+    padding: 16px 18px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .current-shift-card {
+    padding: 16px 18px;
+  }
+}
+
+
+
+
+
+
+
+
+/* =======================================================
+   Quick Navigation Cards
+======================================================= */
+.quick-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+  justify-content: start;
+  max-width: 700px;
+}
+
+.nav-card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  cursor: pointer;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  min-height: 140px; 
+  max-width: 320px;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  .nav-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Gradient per card type */
+.nav-card.assign-shift {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+}
+
+.nav-card.swap-shift {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* =======================================================
+   Main Content Card (Tabs)
+======================================================= */
+.main-content-card {
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+  margin-top: 24px;
+}
+
+/* =======================================================
+   Shift Requests Card
+======================================================= */
+.shift-request-card {
+  padding: var(--spacing-xl);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+  margin-bottom: var(--spacing-lg);
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-300);
+  }
+
+  .request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+
+    .employee-info {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+
+      .employee-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--primary-100);
+        color: var(--primary-700);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.125rem;
+      }
+
+      .employee-details {
+        h4 {
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: var(--gray-900);
+          margin: 0 0 4px;
+        }
+
+        p {
+          font-size: 0.875rem;
+          color: var(--gray-600);
+          margin: 0;
+        }
+      }
+    }
+
+    .status-chip mat-chip {
+      font-weight: 600;
+    }
+  }
+
+  .request-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: flex-end;
+
+    button {
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+    }
+  }
+}
+
+/* =======================================================
+   Employee Table Styling
+======================================================= */
+.table-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-top: var(--spacing-lg);
+}
+
+.shift-table {
+  width: 100%;
+  min-width: 800px;
+
+  .mat-mdc-header-row {
+    background-color: #f9fafb;
+  }
+
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: #1976d2;
+    padding: 16px 12px;
+    text-align: left;
+  }
+
+  .mat-mdc-cell {
+    padding: 16px 12px;
+    color: #1f2937;
+  }
+
+  .mat-row:hover {
+    background-color: #f5f7fa;
+  }
+}
+
+/* Empty State */
+.empty-state,
+.shift-empty-state {
+  text-align: center;
+  padding: var(--spacing-4xl);
+  color: #666;
+
+  mat-icon {
+    font-size: 4rem;
+    color: #b0b0b0;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1976d2;
+    margin-bottom: var(--spacing-md);
+  }
+
+  p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: var(--spacing-xl);
+  }
+}
+
+/* =======================================================
+   Responsive Adjustments
+======================================================= */
+@media (max-width: 1024px) {
+  .quick-nav-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions button {
+    width: 100%;
+  }
+
+  .quick-nav-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .shift-request-card .request-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shift-request-card .request-actions button {
+    width: 100%;
+  }
+
+  .main-content-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header .header-content .page-title {
+    font-size: 1.5rem;
+    mat-icon {
+      font-size: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  }
+  .dashboard-header .header-content .page-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+/* =======================================================
+   Dark Theme
+======================================================= */
+.dark-theme .shift-dashboard-container {
+  background: var(--gray-900);
+}
+
+.dark-theme .page-title {
+  color: var(--gray-100);
+}
+
+.dark-theme .page-subtitle {
+  color: var(--gray-400);
+}
+
+.dark-theme .nav-card {
+  background: var(--gray-800);
+  border-color: var(--gray-700);
+
+  h3 {
+    color: var(--gray-100);
+  }
+
+  p {
+    color: var(--gray-400);
+  }
+}
+
+.dark-theme .table-container {
+  background: var(--gray-800);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .shift-table .mat-mdc-header-row {
+  background-color: #2a2a2a;
+}
+
+.dark-theme .shift-table .mat-mdc-header-cell {
+  color: #90caf9;
+}
+
+.dark-theme .shift-table .mat-mdc-cell {
+  color: #e0e0e0;
+}
+
+.dark-theme .shift-table .mat-row:hover {
+  background-color: #3a3a3a;
+}
+
+.dark-theme .empty-state,
+.dark-theme .shift-empty-state {
+  color: #aaa;
+
+  mat-icon {
+    color: #777;
+  }
+
+  h3 {
+    color: #90caf9;
+  }
+
+  p {
+    color: #ccc;
+  }
+}

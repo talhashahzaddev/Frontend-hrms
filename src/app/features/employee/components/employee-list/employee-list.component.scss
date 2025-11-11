@@ -324,23 +324,51 @@
           align-items: center;
           gap: 12px;
 
-          .employee-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+          // .employee-avatar {
+          //   width: 40px;
+          //   height: 40px;
+          //   border-radius: 10px;
+          //   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          //   display: flex;
+          //   align-items: center;
+          //   justify-content: center;
+          //   flex-shrink: 0;
 
-            mat-icon {
-              color: white;
-              font-size: 22px;
-              width: 22px;
-              height: 22px;
-            }
-          }
+          //   mat-icon {
+          //     color: white;
+          //     font-size: 22px;
+          //     width: 22px;
+          //     height: 22px;
+          //   }
+          // }
+
+.employee-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px; // same as avatar
+    object-fit: contain;  // <-- changed from cover to contain
+    object-position: center;
+  }
+
+  mat-icon {
+    color: white;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
 
           .employee-details {
             .employee-name {
