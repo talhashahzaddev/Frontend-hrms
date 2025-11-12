@@ -11,12 +11,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { of, catchError } from 'rxjs';
 
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
 import { 
   LeaveRequest, 
   LeaveType, 
@@ -40,7 +42,8 @@ import { User } from '../../../../core/models/auth.models';
     MatTooltipModule,
     MatMenuModule,
     MatTabsModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatDialogModule
   ],
   template: `
     <div class="leave-dashboard-container">
@@ -347,7 +350,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     public leaveService: LeaveService,
     private authService: AuthService,
     private notificationService: NotificationService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -453,21 +457,33 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   }
 
   rejectRequest(request: LeaveRequest): void {
-    const reason = prompt('Please provide a reason for rejection:');
-    if (reason) {
-      this.leaveService.rejectLeaveRequest(request.requestId, reason)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave request rejected');
-            this.loadInitialData();
-          },
-          error: (error) => {
-            console.error('Error rejecting request:', error);
-            this.notificationService.showError('Failed to reject leave request');
-          }
-        });
-    }
+    const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName: request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        daysRequested: request.daysRequested
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.rejected) {
+        this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Leave request rejected successfully');
+              this.loadInitialData();
+            },
+            error: (error) => {
+              console.error('Error rejecting request:', error);
+              this.notificationService.showError('Failed to reject leave request');
+            }
+          });
+      }
+    });
   }
 
   hasManagerRole(): boolean {

@@ -21,6 +21,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, forkJoin } from
 import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
 import { 
   LeaveRequest, 
   LeaveStatus,
@@ -424,26 +425,37 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   }
 
   openRejectDialog(request: LeaveRequest): void {
-    const reason = prompt(`Provide reason for rejecting ${request.employeeName}'s leave request:`);
-    
-    if (reason && reason.trim()) {
-      this.isProcessing = true;
-      
-      this.leaveService.rejectLeaveRequest(request.requestId, reason)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave request rejected');
-            this.isProcessing = false;
-            this.loadInitialData();
-          },
-          error: (error) => {
-            console.error('Error rejecting request:', error);
-            this.notificationService.showError('Failed to reject leave request');
-            this.isProcessing = false;
-          }
-        });
-    }
+    const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName: request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        daysRequested: request.daysRequested
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.rejected) {
+        this.isProcessing = true;
+        
+        this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Leave request rejected successfully');
+              this.isProcessing = false;
+              this.loadInitialData();
+            },
+            error: (error) => {
+              console.error('Error rejecting request:', error);
+              this.notificationService.showError('Failed to reject leave request');
+              this.isProcessing = false;
+            }
+          });
+      }
+    });
   }
 
   viewRequestDetails(request: LeaveRequest): void {
