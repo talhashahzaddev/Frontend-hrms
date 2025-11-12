@@ -229,26 +229,61 @@
   </mat-card>
 
   <!-- Recent Processing History -->
+  <!-- Recent Processing History -->
   <mat-card class="history-card" *ngIf="recentProcessing.length > 0">
     <mat-card-header>
-      <mat-card-title>Recent Processing History</mat-card-title>
+      <mat-card-title>
+        <div class="card-title-wrapper">
+          <mat-icon class="title-icon">history</mat-icon>
+          <span>Recent Processing History</span>
+        </div>
+      </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="history-list">
         <div *ngFor="let item of recentProcessing" class="history-item">
-          <div class="history-info">
-            <h5>{{ item.periodName }}</h5>
-            <p>{{ item.processedAt | date:'medium' }}</p>
-            <small class="processed-by">Processed by: {{ item.processedBy }}</small>
+          <div class="history-date">
+            <div class="date-icon">
+              <mat-icon>event</mat-icon>
+            </div>
           </div>
-          <div class="history-stats">
-            <span class="stat">{{ item.entriesCreated }} entries</span>
-            <span class="stat">{{ item.totalGrossAmount | currency:organizationCurrency }}</span>
-            <span class="stat net-amount">Net: {{ item.totalNetAmount | currency:organizationCurrency }}</span>
+          
+          <div class="history-content">
+            <div class="history-header">
+              <div class="history-info">
+                <h5 class="period-name">{{ item.periodName }}</h5>
+                <p class="processed-time">
+                  <mat-icon>schedule</mat-icon>
+                  {{ item.processedAt | date:'medium' }}
+                </p>
+                <small class="processed-by">
+                  <mat-icon>person</mat-icon>
+                  Processed by: {{ item.processedBy }}
+                </small>
+              </div>
+              <mat-chip class="status-chip" [class]="'status-' + item.status">
+                {{ item.status | titlecase }}
+              </mat-chip>
+            </div>
+            
+            <div class="history-stats">
+              <div class="stat-item">
+                <mat-icon>receipt</mat-icon>
+                <span class="stat-label">Entries:</span>
+                <span class="stat-value">{{ item.entriesCreated }}</span>
+              </div>
+              <div class="stat-item">
+                <mat-icon>account_balance_wallet</mat-icon>
+                <span class="stat-label">Gross:</span>
+                <span class="stat-value">{{ item.totalGrossAmount | currency:organizationCurrency }}</span>
+              </div>
+              <div class="stat-item highlight">
+                <mat-icon>payments</mat-icon>
+                <span class="stat-label">Net:</span>
+                <span class="stat-value">{{ item.totalNetAmount | currency:organizationCurrency }}</span>
+              </div>
+            </div>
           </div>
-          <mat-chip [color]="getStatusColor(item.status)">
-            {{ item.status | titlecase }}
-          </mat-chip>
         </div>
       </div>
     </mat-card-content>

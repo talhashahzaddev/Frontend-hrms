@@ -82,7 +82,9 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   pageSize = 10;
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25, 50];
-  
+  profilePreviewUrl:string|null=null;
+private backendBaseUrl = 'https://localhost:60485';
+
   // Search and Filters
   searchControl = new FormControl('');
   departmentControl = new FormControl('');
@@ -182,10 +184,21 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.employees = response.employees;
+         
+          // this.employees = response.employees;
+this.employees = response.employees.map(emp => ({
+  ...emp,
+  profilePictureUrl: emp.profilePictureUrl
+    ? emp.profilePictureUrl.startsWith('http')
+      ? emp.profilePictureUrl
+      : `${this.backendBaseUrl}${emp.profilePictureUrl}`
+    : undefined // ✅ use undefined instead of null
+}));
+
           this.totalCount = response.totalCount;
           this.isLoading = false;
           this.selection.clear();
+          
         },
         error: (error) => {
           console.error('Failed to load employees:', error);

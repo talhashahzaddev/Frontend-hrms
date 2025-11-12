@@ -175,20 +175,32 @@
   </td>
 </ng-container>
         <!-- Name Column -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let employee">
-            <div class="employee-info">
-              <div class="employee-avatar">
-                <mat-icon>person</mat-icon>
-              </div>
-              <div class="employee-details">
-                <!-- <div class="employee-name">{{ getEmployeeFullName(employee) }}</div> -->
-                <div class="employee-email">{{ employee.fullName}}</div>
-              </div>
-            </div>
-          </td>
+        <!-- Name Column -->
+<ng-container matColumnDef="name">
+  <th mat-header-cell *matHeaderCellDef>Name</th>
+  <td mat-cell *matCellDef="let employee">
+    <div class="employee-info">
+      <!-- Avatar -->
+      <div class="employee-avatar">
+        <ng-container *ngIf="employee.profilePictureUrl; else defaultIcon">
+          <img [src]="employee.profilePictureUrl" 
+               alt="{{ employee.fullName }}" 
+               class="avatar-img">
         </ng-container>
+        <ng-template #defaultIcon>
+          <mat-icon>person</mat-icon>
+        </ng-template>
+      </div>
+
+      <!-- Details -->
+      <div class="employee-details">
+        <div class="employee-name">{{ employee.fullName }}</div>
+        <div class="employee-email">{{ employee.email }}</div>
+      </div>
+    </div>
+  </td>
+</ng-container>
+
         
         <!-- Email Column -->
         <ng-container matColumnDef="email">

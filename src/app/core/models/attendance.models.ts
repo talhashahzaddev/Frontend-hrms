@@ -184,6 +184,80 @@ export interface AttendanceCalendarData {
   isHoliday: boolean;
 }
 
+
+export interface UpdateShiftDto {
+  shiftId: string;         
+  shiftName: string;       
+  startTime: string;       
+  endTime: string;         
+  breakDuration?: number;  
+  daysofWeek?: number[];  
+  timezone?: string;       
+}
+
+
+export interface ShiftDto {
+  shiftId: string;
+  shiftName: string;
+  startTime: string; // "HH:mm:ss"
+  endTime: string;
+  breakDuration: number;
+  daysOfWeek: number[];
+  timezone: string;
+  isActive: boolean;
+}
+
+// assign-shift-request.model.ts
+export interface AssignShiftRequest {
+  employeeId: string;
+  shiftId: string;
+}
+
+export interface EmployeeShift {
+  employeeId: string;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  departmentName: string;
+  positionName: string;
+  shiftName: string;
+}
+
+export interface PendingShiftSwap {
+  requestId: string;
+  employeeId: string;
+  employeeName: string;
+  currentShiftId: string;
+  currentShiftName: string;
+  requestedShiftId: string;
+  requestedShiftName: string;
+  reason: string;
+  status: string; // approved | rejected | pending
+}
+
+export interface approvedshiftRequest{
+  requestId:string;
+  approvedBy:string;
+  isApproved:boolean;
+  rejectionReason:string;
+}
+
+
+
+// shift-swap.model.ts
+export interface ShiftSwap {
+  employeeId: string;
+  currentShiftId?: string; // optional (as per your DTO)
+  requestedShiftId: string;
+  reason?: string;
+}
+
+
+
+
+
+
 export interface AttendancePolicy {
   policyId: string;
   name: string;
