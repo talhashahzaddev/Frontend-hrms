@@ -435,7 +435,78 @@
         background: rgba(255, 255, 255, 0.2);
         backdrop-filter: blur(10px);
       }
+// This new class handles dynamic background colors
+// This new class handles dynamic background colors
+.stat-card.stat-card-dynamic-color {
+  color: white; // Make all text inside white
 
+  .stat-item {
+    .stat-icon-wrapper {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-details {
+      .stat-label,
+      .stat-value {
+        color: white;
+      }
+
+      .stat-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: 8px;
+        margin-top: 4px;
+
+        .stat-indicator,
+        span {
+          color: rgba(255, 255, 255, 0.9);
+        }
+      }
+    }
+  }
+
+  // This fixes the three-dot menu button color
+  .card-actions .menu-button {
+    mat-icon {
+      color: white;
+    }
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      mat-icon {
+        color: white;
+      }
+    }
+  }
+
+  // --- NEW FIXES START HERE ---
+
+  // 1. Fixes the description box
+  .type-description {
+    background: rgba(255, 255, 255, 0.15); // Semi-transparent white background
+    border-left-color: rgba(255, 255, 255, 0.5); // Lighter border
+    p {
+      color: rgba(255, 255, 255, 0.95); // White-ish text
+    }
+  }
+
+  // 2. Fixes the "Paid" / "Carry Forward" chips
+  .type-flags .flag-chip {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px);
+
+    mat-icon {
+      color: white !important;
+    }
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.35) !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+  }
+  // --- NEW FIXES END HERE ---
+}
       .stat-details {
         .stat-label,
         .stat-value {

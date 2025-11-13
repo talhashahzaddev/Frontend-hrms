@@ -149,8 +149,8 @@ import { User } from '../../../../core/models/auth.models';
         
         <div class="statistics-cards">
           <mat-card *ngFor="let balance of leaveBalances; let i = index" 
-                    class="stat-card" 
-                    [ngClass]="'stat-card-' + getCardColorClass(i)">
+                    class="stat-card stat-card-dynamic-color" 
+                    [style.background]="getBalanceCardColor(balance)">
             <mat-card-content>
               <div class="stat-item">
                 <div class="stat-icon-wrapper">
@@ -492,6 +492,11 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
 
   hasAdminRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
+getBalanceCardColor(balance: LeaveBalance): string {
+    const leaveType = this.leaveTypes.find(lt => lt.typeName === balance.leaveTypeName);
+    return leaveType?.color || '#2196F3'; // Default to blue if not found
   }
 
   getLeaveTypeColor(leaveTypeId: string): string {
