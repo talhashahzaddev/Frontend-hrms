@@ -24,8 +24,6 @@ import {
   AppraisalFilter,
   PerformanceReportFilter,
   CreateAppraisal,
-  CreateGoalRequest,
-  Goal,
   SelfAssessment,
   CreateSelfAssessmentRequest,
   ManagerReview,
@@ -296,35 +294,6 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     this.refreshPerformanceSummary(cycleId);
   }
 
-//Goals 
-
-createGoal(request: CreateGoalRequest): Observable<ApiResponse<Goal>> {
-  return this.http.post<ApiResponse<Goal>>(`${this.apiUrl}/performance/goals`, request);
-}
-
-//get all goals
-
-// Get all goals (for manager)
-getAllGoals(): Observable<ApiResponse<Goal[]>> {
-  return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/performance/goals`);
-}
-
-//Get api by id
-
-/** Get goals by employee ID */
-getGoalsByEmployeeId(employeeId: string): Observable<ApiResponse<Goal[]>> {
-  return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/performance/goals/employee/${employeeId}`);
-}
-
-// Get goal Completed
-
-// Mark a goal as completed
-completeGoal(goalId: string): Observable<ApiResponse<any>> {
-  return this.http.put<ApiResponse<any>>(
-    `${this.apiUrl}/Performance/Goals/${goalId}/complete`,
-    {}
-  );
-}
 
 
 

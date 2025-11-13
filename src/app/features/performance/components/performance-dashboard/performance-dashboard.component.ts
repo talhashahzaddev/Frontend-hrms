@@ -72,9 +72,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   employeeAppraisals: EmployeeAppraisal[] = [];
   selectedCycleId: string | null = null;
 
-  // ⭐ For Goal Summary Card
-  totalGoals: number = 0;
-  achievedGoals: number = 0;
   overallRating: number = 0;
 
   // ⭐ For rating stars
@@ -181,27 +178,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
             this.employeeAppraisals = res.data || [];
             console.log('Employee Appraisals:', this.employeeAppraisals);
 
-            // ✅ Extract goal summary safely
             if (this.employeeAppraisals.length > 0) {
-              let goalsData: any = this.employeeAppraisals[0].goalsAchieved;
-
-              if (typeof goalsData === 'string') {
-                try {
-                  goalsData = JSON.parse(goalsData);
-                } catch (e) {
-                  console.error('Invalid JSON in goalsAchieved:', e);
-                  goalsData = null;
-                }
-              }
-
-              if (goalsData) {
-                this.totalGoals = goalsData.total || 0;
-                this.achievedGoals = goalsData.completed || 0;
-              } else {
-                this.totalGoals = 0;
-                this.achievedGoals = 0;
-              }
-
               this.overallRating = this.employeeAppraisals[0].overallRating || 0;
             }
           } else {

@@ -51,12 +51,6 @@
                   <span class="stat-value text-xl font-semibold">{{ myPerformanceMetrics.skillsCount }}</span>
                 </div>
                 <div class="stat-item">
-                  <span class="stat-label text-gray-500 text-sm block">Goals Completed</span>
-                  <span class="stat-value text-xl font-semibold">
-                    {{ myPerformanceMetrics.goalsCompleted }}/{{ myPerformanceMetrics.totalGoals }}
-                  </span>
-                </div>
-                <div class="stat-item">
                   <span class="stat-label text-gray-500 text-sm block">Last Review</span>
                   <span class="stat-value text-xl font-semibold">
                     {{ (myPerformanceMetrics.lastAppraisalDate | date:'mediumDate') || 'Not available' }}
@@ -72,29 +66,14 @@
           </mat-card-content>
         </mat-card>
 
-        <!-- Goal Completion Summary -->
+        <!-- Overall Rating Summary -->
         <mat-card class="shift-card p-4 rounded-2xl shadow-md bg-white">
           <mat-card-header>
-            <mat-card-title>Goal Completion Summary</mat-card-title>
+            <mat-card-title>Overall Rating</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div class="p-4 rounded-lg border">
-                <h3 class="text-gray-500 text-sm">Total Goals</h3>
-                <p class="text-2xl font-semibold text-blue-600">{{ totalGoals }}</p>
-              </div>
-              <div class="p-4 rounded-lg border">
-                <h3 class="text-gray-500 text-sm">Achieved Goals</h3>
-                <p class="text-2xl font-semibold text-green-600">{{ achievedGoals }}</p>
-              </div>
-              <div class="p-4 rounded-lg border">
-                <h3 class="text-gray-500 text-sm">Pending Goals</h3>
-                <p class="text-2xl font-semibold text-yellow-600">{{ totalGoals - achievedGoals }}</p>
-              </div>
-              <div class="p-4 rounded-lg border">
-                <h3 class="text-gray-500 text-sm">Overall Rating</h3>
-                <p class="text-2xl font-semibold text-purple-600">{{ overallRating }}</p>
-              </div>
+            <div class="text-center">
+              <p class="text-4xl font-semibold text-purple-600">{{ overallRating || 0 }}</p>
             </div>
           </mat-card-content>
         </mat-card>

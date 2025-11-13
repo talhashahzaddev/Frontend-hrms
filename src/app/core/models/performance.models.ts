@@ -74,7 +74,7 @@ export interface EmployeeAppraisal {
   overallRating?: number;
   kraRatings: { [kraId: string]: number };
   skillRatings: { [skillId: string]: number };
-  goalsAchieved: Goal[];
+  goalsAchieved: any;
   feedback?: string;
   improvementAreas?: string;
   developmentPlan?: string;
@@ -100,32 +100,6 @@ export enum AppraisalStatus {
   REJECTED = 'rejected'
 }
 
-export interface Goal {
-  goalId: string;
-  employeeId: string;
-  employee_name: string;
-  title: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  status: GoalStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateGoalRequest {
-  employeeId: string;
-  title: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-}
-export enum GoalStatus {
-  NOT_STARTED = 'not_started',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
-}
 
 export interface CreateAppraisal {
   cycleId: string;
@@ -203,8 +177,6 @@ export interface EmployeePerformanceDetail {
   overallRating: number;
   kraAverage: number;
   skillAverage: number;
-  goalsAchieved: number;
-  totalGoals: number;
   feedback: string;
   developmentPlan: string;
 }
@@ -330,7 +302,7 @@ export interface SubmitAppraisalRequest {
   overallRating?: number;
   kraRatings: { [kraId: string]: number };
   skillRatings: { [skillId: string]: number };
-  goalsAchieved: Goal[];
+  goalsAchieved: any;
   feedback?: string;
   improvementAreas?: string;
   developmentPlan?: string;
@@ -375,8 +347,6 @@ export interface PerformanceMetrics {
   previousRating?: number;
   ratingTrend: 'up' | 'down' | 'stable';
   skillsCount: number;
-  goalsCompleted: number;
-  totalGoals: number;
   lastAppraisalDate?: string;
   nextAppraisalDate?: string;
 }

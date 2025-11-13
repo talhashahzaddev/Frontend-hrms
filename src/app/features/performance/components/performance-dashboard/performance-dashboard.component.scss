@@ -173,34 +173,6 @@
   color: #facc15; /* yellow for filled stars */
 }
 
-/* Goal Summary Grid */
-.performance-card .goal-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.performance-card .goal-item {
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  text-align: center;
-}
-
-.performance-card .goal-item h3 {
-  font-size: 13px;
-  font-weight: 500;
-  color: #6b7280;
-  margin-bottom: 8px;
-}
-
-.performance-card .goal-item p {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
 /* Skills List */
 .performance-card .skills-list .skill-item {
   margin-bottom: 16px;
