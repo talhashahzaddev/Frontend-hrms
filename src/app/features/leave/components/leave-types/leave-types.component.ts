@@ -26,6 +26,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LeaveType } from '../../../../core/models/leave.models';
+import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
 
 @Component({
   selector: 'app-leave-types',
@@ -59,9 +60,9 @@ import { LeaveType } from '../../../../core/models/leave.models';
       </div>
 
       <div class="types-grid" *ngIf="!isLoading">
-        <mat-card *ngFor="let type of leaveTypes; let i = index" 
-                  class="stat-card" 
-                  [ngClass]="'stat-card-' + getCardColorClass(i)">
+       <mat-card *ngFor="let type of leaveTypes; let i = index" 
+          class="stat-card stat-card-dynamic-color" 
+          [style.background]="type.color || '#2196F3'">
           <mat-card-content>
             <div class="stat-item">
               <div class="stat-icon-wrapper">
@@ -719,33 +720,19 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
 export class AddLeaveTypeDialogTemplate {
   isSubmitting = false;
 
+  readonly colors: ColorOption[] = inject(LEAVE_COLOR_TOKEN);
+
+  // default to the first color in the shared palette
+  private readonly defaultColor = this.colors?.[0]?.value ?? '#2196f3';
+
   readonly form = inject(FormBuilder).group({
     typeName: ['', Validators.required],
     description: [''],
     maxDaysPerYear: [15, [Validators.required, Validators.min(1)]],
     isPaid: [true],
     carryForwardAllowed: [false],
-    color: ['#2196f3', Validators.required]
+    color: [this.defaultColor, Validators.required]
   });
-
-  readonly colors = [
-    { name: 'Red', value: '#f44336' },
-    { name: 'Pink', value: '#e91e63' },
-    { name: 'Purple', value: '#9c27b0' },
-    { name: 'Deep Purple', value: '#673ab7' },
-    { name: 'Indigo', value: '#3f51b5' },
-    { name: 'Blue', value: '#2196f3' },
-    { name: 'Light Blue', value: '#03a9f4' },
-    { name: 'Cyan', value: '#00bcd4' },
-    { name: 'Teal', value: '#009688' },
-    { name: 'Green', value: '#4caf50' },
-    { name: 'Light Green', value: '#8bc34a' },
-    { name: 'Lime', value: '#cddc39' },
-    { name: 'Yellow', value: '#ffeb3b' },
-    { name: 'Amber', value: '#ffc107' },
-    { name: 'Orange', value: '#ff9800' },
-    { name: 'Deep Orange', value: '#ff5722' }
-  ];
 
   private dialogRef = inject(MatDialogRef<AddLeaveTypeDialogTemplate>);
 
