@@ -12,8 +12,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PerformanceSummary } from '@/app/core/models/performance.models';
+import { MatIconModule } from '@angular/material/icon';
 
-
+import { MatCard } from '@angular/material/card';
 @Component({
   selector: 'app-reports',
   imports: [
@@ -21,6 +22,8 @@ import { PerformanceSummary } from '@/app/core/models/performance.models';
       MatFormFieldModule,
     MatSelectModule,
     MatOptionModule,
+   MatIconModule,
+    MatCard,
     ReactiveFormsModule
   ],
   templateUrl: './reports.component.html',

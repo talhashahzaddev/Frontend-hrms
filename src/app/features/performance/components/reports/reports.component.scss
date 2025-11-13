@@ -1,103 +1,221 @@
-/* Container for "no selection" state */
-.no-selection {
-  text-align: center;
-  padding: 40px;
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-//   border: 2px dashed #9ca3af;
-//   border-radius: 12px;
-  margin: 20px auto;
-  max-width: 600px;
-  color: #4b5563;
-  font-size: 1.2rem;
-  font-style: italic;
-  transition: all 0.3s ease;
+
+
+
+
+.performance-summary-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  /* ================================
+     Appraisal Cycle Select
+  ================================== */
+  .report-form {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 24px;
+
+    ::ng-deep mat-form-field.mat-form-field-appearance-outline {
+      width: 320px;
+      background: white;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+      .mat-mdc-form-field-flex {
+        padding: 0 16px;
+      }
+
+      .mat-mdc-notch-piece {
+        border-color: #e5e7eb !important;
+      }
+
+      &:hover .mat-mdc-notch-piece {
+        border-color: #667eea !important;
+      }
+
+      &.mat-focused {
+        .mat-mdc-text-field-wrapper {
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .mat-mdc-notch-piece {
+          border-color: #667eea !important;
+          border-width: 2px !important;
+        }
+      }
+
+      .mat-mdc-form-field-label {
+        color: #6b7280;
+      }
+
+      &.mat-focused .mat-mdc-form-field-label {
+        color: #667eea;
+      }
+
+      .mat-mdc-select-arrow {
+        color: #667eea !important;
+      }
+    }
+  }
+
+  /* ================================
+     Empty State
+  ================================== */
+  .summary-empty-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 24px;
+
+    .summary-empty-card {
+      text-align: center;
+      border: 2px dashed #e5e7eb;
+      background: white;
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15);
+      }
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #cbd5e1;
+        margin-bottom: 12px;
+      }
+
+      p {
+        font-size: 16px;
+        color: #6b7280;
+        font-weight: 500;
+        margin: 0;
+      }
+    }
+  }
+
+  /* ================================
+     Summary Section
+  ================================== */
+  .summary-section {
+    margin-top: 16px;
+
+    .summary-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 2px;
+      }
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+
+      .summary-card {
+        padding: 24px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        text-align: center;
+        border: 1px solid #f1f2f5;
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+          border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .summary-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 12px;
+        }
+
+        .summary-value {
+          font-size: 26px;
+          font-weight: 700;
+          color: #1f2937;
+          font-family: 'Inter', sans-serif;
+        }
+
+        &.wide {
+          grid-column: span 2;
+        }
+      }
+    }
+  }
 }
 
-.no-selection:hover {
-  background: linear-gradient(135deg, #f9fafb, #d1d5db);
-  border-color: #6b7280;
+/* ================================
+   Responsive Design
+================================== */
+@media (max-width: 1200px) {
+  .performance-summary-container {
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .report-form ::ng-deep mat-form-field {
+      width: 100%;
+    }
+  }
 }
 
-/* Summary section */
-.summary-section {
-  margin-top: 30px;
-  padding: 25px;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.summary-section h3 {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Grid layout */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-/* Each card */
-.summary-item {
-  background: #f9fafb;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.summary-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-}
-
-/* Label */
-.summary-label {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Value */
-.summary-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2563eb; /* nice blue */
-}
-
-/* Special coloring for different items */
-.summary-item:nth-child(1) .summary-value {
-  color: #f59e0b; /* amber for rating */
-}
-
-.summary-item:nth-child(2) .summary-value {
-  color: #10b981; /* green for total */
-}
-
-.summary-item:nth-child(3) .summary-value {
-  color: #ef4444; /* red for pending */
-}
-
-.summary-item:nth-child(4) .summary-value {
-  color: #8b5cf6; /* purple for distribution */
-}
-
-.summary-item:nth-child(5) .summary-value {
-  color: #0ea5e9; /* sky blue for top performers */
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .summary-grid {
-    grid-template-columns: 1fr;
+  .performance-summary-container {
+    padding: 16px;
+
+    .summary-title {
+      font-size: 20px;
+    }
+
+    .summary-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+
+      .summary-card {
+        padding: 20px;
+
+        .summary-label {
+          font-size: 13px;
+        }
+
+        .summary-value {
+          font-size: 22px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-summary-container {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
   }
 }

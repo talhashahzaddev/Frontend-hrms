@@ -1,46 +1,53 @@
-<form [formGroup]="reportForm">
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Select Appraisal Cycle</mat-label>
-    <mat-select formControlName="cycleId">
-      <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-        {{ cycle.cycleName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</form>
+<div class="performance-summary-container">
+  <!-- Appraisal Cycle Select -->
+  <form [formGroup]="reportForm" class="report-form">
+    <mat-form-field appearance="outline" class="full-width cycle-select mat-elevation-z2">
+      <mat-label>Select Appraisal Cycle</mat-label>
+      <mat-select formControlName="cycleId">
+        <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+          {{ cycle.cycleName }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
 
-<!-- Summary -->
-<div *ngIf="!reportForm.get('cycleId')?.value" class="no-selection">
-<p>Select Cycle to load Smmary  </p>
-</div>
+  <!-- No Selection / Empty State -->
+  <div *ngIf="!reportForm.get('cycleId')?.value" class="summary-empty-state">
+    <mat-card class="summary-empty-card mat-elevation-z8">
+      <mat-icon>info_outline</mat-icon>
+      <p>Select a cycle to load summary</p>
+    </mat-card>
+  </div>
 
-<div *ngIf="summary" class="summary-section">
-  <h3>Performance Summary</h3>
+  <!-- Summary Section -->
+  <div *ngIf="summary" class="summary-section">
+    <h3 class="summary-title">Performance Summary</h3>
 
-  <div class="summary-grid">
-    <div class="summary-item">
-      <div class="summary-label">Average Rating</div>
-      <div class="summary-value">{{ summary.averageRating }}</div>
-    </div>
+    <div class="summary-grid">
+      <mat-card class="summary-card mat-elevation-z8">
+        <div class="summary-label">Average Rating</div>
+        <div class="summary-value">{{ summary.averageRating }}</div>
+      </mat-card>
 
-    <div class="summary-item">
-      <div class="summary-label">Total Appraisals</div>
-      <div class="summary-value">{{ summary.totalAppraisals }}</div>
-    </div>
+      <mat-card class="summary-card mat-elevation-z8">
+        <div class="summary-label">Total Appraisals</div>
+        <div class="summary-value">{{ summary.totalAppraisals }}</div>
+      </mat-card>
 
-    <div class="summary-item">
-      <div class="summary-label">Pending Appraisals</div>
-      <div class="summary-value">{{ summary.pendingAppraisals }}</div>
-    </div>
+      <mat-card class="summary-card mat-elevation-z8">
+        <div class="summary-label">Pending Appraisals</div>
+        <div class="summary-value">{{ summary.pendingAppraisals }}</div>
+      </mat-card>
 
-    <div class="summary-item">
-      <div class="summary-label">Rating Distribution</div>
-      <div class="summary-value">{{ summary.ratingDistribution }}</div>
-    </div>
+      <mat-card class="summary-card mat-elevation-z8">
+        <div class="summary-label">Rating Distribution</div>
+        <div class="summary-value">{{ summary.ratingDistribution }}</div>
+      </mat-card>
 
-    <div class="summary-item" style="grid-column: span 2;">
-      <div class="summary-label">Top Performers</div>
-      <div class="summary-value">{{ summary.topPerformers }}</div>
+      <mat-card class="summary-card wide mat-elevation-z8">
+        <div class="summary-label">Top Performers</div>
+        <div class="summary-value">{{ summary.topPerformers }}</div>
+      </mat-card>
     </div>
   </div>
 </div>

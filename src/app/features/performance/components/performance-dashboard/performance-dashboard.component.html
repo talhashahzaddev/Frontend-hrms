@@ -1,5 +1,4 @@
-
-<div class="performance-dashboard-container">
+<div class="shift-dashboard-container">
 
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container text-center py-10">
@@ -23,7 +22,7 @@
       <div class="overview-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- My Performance Card -->
-        <mat-card class="performance-overview-card p-4 rounded-2xl shadow-md">
+        <mat-card class="shift-card p-4 rounded-2xl shadow-md">
           <mat-card-header>
             <mat-card-title>My Performance</mat-card-title>
           </mat-card-header>
@@ -43,11 +42,6 @@
                     </mat-icon>
                   </div>
                 </div>
-                <!-- <div class="rating-trend flex items-center gap-1 text-sm"
-                     [ngClass]="'trend-' + myPerformanceMetrics.ratingTrend">
-                  <mat-icon>{{ getTrendIcon(myPerformanceMetrics.ratingTrend) }}</mat-icon>
-                  {{ myPerformanceMetrics.ratingTrend | titlecase }}
-                </div> -->
               </div>
 
               <!-- Stats -->
@@ -71,7 +65,7 @@
               </div>
             </div>
 
-            <div *ngIf="!myPerformanceMetrics" class="empty-state text-center mt-6">
+            <div *ngIf="!myPerformanceMetrics" class="shift-empty-state text-center mt-6">
               <mat-icon>info</mat-icon>
               <p>No performance data available</p>
             </div>
@@ -79,7 +73,7 @@
         </mat-card>
 
         <!-- Goal Completion Summary -->
-        <mat-card class="goal-summary-card p-4 rounded-2xl shadow-md bg-white">
+        <mat-card class="shift-card p-4 rounded-2xl shadow-md bg-white">
           <mat-card-header>
             <mat-card-title>Goal Completion Summary</mat-card-title>
           </mat-card-header>
@@ -106,7 +100,7 @@
         </mat-card>
 
         <!-- My Skills -->
-        <mat-card class="skills-card p-4 rounded-2xl shadow-md">
+        <mat-card class="shift-card p-4 rounded-2xl shadow-md">
           <mat-card-header>
             <mat-card-title>My Skills</mat-card-title>
           </mat-card-header>
@@ -125,7 +119,7 @@
               </div>
             </div>
 
-            <div *ngIf="!mySkills.length" class="empty-state text-center mt-6">
+            <div *ngIf="!mySkills.length" class="shift-empty-state text-center mt-6">
               <mat-icon>school</mat-icon>
               <p>No skills assessed yet</p>
             </div>
@@ -136,7 +130,7 @@
     </div>
 
     <!-- Main Content Tabs -->
-    <mat-card class="main-content-card rounded-2xl shadow-lg">
+    <mat-card class="shift-card rounded-2xl shadow-lg">
       <mat-tab-group>
 
         <!-- My Appraisals -->
@@ -154,7 +148,7 @@
             </mat-form-field>
 
             <div class="appraisals-section">
-              <table class="appraisals-table w-full border rounded-lg" *ngIf="employeeAppraisals.length > 0">
+              <table class="shift-table w-full border rounded-lg" *ngIf="employeeAppraisals.length > 0">
                 <thead class="bg-gray-100">
                   <tr>
                     <th>Cycle Name</th>
@@ -175,7 +169,7 @@
                 </tbody>
               </table>
 
-              <div *ngIf="!employeeAppraisals.length" class="empty-state text-center mt-6">
+              <div *ngIf="!employeeAppraisals.length" class="shift-empty-state text-center mt-6">
                 <mat-icon>assessment</mat-icon>
                 <h3>No Appraisals</h3>
                 <p>You don't have any performance appraisals yet.</p>
@@ -227,7 +221,7 @@
                 </div>
               </div>
 
-              <div *ngIf="!teamPerformanceSummary" class="empty-state text-center mt-6">
+              <div *ngIf="!teamPerformanceSummary" class="shift-empty-state text-center mt-6">
                 <mat-icon>group</mat-icon>
                 <h3>No Team Data</h3>
                 <p>No team performance data available.</p>
@@ -243,7 +237,7 @@
 
   <!-- Appraisal Cycles (visible only to HR/Admin) -->
   <div *ngIf="hasHRRole() && !isLoading">
-    <mat-card class="main-content-card rounded-2xl shadow-lg">
+    <mat-card class="shift-card rounded-2xl shadow-lg">
       <mat-tab-group>
         <mat-tab label="Appraisal Cycles">
           <div class="tab-content p-4">
@@ -256,7 +250,7 @@
                 </button>
               </div>
 
-              <table class="cycles-table w-full border rounded-lg" *ngIf="appraisalCycles.length > 0; else emptyState">
+              <table class="shift-table w-full border rounded-lg" *ngIf="appraisalCycles.length > 0; else emptyState">
                 <thead class="bg-gray-100">
                   <tr>
                     <th>Cycle Name</th>
@@ -277,21 +271,30 @@
                       </mat-chip>
                     </td>
                     <td>
-                      <button mat-stroked-button (click)="viewCycleDetails(cycle)">
-                        <mat-icon>visibility</mat-icon>
-                        View
-                      </button>
-                      <button mat-stroked-button (click)="manageCycle(cycle)">
-                        <mat-icon>settings</mat-icon>
-                        Manage
-                      </button>
-                    </td>
+  <!-- Three-dot button -->
+  <button mat-icon-button [matMenuTriggerFor]="cycleMenu">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+
+  <!-- Menu that opens on three-dot click -->
+  <mat-menu #cycleMenu="matMenu">
+    <button mat-menu-item (click)="editCycle(cycle)">
+      <mat-icon>edit</mat-icon>
+      Edit
+    </button>
+    <button mat-menu-item (click)="deleteCycle(cycle)">
+      <mat-icon>delete</mat-icon>
+      Delete
+    </button>
+  </mat-menu>
+</td>
+
                   </tr>
                 </tbody>
               </table>
 
               <ng-template #emptyState>
-                <div class="empty-state text-center mt-6">
+                <div class="shift-empty-state text-center mt-6">
                   <mat-icon>event</mat-icon>
                   <h3>No Appraisal Cycles</h3>
                   <p>No appraisal cycles have been created yet.</p>

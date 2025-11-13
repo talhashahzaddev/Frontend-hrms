@@ -1,897 +1,473 @@
-@use '../../../../../styles.scss' as *;
+/* =======================================================
+   Performance Dashboard - Shift Dashboard Style Replica
+========================================================= */
 
 .performance-dashboard-container {
-  padding: 2rem;
+  padding: 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-  animation: fadeIn 0.6s ease-out;
-
-  // Page Header
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-    padding: 1.5rem 0;
-
-    .header-content {
-      .page-title {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin: 0 0 0.5rem 0;
-
-        mat-icon {
-          font-size: 2.25rem;
-          width: 2.25rem;
-          height: 2.25rem;
-          background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-      }
-
-      .page-subtitle {
-        color: var(--text-secondary);
-        font-size: 1.125rem;
-        margin: 0;
-        font-weight: 400;
-      }
-    }
-
-
-    ///Adding button style
-
-
-
-
-    .header-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-
-      .action-btn {
-        border: 2px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-        &:hover {
-          border-color: var(--primary-color);
-          color: var(--primary-color);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(79, 70, 229, 0.15);
-        }
-
-        mat-icon {
-          margin-right: 0.5rem;
-        }
-      }
-
-      .process-btn {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border-radius: 12px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        border: none;
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
-        }
-
-        mat-icon {
-          margin-right: 0.5rem;
-        }
-      }
-    }
-
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 1.5rem;
-      align-items: stretch;
-
-      .header-content .page-title {
-        font-size: 1.875rem;
-      }
-
-      .header-actions {
-        justify-content: stretch;
-        flex-wrap: wrap;
-        
-        button {
-          flex: 1;
-          min-width: 120px;
-        }
-      }
-    }
-  }
-
-  // Metrics Grid
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-
-    @media (max-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-
-    @media (max-width: 480px) {
-      grid-template-columns: 1fr;
-    }
-
-    .metric-card {
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      background: white;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-      }
-
-      mat-card-content {
-        padding: 1.5rem;
-      }
-
-      .metric-content {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-
-        .metric-icon {
-          width: 56px;
-          height: 56px;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-
-          mat-icon {
-            color: white;
-            font-size: 1.75rem;
-            width: 1.75rem;
-            height: 1.75rem;
-          }
-        }
-
-        .metric-info {
-          min-width: 0;
-
-          .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1.2;
-            margin-bottom: 0.25rem;
-          }
-
-          .metric-label {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-          }
-        }
-      }
-
-      &.primary .metric-icon {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      }
-
-      &.success .metric-icon {
-        background: linear-gradient(135deg, #10b981, #059669);
-      }
-
-      &.info .metric-icon {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-      }
-
-      &.warning .metric-icon {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-      }
-
-      @media (max-width: 480px) {
-        .metric-content {
-          gap: 0.75rem;
-
-          .metric-icon {
-            width: 48px;
-            height: 48px;
-
-            mat-icon {
-              font-size: 1.5rem;
-              width: 1.5rem;
-              height: 1.5rem;
-            }
-          }
-
-          .metric-info .metric-value {
-            font-size: 1.5rem;
-          }
-        }
-      }
-    }
-  }
-
-  // Department Performance Card
-  .department-performance-card {
-    margin-bottom: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--border-color);
-    background: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
-    }
-
-    mat-card-header {
-      background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      mat-card-title {
-        color: var(--primary-color);
-        font-weight: 600;
-        font-size: 1.25rem;
-        margin: 0;
-      }
-
-      .card-actions button {
-        border: 2px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        transition: all 0.3s ease;
-
-        &:hover {
-          border-color: var(--primary-color);
-          color: var(--primary-color);
-        }
-      }
-    }
-
-    mat-card-content {
-      padding: 0;
-    }
-
-    .department-list {
-      .department-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-light);
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: #fafbfc;
-        }
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        .department-info {
-          .department-name {
-            font-weight: 600;
-            font-size: 1.125rem;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-          }
-
-          .department-stats {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-          }
-        }
-
-        .performance-metrics {
-          display: flex;
-          align-items: center;
-          gap: 2rem;
-
-          .rating-display {
-            text-align: center;
-
-            .rating-value {
-              font-size: 1.5rem;
-              font-weight: 700;
-              color: var(--primary-color);
-              margin-bottom: 0.25rem;
-            }
-
-            .rating-stars {
-              display: flex;
-              gap: 0.125rem;
-
-              mat-icon {
-                font-size: 1rem;
-                width: 1rem;
-                height: 1rem;
-                color: #e5e7eb;
-                transition: color 0.3s ease;
-
-                &.filled {
-                  color: #fbbf24;
-                }
-              }
-            }
-          }
-
-          .completion-progress {
-            min-width: 150px;
-
-            .progress-label {
-              font-size: 0.875rem;
-              color: var(--text-secondary);
-              margin-bottom: 0.5rem;
-              text-align: center;
-            }
-
-            mat-progress-bar {
-              height: 8px;
-              border-radius: 4px;
-
-              ::ng-deep .mdc-linear-progress__bar-inner {
-                border-radius: 4px;
-              }
-            }
-          }
-        }
-
-        @media (max-width: 768px) {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 1rem;
-
-          .performance-metrics {
-            justify-content: space-between;
-            gap: 1rem;
-
-            .completion-progress {
-              min-width: 120px;
-            }
-          }
-        }
-      }
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem 2rem;
-      color: var(--text-secondary);
-
-      mat-icon {
-        font-size: 4rem;
-        width: 4rem;
-        height: 4rem;
-        color: var(--text-light);
-        margin-bottom: 1rem;
-      }
-
-      h3 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        margin: 0 0 0.5rem 0;
-      }
-
-      p {
-        margin: 0;
-        color: var(--text-light);
-      }
-    }
-  }
-
-  // Dashboard Row
-  .dashboard-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    // Recent Appraisals Card
-    .recent-appraisals-card,
-    .skill-gaps-card {
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      border: 1px solid var(--border-color);
-      background: white;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-      &:hover {
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        transform: translateY(-2px);
-      }
-
-      mat-card-header {
-        background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        mat-card-title {
-          color: var(--primary-color);
-          font-weight: 600;
-          font-size: 1.125rem;
-          margin: 0;
-        }
-
-        .card-actions button {
-          border: 2px solid var(--border-color);
-          border-radius: 8px;
-          padding: 0.5rem 1rem;
-          font-weight: 600;
-          color: var(--text-primary);
-          transition: all 0.3s ease;
-
-          &:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-          }
-        }
-      }
-
-      mat-card-content {
-        padding: 0;
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 3rem 2rem;
-        color: var(--text-secondary);
-
-        mat-icon {
-          font-size: 3rem;
-          width: 3rem;
-          height: 3rem;
-          color: var(--text-light);
-          margin-bottom: 1rem;
-        }
-
-        h3 {
-          font-size: 1.125rem;
-          font-weight: 600;
-          color: var(--text-secondary);
-          margin: 0 0 0.5rem 0;
-        }
-
-        p {
-          margin: 0;
-          color: var(--text-light);
-        }
-      }
-    }
-
-    // Appraisals List
-    .appraisals-list {
-      .appraisal-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-light);
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: #fafbfc;
-        }
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        .employee-info {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          flex: 1;
-          min-width: 0;
-
-          .employee-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-
-            mat-icon {
-              color: white;
-              font-size: 1.125rem;
-            }
-          }
-
-          .employee-details {
-            min-width: 0;
-
-            .employee-name {
-              font-weight: 600;
-              color: var(--text-primary);
-              font-size: 0.9rem;
-              margin-bottom: 0.25rem;
-            }
-
-            .appraisal-cycle {
-              font-size: 0.8rem;
-              color: var(--text-secondary);
-            }
-          }
-        }
-
-        .appraisal-status {
-          text-align: right;
-
-          .status-indicator {
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-            margin-bottom: 0.25rem;
-
-            &.draft {
-              background: #f3f4f6;
-              color: #6b7280;
-            }
-
-            &.in_progress {
-              background: #fef3c7;
-              color: #d97706;
-            }
-
-            &.submitted {
-              background: #dbeafe;
-              color: #2563eb;
-            }
-
-            &.reviewed {
-              background: #e0e7ff;
-              color: #6366f1;
-            }
-
-            &.completed {
-              background: #d1fae5;
-              color: #059669;
-            }
-          }
-
-          .rating {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-          }
-        }
-
-        @media (max-width: 768px) {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 1rem;
-
-          .employee-info {
-            justify-content: flex-start;
-          }
-
-          .appraisal-status {
-            text-align: left;
-          }
-        }
-      }
-    }
-
-    // Skill Gaps List
-    .skill-gaps-list {
-      .skill-gap-item {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border-light);
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: #fafbfc;
-        }
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        .skill-info {
-          margin-bottom: 1rem;
-
-          .skill-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
-          }
-
-          .employee-count {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-          }
-        }
-
-        .gap-visualization {
-          .gap-levels {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.75rem;
-
-            .current-level {
-              color: var(--text-secondary);
-            }
-
-            .target-level {
-              color: var(--primary-color);
-              font-weight: 600;
-            }
-          }
-
-          .gap-indicator {
-            .gap-bar {
-              height: 8px;
-              background: #e5e7eb;
-              border-radius: 4px;
-              position: relative;
-              overflow: hidden;
-
-              .current-progress {
-                height: 100%;
-                background: linear-gradient(135deg, #3b82f6, #2563eb);
-                border-radius: 4px;
-                transition: width 0.3s ease;
-              }
-
-              .target-marker {
-                position: absolute;
-                top: 0;
-                width: 2px;
-                height: 100%;
-                background: var(--primary-color);
-                border-radius: 1px;
-                
-                &::before {
-                  content: '';
-                  position: absolute;
-                  top: -4px;
-                  left: -2px;
-                  width: 6px;
-                  height: 4px;
-                  background: var(--primary-color);
-                  border-radius: 2px;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
 }
 
-// Animations
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-
-/* Container for the whole cycles tab */
-.cycles-section {
-  padding: 16px;
+/* =======================================================
+   Header
+========================================================= */
+.dashboard-header {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h3 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    button {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-  }
-
-  /* Table wrapper */
-  .cycles-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
-    thead {
-      background: #f5f5f5;
-
-      th {
-        text-align: left;
-        padding: 12px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
-        border-bottom: 1px solid #ddd;
-      }
-    }
-
-    tbody {
-      tr {
-        transition: background 0.2s ease;
-
-        &:hover {
-          background: #f9f9f9;
-        }
-
-        td {
-          padding: 12px 16px;
-          font-size: 14px;
-          color: #444;
-          border-bottom: 1px solid #eee;
-
-          &.cycle-name {
-            font-weight: 500;
-            color: #1976d2; /* Material primary color */
-          }
-
-          &.cycle-dates {
-            font-style: italic;
-            color: #666;
-          }
-
-          &.cycle-actions {
-            display: flex;
-            gap: 8px;
-
-            button {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              font-size: 13px;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #888;
-
-    mat-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-      color: #ccc;
-    }
-
-    h3 {
-      margin: 8px 0 4px;
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    p {
-      margin: 0 0 16px;
-      font-size: 14px;
-      color: #666;
-    }
-
-    button {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-  }
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  padding: 28px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+  gap: 32px;
 }
-/* 🔹 Container styling */
-.tab-content {
+
+.dashboard-header .page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.dashboard-header .page-title mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #667eea;
+}
+
+// /* =======================================================
+//    Cards
+// ========================================================= */
+// .shift-card {
+//   border-radius: 16px;
+//   background: white;
+//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+//   padding: 24px;
+//   transition: all 0.3s ease;
+// }
+
+// .shift-card:hover {
+//   transform: translateY(-2px);
+//   box-shadow: 0 6px 18px rgba(102, 126, 234, 0.15);
+// }
+
+// .shift-card mat-card-header {
+//   margin-bottom: 12px;
+// }
+
+// .shift-card mat-card-title {
+//   font-size: 18px;
+//   font-weight: 600;
+//   color: #1f2937;
+// }
+
+
+
+/* =======================================================
+   Performance Dashboard Cards - Exact Shift Dashboard Style
+======================================================= */
+
+
+/* =======================================================
+   Performance Card — Same as Shift Dashboard mat-card
+======================================================= */
+.performance-card {
+  padding: 28px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 24px;
+}
+
+.performance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.15);
+}
+
+/* Card Header */
+.performance-card mat-card-header {
+  margin-bottom: 16px;
+}
+
+.performance-card mat-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* Empty State */
+.performance-card .shift-empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #6b7280;
+}
+
+.performance-card .shift-empty-state mat-icon {
+  font-size: 48px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+}
+
+/* Performance Stats */
+.performance-card .performance-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.performance-card .stat-item {
+  flex: 1;
+  text-align: center;
+}
+
+.performance-card .stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.performance-card .stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Rating Display */
+.performance-card .rating-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.performance-card .current-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.performance-card .rating-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.performance-card .rating-stars mat-icon {
+  font-size: 24px;
+  color: #d1d5db; /* default grey */
+}
+
+.performance-card .rating-stars mat-icon.filled {
+  color: #facc15; /* yellow for filled stars */
+}
+
+/* Goal Summary Grid */
+.performance-card .goal-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.performance-card .goal-item {
   padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  text-align: center;
 }
 
-/* 🔹 Table styling */
-.appraisals-table {
+.performance-card .goal-item h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.performance-card .goal-item p {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Skills List */
+.performance-card .skills-list .skill-item {
+  margin-bottom: 16px;
+}
+
+.performance-card .skills-list .skill-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.performance-card mat-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+}
+
+
+
+
+
+/* =======================================================
+   Tables
+========================================================= */
+.shift-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  border-radius: 8px;
+  background: white;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.appraisals-table th, 
-.appraisals-table td {
-  padding: 12px 16px;
+.shift-table th {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e5e7eb;
+  padding: 16px 12px;
   text-align: left;
 }
 
-.appraisals-table thead {
-  background: #1976d2; /* Material blue */
-  color: #fff;
-}
-
-.appraisals-table tbody tr:nth-child(even) {
-  background: #f9f9f9;
-}
-
-.appraisals-table tbody tr:hover {
-  background: #e3f2fd; /* Light blue hover */
-  transition: background 0.2s ease-in-out;
-}
-
-/* 🔹 Empty state styling */
-.empty-state {
-  text-align: center;
-  margin: 40px 0;
-  color: #757575;
-}
-
-.empty-state mat-icon {
-  font-size: 48px;
-  color: #bdbdbd;
-  display: block;
-  margin: 0 auto 8px;
-}
-
-.empty-state h3 {
-  margin: 8px 0 4px;
-  font-weight: 500;
-  color: #424242;
-}
-
-.empty-state p {
+.shift-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #f3f4f6;
   font-size: 14px;
-  color: #616161;
+  color: #374151;
+}
+
+.shift-table tr:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+}
+
+/* =======================================================
+   Tabs
+========================================================= */
+.tab-content {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+/* =======================================================
+   Buttons
+========================================================= */
+button[mat-raised-button],
+button[mat-stroked-button] {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  padding: 0 22px !important;
+  height: 44px !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease;
+}
+
+button[mat-raised-button] mat-icon,
+button[mat-stroked-button] mat-icon {
+  margin-right: 6px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+button[color="primary"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+button[color="primary"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
+}
+
+button[color="warn"] {
+  color: #dc2626 !important;
+  border-color: #fee2e2 !important;
+}
+
+button[color="warn"]:hover {
+  background: #fee2e2 !important;
+}
+
+/* =======================================================
+   Empty State
+========================================================= */
+.shift-empty-state {
+  text-align: center;
+  padding: 80px 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 2px dashed #e5e7eb;
+}
+
+.shift-empty-state mat-icon {
+  font-size: 64px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.shift-empty-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.shift-empty-state p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.shift-empty-state button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 0 28px !important;
+  border-radius: 12px;
+  height: 48px;
+}
+
+.shift-empty-state button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* =======================================================
+   Form Fields (Dropdown, etc.)
+========================================================= */
+::ng-deep .performance-dashboard-container mat-form-field.mat-form-field-appearance-outline {
+  width: 240px;
+  margin-bottom: 16px;
+}
+
+::ng-deep .performance-dashboard-container .mat-mdc-text-field-wrapper {
+  background: white;
+  border-radius: 10px;
+  height: 48px;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .performance-dashboard-container .mat-mdc-form-field-flex {
+  padding: 0 14px !important;
+  align-items: center;
+  height: 48px;
+}
+
+::ng-deep .performance-dashboard-container .mat-mdc-form-field-infix {
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+::ng-deep .performance-dashboard-container mat-form-field:hover .mat-mdc-notch-piece {
+  border-color: #667eea !important;
+}
+
+::ng-deep .performance-dashboard-container mat-form-field.mat-focused .mat-mdc-text-field-wrapper {
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+::ng-deep .performance-dashboard-container mat-form-field.mat-focused .mat-mdc-notch-piece {
+  border-color: #667eea !important;
+}
+
+::ng-deep .performance-dashboard-container mat-form-field.mat-focused .mat-mdc-form-field-label {
+  color: #667eea !important;
+}
+
+/* =======================================================
+   Overview Grid
+========================================================= */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+  margin-bottom: 40px;
+}
+
+/* =======================================================
+   Rating Stars
+========================================================= */
+.rating-stars mat-icon {
+  color: #d1d5db;
+  transition: color 0.25s ease;
+}
+
+.rating-stars mat-icon.filled {
+  color: #fbbf24;
+}
+
+/* =======================================================
+   Stats
+========================================================= */
+.performance-stats .stat-item {
+  text-align: center;
+}
+
+.performance-stats .stat-label {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.performance-stats .stat-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* =======================================================
+   Progress Bars
+========================================================= */
+::ng-deep mat-progress-bar .mdc-linear-progress__bar-inner {
+  border-radius: 8px !important;
+}
+
+/* =======================================================
+   Responsive
+========================================================= */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  ::ng-deep .performance-dashboard-container mat-form-field.mat-form-field-appearance-outline {
+    width: 100%;
+  }
 }
