@@ -17,6 +17,8 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { PerformanceService } from '../../services/performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { MatMenuModule } from '@angular/material/menu';
+
 import { NotificationService } from '../../../../core/services/notification.service';
 import { 
   EmployeeAppraisal, 
@@ -38,6 +40,7 @@ import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-c
     MatFormFieldModule,
     MatSelectModule,
     MatCardModule,
+    MatMenuModule,
     MatButtonModule,
     MatIconModule,
     MatTableModule,
@@ -105,18 +108,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     const requests: any[] = [
-      this.performanceService.getMyAppraisals().pipe(
-        catchError((err) => {
-          console.error('getMyAppraisals failed:', err);
-          return of([]);
-        })
-      ),
-      // this.performanceService.getMyPerformanceMetrics().pipe(
-      //   catchError((err) => {
-      //     console.error('getMyPerformanceMetrics failed:', err);
-      //     return of(null);
-      //   })
-      // ),
+    
       this.performanceService.getMySkills().pipe(
         catchError((err) => {
           console.error('getMySkills failed:', err);
@@ -125,17 +117,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
       ),
     ];
 
-    // if (this.hasManagerRole()) {
-    //   requests.push(
-    //     this.performanceService.getTeamPerformanceSummary().pipe(
-    //       catchError((err) => {
-    //         console.error('getTeamPerformanceSummary failed:', err);
-    //         return of(null);
-    //       })
-    //     )
-    //   );
-    // }
-
+  
     requests.push(
       this.performanceService.getAppraisalCycles().pipe(
         catchError((err) => {
@@ -256,6 +238,16 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  editCycle(cycle: AppraisalCycle) {
+  console.log('Edit clicked for cycle:', cycle);
+  this.notificationService.showInfo('Edit cycle will be implemented.');
+}
+
+deleteCycle(cycle: AppraisalCycle) {
+  console.log('Delete clicked for cycle:', cycle);
+  this.notificationService.showInfo('Delete cycle will be implemented.');
+}
 
 
 

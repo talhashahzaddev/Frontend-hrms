@@ -1,120 +1,153 @@
-<!-- Create Goal Form (only for Manager / HR / Super Admin) -->
-<mat-card class="goal-card" *ngIf="hasManagerRole() || hasHRRole()">
-  <mat-card-title>Create New Goal</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="goalForm" (ngSubmit)="onSubmit()">
+<div class="appraisal-form-container">
+  <!-- Create Goal Form (only for Manager / HR / Super Admin) -->
+  <mat-card class="appraisal-card" *ngIf="hasManagerRole() || hasHRRole()">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>flag</mat-icon>
+        Create New Goal
+      </mat-card-title>
+    </mat-card-header>
 
-      <!-- Employee Selection -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Select Employee</mat-label>
-        <mat-select formControlName="employeeId" required>
-          <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-            {{ emp.fullName }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="goalForm.get('employeeId')?.touched && goalForm.get('employeeId')?.invalid">
-          Employee is required
-        </mat-error>
-      </mat-form-field>
+    <mat-card-content>
+      <form [formGroup]="goalForm" (ngSubmit)="onSubmit()" class="appraisal-form">
 
-      <!-- Title -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Title</mat-label>
-        <input matInput placeholder="Enter goal title" formControlName="title" />
-        <mat-error *ngIf="goalForm.get('title')?.touched && goalForm.get('title')?.invalid">
-          Title is required
-        </mat-error>
-      </mat-form-field>
+        <div class="form-section">
+          <div class="section-title">
+            <mat-icon>assignment</mat-icon>
+            Goal Details
+          </div>
 
-      <!-- Description -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput placeholder="Enter description" formControlName="description"></textarea>
-      </mat-form-field>
+          <div class="form-row">
+            <!-- Employee Selection -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Select Employee</mat-label>
+              <mat-select formControlName="employeeId" required>
+                <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                  {{ emp.fullName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="goalForm.get('employeeId')?.touched && goalForm.get('employeeId')?.invalid">
+                Employee is required
+              </mat-error>
+            </mat-form-field>
 
-      <!-- Start Date -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="Choose a start date" />
-        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-        <mat-datepicker #startPicker></mat-datepicker>
-      </mat-form-field>
+            <!-- Title -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Title</mat-label>
+              <input matInput placeholder="Enter goal title" formControlName="title" />
+              <mat-error *ngIf="goalForm.get('title')?.touched && goalForm.get('title')?.invalid">
+                Title is required
+              </mat-error>
+            </mat-form-field>
 
-      <!-- End Date -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" formControlName="endDate" placeholder="Choose an end date" />
-        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-        <mat-datepicker #endPicker></mat-datepicker>
-      </mat-form-field>
+            <!-- Description -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput placeholder="Enter description" formControlName="description"></textarea>
+            </mat-form-field>
 
-      <div class="button-row">
-        <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting">
-          {{ isSubmitting ? 'Creating...' : 'Create Goal' }}
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+            <!-- Start Date -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate" placeholder="Choose a start date" />
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+
+            <!-- End Date -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>End Date</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endDate" placeholder="Choose an end date" />
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting">
+            <mat-icon>save</mat-icon>
+            {{ isSubmitting ? 'Creating...' : 'Create Goal' }}
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+
+
+
 
 <!-- All Goals Table -->
-<mat-card class="goal-card" style="margin-top: 20px;">
-  <mat-card-title>All Goals</mat-card-title>
-  <mat-card-content>
-    <table mat-table [dataSource]="allGoals" class="mat-elevation-z8 full-width">
+<mat-card class="goal-card">
+  <mat-card-title class="goal-card-title">All Goals</mat-card-title>
+  <mat-card-content class="goal-card-content">
+    <div class="goal-table-container">
+      <table mat-table [dataSource]="allGoals" class="goal-table mat-elevation-z8 full-width">
 
-      <!-- Employee Column -->
-      <ng-container matColumnDef="employee">
-        <th mat-header-cell *matHeaderCellDef> Employee </th>
-        <td mat-cell *matCellDef="let goal"> {{ goal.employee_name }} </td>
-      </ng-container>
+        <!-- Employee Column -->
+        <ng-container matColumnDef="employee">
+          <th mat-header-cell *matHeaderCellDef> Employee </th>
+          <td mat-cell *matCellDef="let goal"> {{ goal.employee_name }} </td>
+        </ng-container>
 
-      <!-- Title Column -->
-      <ng-container matColumnDef="title">
-        <th mat-header-cell *matHeaderCellDef> Title </th>
-        <td mat-cell *matCellDef="let goal"> {{ goal.title }} </td>
-      </ng-container>
+        <!-- Title Column -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef> Title </th>
+          <td mat-cell *matCellDef="let goal"> {{ goal.title }} </td>
+        </ng-container>
 
-      <!-- Description Column -->
-      <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef> Description </th>
-        <td mat-cell *matCellDef="let goal"> {{ goal.description }} </td>
-      </ng-container>
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef> Description </th>
+          <td mat-cell *matCellDef="let goal"> {{ goal.description }} </td>
+        </ng-container>
 
-      <!-- Start Date Column -->
-      <ng-container matColumnDef="startDate">
-        <th mat-header-cell *matHeaderCellDef> Start Date </th>
-        <td mat-cell *matCellDef="let goal"> {{ goal.startDate | date:'mediumDate' }} </td>
-      </ng-container>
+        <!-- Start Date Column -->
+        <ng-container matColumnDef="startDate">
+          <th mat-header-cell *matHeaderCellDef> Start Date </th>
+          <td mat-cell *matCellDef="let goal"> {{ goal.startDate | date:'mediumDate' }} </td>
+        </ng-container>
 
-      <!-- End Date Column -->
-      <ng-container matColumnDef="endDate">
-        <th mat-header-cell *matHeaderCellDef> End Date </th>
-        <td mat-cell *matCellDef="let goal"> {{ goal.endDate | date:'mediumDate' }} </td>
-      </ng-container>
+        <!-- End Date Column -->
+        <ng-container matColumnDef="endDate">
+          <th mat-header-cell *matHeaderCellDef> End Date </th>
+          <td mat-cell *matCellDef="let goal"> {{ goal.endDate | date:'mediumDate' }} </td>
+        </ng-container>
 
-      <!-- Status Column -->
-      <ng-container matColumnDef="status">
-  <th mat-header-cell *matHeaderCellDef> Status </th>
-  <td mat-cell *matCellDef="let goal">
-    {{ goal.status }}
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef> Status </th>
+          <td mat-cell *matCellDef="let goal">
+            {{ goal.status }}
 
-    <!-- Buttons for employee to click -->
-    <button mat-mini-button color="primary" (click)="onSubmitStatus(goal, 'IN_PROGRESS')">
-      In Progress
-    </button>
-    <button mat-mini-button color="accent" (click)="onSubmitStatus(goal, 'COMPLETED')"
-                                         [disabled]="goal.status === 'COMPLETED'">
-      Completed
-    </button>
-  </td>
-</ng-container>
+            <div class="goal-status-buttons">
+              <button mat-mini-button color="primary" *ngIf="!hasHRRole()" 
+                      (click)="onSubmitStatus(goal, 'IN_PROGRESS')">
+                In Progress
+              </button>
+              <button mat-mini-button color="accent" *ngIf="!hasHRRole()" 
+                      [disabled]="goal.status === 'COMPLETED'" 
+                      (click)="onSubmitStatus(goal, 'COMPLETED')">
+                Completed
+              </button>
+            </div>
+          </td>
+        </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="['employee','title','description','startDate','endDate','status']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['employee','title','description','startDate','endDate','status']"></tr>
-    </table>
+        <tr mat-header-row *matHeaderRowDef="['employee','title','description','startDate','endDate','status']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['employee','title','description','startDate','endDate','status']"></tr>
+      </table>
 
-    <p *ngIf="!allGoals?.length && !isLoadingGoals" style="text-align:center; margin-top: 10px;">No goals found.</p>
-    <p *ngIf="isLoadingGoals" style="text-align:center; margin-top: 10px;">Loading goals...</p>
+      <p *ngIf="!allGoals?.length && !isLoadingGoals" class="goal-empty-state">
+        No goals found.
+      </p>
+      <p *ngIf="isLoadingGoals" class="goal-empty-state">
+        Loading goals...
+      </p>
+    </div>
   </mat-card-content>
 </mat-card>
