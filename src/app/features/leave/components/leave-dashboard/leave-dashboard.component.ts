@@ -274,9 +274,18 @@ import { User } from '../../../../core/models/auth.models';
                 <div *ngFor="let request of pendingApprovals" class="approval-card">
                   <div class="approval-header">
                     <div class="employee-info">
-                      <div class="employee-avatar">
-                        {{ getInitials(request.employeeName) }}
-                      </div>
+                    
+<div class="employee-avatar">
+  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+    <img [src]="request.profilePreviewUrl" [alt]="request.employeeName" />
+  </ng-container>
+
+  <ng-template #initialsFallback>
+    {{ getInitials(request.employeeName) }}
+  </ng-template>
+</div>
+
+
                       <div class="employee-details">
                         <h4>{{ request.employeeName }}</h4>
                         <p>{{ request.leaveTypeName }}</p>
@@ -338,6 +347,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   leaveTypes: LeaveType[] = [];
   myLeaveRequests: LeaveRequest[] = [];
   pendingApprovals: LeaveRequest[] = [];
+profilePreviewUrl:string|null=null;
+private backendBaseUrl = 'https://localhost:60485';
 
   isLoading = false;
   selectedTab = 0;
@@ -396,7 +407,23 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
         this.leaveBalances = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
         this.leaveTypes = data.leaveTypes || [];
         this.myLeaveRequests = Array.isArray(data.myRequests) ? data.myRequests : [];
-        this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+        // this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+
+         // ✅ Handle pending approvals with profilePreviewUrl
+        this.pendingApprovals = Array.isArray(data.pendingApprovals)
+          ? data.pendingApprovals.map((employee: any) => {
+              if (employee.profilePictureUrl) {
+                employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+                  ? employee.profilePictureUrl
+                  : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+              } else {
+                employee.profilePreviewUrl = null;
+              }
+              return employee;
+            })
+          : [];
+        
+
         this.pendingCount = this.pendingApprovals.length;
 
         this.isLoading = false;

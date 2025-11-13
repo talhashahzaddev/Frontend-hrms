@@ -256,63 +256,46 @@ getInitials(name: string): string {
     .toUpperCase();
 }
 
+onDeleteShift(shiftId: string): void {
+  if (!confirm('Are you sure you want to delete this shift?')) return;
+
+  this.attendanceService.deleteShift(shiftId).subscribe({
+    next: (res: any) => {
+      console.log('Shift deleted:', res);
+      alert('✅ Shift deleted successfully');
+      this.loadAllShifts(); // refresh table
+    },
+    error: (err) => {
+      console.error(err);
+      alert('❌ Failed to delete shift');
+    }
+  });
+}
+
 onEditShift(shift: ShiftDto): void {
-  console.log('Edit clicked:', shift);
-  // You can open a dialog or navigate to edit page here
+  const dialogRef = this.dialog.open(CreateShiftComponent, {
+    width: '600px',
+    maxWidth: '95vw',
+    disableClose: true,
+    autoFocus: false,
+    panelClass: 'custom-dialog-container',
+    data: {        // pass full shift data to the dialog
+      shiftId: shift.shiftId,
+      shiftName: shift.shiftName,
+      startTime: shift.startTime,  // must be "HH:mm:ss" or "HH:mm"
+      endTime: shift.endTime,
+      breakDuration: shift.breakDuration,
+      daysofWeek: shift.daysOfWeek,
+      timezone: shift.timezone
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === 'updated') {
+      this.loadAllShifts();  // refresh table after update
+    }
+  });
 }
-
-onDeleteShift(shift: ShiftDto): void {
-  console.log('Delete clicked:', shift);
-  // You can call your delete service here
-  // Example:
-  // this.attendanceService.deleteShift(shift.shiftId).subscribe(...)
-}
-
-
-
-// onDeleteShift(shiftId: string): void {
-//   if (!confirm('Are you sure you want to delete this shift?')) return;
-
-//   this.attendanceService.deleteShift(shiftId).subscribe({
-//     next: (res: any) => {
-//       console.log('Shift deleted:', res);
-//       alert('✅ Shift deleted successfully');
-//       this.loadAllShifts(); // refresh table
-//     },
-//     error: (err) => {
-//       console.error(err);
-//       alert('❌ Failed to delete shift');
-//     }
-//   });
-// }
-
-
-// onEditShift(shift: any): void {
-//   const updatedShift: UpdateShiftDto = {
-//     shiftId: shift.shiftId,
-//     shiftName: prompt('Enter new shift name:', shift.shiftName) || shift.shiftName,
-//     startTime: shift.startTime,
-//     endTime: shift.endTime,
-//     breakDuration: shift.breakDuration,
-//     daysofWeek: shift.daysofWeek,
-//     timezone: shift.timezone
-//   };
-
-//   this.attendanceService.updateShift(shift.shiftId, updatedShift).subscribe({
-//     next: (res: any) => {
-//       console.log('Shift updated:', res);
-//       alert('✅ Shift updated successfully');
-//       this.loadAllShifts();
-//     },
-//     error: (err) => {
-//       console.error(err);
-//       alert('❌ Failed to update shift');
-//     }
-//   });
-// }
-
-
-
 
 
 

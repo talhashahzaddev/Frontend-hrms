@@ -16,6 +16,7 @@ import {
   DailyAttendanceStats,
   Shift,
   ShiftDto,
+  UpdateShiftDto,
   ShiftSwap,
   EmployeeShift,
   PendingShiftSwap,
@@ -320,6 +321,17 @@ getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
   createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap`, shiftSwap);
   }
+
+      /** ✅ Update an existing shift */
+updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
+  return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
+}
+
+
+deleteShift(shiftId:string):Observable<any>{
+  return this.http.delete(`${this.apiUrl}/shift/${shiftId}`);
+}
+
 
   
 getEmployeeShiftSwaps(employeeId: string): Observable<PendingShiftSwap[]> {

@@ -1,9 +1,9 @@
 
-<!-- Create Shift Dialog -->
+<!-- Create/Edit Shift Dialog -->
 <div class="dialog-header">
   <h2>
     <mat-icon>schedule</mat-icon>
-    Create Shift
+    {{ isEditMode ? 'Edit Shift' : 'Create Shift' }}
   </h2>
   <button mat-icon-button mat-dialog-close class="close-button">
     <mat-icon>close</mat-icon>
@@ -22,21 +22,17 @@
     </mat-form-field>
 
     <!-- Start & End Time -->
+    <div class="date-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Start Time</mat-label>
+        <input matInput type="time" formControlName="startTime" />
+      </mat-form-field>
 
-<div class="date-row">
-  <mat-form-field appearance="outline" class="date-field">
-    <mat-label>Start Time</mat-label>
-    <input matInput type="time" formControlName="startTime" />
-  </mat-form-field>
-
-  <mat-form-field appearance="outline" class="date-field">
-    <mat-label>End Time</mat-label>
-    <input matInput type="time" formControlName="endTime" />
-  </mat-form-field>
-</div>
-
-
-
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>End Time</mat-label>
+        <input matInput type="time" formControlName="endTime" />
+      </mat-form-field>
+    </div>
 
     <!-- Break Duration & Time Zone -->
     <div class="date-row">
@@ -67,6 +63,7 @@
   </form>
 </div>
 
+<!-- Dialog Actions -->
 <div class="dialog-actions">
   <button mat-stroked-button mat-dialog-close>Cancel</button>
   <button
@@ -77,6 +74,6 @@
     (click)="onSubmit()"
   >
     <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
-    <span *ngIf="!isSubmitting">Create Shift</span>
+    <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Shift' : 'Create Shift' }}</span>
   </button>
 </div>
