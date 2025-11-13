@@ -1,0 +1,176 @@
+<div class="kra-management-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>list_alt</mat-icon>
+      KRA Management
+    </h1>
+    <div class="header-actions" *ngIf="hasHRRole()">
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        New KRA
+      </button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <mat-card class="search-card">
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search KRAs</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Search by title...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- KRAs Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container" *ngIf="!isLoading">
+        <table mat-table [dataSource]="kras" class="kra-table">
+          
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let kra">
+              <div class="kra-info">
+                <strong>{{ kra.title }}</strong>
+                <small *ngIf="kra.description">{{ kra.description }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="position">
+            <th mat-header-cell *matHeaderCellDef>Position</th>
+            <td mat-cell *matCellDef="let kra">
+              {{ getPositionName(kra.positionId) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="weight">
+            <th mat-header-cell *matHeaderCellDef>Weight (%)</th>
+            <td mat-cell *matCellDef="let kra">
+              {{ kra.weight }}%
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let kra">
+              <mat-chip [color]="kra.isActive ? 'primary' : undefined">
+                {{ kra.isActive ? 'Active' : 'Inactive' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let kra">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openEditDialog(kra)" *ngIf="hasHRRole()">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="toggleKRAStatus(kra)" *ngIf="hasHRRole()">
+                  <mat-icon>{{ kra.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                  <span>{{ kra.isActive ? 'Deactivate' : 'Activate' }}</span>
+                </button>
+                <button mat-menu-item (click)="deleteKRA(kra)" *ngIf="hasHRRole()">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data">
+                <mat-icon>inbox</mat-icon>
+                <p>No KRAs found</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <mat-paginator
+          [length]="totalItems"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="[5, 10, 20, 50]"
+          (page)="onPageChange($event)">
+        </mat-paginator>
+      </div>
+
+      <div class="loading-spinner" *ngIf="isLoading">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- KRA Form Dialog -->
+  <div class="kra-form-overlay" *ngIf="showKRAForm">
+    <mat-card class="kra-form-card">
+      <mat-card-header>
+        <mat-card-title>{{ isEditMode ? 'Edit KRA' : 'Create KRA' }}</mat-card-title>
+        <button mat-icon-button (click)="closeForm()" class="close-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="kraForm" (ngSubmit)="saveKRA()">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Position</mat-label>
+            <mat-select formControlName="positionId" [disabled]="isEditMode">
+              <mat-option *ngFor="let position of positions" [value]="position.positionId">
+                {{ position.positionTitle }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="kraForm.get('positionId')?.hasError('required')">Required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>KRA Title</mat-label>
+            <input matInput formControlName="title" placeholder="Enter KRA title">
+            <mat-error *ngIf="kraForm.get('title')?.hasError('required')">Required</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3" placeholder="Enter description"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Weight Percentage</mat-label>
+            <input matInput type="number" formControlName="weight" placeholder="0-100">
+            <mat-error *ngIf="kraForm.get('weight')?.hasError('required')">Required</mat-error>
+            <mat-error *ngIf="kraForm.get('weight')?.hasError('min') || kraForm.get('weight')?.hasError('max')">
+              Weight must be between 0 and 100
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Measurement Criteria</mat-label>
+            <textarea matInput formControlName="measurementCriteria" rows="3" placeholder="Enter measurement criteria"></textarea>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+
+          <div class="form-actions">
+            <button mat-stroked-button type="button" (click)="closeForm()">Cancel</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="isLoading || kraForm.invalid">
+              {{ isLoading ? 'Saving...' : (isEditMode ? 'Update' : 'Create') }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+

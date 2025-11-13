@@ -122,7 +122,7 @@ public appraisalCycles: AppraisalCycle[] = [];
   }
 
   private loadAppraisalCycles(): void {
-    this.performanceService.getAppraisalCycles(1, 50)
+    this.performanceService.getAppraisalCycles()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

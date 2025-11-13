@@ -1,0 +1,149 @@
+.manager-review-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
+.loading-container,
+.no-cycle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  h2 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.selection-card {
+  margin-bottom: 24px;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+.review-card {
+  .section {
+    margin-bottom: 32px;
+
+    h3 {
+      margin: 0 0 16px;
+      font-size: 20px;
+    }
+
+    .section-description {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 16px;
+    }
+
+    .rating-field {
+      width: 100%;
+      margin-bottom: 16px;
+
+      .rating-value {
+        margin-left: 16px;
+        font-size: 18px;
+        font-weight: 500;
+        min-width: 30px;
+      }
+    }
+
+    .calculated-rating {
+      margin-top: 8px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 4px;
+
+      strong {
+        font-size: 18px;
+        color: primary;
+      }
+
+      small {
+        display: block;
+        color: rgba(0, 0, 0, 0.6);
+        margin-top: 4px;
+      }
+    }
+
+    .rating-panel {
+      margin-bottom: 16px;
+
+      .rating-fields {
+        padding: 16px 0;
+
+        .employee-comment {
+          margin-top: 16px;
+          padding: 12px;
+          background: rgba(0, 0, 0, 0.02);
+          border-radius: 4px;
+
+          strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+          }
+
+          p {
+            margin: 0;
+            color: rgba(0, 0, 0, 0.7);
+          }
+        }
+      }
+    }
+
+    .full-width {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+

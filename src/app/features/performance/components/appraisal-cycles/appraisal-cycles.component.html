@@ -1,0 +1,134 @@
+<div class="appraisal-cycles-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>assessment</mat-icon>
+      Appraisal Cycles
+    </h1>
+    <div class="header-actions" *ngIf="hasHRRole()">
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        New Appraisal Cycle
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput formControlName="search" placeholder="Search by cycle name...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">All Statuses</mat-option>
+            <mat-option value="active">Active</mat-option>
+            <mat-option value="completed">Completed</mat-option>
+            <mat-option value="cancelled">Cancelled</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply Filters
+          </button>
+          <button mat-stroked-button (click)="clearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Appraisal Cycles Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container" *ngIf="!isLoading">
+        <table mat-table [dataSource]="appraisalCycles" class="appraisal-cycles-table">
+          
+          <ng-container matColumnDef="cycleName">
+            <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+            <td mat-cell *matCellDef="let cycle">
+              <div class="cycle-info">
+                <strong>{{ cycle.cycleName }}</strong>
+                <small *ngIf="cycle.description">{{ cycle.description }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="dates">
+            <th mat-header-cell *matHeaderCellDef>Period Dates</th>
+            <td mat-cell *matCellDef="let cycle">
+              <div class="date-range">
+                <div>{{ cycle.startDate | date:'mediumDate' }}</div>
+                <mat-icon class="date-separator">arrow_forward</mat-icon>
+                <div>{{ cycle.endDate | date:'mediumDate' }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let cycle">
+              <mat-chip [color]="getStatusColor(cycle.status)">
+                {{ cycle.status | titlecase }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="appraisals">
+            <th mat-header-cell *matHeaderCellDef>Appraisals</th>
+            <td mat-cell *matCellDef="let cycle">
+              <div class="appraisal-stats">
+                <span>{{ cycle.completedAppraisals || 0 }} / {{ cycle.totalAppraisals || 0 }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let cycle">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="openEditDialog(cycle)" *ngIf="hasHRRole()">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="deleteCycle(cycle)" *ngIf="hasHRRole()">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="no-data">
+                <mat-icon>inbox</mat-icon>
+                <p>No appraisal cycles found</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="loading-spinner" *ngIf="isLoading">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

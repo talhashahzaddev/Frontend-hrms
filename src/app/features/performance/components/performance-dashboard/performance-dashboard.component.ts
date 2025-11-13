@@ -240,14 +240,33 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   }
 
   editCycle(cycle: AppraisalCycle) {
-  console.log('Edit clicked for cycle:', cycle);
-  this.notificationService.showInfo('Edit cycle will be implemented.');
-}
+    this.router.navigate(['/performance/cycles'], { 
+      queryParams: { edit: cycle.cycleId } 
+    });
+  }
 
-deleteCycle(cycle: AppraisalCycle) {
-  console.log('Delete clicked for cycle:', cycle);
-  this.notificationService.showInfo('Delete cycle will be implemented.');
-}
+  deleteCycle(cycle: AppraisalCycle) {
+    if (confirm(`Are you sure you want to delete "${cycle.cycleName}"? This action cannot be undone.`)) {
+      this.performanceService.deleteAppraisalCycle(cycle.cycleId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.notificationService.showSuccess('Appraisal cycle deleted successfully');
+              this.loadInitialData();
+            } else {
+              this.notificationService.showError(response.message || 'Failed to delete cycle');
+            }
+            this.cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error deleting cycle:', error);
+            this.notificationService.showError('Failed to delete appraisal cycle');
+            this.cdr.markForCheck();
+          }
+        });
+    }
+  }
 
 
 

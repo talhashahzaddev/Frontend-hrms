@@ -24,10 +24,11 @@ export interface EmployeeSkill {
 
 export interface KRA {
   kraId: string;
-  positionId: string;
-  kraTitle: string;
+  organizationId?: string;
+  positionId?: string;
+  title: string;
   description?: string;
-  weightPercentage: number;
+  weight: number;
   measurementCriteria?: string;
   isActive: boolean;
   createdAt: string;
@@ -101,34 +102,23 @@ export enum AppraisalStatus {
 
 export interface Goal {
   goalId: string;
+  employeeId: string;
+  employee_name: string;
   title: string;
   description?: string;
-  targetDate: string;
+  startDate: string;
+  endDate: string;
   status: GoalStatus;
-  achievementPercentage: number;
-  comments?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateGoalRequest {
   employeeId: string;
   title: string;
   description?: string;
-  startDate?: string;
-  endDate?: string;
-  // status?: string;
-}
-
-export interface Goal {
-  goalId: string;
-  employeeId: string;
-   employee_name:string,
-  title: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  status: GoalStatus;
-  createdAt: string;
-  updatedAt: string;
+  startDate: string;
+  endDate: string;
 }
 export enum GoalStatus {
   NOT_STARTED = 'not_started',
@@ -221,16 +211,17 @@ export interface EmployeePerformanceDetail {
 
 export interface CreateKRARequest {
   positionId: string;
-  kraTitle: string;
+  title: string;
   description?: string;
-  weightPercentage: number;
+  weight: number;
   measurementCriteria?: string;
+  isActive?: boolean;
 }
 
 export interface UpdateKRARequest {
-  kraTitle?: string;
+  title?: string;
   description?: string;
-  weightPercentage?: number;
+  weight?: number;
   measurementCriteria?: string;
   isActive?: boolean;
 }
@@ -262,21 +253,15 @@ export interface CreateSkillSetRequest {
   category: string;
   description?: string;
   skillLevelScale: number[];
-  isActive: boolean;
+  isActive?: boolean;
 }
+
 export interface PerformanceReportFilter {
   appraisalCycleId?: string;
   department?: string;
   startDate?: string;
   endDate?: string;
   rating?: number;
-}
-
-export interface CreateSkillSetRequest {
-  skillName: string;
-  category: string;
-  description?: string;
-  skillLevelScale: number[];
 }
 
 export interface UpdateSkillSetRequest {
@@ -394,4 +379,83 @@ export interface PerformanceMetrics {
   totalGoals: number;
   lastAppraisalDate?: string;
   nextAppraisalDate?: string;
+}
+
+// Self-Assessment Interfaces
+export interface SelfAssessment {
+  selfAssessmentId: string;
+  employeeId: string;
+  cycleId: string;
+  kraId?: string;
+  skillId?: string;
+  rating: number;
+  comments?: string;
+  evidenceUrls?: string[];
+  status: 'draft' | 'submitted';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSelfAssessmentRequest {
+  employeeId: string;
+  cycleId: string;
+  kraId?: string;
+  skillId?: string;
+  rating: number;
+  comments?: string;
+  evidenceUrls?: string[];
+  status?: 'draft' | 'submitted';
+}
+
+// Manager Review Interfaces
+export interface ManagerReview {
+  reviewId: string;
+  managerId: string;
+  employeeId: string;
+  cycleId: string;
+  overallRating: number;
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ManagerReviewRequest {
+  managerId: string;
+  employeeId: string;
+  cycleId: string;
+  overallRating: number;
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
+  kraRatings?: { [kraId: string]: number };
+  skillRatings?: { [skillId: string]: number };
+}
+
+// Appraisal Consolidation
+export interface ConsolidateAppraisalRequest {
+  employeeId: string;
+  cycleId: string;
+  reviewerId?: string;
+}
+
+// Employee Performance History
+export interface EmployeePerformanceHistory {
+  employeeId: string;
+  employeeName: string;
+  appraisals: EmployeeAppraisal[];
+  averageRating?: number;
+  totalAppraisals: number;
+  completedAppraisals: number;
+  skillGaps: SkillGapAnalysis[];
+}
+
+export interface SkillGapAnalysis {
+  skillId: string;
+  skillName: string;
+  requiredLevel: number;
+  currentLevel: number;
+  gap: number;
 }

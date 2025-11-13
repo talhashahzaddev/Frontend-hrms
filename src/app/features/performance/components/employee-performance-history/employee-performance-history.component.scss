@@ -1,0 +1,163 @@
+.employee-performance-history-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
+.loading-container,
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  h2 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+
+  .summary-card {
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: rgba(0, 0, 0, 0.5);
+      }
+
+      .summary-value {
+        font-size: 32px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      .summary-label {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+.history-tabs {
+  .tab-content {
+    padding: 24px 0;
+
+    .appraisals-table {
+      width: 100%;
+
+      .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        mat-icon {
+          color: #ffc107;
+        }
+      }
+    }
+
+    .skill-gaps-list {
+      .gap-panel {
+        margin-bottom: 16px;
+
+        .gap-details {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 16px 0;
+
+          .gap-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+            &:last-child {
+              border-bottom: none;
+            }
+          }
+        }
+      }
+
+      .gap-severity-high {
+        background-color: #f44336;
+        color: white;
+      }
+
+      .gap-severity-medium {
+        background-color: #ff9800;
+        color: white;
+      }
+
+      .gap-severity-low {
+        background-color: #4caf50;
+        color: white;
+      }
+    }
+
+    .no-gaps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px;
+      color: rgba(0, 0, 0, 0.5);
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        color: #4caf50;
+      }
+    }
+  }
+}
+
