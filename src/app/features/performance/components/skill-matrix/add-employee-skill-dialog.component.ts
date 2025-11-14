@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CreateEmployeeSkillRequest } from '../../../../core/models/performance.models';
 import { SkillSet } from '../../../../core/models/performance.models';
 import { Employee } from '../../../../core/models/employee.models';
+import { AuthService } from '../../../../core/services/auth.service';
 
 export interface AddEmployeeSkillDialogData {
   employees: Employee[];
@@ -460,6 +461,7 @@ export class AddEmployeeSkillDialogComponent {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AddEmployeeSkillDialogComponent>,
+    private authService: AuthService,
     @Inject(MAT_DIALOG_DATA) public data: AddEmployeeSkillDialogData
   ) {
     this.showEmployeeField = !data.defaultEmployeeId;
@@ -475,10 +477,25 @@ export class AddEmployeeSkillDialogComponent {
   onSubmit(): void {
     if (this.employeeSkillForm.valid) {
       const formValue = this.employeeSkillForm.value;
+      const currentUser = this.authService.getCurrentUserValue();
+      const currentUserId = currentUser?.userId;
+      
+      // If self-assessment (employee adding their own skill), assessedBy = employeeId
+      // If HR/Manager assessing someone else, assessedBy = current logged-in user ID
+      // If currentUserId is not available, backend will handle it from the token
+      let assessedById: string | undefined;
+      if (currentUserId) {
+        assessedById = formValue.employeeId === currentUserId 
+          ? formValue.employeeId  // Self-assessment: assessed by themselves
+          : currentUserId;        // Assessed by the current logged-in user (HR/Manager)
+      }
+      // If assessedById is still undefined, backend controller will set it from the token
+      
       const result: CreateEmployeeSkillRequest = {
         employeeId: formValue.employeeId,
         skillId: formValue.skillId,
         proficiencyLevel: formValue.proficiencyLevel,
+        assessedBy: assessedById,
         notes: formValue.notes || undefined
       };
       this.dialogRef.close(result);
