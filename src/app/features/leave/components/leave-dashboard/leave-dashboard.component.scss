@@ -826,6 +826,15 @@
         flex-shrink: 0;
         box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
       }
+      .employee-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;     /* keeps full image visible without zoom/cropping */
+  border-radius: 12px;     /* matches your avatar rounding */
+  display: block;
+  background-color: #cfd8dc; /* optional: fill empty space if aspect ratio differs */
+}
+
 
       .employee-details {
         h4 {

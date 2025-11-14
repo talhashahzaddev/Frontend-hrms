@@ -112,11 +112,33 @@ import {
         <mat-card-content>
           <div class="pending-list">
             <div *ngFor="let request of pendingApprovals" class="pending-item">
+
               <div class="item-header">
                 <div class="employee-info">
-                  <div class="employee-avatar">
-                    {{ getInitials(request.employeeName) }}
-                  </div>
+                  
+
+<div class="employee-avatar">
+  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+    <img
+      [src]="request.profilePreviewUrl"
+      alt="{{ request.employeeName }}"
+      class="avatar-image"
+    />
+  </ng-container>
+
+  <ng-template #initialsFallback>
+    <div class="avatar-initials">
+      {{ getInitials(request.employeeName) }}
+    </div>
+  </ng-template>
+</div>
+
+
+
+
+
+
+
                   <div class="employee-details">
                     <h4 class="employee-name">{{ request.employeeName }}</h4>
                     <p class="leave-type">
@@ -125,6 +147,10 @@ import {
                     </p>
                   </div>
                 </div>
+
+
+
+
                 <div class="request-dates">
                   <div class="date-badge">
                     <mat-icon>event</mat-icon>
@@ -182,9 +208,21 @@ import {
                 <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
                 <mat-cell *matCellDef="let request">
                   <div class="employee-cell">
-                    <div class="employee-avatar-small">
-                      {{ getInitials(request.employeeName) }}
-                    </div>
+                  
+<div class="employee-avatar-small">
+  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+    <img [src]="request.profilePreviewUrl" [alt]="request.employeeName" />
+  </ng-container>
+
+  <ng-template #initialsFallback>
+    <div class="avatar-initials">
+      {{ getInitials(request.employeeName) }}
+    </div>
+  </ng-template>
+</div>
+
+
+
                     <span>{{ request.employeeName }}</span>
                   </div>
                 </mat-cell>
@@ -301,7 +339,10 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   pendingApprovals: LeaveRequest[] = [];
   teamRequests: LeaveRequest[] = [];
   leaveTypes: LeaveType[] = [];
-  
+  profilePreviewUrl:string|null=null;
+private backendBaseUrl = 'https://localhost:60485';
+
+
   isLoading = false;
   isProcessing = false;
   
@@ -362,7 +403,23 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.leaveTypes = data.leaveTypes || [];
-          this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+          // this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+
+ // ✅ This is where you handle pending approvals and image URLs
+        this.pendingApprovals = Array.isArray(data.pendingApprovals)
+          ? data.pendingApprovals.map((employee: any) => {
+              if (employee.profilePictureUrl) {
+                employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+                  ? employee.profilePictureUrl
+                  : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+              } else {
+                employee.profilePreviewUrl = null;
+              }
+              return employee;
+            })
+          : [];
+
+
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -389,6 +446,16 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: LeaveListResponse) => {
           // API returns data in response.data, not response.leaveRequests
+        this.teamRequests = (response.data || []).map((employee: LeaveRequest) => {
+          if (employee.profilePictureUrl) {
+            employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+              ? employee.profilePictureUrl
+              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+          } else {
+            employee.profilePreviewUrl = null;
+          }
+          return employee;
+        });
           this.teamRequests = response.data || [];
           this.totalCount = response.totalCount;
           this.isLoading = false;
