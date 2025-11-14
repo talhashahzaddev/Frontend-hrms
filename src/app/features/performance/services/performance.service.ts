@@ -122,7 +122,7 @@ export class PerformanceService {
   }
 
   createEmployeeSkill(request: CreateEmployeeSkillRequest): Observable<ApiResponse<EmployeeSkill>> {
-    return this.http.post<ApiResponse<EmployeeSkill>>(`${this.apiUrl}/performance/employee-skills`, request);
+    return this.http.post<ApiResponse<EmployeeSkill>>(`${this.apiUrl}/Performance/create-Employee-skills`, request);
   }
 
   updateEmployeeSkill(id: string, request: UpdateEmployeeSkillRequest): Observable<ApiResponse<EmployeeSkill>> {
@@ -163,7 +163,15 @@ export class PerformanceService {
   }
 
   updateKRA(id: string, request: UpdateKRARequest): Observable<ApiResponse<KRA>> {
-    return this.http.put<ApiResponse<KRA>>(`${this.apiUrl}/Performance/KraUpdate?kraId=${id}`, request);
+    let params = new HttpParams();
+    params = params.set('kraId', id);
+    if (request.title) params = params.set('Title', request.title);
+    if (request.description) params = params.set('Description', request.description);
+    if (request.weight !== undefined) params = params.set('Weight', request.weight.toString());
+    if (request.measurementCriteria) params = params.set('MeasurementCriteria', request.measurementCriteria);
+    if (request.isActive !== undefined) params = params.set('IsActive', request.isActive.toString());
+    
+    return this.http.put<ApiResponse<KRA>>(`${this.apiUrl}/Performance/KraUpdate`, {}, { params });
   }
 
   updateKRAStatus(id: string, isActive: boolean): Observable<ApiResponse<string>> {
@@ -233,7 +241,7 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
       if (filter.search) params = params.set('search', filter.search);
     }
 
-    return this.http.get<ApiResponse<PaginatedResponse<EmployeeAppraisal>>>(`${this.apiUrl}/performance/appraisals`, { params });
+    return this.http.get<ApiResponse<PaginatedResponse<EmployeeAppraisal>>>(`${this.apiUrl}/Performance/appraisals`, { params });
   }
 
   getEmployeeAppraisalsByEmployee(employeeId: string): Observable<ApiResponse<EmployeeAppraisal[]>> {
@@ -371,5 +379,10 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
   // Employee Performance History
   getEmployeePerformanceHistory(employeeId: string): Observable<ApiResponse<EmployeePerformanceHistory>> {
     return this.http.get<ApiResponse<EmployeePerformanceHistory>>(`${this.apiUrl}/Performance/employee/${employeeId}/history`);
+  }
+
+  // Top Performers
+  getTopPerformers(count: number = 10): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/Performance/top-performers?count=${count}`);
   }
 }

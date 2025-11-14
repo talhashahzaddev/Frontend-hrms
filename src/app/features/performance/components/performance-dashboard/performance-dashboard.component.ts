@@ -30,6 +30,7 @@ import {
 import { User } from '../../../../core/models/auth.models';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTableDataSource } from '@angular/material/table';
 
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
 @Component({
@@ -76,6 +77,12 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
   // ⭐ For rating stars
   starRatings = [1, 2, 3, 4, 5];
+
+  // ⭐ Table Data Sources
+  appraisalsDataSource = new MatTableDataSource<EmployeeAppraisal>([]);
+  cyclesDataSource = new MatTableDataSource<AppraisalCycle>([]);
+  displayedColumns: string[] = ['cycleName', 'reviewType', 'reviewerName', 'overallRating', 'feedback'];
+  displayedCycleColumns: string[] = ['cycleName', 'description', 'dates', 'status', 'actions'];
 
   constructor(
     private performanceService: PerformanceService,
@@ -137,6 +144,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
           }
 
           this.appraisalCycles = (results[results.length - 1]?.data) || [];
+          this.cyclesDataSource.data = this.appraisalCycles;
 
           // ✅ Automatically select the latest active or first cycle
           if (this.appraisalCycles.length > 0) {
@@ -176,6 +184,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
         next: (res) => {
           if (res.success) {
             this.employeeAppraisals = res.data || [];
+            this.appraisalsDataSource.data = this.employeeAppraisals;
             console.log('Employee Appraisals:', this.employeeAppraisals);
 
             if (this.employeeAppraisals.length > 0) {
@@ -183,6 +192,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
             }
           } else {
             this.employeeAppraisals = [];
+            this.appraisalsDataSource.data = [];
           }
 
           this.isLoading = false;
@@ -191,6 +201,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Error fetching appraisals by cycle:', err);
           this.employeeAppraisals = [];
+          this.appraisalsDataSource.data = [];
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -296,6 +307,15 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
       case 'completed': return 'accent';
       case 'cancelled': return 'warn';
       default: return undefined;
+    }
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'active': return 'check_circle';
+      case 'completed': return 'done_all';
+      case 'cancelled': return 'cancel';
+      default: return 'help_outline';
     }
   }
 }

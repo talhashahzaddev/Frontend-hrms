@@ -1,292 +1,426 @@
-<div class="shift-dashboard-container">
+<div class="performance-dashboard-container">
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container text-center py-10">
-    <mat-spinner diameter="60"></mat-spinner>
-    <p class="mt-4 text-gray-500">Loading performance data...</p>
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading performance data...</p>
   </div>
 
   <!-- Employee Dashboard (visible only to non-HR users) -->
   <div *ngIf="!hasHRRole() && !isLoading">
 
-    <!-- Header -->
-    <div class="dashboard-header mb-6">
-      <h1 class="page-title flex items-center gap-2 text-2xl font-semibold">
-        <mat-icon>star</mat-icon>
-        Performance Management
-      </h1>
-    </div>
-
-    <!-- Performance Overview -->
-    <div class="overview-section mb-8">
-      <div class="overview-grid grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <!-- My Performance Card -->
-        <mat-card class="shift-card p-4 rounded-2xl shadow-md">
-          <mat-card-header>
-            <mat-card-title>My Performance</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="performance-summary" *ngIf="myPerformanceMetrics">
-              
-              <!-- Rating Display -->
-              <div class="rating-display flex justify-between items-center mb-4">
-                <div class="current-rating flex items-center gap-2">
-                  <span class="rating-value text-3xl font-semibold text-blue-600">
-                    {{ myPerformanceMetrics.currentRating | number:'1.1-1' }}
-                  </span>
-                  <div class="rating-stars flex">
-                    <mat-icon *ngFor="let star of starRatings" 
-                              [ngClass]="{ 'filled text-yellow-500': star <= myPerformanceMetrics.currentRating }">
-                      star
-                    </mat-icon>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Stats -->
-              <div class="performance-stats grid grid-cols-3 gap-4 text-center">
-                <div class="stat-item">
-                  <span class="stat-label text-gray-500 text-sm block">Skills</span>
-                  <span class="stat-value text-xl font-semibold">{{ myPerformanceMetrics.skillsCount }}</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-label text-gray-500 text-sm block">Last Review</span>
-                  <span class="stat-value text-xl font-semibold">
-                    {{ (myPerformanceMetrics.lastAppraisalDate | date:'mediumDate') || 'Not available' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div *ngIf="!myPerformanceMetrics" class="shift-empty-state text-center mt-6">
-              <mat-icon>info</mat-icon>
-              <p>No performance data available</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Overall Rating Summary -->
-        <mat-card class="shift-card p-4 rounded-2xl shadow-md bg-white">
-          <mat-card-header>
-            <mat-card-title>Overall Rating</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="text-center">
-              <p class="text-4xl font-semibold text-purple-600">{{ overallRating || 0 }}</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- My Skills -->
-        <mat-card class="shift-card p-4 rounded-2xl shadow-md">
-          <mat-card-header>
-            <mat-card-title>My Skills</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="skills-list" *ngIf="mySkills.length > 0">
-              <div *ngFor="let skill of mySkills" class="skill-item mb-4">
-                <div class="skill-info flex justify-between mb-1">
-                  <span class="skill-name font-medium">{{ skill.skillName }}</span>
-                  <span class="skill-level text-gray-500">Level {{ skill.proficiencyLevel }}/5</span>
-                </div>
-                <mat-progress-bar 
-                  mode="determinate" 
-                  [value]="(skill.proficiencyLevel / 5) * 100"
-                  [color]="getSkillLevelColor(skill.proficiencyLevel)">
-                </mat-progress-bar>
-              </div>
-            </div>
-
-            <div *ngIf="!mySkills.length" class="shift-empty-state text-center mt-6">
-              <mat-icon>school</mat-icon>
-              <p>No skills assessed yet</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <mat-icon>star</mat-icon>
+          My Performance
+        </h1>
+        <p class="page-subtitle">View your performance metrics, skills, and appraisal history</p>
       </div>
     </div>
 
-    <!-- Main Content Tabs -->
-    <mat-card class="shift-card rounded-2xl shadow-lg">
-      <mat-tab-group>
+    <!-- Performance Stats Grid -->
+    <div class="stats-grid">
+      <!-- My Performance Card -->
+      <mat-card class="stat-card stat-card-primary" *ngIf="myPerformanceMetrics">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">trending_up</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">Current Rating</div>
+              <div class="stat-value">{{ myPerformanceMetrics.currentRating | number:'1.1-1' }}</div>
+              <div class="stat-footer">
+                <div class="rating-stars">
+                  <mat-icon *ngFor="let star of starRatings" 
+                            [class.filled]="star <= myPerformanceMetrics.currentRating">
+                    {{ star <= myPerformanceMetrics.currentRating ? 'star' : 'star_border' }}
+                  </mat-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-        <!-- My Appraisals -->
-        <mat-tab label="My Appraisals">
-          <div class="tab-content p-4">
+      <!-- Overall Rating Card -->
+      <mat-card class="stat-card stat-card-success">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">assessment</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">Overall Rating</div>
+              <div class="stat-value">{{ overallRating || 0 | number:'1.1-1' }}</div>
+              <div class="stat-footer">
+                <span class="stat-hint">Out of 5.0</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
-            <mat-form-field appearance="outline" class="full-width mb-4">
+      <!-- Skills Count Card -->
+      <mat-card class="stat-card stat-card-info" *ngIf="myPerformanceMetrics">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">school</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">My Skills</div>
+              <div class="stat-value">{{ myPerformanceMetrics.skillsCount || mySkills.length }}</div>
+              <div class="stat-footer">
+                <span class="stat-hint">Assessed skills</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Last Appraisal Card -->
+      <mat-card class="stat-card stat-card-warning" *ngIf="myPerformanceMetrics && myPerformanceMetrics.lastAppraisalDate">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">calendar_today</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">Last Review</div>
+              <div class="stat-value">{{ myPerformanceMetrics.lastAppraisalDate | date:'MMM dd' }}</div>
+              <div class="stat-footer">
+                <span class="stat-hint">{{ myPerformanceMetrics.lastAppraisalDate | date:'yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="main-content-section">
+      
+      <!-- My Skills Card -->
+      <mat-card class="content-card skills-card">
+        <div class="card-header">
+          <h3>
+            <mat-icon>school</mat-icon>
+            My Skills
+          </h3>
+        </div>
+        <mat-card-content>
+          <div class="skills-list" *ngIf="mySkills.length > 0">
+            <div *ngFor="let skill of mySkills" class="skill-item">
+              <div class="skill-info">
+                <div class="skill-name">{{ skill.skillName }}</div>
+                <div class="skill-level-badge" [ngClass]="'level-' + skill.proficiencyLevel">
+                  Level {{ skill.proficiencyLevel }}/5
+                </div>
+              </div>
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="(skill.proficiencyLevel / 5) * 100"
+                class="skill-progress"
+                [ngClass]="'progress-level-' + skill.proficiencyLevel">
+              </mat-progress-bar>
+            </div>
+          </div>
+
+          <div *ngIf="!mySkills.length" class="empty-state">
+            <mat-icon>school</mat-icon>
+            <h3>No Skills Assessed</h3>
+            <p>No skills have been assessed yet.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- My Appraisals Card -->
+      <mat-card class="content-card appraisals-card">
+        <div class="card-header">
+          <h3>
+            <mat-icon>assessment</mat-icon>
+            My Appraisals
+          </h3>
+        </div>
+        <mat-card-content>
+          <!-- Filter Section -->
+          <div class="filter-section">
+            <mat-form-field appearance="outline" class="cycle-select-field">
               <mat-label>Select Appraisal Cycle</mat-label>
-              <mat-select formControlName="cycleId" (selectionChange)="onCycleChange($event.value)">
+              <mat-icon matPrefix>schedule</mat-icon>
+              <mat-select [value]="selectedCycleId" (selectionChange)="onCycleChange($event.value)">
                 <mat-option [value]="null">All Cycles</mat-option>
                 <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
                   {{ cycle.cycleName }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-
-            <div class="appraisals-section">
-              <table class="shift-table w-full border rounded-lg" *ngIf="employeeAppraisals.length > 0">
-                <thead class="bg-gray-100">
-                  <tr>
-                    <th>Cycle Name</th>
-                    <th>Review Type</th>
-                    <th>Reviewer</th>
-                    <th>Feedback</th>
-                    <th>Improvement Areas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let appraisal of employeeAppraisals">
-                    <td>{{ appraisal.cycleName }}</td>
-                    <td>{{ appraisal.reviewType | titlecase }}</td>
-                    <td>{{ appraisal.reviewerName || 'N/A' }}</td>
-                    <td>{{ appraisal.feedback || 'N/A' }}</td>
-                    <td>{{ appraisal.improvementAreas || 'N/A' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div *ngIf="!employeeAppraisals.length" class="shift-empty-state text-center mt-6">
-                <mat-icon>assessment</mat-icon>
-                <h3>No Appraisals</h3>
-                <p>You don't have any performance appraisals yet.</p>
-              </div>
-            </div>
           </div>
-        </mat-tab>
 
-        <!-- Team Performance (only for Managers) -->
-        <mat-tab label="Team Performance" *ngIf="hasManagerRole()">
-          <div class="tab-content p-4">
-            <div class="team-performance-section">
-              <h3 class="text-xl font-semibold mb-4">Team Performance Overview</h3>
+          <!-- Appraisals Table -->
+          <div class="table-container" *ngIf="employeeAppraisals.length > 0">
+            <table mat-table [dataSource]="appraisalsDataSource" class="appraisals-table">
               
-              <div *ngIf="teamPerformanceSummary">
-                <div class="summary-stats grid grid-cols-3 gap-4 mb-6 text-center">
-                  <div class="stat-card border rounded-lg p-4">
-                    <div class="stat-value text-2xl font-semibold">{{ teamPerformanceSummary.averageRating | number:'1.1-1' }}</div>
-                    <div class="stat-label text-gray-500 text-sm">Average Rating</div>
+              <ng-container matColumnDef="cycleName">
+                <th mat-header-cell *matHeaderCellDef>Cycle</th>
+                <td mat-cell *matCellDef="let appraisal">
+                  <div class="cycle-info">
+                    <mat-icon>schedule</mat-icon>
+                    <span>{{ appraisal.cycleName }}</span>
                   </div>
-                  <div class="stat-card border rounded-lg p-4">
-                    <div class="stat-value text-2xl font-semibold">{{ teamPerformanceSummary.totalAppraisals }}</div>
-                    <div class="stat-label text-gray-500 text-sm">Total Appraisals</div>
-                  </div>
-                  <div class="stat-card border rounded-lg p-4">
-                    <div class="stat-value text-2xl font-semibold">{{ teamPerformanceSummary.pendingAppraisals }}</div>
-                    <div class="stat-label text-gray-500 text-sm">Pending Reviews</div>
-                  </div>
-                </div>
+                </td>
+              </ng-container>
 
-                <div class="top-performers" *ngIf="teamPerformanceSummary.topPerformers.length > 0">
-                  <h4 class="text-lg font-medium mb-2">Top Performers</h4>
-                  <div class="performers-list divide-y">
-                    <div *ngFor="let performer of teamPerformanceSummary.topPerformers" class="performer-item flex justify-between items-center py-2">
-                      <div>
-                        <span class="font-medium">{{ performer.employeeName }}</span>
-                        <span class="text-gray-500 text-sm ml-2">{{ performer.department }}</span>
-                      </div>
-                      <div class="flex items-center gap-2">
-                        <span>{{ performer.rating | number:'1.1-1' }}</span>
-                        <div class="rating-stars flex">
-                          <mat-icon *ngFor="let star of starRatings" [ngClass]="{ 'filled text-yellow-500': star <= performer.rating }">
-                            star
-                          </mat-icon>
-                        </div>
-                      </div>
+              <ng-container matColumnDef="reviewType">
+                <th mat-header-cell *matHeaderCellDef>Review Type</th>
+                <td mat-cell *matCellDef="let appraisal">
+                  <mat-chip class="review-type-chip" [ngClass]="'review-' + appraisal.reviewType">
+                    {{ appraisal.reviewType | titlecase }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="reviewerName">
+                <th mat-header-cell *matHeaderCellDef>Reviewer</th>
+                <td mat-cell *matCellDef="let appraisal">
+                  <div class="reviewer-info">
+                    <mat-icon>person</mat-icon>
+                    <span>{{ appraisal.reviewerName || 'N/A' }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="overallRating">
+                <th mat-header-cell *matHeaderCellDef>Rating</th>
+                <td mat-cell *matCellDef="let appraisal">
+                  <div class="rating-display">
+                    <span class="rating-value">{{ appraisal.overallRating | number:'1.1-1' }}</span>
+                    <div class="rating-stars">
+                      <mat-icon *ngFor="let star of starRatings" 
+                                [class.filled]="star <= appraisal.overallRating">
+                        {{ star <= appraisal.overallRating ? 'star' : 'star_border' }}
+                      </mat-icon>
                     </div>
                   </div>
-                </div>
-              </div>
+                </td>
+              </ng-container>
 
-              <div *ngIf="!teamPerformanceSummary" class="shift-empty-state text-center mt-6">
-                <mat-icon>group</mat-icon>
-                <h3>No Team Data</h3>
-                <p>No team performance data available.</p>
+              <ng-container matColumnDef="feedback">
+                <th mat-header-cell *matHeaderCellDef>Feedback</th>
+                <td mat-cell *matCellDef="let appraisal">
+                  <div class="feedback-text">{{ appraisal.feedback || 'No feedback available' }}</div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!employeeAppraisals.length" class="empty-state">
+            <mat-icon>assessment</mat-icon>
+            <h3>No Appraisals Found</h3>
+            <p>You don't have any performance appraisals yet.</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- Team Performance Tab (for Managers) -->
+    <mat-card class="content-card team-performance-card" *ngIf="hasManagerRole()">
+      <div class="card-header">
+        <h3>
+          <mat-icon>groups</mat-icon>
+          Team Performance Overview
+        </h3>
+      </div>
+      <mat-card-content>
+        <div *ngIf="teamPerformanceSummary" class="team-performance-section">
+          <div class="summary-stats-grid">
+            <div class="summary-stat-card">
+              <div class="summary-stat-icon">
+                <mat-icon>star</mat-icon>
+              </div>
+              <div class="summary-stat-details">
+                <div class="summary-stat-label">Average Rating</div>
+                <div class="summary-stat-value">{{ teamPerformanceSummary.averageRating | number:'1.1-1' }}</div>
+              </div>
+            </div>
+            <div class="summary-stat-card">
+              <div class="summary-stat-icon">
+                <mat-icon>assignment</mat-icon>
+              </div>
+              <div class="summary-stat-details">
+                <div class="summary-stat-label">Total Appraisals</div>
+                <div class="summary-stat-value">{{ teamPerformanceSummary.totalAppraisals }}</div>
+              </div>
+            </div>
+            <div class="summary-stat-card">
+              <div class="summary-stat-icon">
+                <mat-icon>pending_actions</mat-icon>
+              </div>
+              <div class="summary-stat-details">
+                <div class="summary-stat-label">Pending Reviews</div>
+                <div class="summary-stat-value">{{ teamPerformanceSummary.pendingAppraisals }}</div>
               </div>
             </div>
           </div>
-        </mat-tab>
 
-      </mat-tab-group>
+          <div class="top-performers-section" *ngIf="teamPerformanceSummary.topPerformers && teamPerformanceSummary.topPerformers.length > 0">
+            <h4 class="section-subtitle">
+              <mat-icon>emoji_events</mat-icon>
+              Top Performers
+            </h4>
+            <div class="top-performers-list">
+              <div *ngFor="let performer of teamPerformanceSummary.topPerformers; let i = index" 
+                   class="performer-item">
+                <div class="performer-rank">
+                  <span class="rank-number" [ngClass]="'rank-' + (i + 1)">
+                    <mat-icon *ngIf="i === 0" class="trophy-icon">emoji_events</mat-icon>
+                    <span *ngIf="i !== 0">{{ i + 1 }}</span>
+                  </span>
+                </div>
+                <div class="performer-info">
+                  <div class="performer-name">{{ performer.employeeName }}</div>
+                  <div class="performer-details">
+                    <mat-icon>work</mat-icon>
+                    <span>{{ performer.position }}</span>
+                    <mat-icon>business</mat-icon>
+                    <span>{{ performer.department }}</span>
+                  </div>
+                </div>
+                <div class="performer-rating">
+                  <div class="rating-value">{{ performer.rating | number:'1.1-1' }}</div>
+                  <div class="rating-stars">
+                    <mat-icon *ngFor="let star of starRatings" 
+                              [class.filled]="star <= performer.rating">
+                      {{ star <= performer.rating ? 'star' : 'star_border' }}
+                    </mat-icon>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!teamPerformanceSummary" class="empty-state">
+          <mat-icon>groups</mat-icon>
+          <h3>No Team Data</h3>
+          <p>No team performance data available.</p>
+        </div>
+      </mat-card-content>
     </mat-card>
 
   </div>
 
-  <!-- Appraisal Cycles (visible only to HR/Admin) -->
+  <!-- HR/Admin Dashboard (visible only to HR users) -->
   <div *ngIf="hasHRRole() && !isLoading">
-    <mat-card class="shift-card rounded-2xl shadow-lg">
-      <mat-tab-group>
-        <mat-tab label="Appraisal Cycles">
-          <div class="tab-content p-4">
-            <div class="cycles-section">
-              <div class="section-header flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold">Appraisal Cycles</h3>
-                <button mat-raised-button color="primary" (click)="openCreateCycleDialog()">
-                  <mat-icon>add</mat-icon>
-                  New Cycle
-                </button>
-              </div>
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <mat-icon>dashboard</mat-icon>
+          Performance Dashboard
+        </h1>
+        <p class="page-subtitle">Manage appraisal cycles and performance metrics</p>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-flat-button 
+                (click)="openCreateCycleDialog()"
+                class="add-button">
+          <mat-icon>add</mat-icon>
+          New Cycle
+        </button>
+      </div>
+    </div>
 
-              <table class="shift-table w-full border rounded-lg" *ngIf="appraisalCycles.length > 0; else emptyState">
-                <thead class="bg-gray-100">
-                  <tr>
-                    <th>Cycle Name</th>
-                    <th>Description</th>
-                    <th>Dates</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let cycle of appraisalCycles">
-                    <td>{{ cycle.cycleName }}</td>
-                    <td>{{ cycle.description }}</td>
-                    <td>{{ cycle.startDate | date:'mediumDate' }} - {{ cycle.endDate | date:'mediumDate' }}</td>
-                    <td>
-                      <mat-chip [color]="getCycleStatusColor(cycle.status)">
-                        {{ cycle.status | titlecase }}
-                      </mat-chip>
-                    </td>
-                    <td>
-  <!-- Three-dot button -->
-  <button mat-icon-button [matMenuTriggerFor]="cycleMenu">
-    <mat-icon>more_vert</mat-icon>
-  </button>
-
-  <!-- Menu that opens on three-dot click -->
-  <mat-menu #cycleMenu="matMenu">
-    <button mat-menu-item (click)="editCycle(cycle)">
-      <mat-icon>edit</mat-icon>
-      Edit
-    </button>
-    <button mat-menu-item (click)="deleteCycle(cycle)">
-      <mat-icon>delete</mat-icon>
-      Delete
-    </button>
-  </mat-menu>
-</td>
-
-                  </tr>
-                </tbody>
-              </table>
-
-              <ng-template #emptyState>
-                <div class="shift-empty-state text-center mt-6">
-                  <mat-icon>event</mat-icon>
-                  <h3>No Appraisal Cycles</h3>
-                  <p>No appraisal cycles have been created yet.</p>
-                  <button mat-raised-button color="primary" (click)="openCreateCycleDialog()">
-                    <mat-icon>add</mat-icon>
-                    Create First Cycle
-                  </button>
+    <!-- Appraisal Cycles Card -->
+    <mat-card class="content-card cycles-card">
+      <div class="card-header">
+        <h3>
+          <mat-icon>event</mat-icon>
+          Appraisal Cycles
+        </h3>
+      </div>
+      <mat-card-content>
+        <div class="table-container" *ngIf="appraisalCycles.length > 0">
+          <table mat-table [dataSource]="cyclesDataSource" class="cycles-table">
+            
+            <ng-container matColumnDef="cycleName">
+              <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+              <td mat-cell *matCellDef="let cycle">
+                <div class="cycle-name-info">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ cycle.cycleName }}</span>
                 </div>
-              </ng-template>
-            </div>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Description</th>
+              <td mat-cell *matCellDef="let cycle">{{ cycle.description || 'N/A' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="dates">
+              <th mat-header-cell *matHeaderCellDef>Dates</th>
+              <td mat-cell *matCellDef="let cycle">
+                <div class="dates-info">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>{{ cycle.startDate | date:'shortDate' }} - {{ cycle.endDate | date:'shortDate' }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let cycle">
+                <mat-chip [class]="'status-chip status-' + cycle.status?.toLowerCase()">
+                  <mat-icon>{{ getStatusIcon(cycle.status) }}</mat-icon>
+                  {{ cycle.status | titlecase }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let cycle">
+                <button mat-icon-button [matMenuTriggerFor]="cycleMenu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #cycleMenu="matMenu">
+                  <button mat-menu-item (click)="editCycle(cycle)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="deleteCycle(cycle)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedCycleColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedCycleColumns;"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="!appraisalCycles.length" class="empty-state">
+          <mat-icon>event</mat-icon>
+          <h3>No Appraisal Cycles</h3>
+          <p>No appraisal cycles have been created yet.</p>
+          <button mat-flat-button (click)="openCreateCycleDialog()" class="create-first-button">
+            <mat-icon>add</mat-icon>
+            Create First Cycle
+          </button>
+        </div>
+      </mat-card-content>
     </mat-card>
   </div>
 

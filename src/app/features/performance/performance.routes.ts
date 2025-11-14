@@ -31,6 +31,10 @@ export const performanceRoutes: Routes = [
     loadComponent: () => import('./components/kra-management/kra-management.component').then(m => m.KRAManagementComponent)
   },
   {
+    path: 'goals',
+    loadComponent: () => import('./components/kra-management/kra-management.component').then(m => m.KRAManagementComponent)
+  },
+  {
     path: 'self-assessment',
     loadComponent: () => import('./components/self-assessment/self-assessment.component').then(m => m.SelfAssessmentComponent)
   },

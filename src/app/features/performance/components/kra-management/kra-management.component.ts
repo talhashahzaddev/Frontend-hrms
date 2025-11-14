@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -25,6 +25,8 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { KRA, CreateKRARequest, UpdateKRARequest } from '../../../../core/models/performance.models';
 import { Position, Employee } from '../../../../core/models/employee.models';
 import { PaginatedResponse } from '../../../../core/models/common.models';
+import { CreateKRADialogComponent } from './create-kra-dialog.component';
+import { KRADetailsDialogComponent } from './kra-details-dialog.component';
 
 @Component({
   selector: 'app-kra-management',
@@ -57,6 +59,8 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
   
   isLoading = false;
   kras: KRA[] = [];
+  filteredKRAs: KRA[] = [];
+  krasDataSource = new MatTableDataSource<KRA>([]);
   positions: Position[] = [];
   displayedColumns: string[] = ['title', 'position', 'weight', 'status', 'actions'];
   
@@ -64,13 +68,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
   pageSize = 10;
   pageIndex = 0;
   totalItems = 0;
-  searchTerm = '';
 
-  // Dialog state
-  showKRAForm = false;
-  isEditMode = false;
-  selectedKRA?: KRA;
-  kraForm: FormGroup;
+  // Filter form
+  filterForm: FormGroup;
 
   constructor(
     private performanceService: PerformanceService,
@@ -81,13 +81,10 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
-    this.kraForm = this.fb.group({
-      positionId: ['', Validators.required],
-      title: ['', Validators.required],
-      description: [''],
-      weight: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      measurementCriteria: [''],
-      isActive: [true]
+    this.filterForm = this.fb.group({
+      search: [''],
+      positionId: [''],
+      status: ['']
     });
   }
 
@@ -114,7 +111,8 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
 
   loadKRAs(): void {
     this.isLoading = true;
-    this.performanceService.getKRAs(this.pageIndex + 1, this.pageSize, this.searchTerm)
+    const searchTerm = this.filterForm.get('search')?.value || '';
+    this.performanceService.getKRAs(this.pageIndex + 1, this.pageSize, searchTerm)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -123,6 +121,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
             const paginatedData = response.data as any;
             this.kras = paginatedData.data || paginatedData.items || [];
             this.totalItems = paginatedData.totalCount || 0;
+            this.applyFilters();
           }
           this.isLoading = false;
           this.cdr.markForCheck();
@@ -136,109 +135,127 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
       });
   }
 
-  openCreateDialog(): void {
-    this.isEditMode = false;
-    this.selectedKRA = undefined;
-    this.kraForm.reset({
-      positionId: '',
-      title: '',
-      description: '',
-      weight: 0,
-      measurementCriteria: '',
-      isActive: true
+  applyFilters(): void {
+    const searchTerm = (this.filterForm.get('search')?.value || '').toLowerCase();
+    const positionId = this.filterForm.get('positionId')?.value || '';
+    const status = this.filterForm.get('status')?.value || '';
+
+    this.filteredKRAs = this.kras.filter(kra => {
+      const matchesSearch = !searchTerm || 
+        kra.title.toLowerCase().includes(searchTerm) ||
+        (kra.description && kra.description.toLowerCase().includes(searchTerm));
+      
+      const matchesPosition = !positionId || kra.positionId === positionId;
+      
+      const matchesStatus = !status || 
+        (status === 'active' && kra.isActive) ||
+        (status === 'inactive' && !kra.isActive);
+
+      return matchesSearch && matchesPosition && matchesStatus;
     });
-    this.showKRAForm = true;
+
+    this.krasDataSource.data = this.filteredKRAs;
+  }
+
+  clearFilters(): void {
+    this.filterForm.reset({
+      search: '',
+      positionId: '',
+      status: ''
+    });
+    this.pageIndex = 0;
+    this.loadKRAs();
+  }
+
+  openCreateDialog(): void {
+    const dialogRef = this.dialog.open(CreateKRADialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        positions: this.positions,
+        isEditMode: false
+      },
+      disableClose: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && !result.isEdit) {
+          this.createKRA(result.request);
+        } else if (result && result.isEdit) {
+          this.updateKRA(result.kra.kraId, result.request);
+        }
+      });
   }
 
   openEditDialog(kra: KRA): void {
-    this.isEditMode = true;
-    this.selectedKRA = kra;
-    this.kraForm.patchValue({
-      positionId: kra.positionId || '',
-      title: kra.title,
-      description: kra.description || '',
-      weight: kra.weight,
-      measurementCriteria: kra.measurementCriteria || '',
-      isActive: kra.isActive
+    const dialogRef = this.dialog.open(CreateKRADialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      data: {
+        positions: this.positions,
+        kra: kra,
+        isEditMode: true
+      },
+      disableClose: false
     });
-    this.showKRAForm = true;
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && result.isEdit) {
+          this.updateKRA(result.kra.kraId, result.request);
+        }
+      });
   }
 
-  closeForm(): void {
-    this.showKRAForm = false;
-    this.isEditMode = false;
-    this.selectedKRA = undefined;
-    this.kraForm.reset();
+  private createKRA(request: CreateKRARequest): void {
+    this.isLoading = true;
+    this.performanceService.createKRA(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.notificationService.showSuccess('KRA created successfully');
+            this.loadKRAs();
+          } else {
+            this.notificationService.showError(response.message || 'Failed to create KRA');
+          }
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error creating KRA:', error);
+          this.notificationService.showError(error.error?.message || 'Failed to create KRA');
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
-  saveKRA(): void {
-    if (this.kraForm.valid) {
-      this.isLoading = true;
-      const formValue = this.kraForm.value;
-
-      if (this.isEditMode && this.selectedKRA) {
-        const updateRequest: UpdateKRARequest = {
-          title: formValue.title,
-          description: formValue.description,
-          weight: formValue.weight,
-          measurementCriteria: formValue.measurementCriteria,
-          isActive: formValue.isActive
-        };
-
-        this.performanceService.updateKRA(this.selectedKRA.kraId, updateRequest)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              if (response.success) {
-                this.notificationService.showSuccess('KRA updated successfully');
-                this.closeForm();
-                this.loadKRAs();
-              } else {
-                this.notificationService.showError(response.message || 'Failed to update KRA');
-              }
-              this.isLoading = false;
-              this.cdr.markForCheck();
-            },
-            error: (error) => {
-              console.error('Error updating KRA:', error);
-              this.notificationService.showError(error.error?.message || 'Failed to update KRA');
-              this.isLoading = false;
-              this.cdr.markForCheck();
-            }
-          });
-      } else {
-        const createRequest: CreateKRARequest = {
-          positionId: formValue.positionId,
-          title: formValue.title,
-          description: formValue.description,
-          weight: formValue.weight,
-          measurementCriteria: formValue.measurementCriteria,
-          isActive: formValue.isActive !== undefined ? formValue.isActive : true
-        };
-
-        this.performanceService.createKRA(createRequest)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              if (response.success) {
-                this.notificationService.showSuccess('KRA created successfully');
-                this.closeForm();
-                this.loadKRAs();
-              } else {
-                this.notificationService.showError(response.message || 'Failed to create KRA');
-              }
-              this.isLoading = false;
-              this.cdr.markForCheck();
-            },
-            error: (error) => {
-              console.error('Error creating KRA:', error);
-              this.notificationService.showError(error.error?.message || 'Failed to create KRA');
-              this.isLoading = false;
-              this.cdr.markForCheck();
-            }
-          });
-      }
-    }
+  private updateKRA(kraId: string, request: UpdateKRARequest): void {
+    this.isLoading = true;
+    this.performanceService.updateKRA(kraId, request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.notificationService.showSuccess('KRA updated successfully');
+            this.loadKRAs();
+          } else {
+            this.notificationService.showError(response.message || 'Failed to update KRA');
+          }
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error updating KRA:', error);
+          this.notificationService.showError(error.error?.message || 'Failed to update KRA');
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   deleteKRA(kra: KRA): void {
@@ -286,16 +303,57 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
       });
   }
 
-  onSearchChange(searchTerm: string): void {
-    this.searchTerm = searchTerm;
-    this.pageIndex = 0;
-    this.loadKRAs();
-  }
-
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
     this.loadKRAs();
+  }
+
+  viewKRADetails(kra: KRA): void {
+    this.isLoading = true;
+    this.performanceService.getKRAById(kra.kraId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            const dialogRef = this.dialog.open(KRADetailsDialogComponent, {
+              width: '700px',
+              maxWidth: '90vw',
+              data: {
+                kra: response.data,
+                positionName: this.getPositionName(response.data.positionId),
+                positions: this.positions,
+                hasEditPermission: this.hasHRRole()
+              },
+              disableClose: false
+            });
+
+            dialogRef.afterClosed()
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(result => {
+                if (result?.edit) {
+                  this.openEditDialog(response.data);
+                } else if (result?.refresh) {
+                  this.loadKRAs();
+                }
+              });
+          } else {
+            this.notificationService.showError('Failed to load KRA details');
+          }
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading KRA details:', error);
+          this.notificationService.showError('Failed to load KRA details');
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  getStatusClass(isActive: boolean): string {
+    return isActive ? 'status-active' : 'status-inactive';
   }
 
   getPositionName(positionId?: string): string {

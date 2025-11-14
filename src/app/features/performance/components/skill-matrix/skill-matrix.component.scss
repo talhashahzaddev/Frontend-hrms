@@ -1,25 +1,592 @@
-.skill-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-bottom: 2rem;
+// Skill Matrix Component - Professional & Beautiful Styling
+.skill-matrix-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  // Page Header
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-content {
+      flex: 1;
+
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
+
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: #667eea;
+        }
+      }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    .header-actions {
+      .add-button {
+        height: 48px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+
+        mat-icon {
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          margin: 0 !important;
+          flex-shrink: 0;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+      }
+    }
+  }
+
+  // Filters Card
+  .filters-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+        }
+      }
+
+      .clear-filters-btn {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        color: #667eea !important;
+        border-color: rgba(102, 126, 234, 0.3) !important;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.1) !important;
+          border-color: rgba(102, 126, 234, 0.5) !important;
+        }
+      }
+    }
+
+    .filters-content {
+      display: grid;
+      grid-template-columns: 2fr repeat(2, 1fr);
+      gap: 16px;
+      padding: 24px;
+      align-items: flex-start;
+
+      // Adjust grid for employee skills tab when HR filter is shown
+      mat-form-field.full-width {
+        grid-column: 1 / -1;
+      }
+
+      ::ng-deep mat-form-field {
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper {
+            background: white;
+            border-radius: 12px;
+          }
+
+          .mat-mdc-form-field-flex {
+            padding: 0 16px;
+          }
+
+          .mat-mdc-notch-piece {
+            border-color: #e5e7eb !important;
+          }
+
+          &:hover .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+          }
+
+          &.mat-focused .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+            border-width: 2px !important;
+          }
+
+          .mat-mdc-form-field-label {
+            color: #6b7280;
+          }
+
+          mat-icon {
+            color: #9ca3af;
+
+            &.mat-icon-prefix {
+              margin-right: 8px;
+            }
+          }
+        }
+      }
+
+      .search-field {
+        mat-icon {
+          color: #667eea !important;
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+    }
+
+    .filter-actions-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 24px 24px;
+      gap: 12px;
+
+      button {
+        height: 48px;
+        padding: 0 24px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+
+        mat-icon {
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          margin: 0 !important;
+          flex-shrink: 0;
+        }
+
+        // Add button with gradient style
+        &.add-button {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+
+          mat-icon {
+            font-size: 20px !important;
+            width: 20px !important;
+            height: 20px !important;
+            margin: 0 !important;
+            flex-shrink: 0;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Table Card
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+    }
+
+    // Loading State
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 20px;
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    // Table Container
+    .table-container {
+      overflow-x: auto;
+
+      .skills-table,
+      .employee-skills-table {
+        width: 100%;
+
+        ::ng-deep {
+          // Table Headers
+          .mat-mdc-header-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+            .mat-mdc-header-cell {
+              font-weight: 600;
+              color: #1f2937;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              border-bottom: 2px solid #e5e7eb;
+              padding: 16px 12px;
+            }
+          }
+
+          // Table Rows
+          .mat-mdc-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+
+            &:hover {
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+            }
+
+            .mat-mdc-cell {
+              padding: 16px 12px;
+              border-bottom: 1px solid #f3f4f6;
+              font-size: 14px;
+              color: #374151;
+            }
+          }
+        }
+
+        // Category Badge
+        .category-badge {
+          display: inline-block;
+          padding: 6px 14px;
+          border-radius: 8px;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+          color: #667eea;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        // Skill Info
+        .skill-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+
+          strong {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+          }
+
+          small {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.4;
+          }
+        }
+
+        // Level Chips
+        .level-chips {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+
+          ::ng-deep mat-chip {
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            height: 26px !important;
+            border-radius: 12px !important;
+            padding: 0 10px !important;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+            color: #667eea !important;
+            border: 1px solid rgba(102, 126, 234, 0.3) !important;
+          }
+        }
+
+        // Status Chips
+        ::ng-deep mat-chip {
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          height: 28px !important;
+          border-radius: 14px !important;
+          padding: 0 12px !important;
+
+          &.status-active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+            color: #059669 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+          }
+
+          &.status-inactive {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.1) 100%) !important;
+            color: #4b5563 !important;
+            border: 1px solid rgba(107, 114, 128, 0.3) !important;
+          }
+
+          // Skill Level Classes
+          &.level-beginner {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+            color: #dc2626 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+          }
+
+          &.level-intermediate {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%) !important;
+            color: #d97706 !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+          }
+
+          &.level-advanced {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
+            color: #2563eb !important;
+            border: 1px solid rgba(59, 130, 246, 0.3) !important;
+          }
+
+          &.level-expert {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+            color: #059669 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+          }
+        }
+      }
+
+      // Empty State
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0 0 24px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        .create-first-skill,
+        .add-first-skill {
+          height: 44px;
+          padding: 0 24px !important;
+          border-radius: 12px !important;
+          font-weight: 600 !important;
+          font-size: 14px !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+          margin: 0 auto !important;
+
+          mat-icon {
+            font-size: 20px !important;
+            width: 20px !important;
+            height: 20px !important;
+            margin: 0 !important;
+            flex-shrink: 0;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+    }
+
+    // Pagination
+    ::ng-deep mat-paginator {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-top: 1px solid #e5e7eb;
+
+      .mat-mdc-paginator-container {
+        padding: 16px 24px;
+      }
+
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-paginator-range-label {
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .mat-mdc-select-value {
+        color: #1f2937;
+        font-weight: 500;
+      }
+
+      button {
+        &:not([disabled]) {
+          color: #667eea;
+
+          &:hover {
+            background: rgba(102, 126, 234, 0.1);
+          }
+        }
+      }
+    }
+  }
+
+  // Menu Actions
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+
+    .mat-mdc-menu-content {
+      padding: 8px !important;
+
+      .mat-mdc-menu-item {
+        border-radius: 8px !important;
+        margin: 2px 0 !important;
+        height: 44px !important;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.1) !important;
+        }
+
+        mat-icon {
+          margin-right: 12px;
+          color: #667eea;
+        }
+
+        &.danger-action {
+          color: #dc2626 !important;
+
+          mat-icon {
+            color: #dc2626 !important;
+          }
+
+          &:hover {
+            background: rgba(220, 38, 38, 0.1) !important;
+          }
+        }
+      }
+    }
+  }
 }
-.skill-table th, .skill-table td {
-	border: 1px solid #ddd;
-	padding: 8px;
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .skill-matrix-container {
+    .filters-card .filters-content {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
 }
-.skill-table th {
-	background-color: #f4f4f4;
-}
-.level {
-	display: inline-block;
-	background: #e0e7ff;
-	color: #333;
-	border-radius: 4px;
-	padding: 2px 8px;
-	margin-right: 2px;
-}
-.loading-spinner {
-	text-align: center;
-	margin: 2rem 0;
-	font-size: 1.2rem;
+
+@media (max-width: 768px) {
+  .skill-matrix-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+
+        .add-button {
+          width: 100%;
+        }
+      }
+    }
+
+    .filters-card {
+      .filters-content {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions-container {
+        justify-content: stretch;
+        padding: 0 24px 24px;
+
+        button {
+          flex: 1;
+          width: 100%;
+        }
+      }
+    }
+  }
 }
