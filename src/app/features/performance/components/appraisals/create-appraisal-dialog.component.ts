@@ -1,6 +1,6 @@
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray, FormControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,8 +8,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AppraisalCycle, ReviewType, CreateAppraisal } from '../../../../core/models/performance.models';
+import { MatChipsModule } from '@angular/material/chips';
+import { AppraisalCycle, ReviewType, CreateAppraisal, SkillSet, KRA } from '../../../../core/models/performance.models';
 import { Employee } from '../../../../core/models/employee.models';
+import { PerformanceService } from '../../services/performance.service';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 export interface CreateAppraisalDialogData {
   appraisalCycles: AppraisalCycle[];
@@ -29,7 +33,8 @@ export interface CreateAppraisalDialogData {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatChipsModule
   ],
   template: `
     <div class="dialog-header">
@@ -107,6 +112,102 @@ export interface CreateAppraisalDialogData {
               </mat-error>
             </mat-form-field>
           </div>
+          <div class="form-section">
+            <h3 class="section-title">
+              <mat-icon>target</mat-icon>
+              Key Result Areas (KRAs)
+            </h3>
+  
+            <!-- KRA Selection -->
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Select KRAs</mat-label>
+                <mat-icon matPrefix>checklist</mat-icon>
+                <mat-select formControlName="selectedKras" multiple>
+                  <mat-option *ngFor="let kra of availableKras" [value]="kra.kraId">
+                    {{ kra.title }}
+                  </mat-option>
+                </mat-select>
+                <mat-hint>Select one or more KRAs to rate</mat-hint>
+              </mat-form-field>
+            </div>
+  
+            <!-- KRA Ratings -->
+            <div *ngIf="selectedKrasArray.length > 0" class="ratings-container">
+              <h4 class="ratings-title">KRA Ratings</h4>
+              <div class="rating-item" *ngFor="let kraRating of selectedKrasArray.controls; let i = index">
+                <div class="rating-header">
+                  <span class="rating-label">{{ getKraTitle(kraRating.get('kraId')?.value) }}</span>
+                  <button type="button" mat-icon-button (click)="removeKra(i)" class="remove-button">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                <mat-form-field appearance="outline" class="rating-input">
+                  <mat-label>Rating (0-5)</mat-label>
+                  <mat-icon matPrefix>star</mat-icon>
+                  <input matInput type="number" [formControl]="getKraRatingControl(i)" min="0" max="5" step="0.1" placeholder="Enter rating">
+                  <mat-error *ngIf="getKraRatingControl(i).hasError('min')">
+                    Rating must be at least 0
+                  </mat-error>
+                  <mat-error *ngIf="getKraRatingControl(i).hasError('max')">
+                    Rating must be at most 5
+                  </mat-error>
+                  <mat-error *ngIf="getKraRatingControl(i).hasError('required')">
+                    Rating is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Skills Section -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <mat-icon>psychology</mat-icon>
+              Skills
+            </h3>
+  
+            <!-- Skill Selection -->
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Select Skills</mat-label>
+                <mat-icon matPrefix>build</mat-icon>
+                <mat-select formControlName="selectedSkills" multiple>
+                  <mat-option *ngFor="let skill of availableSkills" [value]="skill.skillId">
+                    {{ skill.skillName }}
+                  </mat-option>
+                </mat-select>
+                <mat-hint>Select one or more skills to rate</mat-hint>
+              </mat-form-field>
+            </div>
+  
+            <!-- Skill Ratings -->
+            <div *ngIf="selectedSkillsArray.length > 0" class="ratings-container">
+              <h4 class="ratings-title">Skill Ratings</h4>
+              <div class="rating-item" *ngFor="let skillRating of selectedSkillsArray.controls; let i = index">
+                <div class="rating-header">
+                  <span class="rating-label">{{ getSkillName(skillRating.get('skillId')?.value) }}</span>
+                  <button type="button" mat-icon-button (click)="removeSkill(i)" class="remove-button">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+                <mat-form-field appearance="outline" class="rating-input">
+                  <mat-label>Rating (0-5)</mat-label>
+                  <mat-icon matPrefix>star</mat-icon>
+                  <input matInput type="number" [formControl]="getSkillRatingControl(i)" min="0" max="5" step="0.1" placeholder="Enter rating">
+                  <mat-error *ngIf="getSkillRatingControl(i).hasError('min')">
+                    Rating must be at least 0
+                  </mat-error>
+                  <mat-error *ngIf="getSkillRatingControl(i).hasError('max')">
+                    Rating must be at most 5
+                  </mat-error>
+                  <mat-error *ngIf="getSkillRatingControl(i).hasError('required')">
+                    Rating is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
 
           <!-- Feedback -->
           <div class="form-row">
@@ -136,6 +237,8 @@ export interface CreateAppraisalDialogData {
           </div>
         </div>
 
+        <!-- KRA Section -->
+
       </mat-dialog-content>
 
       <div class="dialog-actions">
@@ -161,7 +264,7 @@ export interface CreateAppraisalDialogData {
       padding: 0 !important;
       overflow: hidden;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-      max-width: 800px !important;
+      max-width: 900px !important;
       width: 90vw !important;
     }
 
@@ -448,6 +551,66 @@ export interface CreateAppraisalDialogData {
       margin-top: 4px;
     }
 
+    .ratings-container {
+      margin-top: 16px;
+      padding: 16px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .ratings-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #374151;
+      margin: 0 0 16px 0;
+    }
+
+    .rating-item {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #667eea;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .rating-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .rating-label {
+      font-weight: 600;
+      color: #1f2937;
+      font-size: 0.95rem;
+    }
+
+    .remove-button {
+      width: 32px;
+      height: 32px;
+      color: #dc2626;
+
+      &:hover {
+        background: rgba(220, 38, 38, 0.1);
+      }
+    }
+
+    .rating-input {
+      width: 100%;
+    }
+
     @media (max-width: 768px) {
       .form-row.two-columns {
         grid-template-columns: 1fr;
@@ -455,19 +618,31 @@ export interface CreateAppraisalDialogData {
 
       ::ng-deep .mat-mdc-dialog-container {
         width: 95vw !important;
+        max-width: 95vw !important;
+      }
+
+      .dialog-content {
+        max-height: 80vh;
       }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateAppraisalDialogComponent {
+export class CreateAppraisalDialogComponent implements OnInit, OnDestroy {
   appraisalForm: FormGroup;
   isSubmitting = false;
+  isLoadingKras = false;
+  isLoadingSkills = false;
+  availableKras: KRA[] = [];
+  availableSkills: SkillSet[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CreateAppraisalDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateAppraisalDialogData
+    @Inject(MAT_DIALOG_DATA) public data: CreateAppraisalDialogData,
+    private performanceService: PerformanceService,
+    private cdr: ChangeDetectorRef
   ) {
     this.appraisalForm = this.fb.group({
       cycleId: ['', Validators.required],
@@ -476,20 +651,199 @@ export class CreateAppraisalDialogComponent {
       overallRating: [null, [Validators.min(0), Validators.max(5)]],
       feedback: [''],
       improvementAreas: [''],
-      developmentPlan: ['']
+      developmentPlan: [''],
+      selectedKras: [[]],
+      selectedSkills: [[]],
+      kraRatings: this.fb.array([]),
+      skillRatings: this.fb.array([])
     });
+
+    // Watch for changes in selected KRAs
+    this.appraisalForm.get('selectedKras')?.valueChanges.subscribe((selectedIds: string[]) => {
+      this.updateKraRatingsArray(selectedIds);
+    });
+
+    // Watch for changes in selected Skills
+    this.appraisalForm.get('selectedSkills')?.valueChanges.subscribe((selectedIds: string[]) => {
+      this.updateSkillRatingsArray(selectedIds);
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadKras();
+    this.loadSkills();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  get selectedKrasArray(): FormArray {
+    return this.appraisalForm.get('kraRatings') as FormArray;
+  }
+
+  get selectedSkillsArray(): FormArray {
+    return this.appraisalForm.get('skillRatings') as FormArray;
+  }
+
+  loadKras(): void {
+    this.isLoadingKras = true;
+    this.performanceService.getKRAs(1, 100)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            const paginatedData = response.data as any;
+            this.availableKras = (paginatedData.items || paginatedData.data || []).filter((kra: KRA) => kra.isActive);
+          }
+          this.isLoadingKras = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading KRAs:', error);
+          this.isLoadingKras = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  loadSkills(): void {
+    this.isLoadingSkills = true;
+    this.performanceService.getSkillsMatrix()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response && response.success) {
+            const skills = response.data || [];
+            this.availableSkills = (Array.isArray(skills) ? skills : []).filter((skill: SkillSet) => skill.isActive !== false);
+          }
+          this.isLoadingSkills = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading skills:', error);
+          this.isLoadingSkills = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  updateKraRatingsArray(selectedIds: string[]): void {
+    const kraRatingsArray = this.selectedKrasArray;
+    
+    // Remove ratings for unselected KRAs (iterate backwards to avoid index issues)
+    for (let i = kraRatingsArray.length - 1; i >= 0; i--) {
+      const kraId = kraRatingsArray.at(i).get('kraId')?.value;
+      if (!selectedIds.includes(kraId)) {
+        kraRatingsArray.removeAt(i);
+      }
+    }
+
+    // Add ratings for newly selected KRAs
+    selectedIds.forEach(kraId => {
+      const exists = kraRatingsArray.controls.some(control => control.get('kraId')?.value === kraId);
+      if (!exists) {
+        kraRatingsArray.push(this.fb.group({
+          kraId: [kraId],
+          rating: [null, [Validators.required, Validators.min(0), Validators.max(5)]]
+        }));
+      }
+    });
+
+    this.cdr.markForCheck();
+  }
+
+  updateSkillRatingsArray(selectedIds: string[]): void {
+    const skillRatingsArray = this.selectedSkillsArray;
+    
+    // Remove ratings for unselected Skills (iterate backwards to avoid index issues)
+    for (let i = skillRatingsArray.length - 1; i >= 0; i--) {
+      const skillId = skillRatingsArray.at(i).get('skillId')?.value;
+      if (!selectedIds.includes(skillId)) {
+        skillRatingsArray.removeAt(i);
+      }
+    }
+
+    // Add ratings for newly selected Skills
+    selectedIds.forEach(skillId => {
+      const exists = skillRatingsArray.controls.some(control => control.get('skillId')?.value === skillId);
+      if (!exists) {
+        skillRatingsArray.push(this.fb.group({
+          skillId: [skillId],
+          rating: [null, [Validators.required, Validators.min(0), Validators.max(5)]]
+        }));
+      }
+    });
+
+    this.cdr.markForCheck();
+  }
+
+  removeKra(index: number): void {
+    const kraId = this.selectedKrasArray.at(index).get('kraId')?.value;
+    const selectedKras = this.appraisalForm.get('selectedKras')?.value as string[];
+    this.appraisalForm.patchValue({
+      selectedKras: selectedKras.filter(id => id !== kraId)
+    });
+  }
+
+  removeSkill(index: number): void {
+    const skillId = this.selectedSkillsArray.at(index).get('skillId')?.value;
+    const selectedSkills = this.appraisalForm.get('selectedSkills')?.value as string[];
+    this.appraisalForm.patchValue({
+      selectedSkills: selectedSkills.filter(id => id !== skillId)
+    });
+  }
+
+  getKraRatingControl(index: number): FormControl {
+    return this.selectedKrasArray.at(index).get('rating') as FormControl;
+  }
+
+  getSkillRatingControl(index: number): FormControl {
+    return this.selectedSkillsArray.at(index).get('rating') as FormControl;
+  }
+
+  getKraTitle(kraId: string): string {
+    const kra = this.availableKras.find(k => k.kraId === kraId);
+    return kra ? kra.title : 'Unknown KRA';
+  }
+
+  getSkillName(skillId: string): string {
+    const skill = this.availableSkills.find(s => s.skillId === skillId);
+    return skill ? skill.skillName : 'Unknown Skill';
   }
 
   onSubmit(): void {
     if (this.appraisalForm.valid) {
       const formValue = this.appraisalForm.value;
+      
+      // Build KRA ratings object
+      const kraRatings: { [kraId: string]: number } = {};
+      this.selectedKrasArray.controls.forEach(control => {
+        const kraId = control.get('kraId')?.value;
+        const rating = control.get('rating')?.value;
+        if (kraId && rating !== null && rating !== undefined) {
+          kraRatings[kraId] = parseFloat(rating);
+        }
+      });
+
+      // Build Skill ratings object
+      const skillRatings: { [skillId: string]: number } = {};
+      this.selectedSkillsArray.controls.forEach(control => {
+        const skillId = control.get('skillId')?.value;
+        const rating = control.get('rating')?.value;
+        if (skillId && rating !== null && rating !== undefined) {
+          skillRatings[skillId] = parseFloat(rating);
+        }
+      });
+
       const result: CreateAppraisal = {
         cycleId: formValue.cycleId,
         employeeId: formValue.employeeId,
         reviewType: formValue.reviewType as ReviewType,
-        overallRating: formValue.overallRating,
-        kraRatings: {},
-        skillRatings: {},
+        overallRating: formValue.overallRating ? parseFloat(formValue.overallRating) : undefined,
+        kraRatings: kraRatings,
+        skillRatings: skillRatings,
         feedback: formValue.feedback,
         improvementAreas: formValue.improvementAreas,
         developmentPlan: formValue.developmentPlan

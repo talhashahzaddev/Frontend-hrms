@@ -216,7 +216,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
   openCreateForm(): void {
     const dialogRef = this.dialog.open(CreateAppraisalDialogComponent, {
-      width: '800px',
+      width: '900px',
       maxWidth: '90vw',
       data: {
         appraisalCycles: this.appraisalCycles,
