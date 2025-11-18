@@ -23,7 +23,7 @@
     <!-- Performance Stats Grid -->
     <div class="stats-grid">
       <!-- My Performance Card -->
-      <mat-card class="stat-card stat-card-primary" *ngIf="myPerformanceMetrics">
+      <mat-card class="stat-card stat-card-primary">
         <mat-card-content>
           <div class="stat-item">
             <div class="stat-icon-wrapper">
@@ -31,12 +31,12 @@
             </div>
             <div class="stat-details">
               <div class="stat-label">Current Rating</div>
-              <div class="stat-value">{{ myPerformanceMetrics.currentRating | number:'1.1-1' }}</div>
+              <div class="stat-value">{{ overallRating || 0 | number:'1.1-1' }}</div>
               <div class="stat-footer">
                 <div class="rating-stars">
                   <mat-icon *ngFor="let star of starRatings" 
-                            [class.filled]="star <= myPerformanceMetrics.currentRating">
-                    {{ star <= myPerformanceMetrics.currentRating ? 'star' : 'star_border' }}
+                            [class.filled]="star <= (overallRating || 0)">
+                    {{ star <= (overallRating || 0) ? 'star' : 'star_border' }}
                   </mat-icon>
                 </div>
               </div>
@@ -64,7 +64,7 @@
       </mat-card>
 
       <!-- Skills Count Card -->
-      <mat-card class="stat-card stat-card-info" *ngIf="myPerformanceMetrics">
+      <mat-card class="stat-card stat-card-info">
         <mat-card-content>
           <div class="stat-item">
             <div class="stat-icon-wrapper">
@@ -72,7 +72,7 @@
             </div>
             <div class="stat-details">
               <div class="stat-label">My Skills</div>
-              <div class="stat-value">{{ myPerformanceMetrics.skillsCount || mySkills.length }}</div>
+              <div class="stat-value">{{ assessedSkills.length }}</div>
               <div class="stat-footer">
                 <span class="stat-hint">Assessed skills</span>
               </div>
@@ -108,28 +108,54 @@
         <div class="card-header">
           <h3>
             <mat-icon>school</mat-icon>
-            My Skills
+            My Assessed Skills
           </h3>
         </div>
         <mat-card-content>
-          <div class="skills-list" *ngIf="mySkills.length > 0">
-            <div *ngFor="let skill of mySkills" class="skill-item">
-              <div class="skill-info">
-                <div class="skill-name">{{ skill.skillName }}</div>
-                <div class="skill-level-badge" [ngClass]="'level-' + skill.proficiencyLevel">
-                  Level {{ skill.proficiencyLevel }}/5
-                </div>
-              </div>
-              <mat-progress-bar 
-                mode="determinate" 
-                [value]="(skill.proficiencyLevel / 5) * 100"
-                class="skill-progress"
-                [ngClass]="'progress-level-' + skill.proficiencyLevel">
-              </mat-progress-bar>
-            </div>
+          <div class="table-container" *ngIf="assessedSkills.length > 0">
+            <table mat-table [dataSource]="skillsDataSource" class="skills-table">
+              
+              <!-- Skill Name Column -->
+              <ng-container matColumnDef="skillName">
+                <th mat-header-cell *matHeaderCellDef>Skill Name</th>
+                <td mat-cell *matCellDef="let skill">
+                  <strong>{{ skill.skillName }}</strong>
+                </td>
+              </ng-container>
+
+              <!-- Skill Category Column -->
+              <ng-container matColumnDef="skillCategory">
+                <th mat-header-cell *matHeaderCellDef>Skill Category</th>
+                <td mat-cell *matCellDef="let skill">
+                  {{ skill.skillCategory || 'N/A' }}
+                </td>
+              </ng-container>
+
+              <!-- Proficiency Level Column -->
+              <ng-container matColumnDef="proficiencyLevel">
+                <th mat-header-cell *matHeaderCellDef>Proficiency Level</th>
+                <td mat-cell *matCellDef="let skill">
+                  <mat-chip [class]="getSkillLevelClass(skill.proficiencyLevel)">
+                    Level {{ skill.proficiencyLevel }}/5
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Assessor Name Column -->
+              <ng-container matColumnDef="assessorName">
+                <th mat-header-cell *matHeaderCellDef>Assessed By</th>
+                <td mat-cell *matCellDef="let skill">
+                  {{ skill.assessorName || 'N/A' }}
+                </td>
+              </ng-container>
+
+              <!-- Table Headers and Rows -->
+              <tr mat-header-row *matHeaderRowDef="displayedSkillColumns"></tr>
+              <tr mat-row *matRowDef="let skill; columns: displayedSkillColumns;"></tr>
+            </table>
           </div>
 
-          <div *ngIf="!mySkills.length" class="empty-state">
+          <div *ngIf="assessedSkills.length === 0" class="empty-state">
             <mat-icon>school</mat-icon>
             <h3>No Skills Assessed</h3>
             <p>No skills have been assessed yet.</p>

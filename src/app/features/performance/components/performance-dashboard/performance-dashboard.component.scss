@@ -504,10 +504,56 @@
     .table-container {
       overflow-x: auto;
       min-height: 200px;
+
+      .skill-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        small {
+          font-size: 12px;
+          color: #6b7280;
+          font-style: italic;
+        }
+      }
+
+      // Skill Level Chips
+      ::ng-deep mat-chip {
+        &.level-beginner {
+          background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+          color: #dc2626 !important;
+          border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        &.level-intermediate {
+          background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%) !important;
+          color: #d97706 !important;
+          border: 1px solid rgba(251, 191, 36, 0.3) !important;
+        }
+
+        &.level-advanced {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
+          color: #2563eb !important;
+          border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        }
+
+        &.level-expert {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+          color: #059669 !important;
+          border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        }
+      }
     }
 
     .appraisals-table,
-    .cycles-table {
+    .cycles-table,
+    .skills-table {
       width: 100%;
 
       ::ng-deep {

@@ -12,7 +12,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { NgChartsModule } from 'ng2-charts';
 import { Subject, takeUntil, forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { PerformanceService } from '../../services/performance.service';
@@ -67,6 +67,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   myPerformanceMetrics: PerformanceMetrics | null = null;
   mySkills: EmployeeSkill[] = [];
+  assessedSkills: EmployeeSkill[] = [];
   myAppraisals: EmployeeAppraisal[] = [];
   teamPerformanceSummary: PerformanceSummary | null = null;
   appraisalCycles: AppraisalCycle[] = [];
@@ -81,8 +82,10 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   // ⭐ Table Data Sources
   appraisalsDataSource = new MatTableDataSource<EmployeeAppraisal>([]);
   cyclesDataSource = new MatTableDataSource<AppraisalCycle>([]);
+  skillsDataSource = new MatTableDataSource<EmployeeSkill>([]);
   displayedColumns: string[] = ['cycleName', 'reviewType', 'reviewerName', 'overallRating', 'feedback'];
   displayedCycleColumns: string[] = ['cycleName', 'description', 'dates', 'status', 'actions'];
+  displayedSkillColumns: string[] = ['skillName', 'skillCategory', 'proficiencyLevel', 'assessorName'];
 
   constructor(
     private performanceService: PerformanceService,
@@ -94,7 +97,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCurrentUser();
-    this.loadInitialData();
   }
 
   ngOnDestroy(): void {
@@ -102,24 +104,48 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  getSkillLevelClass(level: number): string {
+    if (level >= 4) return 'level-expert';
+    if (level >= 3) return 'level-advanced';
+    if (level >= 2) return 'level-intermediate';
+    return 'level-beginner';
+  }
+
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
     console.log('CurrentUser:', this.currentUser);
+    // Load data after user is available
+    if (this.currentUser) {
+      this.loadInitialData();
+    }
   }
 
   // ✅ Load all data initially
   private loadInitialData(): void {
+    if (!this.currentUser?.userId) {
+      return;
+    }
+    
     this.isLoading = true;
 
-    const requests: any[] = [
+    const requests: any[] = [];
     
-      this.performanceService.getMySkills().pipe(
+    // Get current user's employee skills
+    requests.push(
+      this.performanceService.getEmployeeSkillsByEmployee(this.currentUser.userId).pipe(
         catchError((err) => {
-          console.error('getMySkills failed:', err);
-          return of([]);
+          console.error('getEmployeeSkillsByEmployee failed:', err);
+          return of({ success: false, data: [] });
+        }),
+        map((response: any) => {
+          // Extract data from ApiResponse structure
+          if (response && response.data) {
+            return response.data;
+          }
+          return response || [];
         })
-      ),
-    ];
+      )
+    );
 
   
     requests.push(
@@ -135,16 +161,31 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results: any[]) => {
-          this.myAppraisals = results[0] || [];
-          this.myPerformanceMetrics = results[1] || null;
-          this.mySkills = results[2] || [];
-
-          if (this.hasManagerRole()) {
-            this.teamPerformanceSummary = results[3] || null;
-          }
-
-          this.appraisalCycles = (results[results.length - 1]?.data) || [];
+          // Results array: [skills, appraisalCycles]
+          // Skills are already extracted from ApiResponse in the map operator
+          this.mySkills = Array.isArray(results[0]) ? results[0] : [];
+          
+          // Filter only assessed skills - must have assessorName (not null, not empty, not just whitespace)
+          this.assessedSkills = this.mySkills.filter(skill => {
+            const assessorName = skill.assessorName;
+            // Check if assessorName exists and is not empty/whitespace
+            if (!assessorName) return false;
+            const trimmed = assessorName.trim();
+            return trimmed !== '' && trimmed.length > 0;
+          });
+          
+          this.skillsDataSource.data = this.assessedSkills;
+          
+          // Appraisal cycles
+          const cyclesResponse = results[1];
+          this.appraisalCycles = (cyclesResponse?.data) || [];
           this.cyclesDataSource.data = this.appraisalCycles;
+          
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          
+          console.log('My Skills (all):', this.mySkills);
+          console.log('Assessed Skills (filtered):', this.assessedSkills);
 
           // ✅ Automatically select the latest active or first cycle
           if (this.appraisalCycles.length > 0) {
