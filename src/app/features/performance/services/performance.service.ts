@@ -29,7 +29,8 @@ import {
   ManagerReview,
   ManagerReviewRequest,
   ConsolidateAppraisalRequest,
-  EmployeePerformanceHistory
+  EmployeePerformanceHistory,
+  EmployeeAppraisalForEmployee
 } from '../../../core/models/performance.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
 
@@ -315,10 +316,6 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
 
 
   // Additional methods for dashboard
-  getMyAppraisals(): Observable<ApiResponse<EmployeeAppraisal[]>> {
-    return this.http.get<ApiResponse<EmployeeAppraisal[]>>(`${this.apiUrl}/performance/appraisals/my-appraisals`);
-  }
-
   getTeamPerformanceSummary(): Observable<ApiResponse<PerformanceSummary>> {
     return this.http.get<ApiResponse<PerformanceSummary>>(`${this.apiUrl}/performance/team-summary`);
   }
@@ -353,6 +350,26 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
 
   getSelfAssessments(employeeId: string, cycleId: string): Observable<ApiResponse<SelfAssessment[]>> {
     return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/${employeeId}/${cycleId}`);
+  }
+
+  getMySelfAssessments(filter?: { cycleId?: string; kraId?: string; search?: string }): Observable<ApiResponse<SelfAssessment[]>> {
+    let params = new HttpParams();
+    if (filter) {
+      if (filter.cycleId) params = params.set('cycleId', filter.cycleId);
+      if (filter.kraId) params = params.set('kraId', filter.kraId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-assessments`, { params });
+  }
+
+  getMyAppraisals(filter?: { cycleId?: string; kraId?: string; search?: string }): Observable<ApiResponse<EmployeeAppraisalForEmployee[]>> {
+    let params = new HttpParams();
+    if (filter) {
+      if (filter.cycleId) params = params.set('cycleId', filter.cycleId);
+      if (filter.kraId) params = params.set('kraId', filter.kraId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+    return this.http.get<ApiResponse<EmployeeAppraisalForEmployee[]>>(`${this.apiUrl}/Performance/appraisals/my-appraisals`, { params });
   }
 
   submitSelfAssessment(employeeId: string, cycleId: string): Observable<ApiResponse<string>> {

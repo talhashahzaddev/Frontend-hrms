@@ -85,6 +85,16 @@ export interface EmployeeAppraisal {
   updatedAt: string;
 }
 
+export interface EmployeeAppraisalForEmployee {
+  appraisalId: string;
+  cycleId: string;
+  cycleName: string;
+  kraName?: string;
+  rating?: number;
+  reviewerName?: string;
+  submittedAt?: string;
+}
+
 export enum ReviewType {
   SELF = 'self',
   MANAGER = 'manager',
@@ -364,6 +374,8 @@ export interface SelfAssessment {
   status: 'draft' | 'submitted';
   createdAt: string;
   updatedAt: string;
+  cycleName?: string;
+  kraName?: string;
 }
 
 export interface CreateSelfAssessmentRequest {
