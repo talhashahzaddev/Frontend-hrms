@@ -1,0 +1,171 @@
+<div class="employee-performance-history-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>history</mat-icon>
+      Performance History
+    </h1>
+    <div class="header-info" *ngIf="performanceHistory">
+      <span>{{ performanceHistory.employeeName }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading performance history...</p>
+  </div>
+
+  <div *ngIf="!isLoading && !performanceHistory" class="no-data">
+    <mat-icon>info</mat-icon>
+    <h2>No Performance History</h2>
+    <p>No performance history found for this employee.</p>
+  </div>
+
+  <div *ngIf="!isLoading && performanceHistory">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <mat-icon>assessment</mat-icon>
+            <div>
+              <div class="summary-value">{{ performanceHistory.totalAppraisals }}</div>
+              <div class="summary-label">Total Appraisals</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <mat-icon>check_circle</mat-icon>
+            <div>
+              <div class="summary-value">{{ performanceHistory.completedAppraisals }}</div>
+              <div class="summary-label">Completed</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <mat-icon>star</mat-icon>
+            <div>
+              <div class="summary-value">{{ performanceHistory.averageRating?.toFixed(2) || 'N/A' }}</div>
+              <div class="summary-label">Average Rating</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTab" class="history-tabs">
+      <!-- Appraisals Tab -->
+      <mat-tab label="Appraisals">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <table mat-table [dataSource]="performanceHistory.appraisals" class="appraisals-table">
+                <ng-container matColumnDef="cycle">
+                  <th mat-header-cell *matHeaderCellDef>Appraisal Cycle</th>
+                  <td mat-cell *matCellDef="let appraisal">{{ appraisal.cycleName }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="rating">
+                  <th mat-header-cell *matHeaderCellDef>Overall Rating</th>
+                  <td mat-cell *matCellDef="let appraisal">
+                    <div class="rating-display">
+                      <mat-icon>star</mat-icon>
+                      <span>{{ appraisal.overallRating?.toFixed(2) || 'N/A' }}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let appraisal">
+                    <mat-chip [color]="getStatusColor(appraisal.status)">
+                      {{ appraisal.status | titlecase }}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Completed Date</th>
+                  <td mat-cell *matCellDef="let appraisal">
+                    {{ appraisal.reviewedAt ? (appraisal.reviewedAt | date:'mediumDate') : 'N/A' }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let appraisal">
+                    <button mat-icon-button (click)="viewAppraisalDetails(appraisal)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Skill Gaps Tab -->
+      <mat-tab label="Skill Gaps">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Skill Gap Analysis</mat-card-title>
+              <mat-card-subtitle>Identified skill gaps and development needs</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="skill-gaps-list" *ngIf="performanceHistory.skillGaps.length > 0">
+                <mat-expansion-panel *ngFor="let gap of performanceHistory.skillGaps" class="gap-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{ gap.skillName }}
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      Gap: {{ gap.gap }}
+                      <mat-chip [class]="'gap-severity-' + getSkillGapSeverity(gap.gap)">
+                        {{ getSkillGapSeverity(gap.gap) | titlecase }}
+                      </mat-chip>
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+                  
+                  <div class="gap-details">
+                    <div class="gap-metric">
+                      <strong>Required Level:</strong> {{ gap.requiredLevel }}/5
+                    </div>
+                    <div class="gap-metric">
+                      <strong>Current Level:</strong> {{ gap.currentLevel }}/5
+                    </div>
+                    <div class="gap-metric">
+                      <strong>Gap:</strong> {{ gap.gap }}
+                    </div>
+                  </div>
+                </mat-expansion-panel>
+              </div>
+
+              <div *ngIf="performanceHistory.skillGaps.length === 0" class="no-gaps">
+                <mat-icon>check_circle</mat-icon>
+                <p>No significant skill gaps identified</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+
+
+
+

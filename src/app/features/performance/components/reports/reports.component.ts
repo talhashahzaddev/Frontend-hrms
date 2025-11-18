@@ -6,24 +6,28 @@ import { AuthService } from '@/app/core/services/auth.service';
 import { NotificationService } from '@/app/core/services/notification.service';
 // import { error } from 'console';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
-import { ReactiveFormsModule } from '@angular/forms';
 import { PerformanceSummary } from '@/app/core/models/performance.models';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 
-import { MatCard } from '@angular/material/card';
 @Component({
   selector: 'app-reports',
+  standalone: true,
   imports: [
     CommonModule,
-      MatFormFieldModule,
+    MatFormFieldModule,
     MatSelectModule,
     MatOptionModule,
-   MatIconModule,
-    MatCard,
+    MatIconModule,
+    MatCardModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
     ReactiveFormsModule
   ],
   templateUrl: './reports.component.html',
@@ -36,6 +40,7 @@ private destroy$=new Subject<void>();
 reportForm!: FormGroup;
 
 summary: PerformanceSummary | null = null;
+isLoading = false;
 
 
 
@@ -89,6 +94,8 @@ private notificaionService:NotificationService
   }
 
  private loadSummary(cycleId: string): void {
+    this.isLoading = true;
+    this.summary = null;
     this.PerformanceService.getPerformanceSummary(cycleId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -96,12 +103,37 @@ private notificaionService:NotificationService
           console.log('Summary API response:', response);
           this.summary = response.data;
           console.log('Summary:', this.summary);
+          this.isLoading = false;
         },
         error: (error) => {
           this.notificaionService.showError('Failed to load summary');
           console.error('Failed to load summary', error);
+          this.isLoading = false;
         }
       });
+  }
+
+  hasRatingDistribution(): boolean {
+    if (!this.summary?.ratingDistribution) return false;
+    return Object.keys(this.summary.ratingDistribution).length > 0;
+  }
+
+  getRatingDistributionKeys(): string[] {
+    if (!this.summary?.ratingDistribution) return [];
+    return Object.keys(this.summary.ratingDistribution).sort((a, b) => parseFloat(a) - parseFloat(b));
+  }
+
+  getRatingCount(rating: string): number {
+    if (!this.summary?.ratingDistribution) return 0;
+    // ratingDistribution is typed as { [rating: number]: number } but keys come as strings
+    const count = (this.summary.ratingDistribution as any)[rating];
+    return count || 0;
+  }
+
+  getRatingPercentage(rating: string): number {
+    if (!this.summary?.ratingDistribution || !this.summary.totalAppraisals) return 0;
+    const count = this.getRatingCount(rating);
+    return (count / this.summary.totalAppraisals) * 100;
   }
 
 

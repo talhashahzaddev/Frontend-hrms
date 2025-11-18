@@ -1,473 +1,1007 @@
-/* =======================================================
-   Performance Dashboard - Shift Dashboard Style Replica
-========================================================= */
-
+// Performance Dashboard Component - Professional & Beautiful Styling
 .performance-dashboard-container {
-  padding: 32px;
+  padding: 24px;
   max-width: 1600px;
   margin: 0 auto;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
-}
 
-/* =======================================================
-   Header
-========================================================= */
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 40px;
-  padding: 28px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  flex-wrap: wrap;
-  gap: 32px;
-}
-
-.dashboard-header .page-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 32px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.dashboard-header .page-title mat-icon {
-  font-size: 36px;
-  width: 36px;
-  height: 36px;
-  color: #667eea;
-}
-
-// /* =======================================================
-//    Cards
-// ========================================================= */
-// .shift-card {
-//   border-radius: 16px;
-//   background: white;
-//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-//   padding: 24px;
-//   transition: all 0.3s ease;
-// }
-
-// .shift-card:hover {
-//   transform: translateY(-2px);
-//   box-shadow: 0 6px 18px rgba(102, 126, 234, 0.15);
-// }
-
-// .shift-card mat-card-header {
-//   margin-bottom: 12px;
-// }
-
-// .shift-card mat-card-title {
-//   font-size: 18px;
-//   font-weight: 600;
-//   color: #1f2937;
-// }
-
-
-
-/* =======================================================
-   Performance Dashboard Cards - Exact Shift Dashboard Style
-======================================================= */
-
-
-/* =======================================================
-   Performance Card — Same as Shift Dashboard mat-card
-======================================================= */
-.performance-card {
-  padding: 28px;
-  border-radius: 16px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 24px;
-}
-
-.performance-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.15);
-}
-
-/* Card Header */
-.performance-card mat-card-header {
-  margin-bottom: 16px;
-}
-
-.performance-card mat-card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-/* Empty State */
-.performance-card .shift-empty-state {
-  text-align: center;
-  padding: 40px 0;
-  color: #6b7280;
-}
-
-.performance-card .shift-empty-state mat-icon {
-  font-size: 48px;
-  color: #cbd5e1;
-  margin-bottom: 16px;
-}
-
-/* Performance Stats */
-.performance-card .performance-stats {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.performance-card .stat-item {
-  flex: 1;
-  text-align: center;
-}
-
-.performance-card .stat-label {
-  font-size: 13px;
-  font-weight: 500;
-  text-transform: uppercase;
-  color: #6b7280;
-  margin-bottom: 4px;
-  display: block;
-}
-
-.performance-card .stat-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-/* Rating Display */
-.performance-card .rating-display {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.performance-card .current-rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.performance-card .rating-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #667eea;
-}
-
-.performance-card .rating-stars mat-icon {
-  font-size: 24px;
-  color: #d1d5db; /* default grey */
-}
-
-.performance-card .rating-stars mat-icon.filled {
-  color: #facc15; /* yellow for filled stars */
-}
-
-/* Goal Summary Grid */
-.performance-card .goal-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.performance-card .goal-item {
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  text-align: center;
-}
-
-.performance-card .goal-item h3 {
-  font-size: 13px;
-  font-weight: 500;
-  color: #6b7280;
-  margin-bottom: 8px;
-}
-
-.performance-card .goal-item p {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-/* Skills List */
-.performance-card .skills-list .skill-item {
-  margin-bottom: 16px;
-}
-
-.performance-card .skills-list .skill-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.performance-card mat-progress-bar {
-  height: 8px;
-  border-radius: 4px;
-}
-
-
-
-
-
-/* =======================================================
-   Tables
-========================================================= */
-.shift-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.shift-table th {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #e5e7eb;
-  padding: 16px 12px;
-  text-align: left;
-}
-
-.shift-table td {
-  padding: 16px 12px;
-  border-bottom: 1px solid #f3f4f6;
-  font-size: 14px;
-  color: #374151;
-}
-
-.shift-table tr:hover {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
-}
-
-/* =======================================================
-   Tabs
-========================================================= */
-.tab-content {
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-}
-
-.tab-content h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
-}
-
-/* =======================================================
-   Buttons
-========================================================= */
-button[mat-raised-button],
-button[mat-stroked-button] {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  padding: 0 22px !important;
-  height: 44px !important;
-  line-height: 1 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: 14px !important;
-  transition: all 0.3s ease;
-}
-
-button[mat-raised-button] mat-icon,
-button[mat-stroked-button] mat-icon {
-  margin-right: 6px;
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
-button[color="primary"] {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-button[color="primary"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
-}
-
-button[color="warn"] {
-  color: #dc2626 !important;
-  border-color: #fee2e2 !important;
-}
-
-button[color="warn"]:hover {
-  background: #fee2e2 !important;
-}
-
-/* =======================================================
-   Empty State
-========================================================= */
-.shift-empty-state {
-  text-align: center;
-  padding: 80px 24px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 12px;
-  border: 2px dashed #e5e7eb;
-}
-
-.shift-empty-state mat-icon {
-  font-size: 64px;
-  color: #cbd5e1;
-  margin-bottom: 16px;
-  opacity: 0.6;
-}
-
-.shift-empty-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 8px;
-}
-
-.shift-empty-state p {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 16px;
-}
-
-.shift-empty-state button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  font-weight: 600;
-  padding: 0 28px !important;
-  border-radius: 12px;
-  height: 48px;
-}
-
-.shift-empty-state button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-/* =======================================================
-   Form Fields (Dropdown, etc.)
-========================================================= */
-::ng-deep .performance-dashboard-container mat-form-field.mat-form-field-appearance-outline {
-  width: 240px;
-  margin-bottom: 16px;
-}
-
-::ng-deep .performance-dashboard-container .mat-mdc-text-field-wrapper {
-  background: white;
-  border-radius: 10px;
-  height: 48px;
-  transition: all 0.25s ease;
-  display: flex;
-  align-items: center;
-}
-
-::ng-deep .performance-dashboard-container .mat-mdc-form-field-flex {
-  padding: 0 14px !important;
-  align-items: center;
-  height: 48px;
-}
-
-::ng-deep .performance-dashboard-container .mat-mdc-form-field-infix {
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  height: 100%;
-}
-
-::ng-deep .performance-dashboard-container mat-form-field:hover .mat-mdc-notch-piece {
-  border-color: #667eea !important;
-}
-
-::ng-deep .performance-dashboard-container mat-form-field.mat-focused .mat-mdc-text-field-wrapper {
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
-}
-
-::ng-deep .performance-dashboard-container mat-form-field.mat-focused .mat-mdc-notch-piece {
-  border-color: #667eea !important;
-}
-
-::ng-deep .performance-dashboard-container mat-form-field.mat-focused .mat-mdc-form-field-label {
-  color: #667eea !important;
-}
-
-/* =======================================================
-   Overview Grid
-========================================================= */
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 28px;
-  margin-bottom: 40px;
-}
-
-/* =======================================================
-   Rating Stars
-========================================================= */
-.rating-stars mat-icon {
-  color: #d1d5db;
-  transition: color 0.25s ease;
-}
-
-.rating-stars mat-icon.filled {
-  color: #fbbf24;
-}
-
-/* =======================================================
-   Stats
-========================================================= */
-.performance-stats .stat-item {
-  text-align: center;
-}
-
-.performance-stats .stat-label {
-  color: #6b7280;
-  font-size: 13px;
-}
-
-.performance-stats .stat-value {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-/* =======================================================
-   Progress Bars
-========================================================= */
-::ng-deep mat-progress-bar .mdc-linear-progress__bar-inner {
-  border-radius: 8px !important;
-}
-
-/* =======================================================
-   Responsive
-========================================================= */
-@media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
+  // Page Header
+  .page-header {
+    display: flex;
+    justify-content: space-between;
     align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-content {
+      flex: 1;
+
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
+
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: #667eea;
+        }
+      }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    .header-actions {
+      .add-button {
+        height: 48px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+
+        mat-icon {
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          margin: 0 !important;
+          flex-shrink: 0;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+      }
+    }
   }
 
-  ::ng-deep .performance-dashboard-container mat-form-field.mat-form-field-appearance-outline {
-    width: 100%;
+  // Loading State
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    gap: 16px;
+
+    p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    ::ng-deep mat-spinner {
+      circle {
+        stroke: #667eea !important;
+      }
+    }
+  }
+
+  // Stats Grid
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+
+    .stat-card {
+      border-radius: 16px !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+      border: none !important;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      background: white !important;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+      }
+
+      // Card background gradients
+      &.stat-card-primary {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%) !important;
+        border: 1px solid rgba(102, 126, 234, 0.2) !important;
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+          border-color: rgba(102, 126, 234, 0.3) !important;
+        }
+      }
+
+      &.stat-card-success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%) !important;
+        border: 1px solid rgba(16, 185, 129, 0.2) !important;
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%) !important;
+          border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+      }
+
+      &.stat-card-warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%) !important;
+        border: 1px solid rgba(245, 158, 11, 0.2) !important;
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.08) 100%) !important;
+          border-color: rgba(245, 158, 11, 0.3) !important;
+        }
+      }
+
+      &.stat-card-info {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%) !important;
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%) !important;
+          border-color: rgba(59, 130, 246, 0.3) !important;
+        }
+      }
+
+      ::ng-deep mat-card-content {
+        padding: 24px !important;
+      }
+
+      .stat-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        position: relative;
+
+        .stat-icon-wrapper {
+          width: 64px;
+          height: 64px;
+          border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          position: relative;
+          overflow: hidden;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: 16px;
+          }
+
+          .stat-icon {
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+            position: relative;
+            z-index: 1;
+            color: white;
+          }
+        }
+
+        .stat-details {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          .stat-label {
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin-bottom: 4px;
+          }
+
+          .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: #1f2937;
+            margin: 4px 0;
+            font-family: 'Inter', sans-serif;
+          }
+
+          .stat-footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+
+            .stat-hint {
+              font-size: 12px;
+              color: #9ca3af;
+              font-weight: 500;
+            }
+
+            .rating-stars {
+              display: flex;
+              gap: 2px;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: #d1d5db;
+
+                &.filled {
+                  color: #fbbf24;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Icon backgrounds
+      &.stat-card-primary {
+        .stat-icon-wrapper {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+      }
+
+      &.stat-card-success {
+        .stat-icon-wrapper {
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+      }
+
+      &.stat-card-warning {
+        .stat-icon-wrapper {
+          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+      }
+
+      &.stat-card-info {
+        .stat-icon-wrapper {
+          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+      }
+    }
+  }
+
+  // Main Content Section
+  .main-content-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  // Content Cards
+  .content-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+    background: white !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: #667eea;
+        }
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+          margin-right: 4px;
+        }
+      }
+    }
+
+    ::ng-deep mat-card-content {
+      padding: 24px !important;
+    }
+
+    // Filter Section
+    .filter-section {
+      margin-bottom: 24px;
+
+      .cycle-select-field {
+        width: 100%;
+        max-width: 400px;
+
+        ::ng-deep mat-form-field {
+          &.mat-form-field-appearance-outline {
+            .mat-mdc-text-field-wrapper {
+              background: white;
+              border-radius: 12px;
+            }
+
+            .mat-mdc-form-field-flex {
+              padding: 0 16px;
+            }
+
+            .mat-mdc-notch-piece {
+              border-color: #e5e7eb !important;
+              transition: border-color 0.3s ease;
+            }
+
+            &:hover .mat-mdc-text-field-wrapper {
+              background: #f9fafb;
+            }
+
+            &:hover .mat-mdc-notch-piece {
+              border-color: #667eea !important;
+            }
+
+            &.mat-focused {
+              .mat-mdc-text-field-wrapper {
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+              }
+
+              .mat-mdc-notch-piece {
+                border-color: #667eea !important;
+                border-width: 2px !important;
+              }
+            }
+
+            .mat-mdc-form-field-icon-prefix {
+              padding-right: 12px;
+              margin-right: 4px;
+              display: flex;
+              align-items: center;
+
+              mat-icon {
+                color: #667eea;
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+            }
+
+            .mat-mdc-form-field-infix {
+              min-height: 48px;
+            }
+          }
+        }
+      }
+    }
+
+    // Skills List
+    .skills-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .skill-item {
+        padding: 16px;
+        background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateX(4px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+          border-color: #cbd5e1;
+        }
+
+        .skill-info {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+
+          .skill-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1f2937;
+          }
+
+          .skill-level-badge {
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+
+            &.level-5, &.level-4 {
+              background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+              color: #059669;
+            }
+
+            &.level-3 {
+              background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+              color: #2563eb;
+            }
+
+            &.level-2, &.level-1 {
+              background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
+              color: #d97706;
+            }
+          }
+        }
+
+        .skill-progress {
+          height: 8px;
+          border-radius: 4px;
+          overflow: hidden;
+
+          ::ng-deep .mat-mdc-progress-bar-buffer {
+            background: #e5e7eb;
+          }
+
+          ::ng-deep .mat-mdc-progress-bar-fill {
+            &::after {
+              background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            }
+          }
+
+          &.progress-level-5 ::ng-deep .mat-mdc-progress-bar-fill::after,
+          &.progress-level-4 ::ng-deep .mat-mdc-progress-bar-fill::after {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+          }
+
+          &.progress-level-3 ::ng-deep .mat-mdc-progress-bar-fill::after {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+          }
+
+          &.progress-level-2 ::ng-deep .mat-mdc-progress-bar-fill::after,
+          &.progress-level-1 ::ng-deep .mat-mdc-progress-bar-fill::after {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+          }
+        }
+      }
+    }
+
+    // Tables
+    .table-container {
+      overflow-x: auto;
+      min-height: 200px;
+
+      .skill-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        small {
+          font-size: 12px;
+          color: #6b7280;
+          font-style: italic;
+        }
+      }
+
+      // Skill Level Chips
+      ::ng-deep mat-chip {
+        &.level-beginner {
+          background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+          color: #dc2626 !important;
+          border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        }
+
+        &.level-intermediate {
+          background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%) !important;
+          color: #d97706 !important;
+          border: 1px solid rgba(251, 191, 36, 0.3) !important;
+        }
+
+        &.level-advanced {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
+          color: #2563eb !important;
+          border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        }
+
+        &.level-expert {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+          color: #059669 !important;
+          border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        }
+      }
+    }
+
+    .appraisals-table,
+    .cycles-table,
+    .skills-table {
+      width: 100%;
+
+      ::ng-deep {
+        .mat-mdc-header-cell {
+          background: #f9fafb;
+          font-weight: 600;
+          color: #374151;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          padding: 16px;
+          border-bottom: 2px solid #e5e7eb;
+        }
+
+        .mat-mdc-cell {
+          padding: 16px;
+          border-bottom: 1px solid #f3f4f6;
+          color: #1f2937;
+          font-size: 14px;
+        }
+
+        .mat-mdc-row {
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: #f9fafb;
+          }
+
+          &:last-child .mat-mdc-cell {
+            border-bottom: none;
+          }
+        }
+      }
+
+      .cycle-info,
+      .cycle-name-info,
+      .reviewer-info,
+      .dates-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          color: #667eea;
+        }
+      }
+
+      .review-type-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+
+        &.review-manager {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
+          color: #667eea;
+        }
+
+        &.review-peer {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+          color: #2563eb;
+        }
+
+        &.review-self {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+          color: #059669;
+        }
+      }
+
+      .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .rating-value {
+          font-size: 18px;
+          font-weight: 700;
+          color: #1f2937;
+        }
+
+        .rating-stars {
+          display: flex;
+          gap: 2px;
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: #d1d5db;
+
+            &.filled {
+              color: #fbbf24;
+            }
+          }
+        }
+      }
+
+      .feedback-text {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #6b7280;
+      }
+
+      .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+        }
+
+        &.status-active {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+          color: #059669;
+        }
+
+        &.status-completed {
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%);
+          color: #2563eb;
+        }
+
+        &.status-cancelled {
+          background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+          color: #dc2626;
+        }
+      }
+    }
+
+    // Team Performance
+    .team-performance-section {
+      .summary-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+
+        .summary-stat-card {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 20px;
+          background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+          border-radius: 12px;
+          border: 1px solid #e5e7eb;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            border-color: #cbd5e1;
+          }
+
+          .summary-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+              color: white;
+            }
+          }
+
+          .summary-stat-details {
+            flex: 1;
+
+            .summary-stat-label {
+              font-size: 12px;
+              font-weight: 500;
+              color: #6b7280;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 4px;
+            }
+
+            .summary-stat-value {
+              font-size: 24px;
+              font-weight: 700;
+              color: #1f2937;
+            }
+          }
+        }
+      }
+
+      .section-subtitle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 16px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: #667eea;
+        }
+      }
+
+      .top-performers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        .performer-item {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px;
+          background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+          border-radius: 12px;
+          border: 1px solid #e5e7eb;
+          transition: all 0.3s ease;
+
+          &:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            border-color: #cbd5e1;
+          }
+
+          .performer-rank {
+            flex-shrink: 0;
+
+            .rank-number {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 36px;
+              height: 36px;
+              border-radius: 50%;
+              font-size: 16px;
+              font-weight: 700;
+              color: white;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+              .trophy-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+                color: #fbbf24;
+              }
+
+              &.rank-1 {
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+              }
+
+              &.rank-2 {
+                background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+              }
+
+              &.rank-3 {
+                background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+              }
+            }
+          }
+
+          .performer-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .performer-name {
+              font-size: 15px;
+              font-weight: 600;
+              color: #1f2937;
+            }
+
+            .performer-details {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              font-size: 13px;
+              color: #6b7280;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: #9ca3af;
+              }
+            }
+          }
+
+          .performer-rating {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+
+            .rating-value {
+              font-size: 18px;
+              font-weight: 700;
+              color: #1f2937;
+            }
+
+            .rating-stars {
+              display: flex;
+              gap: 2px;
+
+              mat-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: #d1d5db;
+
+                &.filled {
+                  color: #fbbf24;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Empty State
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 12px;
+      border: 2px dashed #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #cbd5e1;
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      p {
+        margin: 0 0 24px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .create-first-button {
+        height: 44px;
+        padding: 0 24px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        margin: 0 auto !important;
+
+        mat-icon {
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          margin: 0 !important;
+          flex-shrink: 0;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .performance-dashboard-container {
+    .stats-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .performance-dashboard-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: stretch;
+
+      .header-actions {
+        .add-button {
+          width: 100%;
+        }
+      }
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .content-card {
+      .team-performance-section {
+        .summary-stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
   }
 }
