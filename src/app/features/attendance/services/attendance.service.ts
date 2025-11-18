@@ -14,7 +14,7 @@ import {
   ManualAttendanceRequest,
   TimeTrackingSession,
   DailyAttendanceStats,
-  Shift,
+PagedResult,
   ShiftDto,
   UpdateShiftDto,
   ShiftSwap,
@@ -304,18 +304,36 @@ assignShift(request: { employeeId: string; shiftId: string }): Observable<void> 
     );
 }
 
-  /** ✅ Get Employees by Shift ID */
-getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
-  return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
+
+/** ✅ Get Employees by Shift ID (PagedResult + search) using HttpParams */
+getEmployeesByShift(
+  shiftId: string,
+  page = 1,
+  pageSize = 50,
+  searchTerm = ''
+): Observable<PagedResult<EmployeeShift>> {
+
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('pageSize', pageSize.toString());
+
+  if (searchTerm) {
+    params = params.set('searchTerm', searchTerm);
+  }
+
+  return this.http.get<ApiResponse<PagedResult<EmployeeShift>>>(`${this.apiUrl}/shift/${shiftId}`, { params })
     .pipe(
       map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to fetch employees for shift');
-        }
-        return response.data || [];
+        if (!response.success) throw new Error(response.message || 'Failed to fetch employees for shift');
+        if (!response.data) throw new Error('No data returned from server');
+        return response.data; // ✅ returns PagedResult<EmployeeShift>
       })
     );
 }
+
+
+
+
 
 // ✅ Shift Swap API using model
   createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {

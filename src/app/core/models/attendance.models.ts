@@ -14,6 +14,13 @@ export interface Attendance {
   notes?: string;
 }
 
+export interface PagedResult<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 export enum AttendanceStatus {
   PRESENT = 'present',
   ABSENT = 'absent',

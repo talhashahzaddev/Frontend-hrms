@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
-
+import { MatPaginatorModule } from '@angular/material/paginator';
 // Components and Services
 import { AssignShiftComponent } from '../assign-shift/assign-shift.component';
 import { CreateShiftComponent } from '../create-shift/create-shift.component';
@@ -38,6 +39,7 @@ import { PendingShiftSwap,ShiftDto,UpdateShiftDto } from '@/app/core/models/atte
     MatDividerModule,
     MatTableModule,
     MatMenuModule,
+    MatPaginatorModule,
     MatChipsModule,
     MatTabsModule
   ],
@@ -54,9 +56,13 @@ export class ShiftComponent implements OnInit {
   selectedTabIndex = 0;
   isLoading = false;
   allEmployees: Employee[] = [];
-
+pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [5, 10, 25, 50];
+  searchTerm:string='';
   employeeShiftSwaps: PendingShiftSwap[] = []; // ✅ store employee's shift swap requests
   currentUser: any = null; // ✅ store current logged-in user
+pagedResult: { data: EmployeeShift[]; totalCount: number } | null = null;
 
   constructor(
     private dialog: MatDialog,
@@ -108,22 +114,56 @@ if (this.isSuperAdmin) {
     });
   }
 
+  onPageChange(event: any) {
+  this.pageIndex = event.pageIndex;
+  this.pageSize = event.pageSize;
+  this.onShiftChange(this.selectedShiftId, this.pageIndex + 1, this.pageSize, this.searchTerm);
+}
 
-  onShiftChange(shiftId: string): void {
+
+
+// onShiftChange(shiftId: string, page = 1, pageSize = 10,search=''): void {
+//   if (!shiftId) {
+//     this.loadAllEmployees();
+//     return;
+//   }
+
+//   this.attendanceService.getEmployeesByShift(shiftId, page, pageSize,search)
+//     .pipe(takeUntil(this.destroy$))
+//     .subscribe({
+//       next: (pagedResult) => {
+//         this.employeesByShift = pagedResult.data; // ✅ extract data array
+//         console.log('Employees loaded:', this.employeesByShift);
+//       },
+//       error: (err: any) => console.error('Error loading employees:', err)
+//     });
+// }
+
+
+onShiftChange(shiftId: string, page = 1, pageSize = 10, search = ''): void {
   if (!shiftId) {
-    // ✅ If "All Shifts" selected
     this.loadAllEmployees();
     return;
   }
 
-  // ✅ Otherwise load employees by specific shift
-  this.attendanceService.getEmployeesByShift(shiftId)
+  this.isLoading = true;
+  this.attendanceService.getEmployeesByShift(shiftId, page, pageSize, search)
     .pipe(takeUntil(this.destroy$))
     .subscribe({
-      next: (employees: EmployeeShift[]) => (this.employeesByShift = employees),
-      error: (err: any) => console.error('Error loading employees:', err)
+      next: (paged) => {
+        this.pagedResult = paged;         // ✅ store full PagedResult
+        this.employeesByShift = paged.data; // extract data array
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading employees:', err);
+        this.isLoading = false;
+      }
     });
 }
+
+
+
 
 
 private loadAllEmployees(): void {
@@ -347,7 +387,3 @@ onEditShift(shift: ShiftDto): void {
     });
   }
 }
-
-
-
-

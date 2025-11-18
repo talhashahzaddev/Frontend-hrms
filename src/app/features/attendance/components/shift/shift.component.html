@@ -1,3 +1,4 @@
+
 <div class="shift-dashboard-container">
 
   <!-- Header -->
@@ -271,6 +272,17 @@
             </div>
           </div>
         </div>
+     
+
+        <mat-paginator
+  [length]="pagedResult?.totalCount || allEmployees.length || 0"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[5, 10, 25, 50]"
+  [pageIndex]="pageIndex"
+  (page)="onPageChange($event)">
+</mat-paginator>
+
+
       </mat-tab>
 
     </mat-tab-group>
