@@ -161,14 +161,14 @@ export interface CreateAppraisalDialogData {
           </div>
   
           <!-- Skills Section -->
-          <div class="form-section">
+          <!-- <div class="form-section">
             <h3 class="section-title">
               <mat-icon>psychology</mat-icon>
               Skills
-            </h3>
+            </h3> -->
   
             <!-- Skill Selection -->
-            <div class="form-row">
+            <!-- <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Select Skills</mat-label>
                 <mat-icon matPrefix>build</mat-icon>
@@ -179,10 +179,10 @@ export interface CreateAppraisalDialogData {
                 </mat-select>
                 <mat-hint>Select one or more skills to rate</mat-hint>
               </mat-form-field>
-            </div>
+            </div> -->
   
             <!-- Skill Ratings -->
-            <div *ngIf="selectedSkillsArray.length > 0" class="ratings-container">
+            <!-- <div *ngIf="selectedSkillsArray.length > 0" class="ratings-container">
               <h4 class="ratings-title">Skill Ratings</h4>
               <div class="rating-item" *ngFor="let skillRating of selectedSkillsArray.controls; let i = index">
                 <div class="rating-header">
@@ -206,8 +206,8 @@ export interface CreateAppraisalDialogData {
                   </mat-error>
                 </mat-form-field>
               </div>
-            </div>
-          </div>
+            </div> -->
+          <!-- </div> -->
 
           <!-- Feedback -->
           <div class="form-row">

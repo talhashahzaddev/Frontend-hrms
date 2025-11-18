@@ -134,7 +134,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   
   // Table
   skillDisplayedColumns: string[] = ['category', 'skillName', 'levelScale', 'status', 'actions'];
-  displayedColumns: string[] = ['skillName', 'proficiencyLevel', 'assessorName', 'lastAssessed', 'actions'];
+  displayedColumns: string[] = ['employeeName', 'skillName', 'proficiencyLevel', 'assessorName', 'lastAssessed', 'actions'];
   pageSize = 10;
   pageIndex = 0;
   totalItems = 0;
@@ -164,8 +164,9 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadSkills();
     this.loadEmployees();
-    if (this.hasHRRole()) {
-      this.selectedTab = 0; // Show skill sets for HR
+    if (this.hasHRRole() || this.hasManagerRole()) {
+      this.selectedTab = 1; // Show all employee skills for HR/Manager
+      this.loadEmployeeSkills(); // Load all employee skills
     } else {
       this.selectedTab = 1; // Show employee skills for employees
       this.loadCurrentUserSkills();
@@ -226,27 +227,74 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadEmployeeSkills(employeeId: string) {
+  loadEmployeeSkills(employeeId?: string) {
+    // Prevent concurrent API calls
+    if (this.isLoadingEmployeeSkills) {
+      return;
+    }
+    
     this.isLoadingEmployeeSkills = true;
-    this.performanceService.getEmployeeSkillsByEmployee(employeeId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.success && response.data) {
-            this.employeeSkills = response.data;
-            this.applyEmployeeSkillFilters();
-            this.totalItems = response.data.length;
-          }
-          this.isLoadingEmployeeSkills = false;
-          this.cdr.markForCheck();
+    
+    // If HR/Manager role, load all employee skills; otherwise load current user's skills
+    if (this.hasHRRole() || this.hasManagerRole()) {
+      const filterValue = this.employeeSkillFilterForm.value;
+      this.performanceService.getEmployeeSkills(
+        {
+          employeeId: employeeId || filterValue.employeeId || undefined,
+          search: filterValue.search || undefined,
+          proficiencyLevel: filterValue.proficiencyLevel || undefined
         },
-        error: (error) => {
-          console.error('Error loading employee skills:', error);
-          this.notificationService.showError('Failed to load employee skills');
-          this.isLoadingEmployeeSkills = false;
-          this.cdr.markForCheck();
-        }
-      });
+        this.pageIndex + 1,
+        this.pageSize
+      )
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              const paginatedData = response.data as any;
+              this.employeeSkills = paginatedData.items || paginatedData.data || [];
+              this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
+              // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
+              this.filteredEmployeeSkills = this.employeeSkills;
+              this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
+            }
+            this.isLoadingEmployeeSkills = false;
+            this.cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error loading employee skills:', error);
+            this.notificationService.showError('Failed to load employee skills');
+            this.isLoadingEmployeeSkills = false;
+            this.cdr.markForCheck();
+          }
+        });
+    } else {
+      // Employee view - load only their own skills
+      const currentUser = this.authService.getCurrentUserValue();
+      if (currentUser?.userId) {
+        this.performanceService.getEmployeeSkillsByEmployee(currentUser.userId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success && response.data) {
+                this.employeeSkills = response.data;
+                this.totalItems = response.data.length;
+                // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
+                this.filteredEmployeeSkills = this.employeeSkills;
+                this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
+              }
+              this.isLoadingEmployeeSkills = false;
+              this.cdr.markForCheck();
+            },
+            error: (error) => {
+              console.error('Error loading employee skills:', error);
+              this.notificationService.showError('Failed to load employee skills');
+              this.isLoadingEmployeeSkills = false;
+              this.cdr.markForCheck();
+            }
+          });
+      }
+    }
   }
 
   onEmployeeChange(employeeId: string) {
@@ -254,16 +302,18 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
       this.loadEmployeeSkills(employeeId);
     } else {
       this.employeeSkills = [];
-      this.applyEmployeeSkillFilters();
+      this.filteredEmployeeSkills = [];
+      this.filteredEmployeeSkillsDataSource.data = [];
+      this.totalItems = 0;
     }
   }
 
   onEmployeeFilterChange(employeeId: string) {
+    this.pageIndex = 0; // Reset to first page when changing employee filter
     if (employeeId) {
       this.loadEmployeeSkills(employeeId);
     } else {
-      this.employeeSkills = [];
-      this.applyEmployeeSkillFilters();
+      this.loadEmployeeSkills(); // Load all if no employee selected
     }
   }
 
@@ -320,30 +370,33 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   applyEmployeeSkillFilters(): void {
     const filterValue = this.employeeSkillFilterForm.value;
-    let filtered = [...this.employeeSkills];
+    
+    // If HR/Manager, reload from API with filters; otherwise filter locally
+    if (this.hasHRRole() || this.hasManagerRole()) {
+      this.pageIndex = 0; // Reset to first page when filtering
+      this.loadEmployeeSkills();
+    } else {
+      // Employee view - filter locally
+      let filtered = [...this.employeeSkills];
 
-    // Employee filter (handled separately via onEmployeeFilterChange)
-    if (filterValue.employeeId) {
-      filtered = filtered.filter(skill => skill.employeeId === filterValue.employeeId);
+      // Search filter
+      if (filterValue.search) {
+        const searchLower = filterValue.search.toLowerCase();
+        filtered = filtered.filter(skill => 
+          skill.skillName.toLowerCase().includes(searchLower) ||
+          (skill.notes && skill.notes.toLowerCase().includes(searchLower))
+        );
+      }
+
+      // Proficiency level filter
+      if (filterValue.proficiencyLevel) {
+        filtered = filtered.filter(skill => skill.proficiencyLevel === parseInt(filterValue.proficiencyLevel));
+      }
+
+      this.filteredEmployeeSkills = filtered;
+      this.filteredEmployeeSkillsDataSource.data = filtered;
+      this.totalItems = filtered.length;
     }
-
-    // Search filter
-    if (filterValue.search) {
-      const searchLower = filterValue.search.toLowerCase();
-      filtered = filtered.filter(skill => 
-        skill.skillName.toLowerCase().includes(searchLower) ||
-        (skill.notes && skill.notes.toLowerCase().includes(searchLower))
-      );
-    }
-
-    // Proficiency level filter
-    if (filterValue.proficiencyLevel) {
-      filtered = filtered.filter(skill => skill.proficiencyLevel === filterValue.proficiencyLevel);
-    }
-
-    this.filteredEmployeeSkills = filtered;
-    this.filteredEmployeeSkillsDataSource.data = filtered;
-    this.totalItems = filtered.length;
   }
 
   clearEmployeeSkillFilters(): void {
@@ -413,15 +466,18 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   openAddEmployeeSkillDialog(): void {
     const currentUser = this.authService.getCurrentUserValue();
-    const defaultEmployeeId = this.hasHRRole() ? undefined : currentUser?.userId;
+    const isManager = this.hasHRRole() || this.hasManagerRole();
+    const defaultEmployeeId = isManager ? undefined : currentUser?.userId;
+    const mode = isManager ? 'manager' : 'employee';
 
     const dialogRef = this.dialog.open(AddEmployeeSkillDialogComponent, {
-      width: '800px',
+      width: '900px',
       maxWidth: '90vw',
       data: {
         employees: this.employees,
         skills: this.skills.filter(s => s.isActive),
-        defaultEmployeeId: defaultEmployeeId
+        defaultEmployeeId: defaultEmployeeId,
+        mode: mode
       },
       disableClose: false
     });
@@ -430,7 +486,11 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         if (result) {
-          this.createEmployeeSkill(result);
+          if (result.mode === 'manager') {
+            this.updateEmployeeSkills(result.updates);
+          } else {
+            this.createEmployeeSkill(result.request);
+          }
         }
       });
   }
@@ -457,6 +517,69 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
           this.notificationService.showError('Failed to add employee skill');
         }
       });
+  }
+
+  private updateEmployeeSkills(updates: Array<{ employeeSkillId: string; request: UpdateEmployeeSkillRequest }>): void {
+    if (!updates || updates.length === 0) {
+      return;
+    }
+
+    let completed = 0;
+    let failed = 0;
+    const total = updates.length;
+    let employeeId: string | null = null;
+
+    updates.forEach(({ employeeSkillId, request }) => {
+      this.performanceService.updateEmployeeSkill(employeeSkillId, request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              completed++;
+              // Get employeeId from the first response for reloading
+              if (!employeeId && response.data) {
+                employeeId = response.data.employeeId;
+              }
+            } else {
+              failed++;
+            }
+
+            // When all requests are done
+            if (completed + failed === total) {
+              if (completed > 0) {
+                this.notificationService.showSuccess(`Successfully rated ${completed} skill(s)`);
+                if (employeeId) {
+                  this.loadEmployeeSkills(employeeId);
+                }
+              }
+              if (failed > 0) {
+                this.notificationService.showError(`Failed to rate ${failed} skill(s)`);
+              }
+              this.cdr.markForCheck();
+            }
+          },
+          error: (error) => {
+            console.error('Error updating employee skill:', error);
+            failed++;
+            if (completed + failed === total) {
+              if (completed > 0) {
+                this.notificationService.showSuccess(`Successfully rated ${completed} skill(s)`);
+                if (employeeId) {
+                  this.loadEmployeeSkills(employeeId);
+                }
+              }
+              if (failed > 0) {
+                this.notificationService.showError(`Failed to rate ${failed} skill(s)`);
+              }
+              this.cdr.markForCheck();
+            }
+          }
+        });
+    });
+  }
+
+  hasManagerRole(): boolean {
+    return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
   }
 
 
@@ -491,5 +614,6 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
+    this.loadEmployeeSkills(); // Reload with new pagination
   }
 }

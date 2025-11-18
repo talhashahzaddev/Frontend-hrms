@@ -19,6 +19,13 @@
         <mat-icon>add</mat-icon>
         Create Appraisal
       </button>
+      <button *ngIf="!hasHRRole()" 
+              mat-flat-button 
+              (click)="openSelfAssessmentDialog()"
+              class="add-button">
+        <mat-icon>rate_review</mat-icon>
+        Self-Assessment
+      </button>
     </div>
   </div>
 
@@ -273,6 +280,32 @@
         <div class="detail-section mb-4" *ngIf="selectedAppraisal.developmentPlan">
           <h3 class="text-lg font-semibold mb-2">Development Plan</h3>
           <p>{{ selectedAppraisal.developmentPlan }}</p>
+        </div>
+
+        <!-- KRA Ratings Section -->
+        <div class="detail-section mb-4" *ngIf="hasKraRatings(selectedAppraisal)">
+          <h3 class="text-lg font-semibold mb-2">KRA Ratings</h3>
+          <div class="kra-ratings-list">
+            <div *ngFor="let kraRating of getKraRatingsList(selectedAppraisal.kraRatings)" class="kra-rating-item">
+              <div class="kra-rating-header">
+                <strong>{{ kraRating.kraName || 'KRA' }}</strong>
+                <span class="rating-badge">{{ kraRating.rating }}/5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skill Ratings Section -->
+        <div class="detail-section mb-4" *ngIf="hasSkillRatings(selectedAppraisal)">
+          <h3 class="text-lg font-semibold mb-2">Skill Ratings</h3>
+          <div class="skill-ratings-list">
+            <div *ngFor="let skillRating of getSkillRatingsList(selectedAppraisal.skillRatings)" class="skill-rating-item">
+              <div class="skill-rating-header">
+                <strong>{{ skillRating.skillName || 'Skill' }}</strong>
+                <span class="rating-badge">{{ skillRating.rating }}/5</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="detail-section mb-4">

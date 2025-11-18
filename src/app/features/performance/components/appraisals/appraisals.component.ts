@@ -16,6 +16,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { CreateAppraisalDialogComponent } from './create-appraisal-dialog.component';
+import { SelfAssessmentDialogComponent } from './self-assessment-dialog.component';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@/app/core/services/auth.service';
 import { PerformanceService } from '../../services/performance.service';
@@ -235,6 +236,26 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       });
   }
 
+  openSelfAssessmentDialog(): void {
+    const dialogRef = this.dialog.open(SelfAssessmentDialogComponent, {
+      width: '900px',
+      maxWidth: '90vw',
+      data: {
+        appraisalCycles: this.appraisalCycles
+      },
+      disableClose: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && result.success) {
+          // Reload appraisals to show the new self-assessment
+          this.loadAppraisals();
+        }
+      });
+  }
+
   private createAppraisal(request: CreateAppraisal): void {
     if (!this.currentUser) {
       this.notificationService.showError('Current user not found.');
@@ -314,6 +335,34 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       default:
         return 'status-draft';
     }
+  }
+
+  hasKraRatings(appraisal: EmployeeAppraisal | null): boolean {
+    if (!appraisal || !appraisal.kraRatings) return false;
+    return Object.keys(appraisal.kraRatings).length > 0;
+  }
+
+  hasSkillRatings(appraisal: EmployeeAppraisal | null): boolean {
+    if (!appraisal || !appraisal.skillRatings) return false;
+    return Object.keys(appraisal.skillRatings).length > 0;
+  }
+
+  getKraRatingsList(kraRatings: { [kraId: string]: number }): Array<{ kraId: string; kraName: string; rating: number }> {
+    if (!kraRatings) return [];
+    return Object.entries(kraRatings).map(([kraId, rating]) => ({
+      kraId,
+      kraName: `KRA ${kraId.substring(0, 8)}`, // Placeholder - you might want to load actual KRA names
+      rating
+    }));
+  }
+
+  getSkillRatingsList(skillRatings: { [skillId: string]: number }): Array<{ skillId: string; skillName: string; rating: number }> {
+    if (!skillRatings) return [];
+    return Object.entries(skillRatings).map(([skillId, rating]) => ({
+      skillId,
+      skillName: `Skill ${skillId.substring(0, 8)}`, // Placeholder - you might want to load actual skill names
+      rating
+    }));
   }
 
   hasHRRole(): boolean {

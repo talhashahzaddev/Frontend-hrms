@@ -260,6 +260,16 @@
         <div *ngIf="!isLoadingEmployeeSkills" class="table-container">
           <table mat-table [dataSource]="filteredEmployeeSkillsDataSource" class="employee-skills-table">
             
+            <!-- Employee Name Column -->
+            <ng-container matColumnDef="employeeName">
+              <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+              <td mat-cell *matCellDef="let skill">
+                <div class="employee-info">
+                  <strong>{{ skill.employeeName || 'N/A' }}</strong>
+                </div>
+              </td>
+            </ng-container>
+
             <!-- Skill Name Column -->
             <ng-container matColumnDef="skillName">
               <th mat-header-cell *matHeaderCellDef>Skill Name</th>
@@ -275,9 +285,12 @@
             <ng-container matColumnDef="proficiencyLevel">
               <th mat-header-cell *matHeaderCellDef>Proficiency Level</th>
               <td mat-cell *matCellDef="let skill">
-                <mat-chip [class]="getSkillLevelClass(skill.proficiencyLevel)">
+                <mat-chip *ngIf="skill.proficiencyLevel != null && skill.proficiencyLevel > 0" [class]="getSkillLevelClass(skill.proficiencyLevel)">
                   Level {{ skill.proficiencyLevel }}/5
                 </mat-chip>
+                <span *ngIf="skill.proficiencyLevel == null || skill.proficiencyLevel === 0" class="pending-assessment">
+                  Pending Assessment
+                </span>
               </td>
             </ng-container>
 
@@ -285,7 +298,12 @@
             <ng-container matColumnDef="assessorName">
               <th mat-header-cell *matHeaderCellDef>Assessed By</th>
               <td mat-cell *matCellDef="let skill">
-                {{ skill.assessorName || 'N/A' }}
+                <span *ngIf="skill.assessorName && skill.assessorName.trim() !== ''">
+                  {{ skill.assessorName }}
+                </span>
+                <span *ngIf="!skill.assessorName || skill.assessorName.trim() === ''" class="pending-assessment">
+                  Pending Assessment
+                </span>
               </td>
             </ng-container>
 

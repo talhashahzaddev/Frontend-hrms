@@ -117,6 +117,10 @@ export class PerformanceService {
     return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/employees/${employeeId}/skills`);
   }
 
+  getOtherEmployeeSkills(employeeId: string): Observable<ApiResponse<EmployeeSkill[]>> {
+    return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/Performance/Otheremployees/${employeeId}/skills`);
+  }
+
   getEmployeeSkillById(id: string): Observable<ApiResponse<EmployeeSkill>> {
     return this.http.get<ApiResponse<EmployeeSkill>>(`${this.apiUrl}/performance/employee-skills/${id}`);
   }
