@@ -152,11 +152,16 @@
         gap: 12px;
         padding: 0;
 
-        button {
+        button.add-button {
           height: 48px;
           padding: 0 24px !important;
           border-radius: 12px !important;
           font-weight: 600 !important;
+          font-size: 15px !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
@@ -168,6 +173,11 @@
             height: 20px !important;
             margin: 0 !important;
             flex-shrink: 0;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
           }
         }
       }

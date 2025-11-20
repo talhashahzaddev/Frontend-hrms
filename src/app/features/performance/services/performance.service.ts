@@ -257,6 +257,10 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<EmployeeAppraisal>>(`${this.apiUrl}/Performance/appraisals/${id}`);
   }
 
+  deleteAppraisal(id: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/Performance/appraisals/${id}`);
+  }
+
   submitAppraisal(appraisalId: string, request: SubmitAppraisalRequest): Observable<ApiResponse<EmployeeAppraisal>> {
     return this.http.put<ApiResponse<EmployeeAppraisal>>(`${this.apiUrl}/performance/appraisals/${appraisalId}/submit`, request);
   }

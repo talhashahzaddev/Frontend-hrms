@@ -290,12 +290,12 @@
         </ng-container>
 
         <!-- Submitted At Column -->
-        <ng-container matColumnDef="submittedAt">
+        <!-- <ng-container matColumnDef="submittedAt">
           <th mat-header-cell *matHeaderCellDef>Submitted</th>
           <td mat-cell *matCellDef="let appraisal">
             {{ appraisal.submittedAt ? (appraisal.submittedAt | date:'short') : 'N/A' }}
           </td>
-        </ng-container>
+        </ng-container> -->
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
@@ -325,9 +325,7 @@
         <!-- Table Headers and Rows -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row 
-            *matRowDef="let appraisal; columns: displayedColumns;"
-            (click)="viewAppraisal(appraisal)"
-            class="clickable-row">
+            *matRowDef="let appraisal; columns: displayedColumns;">
         </tr>
       </table>
       
@@ -420,109 +418,4 @@
   </mat-card>
 
 
-  <!-- Appraisal Details Card -->
-  <mat-card *ngIf="selectedAppraisal && showDetails" class="details-card">
-    <div class="form-header">
-      <h3>
-        <mat-icon>visibility</mat-icon>
-        Appraisal Details
-      </h3>
-      <button mat-icon-button (click)="closeDetails()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-    
-    <mat-card-content>
-      <div class="appraisal-details">
-        <div class="detail-section mb-4">
-          <h3 class="text-xl font-semibold mb-2">Appraisal Information</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <strong>Cycle:</strong> {{ selectedAppraisal.cycleName }}
-            </div>
-            <div>
-              <strong>Employee:</strong> {{ selectedAppraisal.employeeName }}
-            </div>
-            <div>
-              <strong>Review Type:</strong> {{ selectedAppraisal.reviewType | titlecase }}
-            </div>
-            <div>
-              <strong>Reviewer:</strong> {{ selectedAppraisal.reviewerName || 'N/A' }}
-            </div>
-            <div>
-              <strong>Overall Rating:</strong> 
-              <span *ngIf="selectedAppraisal.overallRating">{{ selectedAppraisal.overallRating | number:'1.1-1' }}</span>
-              <span *ngIf="!selectedAppraisal.overallRating">N/A</span>
-            </div>
-            <div>
-              <strong>Status:</strong>
-              <mat-chip [class]="getStatusChipClass(selectedAppraisal.status)">
-                {{ selectedAppraisal.status | titlecase }}
-              </mat-chip>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-section mb-4" *ngIf="selectedAppraisal.feedback">
-          <h3 class="text-lg font-semibold mb-2">Feedback</h3>
-          <p>{{ selectedAppraisal.feedback }}</p>
-        </div>
-
-        <div class="detail-section mb-4" *ngIf="selectedAppraisal.improvementAreas">
-          <h3 class="text-lg font-semibold mb-2">Improvement Areas</h3>
-          <p>{{ selectedAppraisal.improvementAreas }}</p>
-        </div>
-
-        <div class="detail-section mb-4" *ngIf="selectedAppraisal.developmentPlan">
-          <h3 class="text-lg font-semibold mb-2">Development Plan</h3>
-          <p>{{ selectedAppraisal.developmentPlan }}</p>
-        </div>
-
-        <!-- KRA Ratings Section -->
-        <div class="detail-section mb-4" *ngIf="hasKraRatings(selectedAppraisal)">
-          <h3 class="text-lg font-semibold mb-2">KRA Ratings</h3>
-          <div class="kra-ratings-list">
-            <div *ngFor="let kraRating of getKraRatingsList(selectedAppraisal.kraRatings)" class="kra-rating-item">
-              <div class="kra-rating-header">
-                <strong>{{ kraRating.kraName || 'KRA' }}</strong>
-                <span class="rating-badge">{{ kraRating.rating }}/5</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Skill Ratings Section -->
-        <div class="detail-section mb-4" *ngIf="hasSkillRatings(selectedAppraisal)">
-          <h3 class="text-lg font-semibold mb-2">Skill Ratings</h3>
-          <div class="skill-ratings-list">
-            <div *ngFor="let skillRating of getSkillRatingsList(selectedAppraisal.skillRatings)" class="skill-rating-item">
-              <div class="skill-rating-header">
-                <strong>{{ skillRating.skillName || 'Skill' }}</strong>
-                <span class="rating-badge">{{ skillRating.rating }}/5</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-section mb-4">
-          <h3 class="text-lg font-semibold mb-2">Timeline</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <strong>Created:</strong> {{ selectedAppraisal.createdAt | date:'medium' }}
-            </div>
-            <div>
-              <strong>Submitted:</strong> 
-              <span *ngIf="selectedAppraisal.submittedAt">{{ selectedAppraisal.submittedAt | date:'medium' }}</span>
-              <span *ngIf="!selectedAppraisal.submittedAt">Not submitted</span>
-            </div>
-            <div>
-              <strong>Reviewed:</strong>
-              <span *ngIf="selectedAppraisal.reviewedAt">{{ selectedAppraisal.reviewedAt | date:'medium' }}</span>
-              <span *ngIf="!selectedAppraisal.reviewedAt">Not reviewed</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
 </div>

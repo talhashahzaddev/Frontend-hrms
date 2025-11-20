@@ -17,6 +17,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { CreateAppraisalDialogComponent } from './create-appraisal-dialog.component';
 import { SelfAssessmentDialogComponent } from './self-assessment-dialog.component';
+import { ViewAppraisalDialogComponent } from './view-appraisal-dialog.component';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '@/app/core/services/auth.service';
 import { PerformanceService } from '../../services/performance.service';
@@ -81,7 +83,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   uniqueKras: KRA[] = [];
   
   // Table
-  displayedColumns: string[] = ['cycleName', 'employeeName', 'reviewType', 'overallRating', 'status', 'submittedAt', 'actions'];
+  displayedColumns: string[] = ['cycleName', 'employeeName', 'reviewType', 'overallRating', 'status',  'actions'];
   employeeAppraisalColumns: string[] = ['cycleName', 'kraName', 'rating', 'reviewerName'];
   selfAssessmentColumns: string[] = ['cycleName', 'kraName', 'rating', 'status'];
   
@@ -92,8 +94,6 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   
   // View mode
   selectedTab = 0;
-  selectedAppraisal: EmployeeAppraisal | null = null;
-  showDetails = false;
 
   private destroy$ = new Subject<void>();
 
@@ -285,15 +285,19 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
 
   viewAppraisal(appraisal: EmployeeAppraisal): void {
-    this.selectedAppraisal = appraisal;
-    this.showDetails = true;
-    // Scroll to details section
-    setTimeout(() => {
-      const detailsCard = document.querySelector('.details-card');
-      if (detailsCard) {
-        detailsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+    console.log('Opening view dialog for appraisal:', appraisal);
+    const dialogRef = this.dialog.open(ViewAppraisalDialogComponent, {
+      width: '900px',
+      maxWidth: '90vw',
+      data: {
+        appraisal: appraisal
+      },
+      disableClose: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
   }
 
   openCreateForm(): void {
@@ -463,16 +467,42 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       });
   }
 
-  closeDetails(): void {
-    this.showDetails = false;
-    this.selectedAppraisal = null;
-  }
 
   deleteAppraisal(appraisal: EmployeeAppraisal): void {
-    if (confirm(`Are you sure you want to delete this appraisal?`)) {
-      // Note: Backend might not have delete endpoint, handle accordingly
-      this.notificationService.showInfo('Delete functionality may require backend implementation');
-    }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Appraisal',
+      message: 'Are you sure you want to delete this appraisal?',
+      itemName: `Appraisal for ${appraisal.employeeName} - ${appraisal.cycleName}`
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result === true) {
+          this.performanceService.deleteAppraisal(appraisal.appraisalId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (response) => {
+                if (response.success) {
+                  this.notificationService.showSuccess('Appraisal deleted successfully');
+                  this.loadAppraisals();
+                } else {
+                  this.notificationService.showError(response.message || 'Failed to delete appraisal');
+                }
+              },
+              error: (error) => {
+                console.error('Error deleting appraisal:', error);
+                this.notificationService.showError('Failed to delete appraisal');
+              }
+            });
+        }
+      });
   }
 
   applyFilters(): void {
@@ -528,33 +558,6 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     }
   }
 
-  hasKraRatings(appraisal: EmployeeAppraisal | null): boolean {
-    if (!appraisal || !appraisal.kraRatings) return false;
-    return Object.keys(appraisal.kraRatings).length > 0;
-  }
-
-  hasSkillRatings(appraisal: EmployeeAppraisal | null): boolean {
-    if (!appraisal || !appraisal.skillRatings) return false;
-    return Object.keys(appraisal.skillRatings).length > 0;
-  }
-
-  getKraRatingsList(kraRatings: { [kraId: string]: number }): Array<{ kraId: string; kraName: string; rating: number }> {
-    if (!kraRatings) return [];
-    return Object.entries(kraRatings).map(([kraId, rating]) => ({
-      kraId,
-      kraName: `KRA ${kraId.substring(0, 8)}`, // Placeholder - you might want to load actual KRA names
-      rating
-    }));
-  }
-
-  getSkillRatingsList(skillRatings: { [skillId: string]: number }): Array<{ skillId: string; skillName: string; rating: number }> {
-    if (!skillRatings) return [];
-    return Object.entries(skillRatings).map(([skillId, rating]) => ({
-      skillId,
-      skillName: `Skill ${skillId.substring(0, 8)}`, // Placeholder - you might want to load actual skill names
-      rating
-    }));
-  }
 
   hasHRRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);

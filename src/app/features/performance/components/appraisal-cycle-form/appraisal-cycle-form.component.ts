@@ -11,6 +11,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AppraisalCycle, UpdateAppraisalCycleRequest } from '../../../../core/models/performance.models';
@@ -27,7 +30,10 @@ import { AppraisalCycle, UpdateAppraisalCycleRequest } from '../../../../core/mo
     MatNativeDateModule,
     MatButtonModule,
     MatCardModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   templateUrl: './appraisal-cycle-form.component.html',
   styleUrls: ['./appraisal-cycle-form.component.scss']

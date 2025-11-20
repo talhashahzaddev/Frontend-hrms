@@ -33,6 +33,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 @Component({
   selector: 'app-performance-dashboard',
   standalone: true,
@@ -84,7 +85,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   cyclesDataSource = new MatTableDataSource<AppraisalCycle>([]);
   skillsDataSource = new MatTableDataSource<EmployeeSkill>([]);
   displayedColumns: string[] = ['cycleName', 'reviewType', 'reviewerName', 'overallRating', 'feedback'];
-  displayedCycleColumns: string[] = ['cycleName', 'description', 'dates', 'status', 'actions'];
+  displayedCycleColumns: string[] = ['cycleName', 'dates', 'status', 'appraisals', 'actions'];
   displayedSkillColumns: string[] = ['skillName', 'skillCategory', 'proficiencyLevel', 'assessorName'];
 
   constructor(
@@ -253,49 +254,79 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   // ✅ Open popup for creating new cycle
   openCreateCycleDialog(): void {
     const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '550px',
+      width: '600px',
       disableClose: true,
       data: {}
     });
 
-    dialogRef.afterClosed().subscribe((newCycle: AppraisalCycle | null) => {
-      if (newCycle) {
-        this.appraisalCycles.unshift(newCycle);
-        this.loadInitialData();
-        this.notificationService.showSuccess('Appraisal cycle created successfully!');
-        this.cdr.markForCheck();
-      }
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        if (result === 'saved') {
+          this.loadInitialData();
+          this.notificationService.showSuccess('Appraisal cycle created successfully');
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  editCycle(cycle: AppraisalCycle): void {
+    const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
+      width: '600px',
+      disableClose: true,
+      data: { cycle: cycle }
     });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        if (result === 'saved') {
+          this.loadInitialData();
+          this.notificationService.showSuccess('Appraisal cycle updated successfully');
+          this.cdr.markForCheck();
+        }
+      });
   }
 
-  editCycle(cycle: AppraisalCycle) {
-    this.router.navigate(['/performance/cycles'], { 
-      queryParams: { edit: cycle.cycleId } 
+  deleteCycle(cycle: AppraisalCycle): void {
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Appraisal Cycle',
+      message: 'Are you sure you want to delete this appraisal cycle?',
+      itemName: cycle.cycleName
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
     });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result === true) {
+          this.performanceService.deleteAppraisalCycle(cycle.cycleId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (response) => {
+                if (response.success) {
+                  this.notificationService.showSuccess('Appraisal cycle deleted successfully');
+                  this.loadInitialData();
+                } else {
+                  this.notificationService.showError(response.message || 'Failed to delete cycle');
+                }
+                this.cdr.markForCheck();
+              },
+              error: (error) => {
+                console.error('Error deleting cycle:', error);
+                this.notificationService.showError(error.error?.message || 'Failed to delete appraisal cycle');
+                this.cdr.markForCheck();
+              }
+            });
+        }
+      });
   }
 
-  deleteCycle(cycle: AppraisalCycle) {
-    if (confirm(`Are you sure you want to delete "${cycle.cycleName}"? This action cannot be undone.`)) {
-      this.performanceService.deleteAppraisalCycle(cycle.cycleId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.notificationService.showSuccess('Appraisal cycle deleted successfully');
-              this.loadInitialData();
-            } else {
-              this.notificationService.showError(response.message || 'Failed to delete cycle');
-            }
-            this.cdr.markForCheck();
-          },
-          error: (error) => {
-            console.error('Error deleting cycle:', error);
-            this.notificationService.showError('Failed to delete appraisal cycle');
-            this.cdr.markForCheck();
-          }
-        });
-    }
-  }
 
 
 
@@ -305,19 +336,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
 
 
-
-  // ✅ Helper Methods
-  createAppraisalCycle(): void {
-    this.router.navigate(['/performance/cycles']);
-  }
-
-  viewCycleDetails(cycle: AppraisalCycle): void {
-    this.notificationService.showInfo('Cycle details view will be implemented');
-  }
-
-  manageCycle(cycle: AppraisalCycle): void {
-    this.notificationService.showInfo('Cycle management will be implemented');
-  }
 
   hasManagerRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
