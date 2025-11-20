@@ -13,7 +13,7 @@ import { AppraisalCycle, KRA, CreateSelfAssessmentRequest } from '../../../../co
 import { AuthService } from '../../../../core/services/auth.service';
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 
 export interface SelfAssessmentDialogData {
   appraisalCycles: AppraisalCycle[];
@@ -85,13 +85,18 @@ export interface SelfAssessmentDialogData {
                 <mat-icon matPrefix>checklist</mat-icon>
                 <mat-select formControlName="kraId">
                   <mat-option [value]="">Select a KRA</mat-option>
-                  <mat-option *ngFor="let kra of availableKras" [value]="kra.kraId">
+                  <mat-option *ngFor="let kra of availableKras" 
+                              [value]="kra.kraId"
+                              [disabled]="isKraAlreadyRated(kra.kraId)">
                     {{ kra.title }}
+                    <span *ngIf="isKraAlreadyRated(kra.kraId)" class="already-rated-badge">(Already Rated)</span>
                   </mat-option>
                 </mat-select>
+                <mat-hint *ngIf="!isLoadingExistingRatings">KRAs already rated are disabled</mat-hint>
                 <mat-error *ngIf="assessmentForm.get('kraId')?.hasError('required')">
                   KRA selection is required
                 </mat-error>
+                <mat-error *ngIf="isLoadingExistingRatings">Checking existing ratings...</mat-error>
               </mat-form-field>
             </div>
 
@@ -578,6 +583,19 @@ export interface SelfAssessmentDialogData {
       }
     }
 
+    .already-rated-badge {
+      color: #dc2626;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 8px;
+      font-style: italic;
+    }
+
+    ::ng-deep .mat-mdc-option[aria-disabled="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     ::ng-deep mat-error {
       font-size: 13px;
       font-weight: 500;
@@ -602,7 +620,9 @@ export class SelfAssessmentDialogComponent implements OnInit, OnDestroy {
   assessmentForm: FormGroup;
   isSubmitting = false;
   isLoading = false;
+  isLoadingExistingRatings = false;
   availableKras: KRA[] = [];
+  alreadyRatedKraIds: Set<string> = new Set();
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -625,6 +645,72 @@ export class SelfAssessmentDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadKras();
+    
+    // Watch for cycle changes to check existing ratings
+    this.assessmentForm.get('cycleId')?.valueChanges.subscribe(() => {
+      this.checkExistingRatings();
+    });
+  }
+
+  checkExistingRatings(): void {
+    const cycleId = this.assessmentForm.get('cycleId')?.value;
+    const currentUser = this.authService.getCurrentUserValue();
+
+    if (!cycleId || !currentUser?.userId) {
+      this.alreadyRatedKraIds.clear();
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.isLoadingExistingRatings = true;
+    
+    // Fetch existing appraisals and self-assessments
+    Promise.all([
+      firstValueFrom(this.performanceService.getEmployeeAppraisalsByCycle(cycleId, currentUser.userId)),
+      firstValueFrom(this.performanceService.getSelfAssessments(currentUser.userId, cycleId))
+    ]).then(([appraisalsResponse, selfAssessmentsResponse]) => {
+      const ratedKraIds = new Set<string>();
+
+      // Extract KRA IDs from existing appraisals
+      if (appraisalsResponse?.success && appraisalsResponse.data) {
+        appraisalsResponse.data.forEach((appraisal: any) => {
+          if (appraisal.kraRatings && typeof appraisal.kraRatings === 'object') {
+            Object.keys(appraisal.kraRatings).forEach(kraId => {
+              ratedKraIds.add(kraId);
+            });
+          }
+        });
+      }
+
+      // Extract KRA IDs from existing self-assessments
+      if (selfAssessmentsResponse?.success && selfAssessmentsResponse.data) {
+        selfAssessmentsResponse.data.forEach((assessment: any) => {
+          if (assessment.kraId) {
+            ratedKraIds.add(assessment.kraId);
+          }
+        });
+      }
+
+      this.alreadyRatedKraIds = ratedKraIds;
+      
+      // Clear selected KRA if it's already rated
+      const currentKraId = this.assessmentForm.get('kraId')?.value;
+      if (currentKraId && ratedKraIds.has(currentKraId)) {
+        this.assessmentForm.patchValue({ kraId: '' });
+        this.notificationService.showWarning('This KRA is already rated. Please select a different KRA.');
+      }
+
+      this.isLoadingExistingRatings = false;
+      this.cdr.markForCheck();
+    }).catch((error) => {
+      console.error('Error checking existing ratings:', error);
+      this.isLoadingExistingRatings = false;
+      this.cdr.markForCheck();
+    });
+  }
+
+  isKraAlreadyRated(kraId: string): boolean {
+    return this.alreadyRatedKraIds.has(kraId);
   }
 
   ngOnDestroy(): void {
@@ -704,6 +790,12 @@ export class SelfAssessmentDialogComponent implements OnInit, OnDestroy {
 
       if (!formValue.kraId || !formValue.rating) {
         this.notificationService.showError('Please select a KRA and provide a rating');
+        return;
+      }
+
+      // Validate that the selected KRA is not already rated
+      if (this.alreadyRatedKraIds.has(formValue.kraId)) {
+        this.notificationService.showError('This KRA is already rated. Please select a different KRA.');
         return;
       }
 

@@ -1,25 +1,29 @@
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { CreateKRARequest, UpdateKRARequest, KRA } from '../../../../core/models/performance.models';
-import { Position } from '../../../../core/models/employee.models';
+import { UpdateEmployeeSkillRequest } from '../../../../core/models/performance.models';
+import { AuthService } from '../../../../core/services/auth.service';
+import { PerformanceService } from '../../services/performance.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { Subject, takeUntil } from 'rxjs';
 
-export interface CreateKRADialogData {
-  positions: Position[];
-  kra?: KRA;
-  isEditMode: boolean;
+export interface RateEmployeeSkillDialogData {
+  employeeId: string;
+  employeeName: string;
+  skillId: string;
+  skillName: string;
+  employeeSkillId: string;
+  currentProficiencyLevel: number;
 }
 
 @Component({
-  selector: 'app-create-kra-dialog',
+  selector: 'app-rate-employee-skill-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -27,113 +31,83 @@ export interface CreateKRADialogData {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
-    MatCheckboxModule
+    MatProgressSpinnerModule
   ],
   template: `
     <div class="dialog-header">
       <h2 mat-dialog-title>
-        <mat-icon>list_alt</mat-icon>
-        {{ data.isEditMode ? 'Edit KRA' : 'Create New KRA' }}
+        <mat-icon>star</mat-icon>
+        Rate Employee Skill
       </h2>
       <button mat-icon-button mat-dialog-close class="close-button">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <form [formGroup]="kraForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="ratingForm" (ngSubmit)="onSubmit()">
       <mat-dialog-content class="dialog-content">
-        
         <div class="form-section">
           <h3 class="section-title">
             <mat-icon>info</mat-icon>
-            KRA Details
+            Skill Rating Details
           </h3>
 
-          <div class="form-row two-columns">
-            <!-- Position Selection -->
-            <mat-form-field appearance="outline">
-              <mat-label>Position *</mat-label>
-              <mat-icon matPrefix>work</mat-icon>
-              <mat-select formControlName="positionId" [disabled]="data.isEditMode">
-                <mat-option *ngFor="let position of data.positions" [value]="position.positionId">
-                  {{ position.positionTitle }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="kraForm.get('positionId')?.hasError('required')">
-                Position is required
-              </mat-error>
+          <!-- Employee (Read-only) -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Employee</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput [value]="data.employeeName" readonly>
             </mat-form-field>
+          </div>
 
-            <!-- Weight Percentage -->
-            <mat-form-field appearance="outline">
-              <mat-label>Weight Percentage (0-100) *</mat-label>
-              <mat-icon matPrefix>percent</mat-icon>
+          <!-- Skill (Read-only) -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Skill</mat-label>
+              <mat-icon matPrefix>school</mat-icon>
+              <input matInput [value]="data.skillName" readonly>
+            </mat-form-field>
+          </div>
+
+          <!-- Proficiency Level -->
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Proficiency Level (1-5) *</mat-label>
+              <mat-icon matPrefix>star</mat-icon>
               <input matInput 
                      type="number" 
-                     formControlName="weight" 
-                     min="0" 
-                     max="100"
-                     placeholder="0-100">
-              <mat-error *ngIf="kraForm.get('weight')?.hasError('required')">
-                Weight is required
+                     formControlName="proficiencyLevel" 
+                     min="1" 
+                     max="5" 
+                     step="1" 
+                     placeholder="Enter proficiency level">
+              <mat-error *ngIf="ratingForm.get('proficiencyLevel')?.hasError('required')">
+                Proficiency level is required
               </mat-error>
-              <mat-error *ngIf="kraForm.get('weight')?.hasError('min') || kraForm.get('weight')?.hasError('max')">
-                Weight must be between 0 and 100
+              <mat-error *ngIf="ratingForm.get('proficiencyLevel')?.hasError('min')">
+                Minimum level is 1
               </mat-error>
-            </mat-form-field>
-          </div>
-
-          <!-- KRA Title -->
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>KRA Title *</mat-label>
-              <mat-icon matPrefix>title</mat-icon>
-              <input matInput 
-                     formControlName="title" 
-                     placeholder="Enter KRA title">
-              <mat-error *ngIf="kraForm.get('title')?.hasError('required')">
-                Title is required
+              <mat-error *ngIf="ratingForm.get('proficiencyLevel')?.hasError('max')">
+                Maximum level is 5
               </mat-error>
             </mat-form-field>
           </div>
 
-          <!-- Description -->
+          <!-- Notes -->
           <div class="form-row">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <mat-icon matPrefix>description</mat-icon>
+              <mat-label>Notes</mat-label>
+              <mat-icon matPrefix>note</mat-icon>
               <textarea matInput 
-                        formControlName="description" 
+                        formControlName="notes" 
                         rows="3" 
-                        placeholder="Enter KRA description..."></textarea>
+                        placeholder="Optional: Add notes about this rating..."></textarea>
             </mat-form-field>
-          </div>
-
-          <!-- Measurement Criteria -->
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Measurement Criteria</mat-label>
-              <mat-icon matPrefix>assessment</mat-icon>
-              <textarea matInput 
-                        formControlName="measurementCriteria" 
-                        rows="3" 
-                        placeholder="Enter measurement criteria..."></textarea>
-            </mat-form-field>
-          </div>
-
-          <!-- Active Status -->
-          <div class="form-row">
-            <mat-checkbox formControlName="isActive" class="active-checkbox">
-              <mat-icon>check_circle</mat-icon>
-              <span>Active</span>
-            </mat-checkbox>
           </div>
         </div>
-
       </mat-dialog-content>
 
       <div class="dialog-actions">
@@ -145,10 +119,10 @@ export interface CreateKRADialogData {
           color="primary" 
           class="submit-button"
           type="submit"
-          [disabled]="kraForm.invalid || isSubmitting">
+          [disabled]="ratingForm.invalid || isSubmitting">
           <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
           <mat-icon *ngIf="!isSubmitting">save</mat-icon>
-          {{ isSubmitting ? 'Saving...' : (data.isEditMode ? 'Update KRA' : 'Create KRA') }}
+          {{ isSubmitting ? 'Rating...' : 'Rate Skill' }}
         </button>
       </div>
     </form>
@@ -159,7 +133,7 @@ export interface CreateKRADialogData {
       padding: 0 !important;
       overflow: hidden;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-      max-width: 800px !important;
+      max-width: 600px !important;
       width: 90vw !important;
     }
 
@@ -228,12 +202,6 @@ export interface CreateKRADialogData {
 
     .form-row {
       margin-bottom: 16px;
-
-      &.two-columns {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-      }
     }
 
     .full-width {
@@ -328,47 +296,21 @@ export interface CreateKRADialogData {
           min-height: 48px;
         }
 
-        .mat-mdc-select,
-        .mat-mdc-input-element,
-        .mat-mdc-text-field-input {
+        .mat-mdc-input-element {
           margin-left: 0 !important;
           padding-left: 0 !important;
-        }
-
-        .mat-mdc-select-trigger {
-          padding-left: 0 !important;
-          margin-left: 0 !important;
-        }
-
-        .mat-mdc-form-field-flex {
-          align-items: center;
-          gap: 0;
         }
 
         .mat-mdc-form-field-subscript-wrapper {
           margin-top: 4px;
         }
-      }
-    }
 
-    .active-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #f9fafb;
-      transition: all 0.3s ease;
-
-      &:hover {
-        background: #f3f4f6;
-      }
-
-      mat-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-        color: #667eea;
+        // Read-only input styling
+        input[readonly] {
+          background: #f3f4f6 !important;
+          cursor: not-allowed;
+          color: #6b7280;
+        }
       }
     }
 
@@ -469,125 +411,96 @@ export interface CreateKRADialogData {
       margin-top: 4px;
     }
 
-    ::ng-deep .mat-mdc-select-panel {
-      border-radius: 12px !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
-      margin-top: 8px;
-
-      .mat-mdc-option {
-        border-radius: 8px !important;
-        margin: 4px 8px !important;
-        padding: 12px 16px !important;
-
-        &:hover {
-          background: rgba(102, 126, 234, 0.1) !important;
-        }
-
-        &.mat-mdc-option-active,
-        &.mat-selected {
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
-          color: #667eea !important;
-        }
-      }
-    }
-
-    ::ng-deep mat-spinner {
-      circle {
-        stroke: #667eea !important;
-      }
-    }
-
     @media (max-width: 768px) {
+      ::ng-deep .mat-mdc-dialog-container {
+        width: 95vw !important;
+        max-width: 95vw !important;
+      }
+
       .dialog-content {
-        padding: 20px !important;
-      }
-      .form-section {
-        .section-title {
-          font-size: 1rem;
-        }
-      }
-      .form-row.two-columns {
-        grid-template-columns: 1fr;
-      }
-      .dialog-actions {
-        flex-direction: column;
-        gap: 12px;
-        button {
-          width: 100%;
-        }
+        max-height: 80vh;
       }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateKRADialogComponent {
-  kraForm: FormGroup;
+export class RateEmployeeSkillDialogComponent implements OnInit, OnDestroy {
+  ratingForm: FormGroup;
   isSubmitting = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<CreateKRADialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateKRADialogData
+    private dialogRef: MatDialogRef<RateEmployeeSkillDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: RateEmployeeSkillDialogData,
+    private performanceService: PerformanceService,
+    private authService: AuthService,
+    private notificationService: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {
-    const kra = data.kra;
-    
-    this.kraForm = this.fb.group({
-      positionId: [kra?.positionId || '', data.isEditMode ? [] : Validators.required],
-      title: [kra?.title || '', Validators.required],
-      description: [kra?.description || ''],
-      weight: [kra?.weight || 0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      measurementCriteria: [kra?.measurementCriteria || ''],
-      isActive: [kra?.isActive !== undefined ? kra.isActive : true]
+    this.ratingForm = this.fb.group({
+      proficiencyLevel: [this.data.currentProficiencyLevel || null, [Validators.required, Validators.min(1), Validators.max(5)]],
+      notes: ['']
     });
+  }
 
-    if (data.isEditMode && !kra?.positionId) {
-      this.kraForm.get('positionId')?.disable();
-    }
+  ngOnInit(): void {
+    // Component initialization
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSubmit(): void {
-    if (this.kraForm.valid) {
-      this.isSubmitting = true;
-      const formValue = this.kraForm.value;
-      
-      if (this.data.isEditMode) {
-        const request: UpdateKRARequest = {
-          title: formValue.title,
-          description: formValue.description,
-          weight: formValue.weight,
-          measurementCriteria: formValue.measurementCriteria,
-          isActive: formValue.isActive
-        };
-        this.dialogRef.close({ request, isEdit: true, kra: this.data.kra });
-      } else {
-        const request: CreateKRARequest = {
-          positionId: formValue.positionId,
-          title: formValue.title,
-          description: formValue.description,
-          weight: formValue.weight,
-          measurementCriteria: formValue.measurementCriteria,
-          isActive: formValue.isActive
-        };
-        this.dialogRef.close({ request, isEdit: false });
+    if (this.ratingForm.valid) {
+      const formValue = this.ratingForm.value;
+      const currentUser = this.authService.getCurrentUserValue();
+
+      if (!currentUser?.userId) {
+        this.notificationService.showError('User information not found');
+        return;
       }
+
+      this.isSubmitting = true;
+
+      const request: UpdateEmployeeSkillRequest = {
+        proficiencyLevel: parseInt(formValue.proficiencyLevel),
+        assessedBy: currentUser.userId,
+        lastAssessed: new Date().toISOString(),
+        notes: formValue.notes || undefined
+      };
+
+      this.performanceService.updateEmployeeSkill(this.data.employeeSkillId, request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.notificationService.showSuccess('Skill rated successfully');
+              this.dialogRef.close({ success: true });
+            } else {
+              this.notificationService.showError(response.message || 'Failed to rate skill');
+              this.isSubmitting = false;
+              this.cdr.markForCheck();
+            }
+          },
+          error: (error) => {
+            console.error('Error rating skill:', error);
+            this.notificationService.showError('Failed to rate skill');
+            this.isSubmitting = false;
+            this.cdr.markForCheck();
+          }
+        });
     } else {
-      this.markFormGroupTouched(this.kraForm);
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.ratingForm.controls).forEach(key => {
+        const control = this.ratingForm.get(key);
+        if (control) {
+          control.markAsTouched();
+        }
+      });
     }
   }
-
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
-    });
-  }
 }
-
-
-
-
-
 

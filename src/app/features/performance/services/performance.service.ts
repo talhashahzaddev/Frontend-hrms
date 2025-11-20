@@ -387,6 +387,17 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/Manager/Self-Assessments/${managerId}/${cycleId}`);
   }
 
+  getAllEmployeeSelfAssessments(filter?: { cycleId?: string; employeeId?: string; kraId?: string; search?: string }): Observable<ApiResponse<SelfAssessment[]>> {
+    let params = new HttpParams();
+    if (filter) {
+      if (filter.cycleId) params = params.set('cycleId', filter.cycleId);
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.kraId) params = params.set('kraId', filter.kraId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/all-employee-assessments`, { params });
+  }
+
   // Manager Review Management
   submitManagerReview(request: ManagerReviewRequest): Observable<ApiResponse<ManagerReview>> {
     return this.http.post<ApiResponse<ManagerReview>>(`${this.apiUrl}/Performance/Manager/Review`, request);

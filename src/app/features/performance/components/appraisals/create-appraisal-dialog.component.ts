@@ -12,13 +12,16 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AppraisalCycle, ReviewType, CreateAppraisal, SkillSet, KRA } from '../../../../core/models/performance.models';
 import { Employee } from '../../../../core/models/employee.models';
 import { PerformanceService } from '../../services/performance.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 
 export interface CreateAppraisalDialogData {
   appraisalCycles: AppraisalCycle[];
   employees: Employee[];
   reviewTypes: Array<{ value: string; label: string }>;
+  preSelectedEmployeeId?: string;
+  preSelectedCycleId?: string;
 }
 
 @Component({
@@ -124,11 +127,15 @@ export interface CreateAppraisalDialogData {
                 <mat-label>Select KRAs</mat-label>
                 <mat-icon matPrefix>checklist</mat-icon>
                 <mat-select formControlName="selectedKras" multiple>
-                  <mat-option *ngFor="let kra of availableKras" [value]="kra.kraId">
+                  <mat-option *ngFor="let kra of availableKras" 
+                              [value]="kra.kraId"
+                              [disabled]="isKraAlreadyRated(kra.kraId)">
                     {{ kra.title }}
+                    <span *ngIf="isKraAlreadyRated(kra.kraId)" class="already-rated-badge">(Already Rated)</span>
                   </mat-option>
                 </mat-select>
-                <mat-hint>Select one or more KRAs to rate</mat-hint>
+                <mat-hint>Select one or more KRAs to rate. KRAs already rated are disabled.</mat-hint>
+                <mat-error *ngIf="isLoadingExistingRatings">Checking existing ratings...</mat-error>
               </mat-form-field>
             </div>
   
@@ -611,6 +618,19 @@ export interface CreateAppraisalDialogData {
       width: 100%;
     }
 
+    .already-rated-badge {
+      color: #dc2626;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 8px;
+      font-style: italic;
+    }
+
+    ::ng-deep .mat-mdc-option[aria-disabled="true"] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 768px) {
       .form-row.two-columns {
         grid-template-columns: 1fr;
@@ -633,8 +653,10 @@ export class CreateAppraisalDialogComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   isLoadingKras = false;
   isLoadingSkills = false;
+  isLoadingExistingRatings = false;
   availableKras: KRA[] = [];
   availableSkills: SkillSet[] = [];
+  alreadyRatedKraIds: Set<string> = new Set();
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -642,6 +664,7 @@ export class CreateAppraisalDialogComponent implements OnInit, OnDestroy {
     private dialogRef: MatDialogRef<CreateAppraisalDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: CreateAppraisalDialogData,
     private performanceService: PerformanceService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) {
     this.appraisalForm = this.fb.group({
@@ -667,11 +690,38 @@ export class CreateAppraisalDialogComponent implements OnInit, OnDestroy {
     this.appraisalForm.get('selectedSkills')?.valueChanges.subscribe((selectedIds: string[]) => {
       this.updateSkillRatingsArray(selectedIds);
     });
+
+    // Watch for changes in employee and cycle to check existing ratings
+    this.appraisalForm.get('employeeId')?.valueChanges.subscribe(() => {
+      this.checkExistingRatings();
+    });
+
+    this.appraisalForm.get('cycleId')?.valueChanges.subscribe(() => {
+      this.checkExistingRatings();
+    });
   }
 
   ngOnInit(): void {
     this.loadKras();
     this.loadSkills();
+    
+    // Pre-select employee and cycle if provided
+    if (this.data.preSelectedEmployeeId) {
+      this.appraisalForm.patchValue({
+        employeeId: this.data.preSelectedEmployeeId
+      });
+    }
+    
+    if (this.data.preSelectedCycleId) {
+      this.appraisalForm.patchValue({
+        cycleId: this.data.preSelectedCycleId
+      });
+    }
+
+    // Check existing ratings after a short delay to allow form values to be set
+    setTimeout(() => {
+      this.checkExistingRatings();
+    }, 100);
   }
 
   ngOnDestroy(): void {
@@ -813,9 +863,81 @@ export class CreateAppraisalDialogComponent implements OnInit, OnDestroy {
     return skill ? skill.skillName : 'Unknown Skill';
   }
 
+  checkExistingRatings(): void {
+    const employeeId = this.appraisalForm.get('employeeId')?.value;
+    const cycleId = this.appraisalForm.get('cycleId')?.value;
+
+    if (!employeeId || !cycleId) {
+      this.alreadyRatedKraIds.clear();
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.isLoadingExistingRatings = true;
+    
+    // Fetch existing appraisals and self-assessments
+    Promise.all([
+      firstValueFrom(this.performanceService.getEmployeeAppraisalsByCycle(cycleId, employeeId)),
+      firstValueFrom(this.performanceService.getSelfAssessments(employeeId, cycleId))
+    ]).then(([appraisalsResponse, selfAssessmentsResponse]) => {
+      const ratedKraIds = new Set<string>();
+
+      // Extract KRA IDs from existing appraisals
+      if (appraisalsResponse?.success && appraisalsResponse.data) {
+        appraisalsResponse.data.forEach((appraisal: any) => {
+          if (appraisal.kraRatings && typeof appraisal.kraRatings === 'object') {
+            Object.keys(appraisal.kraRatings).forEach(kraId => {
+              ratedKraIds.add(kraId);
+            });
+          }
+        });
+      }
+
+      // Extract KRA IDs from existing self-assessments
+      if (selfAssessmentsResponse?.success && selfAssessmentsResponse.data) {
+        selfAssessmentsResponse.data.forEach((assessment: any) => {
+          if (assessment.kraId) {
+            ratedKraIds.add(assessment.kraId);
+          }
+        });
+      }
+
+      this.alreadyRatedKraIds = ratedKraIds;
+      
+      // Remove already rated KRAs from current selection
+      const currentSelectedKras = this.appraisalForm.get('selectedKras')?.value || [];
+      const filteredKras = currentSelectedKras.filter((kraId: string) => !ratedKraIds.has(kraId));
+      
+      if (filteredKras.length !== currentSelectedKras.length) {
+        this.appraisalForm.patchValue({ selectedKras: filteredKras });
+        this.notificationService.showWarning('Some KRAs were removed as they are already rated');
+      }
+
+      this.isLoadingExistingRatings = false;
+      this.cdr.markForCheck();
+    }).catch((error) => {
+      console.error('Error checking existing ratings:', error);
+      this.isLoadingExistingRatings = false;
+      this.cdr.markForCheck();
+    });
+  }
+
+  isKraAlreadyRated(kraId: string): boolean {
+    return this.alreadyRatedKraIds.has(kraId);
+  }
+
   onSubmit(): void {
     if (this.appraisalForm.valid) {
       const formValue = this.appraisalForm.value;
+      
+      // Validate that no already-rated KRAs are selected
+      const selectedKras = formValue.selectedKras || [];
+      const invalidKras = selectedKras.filter((kraId: string) => this.alreadyRatedKraIds.has(kraId));
+      
+      if (invalidKras.length > 0) {
+        this.notificationService.showError('Cannot rate KRAs that are already rated. Please remove them and try again.');
+        return;
+      }
       
       // Build KRA ratings object
       const kraRatings: { [kraId: string]: number } = {};

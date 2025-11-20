@@ -1,10 +1,13 @@
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { EmployeeAppraisal } from '../../../../core/models/performance.models';
+import { EmployeeAppraisal, KRA, SkillSet } from '../../../../core/models/performance.models';
+import { PerformanceService } from '../../services/performance.service';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 export interface ViewAppraisalDialogData {
   appraisal: EmployeeAppraisal;
@@ -324,11 +327,61 @@ export interface ViewAppraisalDialogData {
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ViewAppraisalDialogComponent {
+export class ViewAppraisalDialogComponent implements OnInit, OnDestroy {
+  allKras: KRA[] = [];
+  allSkills: SkillSet[] = [];
+  private destroy$ = new Subject<void>();
+
   constructor(
     public dialogRef: MatDialogRef<ViewAppraisalDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ViewAppraisalDialogData
+    @Inject(MAT_DIALOG_DATA) public data: ViewAppraisalDialogData,
+    private performanceService: PerformanceService,
+    private cdr: ChangeDetectorRef
   ) {}
+
+  ngOnInit(): void {
+    this.loadAllKras();
+    this.loadAllSkills();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadAllKras(): void {
+    this.performanceService.getKRAs(1, 1000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            const paginatedData = response.data as any;
+            this.allKras = (paginatedData.items || paginatedData.data || []).filter((kra: KRA) => kra.isActive);
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading KRAs:', error);
+        }
+      });
+  }
+
+  private loadAllSkills(): void {
+    this.performanceService.getSkillsMatrix()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response && response.success) {
+            const skills = response.data || [];
+            this.allSkills = (Array.isArray(skills) ? skills : []).filter((skill: SkillSet) => skill.isActive !== false);
+            this.cdr.markForCheck();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading skills:', error);
+        }
+      });
+  }
 
   hasKraRatings(appraisal: EmployeeAppraisal): boolean {
     if (!appraisal || !appraisal.kraRatings) return false;
@@ -342,20 +395,26 @@ export class ViewAppraisalDialogComponent {
 
   getKraRatingsList(kraRatings: { [kraId: string]: number }): Array<{ kraId: string; kraName: string; rating: number }> {
     if (!kraRatings) return [];
-    return Object.entries(kraRatings).map(([kraId, rating]) => ({
-      kraId,
-      kraName: `KRA ${kraId.substring(0, 8)}`,
-      rating
-    }));
+    return Object.entries(kraRatings).map(([kraId, rating]) => {
+      const kra = this.allKras.find(k => k.kraId === kraId);
+      return {
+        kraId,
+        kraName: kra?.title || 'Unknown KRA',
+        rating
+      };
+    });
   }
 
   getSkillRatingsList(skillRatings: { [skillId: string]: number }): Array<{ skillId: string; skillName: string; rating: number }> {
     if (!skillRatings) return [];
-    return Object.entries(skillRatings).map(([skillId, rating]) => ({
-      skillId,
-      skillName: `Skill ${skillId.substring(0, 8)}`,
-      rating
-    }));
+    return Object.entries(skillRatings).map(([skillId, rating]) => {
+      const skill = this.allSkills.find(s => s.skillId === skillId);
+      return {
+        skillId,
+        skillName: skill?.skillName || 'Unknown Skill',
+        rating
+      };
+    });
   }
 
   getStatusChipClass(status: string): string {

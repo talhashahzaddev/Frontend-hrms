@@ -21,6 +21,7 @@ export interface AddEmployeeSkillDialogData {
   skills: SkillSet[];
   defaultEmployeeId?: string;
   mode?: 'employee' | 'manager'; // 'employee' = add skill, 'manager' = rate existing skills
+  existingEmployeeSkills?: EmployeeSkill[]; // Skills already added by the employee
 }
 
 @Component({
@@ -59,24 +60,36 @@ export interface AddEmployeeSkillDialogData {
             Skill Assignment
           </h3>
 
-          <div class="form-row">
+          <!-- No Available Skills Message -->
+          <div *ngIf="availableSkills.length === 0" class="no-skills-message">
+            <mat-icon>info</mat-icon>
+            <p>No skills are available to add at this time.</p>
+          </div>
+
+          <div class="form-row" *ngIf="availableSkills.length > 0">
             <!-- Skill Selection -->
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Skill *</mat-label>
               <mat-icon matPrefix>school</mat-icon>
               <mat-select formControlName="skillId">
-                <mat-option *ngFor="let skill of data.skills" [value]="skill.skillId">
+                <mat-option *ngFor="let skill of availableSkills" 
+                           [value]="skill.skillId"
+                           [disabled]="isSkillAlreadyAdded(skill.skillId)">
                   {{ skill.skillName }} ({{ skill.category }})
+                  <span *ngIf="isSkillAlreadyAdded(skill.skillId)" class="already-added-badge"> - Already Added</span>
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="employeeSkillForm.get('skillId')?.hasError('required')">
                 Skill is required
               </mat-error>
+              <mat-hint *ngIf="!isManagerMode && data.existingEmployeeSkills && data.existingEmployeeSkills.length > 0">
+                Skills that are already added are disabled
+              </mat-hint>
             </mat-form-field>
           </div>
 
           <!-- Notes (Employee can add notes) -->
-          <div class="form-row">
+          <div class="form-row" *ngIf="availableSkills.length > 0">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Notes</mat-label>
               <mat-icon matPrefix>note</mat-icon>
@@ -182,7 +195,7 @@ export interface AddEmployeeSkillDialogData {
           color="primary" 
           class="submit-button"
           type="submit"
-          [disabled]="employeeSkillForm.invalid || isSubmitting">
+          [disabled]="employeeSkillForm.invalid || isSubmitting || (!isManagerMode && isSkillAlreadyAdded(employeeSkillForm.get('skillId')?.value))">
           <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
           <mat-icon *ngIf="!isSubmitting">save</mat-icon>
           {{ isSubmitting ? (isManagerMode ? 'Rating...' : 'Adding...') : (isManagerMode ? 'Rate Skills' : 'Add Skill') }}
@@ -589,6 +602,28 @@ export interface AddEmployeeSkillDialogData {
       width: 100%;
     }
 
+    .already-added-badge {
+      color: #9ca3af;
+      font-size: 12px;
+      font-style: italic;
+      margin-left: 8px;
+    }
+
+    // Style for disabled mat-options
+    ::ng-deep .mat-mdc-select-panel {
+      .mat-mdc-option {
+        &[aria-disabled="true"] {
+          opacity: 0.6;
+          cursor: not-allowed;
+          background-color: #f9fafb !important;
+          
+          .mdc-list-item__primary-text {
+            color: #9ca3af !important;
+          }
+        }
+      }
+    }
+
     @media (max-width: 768px) {
       .form-row.two-columns {
         grid-template-columns: 1fr;
@@ -607,6 +642,7 @@ export class AddEmployeeSkillDialogComponent implements OnInit, OnDestroy {
   isManagerMode: boolean;
   employeeSkills: EmployeeSkill[] = [];
   isLoadingEmployeeSkills = false;
+  availableSkills: SkillSet[] = []; // Skills that can be added (not already added)
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -656,7 +692,35 @@ export class AddEmployeeSkillDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Component initialization
+    // For employee mode, show all active skills (we'll disable already added ones in the template)
+    // For manager mode, show all active skills
+    this.availableSkills = this.data.skills.filter(skill => skill.isActive);
+
+    // Watch for skill selection changes and validate
+    if (!this.isManagerMode) {
+      this.employeeSkillForm.get('skillId')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(skillId => {
+          if (skillId && this.isSkillAlreadyAdded(skillId)) {
+            // Clear selection if a disabled skill is somehow selected
+            this.employeeSkillForm.get('skillId')?.setValue('', { emitEvent: false });
+            this.cdr.markForCheck();
+          }
+        });
+    }
+  }
+
+  isSkillAlreadyAdded(skillId: string): boolean {
+    if (!this.data.existingEmployeeSkills || this.isManagerMode || !skillId) {
+      return false;
+    }
+    // Compare skillIds (handle both string and GUID comparison)
+    const isAdded = this.data.existingEmployeeSkills.some(skill => {
+      const existingSkillId = skill.skillId?.toString().toLowerCase().trim();
+      const checkSkillId = skillId?.toString().toLowerCase().trim();
+      return existingSkillId === checkSkillId && existingSkillId !== '';
+    });
+    return isAdded;
   }
 
   ngOnDestroy(): void {

@@ -11,6 +11,7 @@ export interface SkillSet {
 export interface EmployeeSkill {
   employeeSkillId: string;
   employeeId: string;
+  employeeName?: string;
   skillId: string;
   skillName: string;
   proficiencyLevel: number;
@@ -376,6 +377,7 @@ export interface SelfAssessment {
   updatedAt: string;
   cycleName?: string;
   kraName?: string;
+  employeeName?: string;
 }
 
 export interface CreateSelfAssessmentRequest {

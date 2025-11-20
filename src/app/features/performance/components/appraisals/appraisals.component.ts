@@ -82,10 +82,18 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   uniqueCycles: AppraisalCycle[] = [];
   uniqueKras: KRA[] = [];
   
+  // Employee Self Assessments for Managers
+  employeeSelfAssessments: SelfAssessment[] = [];
+  employeeSelfAssessmentsDataSource = new MatTableDataSource<SelfAssessment>([]);
+  isLoadingEmployeeSelfAssessments = false;
+  employeeSelfAssessmentFilterForm!: FormGroup;
+  allKras: KRA[] = [];
+  
   // Table
   displayedColumns: string[] = ['cycleName', 'employeeName', 'reviewType', 'overallRating', 'status',  'actions'];
   employeeAppraisalColumns: string[] = ['cycleName', 'kraName', 'rating', 'reviewerName'];
   selfAssessmentColumns: string[] = ['cycleName', 'kraName', 'rating', 'status'];
+  employeeSelfAssessmentColumns: string[] = ['employeeName', 'cycleName', 'kraName', 'rating', 'actions'];
   
   // Pagination
   pageSize = 10;
@@ -94,6 +102,14 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   
   // View mode
   selectedTab = 0;
+  
+  onTabChange(index: number): void {
+    this.selectedTab = index;
+    // Load employee self-assessments when switching to that tab
+    if (index === 1 && this.hasHRRole() && this.employeeSelfAssessmentsDataSource.data.length === 0) {
+      this.loadEmployeeSelfAssessments();
+    }
+  }
 
   private destroy$ = new Subject<void>();
 
@@ -127,6 +143,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     });
     // Initialize self-assessment filter form (always needed for employees)
     this.initializeSelfAssessmentFilterForm();
+    // Initialize employee self-assessment filter form (for managers)
+    this.initializeEmployeeSelfAssessmentFilterForm();
     // Filter form will be reinitialized after user role is determined
   }
 
@@ -136,6 +154,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     this.loadEmployees();
     if (this.hasHRRole()) {
       this.loadAppraisals();
+      this.loadEmployeeSelfAssessments();
+      this.loadAllKrasForManager(); // Load all KRAs for manager filter dropdown
     } else {
       this.loadEmployeeAppraisals();
       this.loadSelfAssessments();
@@ -189,6 +209,15 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   private initializeSelfAssessmentFilterForm(): void {
     this.selfAssessmentFilterForm = this.fb.group({
       cycleId: [''],
+      kraId: [''],
+      search: ['']
+    });
+  }
+
+  private initializeEmployeeSelfAssessmentFilterForm(): void {
+    this.employeeSelfAssessmentFilterForm = this.fb.group({
+      cycleId: [''],
+      employeeId: [''],
       kraId: [''],
       search: ['']
     });
@@ -565,6 +594,100 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
   hasManagerRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
+  }
+
+  loadAllKrasForManager(): void {
+    // Load all active KRAs for the manager filter dropdown
+    this.performanceService.getKRAs(1, 1000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            const paginatedData = response.data as any;
+            this.allKras = (paginatedData.items || paginatedData.data || []).filter((kra: KRA) => kra.isActive);
+          }
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading KRAs for manager:', error);
+        }
+      });
+  }
+
+  loadEmployeeSelfAssessments(): void {
+    this.isLoadingEmployeeSelfAssessments = true;
+    const filterValue = this.employeeSelfAssessmentFilterForm.value;
+    
+    // Build filter object
+    const filter: { cycleId?: string; employeeId?: string; kraId?: string; search?: string } = {};
+    if (filterValue.cycleId) filter.cycleId = filterValue.cycleId;
+    if (filterValue.employeeId) filter.employeeId = filterValue.employeeId;
+    if (filterValue.kraId) filter.kraId = filterValue.kraId;
+    if (filterValue.search) filter.search = filterValue.search;
+
+    // For now, we'll need to fetch all self-assessments and filter them
+    // This might need a new API endpoint that gets all employee self-assessments for managers
+    // For now, let's use a workaround by fetching from all employees
+    this.fetchAllEmployeeSelfAssessments(filter);
+  }
+
+  private fetchAllEmployeeSelfAssessments(filter: { cycleId?: string; employeeId?: string; kraId?: string; search?: string }): void {
+    // Use the new API endpoint that fetches all employee self-assessments in one call
+    this.performanceService.getAllEmployeeSelfAssessments(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.employeeSelfAssessments = response.data;
+            this.employeeSelfAssessmentsDataSource.data = response.data;
+          } else {
+            this.employeeSelfAssessments = [];
+            this.employeeSelfAssessmentsDataSource.data = [];
+          }
+          this.isLoadingEmployeeSelfAssessments = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading employee self-assessments:', error);
+          this.notificationService.showError('Failed to load employee self-assessments');
+          this.employeeSelfAssessments = [];
+          this.employeeSelfAssessmentsDataSource.data = [];
+          this.isLoadingEmployeeSelfAssessments = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  applyEmployeeSelfAssessmentFilters(): void {
+    this.loadEmployeeSelfAssessments();
+  }
+
+  clearEmployeeSelfAssessmentFilters(): void {
+    this.employeeSelfAssessmentFilterForm.reset();
+    this.loadEmployeeSelfAssessments();
+  }
+
+  openCreateAppraisalForEmployee(assessment: SelfAssessment): void {
+    const dialogRef = this.dialog.open(CreateAppraisalDialogComponent, {
+      width: '900px',
+      maxWidth: '90vw',
+      data: {
+        appraisalCycles: this.appraisalCycles,
+        employees: this.employees,
+        reviewTypes: this.reviewTypes,
+        preSelectedEmployeeId: assessment.employeeId,
+        preSelectedCycleId: assessment.cycleId
+      },
+      disableClose: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result) {
+          this.createAppraisal(result);
+        }
+      });
   }
 
 }

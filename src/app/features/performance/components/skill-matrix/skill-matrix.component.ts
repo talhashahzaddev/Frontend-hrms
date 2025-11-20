@@ -79,6 +79,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CreateSkillDialogComponent } from './create-skill-dialog.component';
 import { AddEmployeeSkillDialogComponent } from './add-employee-skill-dialog.component';
+import { RateEmployeeSkillDialogComponent } from './rate-employee-skill-dialog.component';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -459,9 +460,40 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.notificationService.showInfo('Toggle skill status will be implemented');
   }
 
-  editEmployeeSkill(skill: EmployeeSkill): void {
-    // TODO: Open edit dialog
-    this.notificationService.showInfo('Edit Employee Skill dialog will be implemented');
+  isSkillAlreadyRated(skill: EmployeeSkill): boolean {
+    // Check if skill is already rated (has assessorName and it's not empty)
+    // If assessorName exists and is not empty, it means the skill has been rated
+    return !!(skill.assessorName && skill.assessorName.trim() !== '');
+  }
+
+  rateEmployeeSkill(skill: EmployeeSkill): void {
+    // Check if already rated
+    if (this.isSkillAlreadyRated(skill)) {
+      this.notificationService.showWarning('This skill has already been rated. Cannot rate again.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(RateEmployeeSkillDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: {
+        employeeId: skill.employeeId,
+        employeeName: skill.employeeName || 'Unknown Employee',
+        skillId: skill.skillId,
+        skillName: skill.skillName,
+        employeeSkillId: skill.employeeSkillId,
+        currentProficiencyLevel: skill.proficiencyLevel || 0
+      },
+      disableClose: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && result.success) {
+          this.loadEmployeeSkills(skill.employeeId);
+        }
+      });
   }
 
   openAddEmployeeSkillDialog(): void {
@@ -470,6 +502,33 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     const defaultEmployeeId = isManager ? undefined : currentUser?.userId;
     const mode = isManager ? 'manager' : 'employee';
 
+    // For employee mode, ensure skills are loaded and get their existing skills to filter out
+    if (!isManager && currentUser?.userId) {
+      // If employee skills haven't been loaded yet, load them first
+      if (this.employeeSkills.length === 0 || !this.employeeSkills.some(s => s.employeeId === currentUser.userId)) {
+        this.loadCurrentUserSkills();
+        // Wait a bit for the skills to load, then open dialog
+        setTimeout(() => {
+          this.openDialogWithSkills(currentUser.userId, mode, defaultEmployeeId);
+        }, 300);
+        return;
+      }
+    }
+
+    this.openDialogWithSkills(currentUser?.userId, mode, defaultEmployeeId);
+  }
+
+  private openDialogWithSkills(employeeId?: string, mode: 'employee' | 'manager' = 'employee', defaultEmployeeId?: string): void {
+    // For employee mode, get their existing skills to filter out
+    const existingEmployeeSkills = mode === 'employee' && employeeId
+      ? this.employeeSkills.filter(skill => {
+          const skillEmpId = skill.employeeId?.toString().toLowerCase().trim();
+          const checkEmpId = employeeId?.toString().toLowerCase().trim();
+          return skillEmpId === checkEmpId && skillEmpId !== '';
+        })
+      : undefined;
+    
+
     const dialogRef = this.dialog.open(AddEmployeeSkillDialogComponent, {
       width: '900px',
       maxWidth: '90vw',
@@ -477,7 +536,8 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
         employees: this.employees,
         skills: this.skills.filter(s => s.isActive),
         defaultEmployeeId: defaultEmployeeId,
-        mode: mode
+        mode: mode,
+        existingEmployeeSkills: existingEmployeeSkills
       },
       disableClose: false
     });
@@ -500,6 +560,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          // Only handle success case - all errors go to error handler
           if (response.success) {
             this.notificationService.showSuccess('Employee skill added successfully');
             if (request.employeeId) {
@@ -508,13 +569,26 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
               this.loadCurrentUserSkills();
             }
             this.cdr.markForCheck();
-          } else {
-            this.notificationService.showError(response.message || 'Failed to add employee skill');
           }
+          // Don't show error here - let error handler handle it
         },
         error: (error) => {
           console.error('Error creating employee skill:', error);
-          this.notificationService.showError('Failed to add employee skill');
+          // Check if it's a conflict (duplicate) error
+          if (error.status === 409) {
+            const errorMessage = error.error?.message || error.error?.error?.message || 'This skill has already been added. Cannot add duplicate skills.';
+            this.notificationService.showWarning(errorMessage);
+          } else if (error.error?.success === false) {
+            // Handle case where backend returns 200 with success: false
+            const errorMessage = error.error?.message || 'Failed to add employee skill';
+            if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already been added') || errorMessage.toLowerCase().includes('already added')) {
+              this.notificationService.showWarning(errorMessage);
+            } else {
+              this.notificationService.showError(errorMessage);
+            }
+          } else {
+            this.notificationService.showError('Failed to add employee skill');
+          }
         }
       });
   }
