@@ -381,6 +381,21 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/Performance/appraisals/my-team-employees`);
   }
 
+  getMyCreatedAppraisals(filter?: AppraisalFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<EmployeeAppraisal>>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (filter) {
+      if (filter.appraisalCycleId) params = params.set('appraisalCycleId', filter.appraisalCycleId);
+      if (filter.status) params = params.set('status', filter.status);
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+
+    return this.http.get<ApiResponse<PaginatedResponse<EmployeeAppraisal>>>(`${this.apiUrl}/Performance/appraisals/my-created-appraisals`, { params });
+  }
+
   submitSelfAssessment(employeeId: string, cycleId: string): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.apiUrl}/Performance/SelfAssessment/Submit`, {
       employeeId,

@@ -164,14 +164,14 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getCurrentUser();
     this.loadAppraisalCycles();
-    this.loadEmployees();
-    if (this.hasHRRole()) {
+    if (this.hasManagerRole()) {
+      // For managers and HR managers, load employees and appraisals
+      this.loadEmployees();
       this.loadAppraisals();
       this.loadEmployeeSelfAssessments();
-      this.loadManagerSelfAssessments(); // Load manager's own self-assessments
-      this.loadEmployeeAppraisals(); // Load manager's own appraisals
       this.loadAllKrasForManager(); // Load all KRAs for manager filter dropdown
     } else {
+      // For employees only
       this.loadEmployeeAppraisals();
       this.loadSelfAssessments();
       this.loadAllKras(); // Load all KRAs for filter dropdown
@@ -191,8 +191,11 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
           this.currentUser = user;
           // Reinitialize filter form based on role
           this.initializeFilterForm();
-          if (this.hasHRRole()) {
+          // Load employees and data based on role
+          if (this.hasManagerRole()) {
+            this.loadEmployees();
             this.loadAppraisals();
+            this.loadEmployeeSelfAssessments();
           } else {
             this.loadEmployeeAppraisals();
           }
@@ -255,16 +258,55 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   }
 
   private loadEmployees(): void {
-    this.employeeService.getEmployees()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          this.employees = res.employees || [];
-        },
-        error: () => {
-          this.notificationService.showError('Failed to load employees');
-        }
-      });
+    // For managers, load only their team employees
+    // For HR Managers, load all employees
+    if (this.isOnlyManager()) {
+      this.performanceService.getMyTeamEmployees()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              // Convert EmployeeListItemDto to Employee format
+              this.employees = response.data.map((emp: any) => ({
+                employeeId: emp.employeeId ? (typeof emp.employeeId === 'string' ? emp.employeeId : emp.employeeId.toString()) : '',
+                organizationId: '',
+                employeeCode: emp.employeeCode || '',
+                employeeNumber: emp.employeeCode || '',
+                firstName: emp.firstName || '',
+                lastName: emp.lastName || '',
+                fullName: emp.fullName || `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+                email: emp.email || '',
+                phone: emp.phone,
+                hireDate: emp.hireDate ? (typeof emp.hireDate === 'string' ? emp.hireDate : new Date(emp.hireDate).toISOString().split('T')[0]) : '',
+                status: emp.status || 'active',
+                profilePictureUrl: emp.profilePictureUrl || '',
+                createdAt: '',
+                updatedAt: '',
+                workLocation: '',
+                basicSalary: 0
+              }));
+            } else {
+              this.employees = [];
+            }
+          },
+          error: () => {
+            this.notificationService.showError('Failed to load team employees');
+            this.employees = [];
+          }
+        });
+    } else {
+      // For HR Managers, load all employees
+      this.employeeService.getEmployees()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res) => {
+            this.employees = res.employees || [];
+          },
+          error: () => {
+            this.notificationService.showError('Failed to load employees');
+          }
+        });
+    }
   }
 
   private loadAppraisalCycles(): void {
@@ -288,12 +330,18 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     // Build filter based on user role
     const filter: AppraisalFilter = {
       appraisalCycleId: filterValue.cycleId || undefined,
-      employeeId: this.hasHRRole() ? (filterValue.employeeId || undefined) : this.currentUser?.userId,
+      employeeId: this.hasHRRole() ? (filterValue.employeeId || undefined) : undefined,
       status: filterValue.status || undefined,
       search: filterValue.search || undefined
     };
 
-    this.performanceService.getEmployeeAppraisals(filter, this.pageIndex + 1, this.pageSize)
+    // For managers, use the new endpoint that filters by current manager's employee ID
+    // For HR Managers, use the regular endpoint that can show all appraisals
+    const apiCall = this.isOnlyManager() 
+      ? this.performanceService.getMyCreatedAppraisals(filter, this.pageIndex + 1, this.pageSize)
+      : this.performanceService.getEmployeeAppraisals(filter, this.pageIndex + 1, this.pageSize);
+
+    apiCall
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
