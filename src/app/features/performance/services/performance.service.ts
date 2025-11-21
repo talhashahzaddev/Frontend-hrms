@@ -114,6 +114,21 @@ export class PerformanceService {
     return this.http.get<ApiResponse<PaginatedResponse<EmployeeSkill>>>(`${this.apiUrl}/performance/employee-skills`, { params });
   }
 
+  getMyTeamEmployeeSkills(filter?: EmployeeSkillFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<EmployeeSkill>>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (filter) {
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.skillSetId) params = params.set('skillSetId', filter.skillSetId);
+      if (filter.proficiencyLevel) params = params.set('proficiencyLevel', filter.proficiencyLevel.toString());
+      if (filter.search) params = params.set('search', filter.search);
+    }
+
+    return this.http.get<ApiResponse<PaginatedResponse<EmployeeSkill>>>(`${this.apiUrl}/Performance/employee-skills/my-team`, { params });
+  }
+
   getEmployeeSkillsByEmployee(employeeId: string): Observable<ApiResponse<EmployeeSkill[]>> {
     return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/employees/${employeeId}/skills`);
   }

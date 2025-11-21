@@ -165,10 +165,15 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadSkills();
     this.loadEmployees();
-    if (this.hasHRRole() || this.hasManagerRole()) {
-      this.selectedTab = 1; // Show all employee skills for HR/Manager
-      this.loadEmployeeSkills(); // Load all employee skills
+    if (this.hasHRRole()) {
+      // For HR Managers, show only Skill Sets tab
+      this.selectedTab = 0; // Show Skill Sets tab
+    } else if (this.isOnlyManager()) {
+      // For managers only (not HR Managers), show employee skills tab
+      this.selectedTab = 1; // Show employee skills for managers
+      this.loadEmployeeSkills(); // Load team employee skills
     } else {
+      // For employees, show employee skills tab
       this.selectedTab = 1; // Show employee skills for employees
       this.loadCurrentUserSkills();
     }
@@ -236,8 +241,44 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     
     this.isLoadingEmployeeSkills = true;
     
-    // If HR/Manager role, load all employee skills; otherwise load current user's skills
-    if (this.hasHRRole() || this.hasManagerRole()) {
+    // If Manager role (not HR Manager), load team employee skills
+    // If HR Manager role, load all employee skills
+    // Otherwise load current user's skills
+    if (this.isOnlyManager()) {
+      // For managers only, use the new endpoint that filters by ReportingManagerId
+      const filterValue = this.employeeSkillFilterForm.value;
+      this.performanceService.getMyTeamEmployeeSkills(
+        {
+          employeeId: employeeId || filterValue.employeeId || undefined,
+          search: filterValue.search || undefined,
+          proficiencyLevel: filterValue.proficiencyLevel || undefined
+        },
+        this.pageIndex + 1,
+        this.pageSize
+      )
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success && response.data) {
+              const paginatedData = response.data as any;
+              this.employeeSkills = paginatedData.items || paginatedData.data || [];
+              this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
+              // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
+              this.filteredEmployeeSkills = this.employeeSkills;
+              this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
+            }
+            this.isLoadingEmployeeSkills = false;
+            this.cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error loading employee skills:', error);
+            this.notificationService.showError('Failed to load employee skills');
+            this.isLoadingEmployeeSkills = false;
+            this.cdr.markForCheck();
+          }
+        });
+    } else if (this.hasHRRole()) {
+      // For HR Managers, load all employee skills
       const filterValue = this.employeeSkillFilterForm.value;
       this.performanceService.getEmployeeSkills(
         {
@@ -373,7 +414,7 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     const filterValue = this.employeeSkillFilterForm.value;
     
     // If HR/Manager, reload from API with filters; otherwise filter locally
-    if (this.hasHRRole() || this.hasManagerRole()) {
+    if (this.hasManagerRole()) {
       this.pageIndex = 0; // Reset to first page when filtering
       this.loadEmployeeSkills();
     } else {
@@ -656,6 +697,10 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
   }
 
+  isOnlyManager(): boolean {
+    const userRole = this.authService.getCurrentUserValue()?.roleName || '';
+    return userRole === 'Manager';
+  }
 
   deleteEmployeeSkill(skill: EmployeeSkill) {
     if (confirm(`Are you sure you want to remove this skill from the employee?`)) {

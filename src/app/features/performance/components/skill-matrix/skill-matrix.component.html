@@ -185,8 +185,8 @@
       </mat-card>
     </mat-tab>
 
-    <!-- Employee Skills Tab -->
-    <mat-tab label="Employee Skills">
+    <!-- Employee Skills Tab (For Managers and Employees, not HR Managers) -->
+    <mat-tab *ngIf="!hasHRRole()" label="Employee Skills">
       <!-- Filters Section -->
       <mat-card class="filters-card">
         <div class="filters-header">
