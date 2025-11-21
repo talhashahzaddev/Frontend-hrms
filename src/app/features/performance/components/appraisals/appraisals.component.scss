@@ -6,6 +6,56 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
 
+  // Tab Group Styling
+  .appraisals-tabs {
+    margin-bottom: 24px;
+    width: 100%;
+
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        background: white;
+        border-radius: 16px 16px 0 0;
+        padding: 0 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        width: 100%;
+      }
+
+      .mat-mdc-tab-label {
+        min-width: 200px;
+        height: 56px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.05);
+        }
+
+        &.mdc-tab--active {
+          color: #667eea;
+        }
+      }
+
+      .mdc-tab-indicator__content--underline {
+        border-color: #667eea;
+        border-width: 3px;
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        background: transparent;
+        width: 100%;
+      }
+      
+      .mat-mdc-tab-body-content {
+        width: 100%;
+        overflow: visible;
+      }
+    }
+  }
+
   // Page Header
   .page-header {
     display: flex;
@@ -47,6 +97,10 @@
     }
 
     .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
       .add-button {
         height: 48px;
         padding: 0 28px !important;
@@ -367,6 +421,13 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
     border: none !important;
     overflow: hidden;
+    width: 100%;
+    
+    // Ensure table card in tabs uses full width
+    .appraisals-tabs & {
+      width: 100%;
+      margin: 0;
+    }
 
     .table-header {
       display: flex;
@@ -404,14 +465,20 @@
     // Table Container
     .table-container {
       overflow-x: auto;
+      width: 100%;
+      display: block;
 
       .appraisals-table {
         width: 100%;
+        table-layout: fixed;
+        display: table;
 
         ::ng-deep {
           // Table Headers
           .mat-mdc-header-row {
             background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            display: table-row;
+            width: 100%;
 
             .mat-mdc-header-cell {
               font-weight: 600;
@@ -420,7 +487,36 @@
               text-transform: uppercase;
               letter-spacing: 0.5px;
               border-bottom: 2px solid #e5e7eb;
-              padding: 16px 12px;
+              padding: 16px 20px;
+              white-space: nowrap;
+              display: table-cell;
+              
+              // Column width adjustments for employee self-assessments
+              &:first-child {
+                width: 20%;
+                min-width: 180px;
+              }
+              
+              &:nth-child(2) {
+                width: 22%;
+                min-width: 200px;
+              }
+              
+              &:nth-child(3) {
+                width: 22%;
+                min-width: 200px;
+              }
+              
+              &:nth-child(4) {
+                width: 12%;
+                min-width: 120px;
+              }
+              
+              &:last-child {
+                width: 24%;
+                min-width: 180px;
+                text-align: center;
+              }
             }
           }
 
@@ -428,16 +524,31 @@
           .mat-mdc-row {
             transition: all 0.2s ease;
             cursor: pointer;
+            display: table-row;
+            width: 100%;
 
             &:hover {
               background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
             }
 
             .mat-mdc-cell {
-              padding: 16px 12px;
+              padding: 16px 20px;
               border-bottom: 1px solid #f3f4f6;
               font-size: 14px;
               color: #374151;
+              word-wrap: break-word;
+              display: table-cell;
+              
+              // Align action column to center
+              &:last-child {
+                text-align: center;
+                
+                // Center the button within the cell
+                .create-appraisal-btn {
+                  margin: 0 auto;
+                  display: inline-flex;
+                }
+              }
             }
           }
 
@@ -456,6 +567,73 @@
         .no-rating {
           color: #9ca3af;
           font-style: italic;
+        }
+
+        // Create Appraisal Button
+        .create-appraisal-btn {
+          height: 36px !important;
+          padding: 0 20px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
+          margin: 0 auto !important;
+
+          mat-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+          }
+
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        // View Details Button
+        .view-details-btn {
+          height: 36px !important;
+          padding: 0 20px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
+
+          mat-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+          }
+
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
         }
 
         // Status Chips

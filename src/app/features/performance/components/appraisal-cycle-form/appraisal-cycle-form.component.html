@@ -1,42 +1,59 @@
-<mat-card-header>
-    <mat-card-title>{{ isEditMode ? 'Edit Appraisal Cycle' : 'Create Appraisal Cycle' }}</mat-card-title>
-  </mat-card-header>
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
+    {{ isEditMode ? 'Edit Appraisal Cycle' : 'Create Appraisal Cycle' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
 
-  <mat-card-content>
-    <form [formGroup]="cycleForm" (ngSubmit)="onSubmit()">
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="cycleForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Cycle Name *</mat-label>
+      <mat-icon matPrefix>schedule</mat-icon>
+      <input matInput formControlName="cycleName" placeholder="Enter cycle name">
+      <mat-error *ngIf="cycleForm.get('cycleName')?.hasError('required')">Cycle name is required</mat-error>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full mb-3">
-        <mat-label>Cycle Name</mat-label>
-        <input matInput formControlName="cycleName" placeholder="Enter cycle name">
-        <mat-error *ngIf="cycleForm.get('cycleName')?.hasError('required')">Required</mat-error>
-      </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <mat-icon matPrefix>description</mat-icon>
+      <textarea matInput formControlName="description" rows="3" placeholder="Enter description"></textarea>
+    </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full mb-3">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" placeholder="Enter description"></textarea>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full mb-3">
-        <mat-label>Start Date</mat-label>
+    <div class="date-row">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Start Date *</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
         <input matInput [matDatepicker]="pickerStart" formControlName="startDate">
         <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
         <mat-datepicker #pickerStart></mat-datepicker>
+        <mat-error *ngIf="cycleForm.get('startDate')?.hasError('required')">Start date is required</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-full mb-3">
-        <mat-label>End Date</mat-label>
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>End Date *</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
         <input matInput [matDatepicker]="pickerEnd" formControlName="endDate">
         <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
         <mat-datepicker #pickerEnd></mat-datepicker>
+        <mat-error *ngIf="cycleForm.get('endDate')?.hasError('required')">End date is required</mat-error>
       </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
 
-      <div class="flex justify-end gap-2 mt-4">
-        <button mat-button type="button" (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="isSaving || cycleForm.invalid">
-          {{ isSaving ? 'Saving...' : 'Save' }}
-        </button>
-      </div>
-
-    </form>
-  </mat-card-content>
+<div class="dialog-actions">
+  <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+  <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" [disabled]="isSaving || cycleForm.invalid" class="submit-button">
+    <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
+    <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+    {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Cycle' : 'Create Cycle') }}
+  </button>
+</div>
 

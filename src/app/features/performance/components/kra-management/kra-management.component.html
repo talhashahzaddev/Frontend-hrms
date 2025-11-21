@@ -13,8 +13,8 @@
     
     <div class="header-actions">
       <button *ngIf="hasHRRole()" 
-              mat-flat-button 
-              (click)="openCreateDialog()"
+      (click)="openCreateDialog()"
+      mat-flat-button 
               class="add-button">
         <mat-icon>add</mat-icon>
         New KRA
@@ -69,7 +69,10 @@
       
       <!-- Filter Actions -->
       <div class="filter-actions-container">
-        <button mat-raised-button color="primary" (click)="applyFilters()">
+        <button (click)="applyFilters()"
+                mat-flat-button 
+                color="primary"
+                class="add-button">
           <mat-icon>filter_list</mat-icon>
           Apply Filters
         </button>

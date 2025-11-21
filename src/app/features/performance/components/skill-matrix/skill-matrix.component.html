@@ -38,42 +38,45 @@
         </div>
         
         <div class="filters-content" [formGroup]="skillFilterForm">
-          <!-- Search -->
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>Search skills...</mat-label>
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput 
-                   formControlName="search" 
-                   placeholder="Search by skill name or category...">
-          </mat-form-field>
-          
-          <!-- Category Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Category</mat-label>
-            <mat-icon matPrefix>category</mat-icon>
-            <mat-select formControlName="category">
-              <mat-option [value]="">All Categories</mat-option>
-              <mat-option *ngFor="let cat of categories" [value]="cat">
-                {{ cat }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          
-          <!-- Status Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Status</mat-label>
-            <mat-icon matPrefix>check_circle</mat-icon>
-            <mat-select formControlName="status">
-              <mat-option [value]="">All Statuses</mat-option>
-              <mat-option value="active">Active</mat-option>
-              <mat-option value="inactive">Inactive</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <!-- Search, Category, and Status in one row -->
+          <div class="skill-filters-row">
+            <!-- Search -->
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search skills...</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput 
+                     formControlName="search" 
+                     placeholder="Search by skill name or category...">
+            </mat-form-field>
+            
+            <!-- Category Filter -->
+            <mat-form-field appearance="outline" class="category-filter">
+              <mat-label>Category</mat-label>
+              <mat-icon matPrefix>category</mat-icon>
+              <mat-select formControlName="category">
+                <mat-option [value]="">All Categories</mat-option>
+                <mat-option *ngFor="let cat of categories" [value]="cat">
+                  {{ cat }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Status Filter -->
+            <mat-form-field appearance="outline" class="status-filter">
+              <mat-label>Status</mat-label>
+              <mat-icon matPrefix>check_circle</mat-icon>
+              <mat-select formControlName="status">
+                <mat-option [value]="">All Statuses</mat-option>
+                <mat-option value="active">Active</mat-option>
+                <mat-option value="inactive">Inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
         
         <!-- Filter Actions -->
         <div class="filter-actions-container">
-          <button mat-raised-button color="primary" (click)="applySkillFilters()">
+          <button class="add-button" mat-flat-button  (click)="applySkillFilters()">
             <mat-icon>filter_list</mat-icon>
             Apply Filters
           </button>
@@ -182,8 +185,8 @@
       </mat-card>
     </mat-tab>
 
-    <!-- Employee Skills Tab -->
-    <mat-tab label="Employee Skills">
+    <!-- Employee Skills Tab (For Managers and Employees, not HR Managers) -->
+    <mat-tab *ngIf="!hasHRRole()" label="Employee Skills">
       <!-- Filters Section -->
       <mat-card class="filters-card">
         <div class="filters-header">
@@ -197,47 +200,53 @@
         </div>
         
         <div class="filters-content" [formGroup]="employeeSkillFilterForm">
-          <!-- Employee Selection (for HR) -->
-          <mat-form-field appearance="outline" *ngIf="hasHRRole()">
-            <mat-label>Employee</mat-label>
-            <mat-icon matPrefix>person</mat-icon>
-            <mat-select formControlName="employeeId" (selectionChange)="onEmployeeFilterChange($event.value)">
-              <mat-option [value]="">All Employees</mat-option>
-              <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-                {{ emp.fullName }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          
-          <!-- Search -->
-          <mat-form-field appearance="outline" class="search-field" [class.full-width]="!hasHRRole()">
-            <mat-label>Search skills...</mat-label>
-            <mat-icon matPrefix>search</mat-icon>
-            <input matInput 
-                   formControlName="search" 
-                   placeholder="Search by skill name...">
-          </mat-form-field>
-          
-          <!-- Proficiency Level Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Proficiency Level</mat-label>
-            <mat-icon matPrefix>star</mat-icon>
-            <mat-select formControlName="proficiencyLevel">
-              <mat-option [value]="">All Levels</mat-option>
-              <mat-option *ngFor="let level of [1,2,3,4,5]" [value]="level">
-                Level {{ level }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <!-- Employee, Search, and Proficiency Level in one row -->
+          <div class="employee-skills-filters-row">
+            <!-- Employee Selection (for HR) -->
+            <mat-form-field appearance="outline" *ngIf="hasHRRole()" class="employee-filter">
+              <mat-label>Employee</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-select formControlName="employeeId" (selectionChange)="onEmployeeFilterChange($event.value)">
+                <mat-option [value]="">All Employees</mat-option>
+                <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                  {{ emp.fullName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Search -->
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search skills...</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput 
+                     formControlName="search" 
+                     placeholder="Search by skill name...">
+            </mat-form-field>
+            
+            <!-- Proficiency Level Filter -->
+            <mat-form-field appearance="outline" class="proficiency-filter">
+              <mat-label>Proficiency Level</mat-label>
+              <mat-icon matPrefix>star</mat-icon>
+              <mat-select formControlName="proficiencyLevel">
+                <mat-option [value]="">All Levels</mat-option>
+                <mat-option *ngFor="let level of [1,2,3,4,5]" [value]="level">
+                  Level {{ level }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
         
         <!-- Filter Actions -->
         <div class="filter-actions-container">
-          <button mat-raised-button color="primary" (click)="applyEmployeeSkillFilters()">
+          <button class="add-button" mat-flat-button  (click)="applyEmployeeSkillFilters()">
             <mat-icon>filter_list</mat-icon>
             Apply Filters
           </button>
-          <button mat-flat-button (click)="openAddEmployeeSkillDialog()" class="add-button">
+          <button *ngIf="!hasHRRole() && !hasManagerRole()" 
+                  mat-flat-button 
+                  (click)="openAddEmployeeSkillDialog()" 
+                  class="add-button">
             <mat-icon>add</mat-icon>
             Add Skill
           </button>
@@ -324,9 +333,12 @@
                 </button>
                 
                 <mat-menu #employeeSkillMenu="matMenu">
-                  <button mat-menu-item (click)="editEmployeeSkill(skill)">
-                    <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
+                  <button *ngIf="hasHRRole() || hasManagerRole()" 
+                          mat-menu-item 
+                          (click)="rateEmployeeSkill(skill)"
+                          [disabled]="isSkillAlreadyRated(skill)">
+                    <mat-icon>star</mat-icon>
+                    <span>Rate Skill</span>
                   </button>
                   
                   <button mat-menu-item 

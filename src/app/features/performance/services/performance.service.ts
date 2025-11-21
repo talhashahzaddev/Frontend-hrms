@@ -114,6 +114,21 @@ export class PerformanceService {
     return this.http.get<ApiResponse<PaginatedResponse<EmployeeSkill>>>(`${this.apiUrl}/performance/employee-skills`, { params });
   }
 
+  getMyTeamEmployeeSkills(filter?: EmployeeSkillFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<EmployeeSkill>>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (filter) {
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.skillSetId) params = params.set('skillSetId', filter.skillSetId);
+      if (filter.proficiencyLevel) params = params.set('proficiencyLevel', filter.proficiencyLevel.toString());
+      if (filter.search) params = params.set('search', filter.search);
+    }
+
+    return this.http.get<ApiResponse<PaginatedResponse<EmployeeSkill>>>(`${this.apiUrl}/Performance/employee-skills/my-team`, { params });
+  }
+
   getEmployeeSkillsByEmployee(employeeId: string): Observable<ApiResponse<EmployeeSkill[]>> {
     return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/employees/${employeeId}/skills`);
   }
@@ -257,6 +272,10 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<EmployeeAppraisal>>(`${this.apiUrl}/Performance/appraisals/${id}`);
   }
 
+  deleteAppraisal(id: string): Observable<ApiResponse<boolean>> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/Performance/appraisals/${id}`);
+  }
+
   submitAppraisal(appraisalId: string, request: SubmitAppraisalRequest): Observable<ApiResponse<EmployeeAppraisal>> {
     return this.http.put<ApiResponse<EmployeeAppraisal>>(`${this.apiUrl}/performance/appraisals/${appraisalId}/submit`, request);
   }
@@ -362,14 +381,34 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-assessments`, { params });
   }
 
-  getMyAppraisals(filter?: { cycleId?: string; kraId?: string; search?: string }): Observable<ApiResponse<EmployeeAppraisalForEmployee[]>> {
+  getMyAppraisals(filter?: { cycleId?: string; kraId?: string; search?: string; status?: string }): Observable<ApiResponse<EmployeeAppraisalForEmployee[]>> {
     let params = new HttpParams();
     if (filter) {
       if (filter.cycleId) params = params.set('cycleId', filter.cycleId);
       if (filter.kraId) params = params.set('kraId', filter.kraId);
       if (filter.search) params = params.set('search', filter.search);
+      if (filter.status) params = params.set('status', filter.status);
     }
     return this.http.get<ApiResponse<EmployeeAppraisalForEmployee[]>>(`${this.apiUrl}/Performance/appraisals/my-appraisals`, { params });
+  }
+
+  getMyTeamEmployees(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/Performance/appraisals/my-team-employees`);
+  }
+
+  getMyCreatedAppraisals(filter?: AppraisalFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<EmployeeAppraisal>>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (filter) {
+      if (filter.appraisalCycleId) params = params.set('appraisalCycleId', filter.appraisalCycleId);
+      if (filter.status) params = params.set('status', filter.status);
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+
+    return this.http.get<ApiResponse<PaginatedResponse<EmployeeAppraisal>>>(`${this.apiUrl}/Performance/appraisals/my-created-appraisals`, { params });
   }
 
   submitSelfAssessment(employeeId: string, cycleId: string): Observable<ApiResponse<string>> {
@@ -381,6 +420,28 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
 
   getTeamSelfAssessments(managerId: string, cycleId: string): Observable<ApiResponse<SelfAssessment[]>> {
     return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/Manager/Self-Assessments/${managerId}/${cycleId}`);
+  }
+
+  getAllEmployeeSelfAssessments(filter?: { cycleId?: string; employeeId?: string; kraId?: string; search?: string }): Observable<ApiResponse<SelfAssessment[]>> {
+    let params = new HttpParams();
+    if (filter) {
+      if (filter.cycleId) params = params.set('cycleId', filter.cycleId);
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.kraId) params = params.set('kraId', filter.kraId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/all-employee-assessments`, { params });
+  }
+
+  getMyTeamSelfAssessments(filter?: { cycleId?: string; employeeId?: string; kraId?: string; search?: string }): Observable<ApiResponse<SelfAssessment[]>> {
+    let params = new HttpParams();
+    if (filter) {
+      if (filter.cycleId) params = params.set('cycleId', filter.cycleId);
+      if (filter.employeeId) params = params.set('employeeId', filter.employeeId);
+      if (filter.kraId) params = params.set('kraId', filter.kraId);
+      if (filter.search) params = params.set('search', filter.search);
+    }
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-team-assessments`, { params });
   }
 
   // Manager Review Management

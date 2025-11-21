@@ -25,6 +25,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { AuthService } from '../../../../core/services/auth.service';
 import { AppraisalCycle, AppraisalCycleStatus, CreateAppraisalCycleRequest, UpdateAppraisalCycleRequest } from '../../../../core/models/performance.models';
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-appraisal-cycles',
@@ -142,29 +143,45 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
   }
 
   deleteCycle(cycle: AppraisalCycle): void {
-    if (confirm(`Are you sure you want to delete "${cycle.cycleName}"? This action cannot be undone.`)) {
-      this.isLoading = true;
-      this.performanceService.deleteAppraisalCycle(cycle.cycleId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.notificationService.showSuccess('Appraisal cycle deleted successfully');
-              this.loadAppraisalCycles();
-            } else {
-              this.notificationService.showError(response.message || 'Failed to delete appraisal cycle');
-            }
-            this.isLoading = false;
-            this.cdr.markForCheck();
-          },
-          error: (error) => {
-            console.error('Error deleting cycle:', error);
-            this.notificationService.showError(error.error?.message || 'Failed to delete appraisal cycle');
-            this.isLoading = false;
-            this.cdr.markForCheck();
-          }
-        });
-    }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Appraisal Cycle',
+      message: 'Are you sure you want to delete this appraisal cycle?',
+      itemName: cycle.cycleName
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result === true) {
+          this.isLoading = true;
+          this.performanceService.deleteAppraisalCycle(cycle.cycleId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (response) => {
+                if (response.success) {
+                  this.notificationService.showSuccess('Appraisal cycle deleted successfully');
+                  this.loadAppraisalCycles();
+                } else {
+                  this.notificationService.showError(response.message || 'Failed to delete appraisal cycle');
+                }
+                this.isLoading = false;
+                this.cdr.markForCheck();
+              },
+              error: (error) => {
+                console.error('Error deleting cycle:', error);
+                this.notificationService.showError(error.error?.message || 'Failed to delete appraisal cycle');
+                this.isLoading = false;
+                this.cdr.markForCheck();
+              }
+            });
+        }
+      });
   }
 
   applyFilters(): void {

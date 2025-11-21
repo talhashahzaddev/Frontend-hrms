@@ -344,24 +344,24 @@
 
   </div>
 
-  <!-- HR/Admin Dashboard (visible only to HR users) -->
-  <div *ngIf="hasHRRole() && !isLoading">
+  <!-- HR/Admin/Manager Dashboard (visible to HR, Super Admin, and Managers) -->
+  <div *ngIf="hasManagerRole() && !isLoading">
     <!-- Header Section -->
     <div class="page-header">
       <div class="header-content">
         <h1 class="page-title">
-          <mat-icon>dashboard</mat-icon>
-          Performance Dashboard
+          <mat-icon>assessment</mat-icon>
+          Appraisal Cycles
         </h1>
         <p class="page-subtitle">Manage appraisal cycles and performance metrics</p>
       </div>
       
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="hasHRRole()">
         <button mat-flat-button 
                 (click)="openCreateCycleDialog()"
                 class="add-button">
           <mat-icon>add</mat-icon>
-          New Cycle
+          New Appraisal Cycle
         </button>
       </div>
     </div>
@@ -381,24 +381,20 @@
             <ng-container matColumnDef="cycleName">
               <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
               <td mat-cell *matCellDef="let cycle">
-                <div class="cycle-name-info">
-                  <mat-icon>schedule</mat-icon>
-                  <span>{{ cycle.cycleName }}</span>
+                <div class="cycle-info">
+                  <strong>{{ cycle.cycleName }}</strong>
+                  <!-- <small *ngIf="cycle.description">{{ cycle.description }}</small> -->
                 </div>
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="description">
-              <th mat-header-cell *matHeaderCellDef>Description</th>
-              <td mat-cell *matCellDef="let cycle">{{ cycle.description || 'N/A' }}</td>
-            </ng-container>
-
             <ng-container matColumnDef="dates">
-              <th mat-header-cell *matHeaderCellDef>Dates</th>
+              <th mat-header-cell *matHeaderCellDef>Period Dates</th>
               <td mat-cell *matCellDef="let cycle">
-                <div class="dates-info">
-                  <mat-icon>calendar_today</mat-icon>
-                  <span>{{ cycle.startDate | date:'shortDate' }} - {{ cycle.endDate | date:'shortDate' }}</span>
+                <div class="date-range">
+                  <div>{{ cycle.startDate | date:'mediumDate' }}</div>
+                  <mat-icon class="date-separator">arrow_forward</mat-icon>
+                  <div>{{ cycle.endDate | date:'mediumDate' }}</div>
                 </div>
               </td>
             </ng-container>
@@ -406,25 +402,35 @@
             <ng-container matColumnDef="status">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let cycle">
-                <mat-chip [class]="'status-chip status-' + cycle.status?.toLowerCase()">
-                  <mat-icon>{{ getStatusIcon(cycle.status) }}</mat-icon>
+                <mat-chip [color]="getCycleStatusColor(cycle.status)">
                   {{ cycle.status | titlecase }}
                 </mat-chip>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="appraisals">
+              <th mat-header-cell *matHeaderCellDef>Appraisals</th>
+              <td mat-cell *matCellDef="let cycle">
+                <div class="appraisal-stats">
+                  <span>
+                    <!-- {{ cycle.completedAppraisals || 0 }} /  -->
+                    {{ cycle.totalAppraisals || 0 }}</span>
+                </div>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let cycle">
-                <button mat-icon-button [matMenuTriggerFor]="cycleMenu">
+                <button mat-icon-button [matMenuTriggerFor]="cycleMenu" *ngIf="hasHRRole()">
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #cycleMenu="matMenu">
-                  <button mat-menu-item (click)="editCycle(cycle)">
+                  <button mat-menu-item (click)="editCycle(cycle)" *ngIf="hasHRRole()">
                     <mat-icon>edit</mat-icon>
                     <span>Edit</span>
                   </button>
-                  <button mat-menu-item (click)="deleteCycle(cycle)">
+                  <button mat-menu-item (click)="deleteCycle(cycle)" *ngIf="hasHRRole()">
                     <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
@@ -441,7 +447,7 @@
           <mat-icon>event</mat-icon>
           <h3>No Appraisal Cycles</h3>
           <p>No appraisal cycles have been created yet.</p>
-          <button mat-flat-button (click)="openCreateCycleDialog()" class="create-first-button">
+          <button *ngIf="hasHRRole()" mat-flat-button (click)="openCreateCycleDialog()" class="create-first-button">
             <mat-icon>add</mat-icon>
             Create First Cycle
           </button>

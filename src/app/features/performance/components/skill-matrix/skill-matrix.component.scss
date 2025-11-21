@@ -126,15 +126,81 @@
     }
 
     .filters-content {
-      display: grid;
-      grid-template-columns: 2fr repeat(2, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: 16px;
       padding: 24px;
-      align-items: flex-start;
 
-      // Adjust grid for employee skills tab when HR filter is shown
-      mat-form-field.full-width {
-        grid-column: 1 / -1;
+      // Employee Skills filters row (Employee, Search, Proficiency Level) - all in one line
+      .employee-skills-filters-row {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr 1fr;
+        gap: 16px;
+        width: 100%;
+
+        .employee-filter {
+          width: 100%;
+        }
+
+        .search-field {
+          width: 100%;
+        }
+
+        .proficiency-filter {
+          width: 100%;
+        }
+
+        // When employee filter is not present (for non-HR managers), use 2 columns
+        &:not(:has(.employee-filter)) {
+          grid-template-columns: 2.5fr 1fr;
+        }
+      }
+
+      // Legacy support for old structure (if still used)
+      .employee-filter {
+        width: 100%;
+        margin-bottom: 0;
+      }
+
+      // Search and Proficiency Level in one row (legacy)
+      .search-proficiency-row {
+        display: grid !important;
+        grid-template-columns: 2.5fr 1fr !important;
+        gap: 16px !important;
+        width: 100% !important;
+        align-items: start;
+        margin: 0;
+        padding: 0;
+
+        .search-field {
+          width: 100%;
+          margin: 0;
+        }
+
+        .proficiency-filter {
+          width: 100%;
+          margin: 0;
+        }
+      }
+
+      // Skill Sets filters row (Search, Category, Status)
+      .skill-filters-row {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr 1fr;
+        gap: 16px;
+        width: 100%;
+
+        .search-field {
+          width: 100%;
+        }
+
+        .category-filter {
+          width: 100%;
+        }
+
+        .status-filter {
+          width: 100%;
+        }
       }
 
       ::ng-deep mat-form-field {
@@ -600,7 +666,17 @@
 
     .filters-card {
       .filters-content {
-        grid-template-columns: 1fr;
+        .employee-skills-filters-row {
+          grid-template-columns: 1fr;
+        }
+
+        .search-proficiency-row {
+          grid-template-columns: 1fr;
+        }
+
+        .skill-filters-row {
+          grid-template-columns: 1fr;
+        }
       }
 
       .filter-actions-container {
