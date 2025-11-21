@@ -187,6 +187,29 @@
 
     <!-- Employee Skills Tab (For Managers and Employees, not HR Managers) -->
     <mat-tab *ngIf="!hasHRRole()" label="Employee Skills">
+      <!-- Manager View Mode Toggle (Only for Managers) -->
+      <mat-card *ngIf="isOnlyManager()" class="view-mode-card">
+        <div class="view-mode-content">
+          <div class="view-mode-label">
+            <mat-icon>view_module</mat-icon>
+            <span>View Mode</span>
+          </div>
+          <mat-button-toggle-group 
+            [value]="managerViewMode" 
+            (change)="onManagerViewModeChange($event.value)" 
+            class="view-mode-toggle-group">
+            <mat-button-toggle value="my-skills" class="view-mode-toggle">
+              <mat-icon>person</mat-icon>
+              <span>My Skills</span>
+            </mat-button-toggle>
+            <mat-button-toggle value="team-skills" class="view-mode-toggle">
+              <mat-icon>group</mat-icon>
+              <span>Team Skills</span>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </mat-card>
+
       <!-- Filters Section -->
       <mat-card class="filters-card">
         <div class="filters-header">
@@ -243,7 +266,8 @@
             <mat-icon>filter_list</mat-icon>
             Apply Filters
           </button>
-          <button *ngIf="!hasHRRole() && !hasManagerRole()" 
+          <!-- Show Add Skill button for employees or managers viewing their own skills -->
+          <button *ngIf="!hasHRRole() && (!hasManagerRole() || (isOnlyManager() && managerViewMode === 'my-skills'))" 
                   mat-flat-button 
                   (click)="openAddEmployeeSkillDialog()" 
                   class="add-button">
@@ -256,7 +280,12 @@
       <!-- Employee Skills Table -->
       <mat-card class="table-card">
         <div class="table-header">
-          <h3>Employee Skills ({{ filteredEmployeeSkills.length }})</h3>
+          <h3>
+            <span *ngIf="isOnlyManager() && managerViewMode === 'my-skills'">My Skills</span>
+            <span *ngIf="isOnlyManager() && managerViewMode === 'team-skills'">Team Skills</span>
+            <span *ngIf="!hasManagerRole()">Employee Skills</span>
+            ({{ filteredEmployeeSkills.length }})
+          </h3>
         </div>
         
         <!-- Loading Spinner -->
@@ -352,8 +381,8 @@
             </ng-container>
 
             <!-- Table Headers and Rows -->
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let skill; columns: displayedColumns;"></tr>
+            <tr mat-header-row *matHeaderRowDef="employeeSkillsDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let skill; columns: employeeSkillsDisplayedColumns;"></tr>
           </table>
           
           <!-- Empty State -->

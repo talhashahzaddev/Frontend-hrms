@@ -77,6 +77,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { CreateSkillDialogComponent } from './create-skill-dialog.component';
 import { AddEmployeeSkillDialogComponent } from './add-employee-skill-dialog.component';
 import { RateEmployeeSkillDialogComponent } from './rate-employee-skill-dialog.component';
@@ -102,7 +103,8 @@ import { Subject, takeUntil } from 'rxjs';
     MatTabsModule,
     MatMenuModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatButtonToggleModule
   ],
   templateUrl: './skill-matrix.component.html',
   styleUrl: './skill-matrix.component.scss'
@@ -132,10 +134,22 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   // UI State
   selectedTab = 0;
   isLoadingEmployeeSkills = false;
+  managerViewMode: 'my-skills' | 'team-skills' = 'team-skills'; // For managers: view own skills or team skills
   
   // Table
   skillDisplayedColumns: string[] = ['category', 'skillName', 'levelScale', 'status', 'actions'];
   displayedColumns: string[] = ['employeeName', 'skillName', 'proficiencyLevel', 'assessorName', 'lastAssessed', 'actions'];
+  
+  // Get displayed columns for employee skills table (exclude actions for managers viewing own skills)
+  get employeeSkillsDisplayedColumns(): string[] {
+    if (this.isOnlyManager() && this.managerViewMode === 'my-skills') {
+      // Managers viewing their own skills - no actions column
+      return ['employeeName', 'skillName', 'proficiencyLevel', 'assessorName', 'lastAssessed'];
+    }
+    // Employees or managers viewing team skills - include actions
+    return this.displayedColumns;
+  }
+  
   pageSize = 10;
   pageIndex = 0;
   totalItems = 0;
@@ -241,42 +255,73 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     
     this.isLoadingEmployeeSkills = true;
     
-    // If Manager role (not HR Manager), load team employee skills
+    // If Manager role (not HR Manager), check view mode
     // If HR Manager role, load all employee skills
     // Otherwise load current user's skills
     if (this.isOnlyManager()) {
-      // For managers only, use the new endpoint that filters by ReportingManagerId
-      const filterValue = this.employeeSkillFilterForm.value;
-      this.performanceService.getMyTeamEmployeeSkills(
-        {
-          employeeId: employeeId || filterValue.employeeId || undefined,
-          search: filterValue.search || undefined,
-          proficiencyLevel: filterValue.proficiencyLevel || undefined
-        },
-        this.pageIndex + 1,
-        this.pageSize
-      )
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success && response.data) {
-              const paginatedData = response.data as any;
-              this.employeeSkills = paginatedData.items || paginatedData.data || [];
-              this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
-              // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
-              this.filteredEmployeeSkills = this.employeeSkills;
-              this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
-            }
-            this.isLoadingEmployeeSkills = false;
-            this.cdr.markForCheck();
+      // For managers, check if viewing own skills or team skills
+      if (this.managerViewMode === 'my-skills') {
+        // Load manager's own skills
+        const currentUser = this.authService.getCurrentUserValue();
+        if (currentUser?.userId) {
+          const filterValue = this.employeeSkillFilterForm.value;
+          this.performanceService.getEmployeeSkillsByEmployee(currentUser.userId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (response) => {
+                if (response.success && response.data) {
+                  this.employeeSkills = response.data || [];
+                  this.totalItems = this.employeeSkills.length;
+                  // Apply filters
+                  this.applyEmployeeSkillFilters();
+                }
+                this.isLoadingEmployeeSkills = false;
+                this.cdr.markForCheck();
+              },
+              error: (error) => {
+                console.error('Error loading manager skills:', error);
+                this.notificationService.showError('Failed to load your skills');
+                this.isLoadingEmployeeSkills = false;
+                this.cdr.markForCheck();
+              }
+            });
+        } else {
+          this.isLoadingEmployeeSkills = false;
+        }
+      } else {
+        // Load team employee skills
+        const filterValue = this.employeeSkillFilterForm.value;
+        this.performanceService.getMyTeamEmployeeSkills(
+          {
+            employeeId: employeeId || filterValue.employeeId || undefined,
+            search: filterValue.search || undefined,
+            proficiencyLevel: filterValue.proficiencyLevel || undefined
           },
-          error: (error) => {
-            console.error('Error loading employee skills:', error);
-            this.notificationService.showError('Failed to load employee skills');
-            this.isLoadingEmployeeSkills = false;
-            this.cdr.markForCheck();
-          }
-        });
+          this.pageIndex + 1,
+          this.pageSize
+        )
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success && response.data) {
+                const paginatedData = response.data as any;
+                this.employeeSkills = paginatedData.items || paginatedData.data || [];
+                this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
+                // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
+                this.filteredEmployeeSkills = this.employeeSkills;
+                this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
+              }
+              this.isLoadingEmployeeSkills = false;
+              this.cdr.markForCheck();
+            },
+            error: (error) => {
+              console.error('Error loading employee skills:', error);
+              this.notificationService.showError('Failed to load employee skills');
+              this.isLoadingEmployeeSkills = false;
+              this.cdr.markForCheck();
+            }
+          });
+      }
     } else if (this.hasHRRole()) {
       // For HR Managers, load all employee skills
       const filterValue = this.employeeSkillFilterForm.value;
@@ -413,12 +458,13 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
   applyEmployeeSkillFilters(): void {
     const filterValue = this.employeeSkillFilterForm.value;
     
-    // If HR/Manager, reload from API with filters; otherwise filter locally
-    if (this.hasManagerRole()) {
+    // If manager viewing team skills or HR Manager, reload from API with filters
+    // Otherwise (employee or manager viewing own skills), filter locally
+    if (this.hasHRRole() || (this.isOnlyManager() && this.managerViewMode === 'team-skills')) {
       this.pageIndex = 0; // Reset to first page when filtering
       this.loadEmployeeSkills();
     } else {
-      // Employee view - filter locally
+      // Employee view or manager viewing own skills - filter locally
       let filtered = [...this.employeeSkills];
 
       // Search filter
@@ -539,12 +585,21 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
 
   openAddEmployeeSkillDialog(): void {
     const currentUser = this.authService.getCurrentUserValue();
-    const isManager = this.hasHRRole() || this.hasManagerRole();
-    const defaultEmployeeId = isManager ? undefined : currentUser?.userId;
-    const mode = isManager ? 'manager' : 'employee';
+    const isHRManager = this.hasHRRole();
+    const isManager = this.isOnlyManager();
+    
+    // If manager is viewing their own skills, allow them to add skills to themselves (employee mode)
+    // Otherwise, if HR Manager or manager viewing team skills, use manager mode
+    let mode: 'employee' | 'manager' = 'employee';
+    let defaultEmployeeId: string | undefined = currentUser?.userId;
+    
+    if (isHRManager || (isManager && this.managerViewMode === 'team-skills')) {
+      mode = 'manager';
+      defaultEmployeeId = undefined;
+    }
 
-    // For employee mode, ensure skills are loaded and get their existing skills to filter out
-    if (!isManager && currentUser?.userId) {
+    // For employee mode (employees or managers adding to themselves), ensure skills are loaded
+    if (mode === 'employee' && currentUser?.userId) {
       // If employee skills haven't been loaded yet, load them first
       if (this.employeeSkills.length === 0 || !this.employeeSkills.some(s => s.employeeId === currentUser.userId)) {
         this.loadCurrentUserSkills();
@@ -557,6 +612,16 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     }
 
     this.openDialogWithSkills(currentUser?.userId, mode, defaultEmployeeId);
+  }
+
+  onManagerViewModeChange(mode: 'my-skills' | 'team-skills'): void {
+    this.managerViewMode = mode;
+    this.pageIndex = 0; // Reset pagination
+    if (mode === 'my-skills') {
+      this.loadEmployeeSkills(); // Load manager's own skills
+    } else {
+      this.loadEmployeeSkills(); // Load team skills
+    }
   }
 
   private openDialogWithSkills(employeeId?: string, mode: 'employee' | 'manager' = 'employee', defaultEmployeeId?: string): void {

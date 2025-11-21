@@ -85,7 +85,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   cyclesDataSource = new MatTableDataSource<AppraisalCycle>([]);
   skillsDataSource = new MatTableDataSource<EmployeeSkill>([]);
   displayedColumns: string[] = ['cycleName', 'reviewType', 'reviewerName', 'overallRating', 'feedback'];
-  displayedCycleColumns: string[] = ['cycleName', 'dates', 'status', 'appraisals', 'actions'];
+  displayedCycleColumns: string[] = ['cycleName', 'dates', 'status', 'appraisals'];
   displayedSkillColumns: string[] = ['skillName', 'skillCategory', 'proficiencyLevel', 'assessorName'];
 
   constructor(
