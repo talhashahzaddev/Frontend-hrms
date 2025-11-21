@@ -98,7 +98,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'trending_up',
       children: [
         { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', roles: ['Employee'] },
-        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/dashboard', roles: ['Super Admin', 'HR Manager', 'Manager'] },
+        { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', roles: ['Manager'] },
+        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/dashboard', roles: ['Super Admin', 'HR Manager'] },
         { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals' },
         { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills' },
         { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals' },
