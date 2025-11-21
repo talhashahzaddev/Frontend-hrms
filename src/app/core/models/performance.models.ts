@@ -90,10 +90,17 @@ export interface EmployeeAppraisalForEmployee {
   appraisalId: string;
   cycleId: string;
   cycleName: string;
-  kraName?: string;
-  rating?: number;
   reviewerName?: string;
+  reviewType: ReviewType;
+  overallRating?: number;
+  kraRatings: { [kraId: string]: number };
+  skillRatings: { [skillId: string]: number };
+  feedback?: string;
+  improvementAreas?: string;
+  developmentPlan?: string;
+  status: AppraisalStatus;
   submittedAt?: string;
+  reviewedAt?: string;
 }
 
 export enum ReviewType {

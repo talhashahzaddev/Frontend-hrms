@@ -89,11 +89,20 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   employeeSelfAssessmentFilterForm!: FormGroup;
   allKras: KRA[] = [];
   
+  // Manager Self Assessments (Manager's own self-assessments)
+  managerSelfAssessments: SelfAssessment[] = [];
+  managerSelfAssessmentsDataSource = new MatTableDataSource<SelfAssessment>([]);
+  isLoadingManagerSelfAssessments = false;
+  managerSelfAssessmentFilterForm!: FormGroup;
+  
   // Table
   displayedColumns: string[] = ['cycleName', 'employeeName', 'reviewType', 'overallRating', 'status',  'actions'];
-  employeeAppraisalColumns: string[] = ['cycleName', 'kraName', 'rating', 'reviewerName'];
+  employeeAppraisalColumns: string[] = ['cycleName', 'reviewType', 'overallRating', 'status', 'actions'];
   selfAssessmentColumns: string[] = ['cycleName', 'kraName', 'rating', 'status'];
   employeeSelfAssessmentColumns: string[] = ['employeeName', 'cycleName', 'kraName', 'rating', 'actions'];
+  
+  // My Appraisals Filter Form
+  myAppraisalsFilterForm!: FormGroup;
   
   // Pagination
   pageSize = 10;
@@ -145,6 +154,10 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     this.initializeSelfAssessmentFilterForm();
     // Initialize employee self-assessment filter form (for managers)
     this.initializeEmployeeSelfAssessmentFilterForm();
+    // Initialize manager self-assessment filter form (for managers' own self-assessments)
+    this.initializeManagerSelfAssessmentFilterForm();
+    // Initialize my appraisals filter form
+    this.initializeMyAppraisalsFilterForm();
     // Filter form will be reinitialized after user role is determined
   }
 
@@ -155,6 +168,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     if (this.hasHRRole()) {
       this.loadAppraisals();
       this.loadEmployeeSelfAssessments();
+      this.loadManagerSelfAssessments(); // Load manager's own self-assessments
+      this.loadEmployeeAppraisals(); // Load manager's own appraisals
       this.loadAllKrasForManager(); // Load all KRAs for manager filter dropdown
     } else {
       this.loadEmployeeAppraisals();
@@ -223,6 +238,22 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     });
   }
 
+  private initializeManagerSelfAssessmentFilterForm(): void {
+    this.managerSelfAssessmentFilterForm = this.fb.group({
+      cycleId: [''],
+      kraId: [''],
+      search: ['']
+    });
+  }
+
+  private initializeMyAppraisalsFilterForm(): void {
+    this.myAppraisalsFilterForm = this.fb.group({
+      cycleId: [''],
+      status: [''],
+      search: ['']
+    });
+  }
+
   private loadEmployees(): void {
     this.employeeService.getEmployees()
       .pipe(takeUntil(this.destroy$))
@@ -285,11 +316,11 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
   loadEmployeeAppraisals(): void {
     this.isLoadingEmployeeAppraisals = true;
-    const filterValue = this.filterForm.value;
+    const filterValue = this.myAppraisalsFilterForm.value;
     
-    const filter: { cycleId?: string; kraId?: string; search?: string } = {};
+    const filter: { cycleId?: string; kraId?: string; search?: string; status?: string } = {};
     if (filterValue.cycleId) filter.cycleId = filterValue.cycleId;
-    if (filterValue.kraId) filter.kraId = filterValue.kraId;
+    if (filterValue.status) filter.status = filterValue.status;
     if (filterValue.search) filter.search = filterValue.search;
 
     this.performanceService.getMyAppraisals(filter)
@@ -312,6 +343,15 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       });
   }
 
+  applyMyAppraisalsFilters(): void {
+    this.loadEmployeeAppraisals();
+  }
+
+  clearMyAppraisalsFilters(): void {
+    this.myAppraisalsFilterForm.reset();
+    this.loadEmployeeAppraisals();
+  }
+
 
   viewAppraisal(appraisal: EmployeeAppraisal): void {
     console.log('Opening view dialog for appraisal:', appraisal);
@@ -329,13 +369,92 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
+  viewMyAppraisal(appraisal: EmployeeAppraisalForEmployee): void {
+    // Convert EmployeeAppraisalForEmployee to EmployeeAppraisal format for the view dialog
+    const fullName = this.currentUser 
+      ? `${this.currentUser.firstName} ${this.currentUser.lastName}`.trim()
+      : '';
+    
+    const appraisalForView: EmployeeAppraisal = {
+      appraisalId: appraisal.appraisalId,
+      cycleId: appraisal.cycleId,
+      cycleName: appraisal.cycleName,
+      employeeId: this.currentUser?.userId || '',
+      employeeName: fullName,
+      reviewerId: '',
+      reviewerName: appraisal.reviewerName || '',
+      reviewType: appraisal.reviewType,
+      overallRating: appraisal.overallRating,
+      kraRatings: appraisal.kraRatings,
+      skillRatings: appraisal.skillRatings,
+      goalsAchieved: {},
+      feedback: appraisal.feedback,
+      improvementAreas: appraisal.improvementAreas,
+      developmentPlan: appraisal.developmentPlan,
+      status: appraisal.status,
+      submittedAt: appraisal.submittedAt,
+      reviewedAt: appraisal.reviewedAt,
+      createdAt: '',
+      updatedAt: ''
+    };
+
+    this.viewAppraisal(appraisalForView);
+  }
+
   openCreateForm(): void {
+    // If user is only Manager (not HR Manager), load team employees
+    if (this.isOnlyManager()) {
+      this.loadTeamEmployeesForManager();
+    } else {
+      // For HR Manager/Super Admin, use all employees
+      this.openCreateFormWithEmployees(this.employees);
+    }
+  }
+
+  private loadTeamEmployeesForManager(): void {
+    this.performanceService.getMyTeamEmployees()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            // Convert EmployeeListItemDto to Employee format for the dialog
+            const teamEmployees: Employee[] = response.data.map((emp: any) => ({
+              employeeId: emp.employeeId ? (typeof emp.employeeId === 'string' ? emp.employeeId : emp.employeeId.toString()) : '',
+              organizationId: '',
+              employeeCode: emp.employeeCode || '',
+              employeeNumber: emp.employeeCode || '',
+              firstName: emp.firstName || '',
+              lastName: emp.lastName || '',
+              fullName: emp.fullName || `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+              email: emp.email || '',
+              phone: emp.phone,
+              hireDate: emp.hireDate ? (typeof emp.hireDate === 'string' ? emp.hireDate : new Date(emp.hireDate).toISOString().split('T')[0]) : '',
+              status: emp.status || 'active',
+              profilePictureUrl: emp.profilePictureUrl || '',
+              createdAt: '',
+              updatedAt: '',
+              workLocation: '',
+              basicSalary: 0
+            }));
+            this.openCreateFormWithEmployees(teamEmployees);
+          } else {
+            this.notificationService.showError('Failed to load team employees');
+          }
+        },
+        error: (error) => {
+          console.error('Error loading team employees:', error);
+          this.notificationService.showError('Failed to load team employees');
+        }
+      });
+  }
+
+  private openCreateFormWithEmployees(employeesList: Employee[]): void {
     const dialogRef = this.dialog.open(CreateAppraisalDialogComponent, {
       width: '900px',
       maxWidth: '90vw',
       data: {
         appraisalCycles: this.appraisalCycles,
-        employees: this.employees,
+        employees: employeesList,
         reviewTypes: this.reviewTypes
       },
       disableClose: false
@@ -365,7 +484,11 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
       .subscribe(result => {
         if (result && result.success) {
           // Reload self-assessments to show the new one
-          this.loadSelfAssessments();
+          if (this.hasHRRole()) {
+            this.loadManagerSelfAssessments();
+          } else {
+            this.loadSelfAssessments();
+          }
         }
       });
   }
@@ -596,6 +719,12 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
   }
 
+  isOnlyManager(): boolean {
+    // Returns true if user is Manager but NOT HR Manager or Super Admin
+    const userRole = this.currentUser?.roleName || '';
+    return userRole === 'Manager';
+  }
+
   loadAllKrasForManager(): void {
     // Load all active KRAs for the manager filter dropdown
     this.performanceService.getKRAs(1, 1000)
@@ -632,8 +761,13 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   }
 
   private fetchAllEmployeeSelfAssessments(filter: { cycleId?: string; employeeId?: string; kraId?: string; search?: string }): void {
-    // Use the new API endpoint that fetches all employee self-assessments in one call
-    this.performanceService.getAllEmployeeSelfAssessments(filter)
+    // For HR Managers, use getAllEmployeeSelfAssessments
+    // For Managers, use getMyTeamSelfAssessments (only their team)
+    const apiCall = this.hasHRRole() 
+      ? this.performanceService.getAllEmployeeSelfAssessments(filter)
+      : this.performanceService.getMyTeamSelfAssessments(filter);
+    
+    apiCall
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -688,6 +822,44 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
           this.createAppraisal(result);
         }
       });
+  }
+
+  loadManagerSelfAssessments(): void {
+    this.isLoadingManagerSelfAssessments = true;
+    const filterValue = this.managerSelfAssessmentFilterForm.value;
+    
+    const filter: { cycleId?: string; kraId?: string; search?: string } = {};
+    if (filterValue.cycleId) filter.cycleId = filterValue.cycleId;
+    if (filterValue.kraId) filter.kraId = filterValue.kraId;
+    if (filterValue.search) filter.search = filterValue.search;
+
+    this.performanceService.getMySelfAssessments(filter)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.managerSelfAssessments = response.data;
+            this.managerSelfAssessmentsDataSource.data = response.data;
+          }
+          this.isLoadingManagerSelfAssessments = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading manager self-assessments:', error);
+          this.notificationService.showError('Failed to load self-assessments');
+          this.isLoadingManagerSelfAssessments = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  applyManagerSelfAssessmentFilters(): void {
+    this.loadManagerSelfAssessments();
+  }
+
+  clearManagerSelfAssessmentFilters(): void {
+    this.managerSelfAssessmentFilterForm.reset();
+    this.loadManagerSelfAssessments();
   }
 
 }

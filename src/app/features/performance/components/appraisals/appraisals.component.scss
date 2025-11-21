@@ -97,6 +97,10 @@
     }
 
     .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
       .add-button {
         height: 48px;
         padding: 0 28px !important;
@@ -581,6 +585,39 @@
           justify-content: center !important;
           gap: 6px !important;
           margin: 0 auto !important;
+
+          mat-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+          }
+
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        // View Details Button
+        .view-details-btn {
+          height: 36px !important;
+          padding: 0 20px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
 
           mat-icon {
             font-size: 18px !important;

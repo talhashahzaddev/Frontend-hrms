@@ -875,51 +875,43 @@ export class CreateAppraisalDialogComponent implements OnInit, OnDestroy {
 
     this.isLoadingExistingRatings = true;
     
-    // Fetch existing appraisals and self-assessments
-    Promise.all([
-      firstValueFrom(this.performanceService.getEmployeeAppraisalsByCycle(cycleId, employeeId)),
-      firstValueFrom(this.performanceService.getSelfAssessments(employeeId, cycleId))
-    ]).then(([appraisalsResponse, selfAssessmentsResponse]) => {
-      const ratedKraIds = new Set<string>();
+    // Only fetch existing manager appraisals (not employee self-assessments)
+    // Employee self-assessments should NOT block managers from creating appraisals
+    firstValueFrom(this.performanceService.getEmployeeAppraisalsByCycle(cycleId, employeeId))
+      .then((appraisalsResponse) => {
+        const ratedKraIds = new Set<string>();
 
-      // Extract KRA IDs from existing appraisals
-      if (appraisalsResponse?.success && appraisalsResponse.data) {
-        appraisalsResponse.data.forEach((appraisal: any) => {
-          if (appraisal.kraRatings && typeof appraisal.kraRatings === 'object') {
-            Object.keys(appraisal.kraRatings).forEach(kraId => {
-              ratedKraIds.add(kraId);
-            });
-          }
-        });
-      }
+        // Extract KRA IDs only from manager appraisals (reviewType === 'manager')
+        if (appraisalsResponse?.success && appraisalsResponse.data) {
+          appraisalsResponse.data.forEach((appraisal: any) => {
+            // Only consider manager appraisals, not employee self-assessments
+            if (appraisal.reviewType === 'manager' && appraisal.kraRatings && typeof appraisal.kraRatings === 'object') {
+              Object.keys(appraisal.kraRatings).forEach(kraId => {
+                ratedKraIds.add(kraId);
+              });
+            }
+          });
+        }
 
-      // Extract KRA IDs from existing self-assessments
-      if (selfAssessmentsResponse?.success && selfAssessmentsResponse.data) {
-        selfAssessmentsResponse.data.forEach((assessment: any) => {
-          if (assessment.kraId) {
-            ratedKraIds.add(assessment.kraId);
-          }
-        });
-      }
+        this.alreadyRatedKraIds = ratedKraIds;
+        
+        // Remove already rated KRAs from current selection
+        const currentSelectedKras = this.appraisalForm.get('selectedKras')?.value || [];
+        const filteredKras = currentSelectedKras.filter((kraId: string) => !ratedKraIds.has(kraId));
+        
+        if (filteredKras.length !== currentSelectedKras.length) {
+          this.appraisalForm.patchValue({ selectedKras: filteredKras });
+          this.notificationService.showWarning('Some KRAs were removed as they are already rated by a manager');
+        }
 
-      this.alreadyRatedKraIds = ratedKraIds;
-      
-      // Remove already rated KRAs from current selection
-      const currentSelectedKras = this.appraisalForm.get('selectedKras')?.value || [];
-      const filteredKras = currentSelectedKras.filter((kraId: string) => !ratedKraIds.has(kraId));
-      
-      if (filteredKras.length !== currentSelectedKras.length) {
-        this.appraisalForm.patchValue({ selectedKras: filteredKras });
-        this.notificationService.showWarning('Some KRAs were removed as they are already rated');
-      }
-
-      this.isLoadingExistingRatings = false;
-      this.cdr.markForCheck();
-    }).catch((error) => {
-      console.error('Error checking existing ratings:', error);
-      this.isLoadingExistingRatings = false;
-      this.cdr.markForCheck();
-    });
+        this.isLoadingExistingRatings = false;
+        this.cdr.markForCheck();
+      })
+      .catch((error) => {
+        console.error('Error checking existing ratings:', error);
+        this.isLoadingExistingRatings = false;
+        this.cdr.markForCheck();
+      });
   }
 
   isKraAlreadyRated(kraId: string): boolean {
