@@ -407,7 +407,8 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
 
     // Check leave balance
     const balance = balances.find(b => 
-      b.leaveTypeName && request.leaveTypeId
+      // b.leaveTypeName && request.leaveTypeId
+      b.leaveTypeName === request.leaveTypeId
     );
     
     if (balance) {
