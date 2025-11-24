@@ -19,7 +19,7 @@ import { CreateAppraisalDialogComponent } from './create-appraisal-dialog.compon
 import { SelfAssessmentDialogComponent } from './self-assessment-dialog.component';
 import { ViewAppraisalDialogComponent } from './view-appraisal-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { AuthService } from '@/app/core/services/auth.service';
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -164,6 +164,11 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.getCurrentUser();
     this.loadAppraisalCycles();
+    // If user is already available, set up filter form subscription
+    if (this.currentUser && this.hasManagerRole()) {
+      this.initializeFilterForm();
+      this.setupFilterFormSubscription();
+    }
     if (this.hasManagerRole()) {
       // For managers and HR managers, load employees and appraisals
       this.loadEmployees();
@@ -191,6 +196,10 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
           this.currentUser = user;
           // Reinitialize filter form based on role
           this.initializeFilterForm();
+          // Set up form value changes subscription for managers
+          if (this.hasManagerRole()) {
+            this.setupFilterFormSubscription();
+          }
           // Load employees and data based on role
           if (this.hasManagerRole()) {
             this.loadEmployees();
@@ -206,8 +215,8 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
 
   private initializeFilterForm(): void {
-    if (this.hasHRRole()) {
-      // HR role: original filters with status
+    if (this.hasManagerRole()) {
+      // Manager and HR role: filters with cycle, employee, status, and search
       this.filterForm = this.fb.group({
         cycleId: [''],
         employeeId: [''],
@@ -222,6 +231,22 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
         search: ['']
       });
     }
+  }
+
+  private setupFilterFormSubscription(): void {
+    // Subscribe to form value changes with debounce for search field
+    // This will automatically apply filters when user types or changes dropdowns
+    this.filterForm.valueChanges
+      .pipe(
+        debounceTime(300), // Wait 300ms after user stops typing
+        distinctUntilChanged(), // Only emit if value actually changed
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        // Reset to first page when filters change
+        this.pageIndex = 0;
+        this.loadAppraisals();
+      });
   }
 
   private initializeSelfAssessmentFilterForm(): void {
@@ -330,7 +355,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     // Build filter based on user role
     const filter: AppraisalFilter = {
       appraisalCycleId: filterValue.cycleId || undefined,
-      employeeId: this.hasHRRole() ? (filterValue.employeeId || undefined) : undefined,
+      employeeId: this.hasManagerRole() ? (filterValue.employeeId || undefined) : undefined,
       status: filterValue.status || undefined,
       search: filterValue.search || undefined
     };
@@ -707,7 +732,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
 
   applyFilters(): void {
     this.pageIndex = 0;
-    if (this.hasHRRole()) {
+    if (this.hasManagerRole()) {
       this.loadAppraisals();
     } else {
       this.loadEmployeeAppraisals();
@@ -717,7 +742,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.filterForm.reset();
     this.pageIndex = 0;
-    if (this.hasHRRole()) {
+    if (this.hasManagerRole()) {
       this.loadAppraisals();
     } else {
       this.loadEmployeeAppraisals();
