@@ -266,75 +266,72 @@
         </h3>
       </div>
       <mat-card-content>
-        <div *ngIf="teamPerformanceSummary" class="team-performance-section">
-          <div class="summary-stats-grid">
-            <div class="summary-stat-card">
-              <div class="summary-stat-icon">
-                <mat-icon>star</mat-icon>
-              </div>
-              <div class="summary-stat-details">
-                <div class="summary-stat-label">Average Rating</div>
-                <div class="summary-stat-value">{{ teamPerformanceSummary.averageRating | number:'1.1-1' }}</div>
-              </div>
-            </div>
-            <div class="summary-stat-card">
-              <div class="summary-stat-icon">
-                <mat-icon>assignment</mat-icon>
-              </div>
-              <div class="summary-stat-details">
-                <div class="summary-stat-label">Total Appraisals</div>
-                <div class="summary-stat-value">{{ teamPerformanceSummary.totalAppraisals }}</div>
-              </div>
-            </div>
-            <div class="summary-stat-card">
-              <div class="summary-stat-icon">
-                <mat-icon>pending_actions</mat-icon>
-              </div>
-              <div class="summary-stat-details">
-                <div class="summary-stat-label">Pending Reviews</div>
-                <div class="summary-stat-value">{{ teamPerformanceSummary.pendingAppraisals }}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="top-performers-section" *ngIf="teamPerformanceSummary.topPerformers && teamPerformanceSummary.topPerformers.length > 0">
-            <h4 class="section-subtitle">
-              <mat-icon>emoji_events</mat-icon>
-              Top Performers
-            </h4>
-            <div class="top-performers-list">
-              <div *ngFor="let performer of teamPerformanceSummary.topPerformers; let i = index" 
-                   class="performer-item">
-                <div class="performer-rank">
-                  <span class="rank-number" [ngClass]="'rank-' + (i + 1)">
-                    <mat-icon *ngIf="i === 0" class="trophy-icon">emoji_events</mat-icon>
-                    <span *ngIf="i !== 0">{{ i + 1 }}</span>
-                  </span>
-                </div>
-                <div class="performer-info">
-                  <div class="performer-name">{{ performer.employeeName }}</div>
-                  <div class="performer-details">
-                    <mat-icon>work</mat-icon>
-                    <span>{{ performer.position }}</span>
-                    <mat-icon>business</mat-icon>
-                    <span>{{ performer.department }}</span>
-                  </div>
-                </div>
-                <div class="performer-rating">
-                  <div class="rating-value">{{ performer.rating | number:'1.1-1' }}</div>
-                  <div class="rating-stars">
-                    <mat-icon *ngFor="let star of starRatings" 
-                              [class.filled]="star <= performer.rating">
-                      {{ star <= performer.rating ? 'star' : 'star_border' }}
-                    </mat-icon>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Loading State -->
+        <div *ngIf="isLoadingTeamPerformance" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading team performance data...</p>
         </div>
 
-        <div *ngIf="!teamPerformanceSummary" class="empty-state">
+        <!-- Team Performance Table -->
+        <div *ngIf="!isLoadingTeamPerformance && teamPerformanceOverview && teamPerformanceOverview.employees.length > 0" class="team-performance-table-container">
+          <table mat-table [dataSource]="teamPerformanceDataSource" class="team-performance-table">
+            <!-- Employee Name Column -->
+            <ng-container matColumnDef="employeeName">
+              <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="employee-name-cell">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ employee.employeeName }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Cycle Ratings Column -->
+            <ng-container matColumnDef="cycleRatings">
+              <th mat-header-cell *matHeaderCellDef>Cycle Ratings</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="cycle-ratings-cell">
+                  <div *ngFor="let cycleRating of employee.cycleRatings" class="cycle-rating-item">
+                    <div class="cycle-name">{{ cycleRating.cycleName }}</div>
+                    <div class="cycle-rating-value" *ngIf="cycleRating.rating !== null && cycleRating.rating !== undefined">
+                      <mat-icon>star</mat-icon>
+                      <span>{{ cycleRating.rating | number:'1.1-1' }}</span>
+                    </div>
+                    <div class="cycle-rating-value no-rating" *ngIf="cycleRating.rating === null || cycleRating.rating === undefined">
+                      <span>No rating</span>
+                    </div>
+                  </div>
+                  <div *ngIf="employee.cycleRatings.length === 0" class="no-data">
+                    <span>No cycles</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Assessed Skills Column -->
+            <ng-container matColumnDef="assessedSkills">
+              <th mat-header-cell *matHeaderCellDef>Assessed Skills</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="assessed-skills-cell">
+                  <div class="skills-list" *ngIf="employee.assessedSkills.length > 0">
+                    <span *ngFor="let skill of employee.assessedSkills; let last = last">
+                      {{ skill }}<span *ngIf="!last">, </span>
+                    </span>
+                  </div>
+                  <div *ngIf="employee.assessedSkills.length === 0" class="no-data">
+                    <span>No assessed skills</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedTeamColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedTeamColumns"></tr>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!isLoadingTeamPerformance && (!teamPerformanceOverview || teamPerformanceOverview.employees.length === 0)" class="empty-state">
           <mat-icon>groups</mat-icon>
           <h3>No Team Data</h3>
           <p>No team performance data available.</p>
