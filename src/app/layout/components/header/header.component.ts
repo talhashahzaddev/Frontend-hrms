@@ -21,38 +21,45 @@ import { ThemeService } from '@core/services/theme.service';
 import { NotificationService } from '@core/services/notification.service';
 import { User } from '@core/models/auth.models';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
+import {NotificationDialogueComponent} from '../../../features/notification-dialogue/notification-dialogue.component'
 
 @Component({
-    selector: 'app-header',
-    imports: [
-        CommonModule,
-        MatToolbarModule,
-        MatButtonModule,
-        MatIconModule,
-        MatMenuModule,
-        MatBadgeModule,
-        MatTooltipModule,
-        MatDividerModule,
-        AvatarModule
-    ],
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss']
+  selector: 'app-header',
+  imports: [
+    CommonModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatBadgeModule,
+    MatTooltipModule,
+    MatDividerModule,
+    NotificationDialogueComponent,
+    AvatarModule
+  ],
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  
   @Input() isHandset = false;
   @Output() menuToggle = new EventEmitter<void>();
 
   currentUser: User | null = null;
   isDarkMode = false;
-notificationCount = 3; // Mock notification count
-slectedProfileFile:File|null=null;
-profilePreviewUrl:string|null=null;
-private backendBaseUrl = 'https://localhost:60485';
+
+  notificationCount = 3; // Mock notification count
+  slectedProfileFile: File | null = null;
+  profilePreviewUrl: string | null = null;
+  private backendBaseUrl = 'https://localhost:60485';
 
   private destroy$ = new Subject<void>();
 
+  // ⭐ ADD THIS FOR DROPDOWN ⭐
+  isNotificationOpen = false;
+
   constructor(
-    private employeeService:EmployeeService,
+    private employeeService: EmployeeService,
     private authService: AuthService,
     private themeService: ThemeService,
     private notificationService: NotificationService,
@@ -77,9 +84,14 @@ private backendBaseUrl = 'https://localhost:60485';
     this.themeService.toggleTheme();
   }
 
+  // ⭐ UPDATED METHOD ⭐
   onNotificationsClick(): void {
-    // TODO: Open notifications panel
-    console.log('Notifications clicked');
+    this.isNotificationOpen = !this.isNotificationOpen;
+  }
+
+  // ⭐ OPTIONAL: Close function if needed later ⭐
+  closeNotifications(): void {
+    this.isNotificationOpen = false;
   }
 
   onProfileClick(): void {
@@ -98,7 +110,6 @@ private backendBaseUrl = 'https://localhost:60485';
       },
       error: (error) => {
         console.error('Logout error:', error);
-        // Still redirect to login even if API call fails
         this.router.navigate(['/login']);
       }
     });
@@ -121,34 +132,32 @@ private backendBaseUrl = 'https://localhost:60485';
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;   
-        if(this.currentUser?.userId){
+        if (this.currentUser?.userId) {
           this.loademployeeDetails(this.currentUser.userId);
         }
       });
   }
 
-private loademployeeDetails(userId:string):void {
-  this.employeeService.getEmployee(userId).pipe(takeUntil(this.destroy$))
-  .subscribe({
-    next:(employee)=>{
-      if(!employee) return;
-      if(employee.profilePictureUrl){
+  private loademployeeDetails(userId: string): void {
+    this.employeeService.getEmployee(userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (employee) => {
+          if (!employee) return;
 
-        this.profilePreviewUrl=employee.profilePictureUrl.startsWith('http')
-        ?employee.profilePictureUrl:`${this.backendBaseUrl}${employee.profilePictureUrl}`;
-      }
-        else{
-          this.profilePreviewUrl=null;
+          if (employee.profilePictureUrl) {
+            this.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+              ? employee.profilePictureUrl
+              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+          } else {
+            this.profilePreviewUrl = null;
+          }
+        },
+        error: (error) => {
+          console.error('Failed to load employee details', error);
         }
-      },
-      error:(error)=>{
-        console.error('Failed to load emloee details',error);
-      }
-    
-  })
-   
-}
-
+      });
+  }
 
   private subscribeToTheme(): void {
     this.themeService.theme$
@@ -158,4 +167,3 @@ private loademployeeDetails(userId:string):void {
       });
   }
 }
-
