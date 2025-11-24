@@ -1,0 +1,230 @@
+.self-assessment-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .cycle-dates {
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+    }
+  }
+}
+
+.loading-container,
+.no-cycle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  h2 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.submitted-info {
+  margin-bottom: 24px;
+
+  .submitted-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0 0 8px;
+    }
+
+    p {
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+
+.assessment-card {
+  margin-bottom: 24px;
+
+  .step-content {
+    padding: 24px 0;
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .step-description {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 24px;
+    }
+
+    .assessment-panel {
+      margin-bottom: 16px;
+
+      .assessment-fields {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 0;
+
+        .rating-field {
+          width: 100%;
+
+          .rating-value {
+            margin-left: 16px;
+            font-size: 18px;
+            font-weight: 500;
+            min-width: 30px;
+          }
+        }
+
+        .full-width {
+          width: 100%;
+        }
+      }
+    }
+
+    .no-items {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px;
+      color: rgba(0, 0, 0, 0.5);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+      }
+    }
+
+    .review-summary {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 4px;
+
+      .summary-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.6);
+        }
+
+        span {
+          font-size: 24px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+}
+
+.submitted-assessments-card {
+  .assessments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .assessment-item {
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 4px;
+
+      .assessment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .assessment-details {
+        display: flex;
+        justify-content: space-between;
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .comments {
+        color: rgba(0, 0, 0, 0.7);
+        font-style: italic;
+        margin: 8px 0 0;
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+

@@ -18,6 +18,8 @@ export interface LeaveRequest {
   rejectionReason?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  profilePictureUrl?:string|null;
+  profilePreviewUrl?: string | null;
 }
 
 // Leave Status Enum - Matching API lowercase values

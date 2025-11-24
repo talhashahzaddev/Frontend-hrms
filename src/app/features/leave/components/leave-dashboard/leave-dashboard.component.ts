@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,7 +18,7 @@ import { of, catchError } from 'rxjs';
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { ApplyLeaveComponent } from '../apply-leave/apply-leave.component';
+import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
 import { 
   LeaveRequest, 
   LeaveType, 
@@ -65,67 +65,107 @@ import { User } from '../../../../core/models/auth.models';
         </div>
       </div>
 
-      <!-- Quick Navigation Cards -->
+      <!-- Quick Navigation Cards - Stat Cards Style -->
       <div class="quick-nav-grid">
-        <mat-card class="nav-card" routerLink="/leave/apply">
-          <mat-icon class="nav-icon" style="color: var(--primary-600)">add_circle</mat-icon>
-          <h3>Apply for Leave</h3>
-          <p>Submit a new leave request</p>
+        <mat-card class="stat-card stat-card-primary" routerLink="/leave/apply">
+          <mat-card-content>
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <mat-icon class="stat-icon">add_circle</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-label">Apply for Leave</div>
+                <div class="stat-value">New</div>
+                <div class="stat-footer">
+                  <mat-icon class="stat-indicator">edit</mat-icon>
+                  <span>Submit a new request</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
         </mat-card>
 
-        <mat-card class="nav-card" routerLink="/leave/calendar">
-          <mat-icon class="nav-icon" style="color: var(--success-600)">calendar_month</mat-icon>
-          <h3>Leave Calendar</h3>
-          <p>View team leave schedule</p>
+        <mat-card class="stat-card stat-card-success" routerLink="/leave/calendar">
+          <mat-card-content>
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <mat-icon class="stat-icon">calendar_month</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-label">Leave Calendar</div>
+                <div class="stat-value">View</div>
+                <div class="stat-footer">
+                  <mat-icon class="stat-indicator">visibility</mat-icon>
+                  <span>Team leave schedule</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
         </mat-card>
 
-        <mat-card class="nav-card" routerLink="/leave/team" *ngIf="hasManagerRole()">
-          <mat-icon class="nav-icon" style="color: var(--warning-600)">pending_actions</mat-icon>
-          <h3>Team Requests</h3>
-          <p>Approve/reject team leaves</p>
-          <mat-chip *ngIf="pendingCount > 0" color="warn" class="count-badge">
-            {{ pendingCount }}
-          </mat-chip>
+        <mat-card class="stat-card stat-card-warning" routerLink="/leave/team" *ngIf="hasManagerRole()">
+          <mat-card-content>
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <mat-icon class="stat-icon">pending_actions</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-label">Team Requests</div>
+                <div class="stat-value">{{ pendingCount }}</div>
+                <div class="stat-footer">
+                  <mat-icon class="stat-indicator">notifications_active</mat-icon>
+                  <span>Pending approvals</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
         </mat-card>
 
-        <mat-card class="nav-card" routerLink="/leave/types" *ngIf="hasAdminRole()">
-          <mat-icon class="nav-icon" style="color: var(--purple-600)">category</mat-icon>
-          <h3>Leave Types</h3>
-          <p>Configure leave policies</p>
+        <mat-card class="stat-card stat-card-info" routerLink="/leave/types" *ngIf="hasAdminRole()">
+          <mat-card-content>
+            <div class="stat-item">
+              <div class="stat-icon-wrapper">
+                <mat-icon class="stat-icon">category</mat-icon>
+              </div>
+              <div class="stat-details">
+                <div class="stat-label">Leave Types</div>
+                <div class="stat-value">{{ leaveTypes.length }}</div>
+                <div class="stat-footer">
+                  <mat-icon class="stat-indicator">settings</mat-icon>
+                  <span>Configure policies</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
         </mat-card>
       </div>
 
-      <!-- Leave Balance Section -->
+      <!-- Leave Balance Section - Stat Cards Style -->
       <div class="balance-section" *ngIf="leaveBalances.length > 0">
         <div class="section-header">
           <h2 class="section-title">Your Leave Balance</h2>
           <span class="year-badge">{{ currentYear }}</span>
         </div>
         
-        <div class="balance-grid">
-          <mat-card *ngFor="let balance of leaveBalances" class="balance-card">
-            <div class="balance-header">
-              <div class="type-info">
-                <div class="type-indicator" [style.background-color]="balance.color"></div>
-                <h3>{{ balance.leaveTypeName }}</h3>
+        <div class="statistics-cards">
+          <mat-card *ngFor="let balance of leaveBalances; let i = index" 
+                    class="stat-card stat-card-dynamic-color" 
+                    [style.background]="getBalanceCardColor(balance)">
+            <mat-card-content>
+              <div class="stat-item">
+                <div class="stat-icon-wrapper">
+                  <mat-icon class="stat-icon">event_available</mat-icon>
+                </div>
+                <div class="stat-details">
+                  <div class="stat-label">{{ balance.leaveTypeName }}</div>
+                  <div class="stat-value">{{ balance.remainingDays }}</div>
+                  <div class="stat-footer">
+                    <mat-icon class="stat-indicator">{{getBalanceIcon(balance)}}</mat-icon>
+                    <span>{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
+                  </div>
+                </div>
               </div>
-              <div class="balance-count">
-                <span class="available">{{ balance.remainingDays }}</span>
-                <span class="total">/ {{ balance.totalDays }}</span>
-              </div>
-            </div>
-            
-            <div class="balance-progress">
-              <mat-progress-bar 
-                mode="determinate" 
-                [value]="getUsagePercentage(balance)"
-                [color]="getProgressColor(balance)">
-              </mat-progress-bar>
-              <div class="progress-details">
-                <span class="used">Used: {{ balance.usedDays }}</span>
-                <span class="remaining">{{ balance.remainingDays }} days left</span>
-              </div>
-            </div>
+            </mat-card-content>
           </mat-card>
         </div>
       </div>
@@ -234,9 +274,18 @@ import { User } from '../../../../core/models/auth.models';
                 <div *ngFor="let request of pendingApprovals" class="approval-card">
                   <div class="approval-header">
                     <div class="employee-info">
-                      <div class="employee-avatar">
-                        {{ getInitials(request.employeeName) }}
-                      </div>
+                    
+<div class="employee-avatar">
+  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+    <img [src]="request.profilePreviewUrl" [alt]="request.employeeName" />
+  </ng-container>
+
+  <ng-template #initialsFallback>
+    {{ getInitials(request.employeeName) }}
+  </ng-template>
+</div>
+
+
                       <div class="employee-details">
                         <h4>{{ request.employeeName }}</h4>
                         <p>{{ request.leaveTypeName }}</p>
@@ -298,6 +347,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   leaveTypes: LeaveType[] = [];
   myLeaveRequests: LeaveRequest[] = [];
   pendingApprovals: LeaveRequest[] = [];
+profilePreviewUrl:string|null=null;
+private backendBaseUrl = 'https://localhost:60485';
 
   isLoading = false;
   selectedTab = 0;
@@ -310,6 +361,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     public leaveService: LeaveService,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private router: Router,
     private dialog: MatDialog
   ) {}
 
@@ -355,7 +407,23 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
         this.leaveBalances = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
         this.leaveTypes = data.leaveTypes || [];
         this.myLeaveRequests = Array.isArray(data.myRequests) ? data.myRequests : [];
-        this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+        // this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+
+         // ✅ Handle pending approvals with profilePreviewUrl
+        this.pendingApprovals = Array.isArray(data.pendingApprovals)
+          ? data.pendingApprovals.map((employee: any) => {
+              if (employee.profilePictureUrl) {
+                employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+                  ? employee.profilePictureUrl
+                  : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+              } else {
+                employee.profilePreviewUrl = null;
+              }
+              return employee;
+            })
+          : [];
+        
+
         this.pendingCount = this.pendingApprovals.length;
 
         this.isLoading = false;
@@ -371,21 +439,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
 }
 
   openLeaveRequestDialog(): void {
-    const dialogRef = this.dialog.open(ApplyLeaveComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      disableClose: false,
-      data: { 
-        leaveTypes: this.leaveTypes,
-        leaveBalances: this.leaveBalances 
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadInitialData();
-      }
-    });
+    this.router.navigate(['/leave/apply']);
   }
 
   viewRequest(request: LeaveRequest): void {
@@ -393,21 +447,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   }
 
   editRequest(request: LeaveRequest): void {
-    const dialogRef = this.dialog.open(ApplyLeaveComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      data: { 
-        request,
-        leaveTypes: this.leaveTypes,
-        leaveBalances: this.leaveBalances
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadInitialData();
-      }
-    });
+    // Navigate to edit page - will be implemented when edit route is added
+    this.notificationService.showInfo('Edit functionality will be available soon');
   }
 
   // cancelRequest(request: LeaveRequest): void {
@@ -443,21 +484,33 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   }
 
   rejectRequest(request: LeaveRequest): void {
-    const reason = prompt('Please provide a reason for rejection:');
-    if (reason) {
-      this.leaveService.rejectLeaveRequest(request.requestId, reason)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave request rejected');
-            this.loadInitialData();
-          },
-          error: (error) => {
-            console.error('Error rejecting request:', error);
-            this.notificationService.showError('Failed to reject leave request');
-          }
-        });
-    }
+    const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName: request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        daysRequested: request.daysRequested
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.rejected) {
+        this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Leave request rejected successfully');
+              this.loadInitialData();
+            },
+            error: (error) => {
+              console.error('Error rejecting request:', error);
+              this.notificationService.showError('Failed to reject leave request');
+            }
+          });
+      }
+    });
   }
 
   hasManagerRole(): boolean {
@@ -466,6 +519,11 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
 
   hasAdminRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
+getBalanceCardColor(balance: LeaveBalance): string {
+    const leaveType = this.leaveTypes.find(lt => lt.typeName === balance.leaveTypeName);
+    return leaveType?.color || '#2196F3'; // Default to blue if not found
   }
 
   getLeaveTypeColor(leaveTypeId: string): string {
@@ -492,5 +550,17 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       .join('')
       .toUpperCase()
       .substring(0, 2);
+  }
+
+  getCardColorClass(index: number): string {
+    const colors = ['primary', 'success', 'warning', 'info'];
+    return colors[index % colors.length];
+  }
+
+  getBalanceIcon(balance: LeaveBalance): string {
+    const percentage = this.getUsagePercentage(balance);
+    if (percentage >= 80) return 'trending_down';
+    if (percentage >= 50) return 'remove';
+    return 'trending_up';
   }
 }

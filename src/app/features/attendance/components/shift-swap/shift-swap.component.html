@@ -1,0 +1,47 @@
+
+<div class="dialog-header">
+  <h2>
+    <mat-icon>swap_horiz</mat-icon>
+    Swap Shift
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<div class="dialog-content">
+  <form [formGroup]="swapForm" class="period-form">
+
+
+    <!-- Requested Shift Dropdown -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Requested Shift</mat-label>
+      <mat-select formControlName="requestedShiftId">
+        <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
+          {{ shift.shiftName }} ({{ shift.startTime }} - {{ shift.endTime }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Reason -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reason</mat-label>
+      <textarea matInput formControlName="reason" rows="3" placeholder="Enter reason for shift swap"></textarea>
+    </mat-form-field>
+
+  </form>
+</div>
+
+<div class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close>Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="swapForm.invalid || isSubmitting"
+    (click)="onSubmit()"
+  >
+    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+    <span *ngIf="!isSubmitting">Submit Swap Request</span>
+  </button>
+</div>
+

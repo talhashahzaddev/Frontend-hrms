@@ -1,46 +1,197 @@
-<form [formGroup]="reportForm">
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Select Appraisal Cycle</mat-label>
-    <mat-select formControlName="cycleId">
-      <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-        {{ cycle.cycleName }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</form>
+<!-- Performance Reports Container -->
+<div class="performance-reports-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>assessment</mat-icon>
+        Performance Reports
+      </h1>
+      <p class="page-subtitle">View comprehensive performance analytics and summaries</p>
+    </div>
+  </div>
 
-<!-- Summary -->
-<div *ngIf="!reportForm.get('cycleId')?.value" class="no-selection">
-<p>Select Cycle to load Smmary  </p>
-</div>
+  <!-- Cycle Selection Card -->
+  <mat-card class="selection-card">
+    <div class="selection-header">
+      <h3>
+        <mat-icon>schedule</mat-icon>
+        Select Appraisal Cycle
+      </h3>
+    </div>
+    <div class="selection-content">
+      <form [formGroup]="reportForm" class="report-form">
+        <mat-form-field appearance="outline" class="cycle-select-field">
+          <mat-label>Appraisal Cycle</mat-label>
+          <mat-icon matPrefix>schedule</mat-icon>
+          <mat-select formControlName="cycleId">
+            <mat-option [value]="">All Cycles</mat-option>
+            <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+              {{ cycle.cycleName }} ({{ cycle.startDate | date:'shortDate' }} - {{ cycle.endDate | date:'shortDate' }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </div>
+  </mat-card>
 
-<div *ngIf="summary" class="summary-section">
-  <h3>Performance Summary</h3>
+  <!-- Empty State -->
+  <div *ngIf="!reportForm.get('cycleId')?.value" class="empty-state">
+    <div class="empty-state-content">
+      <mat-icon>assessment</mat-icon>
+      <h3>Select an Appraisal Cycle</h3>
+      <p>Choose an appraisal cycle from the dropdown above to view performance reports and analytics</p>
+    </div>
+  </div>
 
-  <div class="summary-grid">
-    <div class="summary-item">
-      <div class="summary-label">Average Rating</div>
-      <div class="summary-value">{{ summary.averageRating }}</div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading performance reports...</p>
+  </div>
+
+  <!-- Summary Section -->
+  <div *ngIf="summary && reportForm.get('cycleId')?.value && !isLoading" class="summary-section">
+    
+    <!-- Summary Cards Grid -->
+    <div class="stats-grid">
+      <!-- Average Rating Card -->
+      <mat-card class="stat-card stat-card-primary">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">star</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">Average Rating</div>
+              <div class="stat-value">{{ summary.averageRating | number:'1.1-1' }}</div>
+              <div class="stat-footer">
+                <span class="stat-hint">Out of 5.0</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Total Appraisals Card -->
+      <mat-card class="stat-card stat-card-success">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">assignment</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">Total Appraisals</div>
+              <div class="stat-value">{{ summary.totalAppraisals }}</div>
+              <div class="stat-footer">
+                <span class="stat-hint">Completed reviews</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Pending Appraisals Card -->
+      <mat-card class="stat-card stat-card-warning">
+        <mat-card-content>
+          <div class="stat-item">
+            <div class="stat-icon-wrapper">
+              <mat-icon class="stat-icon">pending_actions</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-label">Pending Appraisals</div>
+              <div class="stat-value">{{ summary.pendingAppraisals }}</div>
+              <div class="stat-footer">
+                <span class="stat-hint">Awaiting completion</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
-    <div class="summary-item">
-      <div class="summary-label">Total Appraisals</div>
-      <div class="summary-value">{{ summary.totalAppraisals }}</div>
-    </div>
+    <!-- Rating Distribution Card -->
+    <mat-card class="content-card" *ngIf="hasRatingDistribution()">
+      <div class="card-header">
+        <h3>
+          <mat-icon>bar_chart</mat-icon>
+          Rating Distribution
+        </h3>
+      </div>
+      <mat-card-content>
+        <div class="rating-distribution">
+          <div *ngFor="let rating of getRatingDistributionKeys()" class="rating-item">
+            <div class="rating-header">
+              <div class="rating-label-wrapper">
+                <mat-icon class="rating-icon">star</mat-icon>
+                <span class="rating-label">Rating {{ rating }}</span>
+              </div>
+              <span class="rating-count">{{ getRatingCount(rating) }} employee{{ getRatingCount(rating) !== 1 ? 's' : '' }}</span>
+            </div>
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="getRatingPercentage(rating)"
+              [class]="'rating-progress rating-progress-' + rating"
+              class="rating-progress">
+            </mat-progress-bar>
+            <div class="rating-percentage">{{ getRatingPercentage(rating) | number:'1.1-1' }}%</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
-    <div class="summary-item">
-      <div class="summary-label">Pending Appraisals</div>
-      <div class="summary-value">{{ summary.pendingAppraisals }}</div>
-    </div>
+    <!-- Top Performers Card -->
+    <mat-card class="content-card" *ngIf="summary.topPerformers && summary.topPerformers.length > 0">
+      <div class="card-header">
+        <h3>
+          <mat-icon>emoji_events</mat-icon>
+          Top Performers
+        </h3>
+      </div>
+      <mat-card-content>
+        <div class="top-performers-list">
+          <div *ngFor="let performer of summary.topPerformers; let i = index" 
+               class="performer-item">
+            <div class="performer-rank">
+              <span class="rank-number" [ngClass]="'rank-' + (i + 1)">
+                <mat-icon *ngIf="i === 0" class="trophy-icon">emoji_events</mat-icon>
+                <span *ngIf="i !== 0">{{ i + 1 }}</span>
+              </span>
+            </div>
+            <div class="performer-info">
+              <div class="performer-name">{{ performer.employeeName }}</div>
+              <div class="performer-details">
+                <mat-icon>work</mat-icon>
+                <span>{{ performer.position }}</span>
+                <mat-icon>business</mat-icon>
+                <span>{{ performer.department }}</span>
+              </div>
+            </div>
+            <div class="performer-rating">
+              <div class="rating-value">{{ performer.rating | number:'1.1-1' }}</div>
+              <div class="rating-stars">
+                <mat-icon *ngFor="let star of [1,2,3,4,5]" 
+                          [class.filled]="star <= performer.rating"
+                          [class.half-filled]="star - 0.5 <= performer.rating && star > performer.rating">
+                  {{ star <= performer.rating ? 'star' : (star - 0.5 <= performer.rating ? 'star_half' : 'star_border') }}
+                </mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
-    <div class="summary-item">
-      <div class="summary-label">Rating Distribution</div>
-      <div class="summary-value">{{ summary.ratingDistribution }}</div>
-    </div>
+    <!-- No Top Performers -->
+    <mat-card class="content-card" *ngIf="!summary.topPerformers || summary.topPerformers.length === 0">
+      <mat-card-content>
+        <div class="empty-card-state">
+          <mat-icon>info</mat-icon>
+          <p>No top performers data available for this cycle</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
-    <div class="summary-item" style="grid-column: span 2;">
-      <div class="summary-label">Top Performers</div>
-      <div class="summary-value">{{ summary.topPerformers }}</div>
-    </div>
   </div>
 </div>

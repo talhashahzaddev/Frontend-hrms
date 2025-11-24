@@ -1,121 +1,695 @@
+<!-- Appraisals Container -->
+<div class="appraisals-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>assessment</mat-icon>
+        Performance Appraisals
+      </h1>
+      <p class="page-subtitle">Manage and review employee performance appraisals</p>
+    </div>
+    
+    <div class="header-actions">
+      <button *ngIf="hasManagerRole()" 
+              mat-flat-button 
+              (click)="openCreateForm()"
+              class="add-button">
+        <mat-icon>add</mat-icon>
+        Create Appraisal
+      </button>
+      <button *ngIf="hasManagerRole()" 
+              mat-flat-button 
+              (click)="openSelfAssessmentDialog()"
+              class="add-button">
+        <mat-icon>rate_review</mat-icon>
+        Self-Assessment
+      </button>
+      <button *ngIf="!hasManagerRole()" 
+              mat-flat-button 
+              (click)="openSelfAssessmentDialog()"
+              class="add-button">
+        <mat-icon>rate_review</mat-icon>
+        Self-Assessment
+      </button>
+    </div>
+  </div>
 
-<mat-card class="appraisal-card">
-  <mat-card-title>Create Appraisal</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="appraisalForm" (ngSubmit)="onSubmit()">
-
-      <!-- Employee ID -->
-    <mat-form-field appearance="outline" class="full-width">
-  <mat-label>Select Employee</mat-label>
-  <mat-select formControlName="employeeId" required>
-    <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-     {{ emp.fullName }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
-
-
-
-      <!-- Appraisal Cycle -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Select Appraisal Cycle</mat-label>
+  <!-- Self-Assessments Filters Section (Employee Only) -->
+  <mat-card *ngIf="!hasHRRole()" class="filters-card self-assessment-filters">
+    <div class="filters-header">
+      <h3>Search & Filters</h3>
+      <button mat-stroked-button 
+              (click)="clearSelfAssessmentFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content" [formGroup]="selfAssessmentFilterForm">
+      <!-- Search -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search self-assessments...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput 
+               formControlName="search" 
+               placeholder="Search by cycle, KRA, or comments...">
+      </mat-form-field>
+      
+      <!-- Cycle Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Cycle</mat-label>
+        <mat-icon matPrefix>schedule</mat-icon>
         <mat-select formControlName="cycleId">
+          <mat-option [value]="">All Cycles</mat-option>
+          <mat-option *ngFor="let cycle of uniqueCycles" [value]="cycle.cycleId">
+            {{ cycle.cycleName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- KRA Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>KRA</mat-label>
+        <mat-icon matPrefix>target</mat-icon>
+        <mat-select formControlName="kraId">
+          <mat-option [value]="">All KRAs</mat-option>
+          <mat-option *ngFor="let kra of uniqueKras" [value]="kra.kraId">
+            {{ kra.title }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-actions-container">
+      <button mat-raised-button 
+              color="primary" 
+              (click)="applySelfAssessmentFilters()">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filters
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- Self-Assessments Table Section (Employee Only) -->
+  <mat-card *ngIf="!hasHRRole()" class="self-assessments-card">
+    <div class="table-header">
+      <h3>My Self-Assessments</h3>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoadingSelfAssessments" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading self-assessments...</p>
+    </div>
+    
+    <!-- Self-Assessments Table -->
+    <div *ngIf="!isLoadingSelfAssessments" class="table-container">
+      <table mat-table [dataSource]="selfAssessmentsDataSource" class="self-assessments-table">
+        
+        <!-- Cycle Name Column -->
+        <ng-container matColumnDef="cycleName">
+          <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+          <td mat-cell *matCellDef="let assessment">{{ assessment.cycleName || 'N/A' }}</td>
+        </ng-container>
+
+        <!-- KRA Name Column -->
+        <ng-container matColumnDef="kraName">
+          <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+          <td mat-cell *matCellDef="let assessment">{{ assessment.kraName || 'N/A' }}</td>
+        </ng-container>
+
+        <!-- Rating Column -->
+        <ng-container matColumnDef="rating">
+          <th mat-header-cell *matHeaderCellDef>Rating</th>
+          <td mat-cell *matCellDef="let assessment">
+            <span class="rating-value">{{ assessment.rating | number:'1.1-1' }}/5</span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let assessment">
+            <mat-chip [class]="getStatusChipClass(assessment.status)">
+              {{ assessment.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Table Headers and Rows -->
+        <tr mat-header-row *matHeaderRowDef="selfAssessmentColumns"></tr>
+        <tr mat-row *matRowDef="let assessment; columns: selfAssessmentColumns;"></tr>
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="selfAssessmentsDataSource.data.length === 0" class="empty-state">
+        <mat-icon>rate_review</mat-icon>
+        <h3>No Self-Assessments Found</h3>
+        <p>You haven't submitted any self-assessments yet.</p>
+        <button mat-flat-button 
+                (click)="openSelfAssessmentDialog()" 
+                class="create-first-appraisal">
+          <mat-icon>add</mat-icon>
+          Create Your First Self-Assessment
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- Tab Group for Manager/SuperAdmin -->
+  <mat-tab-group *ngIf="hasManagerRole()" [(selectedIndex)]="selectedTab" (selectedIndexChange)="onTabChange($event)" class="appraisals-tabs">
+    <!-- Manager Appraisals Tab -->
+    <mat-tab label="Manager Appraisals">
+      <mat-card class="filters-card">
+        <div class="filters-header">
+          <h3>Employee Appraisals - Search & Filters</h3>
+          <button mat-stroked-button 
+                  (click)="clearFilters()" 
+                  class="clear-filters-btn">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+        
+        <div class="filters-content" [formGroup]="filterForm">
+          <!-- Search -->
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search appraisals...</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput 
+                   formControlName="search" 
+                   placeholder="Search by employee name or cycle...">
+          </mat-form-field>
+          
+          <!-- Appraisal Cycle Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cycle</mat-label>
+            <mat-icon matPrefix>schedule</mat-icon>
+            <mat-select formControlName="cycleId">
+              <mat-option [value]="">All Cycles</mat-option>
+              <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+                {{ cycle.cycleName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Employee Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Employee</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-select formControlName="employeeId">
+              <mat-option [value]="">All Employees</mat-option>
+              <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                {{ emp.fullName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Status Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-icon matPrefix>check_circle</mat-icon>
+            <mat-select formControlName="status">
+              <mat-option [value]="">All Statuses</mat-option>
+              <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                {{ status.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <!-- Filter Actions -->
+        <div class="filter-actions-container">
+          <button mat-raised-button color="primary" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply Filters
+          </button>
+        </div>
+      </mat-card>
+
+      <!-- Appraisals Table -->
+      <mat-card class="table-card">
+    <div class="table-header">
+      <h3>Employee Appraisals ({{ totalItems }})</h3>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading appraisals...</p>
+    </div>
+    
+    <!-- Appraisals Table -->
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="appraisals" class="appraisals-table">
+        
+        <!-- Cycle Name Column -->
+        <ng-container matColumnDef="cycleName">
+          <th mat-header-cell *matHeaderCellDef>Cycle</th>
+          <td mat-cell *matCellDef="let appraisal">{{ appraisal.cycleName }}</td>
+        </ng-container>
+
+        <!-- Employee Name Column -->
+        <ng-container matColumnDef="employeeName">
+          <th mat-header-cell *matHeaderCellDef>Employee</th>
+          <td mat-cell *matCellDef="let appraisal">{{ appraisal.employeeName }}</td>
+        </ng-container>
+
+        <!-- Review Type Column -->
+        <ng-container matColumnDef="reviewType">
+          <th mat-header-cell *matHeaderCellDef>Review Type</th>
+          <td mat-cell *matCellDef="let appraisal">{{ appraisal.reviewType | titlecase }}</td>
+        </ng-container>
+
+        <!-- Overall Rating Column -->
+        <ng-container matColumnDef="overallRating">
+          <th mat-header-cell *matHeaderCellDef>Rating</th>
+          <td mat-cell *matCellDef="let appraisal">
+            <span *ngIf="appraisal.overallRating; else noRating" class="rating-value">
+              {{ appraisal.overallRating | number:'1.1-1' }}
+            </span>
+            <ng-template #noRating>
+              <span class="no-rating">N/A</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let appraisal">
+            <mat-chip [class]="getStatusChipClass(appraisal.status)">
+              {{ appraisal.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Submitted At Column -->
+        <!-- <ng-container matColumnDef="submittedAt">
+          <th mat-header-cell *matHeaderCellDef>Submitted</th>
+          <td mat-cell *matCellDef="let appraisal">
+            {{ appraisal.submittedAt ? (appraisal.submittedAt | date:'short') : 'N/A' }}
+          </td>
+        </ng-container> -->
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let appraisal">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="viewAppraisal(appraisal)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              
+              <button *ngIf="hasHRRole()" 
+                      mat-menu-item 
+                      (click)="deleteAppraisal(appraisal)"
+                      class="danger-action">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <!-- Table Headers and Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row 
+            *matRowDef="let appraisal; columns: displayedColumns;">
+        </tr>
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="appraisals.length === 0" class="empty-state">
+        <mat-icon>assessment</mat-icon>
+        <h3>No Appraisals Found</h3>
+        <p>No appraisals match your current filters.</p>
+        <button *ngIf="hasManagerRole()" 
+                mat-flat-button 
+                (click)="openCreateForm()" 
+                class="create-first-appraisal">
+          <mat-icon>add</mat-icon>
+          Create Your First Appraisal
+        </button>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <mat-paginator 
+      *ngIf="!isLoading && appraisals.length > 0"
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+      </mat-card>
+    </mat-tab>
+
+    <!-- Employees Self Assessments Tab -->
+    <mat-tab label="Employees Self Assessments">
+      <!-- Filters Section -->
+      <mat-card class="filters-card">
+        <div class="filters-header">
+          <h3>Search & Filters</h3>
+          <button mat-stroked-button 
+                  (click)="clearEmployeeSelfAssessmentFilters()" 
+                  class="clear-filters-btn">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+        
+        <div class="filters-content" [formGroup]="employeeSelfAssessmentFilterForm">
+          <!-- Search -->
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search self-assessments...</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput 
+                   formControlName="search" 
+                   placeholder="Search by employee, cycle, or KRA...">
+          </mat-form-field>
+          
+          <!-- Appraisal Cycle Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cycle</mat-label>
+            <mat-icon matPrefix>schedule</mat-icon>
+            <mat-select formControlName="cycleId">
+              <mat-option [value]="">All Cycles</mat-option>
+              <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+                {{ cycle.cycleName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- Employee Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>Employee</mat-label>
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-select formControlName="employeeId">
+              <mat-option [value]="">All Employees</mat-option>
+              <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                {{ emp.fullName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          
+          <!-- KRA Filter -->
+          <mat-form-field appearance="outline">
+            <mat-label>KRA</mat-label>
+            <mat-icon matPrefix>target</mat-icon>
+            <mat-select formControlName="kraId">
+              <mat-option [value]="">All KRAs</mat-option>
+              <mat-option *ngFor="let kra of allKras" [value]="kra.kraId">
+                {{ kra.title }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        
+        <!-- Filter Actions -->
+        <div class="filter-actions-container">
+          <button mat-raised-button color="primary" (click)="applyEmployeeSelfAssessmentFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply Filters
+          </button>
+        </div>
+      </mat-card>
+
+      <!-- Employees Self Assessments Table -->
+      <mat-card class="table-card">
+        <div class="table-header">
+          <h3>Employees Self Assessments ({{ employeeSelfAssessmentsDataSource.data.length }})</h3>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div *ngIf="isLoadingEmployeeSelfAssessments" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading employee self-assessments...</p>
+        </div>
+        
+        <!-- Self Assessments Table -->
+        <div *ngIf="!isLoadingEmployeeSelfAssessments" class="table-container">
+          <table mat-table [dataSource]="employeeSelfAssessmentsDataSource" class="appraisals-table">
+            
+            <!-- Employee Name Column -->
+            <ng-container matColumnDef="employeeName">
+              <th mat-header-cell *matHeaderCellDef>Employee</th>
+              <td mat-cell *matCellDef="let assessment">{{ assessment.employeeName || 'N/A' }}</td>
+            </ng-container>
+
+            <!-- Cycle Name Column -->
+            <ng-container matColumnDef="cycleName">
+              <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+              <td mat-cell *matCellDef="let assessment">{{ assessment.cycleName || 'N/A' }}</td>
+            </ng-container>
+
+            <!-- KRA Name Column -->
+            <ng-container matColumnDef="kraName">
+              <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+              <td mat-cell *matCellDef="let assessment">{{ assessment.kraName || 'N/A' }}</td>
+            </ng-container>
+
+            <!-- Rating Column -->
+            <ng-container matColumnDef="rating">
+              <th mat-header-cell *matHeaderCellDef>Rating</th>
+              <td mat-cell *matCellDef="let assessment">
+                <span *ngIf="assessment.rating" class="rating-value">
+                  {{ assessment.rating | number:'1.1-1' }}/5
+                </span>
+                <span *ngIf="!assessment.rating" class="no-rating">N/A</span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let assessment">
+                <button mat-raised-button 
+                        color="primary" 
+                        (click)="openCreateAppraisalForEmployee(assessment)"
+                        class="create-appraisal-btn">
+                  <mat-icon>add</mat-icon>
+                  Create Appraisal
+                </button>
+              </td>
+            </ng-container>
+
+            <!-- Table Headers and Rows -->
+            <tr mat-header-row *matHeaderRowDef="employeeSelfAssessmentColumns"></tr>
+            <tr mat-row *matRowDef="let assessment; columns: employeeSelfAssessmentColumns;"></tr>
+          </table>
+          
+          <!-- Empty State -->
+          <div *ngIf="employeeSelfAssessmentsDataSource.data.length === 0" class="empty-state">
+            <mat-icon>rate_review</mat-icon>
+            <h3>No Employee Self-Assessments Found</h3>
+            <p>No employee self-assessments match your current filters.</p>
+          </div>
+        </div>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Filters Section (for non-HR roles) -->
+  <!-- <mat-card *ngIf="!hasHRRole()" class="filters-card">
+    <div class="filters-header">
+      <h3>Search & Filters</h3>
+      <button mat-stroked-button 
+              (click)="clearFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content" [formGroup]="filterForm">
+     Search 
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search appraisals...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput 
+               formControlName="search" 
+               placeholder="Search by employee name or cycle...">
+      </mat-form-field>
+      
+    
+      <mat-form-field appearance="outline">
+        <mat-label>Cycle</mat-label>
+        <mat-icon matPrefix>schedule</mat-icon>
+        <mat-select formControlName="cycleId">
+          <mat-option [value]="">All Cycles</mat-option>
           <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
             {{ cycle.cycleName }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <!-- Employee Selection -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Select Employee</mat-label>
-        <mat-select formControlName="employeeId" required>
-          <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-            {{ emp.fullName }}
+     
+      <mat-form-field appearance="outline">
+        <mat-label>KRA</mat-label>
+        <mat-icon matPrefix>target</mat-icon>
+        <mat-select formControlName="kraId">
+          <mat-option [value]="">All KRAs</mat-option>
+          <mat-option *ngFor="let kra of uniqueKras" [value]="kra.kraId">
+            {{ kra.title }}
           </mat-option>
         </mat-select>
       </mat-form-field>
-
-      <!-- Review Type -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Review Type</mat-label>
-        <mat-select formControlName="reviewType" required>
-          <mat-option *ngFor="let type of reviewTypes" [value]="type.value">
-            {{ type.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Overall Rating -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Overall Rating (0–5)</mat-label>
-        <input matInput type="number" formControlName="overallRating" min="0" max="5" />
-      </mat-form-field>
-
-      <!-- 🚫 KRA Ratings Section (Currently Disabled)
-      <div formGroupName="kraRatings" class="mb-4">
-        <h3 class="text-lg font-semibold mb-2">KRA Ratings</h3>
-
-        <mat-form-field appearance="outline" class="w-full mb-3">
-          <mat-label>Goal Achievement</mat-label>
-          <input matInput type="number" formControlName="Goal Achievement" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full mb-3">
-          <mat-label>Teamwork</mat-label>
-          <input matInput type="number" formControlName="Teamwork" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full mb-3">
-          <mat-label>Leadership</mat-label>
-          <input matInput type="number" formControlName="Leadership" />
-        </mat-form-field>
-      </div>
-      -->
-
-      <!-- 🚫 Skill Ratings Section (Currently Disabled)
-      <div formGroupName="skillRatings" class="mb-4">
-        <h3 class="text-lg font-semibold mb-2">Skill Ratings</h3>
-
-        <mat-form-field appearance="outline" class="w-full mb-3">
-          <mat-label>Technical Knowledge</mat-label>
-          <input matInput type="number" formControlName="Technical Knowledge" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full mb-3">
-          <mat-label>Communication</mat-label>
-          <input matInput type="number" formControlName="Communication" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full mb-3">
-          <mat-label>Decision Making</mat-label>
-          <input matInput type="number" formControlName="Decision Making" />
-        </mat-form-field>
-      </div>
-      -->
-
-      <!-- Feedback -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Feedback</mat-label>
-        <textarea matInput formControlName="feedback"></textarea>
-      </mat-form-field>
-
-      <!-- Improvement Areas -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Improvement Areas</mat-label>
-        <textarea matInput formControlName="improvementAreas"></textarea>
-      </mat-form-field>
-
-      <!-- Development Plan -->
-      <mat-form-field appearance="outline" class="w-full mb-4">
-        <mat-label>Development Plan</mat-label>
-        <textarea matInput formControlName="developmentPlan"></textarea>
-      </mat-form-field>
-
-      <!-- Submit Button -->
-      <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Submitting...' : 'Create Appraisal' }}
+    </div>
+    
+   
+    <div class="filter-actions-container">
+      <button mat-raised-button color="primary" (click)="applyFilters()">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filters
       </button>
-    </form>
-  </mat-card-content>
-</mat-card>
+    </div>
+  </mat-card> -->
+
+  <!-- My Appraisals Filters Section (Employee Only - Not Manager) -->
+  <mat-card *ngIf="!hasManagerRole()" class="filters-card">
+    <div class="filters-header">
+      <h3>My Appraisals - Search & Filters</h3>
+      <button mat-stroked-button 
+              (click)="clearMyAppraisalsFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content" [formGroup]="myAppraisalsFilterForm">
+      <!-- Search -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search appraisals...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput 
+               formControlName="search" 
+               placeholder="Search by cycle, reviewer, or feedback...">
+      </mat-form-field>
+      
+      <!-- Appraisal Cycle Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Cycle</mat-label>
+        <mat-icon matPrefix>schedule</mat-icon>
+        <mat-select formControlName="cycleId">
+          <mat-option [value]="">All Cycles</mat-option>
+          <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
+            {{ cycle.cycleName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Status Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-icon matPrefix>check_circle</mat-icon>
+        <mat-select formControlName="status">
+          <mat-option [value]="">All Statuses</mat-option>
+          <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    
+    <!-- Filter Actions -->
+    <div class="filter-actions-container">
+      <button mat-raised-button color="primary" (click)="applyMyAppraisalsFilters()">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filters
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- Employee Appraisals Table (Employee Role Only - Not Manager) -->
+  <mat-card *ngIf="!hasManagerRole()" class="table-card">
+    <div class="table-header">
+      <h3>My Appraisals ({{ employeeAppraisalsDataSource.data.length }})</h3>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoadingEmployeeAppraisals" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading appraisals...</p>
+    </div>
+    
+    <!-- Employee Appraisals Table -->
+    <div *ngIf="!isLoadingEmployeeAppraisals" class="table-container">
+      <table mat-table [dataSource]="employeeAppraisalsDataSource" class="appraisals-table">
+        
+        <!-- Cycle Name Column -->
+        <ng-container matColumnDef="cycleName">
+          <th mat-header-cell *matHeaderCellDef>Cycle</th>
+          <td mat-cell *matCellDef="let appraisal">{{ appraisal.cycleName || 'N/A' }}</td>
+        </ng-container>
+
+        <!-- Review Type Column -->
+        <ng-container matColumnDef="reviewType">
+          <th mat-header-cell *matHeaderCellDef>Review Type</th>
+          <td mat-cell *matCellDef="let appraisal">{{ appraisal.reviewType | titlecase }}</td>
+        </ng-container>
+
+        <!-- Overall Rating Column -->
+        <ng-container matColumnDef="overallRating">
+          <th mat-header-cell *matHeaderCellDef>Rating</th>
+          <td mat-cell *matCellDef="let appraisal">
+            <span *ngIf="appraisal.overallRating; else noRating" class="rating-value">
+              {{ appraisal.overallRating | number:'1.1-1' }}
+            </span>
+            <ng-template #noRating>
+              <span class="no-rating">N/A</span>
+            </ng-template>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let appraisal">
+            <mat-chip [class]="getStatusChipClass(appraisal.status)">
+              {{ appraisal.status | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let appraisal">
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="viewMyAppraisal(appraisal)"
+                    class="view-details-btn">
+              <mat-icon>visibility</mat-icon>
+              Show Details
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Table Headers and Rows -->
+        <tr mat-header-row *matHeaderRowDef="employeeAppraisalColumns"></tr>
+        <tr mat-row *matRowDef="let appraisal; columns: employeeAppraisalColumns;"></tr>
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="employeeAppraisalsDataSource.data.length === 0" class="empty-state">
+        <mat-icon>assessment</mat-icon>
+        <h3>No Appraisals Found</h3>
+        <p>You don't have any appraisals yet.</p>
+      </div>
+    </div>
+  </mat-card>
+
+
+</div>

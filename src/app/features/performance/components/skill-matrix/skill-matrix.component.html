@@ -1,30 +1,415 @@
-<div *ngIf="loading" class="loading-spinner">
-	Loading skills...
-</div>
-<div *ngIf="!loading">
-	<h2>Skill Matrix</h2>
-	<div *ngFor="let category of groupedSkills | keyvalue">
-		<h3>{{ category.key }}</h3>
-		<table class="skill-table">
-			<thead>
-				<tr>
-					<th>Skill Name</th>
-					<th>Description</th>
-					<th>Level Scale</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr *ngFor="let skill of category.value">
-					<td>{{ skill.skillName }}</td>
-					<td>{{ skill.description }}</td>
-					<td>
-						<ng-container *ngFor="let level of skill.skillLevelScale; let i = index">
-							<span class="level">{{ level }}</span>
-							<span *ngIf="i < skill.skillLevelScale.length - 1">, </span>
-						</ng-container>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+<!-- Skill Matrix Container -->
+<div class="skill-matrix-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>school</mat-icon>
+        Skill Matrix
+      </h1>
+      <p class="page-subtitle">Manage and organize employee skills and competencies</p>
+    </div>
+    
+    <div class="header-actions">
+      <button *ngIf="hasHRRole()" 
+              mat-flat-button 
+              (click)="openCreateSkillDialog()"
+              class="add-button">
+        <mat-icon>add</mat-icon>
+        Create Skill
+      </button>
+    </div>
+  </div>
+
+  <mat-tab-group [(selectedIndex)]="selectedTab">
+    <!-- Skill Sets Tab -->
+    <mat-tab label="Skill Sets">
+      <!-- Filters Section -->
+      <mat-card class="filters-card">
+        <div class="filters-header">
+          <h3>Search & Filters</h3>
+          <button mat-stroked-button 
+                  (click)="clearSkillFilters()" 
+                  class="clear-filters-btn">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+        
+        <div class="filters-content" [formGroup]="skillFilterForm">
+          <!-- Search, Category, and Status in one row -->
+          <div class="skill-filters-row">
+            <!-- Search -->
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search skills...</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput 
+                     formControlName="search" 
+                     placeholder="Search by skill name or category...">
+            </mat-form-field>
+            
+            <!-- Category Filter -->
+            <mat-form-field appearance="outline" class="category-filter">
+              <mat-label>Category</mat-label>
+              <mat-icon matPrefix>category</mat-icon>
+              <mat-select formControlName="category">
+                <mat-option [value]="">All Categories</mat-option>
+                <mat-option *ngFor="let cat of categories" [value]="cat">
+                  {{ cat }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Status Filter -->
+            <mat-form-field appearance="outline" class="status-filter">
+              <mat-label>Status</mat-label>
+              <mat-icon matPrefix>check_circle</mat-icon>
+              <mat-select formControlName="status">
+                <mat-option [value]="">All Statuses</mat-option>
+                <mat-option value="active">Active</mat-option>
+                <mat-option value="inactive">Inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        
+        <!-- Filter Actions -->
+        <div class="filter-actions-container">
+          <button class="add-button" mat-flat-button  (click)="applySkillFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply Filters
+          </button>
+        </div>
+      </mat-card>
+
+      <!-- Skills Table -->
+      <mat-card class="table-card">
+        <div class="table-header">
+          <h3>Available Skills ({{ filteredSkills.length }})</h3>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading skills...</p>
+        </div>
+        
+        <!-- Skills Table -->
+        <div *ngIf="!loading" class="table-container">
+          <table mat-table [dataSource]="groupedSkillsDataSource" class="skills-table">
+            
+            <!-- Category Column -->
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let group">
+                <div class="category-badge">{{ group.category }}</div>
+              </td>
+            </ng-container>
+
+            <!-- Skill Name Column -->
+            <ng-container matColumnDef="skillName">
+              <th mat-header-cell *matHeaderCellDef>Skill Name</th>
+              <td mat-cell *matCellDef="let group">
+                <div class="skill-info">
+                  <strong>{{ group.skillName }}</strong>
+                  <small *ngIf="group.description">{{ group.description }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Level Scale Column -->
+            <ng-container matColumnDef="levelScale">
+              <th mat-header-cell *matHeaderCellDef>Level Scale</th>
+              <td mat-cell *matCellDef="let group">
+                <div class="level-chips">
+                  <mat-chip *ngFor="let level of group.skillLevelScale">{{ level }}</mat-chip>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let group">
+                <mat-chip [class]="getSkillStatusClass(group.isActive)">
+                  {{ group.isActive ? 'Active' : 'Inactive' }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let group">
+                <button mat-icon-button [matMenuTriggerFor]="skillMenu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #skillMenu="matMenu">
+                  <button mat-menu-item (click)="editSkill(group)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  
+                  <button *ngIf="hasHRRole()" 
+                          mat-menu-item 
+                          (click)="toggleSkillStatus(group)"
+                          class="danger-action">
+                    <mat-icon>{{ group.isActive ? 'block' : 'check_circle' }}</mat-icon>
+                    <span>{{ group.isActive ? 'Deactivate' : 'Activate' }}</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <!-- Table Headers and Rows -->
+            <tr mat-header-row *matHeaderRowDef="skillDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let skill; columns: skillDisplayedColumns;"></tr>
+          </table>
+          
+          <!-- Empty State -->
+          <div *ngIf="filteredSkills.length === 0" class="empty-state">
+            <mat-icon>school</mat-icon>
+            <h3>No Skills Found</h3>
+            <p>No skills match your current filters.</p>
+            <button *ngIf="hasHRRole()" 
+                    mat-flat-button 
+                    (click)="openCreateSkillDialog()" 
+                    class="create-first-skill">
+              <mat-icon>add</mat-icon>
+              Create Your First Skill
+            </button>
+          </div>
+        </div>
+      </mat-card>
+    </mat-tab>
+
+    <!-- Employee Skills Tab (For Managers and Employees, not HR Managers) -->
+    <mat-tab *ngIf="!hasHRRole()" label="Employee Skills">
+      <!-- Manager View Mode Toggle (Only for Managers) -->
+      <mat-card *ngIf="isOnlyManager()" class="view-mode-card">
+        <div class="view-mode-content">
+          <div class="view-mode-label">
+            <mat-icon>view_module</mat-icon>
+            <span>View Mode</span>
+          </div>
+          <mat-button-toggle-group 
+            [value]="managerViewMode" 
+            (change)="onManagerViewModeChange($event.value)" 
+            class="view-mode-toggle-group">
+            <mat-button-toggle value="my-skills" class="view-mode-toggle">
+              <mat-icon>person</mat-icon>
+              <span>My Skills</span>
+            </mat-button-toggle>
+            <mat-button-toggle value="team-skills" class="view-mode-toggle">
+              <mat-icon>group</mat-icon>
+              <span>Team Skills</span>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </mat-card>
+
+      <!-- Filters Section -->
+      <mat-card class="filters-card">
+        <div class="filters-header">
+          <h3>Search & Filters</h3>
+          <button mat-stroked-button 
+                  (click)="clearEmployeeSkillFilters()" 
+                  class="clear-filters-btn">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+        
+        <div class="filters-content" [formGroup]="employeeSkillFilterForm">
+          <!-- Employee, Search, and Proficiency Level in one row -->
+          <div class="employee-skills-filters-row">
+            <!-- Employee Selection (for HR) -->
+            <mat-form-field appearance="outline" *ngIf="hasHRRole()" class="employee-filter">
+              <mat-label>Employee</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-select formControlName="employeeId" (selectionChange)="onEmployeeFilterChange($event.value)">
+                <mat-option [value]="">All Employees</mat-option>
+                <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                  {{ emp.fullName }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <!-- Search -->
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search skills...</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput 
+                     formControlName="search" 
+                     placeholder="Search by skill name...">
+            </mat-form-field>
+            
+            <!-- Proficiency Level Filter -->
+            <mat-form-field appearance="outline" class="proficiency-filter">
+              <mat-label>Proficiency Level</mat-label>
+              <mat-icon matPrefix>star</mat-icon>
+              <mat-select formControlName="proficiencyLevel">
+                <mat-option [value]="">All Levels</mat-option>
+                <mat-option *ngFor="let level of [1,2,3,4,5]" [value]="level">
+                  Level {{ level }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        
+        <!-- Filter Actions -->
+        <div class="filter-actions-container">
+          <button class="add-button" mat-flat-button  (click)="applyEmployeeSkillFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply Filters
+          </button>
+          <!-- Show Add Skill button for employees or managers viewing their own skills -->
+          <button *ngIf="!hasHRRole() && (!hasManagerRole() || (isOnlyManager() && managerViewMode === 'my-skills'))" 
+                  mat-flat-button 
+                  (click)="openAddEmployeeSkillDialog()" 
+                  class="add-button">
+            <mat-icon>add</mat-icon>
+            Add Skill
+          </button>
+        </div>
+      </mat-card>
+
+      <!-- Employee Skills Table -->
+      <mat-card class="table-card">
+        <div class="table-header">
+          <h3>
+            <span *ngIf="isOnlyManager() && managerViewMode === 'my-skills'">My Skills</span>
+            <span *ngIf="isOnlyManager() && managerViewMode === 'team-skills'">Team Skills</span>
+            <span *ngIf="!hasManagerRole()">Employee Skills</span>
+            ({{ filteredEmployeeSkills.length }})
+          </h3>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <div *ngIf="isLoadingEmployeeSkills" class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading employee skills...</p>
+        </div>
+        
+        <!-- Employee Skills Table -->
+        <div *ngIf="!isLoadingEmployeeSkills" class="table-container">
+          <table mat-table [dataSource]="filteredEmployeeSkillsDataSource" class="employee-skills-table">
+            
+            <!-- Employee Name Column -->
+            <ng-container matColumnDef="employeeName">
+              <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+              <td mat-cell *matCellDef="let skill">
+                <div class="employee-info">
+                  <strong>{{ skill.employeeName || 'N/A' }}</strong>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Skill Name Column -->
+            <ng-container matColumnDef="skillName">
+              <th mat-header-cell *matHeaderCellDef>Skill Name</th>
+              <td mat-cell *matCellDef="let skill">
+                <div class="skill-info">
+                  <strong>{{ skill.skillName }}</strong>
+                  <small *ngIf="skill.notes">{{ skill.notes }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Proficiency Level Column -->
+            <ng-container matColumnDef="proficiencyLevel">
+              <th mat-header-cell *matHeaderCellDef>Proficiency Level</th>
+              <td mat-cell *matCellDef="let skill">
+                <mat-chip *ngIf="skill.proficiencyLevel != null && skill.proficiencyLevel > 0" [class]="getSkillLevelClass(skill.proficiencyLevel)">
+                  Level {{ skill.proficiencyLevel }}/5
+                </mat-chip>
+                <span *ngIf="skill.proficiencyLevel == null || skill.proficiencyLevel === 0" class="pending-assessment">
+                  Pending Assessment
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Assessor Name Column -->
+            <ng-container matColumnDef="assessorName">
+              <th mat-header-cell *matHeaderCellDef>Assessed By</th>
+              <td mat-cell *matCellDef="let skill">
+                <span *ngIf="skill.assessorName && skill.assessorName.trim() !== ''">
+                  {{ skill.assessorName }}
+                </span>
+                <span *ngIf="!skill.assessorName || skill.assessorName.trim() === ''" class="pending-assessment">
+                  Pending Assessment
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Last Assessed Column -->
+            <ng-container matColumnDef="lastAssessed">
+              <th mat-header-cell *matHeaderCellDef>Last Assessed</th>
+              <td mat-cell *matCellDef="let skill">
+                {{ skill.lastAssessed ? (skill.lastAssessed | date:'short') : 'N/A' }}
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let skill">
+                <button mat-icon-button [matMenuTriggerFor]="employeeSkillMenu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #employeeSkillMenu="matMenu">
+                  <button *ngIf="hasHRRole() || hasManagerRole()" 
+                          mat-menu-item 
+                          (click)="rateEmployeeSkill(skill)"
+                          [disabled]="isSkillAlreadyRated(skill)">
+                    <mat-icon>star</mat-icon>
+                    <span>Rate Skill</span>
+                  </button>
+                  
+                  <button mat-menu-item 
+                          (click)="deleteEmployeeSkill(skill)"
+                          class="danger-action">
+                    <mat-icon>delete</mat-icon>
+                    <span>Remove</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <!-- Table Headers and Rows -->
+            <tr mat-header-row *matHeaderRowDef="employeeSkillsDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let skill; columns: employeeSkillsDisplayedColumns;"></tr>
+          </table>
+          
+          <!-- Empty State -->
+          <div *ngIf="filteredEmployeeSkills.length === 0" class="empty-state">
+            <mat-icon>person</mat-icon>
+            <h3>No Employee Skills Found</h3>
+            <p>No employee skills match your current filters.</p>
+            <button mat-flat-button 
+                    (click)="openAddEmployeeSkillDialog()" 
+                    class="add-first-skill">
+              <mat-icon>add</mat-icon>
+              Add Your First Skill
+            </button>
+          </div>
+        </div>
+        
+        <!-- Pagination -->
+        <mat-paginator 
+          *ngIf="!isLoadingEmployeeSkills && filteredEmployeeSkills.length > 0"
+          [length]="filteredEmployeeSkills.length"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[5, 10, 25, 50]"
+          [pageIndex]="pageIndex"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
 </div>

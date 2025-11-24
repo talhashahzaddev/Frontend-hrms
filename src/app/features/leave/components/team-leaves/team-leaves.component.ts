@@ -21,6 +21,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, forkJoin } from
 import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
 import { 
   LeaveRequest, 
   LeaveStatus,
@@ -111,11 +112,33 @@ import {
         <mat-card-content>
           <div class="pending-list">
             <div *ngFor="let request of pendingApprovals" class="pending-item">
+
               <div class="item-header">
                 <div class="employee-info">
-                  <div class="employee-avatar">
-                    {{ getInitials(request.employeeName) }}
-                  </div>
+                  
+
+<div class="employee-avatar">
+  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+    <img
+      [src]="request.profilePreviewUrl"
+      alt="{{ request.employeeName }}"
+      class="avatar-image"
+    />
+  </ng-container>
+
+  <ng-template #initialsFallback>
+    <div class="avatar-initials">
+      {{ getInitials(request.employeeName) }}
+    </div>
+  </ng-template>
+</div>
+
+
+
+
+
+
+
                   <div class="employee-details">
                     <h4 class="employee-name">{{ request.employeeName }}</h4>
                     <p class="leave-type">
@@ -124,6 +147,10 @@ import {
                     </p>
                   </div>
                 </div>
+
+
+
+
                 <div class="request-dates">
                   <div class="date-badge">
                     <mat-icon>event</mat-icon>
@@ -181,9 +208,21 @@ import {
                 <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
                 <mat-cell *matCellDef="let request">
                   <div class="employee-cell">
-                    <div class="employee-avatar-small">
-                      {{ getInitials(request.employeeName) }}
-                    </div>
+                  
+<div class="employee-avatar-small">
+  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+    <img [src]="request.profilePreviewUrl" [alt]="request.employeeName" />
+  </ng-container>
+
+  <ng-template #initialsFallback>
+    <div class="avatar-initials">
+      {{ getInitials(request.employeeName) }}
+    </div>
+  </ng-template>
+</div>
+
+
+
                     <span>{{ request.employeeName }}</span>
                   </div>
                 </mat-cell>
@@ -289,416 +328,7 @@ import {
 
     </div>
   `,
-  styles: [`
-    .team-leaves-container {
-      padding: var(--spacing-lg);
-      min-height: calc(100vh - 64px);
-      background: var(--gray-50);
-    }
-
-    .page-header {
-      margin-bottom: var(--spacing-2xl);
-
-      .header-content {
-        .page-title {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-sm);
-          font-size: 2rem;
-          font-weight: 700;
-          color: var(--gray-900);
-          margin: 0 0 var(--spacing-sm);
-
-          mat-icon {
-            color: var(--primary-600);
-            font-size: 2rem;
-            width: 2rem;
-            height: 2rem;
-          }
-        }
-
-        .page-subtitle {
-          font-size: 1.125rem;
-          color: var(--gray-600);
-          margin: 0;
-        }
-      }
-    }
-
-    .filters-card {
-      margin-bottom: var(--spacing-xl);
-      border-radius: var(--radius-xl);
-
-      ::ng-deep .mat-mdc-card-content {
-        padding: var(--spacing-lg);
-      }
-    }
-
-    .filters-form {
-      display: flex;
-      gap: var(--spacing-lg);
-      align-items: center;
-      flex-wrap: wrap;
-
-      .filter-field {
-        flex: 1;
-        min-width: 200px;
-      }
-
-      .clear-button {
-        height: 48px;
-        border-radius: var(--radius-lg);
-      }
-    }
-
-    .pending-card {
-      margin-bottom: var(--spacing-xl);
-      border-radius: var(--radius-xl);
-      border: 2px solid var(--warning-300);
-
-      ::ng-deep {
-        .mat-mdc-card-header {
-          padding: var(--spacing-lg);
-          background: var(--warning-50);
-          border-bottom: 1px solid var(--warning-200);
-
-          .mat-mdc-card-title {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--warning-900);
-            margin: 0;
-
-            .pending-icon {
-              color: var(--warning-600);
-            }
-          }
-        }
-
-        .mat-mdc-card-content {
-          padding: var(--spacing-lg);
-        }
-      }
-    }
-
-    .pending-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-lg);
-    }
-
-    .pending-item {
-      padding: var(--spacing-lg);
-      border: 1px solid var(--gray-200);
-      border-radius: var(--radius-lg);
-      background: white;
-      transition: all 0.2s ease;
-
-      &:hover {
-        box-shadow: var(--shadow-md);
-        border-color: var(--primary-300);
-      }
-
-      .item-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--spacing-md);
-        flex-wrap: wrap;
-        gap: var(--spacing-md);
-      }
-
-      .employee-info {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-
-        .employee-avatar {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: var(--primary-100);
-          color: var(--primary-700);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 1.125rem;
-        }
-
-        .employee-details {
-          .employee-name {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0 0 var(--spacing-xs);
-          }
-
-          .leave-type {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            font-size: 0.875rem;
-            color: var(--gray-600);
-            margin: 0;
-
-            .type-indicator {
-              width: 10px;
-              height: 10px;
-              border-radius: 50%;
-            }
-          }
-        }
-      }
-
-      .request-dates {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: var(--spacing-xs);
-
-        .date-badge {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-xs);
-          padding: var(--spacing-xs) var(--spacing-sm);
-          background: var(--gray-100);
-          border-radius: var(--radius-md);
-          font-size: 0.875rem;
-          color: var(--gray-700);
-
-          mat-icon {
-            font-size: 1rem;
-            width: 1rem;
-            height: 1rem;
-          }
-        }
-
-        .days-badge {
-          padding: var(--spacing-xs) var(--spacing-md);
-          background: var(--primary-100);
-          color: var(--primary-800);
-          border-radius: var(--radius-full);
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-      }
-
-      .item-content {
-        padding: var(--spacing-md);
-        background: var(--gray-50);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-md);
-
-        .reason-label {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: var(--gray-600);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          margin: 0 0 var(--spacing-xs);
-        }
-
-        .reason-text {
-          font-size: 0.875rem;
-          color: var(--gray-800);
-          line-height: 1.5;
-          margin: 0;
-        }
-      }
-
-      .item-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: var(--spacing-md);
-
-        .submitted-info {
-          display: flex;
-          align-items: center;
-          gap: var(--spacing-xs);
-          font-size: 0.875rem;
-          color: var(--gray-600);
-
-          mat-icon {
-            font-size: 1rem;
-            width: 1rem;
-            height: 1rem;
-          }
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: var(--spacing-sm);
-
-          button {
-            font-weight: 600;
-            border-radius: var(--radius-lg);
-          }
-        }
-      }
-    }
-
-    .requests-table-card {
-      border-radius: var(--radius-xl);
-
-      ::ng-deep {
-        .mat-mdc-card-header {
-          padding: var(--spacing-lg);
-          border-bottom: 1px solid var(--gray-200);
-
-          .mat-mdc-card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0;
-          }
-        }
-
-        .mat-mdc-card-content {
-          padding: 0;
-        }
-      }
-    }
-
-    .table-container {
-      overflow-x: auto;
-    }
-
-    .team-requests-table {
-      width: 100%;
-
-      .employee-cell {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-
-        .employee-avatar-small {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          background: var(--primary-100);
-          color: var(--primary-700);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 0.875rem;
-        }
-      }
-
-      .leave-type-cell {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-xs);
-
-        .type-indicator {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-        }
-      }
-
-      .dates-cell {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 0.875rem;
-
-        .date-separator {
-          color: var(--gray-500);
-          font-size: 0.75rem;
-        }
-
-        .days-count {
-          color: var(--gray-600);
-          font-size: 0.75rem;
-        }
-      }
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: var(--spacing-4xl);
-
-      mat-icon {
-        font-size: 4rem;
-        width: 4rem;
-        height: 4rem;
-        color: var(--gray-400);
-        margin-bottom: var(--spacing-lg);
-      }
-
-      h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--gray-900);
-        margin: 0 0 var(--spacing-md);
-      }
-
-      p {
-        font-size: 1rem;
-        color: var(--gray-600);
-        margin: 0;
-      }
-    }
-
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--spacing-4xl);
-      gap: var(--spacing-lg);
-
-      p {
-        color: var(--gray-600);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .team-leaves-container {
-        padding: var(--spacing-md);
-      }
-
-      .filters-form {
-        flex-direction: column;
-        align-items: stretch;
-
-        .filter-field,
-        .clear-button {
-          width: 100%;
-        }
-      }
-
-      .pending-item {
-        .item-header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .request-dates {
-          align-items: flex-start;
-        }
-
-        .item-footer {
-          flex-direction: column;
-          align-items: stretch;
-
-          .action-buttons {
-            width: 100%;
-
-            button {
-              flex: 1;
-            }
-          }
-        }
-      }
-    }
-  `]
+  styleUrls: ['./team-leaves.component.scss']
 })
 export class TeamLeavesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -709,7 +339,10 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   pendingApprovals: LeaveRequest[] = [];
   teamRequests: LeaveRequest[] = [];
   leaveTypes: LeaveType[] = [];
-  
+  profilePreviewUrl:string|null=null;
+private backendBaseUrl = 'https://localhost:60485';
+
+
   isLoading = false;
   isProcessing = false;
   
@@ -770,7 +403,23 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.leaveTypes = data.leaveTypes || [];
-          this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+          // this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
+
+ // ✅ This is where you handle pending approvals and image URLs
+        this.pendingApprovals = Array.isArray(data.pendingApprovals)
+          ? data.pendingApprovals.map((employee: any) => {
+              if (employee.profilePictureUrl) {
+                employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+                  ? employee.profilePictureUrl
+                  : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+              } else {
+                employee.profilePreviewUrl = null;
+              }
+              return employee;
+            })
+          : [];
+
+
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -797,6 +446,16 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: LeaveListResponse) => {
           // API returns data in response.data, not response.leaveRequests
+        this.teamRequests = (response.data || []).map((employee: LeaveRequest) => {
+          if (employee.profilePictureUrl) {
+            employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
+              ? employee.profilePictureUrl
+              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
+          } else {
+            employee.profilePreviewUrl = null;
+          }
+          return employee;
+        });
           this.teamRequests = response.data || [];
           this.totalCount = response.totalCount;
           this.isLoading = false;
@@ -833,26 +492,37 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   }
 
   openRejectDialog(request: LeaveRequest): void {
-    const reason = prompt(`Provide reason for rejecting ${request.employeeName}'s leave request:`);
-    
-    if (reason && reason.trim()) {
-      this.isProcessing = true;
-      
-      this.leaveService.rejectLeaveRequest(request.requestId, reason)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave request rejected');
-            this.isProcessing = false;
-            this.loadInitialData();
-          },
-          error: (error) => {
-            console.error('Error rejecting request:', error);
-            this.notificationService.showError('Failed to reject leave request');
-            this.isProcessing = false;
-          }
-        });
-    }
+    const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName: request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate: request.startDate,
+        endDate: request.endDate,
+        daysRequested: request.daysRequested
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.rejected) {
+        this.isProcessing = true;
+        
+        this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Leave request rejected successfully');
+              this.isProcessing = false;
+              this.loadInitialData();
+            },
+            error: (error) => {
+              console.error('Error rejecting request:', error);
+              this.notificationService.showError('Failed to reject leave request');
+              this.isProcessing = false;
+            }
+          });
+      }
+    });
   }
 
   viewRequestDetails(request: LeaveRequest): void {

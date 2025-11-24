@@ -1,0 +1,188 @@
+
+
+/* Swap Shift Dialog - Exact Same Create Shift Style */
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12) !important;
+  max-width: 520px !important;
+}
+
+/* Header */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+
+    mat-icon {
+      font-size: 26px;
+    }
+  }
+
+  .close-button {
+    color: white;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+  }
+}
+
+/* Content */
+.dialog-content {
+  padding: 22px !important;
+  min-width: 420px;
+  max-width: 520px;
+
+  .period-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    .full-width {
+      width: 100%;
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    ::ng-deep mat-form-field.mat-form-field-appearance-outline {
+      .mat-mdc-text-field-wrapper {
+        background: #f9fafb;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+
+      &:hover .mat-mdc-text-field-wrapper {
+        background: white;
+      }
+
+      &.mat-focused .mat-mdc-text-field-wrapper {
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .mat-mdc-form-field-label {
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      &.mat-focused .mat-mdc-form-field-label {
+        color: #667eea;
+      }
+
+      input,
+      mat-select,
+      textarea {
+        color: #1f2937;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+/* Actions */
+.dialog-actions {
+  padding: 16px 22px !important;
+  background: #fafafa;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  button {
+    height: 40px;
+    padding: 0 24px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.3s ease !important;
+
+    &[mat-stroked-button] {
+      background: white !important;
+      color: #6b7280 !important;
+      border: 2px solid #e5e7eb !important;
+
+      &:hover:not([disabled]) {
+        background: #f9fafb !important;
+        border-color: #cbd5e1 !important;
+        color: #374151 !important;
+      }
+    }
+
+    /* ✅ Exact Create Shift Gradient Button Style */
+    &[mat-flat-button],
+    &.submit-button {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%) !important;
+      color: white !important;
+      box-shadow: 0 3px 10px rgba(102, 126, 234, 0.35) !important;
+      font-weight: 600 !important;
+      position: relative;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 16px rgba(102, 126, 234, 0.45) !important;
+        background: linear-gradient(135deg, #5b0db5 0%, #1f5ae0 100%) !important;
+      }
+
+      &:disabled {
+        background: #cbd5e1 !important;
+        color: #f1f5f9 !important;
+        box-shadow: none !important;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+/* Error */
+::ng-deep mat-error {
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 2px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .dialog-content {
+    min-width: unset;
+    padding: 16px !important;
+
+    .period-form .date-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    gap: 10px;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+/* Ensure Timepicker Above Dialog */
+::ng-deep ngx-material-timepicker-dialog {
+  z-index: 2000 !important;
+}

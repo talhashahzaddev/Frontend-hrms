@@ -1,70 +1,1156 @@
-/* Card styling */
-.appraisal-card {
-  max-width: 700px;          // Restrict max width
-  margin: 40px auto;          // Center horizontally
-  padding: 25px 30px;         // Inner padding
-  border-radius: 12px;        // Rounded corners
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1); // Soft shadow
-  background-color: #ffffff;  // White background
+// Appraisals Component - Professional & Beautiful Styling
+.appraisals-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
 
-  /* Title styling */
-  mat-card-title {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: #1976d2; // Primary Material color
-    margin-bottom: 20px;
+  // Tab Group Styling
+  .appraisals-tabs {
+    margin-bottom: 24px;
+    width: 100%;
+
+    ::ng-deep {
+      .mat-mdc-tab-header {
+        background: white;
+        border-radius: 16px 16px 0 0;
+        padding: 0 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        width: 100%;
+      }
+
+      .mat-mdc-tab-label {
+        min-width: 200px;
+        height: 56px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.05);
+        }
+
+        &.mdc-tab--active {
+          color: #667eea;
+        }
+      }
+
+      .mdc-tab-indicator__content--underline {
+        border-color: #667eea;
+        border-width: 3px;
+      }
+
+      .mat-mdc-tab-body-wrapper {
+        background: transparent;
+        width: 100%;
+      }
+      
+      .mat-mdc-tab-body-content {
+        width: 100%;
+        overflow: visible;
+      }
+    }
   }
 
-  /* Card content layout */
-  mat-card-content {
+  // Page Header
+  .page-header {
     display: flex;
-    flex-direction: column;
-    gap: 20px; // spacing between form fields
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
-    .full-width {
-      width: 100%;
-    }
+    .header-content {
+      flex: 1;
 
-    mat-form-field {
-      width: 100%;
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
 
-      textarea.mat-input-element {
-        min-height: 80px; // make textareas taller
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: #667eea;
+        }
+      }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
       }
     }
 
-    /* Submit button styling */
-    button[type="submit"] {
-      margin-top: 10px;
-      align-self: flex-end;
-      min-width: 150px;
-      font-weight: 500;
-      background-color: #1976d2;
-      color: #fff;
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .add-button {
+        height: 48px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+        mat-icon {
+          margin-right: 8px;
+        }
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+      }
+    }
+  }
+
+  // Filters Card
+  .filters-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+        }
+      }
+
+      .clear-filters-btn {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        color: #667eea !important;
+        border-color: rgba(102, 126, 234, 0.3) !important;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.1) !important;
+          border-color: rgba(102, 126, 234, 0.5) !important;
+        }
+      }
+    }
+
+    .filters-content {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 16px;
+      padding: 24px;
+      align-items: flex-start;
+
+      ::ng-deep mat-form-field {
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper {
+            background: white;
+            border-radius: 12px;
+          }
+
+          .mat-mdc-form-field-flex {
+            padding: 0 16px;
+          }
+
+          .mat-mdc-notch-piece {
+            border-color: #e5e7eb !important;
+          }
+
+          &:hover .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+          }
+
+          &.mat-focused .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+            border-width: 2px !important;
+          }
+
+          .mat-mdc-form-field-label {
+            color: #6b7280;
+          }
+
+          mat-icon {
+            color: #9ca3af;
+
+            &.mat-icon-prefix {
+              margin-right: 8px;
+            }
+          }
+        }
+      }
+
+      .search-field {
+        mat-icon {
+          color: #667eea !important;
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+    }
+
+    // Self-assessment filters (only 3 fields: search, cycle, KRA)
+    &.self-assessment-filters .filters-content {
+      grid-template-columns: 2fr repeat(2, 1fr);
+    }
+
+    .filter-actions-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 24px 24px;
+      gap: 12px;
+
+      button {
+        height: 48px;
+        padding: 0 24px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+
+        mat-icon {
+          margin-right: 0;
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+        }
+
+        &[mat-raised-button] {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Self-Assessments Card
+  .self-assessments-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+    margin-bottom: 24px;
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+        }
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+
+      .self-assessments-table {
+        width: 100%;
+
+        ::ng-deep {
+          .mat-mdc-header-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+            .mat-mdc-header-cell {
+              font-weight: 600;
+              color: #1f2937;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              border-bottom: 2px solid #e5e7eb;
+              padding: 16px 12px;
+            }
+          }
+
+          .mat-mdc-row {
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+            }
+
+            .mat-mdc-cell {
+              padding: 16px 12px;
+              border-bottom: 1px solid #f3f4f6;
+              font-size: 14px;
+              color: #374151;
+            }
+          }
+        }
+
+        .rating-value {
+          font-weight: 600;
+          color: #667eea;
+          font-size: 15px;
+        }
+      }
+
+      // Empty State
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        margin: 20px;
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0 0 24px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        .create-first-appraisal {
+          height: 48px;
+          padding: 0 28px !important;
+          border-radius: 12px !important;
+          font-weight: 600 !important;
+          font-size: 15px !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+
+          mat-icon {
+            font-size: 20px !important;
+            width: 20px !important;
+            height: 20px !important;
+            margin: 0 !important;
+            color: white !important;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Table Card
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+    width: 100%;
+    
+    // Ensure table card in tabs uses full width
+    .appraisals-tabs & {
+      width: 100%;
+      margin: 0;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+    }
+
+    // Loading State
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 20px;
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    // Table Container
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+      display: block;
+
+      .appraisals-table {
+        width: 100%;
+        table-layout: fixed;
+        display: table;
+
+        ::ng-deep {
+          // Table Headers
+          .mat-mdc-header-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            display: table-row;
+            width: 100%;
+
+            .mat-mdc-header-cell {
+              font-weight: 600;
+              color: #1f2937;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              border-bottom: 2px solid #e5e7eb;
+              padding: 16px 20px;
+              white-space: nowrap;
+              display: table-cell;
+              
+              // Column width adjustments for employee self-assessments
+              &:first-child {
+                width: 20%;
+                min-width: 180px;
+              }
+              
+              &:nth-child(2) {
+                width: 22%;
+                min-width: 200px;
+              }
+              
+              &:nth-child(3) {
+                width: 22%;
+                min-width: 200px;
+              }
+              
+              &:nth-child(4) {
+                width: 12%;
+                min-width: 120px;
+              }
+              
+              &:last-child {
+                width: 24%;
+                min-width: 180px;
+                text-align: center;
+              }
+            }
+          }
+
+          // Table Rows
+          .mat-mdc-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: table-row;
+            width: 100%;
+
+            &:hover {
+              background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+            }
+
+            .mat-mdc-cell {
+              padding: 16px 20px;
+              border-bottom: 1px solid #f3f4f6;
+              font-size: 14px;
+              color: #374151;
+              word-wrap: break-word;
+              display: table-cell;
+              
+              // Align action column to center
+              &:last-child {
+                text-align: center;
+                
+                // Center the button within the cell
+                .create-appraisal-btn {
+                  margin: 0 auto;
+                  display: inline-flex;
+                }
+              }
+            }
+          }
+
+          &.clickable-row {
+            cursor: pointer;
+          }
+        }
+
+        // Rating Value
+        .rating-value {
+          font-weight: 600;
+          color: #667eea;
+          font-size: 15px;
+        }
+
+        .no-rating {
+          color: #9ca3af;
+          font-style: italic;
+        }
+
+        // Create Appraisal Button
+        .create-appraisal-btn {
+          height: 36px !important;
+          padding: 0 20px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
+          margin: 0 auto !important;
+
+          mat-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+          }
+
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        // View Details Button
+        .view-details-btn {
+          height: 36px !important;
+          padding: 0 20px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
+
+          mat-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+            margin: 0 !important;
+          }
+
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        // Status Chips
+        ::ng-deep mat-chip {
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          height: 28px !important;
+          border-radius: 14px !important;
+          padding: 0 12px !important;
+
+          &.status-completed {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+            color: #059669 !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+          }
+
+          &.status-submitted {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
+            color: #2563eb !important;
+            border: 1px solid rgba(59, 130, 246, 0.3) !important;
+          }
+
+          &.status-under-review {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%) !important;
+            color: #d97706 !important;
+            border: 1px solid rgba(251, 191, 36, 0.3) !important;
+          }
+
+          &.status-draft {
+            background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.1) 100%) !important;
+            color: #4b5563 !important;
+            border: 1px solid rgba(107, 114, 128, 0.3) !important;
+          }
+
+          &.status-rejected {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+            color: #dc2626 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+          }
+        }
+      }
+
+      // Empty State
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0 0 24px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        .create-first-appraisal {
+          height: 44px;
+          padding: 0 24px !important;
+          border-radius: 12px !important;
+          font-weight: 600 !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+    }
+
+    // Pagination
+    ::ng-deep mat-paginator {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-top: 1px solid #e5e7eb;
+
+      .mat-mdc-paginator-container {
+        padding: 16px 24px;
+      }
+
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-paginator-range-label {
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .mat-mdc-select-value {
+        color: #1f2937;
+        font-weight: 500;
+      }
+
+      button {
+        &:not([disabled]) {
+          color: #667eea;
+
+          &:hover {
+            background: rgba(102, 126, 234, 0.1);
+          }
+        }
+      }
+    }
+  }
+
+
+  // Details Card
+  .details-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+      }
+
+      button {
+        color: white !important;
+      }
+    }
+
+    mat-card-content {
+      padding: 24px !important;
+    }
+  }
+
+  // Form Styling (for Create/Edit tabs)
+  .appraisal-form {
+    .form-section {
+      margin-bottom: 40px;
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      transition: all 0.3s ease;
 
       &:hover {
-        background-color: #115293;
+        border-color: rgba(102, 126, 234, 0.3);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
       }
 
-      &:disabled {
-        background-color: #90caf9;
-        color: #e0e0e0;
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 24px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+        position: relative;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: #667eea;
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 60px;
+          height: 2px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        ::ng-deep mat-form-field {
+          &.full-width {
+            grid-column: 1 / -1;
+          }
+
+          &.mat-form-field-appearance-outline {
+            .mat-mdc-text-field-wrapper {
+              background: #f9fafb;
+              border-radius: 12px;
+              transition: all 0.3s ease;
+            }
+
+            .mat-mdc-form-field-flex {
+              padding: 0 16px;
+            }
+
+            .mat-mdc-notch-piece {
+              border-color: #e5e7eb !important;
+              transition: border-color 0.3s ease;
+            }
+
+            &:hover .mat-mdc-text-field-wrapper {
+              background: white;
+            }
+
+            &:hover .mat-mdc-notch-piece {
+              border-color: #667eea !important;
+            }
+
+            &.mat-focused {
+              .mat-mdc-text-field-wrapper {
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+              }
+
+              .mat-mdc-notch-piece {
+                border-color: #667eea !important;
+                border-width: 2px !important;
+              }
+            }
+
+            .mat-mdc-form-field-label {
+              color: #6b7280;
+              font-weight: 500;
+            }
+
+            &.mat-focused .mat-mdc-form-field-label {
+              color: #667eea;
+            }
+
+            input,
+            .mat-mdc-select-value,
+            textarea {
+              color: #1f2937;
+              font-weight: 500;
+            }
+
+            mat-icon {
+              color: #9ca3af;
+              margin-right: 8px;
+            }
+
+            &.mat-form-field-invalid {
+              .mat-mdc-notch-piece {
+                border-color: #dc2626 !important;
+              }
+
+              .mat-mdc-form-field-label {
+                color: #dc2626;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      padding: 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      margin-top: 32px;
+
+      button {
+        height: 48px;
+        padding: 0 32px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        text-transform: none !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+        mat-icon {
+          margin-right: 8px;
+        }
+
+        &[type="submit"]:not([disabled]) {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          border: none !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          position: relative;
+          overflow: hidden;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+
+            &::before {
+              left: 100%;
+            }
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        &[disabled] {
+          background: #f3f4f6 !important;
+          color: #9ca3af !important;
+          border: 1px solid #e5e7eb !important;
+          cursor: not-allowed;
+          box-shadow: none !important;
+
+          &:hover {
+            transform: none !important;
+          }
+        }
+      }
+    }
+  }
+
+  // Appraisal Details
+  .appraisal-details {
+    .detail-section {
+      padding: 24px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 20px;
+
+      h3 {
+        margin: 0 0 16px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      strong {
+        color: #374151;
+        font-weight: 600;
+      }
+    }
+  }
+
+  // Menu Actions
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+
+    .mat-mdc-menu-content {
+      padding: 8px !important;
+
+      .mat-mdc-menu-item {
+        border-radius: 8px !important;
+        margin: 2px 0 !important;
+        height: 44px !important;
+
+        &:hover {
+          background: rgba(102, 126, 234, 0.1) !important;
+        }
+
+        mat-icon {
+          margin-right: 12px;
+          color: #667eea;
+        }
+
+        &.danger-action {
+          color: #dc2626 !important;
+
+          mat-icon {
+            color: #dc2626 !important;
+          }
+
+          &:hover {
+            background: rgba(220, 38, 38, 0.1) !important;
+          }
+        }
       }
     }
   }
 }
 
-/* Responsive for mobile */
-@media (max-width: 650px) {
-  .appraisal-card {
-    margin: 20px;
-    padding: 20px;
-  }
+// Select Panel Styling
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+  margin-top: 8px;
 
-  mat-card-content {
-    button[type="submit"] {
-      width: 100%;
-      align-self: stretch;
+  .mat-mdc-option {
+    border-radius: 8px !important;
+    margin: 4px 8px !important;
+    padding: 12px 16px !important;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.1) !important;
+    }
+
+    &.mat-mdc-option-active,
+    &.mat-selected {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%) !important;
+      color: #667eea !important;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .appraisals-container {
+    .filters-card .filters-content {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .appraisals-container {
+    .filters-card .filters-content {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .appraisals-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+
+        .add-button {
+          width: 100%;
+        }
+      }
+    }
+
+    .filters-card {
+      .filters-content {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions-container {
+        justify-content: stretch;
+        padding: 0 24px 24px;
+
+        button {
+          flex: 1;
+          width: 100%;
+        }
+      }
+    }
+
+    .appraisal-form {
+      .form-section {
+        padding: 16px;
+
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 12px;
+
+        button {
+          width: 100%;
+        }
+      }
     }
   }
 }

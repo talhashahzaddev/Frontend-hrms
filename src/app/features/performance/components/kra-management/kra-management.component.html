@@ -1,0 +1,195 @@
+<!-- KRA Management Container -->
+<div class="kra-management-container">
+  
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>list_alt</mat-icon>
+        KRA Management
+      </h1>
+      <p class="page-subtitle">Manage Key Result Areas (KRAs) for different positions</p>
+    </div>
+    
+    <div class="header-actions">
+      <button *ngIf="hasHRRole()" 
+      (click)="openCreateDialog()"
+      mat-flat-button 
+              class="add-button">
+        <mat-icon>add</mat-icon>
+        New KRA
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Search & Filters</h3>
+      <button mat-stroked-button 
+              (click)="clearFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+    
+    <div class="filters-content" [formGroup]="filterForm">
+      <!-- Search -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search KRAs...</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput 
+               formControlName="search" 
+               placeholder="Search by title or description...">
+      </mat-form-field>
+      
+      <!-- Position Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Position</mat-label>
+        <mat-icon matPrefix>work</mat-icon>
+        <mat-select formControlName="positionId">
+          <mat-option [value]="">All Positions</mat-option>
+          <mat-option *ngFor="let position of positions" [value]="position.positionId">
+            {{ position.positionTitle }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Status Filter -->
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-icon matPrefix>check_circle</mat-icon>
+        <mat-select formControlName="status">
+          <mat-option [value]="">All Statuses</mat-option>
+          <mat-option value="active">Active</mat-option>
+          <mat-option value="inactive">Inactive</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Filter Actions -->
+      <div class="filter-actions-container">
+        <button (click)="applyFilters()"
+                mat-flat-button 
+                color="primary"
+                class="add-button">
+          <mat-icon>filter_list</mat-icon>
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- KRAs Table -->
+  <mat-card class="table-card">
+    <div class="table-header">
+      <h3>KRAs ({{ filteredKRAs.length }})</h3>
+    </div>
+    
+    <div class="table-container" *ngIf="!isLoading">
+      <table mat-table [dataSource]="krasDataSource" class="kra-table">
+        
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Title</th>
+          <td mat-cell *matCellDef="let kra">
+            <div class="kra-info">
+              <strong>{{ kra.title }}</strong>
+              <small *ngIf="kra.description">{{ kra.description }}</small>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="position">
+          <th mat-header-cell *matHeaderCellDef>Position</th>
+          <td mat-cell *matCellDef="let kra">
+            <span class="position-badge">
+              <mat-icon>work</mat-icon>
+              {{ getPositionName(kra.positionId) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="weight">
+          <th mat-header-cell *matHeaderCellDef>Weight</th>
+          <td mat-cell *matCellDef="let kra">
+            <span class="weight-badge">
+              {{ kra.weight }}%
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let kra">
+            <mat-chip [class]="getStatusClass(kra.isActive)" [disabled]="false">
+              <mat-icon>{{ kra.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ kra.isActive ? 'Active' : 'Inactive' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let kra">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="viewKRADetails(kra)">
+                <mat-icon>visibility</mat-icon>
+                <span>View Details</span>
+              </button>
+              <button mat-menu-item (click)="openEditDialog(kra)" *ngIf="hasHRRole()">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="toggleKRAStatus(kra)" *ngIf="hasHRRole()">
+                <mat-icon>{{ kra.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                <span>{{ kra.isActive ? 'Deactivate' : 'Activate' }}</span>
+              </button>
+              <mat-divider *ngIf="hasHRRole()"></mat-divider>
+              <button mat-menu-item (click)="deleteKRA(kra)" *ngIf="hasHRRole()">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      
+      <!-- Empty State -->
+      <div *ngIf="filteredKRAs.length === 0" class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <h3>No KRAs Found</h3>
+        <p>No KRAs match your current filters.</p>
+        <button *ngIf="hasHRRole()" 
+                mat-flat-button 
+                (click)="openCreateDialog()" 
+                class="create-first-kra">
+          <mat-icon>add</mat-icon>
+          Create Your First KRA
+        </button>
+      </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" *ngIf="isLoading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading KRAs...</p>
+    </div>
+    
+    <!-- Pagination -->
+    <mat-paginator 
+      *ngIf="!isLoading && filteredKRAs.length > 0"
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
+</div>

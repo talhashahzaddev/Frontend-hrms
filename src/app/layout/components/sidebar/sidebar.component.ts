@@ -66,7 +66,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'My Attendance', icon: 'access_time', route: '/attendance/dashboard' },
         { label: 'Time Tracker', icon: 'timer', route: '/attendance/time-tracker' },
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', roles: ['Super Admin', 'HR Manager', 'Manager'] },
-        { label: 'Reports', icon: 'assessment', route: '/attendance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] }
+        { label: 'Reports', icon: 'assessment', route: '/attendance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] },
+         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift' },
       ]
     },
     {
@@ -96,7 +97,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Performance',
       icon: 'trending_up',
       children: [
-        { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard' },
+        { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', roles: ['Employee'] },
+        { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', roles: ['Manager'] },
+        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/dashboard', roles: ['Super Admin', 'HR Manager'] },
         { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals' },
         { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills' },
         { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals' },

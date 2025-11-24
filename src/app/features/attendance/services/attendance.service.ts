@@ -15,6 +15,12 @@ import {
   TimeTrackingSession,
   DailyAttendanceStats,
   Shift,
+  ShiftDto,
+  UpdateShiftDto,
+  ShiftSwap,
+  EmployeeShift,
+  PendingShiftSwap,
+  approvedshiftRequest,
   AttendanceStatus
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
@@ -263,6 +269,92 @@ export class AttendanceService {
       responseType: 'blob' 
     });
   }
+
+  
+//\create Shift 
+
+
+createShift(request: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}/shift`, request);
+}
+
+
+getShifts(): Observable<ShiftDto[]> {
+  return this.http.get<ApiResponse<ShiftDto[]>>(`${this.apiUrl}/shifts`)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch shifts');
+        }
+        return response.data || [];
+      })
+    );
+}
+
+
+assignShift(request: { employeeId: string; shiftId: string }): Observable<void> {
+  return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/assign-shift`, request)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to assign shift');
+        }
+        // No data needed, just return void
+      })
+    );
+}
+
+  /** ✅ Get Employees by Shift ID */
+getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
+  return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch employees for shift');
+        }
+        return response.data || [];
+      })
+    );
+}
+
+// ✅ Shift Swap API using model
+  createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {
+    return this.http.post(`${this.apiUrl}/shiftswap`, shiftSwap);
+  }
+
+      /** ✅ Update an existing shift */
+updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
+  return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
+}
+
+
+deleteShift(shiftId:string):Observable<any>{
+  return this.http.delete(`${this.apiUrl}/shift/${shiftId}`);
+}
+
+
+  
+getEmployeeShiftSwaps(employeeId: string): Observable<PendingShiftSwap[]> {
+  return this.http.get<PendingShiftSwap[]>(
+    `${this.apiUrl}/shiftswap/eemployeeShifts/${employeeId}`
+  );
+}
+
+// Get all pending shift swap requests for Super Admin
+getPendingShiftSwapsForAdmin(): Observable<PendingShiftSwap[]> {
+  return this.http.get<PendingShiftSwap[]>(`${this.apiUrl}/shiftswap/pending`);
+}
+
+// Get current shift for an employee by ID
+getCurrentShift(employeeId: string): Observable<ShiftDto> {
+  return this.http.get<ShiftDto>(`${this.apiUrl}/CurrentShift/${employeeId}`);
+}
+
+//Approve or Reject Shift Swap Request
+approvedshiftRequest(request:approvedshiftRequest):Observable<any>{
+  return this.http.post(`${this.apiUrl}/shiftswap/approve`,request);
+}
+
 
   // Department Attendance (for managers)
   getDepartmentAttendance(departmentId: string, date?: string): Observable<Attendance[]> {
