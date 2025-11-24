@@ -450,3 +450,21 @@ export interface SkillGapAnalysis {
   currentLevel: number;
   gap: number;
 }
+
+// Team Performance Overview
+export interface TeamPerformanceOverview {
+  employees: TeamPerformanceEmployee[];
+}
+
+export interface TeamPerformanceEmployee {
+  employeeId: string;
+  employeeName: string;
+  cycleRatings: CycleRating[];
+  assessedSkills: string[];
+}
+
+export interface CycleRating {
+  cycleId: string;
+  cycleName: string;
+  rating?: number;
+}

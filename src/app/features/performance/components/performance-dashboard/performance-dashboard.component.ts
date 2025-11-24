@@ -25,7 +25,8 @@ import {
   AppraisalCycle, 
   PerformanceSummary,
   EmployeeSkill,
-  PerformanceMetrics
+  PerformanceMetrics,
+  TeamPerformanceOverview
 } from '../../../../core/models/performance.models';
 import { User } from '../../../../core/models/auth.models';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -71,9 +72,15 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   assessedSkills: EmployeeSkill[] = [];
   myAppraisals: EmployeeAppraisal[] = [];
   teamPerformanceSummary: PerformanceSummary | null = null;
+  teamPerformanceOverview: TeamPerformanceOverview | null = null;
+  isLoadingTeamPerformance = false;
   appraisalCycles: AppraisalCycle[] = [];
   employeeAppraisals: EmployeeAppraisal[] = [];
   selectedCycleId: string | null = null;
+  
+  // Team Performance Table
+  teamPerformanceDataSource = new MatTableDataSource<any>([]);
+  displayedTeamColumns: string[] = ['employeeName', 'cycleRatings', 'assessedSkills'];
 
   overallRating: number = 0;
 
@@ -198,6 +205,11 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
             if (this.selectedCycleId) {
               this.onCycleChange(this.selectedCycleId);
             }
+          }
+
+          // Load team performance overview if user is a manager
+          if (this.hasManagerRole()) {
+            this.loadTeamPerformanceOverview();
           }
 
           this.isLoading = false;
@@ -339,6 +351,29 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
   hasManagerRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
+  }
+
+  private loadTeamPerformanceOverview(): void {
+    this.isLoadingTeamPerformance = true;
+    this.performanceService.getTeamPerformanceOverview()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.teamPerformanceOverview = response.data;
+            // Set data directly for table display
+            this.teamPerformanceDataSource.data = response.data.employees || [];
+          }
+          this.isLoadingTeamPerformance = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading team performance overview:', error);
+          this.notificationService.showError('Failed to load team performance overview');
+          this.isLoadingTeamPerformance = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   hasHRRole(): boolean {

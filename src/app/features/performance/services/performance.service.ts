@@ -30,7 +30,8 @@ import {
   ManagerReviewRequest,
   ConsolidateAppraisalRequest,
   EmployeePerformanceHistory,
-  EmployeeAppraisalForEmployee
+  EmployeeAppraisalForEmployee,
+  TeamPerformanceOverview
 } from '../../../core/models/performance.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
 
@@ -466,5 +467,10 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
   // Top Performers
   getTopPerformers(count: number = 10): Observable<ApiResponse<any[]>> {
     return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/Performance/top-performers?count=${count}`);
+  }
+
+  // Team Performance Overview
+  getTeamPerformanceOverview(): Observable<ApiResponse<TeamPerformanceOverview>> {
+    return this.http.get<ApiResponse<TeamPerformanceOverview>>(`${this.apiUrl}/Performance/team-performance-overview`);
   }
 }

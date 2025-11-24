@@ -900,6 +900,175 @@
       }
     }
 
+    // Team Performance Table
+    .team-performance-table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background: white;
+
+      .team-performance-table {
+        width: 100%;
+        min-width: 800px;
+
+        ::ng-deep {
+          .mat-mdc-header-cell {
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+            font-weight: 600;
+            color: #374151;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 20px 24px;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+          }
+
+          .mat-mdc-cell {
+            padding: 24px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #1f2937;
+            font-size: 14px;
+            vertical-align: top;
+          }
+
+          .mat-mdc-row {
+            transition: all 0.2s ease;
+
+            &:hover {
+              background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+
+            &:last-child .mat-mdc-cell {
+              border-bottom: none;
+            }
+          }
+        }
+
+        // Employee Name Cell
+        .employee-name-cell {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-weight: 600;
+          color: #1f2937;
+          font-size: 15px;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 8px;
+            border-radius: 8px;
+          }
+
+          span {
+            flex: 1;
+          }
+        }
+
+        // Cycle Ratings Cell
+        .cycle-ratings-cell {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          min-width: 250px;
+
+          .cycle-rating-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+
+            &:hover {
+              border-color: #cbd5e1;
+              box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
+            }
+
+            .cycle-name {
+              font-weight: 600;
+              color: #1f2937;
+              font-size: 14px;
+              margin-bottom: 4px;
+            }
+
+            .cycle-rating-value {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              font-size: 15px;
+              font-weight: 600;
+
+              mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                color: #fbbf24;
+              }
+
+              span {
+                color: #1f2937;
+              }
+
+              &.no-rating {
+                span {
+                  color: #9ca3af;
+                  font-size: 13px;
+                  font-weight: 500;
+                  font-style: italic;
+                }
+              }
+            }
+          }
+
+          .no-data {
+            padding: 12px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            font-style: italic;
+          }
+        }
+
+        // Assessed Skills Cell
+        .assessed-skills-cell {
+          min-width: 300px;
+          max-width: 400px;
+
+          .skills-list {
+            display: inline-block;
+            font-size: 14px;
+            color: #1f2937;
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+
+            span {
+              display: inline;
+              white-space: normal;
+            }
+          }
+
+          .no-data {
+            padding: 12px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            font-style: italic;
+          }
+        }
+      }
+    }
+
     // Empty State
     .empty-state {
       text-align: center;
@@ -1000,6 +1169,62 @@
       .team-performance-section {
         .summary-stats-grid {
           grid-template-columns: 1fr;
+        }
+      }
+
+      .team-performance-table-container {
+        .team-performance-table {
+          min-width: 600px;
+
+          ::ng-deep {
+            .mat-mdc-header-cell,
+            .mat-mdc-cell {
+              padding: 16px;
+              font-size: 13px;
+            }
+          }
+
+          .employee-name-cell {
+            font-size: 14px;
+
+            mat-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
+              padding: 6px;
+            }
+          }
+
+          .cycle-ratings-cell {
+            min-width: 200px;
+
+            .cycle-rating-item {
+              padding: 10px;
+
+              .cycle-name {
+                font-size: 13px;
+              }
+
+              .cycle-rating-value {
+                font-size: 14px;
+
+                mat-icon {
+                  font-size: 16px;
+                  width: 16px;
+                  height: 16px;
+                }
+              }
+            }
+          }
+
+          .assessed-skills-cell {
+            min-width: 200px;
+            max-width: 300px;
+
+            .skills-list {
+              font-size: 13px;
+            }
+          }
         }
       }
     }
