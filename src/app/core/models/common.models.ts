@@ -25,6 +25,20 @@ export interface PagedResult<T> {
   hasPreviousPage: boolean;
 }
 
+export interface ServerNotification {
+  notificationid: string;
+  receiverUserId: string;
+  senderUserId: string;
+  title: string;
+  notificationType: string;
+  message: string;
+  redirectUrl?: string;
+  requestid?:string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+
 export interface BaseEntity {
   id: string;
   createdAt: string;

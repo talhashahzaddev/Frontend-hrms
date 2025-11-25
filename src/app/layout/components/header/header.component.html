@@ -45,19 +45,30 @@
     </button>
 
     <!-- Notifications -->
-    <button 
-      mat-icon-button 
-      class="action-button"
-      (click)="onNotificationsClick()"
-      matTooltip="Notifications"
-      aria-label="Notifications">
-      <mat-icon [matBadge]="notificationCount" 
-               [matBadgeHidden]="notificationCount === 0"
-               matBadgeColor="warn" 
-               matBadgeSize="small">
-        notifications
-      </mat-icon>
-    </button>
+  
+
+    <!-- Notifications -->
+<div class="notification-container">
+  <button 
+    mat-icon-button 
+    class="action-button"
+    (click)="onNotificationsClick()"
+    matTooltip="Notifications"
+    aria-label="Notifications">
+    <mat-icon [matBadge]="notificationCount" 
+              [matBadgeHidden]="notificationCount === 0"
+              matBadgeColor="warn" 
+              matBadgeSize="small">
+      notifications
+    </mat-icon>
+  </button>
+
+  <!-- Dropdown -->
+  <div class="notification-panel" *ngIf="isNotificationOpen">
+    <!-- Pass isOpen input to NotificationDialogueComponent -->
+    <app-notification-dialogue [isOpen]="isNotificationOpen"></app-notification-dialogue>
+  </div>
+</div>
 
 
 <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
@@ -97,7 +108,7 @@
 
   <ng-template #initialsLarge>
     <p-avatar 
-      [label]="getUserInitials()" 
+      [label]="getUserInitials()"
       size="large"
       shape="circle"
       styleClass="user-avatar-large-content">
