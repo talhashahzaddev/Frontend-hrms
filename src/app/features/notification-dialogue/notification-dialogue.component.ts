@@ -10,7 +10,7 @@ import { AuthService } from '@core/services/auth.service';
 import { ServerNotification } from '../../core/models/common.models';
 import { LeaveService } from '../leave/services/leave.service';
 import  {AttendanceService} from '../attendance/services/attendance.service' 
-
+import { Output, EventEmitter } from '@angular/core';
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
@@ -20,6 +20,7 @@ import  {AttendanceService} from '../attendance/services/attendance.service'
 })
 export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isOpen = false;
+@Output() unreadCountChange = new EventEmitter<number>();
 
   notification: ServerNotification[] = [];
   currentUser: any = null;
@@ -46,9 +47,17 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     }
   }
 
+
   get unreadCount(): number {
-    return this.notification.filter(n => !n.isRead).length;
+    const count = this.notification.filter(n => !n.isRead).length;
+    this.unreadCountChange.emit(count); // emit count whenever accessed
+    return count;
   }
+
+
+  // get unreadCount(): number {
+  //   return this.notification.filter(n => !n.isRead).length;
+  // }
 
   loadNotifications(): void {
     if (!this.currentUser?.userId) return;
@@ -56,7 +65,11 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     this.serverNotificationService.getNotifications(this.currentUser.userId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res: ServerNotification[]) => this.notification = res || [],
+               next: (res: ServerNotification[]) => {
+          this.notification = res || [];
+          this.unreadCountChange.emit(this.unreadCount); // emit after load
+        },
+
         error: (err) => console.error('Failed to load notifications', err)
       });
   }
@@ -68,7 +81,10 @@ onNotificationClick(notification: ServerNotification): void {
     this.serverNotificationService.markAsRead(notification.notificationid)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => notification.isRead = true,
+        next: () => {
+            notification.isRead = true;
+            this.unreadCountChange.emit(this.unreadCount); // emit after single read
+          },
         error: (err) => console.error('Failed to mark as read', err)
       });
   }
@@ -87,7 +103,10 @@ onNotificationClick(notification: ServerNotification): void {
         this.serverNotificationService.markAsRead(notification.notificationid)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
-            next: () => notification.isRead = true,
+             next: () => {
+              notification.isRead = true;
+              this.unreadCountChange.emit(this.unreadCount); // emit after marking read
+            },
             error: (err) => console.error('Failed to mark all as read', err)
           });
       }
