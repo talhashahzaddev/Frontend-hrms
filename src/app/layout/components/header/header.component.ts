@@ -23,6 +23,7 @@ import { User } from '@core/models/auth.models';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import {NotificationDialogueComponent} from '../../../features/notification-dialogue/notification-dialogue.component'
 
+
 @Component({
   selector: 'app-header',
   imports: [
@@ -48,7 +49,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isDarkMode = false;
 
-  notificationCount = 3; // Mock notification count
+  notificationCount = 0; // Mock notification count
   slectedProfileFile: File | null = null;
   profilePreviewUrl: string | null = null;
   private backendBaseUrl = 'https://localhost:60485';
