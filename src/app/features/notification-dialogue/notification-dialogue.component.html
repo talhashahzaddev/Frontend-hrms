@@ -1,0 +1,43 @@
+<div class="notification-dialogue" *ngIf="isOpen">
+  <!-- Header -->
+  <div class="header">
+    <span>Notifications</span>
+    <button mat-button (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+      Mark all as read
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Notifications List -->
+  <div class="notification-list" *ngIf="notification.length > 0; else noNotifications">
+    <div *ngFor="let n of notification" 
+         class="notification-item" 
+         [class.unread]="!n.isRead"
+         (click)="onNotificationClick(n)">
+      <mat-icon class="notification-icon">notifications</mat-icon>
+      <div class="content">
+        <div class="title">{{ n.title }}</div>
+        <div class="message">{{ n.message }}</div>
+        <div class="time">{{ n.createdAt| date:'short' }}</div>
+
+         <!-- Accept button only for leave requests -->
+        <div *ngIf="n.notificationType === 'Request'" class="action-buttons">
+          <button mat-button color="primary" 
+                  (click)="approveLeave(n.requestid); $event.stopPropagation()">
+            Accept
+          </button>
+           <button mat-button color="warn" 
+          (click)="rejectLeave(n.requestid); $event.stopPropagation()">
+             Reject
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No notifications fallback -->
+  <ng-template #noNotifications>
+    <div class="no-notifications">No notifications</div>
+  </ng-template>
+</div>
