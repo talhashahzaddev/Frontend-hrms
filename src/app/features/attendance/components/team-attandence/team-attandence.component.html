@@ -79,6 +79,24 @@
         </mat-select>
       </mat-form-field>
     </div>
+
+    <!-- Filter Actions -->
+    <div class="filter-actions">
+      <button mat-flat-button 
+              (click)="applyFilters()" 
+              [disabled]="isLoading"
+              class="apply-filter-btn">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filters
+      </button>
+      <!-- <button mat-stroked-button 
+              (click)="clearFilters()" 
+              [disabled]="isLoading"
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear
+      </button> -->
+    </div>
   </mat-card>
 
   <!-- Daily Stats Cards - Dashboard Style -->
