@@ -69,7 +69,7 @@ export class ShiftComponent implements OnInit {
     this.loadCurrentUser();
     this.loadAllShifts();
     
-if (this.isSuperAdmin) {
+if (this.isAdminOrHR) {
   this.loadSuperAdminPendingSwaps();
 }
 
@@ -91,6 +91,14 @@ if (this.isSuperAdmin) {
   // Role helpers
   get isSuperAdmin(): boolean {
     return this.authService.hasRole('Super Admin');
+  }
+
+  get isHRManager(): boolean {
+    return this.authService.hasRole('HR Manager');
+  }
+
+  get isAdminOrHR(): boolean {
+    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
   }
 
   get isEmployee(): boolean {
@@ -341,7 +349,7 @@ onEditShift(shift: ShiftDto): void {
       if (result === 'swapped' && this.isEmployee) {
         // reload employee requests after swap
         this.loadEmployeeShiftSwaps();
-      } else if (result === 'swapped' && this.isSuperAdmin) {
+      } else if (result === 'swapped' && this.isAdminOrHR) {
         this.loadAllShifts();
       }
     });

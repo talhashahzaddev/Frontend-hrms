@@ -35,6 +35,7 @@ export interface ServerNotification {
   redirectUrl?: string;
   requestid?:string;
   isRead: boolean;
+  moduletype:string;
   createdAt: string;
 }
 

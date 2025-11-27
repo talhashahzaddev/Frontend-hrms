@@ -164,7 +164,7 @@
           </mat-card-header>
           <mat-card-content>
             <div class="quick-actions-grid">
-              <button mat-stroked-button class="quick-action-button action-primary" (click)="quickemployee()">
+              <button mat-stroked-button class="quick-action-button action-primary" *ngIf="!isEmployee && !isManager" (click)="quickemployee()">
                 <div class="action-icon-wrapper">
                   <mat-icon>person_add</mat-icon>
                 </div>

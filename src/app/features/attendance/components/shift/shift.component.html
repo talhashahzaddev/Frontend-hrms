@@ -11,7 +11,7 @@
     </div>
 
     <!-- Create Shift Button -->
-    <div class="header-actions" *ngIf="isSuperAdmin">
+    <div class="header-actions" *ngIf="isAdminOrHR">
       <button mat-raised-button color="primary" (click)="openCreateShiftDialog()">
         <mat-icon>add</mat-icon>
         Create Shift
@@ -38,7 +38,7 @@
   <!-- Quick Navigation (Stat Cards Style) -->
   <div class="quick-nav-grid">
     <!-- Assign Shift -->
-    <mat-card class="stat-card stat-card-primary" *ngIf="isSuperAdmin" (click)="openAssignShiftDialog()">
+    <mat-card class="stat-card stat-card-primary" *ngIf="isAdminOrHR" (click)="openAssignShiftDialog()">
       <mat-card-content>
         <div class="stat-item">
           <div class="stat-icon-wrapper">
@@ -77,7 +77,7 @@
   </div>
 
   <!-- All Shifts Table -->
-  <div *ngIf="isSuperAdmin" class="table-container">
+  <div *ngIf="isAdminOrHR" class="table-container">
      <h1>All Shifts</h1>
     <mat-table [dataSource]="shifts" class="shift-table">
 
@@ -167,32 +167,43 @@
           </div>
 
           <!-- Admin Requests -->
-          <div *ngFor="let swap of superAdminPendingSwaps" class="current-shift-card">
-            <div class="card-header">
-              <h3>{{ swap.employeeName }}</h3>
-              <mat-chip color="primary" selected>{{ swap.status || 'Pending' }}</mat-chip>
+          <div *ngIf="isAdminOrHR">
+            <div *ngIf="superAdminPendingSwaps.length > 0; else noAdminRequests">
+              <div *ngFor="let swap of superAdminPendingSwaps" class="current-shift-card">
+                <div class="card-header">
+                  <h3>{{ swap.employeeName }}</h3>
+                  <mat-chip color="primary" selected>{{ swap.status || 'Pending' }}</mat-chip>
+                </div>
+                <div class="card-body">
+                  <p><strong>Current Shift:</strong> {{ swap.currentShiftName }}</p>
+                  <p><strong>Requested Shift:</strong> {{ swap.requestedShiftName }}</p>
+                </div>
+                <div class="approval-actions">
+                  <button mat-stroked-button color="warn" (click)="rejectRequest(swap)">
+                    <mat-icon>close</mat-icon>
+                    Reject
+                  </button>
+                  <button mat-raised-button color="primary" (click)="approveRequest(swap)">
+                    <mat-icon>check</mat-icon>
+                    Approve
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="card-body">
-              <p><strong>Current Shift:</strong> {{ swap.currentShiftName }}</p>
-              <p><strong>Requested Shift:</strong> {{ swap.requestedShiftName }}</p>
-            </div>
-            <div class="approval-actions">
-              <button mat-stroked-button color="warn" (click)="rejectRequest(swap)">
-                <mat-icon>close</mat-icon>
-                Reject
-              </button>
-              <button mat-raised-button color="primary" (click)="approveRequest(swap)">
-                <mat-icon>check</mat-icon>
-                Approve
-              </button>
-            </div>
+            <ng-template #noAdminRequests>
+              <div class="empty-state">
+                <mat-icon>hourglass_empty</mat-icon>
+                <h3>No Pending Requests</h3>
+                <p>There are no pending shift swap requests to review.</p>
+              </div>
+            </ng-template>
           </div>
 
         </div>
       </mat-tab>
 
       <!-- Details Tab -->
-      <mat-tab label="Details" *ngIf="isSuperAdmin">
+      <mat-tab label="Details" *ngIf="isAdminOrHR">
         <div class="tab-content">
           <h3>Select Shift</h3>
           <mat-form-field appearance="outline" class="w-100">

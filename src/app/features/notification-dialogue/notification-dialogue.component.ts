@@ -4,13 +4,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { Subject, takeUntil } from 'rxjs';
-
+import { Router } from '@angular/router';
 import { ServerNotificationService } from '@core/services/server-notification';
 import { AuthService } from '@core/services/auth.service';
 import { ServerNotification } from '../../core/models/common.models';
 import { LeaveService } from '../leave/services/leave.service';
-
-
+import  {AttendanceService} from '../attendance/services/attendance.service' 
+import { Output, EventEmitter } from '@angular/core';
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
@@ -19,7 +19,8 @@ import { LeaveService } from '../leave/services/leave.service';
   styleUrls: ['./notification-dialogue.component.scss']
 })
 export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChanges {
-  @Input() isOpen = false; // Control from parent (header)
+  @Input() isOpen = false;
+@Output() unreadCountChange = new EventEmitter<number>();
 
   notification: ServerNotification[] = [];
   currentUser: any = null;
@@ -27,7 +28,9 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   constructor(
     private serverNotificationService: ServerNotificationService,
-     public leaveService: LeaveService,
+    private attendanceService:AttendanceService,
+    public leaveService: LeaveService,
+    private router: Router ,
     private authService: AuthService
   ) {}
 
@@ -39,94 +42,144 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isOpen'] && changes['isOpen'].currentValue) {
+    if (changes['isOpen']?.currentValue) {
       this.loadNotifications();
     }
   }
 
-  // Count of unread notifications
+
   get unreadCount(): number {
-    return this.notification.filter(n => !n.isRead).length;
+    const count = this.notification.filter(n => !n.isRead).length;
+    this.unreadCountChange.emit(count); // emit count whenever accessed
+    return count;
   }
 
-  // Fetch notifications from backend
+
+  // get unreadCount(): number {
+  //   return this.notification.filter(n => !n.isRead).length;
+  // }
+
   loadNotifications(): void {
     if (!this.currentUser?.userId) return;
 
     this.serverNotificationService.getNotifications(this.currentUser.userId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res: ServerNotification[]) => this.notification = res || [],
+               next: (res: ServerNotification[]) => {
+          this.notification = res || [];
+          this.unreadCountChange.emit(this.unreadCount); // emit after load
+        },
+
         error: (err) => console.error('Failed to load notifications', err)
       });
   }
 
-  // Click on single notification
-  onNotificationClick(notification: ServerNotification): void {
-    if (!notification.isRead) {
-      this.serverNotificationService.markAsRead(notification.notificationid)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => notification.isRead = true,
-          error: (err) => console.error('Failed to mark notification as read', err)
-        });
-    }
-
-    if (notification.redirectUrl) {
-      window.open(notification.redirectUrl, '_blank');
-    }
+ 
+onNotificationClick(notification: ServerNotification): void {
+  // Mark as read if unread
+  if (!notification.isRead) {
+    this.serverNotificationService.markAsRead(notification.notificationid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+            notification.isRead = true;
+            this.unreadCountChange.emit(this.unreadCount); // emit after single read
+          },
+        error: (err) => console.error('Failed to mark as read', err)
+      });
   }
 
-  // Mark all as read
+  // Navigate inside Angular app if redirectUrl exists
+  if (notification.redirectUrl) {
+    this.router.navigateByUrl(notification.redirectUrl);
+  }
+}
+
+
+
   markAllAsRead(): void {
     this.notification.forEach(notification => {
       if (!notification.isRead) {
         this.serverNotificationService.markAsRead(notification.notificationid)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
-            next: () => notification.isRead = true,
-            error: (err) => console.error('Failed to mark notification as read', err)
+             next: () => {
+              notification.isRead = true;
+              this.unreadCountChange.emit(this.unreadCount); // emit after marking read
+            },
+            error: (err) => console.error('Failed to mark all as read', err)
           });
       }
     });
   }
 
-approveLeave(requestId?: string): void {
-  if (!requestId) return;
+  // -------------------------------------------------------
+  // 🚀 NEW SWITCH-CASE FUNCTION FOR MODULE TYPE HANDLING
+  // -------------------------------------------------------
+  handleAction(n: ServerNotification, action: 'accept' | 'reject'): void {
+    const moduleType = n.moduletype?.toLowerCase();
 
-  this.leaveService.approveLeaveRequest(requestId)
-    .subscribe({
-      next: () => {
-        alert('Leave Approved');
-        // Optional: mark notification as read
-        const n = this.notification.find(x => x.requestid === requestId);
-        if (n) n.isRead = true;
-      },
-      error: (err) => console.error('Approve failed', err)
-    });
-}
+    switch (moduleType) {
 
-rejectLeave(requestId?: string): void {
-  if (!requestId) return;
+      // LEAVE MODULE
+      case 'leave':
+        this.handleLeave(n.notificationid, action);
+        break;
 
-  // Optional: ask for reason
-  const reason = prompt('Please enter reason for rejection:');
-  if (reason === null) return; // user canceled
+      // ATTENDANCE MODULE
+      case 'attendance':
+        this.handleAttendance(n.notificationid, action);
+        break;
 
-  this.leaveService.rejectLeaveRequest(requestId, reason)
-    .subscribe({
-      next: () => {
-        alert('Leave Rejected');
-        // Optional: mark notification as read
-        const n = this.notification.find(x => x.requestid === requestId);
-        if (n) n.isRead = true;
-      },
-      error: (err) => console.error('Reject failed', err)
-    });
-}
+      default:
+        console.warn("Unknown module type:", moduleType);
+        break;
+    }
+  }
 
+  // -------------------------------------------------------
+  // 🚀 LEAVE HANDLING API CALLS
+  // -------------------------------------------------------
+  private handleLeave(notificationid: string | undefined, action: 'accept' | 'reject'): void {
+    if (!notificationid) return;
 
+    if (action === 'accept') {
+      this.leaveService.approveLeaveRequest(notificationid)
+        .subscribe({
+          next: () => {
+            alert("Leave Approved");
+            const n = this.notification.find(x => x.notificationid === notificationid);
+            if (n) n.isRead = true;
+          },
+          error: (err) => console.error("Approve failed", err)
+        });
+    } else {
+      const reason = prompt("Enter reason for rejection:");
+      if (reason === null) return;
 
+      this.leaveService.rejectLeaveRequest(notificationid, reason)
+        .subscribe({
+          next: () => {
+            alert("Leave Rejected");
+            const n = this.notification.find(x => x.notificationid === notificationid);
+            if (n) n.isRead = true;
+          },
+          error: (err) => console.error("Reject failed", err)
+        });
+    }
+  }
+
+  // -------------------------------------------------------
+  // 🚀 ATTENDANCE MODULE HANDLING
+  // -------------------------------------------------------
+  private handleAttendance(notificationid: string | undefined, action: 'accept' | 'reject'): void {
+    if (!notificationid) return;
+
+    console.log("Attendance module:", action, notificationid);
+    // Add attendance approve/reject APIs here
+  }
+
+ 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

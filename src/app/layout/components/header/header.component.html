@@ -48,6 +48,7 @@
   
 
     <!-- Notifications -->
+<!-- Notifications -->
 <div class="notification-container">
   <button 
     mat-icon-button 
@@ -65,12 +66,17 @@
 
   <!-- Dropdown -->
   <div class="notification-panel" *ngIf="isNotificationOpen">
-    <!-- Pass isOpen input to NotificationDialogueComponent -->
-    <app-notification-dialogue [isOpen]="isNotificationOpen"></app-notification-dialogue>
+    <!-- Pass isOpen input and emit unread count -->
+    <app-notification-dialogue 
+      [isOpen]="isNotificationOpen"
+      (unreadCountChange)="notificationCount = $event">
+    </app-notification-dialogue>
   </div>
 </div>
 
 
+
+<!-- user menu -->
 <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
   <div class="user-avatar-pic">
     <p-avatar
