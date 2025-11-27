@@ -60,31 +60,70 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid && !this.isLoading) {
-      const credentials = this.loginForm.value;
+  // onSubmit(): void {
+  //   if (this.loginForm.valid && !this.isLoading) {
+  //     const credentials = this.loginForm.value;
       
-      this.authService.login(credentials).subscribe({
-        next: (response) => {
-          this.notificationService.loginSuccess(response.firstName);
+  //     this.authService.login(credentials).subscribe({
+  //       next: (response) => {
+  //         this.notificationService.loginSuccess(response.firstName);
           
-          // Check for redirect URL
-          const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
-          sessionStorage.removeItem('redirectUrl');
+  //         // Check for redirect URL
+  //         const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
+  //         sessionStorage.removeItem('redirectUrl');
           
-          this.router.navigate([redirectUrl]);
-        },
-        error: (error) => {
-          this.notificationService.error({
-            title: 'Login Failed',
-            message: error.message || 'Invalid email or password'
-          });
+  //         this.router.navigate([redirectUrl]);
+  //       },
+  //       error: (error) => {
+  //         this.notificationService.error({
+  //           title: 'Login Failed',
+  //           message: error.message || 'Invalid email or password'
+  //         });
+  //       }
+  //     });
+  //   } else {
+  //     this.markFormGroupTouched();
+  //   }
+  // }
+
+
+  onSubmit(): void {
+  if (this.loginForm.valid && !this.isLoading) {
+    const credentials = this.loginForm.value;
+
+    this.authService.login(credentials).subscribe({
+      next: (response) => {
+        this.notificationService.loginSuccess(response.firstName);
+
+        // Remove previously stored redirect URL (from guard)
+        let redirectUrl = sessionStorage.getItem('redirectUrl');
+        sessionStorage.removeItem('redirectUrl');
+
+        // Determine redirect based on role if no stored redirect
+        if (!redirectUrl) {
+          const user = this.authService.getCurrentUserValue(); // get logged-in user
+
+          if (user?.roleName === 'Employee' || user?.roleName === 'Manager') {
+            redirectUrl = '/performance/dashboard';
+          } else {
+            redirectUrl = '/dashboard';
+          }
         }
-      });
-    } else {
-      this.markFormGroupTouched();
-    }
+
+        this.router.navigate([redirectUrl]);
+      },
+      error: (error) => {
+        this.notificationService.error({
+          title: 'Login Failed',
+          message: error.message || 'Invalid email or password'
+        });
+      }
+    });
+  } else {
+    this.markFormGroupTouched();
   }
+}
+
 
   onForgotPassword(): void {
     this.router.navigate(['/forgot-password']);

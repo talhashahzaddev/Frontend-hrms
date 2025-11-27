@@ -47,7 +47,7 @@ export class EmployeeService {
       params = params.set('page', searchRequest.page.toString());
       params = params.set('pageSize', searchRequest.pageSize.toString());
     }
-
+   
     return this.http.get<ApiResponse<PagedResult<Employee>>>(`${this.apiUrl}`, { params })
       .pipe(
         map(response => {

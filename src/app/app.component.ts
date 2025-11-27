@@ -24,6 +24,7 @@ import { AuthService } from './core/services/auth.service';
 import { LoadingService } from './core/services/loading.service';
 import { ThemeService } from './core/services/theme.service';
 
+
 @Component({
     selector: 'app-root',
     imports: [
@@ -73,6 +74,10 @@ export class AppComponent implements OnInit, OnDestroy {
     
     // Check authentication status
     this.authService.checkAuthStatus();
+  
+    
+ // Redirect user based on role
+  this.redirectUserOnInit();
 
     // Set up error handling
     this.setupGlobalErrorHandling();
@@ -92,6 +97,20 @@ export class AppComponent implements OnInit, OnDestroy {
         window.scrollTo(0, 0);
       });
   }
+private redirectUserOnInit(): void {
+  const user = this.authService.getCurrentUserValue();
+
+  if (!user) {
+    // Not logged in, go to login page
+    this.router.navigate(['/login']);
+  } else if (user.roleName === 'Super Admin' || user.roleName === 'HR Manager') {
+    this.router.navigate(['/dashboard']);
+  } else {
+    this.router.navigate(['/performance/dashboard']);
+  }
+}
+
+
 
   private updatePageTitle(url: string): void {
     const routeTitles: { [key: string]: string } = {
