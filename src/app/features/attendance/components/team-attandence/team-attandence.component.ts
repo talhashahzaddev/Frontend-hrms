@@ -153,16 +153,11 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   private setupFilters(): void {
-    combineLatest([
-      this.startDateControl.valueChanges.pipe(debounceTime(300), distinctUntilChanged()),
-      this.endDateControl.valueChanges.pipe(debounceTime(300), distinctUntilChanged()),
-      this.departmentControl.valueChanges,
-      this.statusControl.valueChanges
-    ])
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(() => {
-      this.loadAttendanceData();
-    });
+    // Removed auto-filtering - now filters are applied only when Apply Filters button is clicked
+  }
+
+  applyFilters(): void {
+    this.loadAttendanceData();
   }
 
   private loadAttendanceData(): void {
@@ -185,7 +180,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.attendanceRecords = response.attendances;
-          this.applyFilters();
+          this.filterAttendanceData();
           this.isLoading = false;
         },
         error: (error) => {
@@ -196,7 +191,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       });
   }
 
-  private applyFilters(): void {
+  private filterAttendanceData(): void {
     this.filteredAttendance = [...this.attendanceRecords];
   }
 
