@@ -47,11 +47,20 @@ export class SidebarComponent implements OnInit, OnDestroy {
     {
       label: 'Dashboard',
       icon: 'dashboard',
-      route: '/dashboard'
+      route: '/dashboard',
+      roles: ['Super Admin', 'HR Manager']
     },
+    {
+      label: 'Dashboard',
+      icon: 'dashboard',
+      route: '/performance/dashboard',
+      roles: ['Manager', 'Employee']
+    }
+    ,
     {
       label: 'Employee Management',
       icon: 'people',
+      roles: ['Super Admin', 'HR Manager'],
       children: [
         { label: 'All Employees', icon: 'group', route: '/employees' },
         { label: 'Add Employee', icon: 'person_add', route: '/employees/add', roles: ['Super Admin', 'HR Manager'] },

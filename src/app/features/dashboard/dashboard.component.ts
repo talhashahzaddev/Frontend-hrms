@@ -1,5 +1,3 @@
-
-
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -125,6 +123,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => this.currentUser = user);
   }
+
+  // Role helpers for DashboardComponent (or any component)
+get isAdmin(): boolean {
+  return this.authService.hasRole('Admin');
+}
+get isSuperAdmin(): boolean {
+  return this.authService.hasRole('Admin');
+}
+
+get isHR(): boolean {
+  return this.authService.hasRole('HR');
+}
+
+get isManager(): boolean {
+  return this.authService.hasRole('Manager');
+}
+
+get isEmployee(): boolean {
+  return this.authService.hasRole('Employee');
+}
+
+// Generic function if you want to check any role dynamically
+hasRole(role: string): boolean {
+  return this.authService.hasRole(role);
+}
+
+// Check multiple roles at once
+hasAnyRole(roles: string[]): boolean {
+  return this.authService.hasAnyRole(roles);
+}
+
+
+
 
   private loadDashboardData(): void {
     this.isLoading = true;
