@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { ServerNotificationService } from '@core/services/server-notification';
@@ -11,10 +12,13 @@ import { ServerNotification } from '../../core/models/common.models';
 import { LeaveService } from '../leave/services/leave.service';
 import  {AttendanceService} from '../attendance/services/attendance.service' 
 import { Output, EventEmitter } from '@angular/core';
+import { RejectLeaveDialogComponent } from '../leave/components/reject-leave-dialog/reject-leave-dialog.component';
+import { NotificationService } from '../../core/services/notification.service';
+import { LeaveRequest } from '../../core/models/leave.models';
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDividerModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatDividerModule, MatDialogModule],
   templateUrl: './notification-dialogue.component.html',
   styleUrls: ['./notification-dialogue.component.scss']
 })
@@ -31,7 +35,9 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     private attendanceService:AttendanceService,
     public leaveService: LeaveService,
     private router: Router ,
-    private authService: AuthService
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -123,7 +129,7 @@ onNotificationClick(notification: ServerNotification): void {
 
       // LEAVE MODULE
       case 'leave':
-        this.handleLeave(n.notificationid, action);
+        this.handleLeave(n, action);
         break;
 
       // ATTENDANCE MODULE
@@ -140,33 +146,78 @@ onNotificationClick(notification: ServerNotification): void {
   // -------------------------------------------------------
   // 🚀 LEAVE HANDLING API CALLS
   // -------------------------------------------------------
-  private handleLeave(notificationid: string | undefined, action: 'accept' | 'reject'): void {
-    if (!notificationid) return;
+  private handleLeave(notification: ServerNotification, action: 'accept' | 'reject'): void {
+    // Use requestid instead of notificationid for leave operations
+    const requestId = notification.requestid;
+    
+    if (!requestId) {
+      this.notificationService.showError('Leave request ID not found in notification');
+      return;
+    }
 
     if (action === 'accept') {
-      this.leaveService.approveLeaveRequest(notificationid)
+      this.leaveService.approveLeaveRequest(requestId)
+        .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            alert("Leave Approved");
-            const n = this.notification.find(x => x.notificationid === notificationid);
-            if (n) n.isRead = true;
+            this.notificationService.showSuccess('Leave request approved successfully');
+            notification.isRead = true;
+            this.unreadCountChange.emit(this.unreadCount);
+            this.loadNotifications(); // Reload to refresh the list
           },
-          error: (err) => console.error("Approve failed", err)
+          error: (err) => {
+            console.error("Approve failed", err);
+            this.notificationService.showError('Failed to approve leave request');
+          }
         });
     } else {
-      const reason = prompt("Enter reason for rejection:");
-      if (reason === null) return;
-
-      this.leaveService.rejectLeaveRequest(notificationid, reason)
+      // For reject, fetch leave request details and open dialog
+      this.leaveService.getLeaveRequest(requestId)
+        .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
-            alert("Leave Rejected");
-            const n = this.notification.find(x => x.notificationid === notificationid);
-            if (n) n.isRead = true;
+          next: (leaveRequest) => {
+            this.openRejectDialog(leaveRequest, notification);
           },
-          error: (err) => console.error("Reject failed", err)
+          error: (err) => {
+            console.error("Failed to fetch leave request", err);
+            this.notificationService.showError('Failed to load leave request details');
+          }
         });
     }
+  }
+
+  private openRejectDialog(leaveRequest: LeaveRequest, notification: ServerNotification): void {
+    const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName: leaveRequest.employeeName || 'Employee',
+        leaveTypeName: leaveRequest.leaveTypeName || 'Leave',
+        startDate: leaveRequest.startDate,
+        endDate: leaveRequest.endDate,
+        daysRequested: leaveRequest.daysRequested || 0
+      }
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && result.rejected && notification.requestid) {
+          this.leaveService.rejectLeaveRequest(notification.requestid, result.reason)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request rejected successfully');
+                notification.isRead = true;
+                this.unreadCountChange.emit(this.unreadCount);
+                this.loadNotifications(); // Reload to refresh the list
+              },
+              error: (err) => {
+                console.error("Reject failed", err);
+                this.notificationService.showError('Failed to reject leave request');
+              }
+            });
+        }
+      });
   }
 
   // -------------------------------------------------------

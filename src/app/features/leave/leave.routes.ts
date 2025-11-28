@@ -20,6 +20,12 @@ export const leaveRoutes: Routes = [
     title: 'Apply for Leave - HRMS'
   },
   {
+    path: 'apply/:id',
+    loadComponent: () => import('./components/apply-leave/apply-leave.component')
+      .then(m => m.ApplyLeaveComponent),
+    title: 'Edit Leave Request - HRMS'
+  },
+  {
     path: 'team',
     //canActivate: [RoleGuard],
     data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },

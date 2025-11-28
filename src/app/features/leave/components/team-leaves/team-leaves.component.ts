@@ -101,8 +101,8 @@ import {
         </mat-card-content>
       </mat-card>
 
-      <!-- Pending Approvals Section -->
-      <mat-card class="pending-card" *ngIf="pendingApprovals.length > 0">
+      <!-- Pending Approvals Section (Only for Managers, not HR Manager) -->
+      <mat-card class="pending-card" *ngIf="!isHRManager && pendingApprovals.length > 0">
         <mat-card-header>
           <mat-card-title>
             <mat-icon class="pending-icon">pending_actions</mat-icon>
@@ -274,10 +274,6 @@ import {
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #menu="matMenu">
-                    <button mat-menu-item (click)="viewRequestDetails(request)">
-                      <mat-icon>visibility</mat-icon>
-                      View Details
-                    </button>
                     <button mat-menu-item 
                             *ngIf="isPending(request.status)"
                             (click)="approveRequest(request)">
@@ -352,6 +348,7 @@ private backendBaseUrl = 'https://localhost:60485';
   totalCount = 0;
   
   displayedColumns: string[] = ['employee', 'leaveType', 'dates', 'status', 'submitted', 'actions'];
+  isHRManager = false;
 
   constructor(
     private fb: FormBuilder,
@@ -361,6 +358,15 @@ private backendBaseUrl = 'https://localhost:60485';
     private dialog: MatDialog
   ) {
     this.initializeFilterForm();
+    this.checkUserRole();
+  }
+
+  private checkUserRole(): void {
+    this.isHRManager = this.authService.hasAnyRole(['HR Manager', 'Super Admin']);
+    // Update displayed columns based on role
+    if (this.isHRManager) {
+      this.displayedColumns = ['employee', 'leaveType', 'dates', 'status', 'submitted'];
+    }
   }
 
   ngOnInit(): void {
@@ -394,38 +400,64 @@ private backendBaseUrl = 'https://localhost:60485';
   }
 
   private loadInitialData(): void {
-    // Load leave types and pending approvals
-    forkJoin({
-      leaveTypes: this.leaveService.getLeaveTypes(),
-      pendingApprovals: this.leaveService.getPendingApprovals()
-    })
+    // Load leave types
+    this.leaveService.getLeaveTypes()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
-          this.leaveTypes = data.leaveTypes || [];
-          // this.pendingApprovals = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
-
- // ✅ This is where you handle pending approvals and image URLs
-        this.pendingApprovals = Array.isArray(data.pendingApprovals)
-          ? data.pendingApprovals.map((employee: any) => {
-              if (employee.profilePictureUrl) {
-                employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
-                  ? employee.profilePictureUrl
-                  : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
-              } else {
-                employee.profilePreviewUrl = null;
-              }
-              return employee;
-            })
-          : [];
-
-
+        next: (leaveTypes) => {
+          this.leaveTypes = leaveTypes || [];
           this.cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error loading initial data:', error);
+          console.error('Error loading leave types:', error);
         }
       });
+
+    // Load pending approvals only for Managers (not HR Manager)
+    if (!this.isHRManager) {
+      this.leaveService.getPendingApprovals()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (pendingApprovals) => {
+            // Handle both camelCase and PascalCase from API
+            this.pendingApprovals = Array.isArray(pendingApprovals)
+              ? pendingApprovals.map((employee: any) => {
+                  const mappedRequest: LeaveRequest = {
+                    requestId: employee.requestId || employee.RequestId || '',
+                    employeeId: employee.employeeId || employee.EmployeeId || '',
+                    employeeName: employee.employeeName || employee.EmployeeName || '',
+                    leaveTypeId: employee.leaveTypeId || employee.LeaveTypeId || '',
+                    leaveTypeName: employee.leaveTypeName || employee.LeaveTypeName || '',
+                    startDate: employee.startDate || employee.StartDate || '',
+                    endDate: employee.endDate || employee.EndDate || '',
+                    daysRequested: employee.daysRequested || employee.DaysRequested || 0,
+                    reason: employee.reason || employee.Reason,
+                    status: employee.status || employee.Status || 'pending',
+                    submittedAt: employee.submittedAt || employee.SubmittedAt || '',
+                    approverName: employee.approverName || employee.ApproverName,
+                    approvedAt: employee.approvedAt || employee.ApprovedAt,
+                    rejectionReason: employee.rejectionReason || employee.RejectionReason,
+                    profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
+                    profilePreviewUrl: null
+                  };
+                  
+                  // Set profile preview URL
+                  if (mappedRequest.profilePictureUrl) {
+                    mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
+                      ? mappedRequest.profilePictureUrl
+                      : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
+                  }
+                  
+                  return mappedRequest;
+                })
+              : [];
+            this.cdr.markForCheck();
+          },
+          error: (error) => {
+            console.error('Error loading pending approvals:', error);
+          }
+        });
+    }
 
     this.loadTeamRequests();
   }
@@ -441,22 +473,47 @@ private backendBaseUrl = 'https://localhost:60485';
       sortDirection: 'desc'
     };
 
-    this.leaveService.getLeaveRequests(searchRequest)
+    // Use different API based on user role
+    const requestObservable = this.isHRManager 
+      ? this.leaveService.getLeaveRequestsForHR(searchRequest)
+      : this.leaveService.getLeaveRequests(searchRequest);
+
+    requestObservable
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: LeaveListResponse) => {
           // API returns data in response.data, not response.leaveRequests
-        this.teamRequests = (response.data || []).map((employee: LeaveRequest) => {
-          if (employee.profilePictureUrl) {
-            employee.profilePreviewUrl = employee.profilePictureUrl.startsWith('http')
-              ? employee.profilePictureUrl
-              : `${this.backendBaseUrl}${employee.profilePictureUrl}`;
-          } else {
-            employee.profilePreviewUrl = null;
-          }
-          return employee;
-        });
-          this.teamRequests = response.data || [];
+          // Map the response and ensure requestId is properly set
+          this.teamRequests = (response.data || []).map((employee: any) => {
+            // Handle both camelCase and PascalCase from API
+            const mappedRequest: LeaveRequest = {
+              requestId: employee.requestId || employee.RequestId || '',
+              employeeId: employee.employeeId || employee.EmployeeId || '',
+              employeeName: employee.employeeName || employee.EmployeeName || '',
+              leaveTypeId: employee.leaveTypeId || employee.LeaveTypeId || '',
+              leaveTypeName: employee.leaveTypeName || employee.LeaveTypeName || '',
+              startDate: employee.startDate || employee.StartDate || '',
+              endDate: employee.endDate || employee.EndDate || '',
+              daysRequested: employee.daysRequested || employee.DaysRequested || 0,
+              reason: employee.reason || employee.Reason,
+              status: employee.status || employee.Status || 'pending',
+              submittedAt: employee.submittedAt || employee.SubmittedAt || '',
+              approverName: employee.approverName || employee.ApproverName,
+              approvedAt: employee.approvedAt || employee.ApprovedAt,
+              rejectionReason: employee.rejectionReason || employee.RejectionReason,
+              profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
+              profilePreviewUrl: null
+            };
+            
+            // Set profile preview URL
+            if (mappedRequest.profilePictureUrl) {
+              mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
+                ? mappedRequest.profilePictureUrl
+                : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
+            }
+            
+            return mappedRequest;
+          });
           this.totalCount = response.totalCount;
           this.isLoading = false;
           this.cdr.markForCheck();
@@ -471,27 +528,42 @@ private backendBaseUrl = 'https://localhost:60485';
   }
 
   approveRequest(request: LeaveRequest): void {
-    if (confirm(`Approve leave request for ${request.employeeName}?`)) {
-      this.isProcessing = true;
-      
-      this.leaveService.approveLeaveRequest(request.requestId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave request approved successfully');
-            this.isProcessing = false;
-            this.loadInitialData();
-          },
-          error: (error) => {
-            console.error('Error approving request:', error);
-            this.notificationService.showError('Failed to approve leave request');
-            this.isProcessing = false;
-          }
-        });
+    // Validate request ID
+    if (!request.requestId) {
+      console.error('Request ID is missing:', request);
+      this.notificationService.showError('Leave request ID is missing. Cannot approve.');
+      return;
     }
+
+    this.isProcessing = true;
+    
+    console.log('Approving leave request with ID:', request.requestId);
+    
+    this.leaveService.approveLeaveRequest(request.requestId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Leave request approved successfully');
+          this.isProcessing = false;
+          this.loadInitialData();
+        },
+        error: (error) => {
+          console.error('Error approving request:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to approve leave request';
+          this.notificationService.showError(errorMessage);
+          this.isProcessing = false;
+        }
+      });
   }
 
   openRejectDialog(request: LeaveRequest): void {
+    // Validate request ID
+    if (!request.requestId) {
+      console.error('Request ID is missing:', request);
+      this.notificationService.showError('Leave request ID is missing. Cannot reject.');
+      return;
+    }
+
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
       width: '650px',
       data: {
@@ -503,26 +575,31 @@ private backendBaseUrl = 'https://localhost:60485';
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && result.rejected) {
-        this.isProcessing = true;
-        
-        this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.notificationService.showSuccess('Leave request rejected successfully');
-              this.isProcessing = false;
-              this.loadInitialData();
-            },
-            error: (error) => {
-              console.error('Error rejecting request:', error);
-              this.notificationService.showError('Failed to reject leave request');
-              this.isProcessing = false;
-            }
-          });
-      }
-    });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result && result.rejected) {
+          this.isProcessing = true;
+          
+          console.log('Rejecting leave request with ID:', request.requestId, 'Reason:', result.reason);
+          
+          this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request rejected successfully');
+                this.isProcessing = false;
+                this.loadInitialData();
+              },
+              error: (error) => {
+                console.error('Error rejecting request:', error);
+                const errorMessage = error?.error?.message || error?.message || 'Failed to reject leave request';
+                this.notificationService.showError(errorMessage);
+                this.isProcessing = false;
+              }
+            });
+        }
+      });
   }
 
   viewRequestDetails(request: LeaveRequest): void {
