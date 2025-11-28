@@ -462,6 +462,33 @@
       }
     }
 
+    // Dynamic color override - must be inside .stat-card to override base styles
+    &.stat-card-dynamic-color {
+      .stat-item {
+        .stat-details {
+          .stat-label {
+            color: white !important;
+          }
+
+          .stat-value {
+            color: white !important;
+          }
+
+          .stat-footer {
+            color: white !important;
+
+            .stat-indicator {
+              color: rgba(255, 255, 255, 0.9) !important;
+            }
+
+            span {
+              color: white !important;
+            }
+          }
+        }
+      }
+    }
+
     // Color Variants (Exact same as Payroll Reports - Colored Backgrounds)
     &.stat-card-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1166,34 +1193,5 @@
     }
   }
   
-  // This new class handles dynamic background colors
-.stat-card.stat-card-dynamic-color {
-  color: white; // Make all text inside white
-
-  .stat-item {
-    .stat-icon-wrapper {
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-    }
-
-    .stat-details {
-      .stat-label,
-      .stat-value {
-        color: white;
-      }
-
-      .stat-footer {
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        padding-top: 8px;
-        margin-top: 4px;
-
-        .stat-indicator,
-        span {
-          color: rgba(255, 255, 255, 0.9);
-        }
-      }
-    }
-  }
-}
 
 }

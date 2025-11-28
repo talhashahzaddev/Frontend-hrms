@@ -104,7 +104,7 @@ import { User } from '../../../../core/models/auth.models';
           </mat-card-content>
         </mat-card>
 
-        <mat-card class="stat-card stat-card-warning" routerLink="/leave/team" *ngIf="hasManagerRole()">
+        <mat-card class="stat-card stat-card-warning" routerLink="/leave/team" *ngIf="isManagerOnly()">
           <mat-card-content>
             <div class="stat-item">
               <div class="stat-icon-wrapper">
@@ -158,11 +158,11 @@ import { User } from '../../../../core/models/auth.models';
                   <mat-icon class="stat-icon">event_available</mat-icon>
                 </div>
                 <div class="stat-details">
-                  <div class="stat-label">{{ balance.leaveTypeName }}</div>
-                  <div class="stat-value">{{ balance.remainingDays }}</div>
-                  <div class="stat-footer">
-                    <mat-icon class="stat-indicator">{{getBalanceIcon(balance)}}</mat-icon>
-                    <span>{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
+                  <div class="stat-label" [style.color]="'white'">{{ balance.leaveTypeName }}</div>
+                  <div class="stat-value" [style.color]="'white'">{{ balance.remainingDays }}</div>
+                  <div class="stat-footer" [style.color]="'white'">
+                    <mat-icon class="stat-indicator" [style.color]="'rgba(255, 255, 255, 0.9)'">{{getBalanceIcon(balance)}}</mat-icon>
+                    <span [style.color]="'white'">{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
                   </div>
                 </div>
               </div>
@@ -264,8 +264,8 @@ import { User } from '../../../../core/models/auth.models';
             </div>
           </mat-tab>
 
-          <!-- Team Requests Tab (for managers) -->
-          <mat-tab label="Team Requests" *ngIf="hasManagerRole()">
+          <!-- Team Requests Tab (for managers, but not HR Managers) -->
+          <mat-tab label="Team Requests" *ngIf="isManagerOnly()">
             <div class="tab-content">
               <div class="pending-approvals-section">
                 <h3>Pending Approvals ({{ pendingApprovals.length }})</h3>
@@ -393,7 +393,8 @@ private backendBaseUrl = 'https://localhost:60485';
     )
   };
 
-  if (this.hasManagerRole()) {
+  // Only load pending approvals for Managers and Super Admins, not HR Managers
+  if (this.isManagerOnly()) {
     requests.pendingApprovals = this.leaveService.getPendingApprovals().pipe(
       catchError(() => of([]))
     );
@@ -535,6 +536,17 @@ private backendBaseUrl = 'https://localhost:60485';
 
   hasAdminRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
+  isHRManagerOnly(): boolean {
+    // Check if user is HR Manager but not Super Admin or Manager
+    return this.authService.hasAnyRole(['HR Manager']) && 
+           !this.authService.hasAnyRole(['Super Admin', 'Manager']);
+  }
+
+  isManagerOnly(): boolean {
+    // Check if user is Manager or Super Admin (not just HR Manager)
+    return this.authService.hasAnyRole(['Super Admin', 'Manager']);
   }
 
 getBalanceCardColor(balance: LeaveBalance): string {
