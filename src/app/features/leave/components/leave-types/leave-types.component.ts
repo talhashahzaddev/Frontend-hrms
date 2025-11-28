@@ -66,14 +66,14 @@ import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
           <mat-card-content>
             <div class="stat-item">
               <div class="stat-icon-wrapper">
-                <mat-icon class="stat-icon">category</mat-icon>
+                <mat-icon class="stat-icon">event_available</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-label">{{ type.typeName }}</div>
-                <div class="stat-value">{{ type.maxDaysPerYear }}</div>
-                <div class="stat-footer">
-                  <mat-icon class="stat-indicator">event</mat-icon>
-                  <span>Days per year</span>
+                <div class="stat-label" [style.color]="'white'">{{ type.typeName }}</div>
+                <div class="stat-value" [style.color]="'white'">{{ type.maxDaysPerYear }}</div>
+                <div class="stat-footer" [style.color]="'white'">
+                  <mat-icon class="stat-indicator" [style.color]="'rgba(255, 255, 255, 0.9)'">event</mat-icon>
+                  <span [style.color]="'white'">Days per year</span>
                 </div>
               </div>
               <div class="card-actions">
