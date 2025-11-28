@@ -248,8 +248,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
 
     // If edit mode, load the request data
     if (this.isEditMode && this.requestId) {
-      // For now, we'll load from the list - in production you'd have a getLeaveRequestById method
-      requests.myRequests = this.leaveService.getMyLeaveRequestsByToken();
+      requests.leaveRequest = this.leaveService.getLeaveRequest(this.requestId);
     }
 
     forkJoin(requests)
@@ -260,11 +259,8 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           this.leaveBalances = Array.isArray(data.leaveBalances) ? data.leaveBalances : [];
           
           // If editing, populate form with request data
-          if (this.isEditMode && data.myRequests) {
-            const request = data.myRequests.find((r: LeaveRequest) => r.requestId === this.requestId);
-            if (request) {
-              this.populateFormForEdit(request);
-            }
+          if (this.isEditMode && data.leaveRequest) {
+            this.populateFormForEdit(data.leaveRequest);
           }
           
           this.isLoading = false;
@@ -365,7 +361,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
       };
 
       // Validate before submission
-      const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances);
+      const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
       
       if (validationErrors.length > 0) {
         this.notificationService.showError(validationErrors[0]);
@@ -373,21 +369,41 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.leaveService.createLeaveRequest(request)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            this.isSubmitting = false;
-            this.notificationService.showSuccess('Leave request submitted successfully');
-            this.router.navigate(['/leave/dashboard']);
-          },
-          error: (error) => {
-            console.error('Error submitting leave request:', error);
-            this.isSubmitting = false;
-            const errorMessage = error?.message || 'Failed to submit leave request';
-            this.notificationService.showError(errorMessage);
-          }
-        });
+      if (this.isEditMode && this.requestId) {
+        // Update existing request
+        this.leaveService.updateLeaveRequest(this.requestId, request)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              this.isSubmitting = false;
+              this.notificationService.showSuccess('Leave request updated successfully');
+              this.router.navigate(['/leave/dashboard']);
+            },
+            error: (error) => {
+              console.error('Error updating leave request:', error);
+              this.isSubmitting = false;
+              const errorMessage = error?.error?.message || error?.message || 'Failed to update leave request';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      } else {
+        // Create new request
+        this.leaveService.createLeaveRequest(request)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              this.isSubmitting = false;
+              this.notificationService.showSuccess('Leave request submitted successfully');
+              this.router.navigate(['/leave/dashboard']);
+            },
+            error: (error) => {
+              console.error('Error submitting leave request:', error);
+              this.isSubmitting = false;
+              const errorMessage = error?.error?.message || error?.message || 'Failed to submit leave request';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      }
     }
   }
 }

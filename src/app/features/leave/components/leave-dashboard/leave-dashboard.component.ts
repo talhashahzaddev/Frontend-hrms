@@ -19,6 +19,7 @@ import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { 
   LeaveRequest, 
   LeaveType, 
@@ -223,27 +224,25 @@ import { User } from '../../../../core/models/auth.models';
                   <ng-container matColumnDef="actions">
                     <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
                     <mat-cell *matCellDef="let request">
-                      <button mat-icon-button [matMenuTriggerFor]="requestMenu">
+                      <button mat-icon-button 
+                              [matMenuTriggerFor]="requestMenu"
+                              [disabled]="!isPending(request.status)">
                         <mat-icon>more_vert</mat-icon>
                       </button>
                       <mat-menu #requestMenu="matMenu">
-                        <button mat-menu-item (click)="viewRequest(request)">
-                          <mat-icon>visibility</mat-icon>
-                          View Details
-                        </button>
                         <button mat-menu-item 
                                 (click)="editRequest(request)"
-                                [disabled]="!leaveService.isLeaveRequestEditable(request)">
+                                [disabled]="!isPending(request.status)">
                           <mat-icon>edit</mat-icon>
                           Edit Request
                         </button>
-                        <!-- <button mat-menu-item 
+                        <button mat-menu-item 
                                 (click)="cancelRequest(request)"
-                                [disabled]="!leaveService.isLeaveRequestCancellable(request)"
+                                [disabled]="!isPending(request.status)"
                                 class="delete-action">
                           <mat-icon>cancel</mat-icon>
                           Cancel Request
-                        </button> -->
+                        </button>
                       </mat-menu>
                     </mat-cell>
                   </ng-container>
@@ -442,31 +441,48 @@ private backendBaseUrl = 'https://localhost:60485';
     this.router.navigate(['/leave/apply']);
   }
 
-  viewRequest(request: LeaveRequest): void {
-    this.notificationService.showInfo('View request details will be implemented');
-  }
-
   editRequest(request: LeaveRequest): void {
-    // Navigate to edit page - will be implemented when edit route is added
-    this.notificationService.showInfo('Edit functionality will be available soon');
+    // Navigate to apply-leave page with requestId to edit
+    this.router.navigate(['/leave/apply', request.requestId]);
   }
 
-  // cancelRequest(request: LeaveRequest): void {
-  //   if (confirm('Are you sure you want to cancel this leave request?')) {
-  //     this.leaveService.cancelLeaveRequest(request.requestId)
-  //       .pipe(takeUntil(this.destroy$))
-  //       .subscribe({
-  //         next: () => {
-  //           this.notificationService.showSuccess('Leave request cancelled successfully');
-  //           this.loadInitialData();
-  //         },
-  //         error: (error) => {
-  //           console.error('Error cancelling request:', error);
-  //           this.notificationService.showError('Failed to cancel leave request');
-  //         }
-  //       });
-  //   }
-  // }
+  cancelRequest(request: LeaveRequest): void {
+    const dialogData: ConfirmDeleteData = {
+      title: 'Cancel Leave Request',
+      message: 'Are you sure you want to cancel this leave request?',
+      itemName: `${request.leaveTypeName} - ${new Date(request.startDate).toLocaleDateString()} to ${new Date(request.endDate).toLocaleDateString()}`
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result === true) {
+          this.leaveService.cancelLeaveRequest(request.requestId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request cancelled successfully');
+                this.loadInitialData();
+              },
+              error: (error) => {
+                console.error('Error cancelling request:', error);
+                const errorMessage = error?.error?.message || error?.message || 'Failed to cancel leave request';
+                this.notificationService.showError(errorMessage);
+              }
+            });
+        }
+      });
+  }
+
+  isPending(status: string): boolean {
+    return status?.toLowerCase() === 'pending';
+  }
 
   approveRequest(request: LeaveRequest): void {
     this.leaveService.approveLeaveRequest(request.requestId)

@@ -58,17 +58,45 @@ export class LeaveService {
       );
   }
 
-  // getLeaveRequest(requestId: string): Observable<LeaveRequest> {
-  //   return this.http.get<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests/${requestId}`)
-  //     .pipe(
-  //       map(response => {
-  //         if (!response.success) {
-  //           throw new Error(response.message || 'Failed to fetch leave request');
-  //         }
-  //         return response.data!;
-  //       })
-  //     );
-  // }
+  // Get leave requests for HR Manager (by organization)
+  getLeaveRequestsForHR(searchRequest?: LeaveSearchRequest): Observable<LeaveListResponse> {
+    let params = new HttpParams();
+    
+    if (searchRequest) {
+      if (searchRequest.employeeId) params = params.set('EmployeeId', searchRequest.employeeId);
+      if (searchRequest.leaveTypeId) params = params.set('LeaveTypeId', searchRequest.leaveTypeId);
+      if (searchRequest.status) params = params.set('Status', searchRequest.status);
+      if (searchRequest.startDate) params = params.set('StartDate', searchRequest.startDate);
+      if (searchRequest.endDate) params = params.set('EndDate', searchRequest.endDate);
+      if (searchRequest.sortBy) params = params.set('SortBy', searchRequest.sortBy);
+      if (searchRequest.sortDirection) params = params.set('SortDirection', searchRequest.sortDirection);
+      
+      if (searchRequest.page) params = params.set('Page', searchRequest.page.toString());
+      if (searchRequest.pageSize) params = params.set('PageSize', searchRequest.pageSize.toString());
+    }
+
+    return this.http.get<ApiResponse<LeaveListResponse>>(`${this.apiUrl}/requests/hr`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch leave requests');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  getLeaveRequest(requestId: string): Observable<LeaveRequest> {
+    return this.http.get<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests/${requestId}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch leave request');
+          }
+          return response.data!;
+        })
+      );
+  }
 
   // createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   //   return this.http.post<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests`, request)
@@ -119,6 +147,30 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to reject leave request');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  updateLeaveRequest(requestId: string, request: CreateLeaveRequest): Observable<LeaveRequest> {
+    return this.http.put<ApiResponse<LeaveRequest>>(`${this.apiUrl}/requests/${requestId}`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to update leave request');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  cancelLeaveRequest(requestId: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/requests/${requestId}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to cancel leave request');
           }
           return response.data!;
         })
@@ -392,7 +444,7 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
            new Date(request.startDate) > new Date();
   }
 
-  validateLeaveRequest(request: CreateLeaveRequest, balances: LeaveBalance[]): string[] {
+  validateLeaveRequest(request: CreateLeaveRequest, balances: LeaveBalance[], leaveTypes: LeaveType[]): string[] {
     const errors: string[] = [];
     
     // Check if start date is in the future
@@ -405,15 +457,16 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
       errors.push('Leave end date must be after start date');
     }
 
-    // Check leave balance
-    const balance = balances.find(b => 
-      b.leaveTypeName && request.leaveTypeId
-    );
-    
-    if (balance) {
-      const requestedDays = this.calculateLeaveDays(request.startDate, request.endDate);
-      if (requestedDays > balance.remainingDays) {
-        errors.push(`Insufficient leave balance. Available: ${balance.remainingDays} days, Requested: ${requestedDays} days`);
+    // Check leave balance - find the leave type first, then match with balance
+    const selectedLeaveType = leaveTypes.find(lt => lt.leaveTypeId === request.leaveTypeId);
+    if (selectedLeaveType) {
+      const balance = balances.find(b => b.leaveTypeName === selectedLeaveType.typeName);
+      
+      if (balance) {
+        const requestedDays = this.calculateLeaveDays(request.startDate, request.endDate);
+        if (requestedDays > balance.remainingDays) {
+          errors.push(`Insufficient leave balance. Available: ${balance.remainingDays} days, Requested: ${requestedDays} days`);
+        }
       }
     }
 
