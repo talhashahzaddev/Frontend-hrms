@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,8 +13,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Subject, takeUntil, forkJoin, debounceTime, distinctUntilChanged } from 'rxjs';
 import { of, catchError } from 'rxjs';
+import { FormControl } from '@angular/forms';
 
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -24,7 +30,8 @@ import {
   LeaveRequest, 
   LeaveType, 
   LeaveBalance,
-  LeaveStatus
+  LeaveStatus,
+  TeamRemainingLeaves
 } from '../../../../core/models/leave.models';
 import { User } from '../../../../core/models/auth.models';
 
@@ -33,6 +40,7 @@ import { User } from '../../../../core/models/auth.models';
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     RouterModule,
     MatCardModule,
     MatButtonModule,
@@ -44,7 +52,11 @@ import { User } from '../../../../core/models/auth.models';
     MatMenuModule,
     MatTabsModule,
     MatProgressBarModule,
-    MatDialogModule
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatPaginatorModule
   ],
   template: `
     <div class="leave-dashboard-container">
@@ -104,7 +116,7 @@ import { User } from '../../../../core/models/auth.models';
           </mat-card-content>
         </mat-card>
 
-        <mat-card class="stat-card stat-card-warning" routerLink="/leave/team" *ngIf="isManagerOnly()">
+        <mat-card class="stat-card stat-card-warning" routerLink="/leave/team" *ngIf="hasManagerRole()">
           <mat-card-content>
             <div class="stat-item">
               <div class="stat-icon-wrapper">
@@ -158,11 +170,11 @@ import { User } from '../../../../core/models/auth.models';
                   <mat-icon class="stat-icon">event_available</mat-icon>
                 </div>
                 <div class="stat-details">
-                  <div class="stat-label" [style.color]="'white'">{{ balance.leaveTypeName }}</div>
-                  <div class="stat-value" [style.color]="'white'">{{ balance.remainingDays }}</div>
-                  <div class="stat-footer" [style.color]="'white'">
-                    <mat-icon class="stat-indicator" [style.color]="'rgba(255, 255, 255, 0.9)'">{{getBalanceIcon(balance)}}</mat-icon>
-                    <span [style.color]="'white'">{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
+                  <div class="stat-label">{{ balance.leaveTypeName }}</div>
+                  <div class="stat-value">{{ balance.remainingDays }}</div>
+                  <div class="stat-footer">
+                    <mat-icon class="stat-indicator">{{getBalanceIcon(balance)}}</mat-icon>
+                    <span>{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
                   </div>
                 </div>
               </div>
@@ -264,8 +276,8 @@ import { User } from '../../../../core/models/auth.models';
             </div>
           </mat-tab>
 
-          <!-- Team Requests Tab (for managers, but not HR Managers) -->
-          <mat-tab label="Team Requests" *ngIf="isManagerOnly()">
+          <!-- Team Requests Tab (for managers) -->
+          <mat-tab label="Team Requests" *ngIf="hasManagerRole()">
             <div class="tab-content">
               <div class="pending-approvals-section">
                 <h3>Pending Approvals ({{ pendingApprovals.length }})</h3>
@@ -320,6 +332,90 @@ import { User } from '../../../../core/models/auth.models';
                   <p>All leave requests have been processed.</p>
                 </div>
               </div>
+
+              <!-- Team Remaining Leaves Section -->
+              <div class="team-remaining-leaves-section">
+                <h3>Team Remaining Leaves</h3>
+                
+                <!-- Filters Card -->
+                <mat-card class="filters-card">
+                  <div class="filters-header">
+                    <h3>Search & Filters</h3>
+                    <button mat-stroked-button 
+                            (click)="clearTeamLeavesFilters()" 
+                            class="clear-filters-btn">
+                      <mat-icon>clear</mat-icon>
+                      Clear Filters
+                    </button>
+                  </div>
+                  
+                  <div class="filters-content">
+                    <!-- Search -->
+                    <mat-form-field appearance="outline" class="search-field">
+                      <mat-label>Search employees...</mat-label>
+                      <mat-icon matPrefix>search</mat-icon>
+                      <input matInput 
+                             [formControl]="employeeNameFilter" 
+                             placeholder="Name, email, or employee number">
+                    </mat-form-field>
+                  </div>
+                </mat-card>
+
+                <div *ngIf="isLoadingTeamLeaves" class="loading-overlay">
+                  <mat-spinner diameter="40"></mat-spinner>
+                </div>
+                
+                <div class="table-container" *ngIf="!isLoadingTeamLeaves && teamRemainingLeaves.length > 0 && teamRemainingLeavesColumns.length > 1">
+                  <table mat-table [dataSource]="teamRemainingLeaves" class="team-leaves-table">
+                    <!-- Employee Name Column -->
+                    <ng-container matColumnDef="employeeName">
+                      <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+                      <td mat-cell *matCellDef="let employee">
+                        <div class="employee-name-cell">
+                          <mat-icon class="employee-icon">person</mat-icon>
+                          <span>{{ employee.employeeName }}</span>
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <!-- Dynamic Leave Type Columns -->
+                    <ng-container *ngFor="let leaveTypeName of getLeaveTypeColumns()" [matColumnDef]="leaveTypeName">
+                      <th mat-header-cell *matHeaderCellDef>
+                        <div class="leave-type-header">
+                          <span class="leave-type-name">{{ leaveTypeName }}</span>
+                          <span class="leave-type-total">({{ getLeaveTypeTotal(leaveTypeName) }})</span>
+                        </div>
+                      </th>
+                      <td mat-cell *matCellDef="let employee">
+                        <span class="remaining-badge">
+                          Remaining {{ getEmployeeLeaveBalance(employee.employeeId, leaveTypeName) }}
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="teamRemainingLeavesColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: teamRemainingLeavesColumns;"></tr>
+                  </table>
+
+                  <!-- Pagination -->
+                  <div class="pagination-container">
+                    <mat-paginator
+                      [length]="teamRemainingLeavesTotalCount"
+                      [pageSize]="teamRemainingLeavesPageSize"
+                      [pageSizeOptions]="teamRemainingLeavesPageSizeOptions"
+                      [pageIndex]="teamRemainingLeavesPage - 1"
+                      (page)="onTeamLeavesPageChange($event)"
+                      showFirstLastButtons>
+                    </mat-paginator>
+                  </div>
+                </div>
+
+                <div *ngIf="!isLoadingTeamLeaves && teamRemainingLeaves.length === 0" class="empty-state">
+                  <mat-icon>people</mat-icon>
+                  <h3>No Team Members</h3>
+                  <p>You don't have any team members reporting to you.</p>
+                </div>
+              </div>
             </div>
           </mat-tab>
 
@@ -346,10 +442,21 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   leaveTypes: LeaveType[] = [];
   myLeaveRequests: LeaveRequest[] = [];
   pendingApprovals: LeaveRequest[] = [];
+  teamRemainingLeaves: TeamRemainingLeaves[] = [];
+  teamRemainingLeavesColumns: string[] = [];
+  teamRemainingLeavesTotalCount = 0;
+  teamRemainingLeavesPage = 1;
+  teamRemainingLeavesPageSize = 10;
+  teamRemainingLeavesPageSizeOptions = [5, 10, 25, 50];
+  
+  // Filter controls
+  employeeNameFilter = new FormControl('');
+  
 profilePreviewUrl:string|null=null;
 private backendBaseUrl = 'https://localhost:60485';
 
   isLoading = false;
+  isLoadingTeamLeaves = false;
   selectedTab = 0;
   currentYear = new Date().getFullYear();
   pendingCount = 0;
@@ -367,11 +474,87 @@ private backendBaseUrl = 'https://localhost:60485';
   ngOnInit(): void {
     this.loadCurrentUser();
     this.loadInitialData();
+    this.setupTeamLeavesFilters();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private setupTeamLeavesFilters(): void {
+    // Debounce employee name filter
+    this.employeeNameFilter.valueChanges
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.teamRemainingLeavesPage = 1;
+        this.loadTeamRemainingLeaves();
+      });
+  }
+
+  loadTeamRemainingLeaves(): void {
+    if (!this.hasManagerRole()) return;
+
+    this.isLoadingTeamLeaves = true;
+    const employeeName = this.employeeNameFilter.value?.trim() || undefined;
+
+    this.leaveService.getTeamRemainingLeaves(
+      this.currentYear,
+      employeeName,
+      this.teamRemainingLeavesPage,
+      this.teamRemainingLeavesPageSize
+    )
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of([]))
+      )
+      .subscribe({
+        next: (data) => {
+          this.teamRemainingLeaves = data;
+          // Extract pagination info if available
+          if ((data as any).__pagination) {
+            this.teamRemainingLeavesTotalCount = (data as any).__pagination.totalCount || 0;
+          }
+          // Build dynamic columns based on leave types
+          if (this.teamRemainingLeaves.length > 0) {
+            const allLeaveTypes = new Set<string>();
+            this.teamRemainingLeaves.forEach(emp => {
+              if (emp.leaveBalances && Array.isArray(emp.leaveBalances)) {
+                emp.leaveBalances.forEach(balance => {
+                  allLeaveTypes.add(balance.leaveTypeName);
+                });
+              }
+            });
+            const sortedLeaveTypes = Array.from(allLeaveTypes).sort();
+            this.teamRemainingLeavesColumns = ['employeeName', ...sortedLeaveTypes];
+          } else {
+            this.teamRemainingLeavesColumns = ['employeeName'];
+          }
+          this.isLoadingTeamLeaves = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading team remaining leaves:', error);
+          this.isLoadingTeamLeaves = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  onTeamLeavesPageChange(event: PageEvent): void {
+    this.teamRemainingLeavesPage = event.pageIndex + 1;
+    this.teamRemainingLeavesPageSize = event.pageSize;
+    this.loadTeamRemainingLeaves();
+  }
+
+  clearTeamLeavesFilters(): void {
+    this.employeeNameFilter.setValue('');
+    this.teamRemainingLeavesPage = 1;
+    this.loadTeamRemainingLeaves();
   }
 
   private loadCurrentUser(): void {
@@ -393,11 +576,11 @@ private backendBaseUrl = 'https://localhost:60485';
     )
   };
 
-  // Only load pending approvals for Managers and Super Admins, not HR Managers
-  if (this.isManagerOnly()) {
+  if (this.hasManagerRole()) {
     requests.pendingApprovals = this.leaveService.getPendingApprovals().pipe(
       catchError(() => of([]))
     );
+    // Team remaining leaves will be loaded separately with filters
   }
 
   forkJoin(requests)
@@ -425,6 +608,11 @@ private backendBaseUrl = 'https://localhost:60485';
         
 
         this.pendingCount = this.pendingApprovals.length;
+
+        // Load team remaining leaves after initial data is loaded
+        if (this.hasManagerRole()) {
+          this.loadTeamRemainingLeaves();
+        }
 
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -538,17 +726,6 @@ private backendBaseUrl = 'https://localhost:60485';
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
   }
 
-  isHRManagerOnly(): boolean {
-    // Check if user is HR Manager but not Super Admin or Manager
-    return this.authService.hasAnyRole(['HR Manager']) && 
-           !this.authService.hasAnyRole(['Super Admin', 'Manager']);
-  }
-
-  isManagerOnly(): boolean {
-    // Check if user is Manager or Super Admin (not just HR Manager)
-    return this.authService.hasAnyRole(['Super Admin', 'Manager']);
-  }
-
 getBalanceCardColor(balance: LeaveBalance): string {
     const leaveType = this.leaveTypes.find(lt => lt.typeName === balance.leaveTypeName);
     return leaveType?.color || '#2196F3'; // Default to blue if not found
@@ -590,5 +767,27 @@ getBalanceCardColor(balance: LeaveBalance): string {
     if (percentage >= 80) return 'trending_down';
     if (percentage >= 50) return 'remove';
     return 'trending_up';
+  }
+
+  getEmployeeLeaveBalance(employeeId: string, leaveTypeName: string): number {
+    const employee = this.teamRemainingLeaves.find(emp => emp.employeeId === employeeId);
+    if (!employee) return 0;
+    const balance = employee.leaveBalances.find(b => b.leaveTypeName === leaveTypeName);
+    return balance ? balance.remainingDays : 0;
+  }
+
+  getLeaveTypeTotal(leaveTypeName: string): number {
+    if (this.teamRemainingLeaves.length === 0) return 0;
+    const firstEmployee = this.teamRemainingLeaves[0];
+    const balance = firstEmployee.leaveBalances.find(b => b.leaveTypeName === leaveTypeName);
+    return balance ? balance.totalDays : 0;
+  }
+
+  isEmployeeColumn(column: string): boolean {
+    return column === 'employeeName';
+  }
+
+  getLeaveTypeColumns(): string[] {
+    return this.teamRemainingLeavesColumns.filter(col => col !== 'employeeName');
   }
 }
