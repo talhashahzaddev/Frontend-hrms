@@ -346,3 +346,29 @@ export interface LeaveRequestValidation {
   warnings: string[];
   conflicts?: LeaveConflict[];
 }
+
+// Team Remaining Leaves Models
+export interface LeaveTypeBalance {
+  leaveTypeId: string;
+  leaveTypeName: string;
+  totalDays: number;
+  usedDays: number;
+  remainingDays: number;
+}
+
+export interface TeamRemainingLeaves {
+  employeeId: string;
+  employeeName: string;
+  leaveBalances: LeaveTypeBalance[];
+}
+
+// Paginated Response for Team Remaining Leaves
+export interface TeamRemainingLeavesResponse {
+  data: TeamRemainingLeaves[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
