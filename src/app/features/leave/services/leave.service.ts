@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { catchError } from 'rxjs/operators';
@@ -18,7 +18,9 @@ import {
   LeaveCalendarEvent,
   LeaveSummary,
   LeaveStatus,
-  CreateLeaveTypeRequest
+  CreateLeaveTypeRequest,
+  TeamRemainingLeaves,
+  TeamRemainingLeavesResponse
 } from '../../../core/models/leave.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -476,6 +478,53 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   // Helper to convert dates to ISO format for API
   formatDateForApi(date: Date): string {
     return date.toISOString();
+  }
+
+  // Get team remaining leaves (for managers)
+  getTeamRemainingLeaves(year?: number, employeeName?: string, page: number = 1, pageSize: number = 50, leaveTypeId?: string): Observable<TeamRemainingLeaves[]> {
+    let params = new HttpParams();
+    if (year) {
+      params = params.set('year', year.toString());
+    }
+    if (employeeName) {
+      params = params.set('employeeName', employeeName);
+    }
+    if (leaveTypeId) {
+      params = params.set('leaveTypeId', leaveTypeId);
+    }
+    params = params.set('page', page.toString());
+    params = params.set('pageSize', pageSize.toString());
+
+    return this.http.get<ApiResponse<TeamRemainingLeavesResponse>>(`${this.apiUrl}/team/remaining-leaves`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            console.error('Failed to fetch team remaining leaves:', response.message);
+            throw new Error(response.message || 'Failed to fetch team remaining leaves');
+          }
+          // Return the data array from the paginated response
+          const result = response.data?.data || [];
+          // Store pagination info in a way that can be accessed
+          if (response.data) {
+            (result as any).__pagination = {
+              totalCount: response.data.totalCount || 0,
+              page: response.data.page || page,
+              pageSize: response.data.pageSize || pageSize
+            };
+          }
+          console.log('Team remaining leaves response:', { 
+            totalCount: response.data?.totalCount, 
+            dataLength: result.length,
+            page: response.data?.page,
+            pageSize: response.data?.pageSize
+          });
+          return result;
+        }),
+        catchError(error => {
+          console.error('Error fetching team remaining leaves:', error);
+          return of([]);
+        })
+      );
   }
 
   // Helper to parse API date strings
