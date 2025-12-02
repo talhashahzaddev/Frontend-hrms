@@ -22,8 +22,8 @@
         <div class="time">{{ n.createdAt| date:'short' }}</div>
         
 
-       <!-- NEW: Accept/Reject based on module type -->
-        <div *ngIf="n.notificationType === 'Request' && n.moduletype"
+       <!-- NEW: Accept/Reject based on module type - Only show for unread notifications -->
+        <div *ngIf="n.notificationType === 'Request' && n.moduletype && !n.isRead"
              class="action-buttons">
 
           <button mat-button color="primary"
