@@ -397,9 +397,26 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   calculateLeaveDays(startDate: string, endDate: string): number {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1;
+    
+    // Set time to midnight to avoid timezone issues
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    
+    let count = 0;
+    const currentDate = new Date(start);
+    
+    // Iterate through each day from start to end (inclusive)
+    while (currentDate <= end) {
+      const dayOfWeek = currentDate.getDay();
+      // Exclude weekends: 0 = Sunday, 6 = Saturday
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        count++;
+      }
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return count;
   }
 
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
