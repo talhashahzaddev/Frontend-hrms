@@ -586,6 +586,362 @@
   stroke: #667eea !important;
 }
 
+
+
+
+
+
+// Time Tracker Component - Matches KRA Styling
+.time-tracker-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  // Filters Card
+  .filters-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+        }
+      }
+    }
+
+    .filters-content {
+      display: grid;
+      grid-template-columns: 2fr 2fr auto;
+      gap: 16px;
+      padding: 24px;
+      align-items: flex-start;
+
+      .filter-field {
+        grid-column: span 1;
+      }
+
+      .filter-actions-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+
+        button.add-button {
+          height: 48px;
+          padding: 0 24px !important;
+          border-radius: 12px !important;
+          font-weight: 600 !important;
+          font-size: 15px !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+
+          mat-icon {
+            font-size: 20px !important;
+            width: 20px !important;
+            height: 20px !important;
+          }
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+          }
+        }
+      }
+
+      ::ng-deep mat-form-field {
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper {
+            background: white;
+            border-radius: 12px;
+          }
+
+          .mat-mdc-form-field-flex {
+            padding: 0 16px;
+          }
+
+          .mat-mdc-notch-piece {
+            border-color: #e5e7eb !important;
+          }
+
+          &:hover .mat-mdc-text-field-wrapper {
+            background: #f9fafb;
+          }
+
+          &:hover .mat-mdc-notch-piece {
+            border-color: #667eea !important;
+          }
+
+          &.mat-focused {
+            .mat-mdc-text-field-wrapper {
+              background: white;
+              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .mat-mdc-notch-piece {
+              border-color: #667eea !important;
+              border-width: 2px !important;
+            }
+          }
+
+          .mat-mdc-form-field-icon-prefix mat-icon {
+            color: #667eea;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+
+          .mat-mdc-form-field-infix {
+            min-height: 48px;
+          }
+        }
+      }
+    }
+  }
+
+  // Table Card
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .table-header {
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 2px;
+        }
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+      min-height: 200px;
+    }
+
+    .attendance-table {
+      width: 100%;
+
+      ::ng-deep {
+        .mat-mdc-header-cell {
+          background: #f9fafb;
+          font-weight: 600;
+          color: #374151;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          padding: 16px;
+          border-bottom: 2px solid #e5e7eb;
+        }
+
+        .mat-mdc-cell {
+          padding: 16px;
+          border-bottom: 1px solid #f3f4f6;
+          color: #1f2937;
+          font-size: 14px;
+        }
+
+        .mat-mdc-row {
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: #f9fafb;
+          }
+
+          &:last-child .mat-mdc-cell {
+            border-bottom: none;
+          }
+        }
+      }
+
+      .status-active {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      .status-inactive {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+    }
+
+    // Empty State
+    .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #cbd5e1;
+        margin-bottom: 16px;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      p {
+        margin: 0 0 24px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+    }
+
+    // Loading Spinner
+    .loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 16px;
+
+      p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      ::ng-deep mat-spinner circle {
+        stroke: #667eea !important;
+      }
+    }
+  }
+
+  // Pagination
+  ::ng-deep mat-paginator {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-top: 1px solid #e5e7eb;
+    border-radius: 0 0 16px 16px;
+
+    .mat-mdc-paginator-container {
+      padding: 12px 24px;
+    }
+  }
+
+  // Responsive
+  @media (max-width: 1024px) {
+    .filters-content {
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-rows: auto auto;
+      .filter-actions-container {
+        grid-column: 1 / -1;
+        justify-content: stretch;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .filters-content {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: auto;
+      .filter-actions-container {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   Responsive Adjustments
+======================================================= */
+@media (max-width: 768px) {
+  .date-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .date-filter .filter-field {
+    width: 100%;
+  }
+
+  .date-filter button {
+    width: 100%;
+  }
+
+  .attendance-card {
+    padding: 20px;
+  }
+
+  ::ng-deep .attendance-table .mat-mdc-header-cell,
+  ::ng-deep .attendance-table .mat-mdc-cell {
+    padding: 12px 8px;
+  }
+}
+
+
+
+
 // Responsive Design
 @media (max-width: 768px) {
   .time-tracker-container {

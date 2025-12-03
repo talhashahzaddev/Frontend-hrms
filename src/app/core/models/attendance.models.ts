@@ -11,8 +11,24 @@ export interface Attendance {
   totalHours: number;
   overtimeHours: number;
   status: string;
+  sessionsCount:number;
   notes?: string;
 }
+
+export interface DepartmentEmployee {
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+}
+
+
+export interface AttendanceSessionDto {
+  sessionId: string;       // maps to SessionId (GUID)
+  attendanceId: string;    // maps to AttendanceId (GUID)
+  checkInTime: string;     // ISO string from backend
+  checkOutTime?: string;   // optional ISO string if session is checked out
+}
+
 
 export enum AttendanceStatus {
   PRESENT = 'present',

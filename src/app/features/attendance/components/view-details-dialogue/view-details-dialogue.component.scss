@@ -1,0 +1,441 @@
+// ::ng-deep .mat-mdc-dialog-container {
+//   border-radius: 16px !important;
+//   padding: 0 !important;
+//   overflow: hidden;
+//   box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+//   max-width: 700px !important;
+//   width: 90vw !important;
+// }
+
+// .dialog-header {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   padding: 20px 24px;
+//   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+//   color: white;
+// }
+
+// .dialog-header h2 {
+//   display: flex;
+//   align-items: center;
+//   gap: 10px;
+//   margin: 0;
+//   font-size: 20px;
+//   font-weight: 700;
+// }
+
+// .dialog-header .close-button {
+//   color: white;
+//   transition: all 0.2s ease;
+// }
+
+// .dialog-header .close-button:hover {
+//   background: rgba(255,255,255,0.2);
+//   transform: rotate(90deg);
+// }
+
+// .dialog-content {
+//   padding: 20px 24px !important;
+//   max-height: 70vh;
+//   overflow-y: auto;
+// }
+
+// /* Compact detail sections */
+// .attendance-details .detail-section {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 12px;
+// }
+
+// .attendance-details .detail-section.row {
+//   flex-direction: row !important;
+//   gap: 20px;
+// }
+
+// .attendance-details .detail-section.row .detail-item {
+//   flex: 1;
+//   padding-bottom: 0;
+//   border-bottom: none;
+// }
+
+// .attendance-details .detail-item {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 4px;
+//   padding-bottom: 8px;
+//   border-bottom: 1px solid #e5e7eb;
+// }
+
+// .attendance-details .detail-item:last-child {
+//   border-bottom: none;
+// }
+
+// .attendance-details .detail-label {
+//   display: flex;
+//   align-items: center;
+//   gap: 6px;
+//   font-size: 0.8rem;
+//   font-weight: 600;
+//   color: #6b7280;
+//   text-transform: uppercase;
+// }
+
+// .attendance-details .detail-label mat-icon {
+//   font-size: 16px;
+//   width: 16px;
+//   height: 16px;
+//   color: #667eea;
+// }
+
+// .attendance-details .detail-value {
+//   font-size: 0.95rem;
+//   color: #1f2937;
+//   font-weight: 500;
+//   line-height: 1.4;
+// }
+
+// .attendance-details mat-chip {
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 4px;
+//   padding: 4px 10px;
+//   border-radius: 8px;
+//   font-weight: 600;
+//   font-size: 0.825rem;
+// }
+
+// .attendance-details mat-chip mat-icon {
+//   font-size: 16px;
+//   width: 16px;
+//   height: 16px;
+// }
+
+// .sessions-heading {
+//   display: flex;
+//   align-items: center;
+//   gap: 6px;
+//   font-weight: 600;
+//   font-size: 14px;
+//   margin-bottom: 8px;
+// }
+
+// .session-item {
+//   display: flex;
+//   justify-content: space-between;
+//   padding: 6px 8px;
+//   border-bottom: 1px solid #e5e7eb;
+// }
+
+// .session-item:last-child {
+//   border-bottom: none;
+// }
+
+// .session-item > div {
+//   flex: 1;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+// .absent-text {
+//   color: #9ca3af;
+//   font-style: italic;
+//   font-size: 0.875rem;
+// }
+
+// .location {
+//   color: #6b7280;
+//   font-size: 0.75rem;
+//   line-height: 1.2;
+// }
+
+// .dialog-actions {
+//   padding: 16px 24px !important;
+//   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+//   border-top: 1px solid #e5e7eb;
+//   display: flex;
+//   justify-content: flex-end;
+//   gap: 12px;
+// }
+
+// .dialog-actions button {
+//   height: 40px;
+//   padding: 0 24px !important;
+//   border-radius: 12px !important;
+//   font-size: 14px !important;
+//   font-weight: 600 !important;
+// }
+
+// .dialog-actions button[mat-stroked-button] {
+//   background: white !important;
+//   color: #6b7280 !important;
+//   border: 2px solid #e5e7eb !important;
+// }
+
+// .dialog-actions button[mat-stroked-button]:hover {
+//   background: #f9fafb !important;
+//   border-color: #cbd5e1 !important;
+//   color: #374151 !important;
+// }
+
+// @media (max-width: 768px) {
+//   .attendance-details .detail-section.row,
+//   .session-item {
+//     flex-direction: column !important;
+//     gap: 12px;
+//   }
+//   .dialog-actions {
+//     flex-direction: column;
+//     gap: 12px;
+//   }
+//   .dialog-actions button {
+//     width: 100%;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+  max-width: 700px !important;
+  width: 90vw !important;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.dialog-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+}
+
+.dialog-header h2 mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.dialog-header .close-button {
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.dialog-header .close-button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: rotate(90deg);
+}
+
+.dialog-content {
+  padding: 28px !important;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Attendance details */
+.attendance-details, .kra-details {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.attendance-details .detail-section, .kra-details .detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.attendance-details .detail-section.row {
+  flex-direction: row !important;
+  gap: 24px;
+}
+
+.attendance-details .detail-section.row .detail-item {
+  flex: 1;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.attendance-details .detail-item, .kra-details .detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attendance-details .detail-item:last-child, .kra-details .detail-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.attendance-details .detail-label, .kra-details .detail-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attendance-details .detail-label mat-icon, .kra-details .detail-label mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #667eea;
+}
+
+.attendance-details .detail-value, .kra-details .detail-value {
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.attendance-details mat-chip, .kra-details mat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.attendance-details mat-chip mat-icon, .kra-details mat-chip mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.sessions-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 12px;
+}
+
+.session-item:last-child {
+  border-bottom: none;
+}
+
+.session-item > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.absent-text {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.location {
+  color: #6b7280;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.dialog-actions {
+  padding: 20px 28px !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.dialog-actions button {
+  height: 44px;
+  padding: 0 28px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dialog-actions button[mat-stroked-button] {
+  background: white !important;
+  color: #6b7280 !important;
+  border: 2px solid #e5e7eb !important;
+}
+
+.dialog-actions button[mat-stroked-button]:hover {
+  background: #f9fafb !important;
+  border-color: #cbd5e1 !important;
+  color: #374151 !important;
+}
+
+.dialog-actions button.edit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+.dialog-actions button.edit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+.dialog-actions button.edit-button mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+@media (max-width: 768px) {
+  .attendance-details .detail-section.row,
+  .session-item {
+    flex-direction: column !important;
+    gap: 12px;
+  }
+  .dialog-content {
+    padding: 20px !important;
+  }
+  .dialog-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .dialog-actions button {
+    width: 100%;
+  }
+}

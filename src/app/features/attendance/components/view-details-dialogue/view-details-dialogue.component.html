@@ -1,0 +1,134 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>schedule</mat-icon>
+    Attendance Details
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <div class="attendance-details">
+
+    <!-- Employee Info Section -->
+    <div class="detail-section">
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>person</mat-icon>
+          <span>Employee</span>
+        </div>
+        <div class="detail-value">{{ data.employeeName }}</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>badge</mat-icon>
+          <span>Date</span>
+        </div>
+        <div class="detail-value">{{ data.workDate | date:'fullDate' }}</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>check_circle</mat-icon>
+          <span>Status</span>
+        </div>
+        <div class="detail-value">
+          <mat-chip [ngClass]="{'status-present': data.status==='present', 'status-absent': data.status==='absent'}">
+            <mat-icon>{{ data.status==='present' ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ data.status | titlecase }}
+          </mat-chip>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Check In / Check Out Section (row) -->
+    <div class="detail-section row">
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>login</mat-icon>
+          <span>Check In</span>
+        </div>
+        <div class="detail-value">
+          <ng-container *ngIf="data.checkInTime; else noCheckIn">
+            {{ data.checkInTime | date:'shortTime' }}<br>
+            <span class="location">{{ data.checkInLocation }}</span>
+          </ng-container>
+          <ng-template #noCheckIn>
+            <span class="absent-text">Not Checked In</span>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>logout</mat-icon>
+          <span>Check Out</span>
+        </div>
+        <div class="detail-value">
+          <ng-container *ngIf="data.checkOutTime; else noCheckOut">
+            {{ data.checkOutTime | date:'shortTime' }}<br>
+            <span class="location">{{ data.checkOutLocation }}</span>
+          </ng-container>
+          <ng-template #noCheckOut>
+            <span class="absent-text">Not Checked Out</span>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Hours & Overtime Section (row) -->
+    <div class="detail-section row">
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>schedule</mat-icon>
+          <span>Total Hours</span>
+        </div>
+        <div class="detail-value">{{ data.totalHours ?? '0' }} hrs</div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-label">
+          <mat-icon>trending_up</mat-icon>
+          <span>Overtime</span>
+        </div>
+        <div class="detail-value">{{ data.overtimeHours ?? '0' }} hrs</div>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Today's Sessions -->
+    <div class="detail-section" style="margin-top: 20px;">
+      <h3 class="sessions-heading">
+        <mat-icon>list</mat-icon>
+        Today's Sessions
+      </h3>
+
+      <ng-container *ngIf="todaySessions.length > 0; else noSessions">
+        <div class="session-item row" *ngFor="let s of todaySessions">
+          <div>
+            <mat-icon>login</mat-icon>
+            {{ s.checkInTime | date:'shortTime' }}
+          </div>
+          <div>
+            <mat-icon>logout</mat-icon>
+            {{ s.checkOutTime ? (s.checkOutTime | date:'shortTime') : '—' }}
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noSessions>
+        <div class="absent-text">No sessions found</div>
+      </ng-template>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<div class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close>Close</button>
+</div>
