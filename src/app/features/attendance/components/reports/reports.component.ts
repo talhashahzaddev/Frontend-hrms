@@ -14,13 +14,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, combineLatest } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
-import { 
-  AttendanceReport
-} from '../../../../core/models/attendance.models';
+import { AttendanceReport,DepartmentEmployee } from '../../../../core/models/attendance.models';
 import { Department, Employee } from '../../../../core/models/employee.models';
 
 @Component({
@@ -52,7 +50,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   reportData: AttendanceReport | null = null;
   departments: Department[] = [];
   employees: Employee[] = [];
-  
+departmentEmployees: DepartmentEmployee[] = [];
   // Table configuration
   displayedColumns: string[] = [
     'employee',
@@ -62,10 +60,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
     'totalHours',
     'status'
   ];
-  
+
   // Loading states
   isLoading = false;
-  
+
   // Filters
   startDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   endDateControl = new FormControl(new Date());
@@ -92,7 +90,14 @@ export class ReportsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.loadInitialData();
+    this.loadDepartmentsOnly();
+
+    // Listen for department changes to load employees dynamically
+    this.departmentControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((departmentId) => {
+        this.loadEmployeesByDepartment(departmentId);
+      });
   }
 
   ngOnDestroy(): void {
@@ -100,32 +105,63 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadInitialData(): void {
-    combineLatest([
-      this.employeeService.getDepartments(),
-      this.employeeService.getManagers() // Get all employees through managers endpoint for now
-    ])
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: ([departments, employees]) => {
-        this.departments = departments;
-        this.employees = employees;
-      },
-      error: (error) => {
-        console.error('Error loading initial data:', error);
-      }
-    });
+  // -----------------------------
+  // Load departments initially
+  // -----------------------------
+  private loadDepartmentsOnly(): void {
+    this.employeeService.getDepartments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => {
+          this.departments = departments;
+          this.employees = []; // Start with empty employees
+        },
+        error: (error) => console.error('Error loading departments:', error)
+      });
   }
 
+  // -----------------------------
+  // Load employees dynamically by department
+  // -----------------------------
+  private loadEmployeesByDepartment(departmentId: string | null): void {
+    if (!departmentId) {
+      // No department selected → clear employee list
+      this.employees = [];
+      this.employeeControl.setValue('');
+      return;
+    }
+
+this.attendanceService.getDepartmentEmployees(departmentId)
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: (deptEmployees) => {
+      this.departmentEmployees = deptEmployees; // store in new array
+      this.employeeControl.setValue(''); // reset selected employee if needed
+    },
+    error: (err) => {
+      console.error('Error loading employees:', err);
+      this.showError('Failed to load employees for department');
+    }
+  });
+
+
+
+
+  }
+
+  // -----------------------------
+  // Generate attendance report
+  // -----------------------------
   generateReport(): void {
     this.isLoading = true;
-    
+
     const startDate = this.startDateControl.value?.toISOString().split('T')[0] || '';
     const endDate = this.endDateControl.value?.toISOString().split('T')[0] || '';
-    const employeeId = this.employeeControl.value || undefined;
+    const employeeId = this.employeeControl.value ? this.employeeControl.value : undefined;
     const departmentId = this.departmentControl.value || undefined;
+    const status = this.statusControl.value || undefined;
 
-    this.attendanceService.getAttendanceReport(startDate, endDate, employeeId, departmentId)
+    this.attendanceService.getAttendanceReport(startDate, endDate, employeeId, departmentId, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (report) => {
@@ -141,10 +177,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
       });
   }
 
+  // -----------------------------
+  // Date range shortcuts
+  // -----------------------------
   setDateRange(range: string): void {
     const today = new Date();
     let startDate: Date;
-    
+
     switch (range) {
       case 'today':
         startDate = new Date(today);
@@ -166,10 +205,13 @@ export class ReportsComponent implements OnInit, OnDestroy {
       default:
         return;
     }
-    
+
     this.startDateControl.setValue(startDate);
   }
 
+  // -----------------------------
+  // Export functions
+  // -----------------------------
   exportToCSV(): void {
     this.exportReport('csv');
   }
@@ -181,7 +223,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   private exportReport(format: 'csv' | 'xlsx'): void {
     const startDate = this.startDateControl.value?.toISOString().split('T')[0] || '';
     const endDate = this.endDateControl.value?.toISOString().split('T')[0] || '';
-    const employeeId = this.employeeControl.value || undefined;
+    const employeeId = this.employeeControl.value ? this.employeeControl.value : undefined;
 
     this.attendanceService.exportAttendanceReport(startDate, endDate, format, employeeId)
       .pipe(takeUntil(this.destroy$))
@@ -202,6 +244,9 @@ export class ReportsComponent implements OnInit, OnDestroy {
       });
   }
 
+  // -----------------------------
+  // Utility
+  // -----------------------------
   formatHours(hours: number): string {
     if (hours === 0) return '0h 0m';
     const hrs = Math.floor(hours);

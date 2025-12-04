@@ -18,6 +18,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 
+import { MatDialog } from '@angular/material/dialog';
+import { ViewDetailsDialogueComponent } from '../view-details-dialogue/view-details-dialogue.component';
+
 import { AttendanceService } from '../../services/attendance.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -71,6 +74,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     'date',
     'checkIn',
     'checkOut',
+    'sessions',
     'totalHours',
     'status',
     'notes',
@@ -102,6 +106,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     private attendanceService: AttendanceService,
     private employeeService: EmployeeService,
     private authService: AuthService,
+    private dialog: MatDialog  ,
     private snackBar: MatSnackBar
   ) {}
 
@@ -161,39 +166,48 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   private loadAttendanceData(): void {
-    this.isLoading = true;
-    
-    const startDate = this.startDateControl.value?.toISOString().split('T')[0] || '';
-    const endDate = this.endDateControl.value?.toISOString().split('T')[0] || '';
-    
-    const searchRequest: AttendanceSearchRequest = {
-      startDate,
-      endDate,
-      departmentId: this.departmentControl.value || undefined,
-      status: this.statusControl.value || undefined,
-      page: 1,
-      pageSize: 100
-    };
+  this.isLoading = true;
 
-    this.attendanceService.getAttendances(searchRequest)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.attendanceRecords = response.attendances;
-          this.filterAttendanceData();
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading attendance data:', error);
-          this.showError('Failed to load attendance data');
-          this.isLoading = false;
-        }
-      });
-  }
+  const formatLocalDate = (date: Date | null) => {
+    if (!date) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
 
-  private filterAttendanceData(): void {
-    this.filteredAttendance = [...this.attendanceRecords];
-  }
+  const startDate = formatLocalDate(this.startDateControl.value);
+  const endDate = formatLocalDate(this.endDateControl.value);
+
+  const searchRequest: AttendanceSearchRequest = {
+    startDate,
+    endDate,
+    departmentId: this.departmentControl.value || undefined,
+    status: this.statusControl.value || undefined,
+    page: 1,
+    pageSize: 100
+  };
+
+  this.attendanceService.getAttendances(searchRequest)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response) => {
+        this.attendanceRecords = response.attendances;
+        this.filterAttendanceData();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading attendance data:', error);
+        this.showError('Failed to load attendance data');
+        this.isLoading = false;
+      }
+    });
+}
+
+private filterAttendanceData(): void {
+  this.filteredAttendance = [...this.attendanceRecords];
+}
+
 
   clearFilters(): void {
     this.startDateControl.setValue(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
@@ -202,10 +216,24 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     this.statusControl.setValue('');
   }
 
-  viewAttendanceDetails(attendance: Attendance): void {
-    // TODO: Implement attendance details view
-    console.log('View attendance details:', attendance);
-  }
+viewAttendanceDetails(attendance: Attendance): void {
+  this.dialog.open(ViewDetailsDialogueComponent, {
+    width: '600px',
+    panelClass: 'attendance-details-dialog',
+    data: {
+      employeeId: attendance.employeeId,
+      employeeName: attendance.employeeName,
+      workDate: attendance.workDate,
+      checkInTime: attendance.checkInTime,
+      checkOutTime: attendance.checkOutTime,
+      totalHours: this.formatHours(attendance.totalHours),
+      overtimeHours: attendance.overtimeHours,
+      status: attendance.status,
+
+    }
+  });
+}
+
 
   editAttendance(attendance: Attendance): void {
     // TODO: Implement attendance edit dialog

@@ -14,8 +14,9 @@ import {
   ManualAttendanceRequest,
   TimeTrackingSession,
   DailyAttendanceStats,
-  Shift,
+  AttendanceSessionDto,
   ShiftDto,
+  DepartmentEmployee,
   UpdateShiftDto,
   ShiftSwap,
   EmployeeShift,
@@ -71,6 +72,7 @@ export class AttendanceService {
   }
 
   // Attendance CRUD Operations
+
   getAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
     let params = new HttpParams();
     
@@ -184,6 +186,37 @@ export class AttendanceService {
         })
       );
   }
+//Today chhhn
+
+getTodaySessions(): Observable<AttendanceSessionDto[]> {
+  return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
+    .pipe(map(res => res.data || []));
+}
+
+//Today session for specific employee by its id_Parameter
+
+// getTodaySessionsById(employeeId: string): Observable<AttendanceSessionDto[]> {
+//   return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession/${employeeId}`)
+//     .pipe(map(res => res.data || []));
+// }
+
+getTodaySessionsById(employeeId: string, workDate?: string | Date): Observable<AttendanceSessionDto[]> {
+  let url = `${this.apiUrl}/employeeSession/${employeeId}`;
+  
+  if (workDate) {
+    const dateStr = (workDate instanceof Date) 
+      ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
+      : workDate; // assume string is already formatted
+    url += `?date=${dateStr}`;
+  }
+
+  return this.http.get<ApiResponse<AttendanceSessionDto[]>>(url)
+    .pipe(map(res => res.data || []));
+}
+
+
+
+
 
   getEmployeeAttendance(employeeId: string, startDate: string, endDate: string): Observable<Attendance[]> {
     const params = new HttpParams()
@@ -236,15 +269,34 @@ export class AttendanceService {
       );
   }
 
+
+  getDepartmentEmployees(departmentId: string): Observable<DepartmentEmployee[]> {
+  const params = new HttpParams().set('departmentId', departmentId);
+
+  return this.http.get<ApiResponse<DepartmentEmployee[]>>(
+    `${this.apiUrl}/departmentEmployees`,
+    { params }
+  )
+  .pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch department employees');
+      }
+      return response.data!;
+    })
+  );
+}
+
+
   // Reports
-  getAttendanceReport(startDate: string, endDate: string, employeeId?: string, departmentId?: string): Observable<AttendanceReport> {
+  getAttendanceReport(startDate: string, endDate: string, employeeId?: string, departmentId?: string, status?:string): Observable<AttendanceReport> {
     let params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate);
 
     if (employeeId) params = params.set('employeeId', employeeId);
     if (departmentId) params = params.set('departmentId', departmentId);
-
+    if (status) params = params.set('status', status);
     return this.http.get<ApiResponse<AttendanceReport>>(`${this.apiUrl}/reports`, { params })
       .pipe(
         map(response => {

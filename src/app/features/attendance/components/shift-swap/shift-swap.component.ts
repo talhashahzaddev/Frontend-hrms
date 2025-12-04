@@ -63,7 +63,7 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
     private authService: AuthService // ✅ inject AuthService
   ) {
     this.swapForm = this.fb.group({
-      currentShiftId: ['', Validators.required],
+      currentShiftId: null,
       requestedShiftId: ['', Validators.required],
       reason: ['', [Validators.required, Validators.minLength(5)]]
     });
@@ -137,9 +137,6 @@ private loadCurrentShift(): void {
       error: (err) => console.error(err)
     });
 }
-
-
-
 
   ngOnDestroy(): void {
     this.destroy$.next();

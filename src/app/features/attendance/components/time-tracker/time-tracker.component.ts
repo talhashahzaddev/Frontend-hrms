@@ -9,19 +9,38 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, interval } from 'rxjs';
 
+
+
+import { MatFormFieldModule } from '@angular/material/form-field'; 
+import { MatInputModule } from '@angular/material/input'; 
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { MatNativeDateModule } from '@angular/material/core'; 
+import { FormsModule } from '@angular/forms'; 
+import { MatTableModule } from '@angular/material/table';
+
+
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { 
   TimeTrackingSession, 
-  Attendance, 
+  Attendance,
+  AttendanceSessionDto, 
   ClockInOutRequest 
 } from '../../../../core/models/attendance.models';
 import { User } from '../../../../core/models/auth.models';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-time-tracker',
   standalone: true,
   imports: [
+    MatFormFieldModule,   
+    MatInputModule,       
+    MatDatepickerModule,  
+FormsModule,          
+    MatTableModule,
+
+    MatNativeDateModule, 
     CommonModule,
     RouterModule,
     MatCardModule,
@@ -42,7 +61,12 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   todayAttendance: Attendance | null = null;
   recentAttendance: Attendance[] = [];
   currentTime = new Date();
-
+  // Date filter for recent attendance
+filterStartDate: Date | null = null;
+filterEndDate: Date | null = null;
+// New: Today's sessions
+todaySessions: AttendanceSessionDto[] = [];
+isLoadingSessions = false;
   // Loading states
   isLoading = false;
   isClockActionLoading = false;
@@ -61,6 +85,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     this.loadCurrentSession();
     this.loadTodayAttendance();
     this.loadRecentAttendance();
+    this.loadTodaySessions();
     this.setupTimeUpdater();
   }
 
@@ -104,6 +129,33 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     }
   }
 
+  private loadTodaySessions(): void {
+  this.isLoadingSessions = true;
+  this.attendanceService.getTodaySessions()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (sessions) => {
+        this.todaySessions = sessions || [];
+        this.isLoadingSessions = false;
+      },
+      error: (error) => {
+        console.error('Error loading today sessions:', error);
+        this.isLoadingSessions = false;
+      }
+    });
+}
+
+
+formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string {
+  const start = new Date(checkIn).getTime();
+  const end = checkOut ? new Date(checkOut).getTime() : new Date().getTime();
+  const diffMs = end - start;
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return `${hours}h ${minutes}m`;
+}
+
+
   private loadCurrentSession(): void {
     this.attendanceService.getCurrentSession()
       .pipe(takeUntil(this.destroy$))
@@ -131,24 +183,45 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadRecentAttendance(): void {
-    this.isLoading = true;
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+private formatLocalDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = (date.getMonth() + 1).toString().padStart(2, '0');
+  const d = date.getDate().toString().padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
-    this.attendanceService.getMyAttendance(startDate, endDate)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (attendances) => {
-          this.recentAttendance = attendances.slice(0, 5);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error loading recent attendance:', error);
-          this.isLoading = false;
-        }
-      });
-  }
+
+private loadRecentAttendance(): void {
+  this.isLoading = true;
+
+  const startDate = this.filterStartDate
+    ? this.formatLocalDate(this.filterStartDate)
+    : this.formatLocalDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+
+  const endDate = this.filterEndDate
+    ? this.formatLocalDate(this.filterEndDate)
+    : this.formatLocalDate(new Date());
+
+  this.attendanceService.getMyAttendance(startDate, endDate)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (attendances) => {
+        this.recentAttendance = attendances.slice(0, 5);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading recent attendance:', error);
+        this.isLoading = false;
+      }
+    });
+}
+
+applyDateFilter(): void {
+  this.loadRecentAttendance();
+}
+
+
+
 
   clockIn(): void {
     this.isClockActionLoading = true;
@@ -168,6 +241,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
           this.showSuccess('Clocked in successfully!');
           this.loadCurrentSession();
           this.loadTodayAttendance();
+          this.loadTodaySessions();
           this.isClockActionLoading = false;
         },
         error: (error) => {
@@ -197,6 +271,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
           this.loadCurrentSession();
           this.loadTodayAttendance();
           this.loadRecentAttendance();
+          this.loadTodaySessions();
           this.isClockActionLoading = false;
         },
         error: (error) => {

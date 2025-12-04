@@ -131,52 +131,151 @@
     </mat-card>
   </div>
 
-  <!-- Recent Activity -->
-  <mat-card class="recent-activity-card">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>history</mat-icon>
-        Recent Activity
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngIf="isLoading" class="loading-container">
-        <mat-spinner diameter="30"></mat-spinner>
-        <p>Loading recent activity...</p>
-      </div>
 
-      <div *ngIf="!isLoading && recentAttendance.length > 0" class="activity-list">
-        <div class="activity-item" *ngFor="let record of recentAttendance">
-          <div class="activity-date">
-            <div class="day">{{ record.workDate | date:'d' }}</div>
-            <div class="month">{{ record.workDate | date:'MMM' }}</div>
+ <!-- Today's Sessions -->
+<mat-card class="recent-activity-card today-sessions-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>today</mat-icon>
+      Today's Sessions
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <!-- Loading State -->
+    <div *ngIf="isLoadingSessions" class="loading-container">
+      <mat-spinner diameter="30"></mat-spinner>
+      <p>Loading today's sessions...</p>
+    </div>
+
+    <!-- Session List -->
+    <div *ngIf="!isLoadingSessions && todaySessions.length > 0" class="activity-list">
+      <div class="activity-item" *ngFor="let session of todaySessions">
+        <div class="activity-date">
+          <div class="day">{{ session.checkInTime | date:'d' }}</div>
+          <div class="month">{{ session.checkInTime | date:'MMM' }}</div>
+        </div>
+        <div class="activity-details">
+          <div class="activity-time">
+            <span class="check-in">
+              <mat-icon>login</mat-icon>
+              {{ session.checkInTime | date:'HH:mm' }}
+            </span>
+            <span class="separator">→</span>
+            <span class="check-out">
+              <mat-icon>logout</mat-icon>
+              {{ session.checkOutTime ? (session.checkOutTime | date:'HH:mm') : '--:--' }}
+            </span>
           </div>
-          <div class="activity-details">
-            <div class="activity-time">
-              <span class="check-in">
-                <mat-icon>login</mat-icon>
-                {{ record.checkInTime ? (record.checkInTime | date:'HH:mm') : '--:--' }}
-              </span>
-              <span class="separator">→</span>
-              <span class="check-out">
-                <mat-icon>logout</mat-icon>
-                {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : '--:--' }}
-              </span>
-            </div>
-            <div class="activity-summary">
-              <span class="hours">{{ formatHours(record.totalHours) }}</span>
-              <mat-chip [class]="'status-' + record.status" class="status-chip">
-                {{ record.status | titlecase }}
-              </mat-chip>
-            </div>
+          <div class="activity-summary">
+            <span class="hours">{{ formatSessionDuration(session.checkInTime, session.checkOutTime) }}</span>
+            <!-- <mat-chip [class]="'status-' + session.status" class="status-chip">
+              {{ session.status | titlecase }}
+            </mat-chip> -->
           </div>
         </div>
       </div>
+    </div>
 
-      <div *ngIf="!isLoading && recentAttendance.length === 0" class="empty-state">
-        <mat-icon>schedule</mat-icon>
-        <p>No recent attendance records found</p>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <!-- Empty State -->
+    <div *ngIf="!isLoadingSessions && todaySessions.length === 0" class="empty-state">
+      <mat-icon>schedule</mat-icon>
+      <p>No sessions recorded for today</p>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+
+<!-- Filters Section (Date Filter) -->
+<mat-card class="filters-card">
+  <div class="filters-header">
+    <h3>Filter Attendance</h3>
+ 
+  </div>
+
+  <div class="filters-content">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Start Date</mat-label>
+      <input matInput [matDatepicker]="startPicker" [(ngModel)]="filterStartDate" placeholder="Choose start date">
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>End Date</mat-label>
+      <input matInput [matDatepicker]="endPicker" [(ngModel)]="filterEndDate" placeholder="Choose end date">
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+
+    <div class="filter-actions-container">
+      <button mat-flat-button color="primary" (click)="applyDateFilter()" class="add-button">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filter
+      </button>
+    </div>
+  </div>
+</mat-card>
+
+<!-- Attendance Table -->
+<mat-card class="table-card">
+  <div class="table-header">
+    <h3>Recent Attendance ({{ recentAttendance.length }})</h3>
+  </div>
+
+  <div class="table-container">
+    <mat-spinner *ngIf="isLoading" diameter="50"></mat-spinner>
+
+    <table mat-table [dataSource]="recentAttendance" *ngIf="!isLoading && recentAttendance.length > 0" class="attendance-table">
+
+      <!-- Date Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Date </th>
+        <td mat-cell *matCellDef="let record"> {{ record.workDate | date:'dd/MM/yyyy' }} </td>
+      </ng-container>
+
+      <!-- Check-in Column -->
+      <ng-container matColumnDef="checkIn">
+        <th mat-header-cell *matHeaderCellDef> Check-in </th>
+        <td mat-cell *matCellDef="let record">
+          {{ record.checkInTime ? (record.checkInTime | date:'HH:mm') : '--:--' }}
+        </td>
+      </ng-container>
+
+      <!-- Check-out Column -->
+      <ng-container matColumnDef="checkOut">
+        <th mat-header-cell *matHeaderCellDef> Check-out </th>
+        <td mat-cell *matCellDef="let record">
+          {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : '--:--' }}
+        </td>
+      </ng-container>
+
+      <!-- Hours Column -->
+      <ng-container matColumnDef="hours">
+        <th mat-header-cell *matHeaderCellDef> Hours </th>
+        <td mat-cell *matCellDef="let record"> {{ formatHours(record.totalHours) }} </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let record">
+          <mat-chip [class]="'status-' + record.status">{{ record.status | titlecase }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['date','checkIn','checkOut','hours','status']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['date','checkIn','checkOut','hours','status'];"></tr>
+    </table>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && recentAttendance.length === 0" class="empty-state">
+      <mat-icon>schedule</mat-icon>
+      <h3>No Attendance Records Found</h3>
+      <p>No attendance records match the current filter.</p>
+    </div>
+  </div>
+</mat-card>
+
+
+
 </div>
