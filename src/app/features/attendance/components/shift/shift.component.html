@@ -144,7 +144,7 @@
         <div class="tab-content">
 
           <!-- Employee Requests -->
-          <div *ngIf="isEmployee">
+          <div *ngIf="isManager || isEmployee">
             <div *ngIf="employeeShiftSwaps.length > 0; else noRequests">
               <div *ngFor="let swap of employeeShiftSwaps" class="current-shift-card">
                 <div class="card-header">
@@ -167,7 +167,7 @@
           </div>
 
           <!-- Admin Requests -->
-          <div *ngIf="isAdminOrHR">
+          <div *ngIf="isManager || isAdminOrHR">
             <div *ngIf="superAdminPendingSwaps.length > 0; else noAdminRequests">
               <div *ngFor="let swap of superAdminPendingSwaps" class="current-shift-card">
                 <div class="card-header">
@@ -199,6 +199,10 @@
             </ng-template>
           </div>
 
+
+
+
+          
         </div>
       </mat-tab>
 

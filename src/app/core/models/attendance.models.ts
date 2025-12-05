@@ -21,6 +21,15 @@ export interface DepartmentEmployee {
   lastName: string;
 }
 
+export interface AttendanceSession {
+  sessionId: string;         // GUID from backend
+  attendanceId: string;      // GUID from backend
+  checkInTime: string;       // ISO string, e.g. "2025-12-04T09:00:00Z"
+  checkOutTime?: string;     // ISO string or undefined
+  location?: string;         // optional
+  employeeName: string;      // employee full name
+  workDate: string;          // ISO date string, e.g. "2025-12-04"
+}
 
 export interface AttendanceSessionDto {
   sessionId: string;       // maps to SessionId (GUID)

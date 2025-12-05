@@ -332,6 +332,18 @@
         <h3>No Attendance Records Found</h3>
         <p>No attendance records match your current filters.</p>
       </div>
+<!-- Pagination -->
+<div class="pagination-container" *ngIf="!isLoading && filteredAttendance.length > 0">
+  <mat-paginator
+      [length]="totalRecords"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[10, 25, 50]"
+      [pageIndex]="currentPage - 1"
+      (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+
+
     </div>
   </mat-card>
 </div>
