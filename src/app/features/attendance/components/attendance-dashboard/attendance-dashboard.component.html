@@ -1,3 +1,4 @@
+
 <!-- My Attendance Container -->
 <div class="attendance-dashboard-container">
   
@@ -17,231 +18,140 @@
     </div>
   </div>
 
-  <!-- Quick Stats -->
-  <div class="stats-grid">
-    <mat-card class="stat-card" *ngFor="let stat of quickStats">
-      <mat-card-content>
-        <div class="stat-content">
-          <div class="stat-icon" [ngClass]="'stat-' + stat.color">
-            <mat-icon>{{ stat.icon }}</mat-icon>
-          </div>
-          <div class="stat-details">
-            <div class="stat-value">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
   <!-- Main Content Tabs -->
   <mat-card class="main-content-card">
     <mat-tab-group>
       
       <!-- Calendar View Tab -->
       <mat-tab label="Calendar View">
-        <div class="tab-content">
-          
-          <!-- Month Selector -->
-          <div class="calendar-header">
-            <div class="month-navigation">
-              <button mat-icon-button (click)="previousMonth()">
-                <mat-icon>chevron_left</mat-icon>
-              </button>
-              <h3 class="month-title">{{ selectedMonth | date:'MMMM y' }}</h3>
-              <button mat-icon-button (click)="nextMonth()">
-                <mat-icon>chevron_right</mat-icon>
-              </button>
-            </div>
-            
-            <div class="calendar-actions">
-              <button mat-stroked-button (click)="goToCurrentMonth()">
-                <mat-icon>today</mat-icon>
-                Current Month
-              </button>
-            </div>
-          </div>
+        <div class="tab-content">  
+         <app-attendance-calendar></app-attendance-calendar>
 
 
-          <app-attendance-calendar></app-attendance-calendar>
-
-
-          <!-- Calendar Grid -->
-          <!-- <div class="calendar-container"> -->
-            <!-- <div class="calendar-grid"> -->
-              <!-- Week Days Header -->
-              <!-- <div class="calendar-header-row">
-                <div class="calendar-day-header" *ngFor="let day of weekDays">
-                  {{ day }}
-                </div>
-              </div>
-               -->
-              <!-- Calendar Days -->
-              <!-- <div class="calendar-body">
-                <div class="calendar-week" *ngFor="let week of calendarWeeks">
-                  <div class="calendar-day" 
-                       *ngFor="let day of week"
-                       [class.other-month]="!day.isCurrentMonth"
-                       [class.today]="day.isToday"
-                       [class.weekend]="day.isWeekend"
-                       [class.holiday]="day.isHoliday">
-                    
-                    <div class="day-number">{{ day.dayNumber }}</div>
-                    
-                    <div class="day-content" *ngIf="day.attendance">
-                      <div class="attendance-status" [class]="'status-' + day.attendance.status">
-                        <mat-icon>{{ getStatusIcon(day.attendance.status) }}</mat-icon>
-                      </div>
-                      
-                      <div class="time-info" *ngIf="day.attendance.checkInTime">
-                        <div class="check-in">{{ day.attendance.checkInTime | date:'HH:mm' }}</div>
-                        <div class="check-out" *ngIf="day.attendance.checkOutTime">
-                          {{ day.attendance.checkOutTime | date:'HH:mm' }}
-                        </div>
-                      </div>
-                      
-                      <div class="hours-badge" *ngIf="day.attendance.totalHours > 0">
-                        {{ formatHours(day.attendance.totalHours) }}
-                      </div>
-                    </div>
-                    
-                    <div class="day-content" *ngIf="!day.attendance && day.isWorkingDay && !day.isToday && day.isPast">
-                      <div class="no-attendance">
-                        <mat-icon>remove_circle_outline</mat-icon>
-                        <span>No Record</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div> -->
-            <!-- </div> -->
-          <!-- </div> -->
-
-          <!-- Calendar Legend -->
-          <!-- <div class="calendar-legend">
-            <div class="legend-item">
-              <div class="legend-color status-present"></div>
-              <span>Present</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color status-absent"></div>
-              <span>Absent</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color status-late"></div>
-              <span>Late</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color status-half_day"></div>
-              <span>Half Day</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color status-on_leave"></div>
-              <span>On Leave</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-color weekend"></div>
-              <span>Weekend</span>
-            </div>
-          </div> -->
+     
         </div>
       </mat-tab>
-      
-      <!-- List View Tab -->
-      <mat-tab label="List View">
-        <div class="tab-content">
-          
-          <!-- Date Range Filter -->
-          <div class="list-filters">
-            <mat-form-field appearance="outline" class="date-field">
-              <mat-label>Start Date</mat-label>
-              <mat-icon matPrefix>event</mat-icon>
-              <input matInput 
-                     [matDatepicker]="listStartPicker" 
-                     [formControl]="listStartDateControl"
-                     placeholder="Select start date">
-              <mat-datepicker-toggle matIconSuffix [for]="listStartPicker"></mat-datepicker-toggle>
-              <mat-datepicker #listStartPicker></mat-datepicker>
-            </mat-form-field>
+<mat-tab label="List View">
+  <div class="tab-content">
 
-            <mat-form-field appearance="outline" class="date-field">
-              <mat-label>End Date</mat-label>
-              <mat-icon matPrefix>event</mat-icon>
-              <input matInput 
-                     [matDatepicker]="listEndPicker" 
-                     [formControl]="listEndDateControl"
-                     placeholder="Select end date">
-              <mat-datepicker-toggle matIconSuffix [for]="listEndPicker"></mat-datepicker-toggle>
-              <mat-datepicker #listEndPicker></mat-datepicker>
-            </mat-form-field>
+    <!-- Date Range Filter -->
+    <div class="list-filters">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Start Date</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput 
+               [matDatepicker]="listStartPicker" 
+               [formControl]="listStartDateControl"
+               placeholder="Select start date">
+        <mat-datepicker-toggle matIconSuffix [for]="listStartPicker"></mat-datepicker-toggle>
+        <mat-datepicker #listStartPicker></mat-datepicker>
+      </mat-form-field>
 
-            <button mat-flat-button (click)="loadListData()" class="load-button">
-              <mat-icon>refresh</mat-icon>
-              <span>Load Data</span>
-            </button>
-          </div>
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>End Date</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput 
+               [matDatepicker]="listEndPicker" 
+               [formControl]="listEndDateControl"
+               placeholder="Select end date">
+        <mat-datepicker-toggle matIconSuffix [for]="listEndPicker"></mat-datepicker-toggle>
+        <mat-datepicker #listEndPicker></mat-datepicker>
+      </mat-form-field>
 
-          <!-- Loading Indicator -->
-          <div *ngIf="isLoadingList" class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Loading attendance records...</p>
-          </div>
+      <button mat-flat-button (click)="loadEmployeeAttendance()" class="load-button">
+        <mat-icon>refresh</mat-icon>
+        <span>Load Data</span>
+      </button>
+    </div>
 
-          <!-- Attendance List -->
-          <div *ngIf="!isLoadingList && myAttendanceList.length > 0" class="attendance-list">
-            <div class="attendance-item" *ngFor="let record of myAttendanceList">
-              <div class="attendance-date">
-                <div class="day">{{ record.workDate | date:'d' }}</div>
-                <div class="month">{{ record.workDate | date:'MMM' }}</div>
-                <div class="year">{{ record.workDate | date:'y' }}</div>
-              </div>
-              
-              <div class="attendance-details">
-                <div class="attendance-times">
-                  <div class="time-entry">
-                    <mat-icon class="check-in-icon">login</mat-icon>
-                    <span class="time-label">Check In:</span>
-                    <span class="time-value">
-                      {{ record.checkInTime ? (record.checkInTime | date:'HH:mm') : '--:--' }}
-                    </span>
-                  </div>
-                  
-                  <div class="time-entry">
-                    <mat-icon class="check-out-icon">logout</mat-icon>
-                    <span class="time-label">Check Out:</span>
-                    <span class="time-value">
-                      {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : '--:--' }}
-                    </span>
-                  </div>
-                </div>
-                
-                <div class="attendance-summary">
-                  <div class="hours-info">
-                    <span class="hours-label">Total Hours:</span>
-                    <span class="hours-value">{{ formatHours(record.totalHours) }}</span>
-                  </div>
-                  
-                  <mat-chip [class]="'status-' + record.status" class="status-chip">
-                    {{ record.status | titlecase }}
-                  </mat-chip>
-                </div>
-                
-                <div class="attendance-notes" *ngIf="record.notes">
-                  <mat-icon>note</mat-icon>
-                  <span>{{ record.notes }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoadingList" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading attendance records...</p>
+    </div>
 
-          <!-- Empty State for List -->
-          <div *ngIf="!isLoadingList && myAttendanceList.length === 0" class="empty-state">
-            <mat-icon>event_busy</mat-icon>
-            <h3>No Attendance Records</h3>
-            <p>No attendance records found for the selected date range.</p>
-          </div>
-        </div>
-      </mat-tab>
+ <!-- Attendance Table -->
+<div *ngIf="!isLoadingList && dataSource.data.length > 0">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" style="width:100%">
+
+    <!-- Employee Name Column -->
+    <ng-container matColumnDef="employeeName">
+      <th mat-header-cell *matHeaderCellDef>Employee</th>
+      <td mat-cell *matCellDef="let session">
+        <mat-icon>person</mat-icon> {{ session.employeeName }}
+      </td>
+    </ng-container>
+
+    <!-- Work Date Column -->
+    <ng-container matColumnDef="workDate">
+      <th mat-header-cell *matHeaderCellDef>Work Date</th>
+      <td mat-cell *matCellDef="let session">
+        <mat-icon>calendar_today</mat-icon> {{ session.workDate | date:'fullDate' }}
+      </td>
+    </ng-container>
+
+    <!-- Check In Column -->
+    <ng-container matColumnDef="checkInTime">
+      <th mat-header-cell *matHeaderCellDef>Check In</th>
+      <td mat-cell *matCellDef="let session">
+        <mat-icon>login</mat-icon>
+        {{ session.checkInTime ? (session.checkInTime | date:'HH:mm') : '--:--' }}
+      </td>
+    </ng-container>
+
+    <!-- Check Out Column -->
+    <ng-container matColumnDef="checkOutTime">
+      <th mat-header-cell *matHeaderCellDef>Check Out</th>
+      <td mat-cell *matCellDef="let session">
+        <mat-icon>logout</mat-icon>
+        {{ session.checkOutTime ? (session.checkOutTime | date:'HH:mm') : '--:--' }}
+      </td>
+    </ng-container>
+
+    <!-- Location Column -->
+
+    
+    <ng-container matColumnDef="location">
+      <th mat-header-cell *matHeaderCellDef>Location</th>
+      <td mat-cell *matCellDef="let session">
+        <ng-container *ngIf="session.location; else noLocation">
+          <mat-icon>location_on</mat-icon> {{ session.location }}
+        </ng-container>
+        <ng-template #noLocation>--</ng-template>
+      </td>
+    </ng-container>
+
+    <!-- Header and Row Declarations -->
+    <tr mat-header-row *matHeaderRowDef="['employeeName','workDate','checkInTime','checkOutTime','location']"></tr>
+    <tr mat-row *matRowDef="let row; columns: ['employeeName','workDate','checkInTime','checkOutTime','location'];"></tr>
+
+  </table>
+</div>
+
+<!-- Empty State for Table -->
+<div *ngIf="!isLoadingList && dataSource.data.length === 0" class="empty-state">
+  <mat-icon>event_busy</mat-icon>
+  <h3>No Attendance Records</h3>
+  <p>No attendance records found for the selected date range.</p>
+</div>
+
+<!-- Paginator -->
+<mat-paginator
+  [length]="totalCount"
+  [pageSize]="pageSize"
+  [pageIndex]="currentPage - 1"
+  [pageSizeOptions]="[5, 10, 20, 50]"
+  (page)="loadEmployeeAttendance($event.pageIndex + 1, $event.pageSize)">
+</mat-paginator>
+
+
+
+
+
+  </div>
+</mat-tab>
+
+
       
       <!-- Summary Tab -->
       <mat-tab label="Summary">

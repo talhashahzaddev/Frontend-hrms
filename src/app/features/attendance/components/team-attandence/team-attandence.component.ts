@@ -17,6 +17,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ViewDetailsDialogueComponent } from '../view-details-dialogue/view-details-dialogue.component';
@@ -48,6 +49,7 @@ import { User } from '../../../../core/models/auth.models';
     MatIconModule,
     MatMenuModule,
     MatChipsModule,
+    MatPaginatorModule, 
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -64,7 +66,9 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   filteredAttendance: Attendance[] = [];
   departments: Department[] = [];
   dailyStats: DailyAttendanceStats | null = null;
-  
+  totalRecords: number = 0;
+  currentPage = 1;
+  pageSize = 10;
   // Current user
   currentUser: User | null = null;
   
@@ -144,6 +148,12 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       });
   }
 
+  onPageChange(event: any) {
+  this.currentPage = event.pageIndex + 1;   // because paginator starts from 0
+  this.pageSize = event.pageSize;
+  this.loadAttendanceData();
+}
+
   private loadDailyStats(): void {
     this.attendanceService.getDailyAttendanceStats()
       .pipe(takeUntil(this.destroy$))
@@ -184,8 +194,8 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     endDate,
     departmentId: this.departmentControl.value || undefined,
     status: this.statusControl.value || undefined,
-    page: 1,
-    pageSize: 100
+    page: this.currentPage,
+    pageSize: this.pageSize
   };
 
   this.attendanceService.getAttendances(searchRequest)
@@ -193,6 +203,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     .subscribe({
       next: (response) => {
         this.attendanceRecords = response.attendances;
+        this.totalRecords = response.totalCount;
         this.filterAttendanceData();
         this.isLoading = false;
       },

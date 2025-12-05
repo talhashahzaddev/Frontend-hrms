@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -16,6 +17,7 @@ import {
   DailyAttendanceStats,
   AttendanceSessionDto,
   ShiftDto,
+  AttendanceSession,
   DepartmentEmployee,
   UpdateShiftDto,
   ShiftSwap,
@@ -193,12 +195,7 @@ getTodaySessions(): Observable<AttendanceSessionDto[]> {
     .pipe(map(res => res.data || []));
 }
 
-//Today session for specific employee by its id_Parameter
 
-// getTodaySessionsById(employeeId: string): Observable<AttendanceSessionDto[]> {
-//   return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession/${employeeId}`)
-//     .pipe(map(res => res.data || []));
-// }
 
 getTodaySessionsById(employeeId: string, workDate?: string | Date): Observable<AttendanceSessionDto[]> {
   let url = `${this.apiUrl}/employeeSession/${employeeId}`;
@@ -214,9 +211,55 @@ getTodaySessionsById(employeeId: string, workDate?: string | Date): Observable<A
     .pipe(map(res => res.data || []));
 }
 
+// getEmployeeAttendanceSessions(
+//   pageNumber: number = 1,
+//   pageSize: number = 10,
+//   startDate: Date,
+//   endDate: Date
+// ): Observable<AttendanceSession[]> {
+
+//   let params = new HttpParams()
+//     .set('pageNumber', pageNumber.toString())
+//     .set('pageSize', pageSize.toString())
+//     .set('startDate', startDate.toISOString())   // required
+//     .set('endDate', endDate.toISOString());      // required
+
+//   return this.http.get<AttendanceSession[]>(this.apiUrl + '/EmployeeAllAttendance', { params });
+// }
 
 
+getEmployeeAttendanceSessions(
+  pageNumber: number = 1,
+  pageSize: number = 10,
+  startDate: Date,
+  endDate: Date
+): Observable<AttendanceListResponse> {
 
+  let params = new HttpParams()
+    .set('pageNumber', pageNumber.toString())
+    .set('pageSize', pageSize.toString())
+    .set('startDate', startDate.toISOString())
+    .set('endDate', endDate.toISOString());
+
+  return this.http.get<ApiResponse<any>>(this.apiUrl + '/EmployeeAllAttendance', { params })
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch employee attendance sessions');
+        }
+        const data = response.data!;
+        return {
+          attendances: data.data,
+          totalCount: data.totalCount,
+          page: data.page,
+          pageSize: data.pageSize,
+          totalPages: data.totalPages,
+          hasNextPage: data.hasNextPage,
+          hasPreviousPage: data.hasPreviousPage
+        };
+      })
+    );
+}
 
   getEmployeeAttendance(employeeId: string, startDate: string, endDate: string): Observable<Attendance[]> {
     const params = new HttpParams()
