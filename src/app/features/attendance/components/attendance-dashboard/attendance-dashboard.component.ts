@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -13,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatNativeDateModule } from '@angular/material/core';
 import { Subject, takeUntil, interval } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
 
 import { AttendanceCalendarComponent } from '../attendancce-calendar/attendance-calendar';
 import { AttendanceService } from '../../services/attendance.service';
@@ -21,9 +23,15 @@ import {
   TimeTrackingSession,
   AttendanceSummary,
   AttendanceCalendarData,
+  AttendanceSession,
   Attendance
 } from '../../../../core/models/attendance.models';
 import { User } from '../../../../core/models/auth.models';
+
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort'; // Optional if you want sorting
+import { MatPaginatorModule } from '@angular/material/paginator'; // Optional if you want pagination
+
 
 interface CalendarDay {
   date: Date;
@@ -54,6 +62,9 @@ interface CalendarDay {
     MatInputModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+     MatTableModule,      // <-- ADD THIS
+    MatSortModule,       // <-- optional
+    MatPaginatorModule   ,
     MatNativeDateModule
   ],
   templateUrl: './attendance-dashboard.component.html',
@@ -66,7 +77,11 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   currentSession: TimeTrackingSession | null = null;
   currentTime = new Date();
-  
+  // Add properties for pagination
+currentPage = 1;
+pageSize = 10;
+totalPages = 0;
+totalCount = 0;
   // Loading states
   isLoading = false;
   isLoadingList = false;
@@ -75,7 +90,9 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   attendanceSummary: AttendanceSummary | null = null;
   calendarData: AttendanceCalendarData[] = [];
   myAttendanceList: Attendance[] = [];
-  
+  Sessionslist:AttendanceSession[]=[];
+dataSource = new MatTableDataSource<AttendanceSession>([]);
+
   // Date controls
   selectedMonth = new Date();
   listStartDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
@@ -188,6 +205,61 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
       }
     ];
   }
+
+
+
+loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
+  if (!this.listStartDateControl.value || !this.listEndDateControl.value) {
+    alert('Please select both start and end dates');
+    return;
+  }
+
+  this.isLoadingList = true;
+
+  const startDate = this.listStartDateControl.value;
+  const endDate = this.listEndDateControl.value;
+
+  this.attendanceService.getEmployeeAttendanceSessions(
+    pageNumber,
+    pageSize,
+    startDate,
+    endDate
+  )
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: (res: any) => {
+      // Use the mapped attendances from your service
+      const sessionsArray = res.attendances ?? [];
+
+      this.Sessionslist = sessionsArray.map((s: any) => ({
+        sessionId: s.sessionId,
+        attendanceId: s.attendanceId,
+        employeeName: s.employeeName || `${s.firstName} ${s.lastName}`,
+        workDate: s.workDate ? new Date(s.workDate) : null,
+        checkInTime: s.checkInTime ? new Date(s.checkInTime) : null,
+        checkOutTime: s.checkOutTime ? new Date(s.checkOutTime) : null,
+        // location: s.location ? (typeof s.location === 'string' ? s.location : s.location.source) : '--'
+      }));
+
+      // Set dataSource for MatTable
+      this.dataSource.data = this.Sessionslist;
+
+      // Pagination info
+      this.currentPage = res.page ?? pageNumber;
+      this.pageSize = res.pageSize ?? pageSize;
+      this.totalPages = res.totalPages ?? 1;
+      this.totalCount = res.totalCount ?? this.Sessionslist.length;
+
+      this.isLoadingList = false;
+    },
+    error: (err) => {
+      console.error('Error fetching employee attendance:', err);
+      this.isLoadingList = false;
+    }
+  });
+}
+
+
 
   generateCalendar(): void {
     const year = this.selectedMonth.getFullYear();

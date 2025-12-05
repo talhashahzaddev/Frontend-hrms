@@ -72,12 +72,21 @@ export class ShiftComponent implements OnInit {
 if (this.isAdminOrHR) {
   this.loadSuperAdminPendingSwaps();
 }
+if(this.isHRManager){
+  this.loadSuperAdminPendingSwaps();
+}
+if(this.isManager){
+  this.loadSuperAdminPendingSwaps();
+  this.loadEmployeeShiftSwaps();
+      this.loadEmployeeCurrentShift();
+}
 
     // ✅ If Employee, load their shift swap requests
     if (this.isEmployee) {
       this.loadEmployeeShiftSwaps();
       this.loadEmployeeCurrentShift();
     }
+    
 
     this.selectedShiftId = '';            // select "All Shifts" by default
   this.onShiftChange(this.selectedShiftId); 
@@ -91,6 +100,9 @@ if (this.isAdminOrHR) {
   // Role helpers
   get isSuperAdmin(): boolean {
     return this.authService.hasRole('Super Admin');
+  }
+  get isManager():boolean {
+    return this.authService.hasRole('Manager');
   }
 
   get isHRManager(): boolean {
