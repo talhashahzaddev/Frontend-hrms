@@ -1,0 +1,163 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>{{ isViewMode ? 'visibility' : 'edit' }}</mat-icon>
+    {{ isViewMode ? 'View Employee' : 'Edit Employee' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="employeeForm" class="employee-form">
+
+    <!-- Row 1 -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Employee Code</mat-label>
+        <input matInput formControlName="employeeCode" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>First Name</mat-label>
+        <input matInput formControlName="firstName" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Last Name</mat-label>
+        <input matInput formControlName="lastName" [disabled]="isViewMode">
+      </mat-form-field>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" [disabled]="isViewMode">
+      </mat-form-field>
+    </div>
+
+    <!-- Row 3 -->
+    <!-- <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Department</mat-label>
+
+        <ng-container *ngIf="!isViewMode; else viewDepartment">
+          <mat-select formControlName="departmentId">
+            <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+              {{ dept.departmentName }}
+            </mat-option>
+          </mat-select>
+        </ng-container>
+
+        <ng-template #viewDepartment>
+          <input matInput [value]="employeeForm.get('departmentName')?.value" disabled>
+        </ng-template>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Position</mat-label>
+
+        <ng-container *ngIf="!isViewMode; else viewPosition">
+          <mat-select formControlName="positionId">
+            <mat-option *ngFor="let pos of positions" [value]="pos.positionId">
+              {{ pos.positionTitle }}
+            </mat-option>
+          </mat-select>
+        </ng-container>
+
+        <ng-template #viewPosition>
+          <input matInput [value]="employeeForm.get('positionTitle')?.value" disabled>
+        </ng-template>
+      </mat-form-field>
+    </div> -->
+
+    <!-- Row 4 -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status" [disabled]="isViewMode">
+          <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Employment Type</mat-label>
+        <mat-select formControlName="employmentType" [disabled]="isViewMode">
+          <mat-option *ngFor="let type of employmentTypes" [value]="type">{{ type }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Row 5 -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Hire Date</mat-label>
+        <input matInput type="date" formControlName="hireDate" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Pay Type</mat-label>
+        <input matInput formControlName="payType" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Basic Salary</mat-label>
+        <input matInput type="number" formControlName="basicSalary" [disabled]="isViewMode">
+      </mat-form-field>
+    </div>
+
+    <!-- Row 6 -->
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Reporting Manager</mat-label>
+
+        <ng-container *ngIf="!isViewMode; else viewManager">
+          <mat-select formControlName="reportingManagerId">
+            <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
+              {{ mgr.fullName }}
+            </mat-option>
+          </mat-select>
+        </ng-container>
+
+        <ng-template #viewManager>
+          <input matInput [value]="employeeForm.get('reportingManagerName')?.value" disabled>
+        </ng-template>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Gender</mat-label>
+        <input matInput formControlName="gender" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nationality</mat-label>
+        <input matInput formControlName="nationality" [disabled]="isViewMode">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Marital Status</mat-label>
+        <input matInput formControlName="maritalStatus" [disabled]="isViewMode">
+      </mat-form-field>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<div class="dialog-actions">
+  <button mat-stroked-button (click)="cancel()">Cancel</button>
+
+  <button 
+    mat-raised-button 
+    class="submit-button" 
+    color="primary" 
+    (click)="save()" 
+    [disabled]="isViewMode">
+    Save
+  </button>
+</div>

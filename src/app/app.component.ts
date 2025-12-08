@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { Subject, filter, takeUntil } from 'rxjs';
+import { Subject, filter, takeUntil,take } from 'rxjs';
 
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -97,17 +97,48 @@ export class AppComponent implements OnInit, OnDestroy {
         window.scrollTo(0, 0);
       });
   }
+
+
 private redirectUserOnInit(): void {
   const user = this.authService.getCurrentUserValue();
 
   if (!user) {
-    // Not logged in, go to login page
     this.router.navigate(['/login']);
-  } else if (user.roleName === 'Super Admin' || user.roleName === 'HR Manager') {
-    this.router.navigate(['/dashboard']);
-  } else {
-    this.router.navigate(['/performance/dashboard']);
+    return;
   }
+
+  this.router.events
+    .pipe(
+      filter(event => event instanceof NavigationEnd),
+      take(1)
+    )
+    .subscribe((event: NavigationEnd) => {
+
+      const currentUrl = event.urlAfterRedirects;
+
+      const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
+      
+      // Employee is trying to access admin dashboard
+      if (!isAdmin && currentUrl.startsWith('/dashboard')) {
+        this.router.navigate(['/performance/dashboard']);
+        return;
+      }
+
+      // Admin trying to access employee dashboard
+      if (isAdmin && currentUrl.startsWith('/performance')) {
+        this.router.navigate(['/dashboard']);
+        return;
+      }
+
+      // If user is on root or login page → role-based redirect
+      if (currentUrl === '/' || currentUrl === '/login') {
+        if (isAdmin) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/performance/dashboard']);
+        }
+      }
+    });
 }
 
 

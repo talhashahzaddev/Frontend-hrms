@@ -1,0 +1,217 @@
+/* ============================
+   Employee Dialog Container
+=============================== */
+
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ============================
+   Dialog Header
+=============================== */
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .close-button {
+    color: white;
+    transition: all 0.2s ease;
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+  }
+}
+
+/* ============================
+   Dialog Content
+=============================== */
+
+.dialog-content {
+  padding: 28px !important;
+  min-width: 650px;
+  max-width: 850px;
+
+  .employee-dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  /* 2 fields row */
+  .form-row:nth-child(2),
+  .form-row:nth-child(3) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 4 fields row */
+  .form-row:nth-child(6) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* --- Material Form Fields Styling --- */
+  ::ng-deep mat-form-field.mat-form-field-appearance-outline {
+    .mat-mdc-text-field-wrapper {
+      background: #f9fafb;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .mat-mdc-form-field-flex {
+      padding: 0 16px;
+    }
+
+    .mat-mdc-notch-piece {
+      border-color: #e5e7eb !important;
+      transition: border-color 0.3s ease;
+    }
+
+    &:hover .mat-mdc-text-field-wrapper {
+      background: white;
+    }
+
+    &:hover .mat-mdc-notch-piece {
+      border-color: #667eea !important;
+    }
+
+    &.mat-focused {
+      .mat-mdc-text-field-wrapper {
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .mat-mdc-notch-piece {
+        border-color: #667eea !important;
+        border-width: 2px !important;
+      }
+    }
+
+    .mat-mdc-form-field-label {
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    &.mat-focused .mat-mdc-form-field-label {
+      color: #667eea;
+    }
+
+    input {
+      color: #1f2937;
+      font-weight: 500;
+    }
+
+    /* Error state */
+    &.mat-form-field-invalid {
+      .mat-mdc-notch-piece {
+        border-color: #dc2626 !important;
+      }
+      .mat-mdc-form-field-label {
+        color: #dc2626;
+      }
+    }
+  }
+}
+
+/* ============================
+   Dialog Actions
+=============================== */
+
+.dialog-actions {
+  padding: 20px 28px !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  button {
+    height: 44px;
+    padding: 0 28px !important;
+    border-radius: 12px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.3s ease;
+
+    /* Cancel */
+    &[color="warn"] {
+      background: white !important;
+      color: #6b7280 !important;
+      border: 2px solid #e5e7eb !important;
+
+      &:hover {
+        background: #f9fafb !important;
+        border-color: #cbd5e1 !important;
+      }
+    }
+
+    /* Save Button */
+    &[color="primary"]:not([disabled]) {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+    }
+
+    /* Disabled */
+    &[disabled] {
+      background: #f3f4f6 !important;
+      color: #9ca3af !important;
+      border: 1px solid #e5e7eb !important;
+    }
+  }
+}
+
+/* ============================
+   Responsive
+=============================== */
+@media (max-width: 600px) {
+  .dialog-content {
+    min-width: unset;
+
+    .form-row {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    button {
+      width: 100%;
+    }
+  }
+}
