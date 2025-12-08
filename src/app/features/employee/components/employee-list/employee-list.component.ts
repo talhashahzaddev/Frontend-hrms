@@ -20,6 +20,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith, combineLatest } from 'rxjs';
 
+import {EmployeeDialogueComponent} from '../employee-dialogue/employee-dialogue.component'
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
@@ -237,13 +238,36 @@ this.employees = response.employees.map(emp => ({
   }
 
   // Actions
-  viewEmployee(employee: Employee): void {
-    // Navigate to employee detail
-  }
+  // viewEmployee(employee: Employee): void {
+  //   // Navigate to employee detail
+  // }
+viewEmployee(employee: Employee): void {
+  this.dialog.open(EmployeeDialogueComponent, {
+    width: '700px',
+    data: { employee, viewOnly: true } // viewOnly = true for viewing
+  });
+}
 
-  editEmployee(employee: Employee): void {
-    // Navigate to employee edit form
-  }
+editEmployee(employee: Employee): void {
+  const dialogRef = this.dialog.open(EmployeeDialogueComponent, {
+    width: '700px',
+    data: { employee, viewOnly: false } // viewOnly = false for editing
+  });
+
+  dialogRef.afterClosed().subscribe((updatedEmployee: Employee) => {
+    if (updatedEmployee) {
+      // Update the employee locally or reload from backend
+      const index = this.employees.findIndex(e => e.employeeId === updatedEmployee.employeeId);
+      if (index !== -1) this.employees[index] = updatedEmployee;
+      this.notificationService.showSuccess('Employee updated successfully');
+    }
+  });
+}
+
+
+  // editEmployee(employee: Employee): void {
+  //   // Navigate to employee edit form
+  // }
 
   deleteEmployee(employee: Employee): void {
     const dialogData: ConfirmDeleteData = {
