@@ -11,11 +11,11 @@
 <mat-dialog-content class="dialog-content">
   <form [formGroup]="employeeForm" class="employee-form">
 
-    <!-- Row 1 -->
+    <!-- Row 1: Basic Info -->
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Employee Code</mat-label>
-        <input matInput formControlName="employeeCode" [disabled]="isViewMode">
+        <input matInput formControlName="employeeCode">
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -29,7 +29,7 @@
       </mat-form-field>
     </div>
 
-    <!-- Row 2 -->
+    <!-- Row 2: Contact -->
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
@@ -42,59 +42,79 @@
       </mat-form-field>
     </div>
 
-    <!-- Row 3 -->
+    <!-- Row 3: Department & Position -->
     <!-- <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Department</mat-label>
-
-        <ng-container *ngIf="!isViewMode; else viewDepartment">
+        <ng-container *ngIf="!isViewMode; else viewDept">
           <mat-select formControlName="departmentId">
             <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
               {{ dept.departmentName }}
             </mat-option>
           </mat-select>
         </ng-container>
-
-        <ng-template #viewDepartment>
-          <input matInput [value]="employeeForm.get('departmentName')?.value" disabled>
+        <ng-template #viewDept>
+          <input matInput [value]="employeeForm.get('departmentName')?.value" readonly>
         </ng-template>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Position</mat-label>
-
-        <ng-container *ngIf="!isViewMode; else viewPosition">
+        <ng-container *ngIf="!isViewMode; else viewPos">
           <mat-select formControlName="positionId">
             <mat-option *ngFor="let pos of positions" [value]="pos.positionId">
               {{ pos.positionTitle }}
             </mat-option>
           </mat-select>
         </ng-container>
-
-        <ng-template #viewPosition>
-          <input matInput [value]="employeeForm.get('positionTitle')?.value" disabled>
+        <ng-template #viewPos>
+          <input matInput [value]="employeeForm.get('positionTitle')?.value" readonly>
         </ng-template>
       </mat-form-field>
     </div> -->
 
-    <!-- Row 4 -->
+    <!-- Row 4: Manager, Status & Employment Type -->
     <div class="form-row">
       <mat-form-field appearance="outline">
+        <mat-label>Reporting Manager</mat-label>
+        <ng-container *ngIf="!isViewMode; else viewMgr">
+          <mat-select formControlName="reportingManagerId">
+            <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
+              {{ mgr.fullName }}
+            </mat-option>
+          </mat-select>
+        </ng-container>
+        <ng-template #viewMgr>
+          <input matInput [value]="employeeForm.get('reportingManagerName')?.value" readonly>
+        </ng-template>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>
-        <mat-select formControlName="status" [disabled]="isViewMode">
-          <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
-        </mat-select>
+        <ng-container *ngIf="!isViewMode; else viewStatus">
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+          </mat-select>
+        </ng-container>
+        <ng-template #viewStatus>
+          <input matInput [value]="employeeForm.get('status')?.value" readonly>
+        </ng-template>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Employment Type</mat-label>
-        <mat-select formControlName="employmentType" [disabled]="isViewMode">
-          <mat-option *ngFor="let type of employmentTypes" [value]="type">{{ type }}</mat-option>
-        </mat-select>
+        <ng-container *ngIf="!isViewMode; else viewEmployment">
+          <mat-select formControlName="employmentType">
+            <mat-option *ngFor="let type of employmentTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </ng-container>
+        <ng-template #viewEmployment>
+          <input matInput [value]="employeeForm.get('employmentType')?.value" readonly>
+        </ng-template>
       </mat-form-field>
     </div>
 
-    <!-- Row 5 -->
+    <!-- Row 5: Hire & Pay -->
     <div class="form-row">
       <mat-form-field appearance="outline">
         <mat-label>Hire Date</mat-label>
@@ -112,22 +132,11 @@
       </mat-form-field>
     </div>
 
-    <!-- Row 6 -->
+    <!-- Row 6: Personal Info -->
     <div class="form-row">
       <mat-form-field appearance="outline">
-        <mat-label>Reporting Manager</mat-label>
-
-        <ng-container *ngIf="!isViewMode; else viewManager">
-          <mat-select formControlName="reportingManagerId">
-            <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
-              {{ mgr.fullName }}
-            </mat-option>
-          </mat-select>
-        </ng-container>
-
-        <ng-template #viewManager>
-          <input matInput [value]="employeeForm.get('reportingManagerName')?.value" disabled>
-        </ng-template>
+        <mat-label>Date of Birth</mat-label>
+        <input matInput type="date" formControlName="dateOfBirth" [disabled]="isViewMode">
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -146,18 +155,50 @@
       </mat-form-field>
     </div>
 
+    <!-- Row 7: Address -->
+    <div formGroupName="address" class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Street</mat-label>
+        <input matInput formControlName="street" [disabled]="isViewMode">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <input matInput formControlName="city" [disabled]="isViewMode">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>State</mat-label>
+        <input matInput formControlName="state" [disabled]="isViewMode">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Zip</mat-label>
+        <input matInput formControlName="zip" [disabled]="isViewMode">
+      </mat-form-field>
+    </div>
+
+    <!-- Row 8: Emergency Contact -->
+    <div formGroupName="emergencyContact" class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" [disabled]="isViewMode">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" [disabled]="isViewMode">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Phone</mat-label>
+        <input matInput formControlName="phone" [disabled]="isViewMode">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Relationship</mat-label>
+        <input matInput formControlName="relationship" [disabled]="isViewMode">
+      </mat-form-field>
+    </div>
+
   </form>
 </mat-dialog-content>
 
 <div class="dialog-actions">
   <button mat-stroked-button (click)="cancel()">Cancel</button>
-
-  <button 
-    mat-raised-button 
-    class="submit-button" 
-    color="primary" 
-    (click)="save()" 
-    [disabled]="isViewMode">
-    Save
-  </button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="isViewMode">Save</button>
 </div>

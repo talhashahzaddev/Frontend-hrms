@@ -552,6 +552,185 @@
         }
       }
 
+//Table
+
+
+/* Attendance List Styling – Same as Employee Table */
+.attendance-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  // Table Card
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+
+      .employee-table {
+        width: 100%;
+
+        ::ng-deep {
+          /* Header Row */
+          .mat-mdc-header-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+          }
+
+          .mat-mdc-header-cell {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 16px 12px;
+          }
+
+          /* Table Rows */
+          .mat-mdc-row {
+            transition: all 0.2s ease;
+            cursor: pointer;
+
+            &:hover {
+              background: linear-gradient(
+                135deg,
+                rgba(102, 126, 234, 0.05) 0%,
+                rgba(118, 75, 162, 0.02) 100%
+              );
+            }
+
+            .mat-mdc-cell {
+              padding: 16px 12px;
+              border-bottom: 1px solid #f3f4f6;
+              font-size: 14px;
+              color: #374151;
+            }
+          }
+        }
+
+        /* Employee Avatar (Same as Employee Table) */
+        .employee-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .employee-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+
+          mat-icon {
+            color: white;
+            font-size: 22px;
+            width: 22px;
+            height: 22px;
+          }
+        }
+
+        .employee-details {
+          .employee-name {
+            font-weight: 600;
+            color: #1f2937;
+          }
+        }
+
+        /* Attendance Type – Chip Style Like Employee Status */
+        .attendance-chip {
+          padding: 4px 12px;
+          font-size: 12px;
+          font-weight: 600;
+          border-radius: 16px;
+          display: inline-block;
+
+          &.present {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+          }
+
+          &.absent {
+            background: rgba(220, 38, 38, 0.15);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+          }
+
+          &.leave {
+            background: rgba(234, 179, 8, 0.15);
+            color: #b45309;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+          }
+        }
+      }
+
+      /* Empty State – Same as Employee Table */
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0 0 24px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .attendance-container {
+    padding: 16px;
+  }
+}
+
+
+
+
       // Summary Tab
       .summary-content {
         .summary-stats {
