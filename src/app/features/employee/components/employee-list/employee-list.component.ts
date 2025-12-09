@@ -237,10 +237,7 @@ this.employees = response.employees.map(emp => ({
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.employeeCode}`;
   }
 
-  // Actions
-  // viewEmployee(employee: Employee): void {
-  //   // Navigate to employee detail
-  // }
+
 viewEmployee(employee: Employee): void {
   this.dialog.open(EmployeeDialogueComponent, {
     width: '700px',

@@ -8,14 +8,20 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
-import { EmployeeService } from '../../services/employee.service'; // service to fetch departments, positions, managers
+import { EmployeeService } from '../../services/employee.service';
 
 @Component({
   selector: 'app-employee-dialogue',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, MatDialogModule,
-    MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule,MatIconModule
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatIconModule
   ],
   templateUrl: './employee-dialogue.component.html',
   styleUrls: ['./employee-dialogue.component.scss']
@@ -43,36 +49,50 @@ export class EmployeeDialogueComponent implements OnInit {
   ngOnInit(): void {
     const emp = this.data.employee;
 
-    // Initialize form
     this.employeeForm = this.fb.group({
       employeeCode: [{ value: emp.employeeCode, disabled: true }],
       firstName: [{ value: emp.firstName, disabled: this.isViewMode }, Validators.required],
       lastName: [{ value: emp.lastName, disabled: this.isViewMode }, Validators.required],
+      fullName: [{ value: emp.fullName, disabled: true }],
       email: [{ value: emp.email, disabled: this.isViewMode }, [Validators.required, Validators.email]],
       phone: [{ value: emp.phone, disabled: this.isViewMode }],
+      dateOfBirth: [{ value: emp.dateOfBirth, disabled: this.isViewMode }],
+      gender: [{ value: emp.gender, disabled: this.isViewMode }],
+      nationality: [{ value: emp.nationality, disabled: this.isViewMode }],
+      maritalStatus: [{ value: emp.maritalStatus, disabled: this.isViewMode }],
+      address: this.fb.group({
+        street: [{ value: emp.address?.street || '', disabled: this.isViewMode }],
+        city: [{ value: emp.address?.city || '', disabled: this.isViewMode }],
+        state: [{ value: emp.address?.state || '', disabled: this.isViewMode }],
+        zip: [{ value: emp.address?.zip || '', disabled: this.isViewMode }]
+      }),
+      emergencyContact: this.fb.group({
+        name: [{ value: emp.emergencyContact?.name || '', disabled: this.isViewMode }],
+        email: [{ value: emp.emergencyContact?.email || '', disabled: this.isViewMode }],
+        phone: [{ value: emp.emergencyContact?.phone || '', disabled: this.isViewMode }],
+        relationship: [{ value: emp.emergencyContact?.relationship || '', disabled: this.isViewMode }]
+      }),
 
-      // Department & Position
       departmentId: [{ value: emp.department?.departmentId || '', disabled: this.isViewMode }],
       departmentName: [{ value: emp.department?.departmentName || '', disabled: true }],
-
       positionId: [{ value: emp.position?.positionId || '', disabled: this.isViewMode }],
       positionTitle: [{ value: emp.position?.positionTitle || '', disabled: true }],
 
-      status: [{ value: emp.status, disabled: this.isViewMode }],
-      employmentType: [{ value: emp.employmentType, disabled: this.isViewMode }],
-      hireDate: [{ value: emp.hireDate, disabled: this.isViewMode }],
-      payType: [{ value: emp.paytype, disabled: this.isViewMode }],
-      basicSalary: [{ value: emp.basicSalary, disabled: this.isViewMode }],
-
       reportingManagerId: [{ value: emp.manager?.employeeId || '', disabled: this.isViewMode }],
-      reportingManagerName: [{ value: emp.manager?.fullName || '', disabled: true }],
+      reportingManagerName: [{ value: emp.reportingManagerName || '',disabled: true }],
 
-      gender: [{ value: emp.gender, disabled: this.isViewMode }],
-      nationality: [{ value: emp.nationality, disabled: this.isViewMode }],
-      maritalStatus: [{ value: emp.maritalStatus, disabled: this.isViewMode }]
+      employmentType: [{ value: emp.employmentType || '', disabled: this.isViewMode }],
+      payType: [{ value: emp.paytype || '', disabled: this.isViewMode }],
+      basicSalary: [{ value: emp.basicSalary || 0, disabled: this.isViewMode }],
+      hireDate: [{ value: emp.hireDate, disabled: this.isViewMode }],
+      status: [{ value: emp.status, disabled: this.isViewMode }]
     });
 
-    // Load departments, positions, managers
+     // Disable entire form in view mode
+  if (this.isViewMode) {
+    this.employeeForm.disable();
+  }
+
     this.loadDropdowns();
   }
 
