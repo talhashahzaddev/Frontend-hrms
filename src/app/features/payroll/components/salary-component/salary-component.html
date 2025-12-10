@@ -22,7 +22,7 @@
           <div class="form-row">
             <mat-form-field appearance="outline">
               <mat-label>Component Name</mat-label>
-              <input matInput formControlName="name" placeholder="Enter component name">
+              <input matInput formControlName="name" placeholder="Enter component name" [disabled]="componentForm.get('isAbsentTax')?.value">
               <mat-error *ngIf="componentForm.get('name')?.hasError('required')">Name is required</mat-error>
             </mat-form-field>
 
@@ -38,7 +38,7 @@
           <div class="form-row">
             <mat-form-field appearance="outline">
               <mat-label>Type</mat-label>
-              <mat-select formControlName="type">
+              <mat-select formControlName="type" [disabled]="componentForm.get('isAbsentTax')?.value">
                 <mat-option value="allowance">Allowance</mat-option>
                 <mat-option value="deduction">Deduction</mat-option>
               </mat-select>
@@ -54,9 +54,8 @@
           </div>
 
           <div class="form-row checkbox-row single-column">
-            <mat-checkbox formControlName="isDefault">Default Component</mat-checkbox>
-            <mat-checkbox formControlName="isTaxable">Taxable</mat-checkbox>
             <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+            <mat-checkbox formControlName="isAbsentTax">Absent Tax</mat-checkbox>
           </div>
         </div>
 
@@ -109,24 +108,6 @@
         <th mat-header-cell *matHeaderCellDef>Value</th>
         <td mat-cell *matCellDef="let component">
           {{ component.value }}{{ component.calculationType === 'percentage' ? '%' : '' }}
-        </td>
-      </ng-container>
-
-      <!-- Default Column -->
-      <ng-container matColumnDef="isDefault">
-        <th mat-header-cell *matHeaderCellDef>Default</th>
-        <td mat-cell *matCellDef="let component">
-          <mat-icon *ngIf="component.isDefault" color="primary">check_circle</mat-icon>
-          <mat-icon *ngIf="!component.isDefault" color="warn">cancel</mat-icon>
-        </td>
-      </ng-container>
-
-      <!-- Taxable Column -->
-      <ng-container matColumnDef="isTaxable">
-        <th mat-header-cell *matHeaderCellDef>Taxable</th>
-        <td mat-cell *matCellDef="let component">
-          <mat-icon *ngIf="component.isTaxable" color="primary">check_circle</mat-icon>
-          <mat-icon *ngIf="!component.isTaxable" color="warn">cancel</mat-icon>
         </td>
       </ng-container>
 
@@ -209,9 +190,8 @@
                 
                 <mat-form-field appearance="outline">
                   <mat-label>Value Override</mat-label>
-                  <input matInput type="number" formControlName="value" min="0">
-                  <mat-error *ngIf="ruleForm.get('value')?.hasError('required')">Value is required</mat-error>
-                  <mat-error *ngIf="ruleForm.get('value')?.hasError('min')">Value must be positive</mat-error>
+                  <input matInput type="number" formControlName="valueOverride" min="0" placeholder="Optional">
+                  <mat-error *ngIf="ruleForm.get('valueOverride')?.hasError('min')">Value must be positive</mat-error>
                 </mat-form-field>
               </div>
 

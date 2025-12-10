@@ -243,12 +243,17 @@ export interface PayrollProcessingHistory {
 export interface SalaryRule {
   ruleId: string;
   rulename: string;
-  description: string;
+  description?: string;
   componentId: string;
   componentName: string;
   componentType?: 'allowance' | 'deduction' | 'earning';
   // condition: string;
-  value: number;
+  value?: number;
+  valueOverride?: number;
+  departmentId?: string;
+  positionId?: string;
+  departmentName?: string;
+  positionTitle?: string;
   isActive: boolean;
 }
 
@@ -274,11 +279,11 @@ export interface UpdateSalaryComponentRequest {
 
 export interface CreateSalaryRuleRequest {
   rulename: string;
-  description: string;
+  description?: string;
   componentId: string;
   // condition: string;
-  value: number;
-  isActive: boolean;
+  valueOverride?: number;
+  isActive?: boolean;
   departmentId?: string;
   positionId?: string;
 }
@@ -288,7 +293,7 @@ export interface UpdateSalaryRuleRequest {
   description?: string;
   componentId?: string;
   // condition?: string;
-  value?: number;
+  valueOverride?: number;
   isActive?: boolean;
   departmentId?: string;
   positionId?: string;
