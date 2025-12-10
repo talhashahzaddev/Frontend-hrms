@@ -59,7 +59,7 @@ export class SalaryComponent implements OnInit {
   ruleForm: FormGroup;
   selectedComponent: SalaryComponentModel | null = null;
   selectedRule: SalaryRule | null = null;
-  displayedColumns: string[] = ['name', 'type', 'calculationType', 'value', 'isDefault', 'isTaxable', 'isActive', 'actions'];
+  displayedColumns: string[] = ['name', 'type', 'calculationType', 'value', 'isActive', 'actions'];
   ruleDisplayedColumns: string[] = ['name', 'componentName', 'value', 'department', 'position', 'isActive', 'actions'];
   
   constructor(
@@ -74,9 +74,27 @@ export class SalaryComponent implements OnInit {
       type: ['allowance', [Validators.required]],
       calculationType: ['fixed', [Validators.required]],
       value: [0, [Validators.required, Validators.min(0)]],
-      isDefault: [false],
-      isTaxable: [false],
+      isAbsentTax: [false],
       isActive: [true]
+    });
+
+    // Handle Absent Tax checkbox changes
+    this.componentForm.get('isAbsentTax')?.valueChanges.subscribe(isChecked => {
+      if (isChecked) {
+        this.updateAbsentTaxName();
+        this.componentForm.get('name')?.disable();
+        this.componentForm.get('type')?.disable();
+      } else {
+        this.componentForm.get('name')?.enable();
+        this.componentForm.get('type')?.enable();
+      }
+    });
+
+    // Handle calculation type changes for Absent Tax
+    this.componentForm.get('calculationType')?.valueChanges.subscribe(() => {
+      if (this.componentForm.get('isAbsentTax')?.value) {
+        this.updateAbsentTaxName();
+      }
     });
     
     this.ruleForm = this.fb.group({
@@ -84,9 +102,9 @@ export class SalaryComponent implements OnInit {
       description: [''],
       componentId: ['', [Validators.required]],
       // condition: ['', [Validators.required]],
-      value: [0, [Validators.required, Validators.min(0)]],
-      departmentId: ['',[Validators.required]],
-      positionId: ['',[Validators.required]],
+      valueOverride: [null, [Validators.min(0)]],
+      departmentId: [''],
+      positionId: [''],
       isActive: [true]
     });
   }
@@ -145,13 +163,70 @@ export class SalaryComponent implements OnInit {
     );
   }
 
+  private updateAbsentTaxName(): void {
+    const calculationType = this.componentForm.get('calculationType')?.value;
+    if (calculationType === 'fixed') {
+      this.componentForm.patchValue({
+        name: 'Absent Tax Fixed Amount',
+        type: 'deduction'
+      }, { emitEvent: false });
+    } else if (calculationType === 'percentage') {
+      this.componentForm.patchValue({
+        name: 'Absent Tax Percentage',
+        type: 'deduction'
+      }, { emitEvent: false });
+    }
+  }
+
+  private canCreateAbsentTaxComponent(calculationType: string): boolean {
+    // Check if Absent Tax components already exist
+    const existingAbsentTaxComponents = this.salaryComponents.filter(
+      comp => comp.name.startsWith('Absent Tax') && comp.type === 'deduction'
+    );
+
+    // Check if the specific calculation type already exists
+    const existingType = existingAbsentTaxComponents.find(
+      comp => {
+        if (calculationType === 'fixed') {
+          return comp.name === 'Absent Tax Fixed Amount';
+        } else {
+          return comp.name === 'Absent Tax Percentage';
+        }
+      }
+    );
+
+    // If editing the same component, allow it
+    if (this.selectedComponent) {
+      return true;
+    }
+
+    // Don't allow if this specific type already exists
+    return !existingType;
+  }
+
   onSubmit(): void {
     if (this.componentForm.invalid) {
       return;
     }
 
+    // Check if trying to create Absent Tax component when limit reached
+    const isAbsentTax = this.componentForm.get('isAbsentTax')?.value;
+    const calculationType = this.componentForm.get('calculationType')?.value;
+    
+    if (isAbsentTax && !this.selectedComponent && !this.canCreateAbsentTaxComponent(calculationType)) {
+      this.snackBar.open(
+        calculationType === 'fixed' 
+          ? 'Absent Tax Fixed Amount component already exists. You can only create one Fixed Amount and one Percentage component.'
+          : 'Absent Tax Percentage component already exists. You can only create one Fixed Amount and one Percentage component.',
+        'Close',
+        { duration: 5000 }
+      );
+      return;
+    }
+
     this.loading = true;
-    const formData = this.componentForm.value as CreateSalaryComponentRequest;
+    // Use getRawValue() to include disabled form controls
+    const formData = this.componentForm.getRawValue() as CreateSalaryComponentRequest;
 
     if (this.selectedComponent) {
       // Update existing component
@@ -184,15 +259,24 @@ export class SalaryComponent implements OnInit {
 
   editComponent(component: SalaryComponentModel): void {
     this.selectedComponent = component;
+    const isAbsentTax = component.name.startsWith('Absent Tax') && component.type === 'deduction';
     this.componentForm.patchValue({
       name: component.name,
       type: component.type,
       calculationType: component.calculationType,
       value: component.value,
-      isDefault: component.isDefault,
-      isTaxable: component.isTaxable,
+      isAbsentTax: isAbsentTax,
       isActive: component.isActive
     });
+    
+    // Handle disabled state for Absent Tax
+    if (isAbsentTax) {
+      this.componentForm.get('name')?.disable();
+      this.componentForm.get('type')?.disable();
+    } else {
+      this.componentForm.get('name')?.enable();
+      this.componentForm.get('type')?.enable();
+    }
   }
 
   deleteComponent(component: SalaryComponentModel): void {
@@ -231,10 +315,11 @@ export class SalaryComponent implements OnInit {
       type: 'allowance',
       calculationType: 'fixed',
       value: 0,
-      isDefault: false,
-      isTaxable: false,
+      isAbsentTax: false,
       isActive: true
     });
+    this.componentForm.get('name')?.enable();
+    this.componentForm.get('type')?.enable();
     this.loading = false;
   }
   
@@ -248,12 +333,16 @@ export class SalaryComponent implements OnInit {
     const formData = this.ruleForm.value as CreateSalaryRuleRequest;
     
     // Only include departmentId if it's not empty
-    if (!formData.departmentId) {
+    if (!formData.departmentId || formData.departmentId === '') {
       delete formData.departmentId;
     }
     // Only include positionId if it's not empty
-    if (!formData.positionId) {
+    if (!formData.positionId || formData.positionId === '') {
       delete formData.positionId;
+    }
+    // Only include valueOverride if it has a value
+    if (formData.valueOverride === null || formData.valueOverride === undefined) {
+      delete formData.valueOverride;
     }
 
     if (this.selectedRule) {
@@ -289,12 +378,12 @@ export class SalaryComponent implements OnInit {
     this.selectedRule = rule;
     this.ruleForm.patchValue({
       rulename: rule.rulename,
-      description: rule.description,
+      description: rule.description || '',
       componentId: rule.componentId,
       // condition: rule.condition,
-      value: (rule as any).valueOverride ?? rule.value,
-      departmentId: (rule as any).departmentId || '',
-      positionId: (rule as any).positionId || '',
+      valueOverride: rule.valueOverride ?? null,
+      departmentId: rule.departmentId || '',
+      positionId: rule.positionId || '',
       isActive: rule.isActive
     });
   }
@@ -335,7 +424,7 @@ export class SalaryComponent implements OnInit {
       rulename: '',
       description: '',
       componentId: '',
-      value: 0,
+      valueOverride: null,
       isActive: true,
       departmentId: '',
       positionId: ''
