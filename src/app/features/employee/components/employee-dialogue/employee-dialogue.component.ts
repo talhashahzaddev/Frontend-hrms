@@ -74,15 +74,15 @@ export class EmployeeDialogueComponent implements OnInit {
       }),
 
       departmentId: [{ value: emp.department?.departmentId || '', disabled: this.isViewMode }],
-      departmentName: [{ value: emp.department?.departmentName || '', disabled: true }],
+      departmentName: [{ value: emp.departmentName|| '', disabled: true }],
       positionId: [{ value: emp.position?.positionId || '', disabled: this.isViewMode }],
-      positionTitle: [{ value: emp.position?.positionTitle || '', disabled: true }],
+      positionTitle: [{ value: emp.positionTitle || '', disabled: true }],
 
       reportingManagerId: [{ value: emp.manager?.employeeId || '', disabled: this.isViewMode }],
       reportingManagerName: [{ value: emp.reportingManagerName || '',disabled: true }],
 
       employmentType: [{ value: emp.employmentType || '', disabled: this.isViewMode }],
-      payType: [{ value: emp.paytype || '', disabled: this.isViewMode }],
+      payType: [{ value: emp.payType || '', disabled: this.isViewMode }],
       basicSalary: [{ value: emp.basicSalary || 0, disabled: this.isViewMode }],
       hireDate: [{ value: emp.hireDate, disabled: this.isViewMode }],
       status: [{ value: emp.status, disabled: this.isViewMode }]

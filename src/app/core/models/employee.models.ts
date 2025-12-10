@@ -5,6 +5,9 @@ export interface Employee {
   positionId?:string;
   reportingManagerId?:string;
   reportingManagerName?:string;
+  departmentName?: string;
+  positionTitle?:string;
+  payType?:string;
   employmentType?:string;
   roleId?:string;
   userId?: string;
