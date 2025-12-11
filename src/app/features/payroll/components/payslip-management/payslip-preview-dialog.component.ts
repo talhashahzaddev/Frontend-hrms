@@ -110,21 +110,20 @@ import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.mod
                 </tr>
               </thead>
               <tbody>
-                <tr *ngIf="entry.taxAmount > 0">
-                  <td>Tax</td>
-                  <td class="text-right">{{ entry.taxAmount | currency:getCurrencyCode(entry) }}</td>
-                </tr>
-                <!-- <tr *ngFor="let deduction of getDeductions()">
+                <tr *ngFor="let deduction of getDeductions()">
                   <td>{{ deduction.name }}</td>
                   <td class="text-right">{{ deduction.amount | currency:getCurrencyCode(entry) }}</td>
-                </tr> -->
+                </tr>
                 <tr *ngIf="entry.otherDeductions > 0">
                   <td>Other Deductions</td>
                   <td class="text-right">{{ entry.otherDeductions | currency:getCurrencyCode(entry) }}</td>
                 </tr>
+                <tr *ngIf="getTotalDeductions() === 0">
+                  <td colspan="2" class="text-center" style="color: #999; font-style: italic;">No deductions</td>
+                </tr>
                 <tr class="total-row">
                   <td><strong>Total Deductions</strong></td>
-                  <td class="text-right"><strong>{{ getTotalDeductions() | currency:getCurrencyCode(entry) }}</strong></td>
+                  <td class="text-right"><strong>{{ (getTotalDeductions() || 0) | currency:getCurrencyCode(entry) }}</strong></td>
                 </tr>
               </tbody>
             </table>
@@ -531,8 +530,26 @@ export class PayslipPreviewDialogComponent implements OnInit, OnDestroy {
   }
 
   getTotalDeductions(): number {
-    const deductions = this.getDeductions().reduce((sum, d) => sum + d.amount, 0);
-    return deductions + this.entry.taxAmount + this.entry.otherDeductions;
+    let total = 0;
+    
+    // Sum all deductions from the deductions object
+    if (this.entry.deductions) {
+      Object.values(this.entry.deductions).forEach(value => {
+        const amount = typeof value === 'number' ? value : (typeof value === 'string' ? parseFloat(value) || 0 : 0);
+        if (!isNaN(amount) && amount > 0) {
+          total += amount;
+        }
+      });
+    }
+    
+    // Add other deductions (taxAmount/General Tax is excluded)
+    const otherDeductions = typeof this.entry.otherDeductions === 'number' ? this.entry.otherDeductions : (typeof this.entry.otherDeductions === 'string' ? parseFloat(this.entry.otherDeductions) || 0 : 0);
+    if (!isNaN(otherDeductions) && otherDeductions > 0) {
+      total += otherDeductions;
+    }
+    
+    // Return total, ensuring it's a valid number
+    return isNaN(total) ? 0 : total;
   }
 
   formatDate(dateString?: string): string {
