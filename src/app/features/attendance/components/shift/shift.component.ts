@@ -208,6 +208,7 @@ approveRequest(swap: PendingShiftSwap): void {
         console.log('Shift swap approved:', res.message);
         this.superAdminPendingSwaps = this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
         this.loadSuperAdminPendingSwaps(); // ✅ reload updated list
+        
       } else {
         console.error('Failed to approve:', res.message);
       }
@@ -292,6 +293,32 @@ onDeleteShift(shiftId: string): void {
   });
 }
 
+// onEditShift(shift: ShiftDto): void {
+//   const dialogRef = this.dialog.open(CreateShiftComponent, {
+//     width: '600px',
+//     maxWidth: '95vw',
+//     disableClose: true,
+//     autoFocus: false,
+//     panelClass: 'custom-dialog-container',
+//     data: {        // pass full shift data to the dialog
+//       shiftId: shift.shiftId,
+//       shiftName: shift.shiftName,
+//       startTime: shift.startTime,  // must be "HH:mm:ss" or "HH:mm"
+//       endTime: shift.endTime,
+//       breakDuration: shift.breakDuration,
+//       daysofWeek: shift.daysOfWeek,
+//       timezone: shift.timezone
+//     }
+//   });
+
+//   dialogRef.afterClosed().subscribe(result => {
+//     if (result === 'updated') {
+//       this.loadAllShifts();  // refresh table after update
+//     }
+//   });
+// }
+
+
 onEditShift(shift: ShiftDto): void {
   const dialogRef = this.dialog.open(CreateShiftComponent, {
     width: '600px',
@@ -302,8 +329,12 @@ onEditShift(shift: ShiftDto): void {
     data: {        // pass full shift data to the dialog
       shiftId: shift.shiftId,
       shiftName: shift.shiftName,
-      startTime: shift.startTime,  // must be "HH:mm:ss" or "HH:mm"
+      startTime: shift.startTime,        // HH:mm:ss or HH:mm
       endTime: shift.endTime,
+      breakStartTime: shift.breakStartTime, 
+      breakEndTime: shift.breakEndTime,
+      overtimeStartTime: shift.overtimeStartTime,
+      maxOvertimeInMinutes: shift.maxOvertimeInMinutes,
       breakDuration: shift.breakDuration,
       daysofWeek: shift.daysOfWeek,
       timezone: shift.timezone
@@ -312,7 +343,8 @@ onEditShift(shift: ShiftDto): void {
 
   dialogRef.afterClosed().subscribe(result => {
     if (result === 'updated') {
-      this.loadAllShifts();  // refresh table after update
+      // Reload shifts or refresh table/list
+      this.loadAllShifts();
     }
   });
 }
