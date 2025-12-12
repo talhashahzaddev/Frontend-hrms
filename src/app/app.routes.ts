@@ -75,10 +75,11 @@ export const appRoutes: Routes = [
       import('./features/leave/leave.routes').then(m => m.leaveRoutes)
   },
   
-  // Payroll Management Routes
+  // Payroll Management Routes (SuperAdmin only)
   {
     path: 'payroll',
     canActivate: [AuthGuard],
+    data: { roles: ['Super Admin'] },
     loadChildren: () => 
       import('./features/payroll/payroll.routes').then(m => m.payrollRoutes)
   },

@@ -175,7 +175,7 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          this.availablePeriods = response.data;
+          this.availablePeriods = response.data?.data || [];
         },
         error: (error: any) => {
           console.error('Error loading payroll periods:', error);

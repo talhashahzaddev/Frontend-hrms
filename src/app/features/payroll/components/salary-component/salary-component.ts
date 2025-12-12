@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -25,6 +26,17 @@ import {
 } from '../../../../core/models/payroll.models';
 import { Department, Position } from '../../../../core/models/employee.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+
+// Custom ErrorStateMatcher that only shows errors when form is submitted and field is touched/dirty
+class CustomErrorStateMatcher implements ErrorStateMatcher {
+  constructor(private formSubmitted: () => boolean) {}
+
+  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    if (!control) return false;
+    const isSubmitted = this.formSubmitted();
+    return !!(control && control.invalid && (control.dirty || control.touched) && isSubmitted);
+  }
+}
 
 @Component({
   selector: 'app-salary-component',
@@ -61,6 +73,12 @@ export class SalaryComponent implements OnInit {
   selectedRule: SalaryRule | null = null;
   displayedColumns: string[] = ['name', 'type', 'calculationType', 'value', 'isActive', 'actions'];
   ruleDisplayedColumns: string[] = ['name', 'componentName', 'value', 'department', 'position', 'isActive', 'actions'];
+  componentFormSubmitted = false;
+  ruleFormSubmitted = false;
+  
+  // Custom error state matchers
+  componentErrorStateMatcher: CustomErrorStateMatcher;
+  ruleErrorStateMatcher: CustomErrorStateMatcher;
   
   constructor(
     private payrollService: PayrollService,
@@ -69,6 +87,9 @@ export class SalaryComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog
   ) {
+    // Initialize custom error state matchers
+    this.componentErrorStateMatcher = new CustomErrorStateMatcher(() => this.componentFormSubmitted);
+    this.ruleErrorStateMatcher = new CustomErrorStateMatcher(() => this.ruleFormSubmitted);
     this.componentForm = this.fb.group({
       name: ['', [Validators.required]],
       type: ['allowance', [Validators.required]],
@@ -205,6 +226,7 @@ export class SalaryComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.componentFormSubmitted = true;
     if (this.componentForm.invalid) {
       return;
     }
@@ -311,20 +333,58 @@ export class SalaryComponent implements OnInit {
 
   resetForm(): void {
     this.selectedComponent = null;
+    this.componentFormSubmitted = false;
+    
+    // Temporarily remove validators to prevent error state after reset
+    const nameControl = this.componentForm.get('name');
+    const valueControl = this.componentForm.get('value');
+    
+    // Store original validators
+    const nameValidators = nameControl?.validator;
+    const valueValidators = valueControl?.validator;
+    
+    // Remove validators temporarily
+    nameControl?.clearValidators();
+    valueControl?.clearValidators();
+    
+    // Clear all errors and reset state
+    Object.keys(this.componentForm.controls).forEach(key => {
+      const control = this.componentForm.get(key);
+      control?.setErrors(null);
+      control?.markAsPristine();
+      control?.markAsUntouched();
+      control?.updateValueAndValidity({ emitEvent: false });
+    });
+    
+    // Reset the form with default values
     this.componentForm.reset({
+      name: '',
       type: 'allowance',
       calculationType: 'fixed',
       value: 0,
       isAbsentTax: false,
       isActive: true
-    });
+    }, { emitEvent: false });
+    
     this.componentForm.get('name')?.enable();
     this.componentForm.get('type')?.enable();
+    
+    // Re-add validators without triggering validation
+    nameControl?.setValidators(nameValidators || null);
+    valueControl?.setValidators(valueValidators || null);
+    nameControl?.updateValueAndValidity({ emitEvent: false });
+    valueControl?.updateValueAndValidity({ emitEvent: false });
+    
+    // Mark form as pristine and untouched after reset
+    this.componentForm.markAsPristine();
+    this.componentForm.markAsUntouched();
+    
     this.loading = false;
   }
   
   // Salary Rules Methods
   onRuleSubmit(): void {
+    this.ruleFormSubmitted = true;
     if (this.ruleForm.invalid) {
       return;
     }
@@ -420,6 +480,30 @@ export class SalaryComponent implements OnInit {
 
   resetRuleForm(): void {
     this.selectedRule = null;
+    this.ruleFormSubmitted = false;
+    
+    // Temporarily remove validators to prevent error state after reset
+    const rulenameControl = this.ruleForm.get('rulename');
+    const componentIdControl = this.ruleForm.get('componentId');
+    
+    // Store original validators
+    const rulenameValidators = rulenameControl?.validator;
+    const componentIdValidators = componentIdControl?.validator;
+    
+    // Remove validators temporarily
+    rulenameControl?.clearValidators();
+    componentIdControl?.clearValidators();
+    
+    // Clear all errors and reset state
+    Object.keys(this.ruleForm.controls).forEach(key => {
+      const control = this.ruleForm.get(key);
+      control?.setErrors(null);
+      control?.markAsPristine();
+      control?.markAsUntouched();
+      control?.updateValueAndValidity({ emitEvent: false });
+    });
+    
+    // Reset the form with default values
     this.ruleForm.reset({
       rulename: '',
       description: '',
@@ -428,7 +512,18 @@ export class SalaryComponent implements OnInit {
       isActive: true,
       departmentId: '',
       positionId: ''
-    });
+    }, { emitEvent: false });
+    
+    // Re-add validators without triggering validation
+    rulenameControl?.setValidators(rulenameValidators || null);
+    componentIdControl?.setValidators(componentIdValidators || null);
+    rulenameControl?.updateValueAndValidity({ emitEvent: false });
+    componentIdControl?.updateValueAndValidity({ emitEvent: false });
+    
+    // Mark form as pristine and untouched after reset
+    this.ruleForm.markAsPristine();
+    this.ruleForm.markAsUntouched();
+    
     this.loading = false;
   }
 }

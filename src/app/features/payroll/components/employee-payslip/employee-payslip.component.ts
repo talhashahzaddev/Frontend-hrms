@@ -340,7 +340,7 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.availablePeriods = response.data;
+            this.availablePeriods = response.data.data || [];
           }
         },
         error: (error) => {
