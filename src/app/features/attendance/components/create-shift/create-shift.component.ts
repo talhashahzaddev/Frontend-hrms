@@ -1,5 +1,3 @@
-
-
 import { Component, ChangeDetectionStrategy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -68,18 +66,23 @@ export class CreateShiftComponent {
     private attendanceService: AttendanceService,
     private overlayContainer: OverlayContainer,
     private notification: NotificationService,
-    @Inject(MAT_DIALOG_DATA) public data?: any // optional, contains shift for edit
+    @Inject(MAT_DIALOG_DATA) public data?: any
   ) {
     this.shiftForm = this.fb.group({
       shiftName: ['', [Validators.required, Validators.minLength(3)]],
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
+
+      breakStartTime: [''],
+      breakEndTime: [''],
+      overtimeStartTime: [''],
+      maxOvertimeInMinutes: [0],
+
       breakDuration: [0, [Validators.min(0)]],
       daysofWeek: [[], Validators.required],
-      timezone: ['']
+      timezone: ['UTC']
     });
 
-    // If data is passed, we are in edit mode
     if (data) {
       this.isEditMode = true;
       this.shiftId = data.shiftId;
@@ -87,35 +90,45 @@ export class CreateShiftComponent {
     }
   }
 
-  /** Populate form when editing */
+  /** Populate form for edit mode */
   private patchForm(data: any): void {
     this.shiftForm.patchValue({
       shiftName: data.shiftName,
-      startTime: data.startTime?.substring(0, 5), // HH:mm
+      startTime: data.startTime?.substring(0, 5),
       endTime: data.endTime?.substring(0, 5),
+
+      breakStartTime: data.breakStartTime?.substring(0, 5),
+      breakEndTime: data.breakEndTime?.substring(0, 5),
+
+      overtimeStartTime: data.overtimeStartTime?.substring(0, 5),
+      maxOvertimeInMinutes: data.maxOvertimeInMinutes,
+
       breakDuration: data.breakDuration,
       daysofWeek: data.daysofWeek,
       timezone: data.timezone
     });
   }
 
-  /** Handle both create & update */
+  /** Handle create & update */
   onSubmit(): void {
     if (!this.shiftForm.valid) return;
     this.isSubmitting = true;
 
-    const formValue = this.shiftForm.value;
+    const f = this.shiftForm.value;
 
     if (this.isEditMode) {
-      // Edit/Update logic
       const updateDto: UpdateShiftDto = {
         shiftId: this.shiftId,
-        shiftName: formValue.shiftName,
-        startTime: formValue.startTime ? `${formValue.startTime}:00` : '',
-        endTime: formValue.endTime ? `${formValue.endTime}:00` : '',
-        breakDuration: formValue.breakDuration,
-        daysofWeek: formValue.daysofWeek,
-        timezone: formValue.timezone
+        shiftName: f.shiftName,
+        startTime: f.startTime ? `${f.startTime}:00` : '',
+        endTime: f.endTime ? `${f.endTime}:00` : '',
+        breakStartTime: f.breakStartTime ? `${f.breakStartTime}:00` : '',
+        breakEndTime: f.breakEndTime ? `${f.breakEndTime}:00` : '',
+        overtimeStartTime: f.overtimeStartTime ? `${f.overtimeStartTime}:00` : '',
+        maxOvertimeInMinutes: f.maxOvertimeInMinutes,
+        breakDuration: f.breakDuration,
+        daysofWeek: f.daysofWeek,
+        timezone: f.timezone
       };
 
       this.attendanceService.updateShift(this.shiftId, updateDto).subscribe({
@@ -124,34 +137,34 @@ export class CreateShiftComponent {
           this.notification.showSuccess('Shift updated successfully');
           this.dialogRef.close('updated');
         },
-        error: (error) => {
+        error: () => {
           this.isSubmitting = false;
-          console.error('Error updating shift:', error);
           this.notification.showError('Failed to update shift');
         }
       });
 
     } else {
-      // Create logic (unchanged)
       const request = {
-        shiftName: formValue.shiftName,
-        startTime: formValue.startTime + ':00',
-        endTime: formValue.endTime + ':00',
-        breakDuration: formValue.breakDuration,
-        daysofWeek: formValue.daysofWeek,
-        timezone: formValue.timezone
+        shiftName: f.shiftName,
+        startTime: f.startTime + ':00',
+        endTime: f.endTime + ':00',
+        breakStartTime: f.breakStartTime ? f.breakStartTime + ':00' : null,
+        breakEndTime: f.breakEndTime ? f.breakEndTime + ':00' : null,
+        overtimeStartTime: f.overtimeStartTime ? f.overtimeStartTime + ':00' : null,
+        maxOvertimeInMinutes: f.maxOvertimeInMinutes,
+        breakDuration: f.breakDuration,
+        daysofWeek: f.daysofWeek,
+        timezone: f.timezone
       };
 
       this.attendanceService.createShift(request).subscribe({
-        next: (response: any) => {
+        next: () => {
           this.isSubmitting = false;
           this.notification.showSuccess('Shift created successfully');
-          this.shiftForm.reset();
           this.dialogRef.close('created');
         },
-        error: (error) => {
+        error: () => {
           this.isSubmitting = false;
-          console.error('Error creating shift:', error);
           this.notification.showError('Failed to create shift');
         }
       });

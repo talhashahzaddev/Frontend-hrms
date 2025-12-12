@@ -210,27 +210,59 @@ export interface AttendanceCalendarData {
 }
 
 
+// export interface UpdateShiftDto {
+//   shiftId: string;         
+//   shiftName: string;       
+//   startTime: string;       
+//   endTime: string;         
+//   breakDuration?: number;  
+//   daysofWeek?: number[];  
+//   timezone?: string;       
+// }
+
 export interface UpdateShiftDto {
-  shiftId: string;         
-  shiftName: string;       
-  startTime: string;       
-  endTime: string;         
-  breakDuration?: number;  
-  daysofWeek?: number[];  
-  timezone?: string;       
+  shiftId: string;                 // Shift unique ID
+  shiftName: string;               // Shift name
+  startTime: string;               // HH:mm:ss
+  endTime: string;                 // HH:mm:ss
+  breakDuration?: number;          // Break duration in minutes
+  breakStartTime?: string;         // Break start time HH:mm:ss
+  breakEndTime?: string;           // Break end time HH:mm:ss
+  overtimeStartTime?: string;      // Overtime start time HH:mm:ss
+  maxOvertimeInMinutes?: number;   // Maximum allowed overtime in minutes
+  daysofWeek?: number[];           // Days of week [0-6]
+  timezone?: string;               // Timezone string, e.g., "UTC"
 }
 
+
+
+// export interface ShiftDto {
+//   shiftId: string;
+//   shiftName: string;
+//   startTime: string; // "HH:mm:ss"
+//   endTime: string;
+//   breakDuration: number;
+//   daysOfWeek: number[];
+//   timezone: string;
+//   isActive: boolean;
+// }
 
 export interface ShiftDto {
   shiftId: string;
   shiftName: string;
-  startTime: string; // "HH:mm:ss"
-  endTime: string;
-  breakDuration: number;
+  startTime: string;              // "HH:mm:ss"
+  endTime: string;                // "HH:mm:ss"
+  breakStartTime?: string;        // optional, "HH:mm:ss"
+  breakEndTime?: string;          // optional, "HH:mm:ss"
+  overtimeStartTime?: string;     // optional, "HH:mm:ss"
+  maxOvertimeInMinutes?: number;  // optional, maximum overtime in minutes
+  breakDuration: number;          // in minutes
   daysOfWeek: number[];
   timezone: string;
   isActive: boolean;
 }
+
+
 
 // assign-shift-request.model.ts
 export interface AssignShiftRequest {
