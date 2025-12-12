@@ -387,7 +387,8 @@ export class PayrollCalculationComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.availablePeriods = response.data.filter(p => p.status === PayrollStatus.DRAFT);
+            const periods = response.data.data || [];
+            this.availablePeriods = periods.filter((p: PayrollPeriod) => p.status === PayrollStatus.DRAFT);
           }
           this.isLoading = false;
           this.cdr.markForCheck();

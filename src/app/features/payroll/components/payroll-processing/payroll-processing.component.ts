@@ -131,7 +131,8 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success && response.data) {
             // Filter periods that can be processed (draft or calculated status)
-            this.availablePeriods = response.data.filter(p => 
+            const periods = response.data.data || [];
+            this.availablePeriods = periods.filter((p: PayrollPeriod) => 
               p.status === 'draft' || p.status === 'calculated'
             );
             this.cdr.markForCheck();

@@ -93,7 +93,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     {
       label: 'Payroll',
       icon: 'payments',
-      roles: ['Super Admin', 'HR Manager'],
+      roles: ['Super Admin'],
       children: [
         { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods' },
         { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process' },

@@ -22,8 +22,8 @@
           <div class="form-row">
             <mat-form-field appearance="outline">
               <mat-label>Component Name</mat-label>
-              <input matInput formControlName="name" placeholder="Enter component name" [disabled]="componentForm.get('isAbsentTax')?.value">
-              <mat-error *ngIf="componentForm.get('name')?.hasError('required')">Name is required</mat-error>
+              <input matInput formControlName="name" placeholder="Enter component name" [disabled]="componentForm.get('isAbsentTax')?.value" [errorStateMatcher]="componentErrorStateMatcher">
+              <mat-error *ngIf="componentForm.get('name')?.hasError('required') && componentFormSubmitted && (componentForm.get('name')?.touched || componentForm.get('name')?.dirty)">Name is required</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -46,10 +46,10 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Value</mat-label>
-              <input matInput type="number" formControlName="value" min="0">
+              <input matInput type="number" formControlName="value" min="0" [errorStateMatcher]="componentErrorStateMatcher">
               <span matTextSuffix *ngIf="componentForm.get('calculationType')?.value === 'percentage'">%</span>
-              <mat-error *ngIf="componentForm.get('value')?.hasError('required')">Value is required</mat-error>
-              <mat-error *ngIf="componentForm.get('value')?.hasError('min')">Value must be positive</mat-error>
+              <mat-error *ngIf="componentForm.get('value')?.hasError('required') && componentFormSubmitted && (componentForm.get('value')?.touched || componentForm.get('value')?.dirty)">Value is required</mat-error>
+              <mat-error *ngIf="componentForm.get('value')?.hasError('min') && componentFormSubmitted && (componentForm.get('value')?.touched || componentForm.get('value')?.dirty)">Value must be positive</mat-error>
             </mat-form-field>
           </div>
 
@@ -165,8 +165,8 @@
               <div class="form-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Rule Name</mat-label>
-                  <input matInput formControlName="rulename" placeholder="Enter rule name">
-                  <mat-error *ngIf="ruleForm.get('rulename')?.hasError('required')">Name is required</mat-error>
+                  <input matInput formControlName="rulename" placeholder="Enter rule name" [errorStateMatcher]="ruleErrorStateMatcher">
+                  <mat-error *ngIf="ruleForm.get('rulename')?.hasError('required') && ruleFormSubmitted && (ruleForm.get('rulename')?.touched || ruleForm.get('rulename')?.dirty)">Name is required</mat-error>
                 </mat-form-field>
               </div>
 
@@ -180,18 +180,18 @@
               <div class="form-row">
                 <mat-form-field appearance="outline">
                   <mat-label>Component</mat-label>
-                  <mat-select formControlName="componentId">
+                  <mat-select formControlName="componentId" [errorStateMatcher]="ruleErrorStateMatcher">
                     <mat-option *ngFor="let component of salaryComponents" [value]="component.componentId">
                       {{ component.name }}
                     </mat-option>
                   </mat-select>
-                  <mat-error *ngIf="ruleForm.get('componentId')?.hasError('required')">Component is required</mat-error>
+                  <mat-error *ngIf="ruleForm.get('componentId')?.hasError('required') && ruleFormSubmitted && (ruleForm.get('componentId')?.touched || ruleForm.get('componentId')?.dirty)">Component is required</mat-error>
                 </mat-form-field>
                 
                 <mat-form-field appearance="outline">
                   <mat-label>Value Override</mat-label>
-                  <input matInput type="number" formControlName="valueOverride" min="0" placeholder="Optional">
-                  <mat-error *ngIf="ruleForm.get('valueOverride')?.hasError('min')">Value must be positive</mat-error>
+                  <input matInput type="number" formControlName="valueOverride" min="0" placeholder="Optional" [errorStateMatcher]="ruleErrorStateMatcher">
+                  <mat-error *ngIf="ruleForm.get('valueOverride')?.hasError('min') && ruleFormSubmitted && (ruleForm.get('valueOverride')?.touched || ruleForm.get('valueOverride')?.dirty)">Value must be positive</mat-error>
                 </mat-form-field>
               </div>
 

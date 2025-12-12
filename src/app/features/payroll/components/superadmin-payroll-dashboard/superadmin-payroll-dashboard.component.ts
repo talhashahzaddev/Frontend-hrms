@@ -191,7 +191,7 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.payrollPeriods = response.data;
+            this.payrollPeriods = response.data.data || [];
           }
         },
         error: (error) => {

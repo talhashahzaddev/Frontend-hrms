@@ -380,7 +380,11 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results: any[]) => {
-          this.payrollPeriods = results[0] || [];
+          // Handle PagedResult structure from getPayrollPeriods
+          const periodsResponse = results[0];
+          this.payrollPeriods = (periodsResponse?.success && periodsResponse?.data?.data) 
+            ? periodsResponse.data.data 
+            : [];
           this.currentPeriod = this.payrollPeriods.find(p => p.status === PayrollStatus.DRAFT || p.status === PayrollStatus.CALCULATED) || null;
           
           if (results[1]) {
