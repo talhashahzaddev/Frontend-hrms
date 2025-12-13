@@ -76,7 +76,7 @@
 
     <!-- Table Content -->
     <div *ngIf="!isLoading" class="table-container">
-      <table mat-table [dataSource]="filteredPositions" class="position-table">
+      <table mat-table [dataSource]="positions" class="position-table">
         
         <!-- Position Title Column -->
         <ng-container matColumnDef="title">
@@ -193,7 +193,7 @@
       </table>
       
       <!-- Empty State -->
-      <div *ngIf="filteredPositions.length === 0" class="empty-state">
+      <div *ngIf="positions.length === 0" class="empty-state">
         <mat-icon>work</mat-icon>
         <h3>No Positions Found</h3>
         <p>No positions match your current filters.</p>

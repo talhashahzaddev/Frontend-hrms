@@ -6,6 +6,49 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
+// ---------- VIEW MODE READONLY STYLING ----------
+::ng-deep mat-form-field.readonly {
+  pointer-events: none !important;      // Disable clicks, focus, select
+  cursor: default !important;
+
+  .mat-mdc-text-field-wrapper {
+    background: #f3f4f6 !important;     // Gray background
+  }
+
+  .mat-mdc-notch-piece {
+    border-color: #d1d5db !important;   // Light gray border
+  }
+
+  .mat-mdc-form-field-label {
+    color: #6b7280 !important;          // Dark gray label
+  }
+
+  input,
+  textarea,
+  .mat-mdc-select-value {
+    color: #374151 !important;          // Dark gray text
+    font-weight: 500;
+  }
+
+  .mat-select-arrow {
+    display: none !important;           // Hide arrow
+  }
+
+  .mat-form-field-ripple {
+    display: none !important;           // Remove ripple effect
+  }
+
+  &:hover .mat-mdc-text-field-wrapper {
+    background: #f3f4f6 !important;     // Prevent hover color change
+  }
+}
+
+// Hide submit buttons in view mode
+.dialog-actions button.submit-button.readonly {
+  display: none !important;
+}
+
+
 // Dialog Header
 .dialog-header {
   display: flex;

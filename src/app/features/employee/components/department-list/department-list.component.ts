@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -15,11 +16,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
 
 import { Department, Employee } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 import { DepartmentFormDialogComponent } from '../department-form-dialog/department-form-dialog.component';
+import { ViewDepartmentDetailsComponent } from '../view-department-details/view-department-details.component';
 
 @Component({
   selector: 'app-department-list',
@@ -48,9 +50,8 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
   // Data
   departments: Department[] = [];
-  filteredDepartments: Department[] = [];
   managers: Employee[] = [];
-  
+
   // Table configuration
   displayedColumns: string[] = [
     'name',
@@ -60,10 +61,10 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     'createdAt',
     'actions'
   ];
-  
-  // Loading states
+
+  // Loading state
   isLoading = false;
-  
+
   // Search and Filters
   searchControl = new FormControl('');
   statusControl = new FormControl('');
@@ -94,67 +95,56 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
   private loadInitialData(): void {
     this.isLoading = true;
-    
-    combineLatest([
-      this.employeeService.getDepartments(),
-      this.employeeService.getManagers()
-    ])
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: ([departments, managers]) => {
-        this.departments = departments;
-        this.managers = managers;
-        this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading departments:', error);
-        this.showError('Failed to load departments');
-        this.isLoading = false;
-      }
-    });
+
+    // Load managers first
+    this.employeeService.getManagers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (managers) => {
+          this.managers = managers;
+          // Fetch departments immediately with default filters
+          this.fetchDepartments();
+        },
+        error: (error) => {
+          console.error('Error loading managers:', error);
+          this.showError('Failed to load managers');
+          this.isLoading = false;
+        }
+      });
   }
 
   private setupFilters(): void {
     combineLatest([
-      this.searchControl.valueChanges.pipe(debounceTime(300), distinctUntilChanged()),
-      this.statusControl.valueChanges,
-      this.managerControl.valueChanges
+      this.searchControl.valueChanges.pipe(startWith(''), debounceTime(300), distinctUntilChanged()),
+      this.statusControl.valueChanges.pipe(startWith('')),
+      this.managerControl.valueChanges.pipe(startWith(''))
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe(() => {
-      this.applyFilters();
+      this.fetchDepartments();
     });
   }
 
-  private applyFilters(): void {
-    let filtered = [...this.departments];
+  private fetchDepartments(): void {
+    const searchQuery = this.searchControl.value || undefined;
+    const status = this.statusControl.value || undefined;
+    const managerId = this.managerControl.value || undefined;
 
-    // Search filter
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
-    if (searchTerm) {
-      filtered = filtered.filter(dept => 
-        dept.departmentName.toLowerCase().includes(searchTerm) ||
-        dept.description?.toLowerCase().includes(searchTerm) ||
-        dept.managerName?.toLowerCase().includes(searchTerm)
-      );
-    }
+    this.isLoading = true;
 
-    // Status filter
-    const statusFilter = this.statusControl.value;
-    if (statusFilter === 'active') {
-      filtered = filtered.filter(dept => dept.isActive);
-    } else if (statusFilter === 'inactive') {
-      filtered = filtered.filter(dept => !dept.isActive);
-    }
-
-    // Manager filter
-    const managerFilter = this.managerControl.value;
-    if (managerFilter) {
-      filtered = filtered.filter(dept => dept.managerId === managerFilter);
-    }
-
-    this.filteredDepartments = filtered;
+    this.employeeService.getDepartments(searchQuery, status as 'active' | 'inactive')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => {
+          this.departments = departments;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching departments:', error);
+          this.showError('Failed to fetch departments');
+          this.isLoading = false;
+        }
+      });
   }
 
   clearFilters(): void {
@@ -166,7 +156,7 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {
       width: '600px',
-      data: { 
+      data: {
         mode: 'create',
         managers: this.managers
       }
@@ -174,50 +164,52 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadInitialData();
+        this.fetchDepartments();
         this.showSuccess('Department created successfully');
       }
     });
   }
 
   viewDepartment(department: Department): void {
-    // TODO: Implement view department details
-    console.log('View department:', department);
+    const dialogRef = this.dialog.open(ViewDepartmentDetailsComponent, {
+      width: '600px',
+      data: {
+        department,
+        managers: this.managers
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {});
   }
 
   editDepartment(department: Department): void {
     const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {
       width: '600px',
-      data: { 
+      data: {
         mode: 'edit',
-        department: department,
+        department,
         managers: this.managers
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadInitialData();
+        this.fetchDepartments();
         this.showSuccess('Department updated successfully');
       }
     });
   }
 
   toggleDepartmentStatus(department: Department, newStatus: boolean): void {
-    const action = newStatus ? 'activate' : 'deactivate';
-    const confirmMessage = `Are you sure you want to ${action} "${department.departmentName}"?`;
-    
-    if (confirm(confirmMessage)) {
-      // Since there's no specific activate/deactivate endpoint, we'll use update
-      this.employeeService.updateDepartment(department.departmentId, {
-        departmentName: department.departmentName,
-        description: department.description,
-        managerId: department.managerId
-      })
+  const action = newStatus ? 'activate' : 'deactivate';
+  const confirmMessage = `Are you sure you want to ${action} "${department.departmentName}"?`;
+
+  if (confirm(confirmMessage)) {
+    this.employeeService.updateDepartmentStatus(department.departmentId, newStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.loadInitialData();
+          this.fetchDepartments();
           this.showSuccess(`Department ${action}d successfully`);
         },
         error: (error) => {
@@ -225,18 +217,19 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
           this.showError(`Failed to ${action} department`);
         }
       });
-    }
   }
+}
+
 
   deleteDepartment(department: Department): void {
     const confirmMessage = `Are you sure you want to delete "${department.departmentName}"? This action cannot be undone.`;
-    
+
     if (confirm(confirmMessage)) {
       this.employeeService.deleteDepartment(department.departmentId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.loadInitialData();
+            this.fetchDepartments();
             this.showSuccess('Department deleted successfully');
           },
           error: (error) => {
@@ -261,4 +254,6 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     });
   }
 }
+
+
 

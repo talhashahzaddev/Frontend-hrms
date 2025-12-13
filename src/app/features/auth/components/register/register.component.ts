@@ -129,54 +129,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
   }
 
-  // onSubmit(): void {
-  //   if (this.registerForm.valid) {
-  //     this.isLoading = true;
-      
-  //     const organizationData = this.organizationForm.value;
-  //     const userData = this.userForm.value;
-
-  //     const registerRequest: RegisterRequest = {
-  //       // Organization data
-  //       companyName: organizationData.companyName,
-  //       companySize: organizationData.companySize,
-  //       website: organizationData.website,
-        
-  //       // User data
-  //       firstName: userData.firstName,
-  //       lastName: userData.lastName,
-  //       email: userData.email,
-  //       password: userData.password
-  //     };
-
-  //     this.authService.register(registerRequest)
-  //       .pipe(takeUntil(this.destroy$))
-  //       .subscribe({
-  //         next: (response) => {
-  //           this.isLoading = false;
-  //           this.notificationService.showSuccess(
-  //             'Registration successful! Welcome to your new HRMS system.'
-  //           );
-  //           // User will be automatically logged in due to the tokens in the response
-  //           const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
-  //             sessionStorage.removeItem('redirectUrl');
-  //             this.router.navigate([redirectUrl]);
-  //         },
-  //         error: (error) => {
-  //           this.isLoading = false;
-  //           const errorMessage = error?.error?.message || 'Registration failed. Please try again.';
-  //           this.notificationService.showError(errorMessage);
-  //         }
-  //       });
-  //   } else {
-  //     this.markFormGroupTouched(this.organizationForm);
-  //     this.markFormGroupTouched(this.userForm);
-  //     this.notificationService.showError('Please fill in all required fields correctly.');
-  //   }
-  // }
-
-
-
   onSubmit(): void {
   // this.submitted = true;
 
