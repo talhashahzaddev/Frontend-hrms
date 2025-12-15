@@ -259,7 +259,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       console.log('Final reportingManagerId in request:', request.reportingManagerId);
 
       const operation = this.isEditMode
-        ? this.employeeService.updateEmployee(this.employeeId!, request as UpdateEmployeeRequest)
+        ? this.employeeService.updateEmployee(+this.employeeId!, request as any)
         : this.employeeService.createEmployee(request as CreateEmployeeRequest);
 
       operation

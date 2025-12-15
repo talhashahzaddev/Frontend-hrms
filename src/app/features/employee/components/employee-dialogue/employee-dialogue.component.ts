@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
 import { EmployeeService } from '../../services/employee.service';
 
 @Component({
@@ -21,79 +22,76 @@ import { EmployeeService } from '../../services/employee.service';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatIconModule
+    MatIconModule,
+    MatChipsModule
   ],
   templateUrl: './employee-dialogue.component.html',
   styleUrls: ['./employee-dialogue.component.scss']
 })
 export class EmployeeDialogueComponent implements OnInit {
+  
+  isViewMode = true;   // always view style unless editing
   employeeForm!: FormGroup;
-  isViewMode = false;
+  private backendBaseUrl = 'https://localhost:60485';
 
   departments: Department[] = [];
   positions: Position[] = [];
   managers: Employee[] = [];
-
-  employmentTypes = ['full_time', 'part_time', 'contract'];
-  statuses = ['active', 'inactive', 'terminated'];
 
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     public dialogRef: MatDialogRef<EmployeeDialogueComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { employee: Employee; viewOnly: boolean }
-  ) {
-    this.isViewMode = data.viewOnly;
-  }
+  ) {}
 
   ngOnInit(): void {
+    this.isViewMode = this.data.viewOnly === true;
+
+    // Fix profile image URL
+    if (this.data.employee.profilePictureUrl && !this.data.employee.profilePictureUrl.startsWith('http')) {
+      this.data.employee.profilePictureUrl = `${this.backendBaseUrl}${this.data.employee.profilePictureUrl}`;
+    }
+
+    if (!this.isViewMode) {
+      this.buildForm();
+      this.loadDropdowns();
+    }
+  }
+
+  buildForm() {
     const emp = this.data.employee;
 
     this.employeeForm = this.fb.group({
-      employeeCode: [{ value: emp.employeeCode, disabled: true }],
-      firstName: [{ value: emp.firstName, disabled: this.isViewMode }, Validators.required],
-      lastName: [{ value: emp.lastName, disabled: this.isViewMode }, Validators.required],
-      fullName: [{ value: emp.fullName, disabled: true }],
-      email: [{ value: emp.email, disabled: this.isViewMode }, [Validators.required, Validators.email]],
-      phone: [{ value: emp.phone, disabled: this.isViewMode }],
-      dateOfBirth: [{ value: emp.dateOfBirth, disabled: this.isViewMode }],
-      gender: [{ value: emp.gender, disabled: this.isViewMode }],
-      nationality: [{ value: emp.nationality, disabled: this.isViewMode }],
-      maritalStatus: [{ value: emp.maritalStatus, disabled: this.isViewMode }],
+      firstName: [emp.firstName, Validators.required],
+      lastName: [emp.lastName, Validators.required],
+      email: [emp.email, [Validators.required, Validators.email]],
+      phone: [emp.phone],
+      dateOfBirth: [emp.dateOfBirth],
+      gender: [emp.gender],
+      nationality: [emp.nationality],
+      maritalStatus: [emp.maritalStatus],
+      departmentId: [emp.department?.departmentId || ''],
+      positionId: [emp.position?.positionId || ''],
+      employmentType: [emp.employmentType],
+      reportingManagerId: [emp.manager?.employeeId || ''],
+      basicSalary: [emp.basicSalary],
+      payType: [emp.payType],
+      hireDate: [emp.hireDate],
+      status: [emp.status],
       address: this.fb.group({
-        street: [{ value: emp.address?.street || '', disabled: this.isViewMode }],
-        city: [{ value: emp.address?.city || '', disabled: this.isViewMode }],
-        state: [{ value: emp.address?.state || '', disabled: this.isViewMode }],
-        zip: [{ value: emp.address?.zip || '', disabled: this.isViewMode }]
+        street: [emp.address?.street],
+        city: [emp.address?.city],
+        state: [emp.address?.state],
+        zip: [emp.address?.zip]
       }),
       emergencyContact: this.fb.group({
-        name: [{ value: emp.emergencyContact?.name || '', disabled: this.isViewMode }],
-        email: [{ value: emp.emergencyContact?.email || '', disabled: this.isViewMode }],
-        phone: [{ value: emp.emergencyContact?.phone || '', disabled: this.isViewMode }],
-        relationship: [{ value: emp.emergencyContact?.relationship || '', disabled: this.isViewMode }]
-      }),
-
-      departmentId: [{ value: emp.department?.departmentId || '', disabled: this.isViewMode }],
-      departmentName: [{ value: emp.departmentName|| '', disabled: true }],
-      positionId: [{ value: emp.position?.positionId || '', disabled: this.isViewMode }],
-      positionTitle: [{ value: emp.positionTitle || '', disabled: true }],
-
-      reportingManagerId: [{ value: emp.manager?.employeeId || '', disabled: this.isViewMode }],
-      reportingManagerName: [{ value: emp.reportingManagerName || '',disabled: true }],
-
-      employmentType: [{ value: emp.employmentType || '', disabled: this.isViewMode }],
-      payType: [{ value: emp.payType || '', disabled: this.isViewMode }],
-      basicSalary: [{ value: emp.basicSalary || 0, disabled: this.isViewMode }],
-      hireDate: [{ value: emp.hireDate, disabled: this.isViewMode }],
-      status: [{ value: emp.status, disabled: this.isViewMode }]
+        name: [emp.emergencyContact?.name],
+        relationship: [emp.emergencyContact?.relationship],
+        phone: [emp.emergencyContact?.phone],
+        email: [emp.emergencyContact?.email]
+      })
     });
-
-     // Disable entire form in view mode
-  if (this.isViewMode) {
-    this.employeeForm.disable();
-  }
-
-    this.loadDropdowns();
   }
 
   loadDropdowns() {
@@ -102,10 +100,15 @@ export class EmployeeDialogueComponent implements OnInit {
     this.employeeService.getManagers().subscribe(mgrs => this.managers = mgrs);
   }
 
+  formatDate(date: string | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
+  }
+
   save(): void {
     if (this.employeeForm.valid) {
-      const updatedEmployee = { ...this.data.employee, ...this.employeeForm.value };
-      this.dialogRef.close(updatedEmployee);
+      const updated = { ...this.data.employee, ...this.employeeForm.value };
+      this.dialogRef.close(updated);
     }
   }
 

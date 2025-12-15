@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -92,16 +92,29 @@ export class EmployeeService {
       );
   }
 
-  updateEmployee(employeeId: string, request: UpdateEmployeeRequest): Observable<Employee> {
-    return this.http.put<ApiResponse<Employee>>(`${this.apiUrl}/${employeeId}`, request)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to update employee');
-          }
-          return response.data!;
-        })
-      );
+  updateEmployee(employeeId: number, employee: Employee): Observable<Employee> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.put<Employee>(
+      `${this.apiUrl}/${employeeId}`,
+      employee,
+      { headers }
+    );
+  }
+
+  // Example of how to use it with error handling:
+  updateEmployeeWithErrorHandling(employeeId: number, employee: Employee): Observable<Employee> {
+    return this.http.put<Employee>(
+      `${this.apiUrl}/${employeeId}`,
+      employee
+    ).pipe(
+      catchError(error => {
+        console.error('Error updating employee:', error);
+        throw error;
+      })
+    );
   }
 
   deleteEmployee(employeeId: string): Observable<void> {
