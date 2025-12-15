@@ -154,8 +154,11 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results: any[]) => {
-          this.departments = results[0];
-          this.positions = results[1];
+          // this.departments = results[0];
+          // this.positions = results[1];
+        this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === results[3]?.employmentDetails?.departmentId));
+        this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === results[3]?.employmentDetails?.positionId));
+
           this.managers = results[2];
           
           // Debug logging for managers

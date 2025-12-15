@@ -1,3 +1,295 @@
+// import { Component, OnInit, OnDestroy } from '@angular/core';
+// import { CommonModule } from '@angular/common';
+// import { ReactiveFormsModule, FormControl } from '@angular/forms';
+// import { MatCardModule } from '@angular/material/card';
+// import { MatTableModule } from '@angular/material/table';
+// import { MatFormFieldModule } from '@angular/material/form-field';
+// import { MatInputModule } from '@angular/material/input';
+// import { MatSelectModule } from '@angular/material/select';
+// import { MatButtonModule } from '@angular/material/button';
+// import { MatIconModule } from '@angular/material/icon';
+// import { MatMenuModule } from '@angular/material/menu';
+// import { MatChipsModule } from '@angular/material/chips';
+// import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+// import { MatTooltipModule } from '@angular/material/tooltip';
+// import { MatDividerModule } from '@angular/material/divider';
+// import { MatDialog } from '@angular/material/dialog';
+// import { MatSnackBar } from '@angular/material/snack-bar';
+// import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
+
+// import { Position, Department, Role } from '../../../../core/models/employee.models';
+// import { EmployeeService } from '../../services/employee.service';
+// import { PositionFormDialogComponent } from '../position-form-dialog/position-form-dialog.component';
+// import {PositionDetailsViewComponent} from '../position-form-dialog/position-details-view.component'
+
+
+// @Component({
+//   selector: 'app-position-list',
+//   standalone: true,
+//   imports: [
+//     CommonModule,
+//     ReactiveFormsModule,
+//     MatCardModule,
+//     MatTableModule,
+//     MatFormFieldModule,
+//     MatInputModule,
+//     MatSelectModule,
+//     MatButtonModule,
+//     MatIconModule,
+//     MatMenuModule,
+//     MatChipsModule,
+//     MatProgressSpinnerModule,
+//     MatTooltipModule,
+//     MatDividerModule
+//   ],
+//   templateUrl: './position-list.component.html',
+//   styleUrls: ['./position-list.component.scss']
+// })
+// export class PositionListComponent implements OnInit, OnDestroy {
+//   private destroy$ = new Subject<void>();
+
+//   // Data
+//   positions: Position[] = [];
+//   filteredPositions: Position[] = [];
+//   departments: Department[] = [];
+//   roles: Role[] = [];
+  
+//   // Table configuration
+//   displayedColumns: string[] = [
+//     'title',
+//     'department',
+//     'role',
+//     'employeeCount',
+//     'status',
+//     'createdAt',
+//     'actions'
+//   ];
+  
+//   // Loading states
+//   isLoading = false;
+  
+//   // Search and Filters
+//   searchControl = new FormControl('');
+//   departmentControl = new FormControl('');
+//   statusControl = new FormControl('');
+
+//   // Filter options
+//   statusOptions = [
+//     { value: '', label: 'All Statuses' },
+//     { value: 'active', label: 'Active' },
+//     { value: 'inactive', label: 'Inactive' }
+//   ];
+
+//   constructor(
+//     private employeeService: EmployeeService,
+//     private dialog: MatDialog,
+//     private snackBar: MatSnackBar
+//   ) {}
+
+//   ngOnInit(): void {
+//     this.loadInitialData();
+//     this.setupFilters();
+//   }
+
+//   ngOnDestroy(): void {
+//     this.destroy$.next();
+//     this.destroy$.complete();
+//   }
+
+//   private loadInitialData(): void {
+//     this.isLoading = true;
+    
+//     combineLatest([
+//       this.employeeService.getPositions(),
+//       this.employeeService.getDepartments(),
+//       this.employeeService.getRoles()
+//     ])
+//     .pipe(takeUntil(this.destroy$))
+//     .subscribe({
+//       next: ([positions, departments, roles]) => {
+//         this.positions = positions;
+//         this.departments = departments;
+//         this.roles = roles;
+//         this.applyFilters();
+//         this.isLoading = false;
+//       },
+//       error: (error) => {
+//         console.error('Error loading data:', error);
+//         this.showError('Failed to load data');
+//         this.isLoading = false;
+//       }
+//     });
+//   }
+
+//   private setupFilters(): void {
+//     combineLatest([
+//       this.searchControl.valueChanges.pipe(debounceTime(300), distinctUntilChanged()),
+//       this.departmentControl.valueChanges,
+//       this.statusControl.valueChanges
+//     ])
+//     .pipe(takeUntil(this.destroy$))
+//     .subscribe(() => {
+//       this.applyFilters();
+//     });
+//   }
+
+//   private applyFilters(): void {
+//     let filtered = [...this.positions];
+
+//     // Search filter
+//     const searchTerm = this.searchControl.value?.toLowerCase() || '';
+//     if (searchTerm) {
+//       filtered = filtered.filter(position => 
+//         position.positionTitle.toLowerCase().includes(searchTerm) ||
+//         position.description?.toLowerCase().includes(searchTerm) ||
+//         position.departmentName?.toLowerCase().includes(searchTerm)
+//       );
+//     }
+
+//     // Department filter
+//     const departmentFilter = this.departmentControl.value;
+//     if (departmentFilter) {
+//       filtered = filtered.filter(position => position.departmentId === departmentFilter);
+//     }
+
+//     // Status filter
+//     const statusFilter = this.statusControl.value;
+//     if (statusFilter === 'active') {
+//       filtered = filtered.filter(position => position.isActive);
+//     } else if (statusFilter === 'inactive') {
+//       filtered = filtered.filter(position => !position.isActive);
+//     }
+
+//     this.filteredPositions = filtered;
+//   }
+
+//   clearFilters(): void {
+//     this.searchControl.setValue('');
+//     this.departmentControl.setValue('');
+//     this.statusControl.setValue('');
+//   }
+
+//   openCreateDialog(): void {
+//     const dialogRef = this.dialog.open(PositionFormDialogComponent, {
+//       width: '600px',
+//       data: { 
+//         mode: 'create',
+//         departments: this.departments,
+//         roles: this.roles
+//       }
+//     });
+
+//     dialogRef.afterClosed().subscribe(result => {
+//       if (result) {
+//         this.loadInitialData();
+//         this.showSuccess('Position created successfully');
+//       }
+//     });
+//   }
+
+
+//   viewPosition(position: Position): void {
+//   const dialogRef = this.dialog.open(PositionDetailsViewComponent, {
+//     width: '600px',
+//     data: {
+//       position: position,
+//       departments: this.departments,
+//       roles: this.roles
+//     }
+//   });
+
+//   dialogRef.afterClosed().subscribe(() => {
+//     // Optional: actions after closing view dialog (usually nothing)
+//   });
+// }
+
+//   editPosition(position: Position): void {
+//     const dialogRef = this.dialog.open(PositionFormDialogComponent, {
+//       width: '600px',
+//       data: { 
+//         mode: 'edit',
+//         position: position,
+//         departments: this.departments,
+//         roles: this.roles
+//       }
+//     });
+
+//     dialogRef.afterClosed().subscribe(result => {
+//       if (result) {
+//         this.loadInitialData();
+//         this.showSuccess('Position updated successfully');
+//       }
+//     });
+//   }
+
+//   togglePositionStatus(position: Position, newStatus: boolean): void {
+//     const action = newStatus ? 'activate' : 'deactivate';
+//     const confirmMessage = `Are you sure you want to ${action} "${position.positionTitle}"?`;
+    
+//     if (confirm(confirmMessage)) {
+//       // Since there's no specific activate/deactivate endpoint, we'll use update
+//       this.employeeService.updatePosition(position.positionId, {
+//         positionTitle: position.positionTitle,
+//         description: position.description,
+//         departmentId: position.departmentId,
+//         roleId: position.roleId
+//       })
+//       .pipe(takeUntil(this.destroy$))
+//       .subscribe({
+//         next: () => {
+//           this.loadInitialData();
+//           this.showSuccess(`Position ${action}d successfully`);
+//         },
+//         error: (error) => {
+//           console.error(`Error ${action}ing position:`, error);
+//           this.showError(`Failed to ${action} position`);
+//         }
+//       });
+//     }
+//   }
+
+//   deletePosition(position: Position): void {
+//     const confirmMessage = `Are you sure you want to delete "${position.positionTitle}"? This action cannot be undone.`;
+    
+//     if (confirm(confirmMessage)) {
+//       this.employeeService.deletePosition(position.positionId)
+//         .pipe(takeUntil(this.destroy$))
+//         .subscribe({
+//           next: () => {
+//             this.loadInitialData();
+//             this.showSuccess('Position deleted successfully');
+//           },
+//           error: (error) => {
+//             console.error('Error deleting position:', error);
+//             this.showError('Failed to delete position');
+//           }
+//         });
+//     }
+//   }
+
+//   private showSuccess(message: string): void {
+//     this.snackBar.open(message, 'Close', {
+//       duration: 3000,
+//       panelClass: ['success-snackbar']
+//     });
+//   }
+
+//   private showError(message: string): void {
+//     this.snackBar.open(message, 'Close', {
+//       duration: 5000,
+//       panelClass: ['error-snackbar']
+//     });
+//   }
+// }
+
+
+
+
+
+
+
+
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -15,11 +307,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
 
 import { Position, Department, Role } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 import { PositionFormDialogComponent } from '../position-form-dialog/position-form-dialog.component';
+import { PositionDetailsViewComponent } from '../position-form-dialog/position-details-view.component';
 
 @Component({
   selector: 'app-position-list',
@@ -48,10 +341,9 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
   // Data
   positions: Position[] = [];
-  filteredPositions: Position[] = [];
   departments: Department[] = [];
   roles: Role[] = [];
-  
+
   // Table configuration
   displayedColumns: string[] = [
     'title',
@@ -62,10 +354,10 @@ export class PositionListComponent implements OnInit, OnDestroy {
     'createdAt',
     'actions'
   ];
-  
-  // Loading states
+
+  // Loading state
   isLoading = false;
-  
+
   // Search and Filters
   searchControl = new FormControl('');
   departmentControl = new FormControl('');
@@ -96,24 +388,23 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
   private loadInitialData(): void {
     this.isLoading = true;
-    
+
     combineLatest([
-      this.employeeService.getPositions(),
       this.employeeService.getDepartments(),
       this.employeeService.getRoles()
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe({
-      next: ([positions, departments, roles]) => {
-        this.positions = positions;
+      next: ([departments, roles]) => {
         this.departments = departments;
         this.roles = roles;
-        this.applyFilters();
-        this.isLoading = false;
+
+        // Fetch positions immediately with default filters
+        this.fetchPositions();
       },
       error: (error) => {
-        console.error('Error loading data:', error);
-        this.showError('Failed to load data');
+        console.error('Error loading filter data:', error);
+        this.showError('Failed to load filter data');
         this.isLoading = false;
       }
     });
@@ -121,44 +412,36 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
   private setupFilters(): void {
     combineLatest([
-      this.searchControl.valueChanges.pipe(debounceTime(300), distinctUntilChanged()),
-      this.departmentControl.valueChanges,
-      this.statusControl.valueChanges
+      this.searchControl.valueChanges.pipe(startWith(''), debounceTime(300), distinctUntilChanged()),
+      this.departmentControl.valueChanges.pipe(startWith('')),
+      this.statusControl.valueChanges.pipe(startWith(''))
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe(() => {
-      this.applyFilters();
+      this.fetchPositions();
     });
   }
 
-  private applyFilters(): void {
-    let filtered = [...this.positions];
+  private fetchPositions(): void {
+    const departmentId = this.departmentControl.value || undefined;
+    const search = this.searchControl.value || undefined;
+    const status = this.statusControl.value || undefined;
 
-    // Search filter
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
-    if (searchTerm) {
-      filtered = filtered.filter(position => 
-        position.positionTitle.toLowerCase().includes(searchTerm) ||
-        position.description?.toLowerCase().includes(searchTerm) ||
-        position.departmentName?.toLowerCase().includes(searchTerm)
-      );
-    }
+    this.isLoading = true;
 
-    // Department filter
-    const departmentFilter = this.departmentControl.value;
-    if (departmentFilter) {
-      filtered = filtered.filter(position => position.departmentId === departmentFilter);
-    }
-
-    // Status filter
-    const statusFilter = this.statusControl.value;
-    if (statusFilter === 'active') {
-      filtered = filtered.filter(position => position.isActive);
-    } else if (statusFilter === 'inactive') {
-      filtered = filtered.filter(position => !position.isActive);
-    }
-
-    this.filteredPositions = filtered;
+    this.employeeService.getPositions(departmentId, search, status)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (positions) => {
+          this.positions = positions;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching positions:', error);
+          this.showError('Failed to fetch positions');
+          this.isLoading = false;
+        }
+      });
   }
 
   clearFilters(): void {
@@ -179,15 +462,23 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadInitialData();
+        this.fetchPositions();
         this.showSuccess('Position created successfully');
       }
     });
   }
 
   viewPosition(position: Position): void {
-    // TODO: Implement view position details
-    console.log('View position:', position);
+    const dialogRef = this.dialog.open(PositionDetailsViewComponent, {
+      width: '600px',
+      data: {
+        position: position,
+        departments: this.departments,
+        roles: this.roles
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {});
   }
 
   editPosition(position: Position): void {
@@ -203,47 +494,50 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadInitialData();
+        this.fetchPositions();
         this.showSuccess('Position updated successfully');
       }
     });
   }
 
-  togglePositionStatus(position: Position, newStatus: boolean): void {
-    const action = newStatus ? 'activate' : 'deactivate';
-    const confirmMessage = `Are you sure you want to ${action} "${position.positionTitle}"?`;
-    
-    if (confirm(confirmMessage)) {
-      // Since there's no specific activate/deactivate endpoint, we'll use update
-      this.employeeService.updatePosition(position.positionId, {
-        positionTitle: position.positionTitle,
-        description: position.description,
-        departmentId: position.departmentId,
-        roleId: position.roleId
-      })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.loadInitialData();
-          this.showSuccess(`Position ${action}d successfully`);
-        },
-        error: (error) => {
-          console.error(`Error ${action}ing position:`, error);
-          this.showError(`Failed to ${action} position`);
-        }
-      });
-    }
+ 
+togglePositionStatus(position: Position, newStatus: boolean): void {
+  const action = newStatus ? 'activate' : 'deactivate';
+  const confirmMessage = `Are you sure you want to ${action} "${position.positionTitle}"?`;
+
+  if (!confirm(confirmMessage)) {
+    return;
   }
+
+  this.employeeService
+    .updatePositionStatus(position.positionId, newStatus)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: () => {
+        // Optimistic UI update
+        position.isActive = newStatus;
+
+        this.showSuccess(`Position ${action}d successfully`);
+      },
+      error: (error) => {
+        console.error(`Error ${action}ing position:`, error);
+        this.showError(`Failed to ${action} position`);
+      }
+    });
+}
+
+
+
 
   deletePosition(position: Position): void {
     const confirmMessage = `Are you sure you want to delete "${position.positionTitle}"? This action cannot be undone.`;
-    
+
     if (confirm(confirmMessage)) {
       this.employeeService.deletePosition(position.positionId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.loadInitialData();
+            this.fetchPositions();
             this.showSuccess('Position deleted successfully');
           },
           error: (error) => {
