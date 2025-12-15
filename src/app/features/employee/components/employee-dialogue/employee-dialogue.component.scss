@@ -1,217 +1,141 @@
-/* ============================
-   Employee Dialog Container
-=============================== */
-
-::ng-deep .mat-mdc-dialog-container {
-  border-radius: 16px !important;
-  padding: 0 !important;
+/* ===========================
+   DIALOG CONTAINER
+   =========================== */
+.dialog-container {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
 }
 
-/* ============================
-   Dialog Header
-=============================== */
-
+/* ===========================
+   TOP HEADER (Purple Gradient)
+   =========================== */
 .dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6a58f7, #8f6dff);
+  padding: 20px;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   h2 {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: white;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 600;
 
     mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+      font-size: 26px;
     }
   }
-
-  .close-button {
-    color: white;
-    transition: all 0.2s ease;
-    &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(90deg);
-    }
-  }
-}
-
-/* ============================
-   Dialog Content
-=============================== */
-
-.dialog-content {
-  padding: 28px !important;
-  min-width: 650px;
-  max-width: 850px;
-
-  .employee-dialog-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
-  /* 2 fields row */
-  .form-row:nth-child(2),
-  .form-row:nth-child(3) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  /* 4 fields row */
-  .form-row:nth-child(6) {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  /* --- Material Form Fields Styling --- */
-  ::ng-deep mat-form-field.mat-form-field-appearance-outline {
-    .mat-mdc-text-field-wrapper {
-      background: #f9fafb;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-    }
-
-    .mat-mdc-form-field-flex {
-      padding: 0 16px;
-    }
-
-    .mat-mdc-notch-piece {
-      border-color: #e5e7eb !important;
-      transition: border-color 0.3s ease;
-    }
-
-    &:hover .mat-mdc-text-field-wrapper {
-      background: white;
-    }
-
-    &:hover .mat-mdc-notch-piece {
-      border-color: #667eea !important;
-    }
-
-    &.mat-focused {
-      .mat-mdc-text-field-wrapper {
-        background: white;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-
-      .mat-mdc-notch-piece {
-        border-color: #667eea !important;
-        border-width: 2px !important;
-      }
-    }
-
-    .mat-mdc-form-field-label {
-      color: #6b7280;
-      font-weight: 500;
-    }
-
-    &.mat-focused .mat-mdc-form-field-label {
-      color: #667eea;
-    }
-
-    input {
-      color: #1f2937;
-      font-weight: 500;
-    }
-
-    /* Error state */
-    &.mat-form-field-invalid {
-      .mat-mdc-notch-piece {
-        border-color: #dc2626 !important;
-      }
-      .mat-mdc-form-field-label {
-        color: #dc2626;
-      }
-    }
-  }
-}
-
-/* ============================
-   Dialog Actions
-=============================== */
-
-.dialog-actions {
-  padding: 20px 28px !important;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
 
   button {
-    height: 44px;
-    padding: 0 28px !important;
-    border-radius: 12px !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    text-transform: none !important;
-    transition: all 0.3s ease;
-
-    /* Cancel */
-    &[color="warn"] {
-      background: white !important;
-      color: #6b7280 !important;
-      border: 2px solid #e5e7eb !important;
-
-      &:hover {
-        background: #f9fafb !important;
-        border-color: #cbd5e1 !important;
-      }
-    }
-
-    /* Save Button */
-    &[color="primary"]:not([disabled]) {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-      }
-    }
-
-    /* Disabled */
-    &[disabled] {
-      background: #f3f4f6 !important;
-      color: #9ca3af !important;
-      border: 1px solid #e5e7eb !important;
-    }
+    background: rgba(255, 255, 255, 0.18);
+    width: 50px;
+    height: 50px;
+    border-radius: 70%;
   }
 }
 
-/* ============================
-   Responsive
-=============================== */
+/* ===========================
+   BODY CONTENT
+   =========================== */
+mat-dialog-content {
+  padding: 22px 28px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ===========================
+   CARD SECTIONS (White Boxes)
+   =========================== */
+.section-card {
+  background: white;
+  border: 1px solid #e7e7e7;
+  padding: 20px;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Section Title */
+.section-title {
+  color: #333;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  border-left: 4px solid #6a58f7;
+  padding-left: 10px;
+}
+
+/* ===========================
+   ROW — LABEL AND VALUE
+   =========================== */
+.row {
+  display: grid;
+  grid-template-columns: 180px auto;
+  padding: 8px 0;
+  align-items: center;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* Label (Left Side) */
+.row label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* Value (Right Side) */
+.row p {
+  font-size: 14px;
+  color: #222;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Chip Styling */
+.status-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: #6a58f7;
+  width: fit-content;
+}
+
+/* ===========================
+   ACTION BUTTONS
+   =========================== */
+.dialog-actions {
+  padding: 16px 26px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: flex-end;
+  background: #fff;
+}
+
+.dialog-actions button {
+  font-weight: 600;
+}
+
+/* ===========================
+   RESPONSIVE FIX (Mobile)
+   =========================== */
 @media (max-width: 600px) {
-  .dialog-content {
-    min-width: unset;
+  .row {
+    grid-template-columns: 1fr;
+    padding: 10px 0;
 
-    .form-row {
-      grid-template-columns: 1fr !important;
-    }
-  }
-
-  .dialog-actions {
-    flex-direction: column;
-    button {
-      width: 100%;
+    label {
+      margin-bottom: 4px;
     }
   }
 }
