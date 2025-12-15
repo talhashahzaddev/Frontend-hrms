@@ -31,12 +31,12 @@
             </div>
             <div class="stat-details">
               <div class="stat-label">Current Rating</div>
-              <div class="stat-value">{{ overallRating || 0 | number:'1.1-1' }}</div>
+              <div class="stat-value">{{ currentRating || 0 | number:'1.1-1' }}</div>
               <div class="stat-footer">
                 <div class="rating-stars">
                   <mat-icon *ngFor="let star of starRatings" 
-                            [class.filled]="star <= (overallRating || 0)">
-                    {{ star <= (overallRating || 0) ? 'star' : 'star_border' }}
+                            [class.filled]="star <= (currentRating || 0)">
+                    {{ star <= (currentRating || 0) ? 'star' : 'star_border' }}
                   </mat-icon>
                 </div>
               </div>
@@ -223,7 +223,7 @@
                 <th mat-header-cell *matHeaderCellDef>Rating</th>
                 <td mat-cell *matCellDef="let appraisal">
                   <div class="rating-display">
-                    <span class="rating-value">{{ appraisal.overallRating | number:'1.1-1' }}</span>
+                    <span class="rating-value">{{ appraisal.currentRating | number:'1.1-1' }}</span>
                     <div class="rating-stars">
                       <mat-icon *ngFor="let star of starRatings" 
                                 [class.filled]="star <= appraisal.overallRating">

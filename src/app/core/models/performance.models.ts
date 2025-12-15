@@ -73,6 +73,7 @@ export interface EmployeeAppraisal {
   reviewerName: string;
   reviewType: ReviewType;
   overallRating?: number;
+  currentRating?: number;
   kraRatings: { [kraId: string]: number };
   skillRatings: { [skillId: string]: number };
   goalsAchieved: any;
@@ -93,6 +94,7 @@ export interface EmployeeAppraisalForEmployee {
   reviewerName?: string;
   reviewType: ReviewType;
   overallRating?: number;
+  currentRating?: number;
   kraRatings: { [kraId: string]: number };
   skillRatings: { [skillId: string]: number };
   feedback?: string;
