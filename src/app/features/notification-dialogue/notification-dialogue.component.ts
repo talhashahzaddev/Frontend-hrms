@@ -134,7 +134,7 @@ onNotificationClick(notification: ServerNotification): void {
 
       // ATTENDANCE MODULE
       case 'attendance':
-        this.handleAttendance(n.notificationid, action);
+        this.handleAttendance(n, action);
         break;
 
       default:
@@ -223,12 +223,91 @@ onNotificationClick(notification: ServerNotification): void {
   // -------------------------------------------------------
   // 🚀 ATTENDANCE MODULE HANDLING
   // -------------------------------------------------------
-  private handleAttendance(notificationid: string | undefined, action: 'accept' | 'reject'): void {
-    if (!notificationid) return;
+  // private handleAttendance(notificationid: string | undefined, action: 'accept' | 'reject'): void {
+  //   if (!notificationid) return;
 
-    console.log("Attendance module:", action, notificationid);
-    // Add attendance approve/reject APIs here
+  //   console.log("Attendance module:", action, notificationid);
+  //   // Add attendance approve/reject APIs here
+  // }
+
+
+  private handleAttendance(
+  notification: ServerNotification,
+  action: 'accept' | 'reject'
+): void {
+
+  // shift swap request id notification se
+  const requestId = notification.requestid;
+
+  if (!requestId) {
+    this.notificationService.showError('Shift swap request ID not found');
+    return;
   }
+
+  if (!this.currentUser?.userId) {
+    this.notificationService.showError('User not authenticated');
+    return;
+  }
+
+  if (action === 'accept') {
+    const payload = {
+      requestId,
+      approvedBy: this.currentUser.userId,
+      isApproved: true,
+      rejectionReason: ''
+    };
+
+    this.attendanceService.approvedshiftRequest(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.notificationService.showSuccess('Shift swap approved successfully');
+            notification.isRead = true;
+            this.unreadCountChange.emit(this.unreadCount);
+            this.loadNotifications();
+          } else {
+            this.notificationService.showError(res.message || 'Approval failed');
+          }
+        },
+        error: (err) => {
+          console.error('Approve shift swap failed', err);
+          this.notificationService.showError('Failed to approve shift swap');
+        }
+      });
+
+  } else {
+    // 🔴 Reject flow
+    const rejectionReason =
+      prompt('Enter rejection reason:', 'Not suitable for schedule') || '';
+
+    const payload = {
+      requestId,
+      approvedBy: this.currentUser.userId,
+      isApproved: false,
+      rejectionReason
+    };
+
+    this.attendanceService.approvedshiftRequest(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.notificationService.showSuccess('Shift swap rejected');
+            notification.isRead = true;
+            this.unreadCountChange.emit(this.unreadCount);
+            this.loadNotifications();
+          } else {
+            this.notificationService.showError(res.message || 'Rejection failed');
+          }
+        },
+        error: (err) => {
+          console.error('Reject shift swap failed', err);
+          this.notificationService.showError('Failed to reject shift swap');
+        }
+      });
+  }
+}
 
  
   ngOnDestroy(): void {
