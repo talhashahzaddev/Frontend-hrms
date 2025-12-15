@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -38,7 +39,8 @@ import { Department, Employee } from '../../../../core/models/employee.models';
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatPaginatorModule
   ],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss']
@@ -63,6 +65,11 @@ departmentEmployees: DepartmentEmployee[] = [];
 
   // Loading states
   isLoading = false;
+
+  // Pagination
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [5, 10, 25, 50, 100];
 
   // Filters
   startDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
@@ -161,7 +168,10 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     const departmentId = this.departmentControl.value || undefined;
     const status = this.statusControl.value || undefined;
 
-    this.attendanceService.getAttendanceReport(startDate, endDate, employeeId, departmentId, status)
+    // Reset to first page when generating new report
+    this.pageIndex = 0;
+
+    this.attendanceService.getAttendanceReport(startDate, endDate, employeeId, departmentId, status, this.pageIndex + 1, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (report) => {
@@ -172,6 +182,46 @@ this.attendanceService.getDepartmentEmployees(departmentId)
         error: (error) => {
           console.error('Error generating report:', error);
           this.showError('Failed to generate report');
+          this.isLoading = false;
+        }
+      });
+  }
+
+  // -----------------------------
+  // Pagination
+  // -----------------------------
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+
+    if (this.reportData) {
+      this.loadPage();
+    }
+  }
+
+  private loadPage(): void {
+    if (!this.startDateControl.value || !this.endDateControl.value) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    const startDate = this.startDateControl.value?.toISOString().split('T')[0] || '';
+    const endDate = this.endDateControl.value?.toISOString().split('T')[0] || '';
+    const employeeId = this.employeeControl.value ? this.employeeControl.value : undefined;
+    const departmentId = this.departmentControl.value || undefined;
+    const status = this.statusControl.value || undefined;
+
+    this.attendanceService.getAttendanceReport(startDate, endDate, employeeId, departmentId, status, this.pageIndex + 1, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (report) => {
+          this.reportData = report;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading page:', error);
+          this.showError('Failed to load page');
           this.isLoading = false;
         }
       });

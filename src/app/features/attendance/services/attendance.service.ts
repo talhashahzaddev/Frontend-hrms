@@ -332,10 +332,12 @@ getEmployeeAttendanceSessions(
 
 
   // Reports
-  getAttendanceReport(startDate: string, endDate: string, employeeId?: string, departmentId?: string, status?:string): Observable<AttendanceReport> {
+  getAttendanceReport(startDate: string, endDate: string, employeeId?: string, departmentId?: string, status?: string, pageNumber: number = 1, pageSize: number = 10): Observable<AttendanceReport> {
     let params = new HttpParams()
       .set('startDate', startDate)
-      .set('endDate', endDate);
+      .set('endDate', endDate)
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
 
     if (employeeId) params = params.set('employeeId', employeeId);
     if (departmentId) params = params.set('departmentId', departmentId);

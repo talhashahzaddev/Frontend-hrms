@@ -402,16 +402,29 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
     start.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
     
+    // Validate dates
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return 0;
+    }
+    
+    if (start > end) {
+      return 0;
+    }
+    
     let count = 0;
     const currentDate = new Date(start);
     
     // Iterate through each day from start to end (inclusive)
+    // Only count weekdays (Monday-Friday), exclude weekends (Saturday=6, Sunday=0)
     while (currentDate <= end) {
       const dayOfWeek = currentDate.getDay();
+      
       // Exclude weekends: 0 = Sunday, 6 = Saturday
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      // Only count Monday (1) through Friday (5) as working days
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
         count++;
       }
+      
       // Move to next day
       currentDate.setDate(currentDate.getDate() + 1);
     }
