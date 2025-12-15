@@ -94,7 +94,8 @@ export class AttendanceCalendarComponent implements OnInit {
             const found = map.get(this.normalizeKey(cell.date));
             if (found) {
               cell.attendance = found;
-              cell.isHoliday = !!found.isHoliday;
+              // Only set isHoliday if status is actually a holiday, not a weekend
+              cell.isHoliday = !!found.isHoliday && found.status?.toLowerCase() !== 'weekend';
             }
           });
         },
@@ -103,7 +104,21 @@ export class AttendanceCalendarComponent implements OnInit {
   }
 
   normalizeKey(dateInput: string | Date): string {
-    const d = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+    let d: Date;
+    if (typeof dateInput === 'string') {
+      // Handle ISO date strings or date-only strings
+      const dateStr = dateInput.split('T')[0]; // Remove time part if present
+      d = new Date(dateStr);
+    } else {
+      d = dateInput;
+    }
+    
+    // Ensure we have a valid date
+    if (isNaN(d.getTime())) {
+      console.error('Invalid date:', dateInput);
+      return '';
+    }
+    
     const y = d.getFullYear();
     const m = (d.getMonth() + 1).toString().padStart(2, '0');
     const dd = d.getDate().toString().padStart(2, '0');
@@ -132,41 +147,55 @@ get currentMonthYear(): string {
 
   // Map to color classes
   getDateClass(cell: CalendarCell): string {
+    // Not in current month (dimmed)
+    if (!cell.inCurrentMonth) return 'other-month-day';
+
+    // Attendance status - check this FIRST to prioritize status over isHoliday flag
+    if (cell.attendance) {
+      const status = (cell.attendance.status || '').toLowerCase().trim();
+      
+      // Prioritize leave status even on weekends
+      if (status === 'leave' || status === 'on_leave') {
+        return 'leave-day';
+      }
+      
+      // Check weekend status BEFORE checking isHoliday - weekends should NOT be holidays
+      if (status === 'weekend' || cell.isWeekend) {
+        return 'weekend-day';
+      }
+      
+      switch (status) {
+        case 'present': 
+          return 'present-day';
+        case 'half_day':
+        case 'half-day':
+        case 'half day': 
+          return 'half-day';
+        case 'late': 
+          return 'late-day';
+        case 'no record':
+        case 'upcoming':
+        case 'norecord':
+        case 'no_record':
+          return 'no-record-day';
+        case 'absent':
+          // Only show absent if it's not a weekend
+          return cell.isWeekend ? 'weekend-day' : 'absent-day';
+        default:
+          // For unknown statuses, check if weekend
+          return cell.isWeekend ? 'weekend-day' : 'working-day';
+      }
+    }
+
+    // Check weekend BEFORE holiday - weekends are not holidays
+    if (cell.isWeekend) return 'weekend-day';
     
-  // Not in current month (dimmed)
-  if (!cell.inCurrentMonth) return 'other-month-day';
+    // API Holiday (only if not a weekend)
+    if (cell.isHoliday) return 'holiday-day';
 
-  // Force weekend to stay grey even if attendance says absent
-  if (cell.isWeekend) return 'weekend-day';
-
-  // API Holiday
-  if (cell.isHoliday) return 'holiday-day';
-
-  // Attendance status
-  if (cell.attendance) {
-  const status = (cell.attendance.status || '').toLowerCase();
-  switch (status) {
-    case 'present': return 'present-day';
-    case 'absent': return 'absent-day';
-    case 'leave': return 'leave-day';
-    case 'half_day':
-    case 'half-day':
-    case 'half day': return 'half-day';
-    case 'late': return 'late-day';
-    case 'no record':
-    case 'upcoming':
-      return 'no-record-day';
-    case 'weekend':
-      return 'weekend-day';
-    default:
-      return 'working-day'; // ✅ neutral color for unknown/future statuses
+    // Default working day
+    return 'working-day';
   }
-}
-
-
-  // Default working day
-  return 'working-day';
-}
 
 
 

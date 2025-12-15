@@ -25,9 +25,11 @@
     margin: 0;
     font-size: 20px;
     font-weight: 700;
+    color: white !important; // ✅ Ensure title text is white
 
     mat-icon {
       font-size: 26px;
+      color: white !important; // ✅ Ensure icon is white
     }
   }
 

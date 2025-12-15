@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 // Material Imports
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +15,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 // Components and Services
 import { AssignShiftComponent } from '../assign-shift/assign-shift.component';
@@ -39,7 +43,9 @@ import { PendingShiftSwap,ShiftDto,UpdateShiftDto } from '@/app/core/models/atte
     MatTableModule,
     MatMenuModule,
     MatChipsModule,
-    MatTabsModule
+    MatTabsModule,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss']
@@ -62,7 +68,8 @@ export class ShiftComponent implements OnInit {
     private dialog: MatDialog,
     private attendanceService: AttendanceService,
     private authService: AuthService,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -276,18 +283,39 @@ getInitials(name: string): string {
     .toUpperCase();
 }
 
-onDeleteShift(shiftId: string): void {
-  if (!confirm('Are you sure you want to delete this shift?')) return;
+onDeleteShift(shift: ShiftDto): void {
+  const shiftName = shift.shiftName || 'this shift';
+  
+  const dialogData: ConfirmDeleteData = {
+    title: 'Delete Shift',
+    message: 'Are you sure you want to delete this shift?',
+    itemName: shiftName
+  };
 
-  this.attendanceService.deleteShift(shiftId).subscribe({
-    next: (res: any) => {
-      console.log('Shift deleted:', res);
-      alert('✅ Shift deleted successfully');
-      this.loadAllShifts(); // refresh table
-    },
-    error: (err) => {
-      console.error(err);
-      alert('❌ Failed to delete shift');
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-delete-dialog-panel'
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.attendanceService.deleteShift(shift.shiftId).subscribe({
+        next: (res: any) => {
+          this.snackBar.open('Shift deleted successfully', 'Close', { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          this.loadAllShifts(); // refresh table
+        },
+        error: (err) => {
+          console.error('Error deleting shift:', err);
+          this.snackBar.open('Failed to delete shift', 'Close', { 
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
     }
   });
 }

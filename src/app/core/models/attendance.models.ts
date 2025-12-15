@@ -146,6 +146,16 @@ export interface DailyAttendanceStats {
   averageCheckOutTime?: string;
 }
 
+export interface PagedResult<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface AttendanceReport {
   startDate: string;
   endDate: string;
@@ -154,7 +164,7 @@ export interface AttendanceReport {
   totalPresentDays: number;
   totalAbsentDays: number;
   averageAttendanceRate: number;
-  records: Attendance[];
+  records: PagedResult<Attendance>;
   summary: AttendanceSummary;
   dailyStats: DailyAttendanceStats[];
   departmentStats: any[];
