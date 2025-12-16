@@ -32,19 +32,19 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <!-- <mat-form-field appearance="outline">
           <mat-label>Start Date</mat-label>
           <input matInput [matDatepicker]="startPicker" formControlName="startDate">
           <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
           <mat-datepicker #startPicker></mat-datepicker>
-        </mat-form-field>
+        </mat-form-field> -->
 
-        <mat-form-field appearance="outline">
+        <!-- <mat-form-field appearance="outline">
           <mat-label>End Date</mat-label>
           <input matInput [matDatepicker]="endPicker" formControlName="endDate">
           <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
           <mat-datepicker #endPicker></mat-datepicker>
-        </mat-form-field>
+        </mat-form-field> -->
 
         <mat-form-field appearance="outline">
           <mat-label>Department</mat-label>
@@ -61,7 +61,7 @@
             <mat-icon>search</mat-icon>
             Generate Report
           </button>
-          <button mat-stroked-button (click)="clearFilters()">
+          <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasActiveFiltersFlag">
             <mat-icon>clear</mat-icon>
             Clear
           </button>
@@ -72,7 +72,7 @@
 
   <!-- Reports Tabs -->
   <mat-card class="reports-card">
-    <mat-tab-group>
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex">
       
       <!-- Statistics Tab -->
       <mat-tab label="Statistics">
@@ -81,7 +81,7 @@
           <!-- Statistics Cards -->
           <div class="statistics-cards">
             <!-- Total Employees Card -->
-            <mat-card class="stat-card stat-card-employee" *ngIf="reportData">
+            <mat-card class="stat-card stat-card-employee" *ngIf="statisticsData">
               <mat-card-content>
                 <div class="stat-item">
                   <div class="stat-icon-wrapper">
@@ -89,7 +89,7 @@
                   </div>
                   <div class="stat-details">
                     <div class="stat-label">Total Employees</div>
-                    <div class="stat-value">{{ reportData.totalEmployees }}</div>
+                    <div class="stat-value">{{ statisticsData.totalEmployees }}</div>
                     <div class="stat-footer">
                       <mat-icon class="stat-indicator">group</mat-icon>
                       <span>Active Staff</span>

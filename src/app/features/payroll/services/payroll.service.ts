@@ -326,11 +326,13 @@ export class PayrollService {
   }
 
   // Payroll Statistics
-  getPayrollStatistics(startDate?: string, endDate?: string): Observable<ApiResponse<any>> {
+  getPayrollStatistics(startDate?: string, endDate?: string, payrollPeriodId?: string, department?: string): Observable<ApiResponse<any>> {
     let params = new HttpParams();
 
     if (startDate) params = params.set('startDate', startDate);
     if (endDate) params = params.set('endDate', endDate);
+    if (payrollPeriodId) params = params.set('payrollPeriodId', payrollPeriodId);
+    if (department) params = params.set('department', department);
 
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payroll/statistics`, { params });
   }

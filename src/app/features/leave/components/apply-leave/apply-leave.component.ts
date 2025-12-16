@@ -131,6 +131,23 @@ import { LeaveType, LeaveBalance, CreateLeaveRequest, LeaveRequest } from '../..
                 <span class="warning-text">You only have {{ selectedLeaveBalance }} days available for this leave type.</span>
               </div>
             </div>
+
+            <!-- Overlap Warning -->
+            <div class="balance-warning" *ngIf="showOverlapWarning">
+              <mat-icon>warning</mat-icon>
+              <div class="warning-content">
+                <span class="warning-label">Leave Overlap Detected!</span>
+                <span class="warning-text">You have already applied for leave during this period. Please select different dates.</span>
+              </div>
+            </div>
+
+            <!-- Checking Overlap Indicator -->
+            <div class="days-info" *ngIf="isCheckingOverlap">
+              <mat-icon>sync</mat-icon>
+              <div class="info-content">
+                <span class="info-label">Checking for overlaps...</span>
+              </div>
+            </div>
           </div>
 
           <!-- Additional Information Section -->
@@ -167,7 +184,7 @@ import { LeaveType, LeaveBalance, CreateLeaveRequest, LeaveRequest } from '../..
                     color="primary" 
                     type="submit"
                     (click)="onSubmit()"
-                    [disabled]="!leaveForm.valid || isSubmitting || showBalanceWarning">
+                    [disabled]="!leaveForm.valid || isSubmitting || showBalanceWarning || showOverlapWarning || isCheckingOverlap">
               <mat-icon *ngIf="!isSubmitting">{{ isEditMode ? 'save' : 'send' }}</mat-icon>
               <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update' : 'Submit' }} Request</span>
               <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Submitting...' }}</span>
@@ -202,6 +219,8 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   calculatedDays = 0;
   selectedLeaveBalance = 0;
   showBalanceWarning = false;
+  showOverlapWarning = false;
+  isCheckingOverlap = false;
   minDate = new Date();
 
   constructor(
@@ -280,7 +299,10 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
       endDate: new Date(request.endDate),
       reason: request.reason
     });
-    this.onDateChange();
+    // Delay the overlap check slightly to ensure form is fully populated
+    setTimeout(() => {
+      this.onDateChange();
+    }, 100);
   }
 
   onLeaveTypeChange(): void {
@@ -313,8 +335,61 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           end.toISOString()
         );
         this.validateBalance();
+        this.checkForOverlap();
+      } else {
+        this.showOverlapWarning = false;
       }
+    } else {
+      this.showOverlapWarning = false;
     }
+  }
+
+  private checkForOverlap(): void {
+    const startDate = this.leaveForm.get('startDate')?.value;
+    const endDate = this.leaveForm.get('endDate')?.value;
+
+    if (!startDate || !endDate) {
+      this.showOverlapWarning = false;
+      return;
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (end < start) {
+      this.showOverlapWarning = false;
+      return;
+    }
+
+    this.isCheckingOverlap = true;
+    const excludeRequestId = this.isEditMode && this.requestId ? this.requestId : undefined;
+
+    // Format dates as YYYY-MM-DD for date-only comparison (database stores DATE type)
+    const formatDateOnly = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    this.leaveService.checkLeaveOverlap(
+      formatDateOnly(start),
+      formatDateOnly(end),
+      excludeRequestId
+    ).pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (hasOverlap) => {
+        console.log('Overlap check result:', hasOverlap, 'for dates:', formatDateOnly(start), 'to', formatDateOnly(end));
+        this.showOverlapWarning = hasOverlap;
+        this.isCheckingOverlap = false;
+      },
+      error: (error) => {
+        console.error('Error checking leave overlap:', error);
+        this.isCheckingOverlap = false;
+        // Don't show warning on error, let backend handle it
+        this.showOverlapWarning = false;
+      }
+    });
   }
 
   private validateBalance(): void {
@@ -349,61 +424,116 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.leaveForm.valid && !this.showBalanceWarning) {
+    if (this.leaveForm.valid && !this.showBalanceWarning && !this.showOverlapWarning && !this.isCheckingOverlap) {
       this.isSubmitting = true;
       const formValue = this.leaveForm.value;
 
+      const startDate = new Date(formValue.startDate);
+      const endDate = new Date(formValue.endDate);
+
+      // Format dates as YYYY-MM-DD for date-only comparison
+      const formatDateOnly = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       const request: CreateLeaveRequest = {
         leaveTypeId: formValue.leaveTypeId,
-        startDate: new Date(formValue.startDate).toISOString(),
-        endDate: new Date(formValue.endDate).toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         reason: formValue.reason || ''
       };
 
-      // Validate before submission
-      const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
-      
-      if (validationErrors.length > 0) {
-        this.notificationService.showError(validationErrors[0]);
-        this.isSubmitting = false;
-        return;
-      }
+      // Final overlap check before submission as safeguard
+      const excludeRequestId = this.isEditMode && this.requestId ? this.requestId : undefined;
+      this.leaveService.checkLeaveOverlap(
+        formatDateOnly(startDate),
+        formatDateOnly(endDate),
+        excludeRequestId
+      ).pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (hasOverlap) => {
+          if (hasOverlap) {
+            this.showOverlapWarning = true;
+            this.isSubmitting = false;
+            this.notificationService.showError('You have already applied for leave during this period. Please select different dates.');
+            return;
+          }
 
-      if (this.isEditMode && this.requestId) {
-        // Update existing request
-        this.leaveService.updateLeaveRequest(this.requestId, request)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              this.isSubmitting = false;
-              this.notificationService.showSuccess('Leave request updated successfully');
-              this.router.navigate(['/leave/dashboard']);
-            },
-            error: (error) => {
-              console.error('Error updating leave request:', error);
-              this.isSubmitting = false;
-              const errorMessage = error?.error?.message || error?.message || 'Failed to update leave request';
-              this.notificationService.showError(errorMessage);
+          // Validate before submission
+          const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
+          
+          if (validationErrors.length > 0) {
+            this.notificationService.showError(validationErrors[0]);
+            this.isSubmitting = false;
+            return;
+          }
+
+          this.submitLeaveRequest(request);
+        },
+        error: (error) => {
+          console.error('Error in final overlap check:', error);
+          // Continue with submission, backend will catch it
+          const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
+          
+          if (validationErrors.length > 0) {
+            this.notificationService.showError(validationErrors[0]);
+            this.isSubmitting = false;
+            return;
+          }
+
+          this.submitLeaveRequest(request);
+        }
+      });
+    }
+  }
+
+  private submitLeaveRequest(request: CreateLeaveRequest): void {
+
+    if (this.isEditMode && this.requestId) {
+      // Update existing request
+      this.leaveService.updateLeaveRequest(this.requestId, request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.isSubmitting = false;
+            this.notificationService.showSuccess('Leave request updated successfully');
+            this.router.navigate(['/leave/dashboard']);
+          },
+          error: (error) => {
+            console.error('Error updating leave request:', error);
+            this.isSubmitting = false;
+            const errorMessage = error?.error?.message || error?.message || 'Failed to update leave request';
+            // Check if it's an overlap error
+            if (errorMessage.toLowerCase().includes('overlap')) {
+              this.showOverlapWarning = true;
             }
-          });
-      } else {
-        // Create new request
-        this.leaveService.createLeaveRequest(request)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              this.isSubmitting = false;
-              this.notificationService.showSuccess('Leave request submitted successfully');
-              this.router.navigate(['/leave/dashboard']);
-            },
-            error: (error) => {
-              console.error('Error submitting leave request:', error);
-              this.isSubmitting = false;
-              const errorMessage = error?.error?.message || error?.message || 'Failed to submit leave request';
-              this.notificationService.showError(errorMessage);
+            this.notificationService.showError(errorMessage);
+          }
+        });
+    } else {
+      // Create new request
+      this.leaveService.createLeaveRequest(request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.isSubmitting = false;
+            this.notificationService.showSuccess('Leave request submitted successfully');
+            this.router.navigate(['/leave/dashboard']);
+          },
+          error: (error) => {
+            console.error('Error submitting leave request:', error);
+            this.isSubmitting = false;
+            const errorMessage = error?.error?.message || error?.message || 'Failed to submit leave request';
+            // Check if it's an overlap error
+            if (errorMessage.toLowerCase().includes('overlap')) {
+              this.showOverlapWarning = true;
             }
-          });
-      }
+            this.notificationService.showError(errorMessage);
+          }
+        });
     }
   }
 }

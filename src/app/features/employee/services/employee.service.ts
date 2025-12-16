@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
@@ -92,17 +92,23 @@ export class EmployeeService {
       );
   }
 
-  updateEmployee(employeeId: number, employee: Employee): Observable<Employee> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
+updateEmployee(formData: FormData): Observable<Employee> {
+  return this.http.put<ApiResponse<Employee>>(
+    `${this.apiUrl}/edit`,
+    formData
+  ).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Employee update failed');
+      }
+      return response.data!;
+    }),
+    catchError(throwError)
+  );
+}
 
-    return this.http.put<Employee>(
-      `${this.apiUrl}/${employeeId}`,
-      employee,
-      { headers }
-    );
-  }
+
+
 
   // Example of how to use it with error handling:
   updateEmployeeWithErrorHandling(employeeId: number, employee: Employee): Observable<Employee> {
@@ -117,16 +123,28 @@ export class EmployeeService {
     );
   }
 
-  deleteEmployee(employeeId: string): Observable<void> {
-    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${employeeId}`)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Failed to delete employee');
-          }
-        })
-      );
-  }
+  // deleteEmployee(employeeId: string): Observable<void> {
+  //   return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${employeeId}`)
+  //     .pipe(
+  //       map(response => {
+  //         if (!response.success) {
+  //           throw new Error(response.message || 'Failed to delete employee');
+  //         }
+  //       })
+  //     );
+  // }
+
+  deleteEmployee(employeeId: string, status?: string): Observable<void> {
+  return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${employeeId}?status=${status}`)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || `Failed to ${status === 'delete' ? 'delete' : 'recover'} employee`);
+        }
+      })
+    );
+}
+
 
   activateEmployee(employeeId: string): Observable<Employee> {
     return this.http.patch<ApiResponse<Employee>>(`${this.apiUrl}/${employeeId}/activate`, {})
@@ -139,6 +157,8 @@ export class EmployeeService {
         })
       );
   }
+
+
 
   deactivateEmployee(employeeId: string): Observable<Employee> {
     return this.http.patch<ApiResponse<Employee>>(`${this.apiUrl}/${employeeId}/deactivate`, {})

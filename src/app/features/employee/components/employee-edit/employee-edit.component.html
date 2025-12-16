@@ -302,8 +302,15 @@
     <mat-icon>close</mat-icon>
     Cancel
   </button>
-  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isLoading || employeeForm.invalid">
+  <!-- <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isLoading || employeeForm.invalid">
     <mat-icon>{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
     {{ isLoading ? 'Saving...' : 'Save Changes' }}
-  </button>
+  </button> -->
+
+  <button mat-raised-button color="primary" (click)="onSave()" 
+        [disabled]="isLoading || !employeeForm.dirty">
+  <mat-icon>{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
+  {{ isLoading ? 'Saving...' : 'Save Changes' }}
+</button>
+
 </div>

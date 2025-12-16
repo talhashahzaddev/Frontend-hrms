@@ -95,9 +95,8 @@ dataSource = new MatTableDataSource<AttendanceSession>([]);
 
   // Date controls
   selectedMonth = new Date();
-  listStartDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
-  listEndDateControl = new FormControl(new Date());
-  
+listStartDateControl = new FormControl(new Date(new Date().getFullYear(), new Date().getMonth(), 1)); // 1st of current month
+listEndDateControl = new FormControl(new Date()); // Today
   // Quick stats
   quickStats = [
     { label: 'Present Today', value: '0', icon: 'check_circle', color: 'success' },
@@ -158,8 +157,8 @@ dataSource = new MatTableDataSource<AttendanceSession>([]);
   }
 
   private loadAttendanceSummary(): void {
-    const startDate = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth(), 1);
-    const endDate = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 0);
+    const startDate = (new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    const endDate = new Date(new Date()); // Today
     
     this.attendanceService.getMyAttendanceSummary(
       startDate.toISOString().split('T')[0],
