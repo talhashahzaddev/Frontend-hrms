@@ -561,4 +561,30 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   parseApiDate(dateString: string): Date {
     return new Date(dateString);
   }
+
+  // Check for overlapping leave requests
+  checkLeaveOverlap(startDate: string, endDate: string, excludeRequestId?: string): Observable<boolean> {
+    let params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate);
+    
+    if (excludeRequestId) {
+      params = params.set('excludeRequestId', excludeRequestId);
+    }
+
+    return this.http.get<ApiResponse<boolean>>(`${this.apiUrl}/check-overlap`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to check leave overlap');
+          }
+          return response.data!;
+        }),
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error checking leave overlap:', error);
+          // Return false on error to allow form submission (backend will catch it)
+          return of(false);
+        })
+      );
+  }
 }
