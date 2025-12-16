@@ -246,21 +246,6 @@ viewEmployee(employee: Employee): void {
   });
 }
 
-// editEmployee(employee: Employee): void {
-//   const dialogRef = this.dialog.open(this.openEditDialog, {
-//     width: '700px',
-//     data: { employee, viewOnly: false } // viewOnly = false for editing
-//   });
-
-//   dialogRef.afterClosed().subscribe((updatedEmployee: Employee) => {
-//     if (updatedEmployee) {
-//       // Update the employee locally or reload from backend
-//       const index = this.employees.findIndex(e => e.employeeId === updatedEmployee.employeeId);
-//       if (index !== -1) this.employees[index] = updatedEmployee;
-//       this.notificationService.showSuccess('Employee updated successfully');
-//     }
-//   });
-// }
 openEditDialog(employee: Employee): void {
     const dialogRef = this.dialog.open(EmployeeEditComponent, {
       width: '1000px',
@@ -307,40 +292,48 @@ openEditDialog(employee: Employee): void {
   }
 
 
-  // editEmployee(employee: Employee): void {
-  //   // Navigate to employee edit form
-  // }
+deleteEmployee(employee: Employee): void {
+  // Determine action based on current status
+  const isDeleted = employee.status === 'deleted';
+  const action = isDeleted ? 'Recover' : 'Delete';
+  const status = isDeleted ? 'active' : 'delete';
 
-  deleteEmployee(employee: Employee): void {
-    const dialogData: ConfirmDeleteData = {
-      title: 'Delete Employee',
-      message: 'Are you sure you want to delete this employee?',
-      itemName: `${employee.firstName} ${employee.lastName}`
-    };
+  const dialogData: ConfirmDeleteData = {
+    title: `${action} Employee`,
+    message: `Are you sure you want to ${action.toLowerCase()} this employee?`,
+    itemName: `${employee.firstName} ${employee.lastName}`
+  };
 
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '450px',
-      data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
-    });
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-delete-dialog-panel'
+  });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.employeeService.deleteEmployee(employee.employeeId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.notificationService.showSuccess('Employee deleted successfully');
-              this.loadEmployees();
-            },
-            error: (error) => {
-              console.error('Failed to delete employee:', error);
-              this.notificationService.showError('Failed to delete employee');
-            }
-          });
-      }
-    });
-  }
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.employeeService.deleteEmployee(employee.employeeId, status)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            // update employee status locally
+            employee.status = status === 'delete' ? 'deleted' : 'active';
+
+            this.notificationService.showSuccess(
+              `Employee ${status === 'delete' ? 'deleted' : 'recovered'} successfully`
+            );
+          },
+          error: (error) => {
+            console.error(`Failed to ${status === 'delete' ? 'delete' : 'recover'} employee:`, error);
+            this.notificationService.showError(
+              `Failed to ${status === 'delete' ? 'delete' : 'recover'} employee`
+            );
+          }
+        });
+    }
+  });
+}
+
 
   toggleEmployeeStatus(employee: Employee): void {
     const isActive = employee.status === 'active';
