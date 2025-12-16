@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -81,7 +82,8 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
     private payrollService: PayrollService,
     private notificationService: NotificationService,
     private employeeService: EmployeeService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private router: Router
   ) {
     this.selectionForm = this.fb.group({
       selectedPeriod: ['', Validators.required]
@@ -349,8 +351,12 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
   }
 
   viewPayrollEntries(): void {
-    // Navigate to payroll entries with filter
-    window.location.href = '/payroll/entries';
+    // Navigate to payroll reports with period ID in query params
+    if (this.selectedPeriodDetails?.periodId) {
+      this.router.navigate(['/payroll/reports'], {
+        queryParams: { periodId: this.selectedPeriodDetails.periodId, tab: 'detailed' }
+      });
+    }
   }
 
   resetProcessing(): void {

@@ -150,18 +150,23 @@ get currentMonthYear(): string {
     // Not in current month (dimmed)
     if (!cell.inCurrentMonth) return 'other-month-day';
 
-    // Attendance status - check this FIRST to prioritize status over isHoliday flag
+    // ✅ PRIORITY 1: Check weekend FIRST - weekends always show as weekends, even with leave requests
+    if (cell.isWeekend) {
+      return 'weekend-day';
+    }
+
+    // Attendance status - check after weekends
     if (cell.attendance) {
       const status = (cell.attendance.status || '').toLowerCase().trim();
       
-      // Prioritize leave status even on weekends
-      if (status === 'leave' || status === 'on_leave') {
-        return 'leave-day';
+      // Check weekend status from API data (shouldn't happen if isWeekend is already checked, but for safety)
+      if (status === 'weekend') {
+        return 'weekend-day';
       }
       
-      // Check weekend status BEFORE checking isHoliday - weekends should NOT be holidays
-      if (status === 'weekend' || cell.isWeekend) {
-        return 'weekend-day';
+      // Check leave status (only if not a weekend)
+      if (status === 'leave' || status === 'on_leave') {
+        return 'leave-day';
       }
       
       switch (status) {
@@ -179,16 +184,11 @@ get currentMonthYear(): string {
         case 'no_record':
           return 'no-record-day';
         case 'absent':
-          // Only show absent if it's not a weekend
-          return cell.isWeekend ? 'weekend-day' : 'absent-day';
+          return 'absent-day';
         default:
-          // For unknown statuses, check if weekend
-          return cell.isWeekend ? 'weekend-day' : 'working-day';
+          return 'working-day';
       }
     }
-
-    // Check weekend BEFORE holiday - weekends are not holidays
-    if (cell.isWeekend) return 'weekend-day';
     
     // API Holiday (only if not a weekend)
     if (cell.isHoliday) return 'holiday-day';

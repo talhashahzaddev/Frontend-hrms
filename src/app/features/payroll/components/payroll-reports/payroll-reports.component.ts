@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -60,6 +61,9 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   // Forms
   filterForm: FormGroup;
+  
+  // Tab control
+  selectedTabIndex = 0;
 
   // Data
   availablePeriods: PayrollPeriod[] = [];
@@ -76,6 +80,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   // UI state
   isLoading = false;
+  hasActiveFiltersFlag = false;
   
   // Currency
   organizationCurrency: string = 'USD';
@@ -163,7 +168,9 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
     private payrollService: PayrollService,
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.filterForm = this.fb.group({
       payrollPeriodId: [''],
@@ -175,9 +182,38 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadOrganizationCurrency();
-    this.loadAvailablePeriods();
     this.loadDepartments();
-    this.generateDefaultReport();
+    
+    // Check for query parameters first
+    const params = this.route.snapshot.queryParams;
+    const periodId = params['periodId'];
+    const tab = params['tab'];
+    
+    if (tab === 'detailed') {
+      this.selectedTabIndex = 1; // Switch to Detailed Report tab
+    }
+    
+    // Load available periods first, then handle query params
+    this.loadAvailablePeriods(() => {
+      if (periodId) {
+        // Set the period filter
+        this.filterForm.patchValue({ payrollPeriodId: periodId }, { emitEvent: false });
+        // Apply filters and then expand the period
+        this.applyFiltersWithPeriodExpansion(periodId);
+      } else {
+        this.generateDefaultReport();
+      }
+    });
+    
+    // Subscribe to form value changes to update hasActiveFiltersFlag
+    this.filterForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.updateActiveFiltersFlag();
+      });
+    
+    // Initial check
+    this.updateActiveFiltersFlag();
   }
 
   private loadOrganizationCurrency(): void {
@@ -212,7 +248,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadAvailablePeriods(): void {
+  private loadAvailablePeriods(callback?: () => void): void {
     this.payrollService.getPayrollPeriods()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -220,10 +256,16 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
           if (response.success && response.data) {
             this.availablePeriods = response.data.data || [];
             this.cdr.markForCheck();
+            if (callback) {
+              callback();
+            }
           }
         },
         error: (error) => {
           console.error('Error loading periods:', error);
+          if (callback) {
+            callback();
+          }
         }
       });
   }
@@ -266,9 +308,41 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
     this.loadDepartmentBreakdown(filter);
   }
 
+  private applyFiltersWithPeriodExpansion(periodId: string): void {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    const filter: PayrollReportFilter = {
+      payrollPeriodId: periodId,
+      startDate: undefined,
+      endDate: undefined,
+      department: undefined
+    };
+
+    // Load all report data with filters
+    this.loadReportData(filter, periodId);
+    this.loadStatisticsData(filter);
+    this.loadDepartmentBreakdown(filter);
+  }
+
   clearFilters(): void {
     this.filterForm.reset();
     this.generateDefaultReport();
+  }
+
+  private updateActiveFiltersFlag(): void {
+    const formValue = this.filterForm.value;
+    this.hasActiveFiltersFlag = !!(
+      formValue.payrollPeriodId ||
+      formValue.startDate ||
+      formValue.endDate ||
+      formValue.department
+    );
+    this.cdr.markForCheck();
+  }
+
+  hasActiveFilters(): boolean {
+    return this.hasActiveFiltersFlag;
   }
 
   exportReport(format: 'excel' | 'pdf'): void {
@@ -398,7 +472,7 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
            (entry.taxAmount || 0) + (entry.otherDeductions || 0);
   }
 
-  private loadReportData(filter?: PayrollReportFilter): void {
+  private loadReportData(filter?: PayrollReportFilter, periodIdToExpand?: string): void {
     this.payrollService.generatePayrollReport(filter)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -409,6 +483,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
             this.detailedData = response.data.entries || [];
             this.filteredDetailedData = [...this.detailedData];
             this.groupEntriesByPeriod();
+            
+            // Expand the period if specified
+            if (periodIdToExpand) {
+              this.expandedPeriods.add(periodIdToExpand);
+            }
           }
           this.isLoading = false;
           this.cdr.markForCheck();
@@ -424,7 +503,9 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
   private loadStatisticsData(filter?: PayrollReportFilter): void {
     this.payrollService.getPayrollStatistics(
       filter?.startDate, 
-      filter?.endDate
+      filter?.endDate,
+      filter?.payrollPeriodId,
+      filter?.department
     )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -446,8 +527,8 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            // Convert single breakdown to array format for table
-            this.departmentData = [response.data];
+            // Response.data is now a list of department breakdowns
+            this.departmentData = response.data;
           }
           this.cdr.markForCheck();
         },
