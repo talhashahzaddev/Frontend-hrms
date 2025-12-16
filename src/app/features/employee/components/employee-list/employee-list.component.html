@@ -261,14 +261,22 @@
                 <span>View Details</span>
               </button>
               
-              <button mat-menu-item (click)="editEmployee(employee)">
+              <button mat-menu-item (click)="openEditDialog(employee)">
                 <mat-icon>edit</mat-icon>
                 <span>Edit Employee</span>
               </button>
               
-              <button mat-menu-item (click)="toggleEmployeeStatus(employee)">
-                <mat-icon>{{ employee.isActive ? 'block' : 'check_circle' }}</mat-icon>
-                <span>{{ employee.isActive ? 'Deactivate' : 'Activate' }}</span>
+              <button
+              mat-menu-item
+              *ngIf="employee.status !== 'deleted'"
+              (click)="toggleEmployeeStatus(employee)"
+              >
+              <mat-icon>
+                {{ employee.status === 'active' ? 'block' : 'check_circle' }}
+              </mat-icon>
+              <span>
+              {{ employee.status === 'active' ? 'Deactivate' : 'Activate' }}
+              </span>
               </button>
               
               <mat-divider></mat-divider>

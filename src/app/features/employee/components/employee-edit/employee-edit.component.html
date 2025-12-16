@@ -1,0 +1,309 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>edit</mat-icon>
+    Edit Employee
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button" (click)="onCancel()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="employeeForm" class="employee-edit-form">
+    
+    <!-- Basic Information Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon>badge</mat-icon>
+        <h3>Basic Information</h3>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Employee Code</mat-label>
+          <input matInput formControlName="employeeCode">
+          <mat-icon matPrefix>fingerprint</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>First Name</mat-label>
+          <input matInput formControlName="firstName" required>
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="employeeForm.get('firstName')?.hasError('required')">
+            First name is required
+          </mat-error>
+          <mat-error *ngIf="employeeForm.get('firstName')?.hasError('minlength')">
+            Minimum 2 characters required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Last Name</mat-label>
+          <input matInput formControlName="lastName" required>
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="employeeForm.get('lastName')?.hasError('required')">
+            Last name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="employeeForm.get('email')?.hasError('required')">
+            Email is required
+          </mat-error>
+          <mat-error *ngIf="employeeForm.get('email')?.hasError('email')">
+            Invalid email format
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone">
+          <mat-icon matPrefix>phone</mat-icon>
+          <mat-error *ngIf="employeeForm.get('phone')?.hasError('pattern')">
+            Invalid phone number (10-15 digits)
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Personal Information Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon>person_outline</mat-icon>
+        <h3>Personal Information</h3>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Date of Birth</mat-label>
+          <input matInput type="date" formControlName="dateOfBirth">
+          <mat-icon matPrefix>cake</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Gender</mat-label>
+          <mat-select formControlName="gender">
+            <mat-option *ngFor="let gender of genderOptions" [value]="gender.value">
+              {{ gender.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>wc</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nationality</mat-label>
+          <input matInput formControlName="nationality">
+          <mat-icon matPrefix>public</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Marital Status</mat-label>
+          <mat-select formControlName="maritalStatus">
+            <mat-option *ngFor="let status of maritalStatusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>family_restroom</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Employment Details Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon>work</mat-icon>
+        <h3>Employment Details</h3>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Department</mat-label>
+          <mat-select formControlName="departmentId" required>
+            <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+              {{ dept.departmentName }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>business</mat-icon>
+          <mat-error>Department is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Position</mat-label>
+          <mat-select formControlName="positionId" required>
+            <mat-option *ngFor="let pos of positions" [value]="pos.positionId">
+              {{ pos.positionTitle }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>assignment_ind</mat-icon>
+          <mat-error>Position is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Reporting Manager</mat-label>
+          <mat-select formControlName="reportingManagerId">
+            <mat-option [value]="null">None</mat-option>
+            <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
+              {{ mgr.fullName }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>supervisor_account</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Employment Type</mat-label>
+          <mat-select formControlName="employmentType" required>
+            <mat-option *ngFor="let type of employmentTypes" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>schedule</mat-icon>
+          <mat-error>Employment type is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status" required>
+            <mat-option *ngFor="let status of statuses" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>toggle_on</mat-icon>
+          <mat-error>Status is required</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Hire Date</mat-label>
+          <input matInput type="date" formControlName="hireDate" required>
+          <mat-icon matPrefix>event</mat-icon>
+          <mat-error>Hire date is required</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Compensation Section -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon>payments</mat-icon>
+        <h3>Compensation</h3>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Pay Type</mat-label>
+          <mat-select formControlName="payType">
+            <mat-option *ngFor="let type of payTypeOptions" [value]="type.value">
+              {{ type.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>account_balance</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Basic Salary</mat-label>
+          <input matInput type="number" formControlName="basicSalary" required min="0">
+          <mat-icon matPrefix>attach_money</mat-icon>
+          <mat-error *ngIf="employeeForm.get('basicSalary')?.hasError('required')">
+            Salary is required
+          </mat-error>
+          <mat-error *ngIf="employeeForm.get('basicSalary')?.hasError('min')">
+            Salary must be greater than 0
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Address Section -->
+    <div class="form-section" formGroupName="address">
+      <div class="section-header">
+        <mat-icon>home</mat-icon>
+        <h3>Address</h3>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width-span-2">
+          <mat-label>Street Address</mat-label>
+          <input matInput formControlName="street">
+          <mat-icon matPrefix>location_on</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>City</mat-label>
+          <input matInput formControlName="city">
+          <mat-icon matPrefix>location_city</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>State/Province</mat-label>
+          <input matInput formControlName="state">
+          <mat-icon matPrefix>map</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Zip/Postal Code</mat-label>
+          <input matInput formControlName="zip">
+          <mat-icon matPrefix>markunread_mailbox</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Emergency Contact Section -->
+    <div class="form-section" formGroupName="emergencyContact">
+      <div class="section-header">
+        <mat-icon>contact_emergency</mat-icon>
+        <h3>Emergency Contact</h3>
+      </div>
+      
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Contact Name</mat-label>
+          <input matInput formControlName="name">
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Relationship</mat-label>
+          <input matInput formControlName="relationship">
+          <mat-icon matPrefix>group</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Phone</mat-label>
+          <input matInput formControlName="phone">
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email">
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-error *ngIf="employeeForm.get('emergencyContact.email')?.hasError('email')">
+            Invalid email format
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<div class="dialog-actions">
+  <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading">
+    <mat-icon>close</mat-icon>
+    Cancel
+  </button>
+  <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isLoading || employeeForm.invalid">
+    <mat-icon>{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
+    {{ isLoading ? 'Saving...' : 'Save Changes' }}
+  </button>
+</div>

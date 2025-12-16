@@ -4,6 +4,11 @@ export interface Employee {
   departmentId?:String;
   positionId?:string;
   reportingManagerId?:string;
+  reportingManagerName?:string;
+  departmentName?: string;
+  positionTitle?:string;
+  payType?:string;
+  employmentType?:string;
   roleId?:string;
   userId?: string;
   employeeCode: string;
@@ -31,6 +36,8 @@ export interface Employee {
   basicSalary:number;
   // Related data
   employmentDetails?: EmploymentDetail;
+  paytype?:string;
+
   department?: Department;
   position?: Position;
   manager?: Employee;

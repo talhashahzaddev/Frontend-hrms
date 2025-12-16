@@ -79,10 +79,10 @@ export interface CreatePayrollPeriodDialogData {
 
           <mat-form-field appearance="outline" class="date-field">
             <mat-label>End Date *</mat-label>
-            <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate" [min]="getMinEndDate()" [matDatepickerFilter]="endDateFilter">
             <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
             <mat-datepicker #endPicker></mat-datepicker>
-            <mat-hint>Required field</mat-hint>
+            <mat-hint>Required field - Must be after start date</mat-hint>
             <mat-error *ngIf="periodForm.get('endDate')?.hasError('required')">
               End date is required
             </mat-error>
@@ -95,10 +95,13 @@ export interface CreatePayrollPeriodDialogData {
         <!-- Pay Date -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Pay Date</mat-label>
-          <input matInput [matDatepicker]="payPicker" formControlName="payDate">
+          <input matInput [matDatepicker]="payPicker" formControlName="payDate" [min]="getMinPayDate()" [matDatepickerFilter]="payDateFilter">
           <mat-datepicker-toggle matSuffix [for]="payPicker"></mat-datepicker-toggle>
           <mat-datepicker #payPicker></mat-datepicker>
-          <mat-hint>Optional - When employees will receive their pay</mat-hint>
+          <mat-hint>Optional - Must be after end date</mat-hint>
+          <mat-error *ngIf="periodForm.get('payDate')?.hasError('payDateBeforeEnd')">
+            Pay date must be after end date
+          </mat-error>
         </mat-form-field>
 
         <!-- Period Preview -->
@@ -166,25 +169,97 @@ export class CreatePayrollPeriodDialogComponent {
         Validators.required
       ],
       payDate: [
-        data.period?.payDate ? new Date(data.period.payDate) : ''
+        data.period?.payDate ? new Date(data.period.payDate) : '',
+        [this.payDateValidator.bind(this)]
       ]
     });
 
     // Add custom validator for date range
-    this.periodForm.setValidators(this.dateRangeValidator);
+    this.periodForm.setValidators(this.dateRangeValidator.bind(this));
+    
+    // Update validators when dates change
+    this.periodForm.get('startDate')?.valueChanges.subscribe(() => {
+      this.periodForm.get('endDate')?.updateValueAndValidity();
+      this.periodForm.get('payDate')?.updateValueAndValidity();
+    });
+    
+    this.periodForm.get('endDate')?.valueChanges.subscribe(() => {
+      this.periodForm.get('payDate')?.updateValueAndValidity();
+    });
   }
 
   private dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     const form = control as FormGroup;
     const startDate = form.get('startDate')?.value;
     const endDate = form.get('endDate')?.value;
+    const payDate = form.get('payDate')?.value;
 
     if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+      form.get('endDate')?.setErrors({ dateRange: true });
       return { dateRange: true };
+    }
+
+    if (endDate && payDate && new Date(payDate) <= new Date(endDate)) {
+      form.get('payDate')?.setErrors({ payDateBeforeEnd: true });
+      return { payDateBeforeEnd: true };
     }
 
     return null;
   }
+
+  private payDateValidator(control: AbstractControl): ValidationErrors | null {
+    const payDate = control.value;
+    const endDate = this.periodForm?.get('endDate')?.value;
+
+    if (payDate && endDate && new Date(payDate) <= new Date(endDate)) {
+      return { payDateBeforeEnd: true };
+    }
+
+    return null;
+  }
+
+  getMinEndDate(): Date | null {
+    const startDate = this.periodForm?.get('startDate')?.value;
+    if (startDate) {
+      const minDate = new Date(startDate);
+      minDate.setDate(minDate.getDate() + 1); // Add 1 day to ensure end date is after start date
+      return minDate;
+    }
+    return null;
+  }
+
+  getMinPayDate(): Date | null {
+    const endDate = this.periodForm?.get('endDate')?.value;
+    if (endDate) {
+      const minDate = new Date(endDate);
+      minDate.setDate(minDate.getDate() + 1); // Add 1 day to ensure pay date is after end date
+      return minDate;
+    }
+    return null;
+  }
+
+  // Date filter functions for datepicker
+  endDateFilter = (date: Date | null): boolean => {
+    if (!date) return false;
+    const startDate = this.periodForm?.get('startDate')?.value;
+    if (startDate) {
+      const minDate = new Date(startDate);
+      minDate.setDate(minDate.getDate() + 1); // End date must be at least 1 day after start date
+      return date >= minDate;
+    }
+    return true;
+  };
+
+  payDateFilter = (date: Date | null): boolean => {
+    if (!date) return false;
+    const endDate = this.periodForm?.get('endDate')?.value;
+    if (endDate) {
+      const minDate = new Date(endDate);
+      minDate.setDate(minDate.getDate() + 1); // Pay date must be at least 1 day after end date
+      return date >= minDate;
+    }
+    return true;
+  };
 
   onSubmit(): void {
     if (!this.periodForm.valid) return;

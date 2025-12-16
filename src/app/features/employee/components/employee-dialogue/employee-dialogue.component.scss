@@ -1,0 +1,141 @@
+/* ===========================
+   DIALOG CONTAINER
+   =========================== */
+.dialog-container {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ===========================
+   TOP HEADER (Purple Gradient)
+   =========================== */
+.dialog-header {
+  background: linear-gradient(135deg, #6a58f7, #8f6dff);
+  padding: 20px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 600;
+
+    mat-icon {
+      font-size: 26px;
+    }
+  }
+
+  button {
+    background: rgba(255, 255, 255, 0.18);
+    width: 50px;
+    height: 50px;
+    border-radius: 70%;
+  }
+}
+
+/* ===========================
+   BODY CONTENT
+   =========================== */
+mat-dialog-content {
+  padding: 22px 28px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ===========================
+   CARD SECTIONS (White Boxes)
+   =========================== */
+.section-card {
+  background: white;
+  border: 1px solid #e7e7e7;
+  padding: 20px;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Section Title */
+.section-title {
+  color: #333;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  border-left: 4px solid #6a58f7;
+  padding-left: 10px;
+}
+
+/* ===========================
+   ROW — LABEL AND VALUE
+   =========================== */
+.row {
+  display: grid;
+  grid-template-columns: 180px auto;
+  padding: 8px 0;
+  align-items: center;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* Label (Left Side) */
+.row label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* Value (Right Side) */
+.row p {
+  font-size: 14px;
+  color: #222;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Chip Styling */
+.status-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: #6a58f7;
+  width: fit-content;
+}
+
+/* ===========================
+   ACTION BUTTONS
+   =========================== */
+.dialog-actions {
+  padding: 16px 26px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: flex-end;
+  background: #fff;
+}
+
+.dialog-actions button {
+  font-weight: 600;
+}
+
+/* ===========================
+   RESPONSIVE FIX (Mobile)
+   =========================== */
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: 1fr;
+    padding: 10px 0;
+
+    label {
+      margin-bottom: 4px;
+    }
+  }
+}

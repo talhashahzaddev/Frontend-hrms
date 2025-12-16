@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +24,7 @@ import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { CreatePayrollPeriodDialogComponent } from '../create-payroll-period-dialog/create-payroll-period-dialog.component';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { 
   PayrollPeriod, 
   PayrollStatus,
@@ -87,9 +89,7 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
                 <mat-option value="">All Statuses</mat-option>
                 <mat-option value="draft">Draft</mat-option>
                 <mat-option value="calculated">Calculated</mat-option>
-                <mat-option value="processed">Processed</mat-option>
-                <mat-option value="approved">Approved</mat-option>
-                <mat-option value="paid">Paid</mat-option>
+                
               </mat-select>
             </mat-form-field>
 
@@ -177,21 +177,13 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
                     <mat-icon>more_vert</mat-icon>
                   </button>
                   <mat-menu #periodMenu="matMenu">
-                    <button mat-menu-item (click)="viewPeriodDetails(period)">
-                      <mat-icon>visibility</mat-icon>
-                      View Details
-                    </button>
                     <button mat-menu-item (click)="editPeriod(period)" [disabled]="period.status !== 'draft'">
                       <mat-icon>edit</mat-icon>
                       Edit
                     </button>
-                    <button mat-menu-item (click)="calculatePayroll(period)" [disabled]="period.status !== 'draft'">
+                    <button mat-menu-item (click)="processPayroll(period)" [disabled]="period.status !== 'draft'">
                       <mat-icon>calculate</mat-icon>
-                      Calculate Payroll
-                    </button>
-                    <button mat-menu-item (click)="duplicatePeriod(period)">
-                      <mat-icon>content_copy</mat-icon>
-                      Duplicate
+                      Process Payroll
                     </button>
                     <mat-divider></mat-divider>
                     <button mat-menu-item (click)="exportPeriod(period)" class="export-action">
@@ -209,9 +201,7 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
               </ng-container>
 
               <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: displayedColumns;" 
-                       (click)="viewPeriodDetails(row)" 
-                       class="clickable-row"></mat-row>
+              <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
             </mat-table>
 
             <!-- Empty State -->
@@ -275,7 +265,8 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
     private payrollService: PayrollService,
     private notificationService: NotificationService,
     private settingsService: SettingsService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -286,13 +277,6 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadOrganizationCurrency();
     this.loadPayrollPeriods();
-    
-    // Auto-apply filters on form changes with debounce
-    this.filterForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.applyFilters();
-      });
   }
 
   private loadOrganizationCurrency(): void {
@@ -319,14 +303,28 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     const search = this.filterForm.get('search')?.value || '';
+    const status = this.filterForm.get('status')?.value || '';
     
-    this.payrollService.getPayrollPeriods(this.currentPage, this.pageSize, search)
+    this.payrollService.getPayrollPeriods(this.currentPage, this.pageSize, search, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.payrollPeriods = response.data;
-            this.totalCount = response.data.length;
+            // Handle PagedResult response structure
+            if (response.data.data && Array.isArray(response.data.data)) {
+              this.payrollPeriods = response.data.data;
+              this.totalCount = response.data.totalCount || 0;
+            } else if (Array.isArray(response.data)) {
+              // Fallback for non-paged response
+              this.payrollPeriods = response.data;
+              this.totalCount = response.data.length;
+            } else {
+              this.payrollPeriods = [];
+              this.totalCount = 0;
+            }
+          } else {
+            this.payrollPeriods = [];
+            this.totalCount = 0;
           }
           this.isLoading = false;
           this.cdr.markForCheck();
@@ -370,11 +368,6 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
     });
   }
 
-  viewPeriodDetails(period: PayrollPeriod): void {
-    // TODO: Navigate to period details page
-    this.notificationService.showInfo('Period details view will be implemented');
-  }
-
   editPeriod(period: PayrollPeriod): void {
     const dialogRef = this.dialog.open(CreatePayrollPeriodDialogComponent, {
       width: '600px',
@@ -388,33 +381,11 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
     });
   }
 
-  calculatePayroll(period: PayrollPeriod): void {
-    if (confirm(`Calculate payroll for ${period.periodName}? This will process all employee salaries for this period.`)) {
-     
-      this.payrollService.calculatePayroll(period.periodId)
-  .pipe(takeUntil(this.destroy$))
-  .subscribe({
-    next: (response) => {
-      if (response.success && response.data) {
-        this.notificationService.showSuccess('Payroll calculated successfully');
-        this.loadPayrollPeriods();
-      } else {
-        this.notificationService.showError(response.message || 'Failed to calculate payroll');
-      }
-    },
-    error: (error) => {
-      console.error('Error calculating payroll:', error);
-      this.notificationService.showError('Failed to calculate payroll');
-    }
-  });
-
-
-    }
-  }
-
-  duplicatePeriod(period: PayrollPeriod): void {
-    // TODO: Implement period duplication
-    this.notificationService.showInfo('Duplicate period functionality will be implemented');
+  processPayroll(period: PayrollPeriod): void {
+    // Navigate to process payroll page
+    this.router.navigate(['/payroll/process'], { 
+      queryParams: { periodId: period.periodId } 
+    });
   }
 
   exportPeriod(period: PayrollPeriod): void {
@@ -438,20 +409,45 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
   }
 
   deletePeriod(period: PayrollPeriod): void {
-    if (confirm(`Are you sure you want to delete the payroll period "${period.periodName}"? This action cannot be undone.`)) {
-      this.payrollService.deletePayrollPeriod(period.periodId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Payroll period deleted successfully');
-            this.loadPayrollPeriods();
-          },
-          error: (error) => {
-            console.error('Error deleting period:', error);
-            this.notificationService.showError('Failed to delete payroll period');
-          }
-        });
+    // Only allow deletion of draft periods that haven't been calculated
+    if (period.status !== 'draft') {
+      this.notificationService.showError('Only draft periods can be deleted');
+      return;
     }
+
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Payroll Period',
+      message: 'Are you sure you want to delete this payroll period? This action cannot be undone.',
+      itemName: period.periodName
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.payrollService.deletePayrollPeriod(period.periodId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success) {
+                this.notificationService.showSuccess('Payroll period deleted successfully');
+                this.loadPayrollPeriods();
+              } else {
+                this.notificationService.showError(response.message || 'Failed to delete payroll period');
+              }
+            },
+            error: (error) => {
+              console.error('Error deleting period:', error);
+              const errorMessage = error?.error?.message || error?.message || 'Failed to delete payroll period';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      }
+    });
   }
 
   getStatusColor(status: PayrollStatus): 'primary' | 'accent' | 'warn' | undefined {

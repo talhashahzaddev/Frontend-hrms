@@ -47,7 +47,7 @@
 .legend-color.absent { background-color: #f44336; }    /* Red */
 .legend-color.half-day { background-color: #ff9800; }  /* Orange */
 .legend-color.leave { background-color: #2196f3; }     /* Blue */
-.legend-color.weekend { background-color: #9e9e9e; }   /* Gray */
+.legend-color.weekend { background-color: #9e9e9e; border: 1px solid #757575; }   /* Gray */
 .legend-color.holiday { background-color: #673ab7; }   /* Purple */
 .legend-color.late { background-color: #ffeb3b; }      /* Yellow */
 
@@ -87,8 +87,8 @@
 .present-day { background-color: #4caf50; color: white; }
 .absent-day { background-color: #f44336; color: white; }
 .half-day { background-color: #ff9800; color: white; }
-.leave-day { background-color: #2196f3; color: white; }
-.weekend-day { background-color: #9e9e9e; color: white; }
+.leave-day { background-color: #2196f3 !important; color: white !important; }
+.weekend-day { background-color: #9e9e9e !important; color: white !important; border: 1px solid #757575 !important; }
 .holiday-day { background-color: #673ab7; color: white; }
 .late-day { background-color: #ffeb3b; color: black; }
 

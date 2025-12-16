@@ -20,6 +20,8 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith, combineLatest } from 'rxjs';
 
+import {EmployeeDialogueComponent} from '../employee-dialogue/employee-dialogue.component'
+import { EmployeeEditComponent } from '../employee-edit/employee-edit.component';
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
@@ -236,14 +238,78 @@ this.employees = response.employees.map(emp => ({
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.employeeCode}`;
   }
 
-  // Actions
-  viewEmployee(employee: Employee): void {
-    // Navigate to employee detail
+
+viewEmployee(employee: Employee): void {
+  this.dialog.open(EmployeeDialogueComponent, {
+    width: '700px',
+    data: { employee, viewOnly: true } // viewOnly = true for viewing
+  });
+}
+
+// editEmployee(employee: Employee): void {
+//   const dialogRef = this.dialog.open(this.openEditDialog, {
+//     width: '700px',
+//     data: { employee, viewOnly: false } // viewOnly = false for editing
+//   });
+
+//   dialogRef.afterClosed().subscribe((updatedEmployee: Employee) => {
+//     if (updatedEmployee) {
+//       // Update the employee locally or reload from backend
+//       const index = this.employees.findIndex(e => e.employeeId === updatedEmployee.employeeId);
+//       if (index !== -1) this.employees[index] = updatedEmployee;
+//       this.notificationService.showSuccess('Employee updated successfully');
+//     }
+//   });
+// }
+openEditDialog(employee: Employee): void {
+    const dialogRef = this.dialog.open(EmployeeEditComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      disableClose: false, // Allow closing by clicking outside
+      data: { employee: employee },
+      panelClass: 'employee-edit-dialog' // Optional custom class
+    });
+
+    // Handle the result after dialog closes
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Employee was updated successfully
+        console.log('Employee updated:', result);
+        
+        // Refresh your employee list or update the specific employee
+        this.refreshEmployeeList();
+        // OR
+        this.updateEmployeeInList(result);
+      } else {
+        // Dialog was cancelled
+        console.log('Edit cancelled');
+      }
+    });
   }
 
-  editEmployee(employee: Employee): void {
-    // Navigate to employee edit form
+  refreshEmployeeList(): void {
+    // Reload your employee list from the API
+    this.loadEmployees();
   }
+
+  updateEmployeeInList(updatedEmployee: Employee): void {
+    // Update a specific employee in your local list
+    const index = this.employees.findIndex(e => e.employeeId === updatedEmployee.employeeId);
+    if (index !== -1) {
+      this.employees[index] = updatedEmployee;
+    }
+  }
+
+  // Example: Edit button click handler
+  onEditClick(employee: Employee): void {
+    this.openEditDialog(employee);
+  }
+
+
+  // editEmployee(employee: Employee): void {
+  //   // Navigate to employee edit form
+  // }
 
   deleteEmployee(employee: Employee): void {
     const dialogData: ConfirmDeleteData = {

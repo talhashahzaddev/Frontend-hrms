@@ -167,7 +167,7 @@
         Attendance Records
       </mat-card-title>
       <mat-card-subtitle>
-        {{ reportData.records.length }} records found
+        {{ reportData.records.totalCount }} records found
       </mat-card-subtitle>
       
       <div class="header-actions">
@@ -189,7 +189,7 @@
 
       <!-- Table Content -->
       <div *ngIf="!isLoading" class="table-container">
-        <table mat-table [dataSource]="reportData.records" class="reports-table">
+        <table mat-table [dataSource]="reportData.records.data" class="reports-table">
           
           <!-- Employee Column -->
           <ng-container matColumnDef="employee">
@@ -254,8 +254,20 @@
           
         </table>
         
+        <!-- Pagination -->
+        <mat-paginator
+          *ngIf="reportData.records.totalCount > 0"
+          [length]="reportData.records.totalCount"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="pageSizeOptions"
+          [showFirstLastButtons]="true"
+          (page)="onPageChange($event)"
+          class="reports-paginator">
+        </mat-paginator>
+        
         <!-- Empty State -->
-        <div *ngIf="reportData.records.length === 0" class="empty-state">
+        <div *ngIf="reportData.records.data.length === 0" class="empty-state">
           <mat-icon>assessment</mat-icon>
           <h3>No Records Found</h3>
           <p>No attendance records found for the selected criteria.</p>

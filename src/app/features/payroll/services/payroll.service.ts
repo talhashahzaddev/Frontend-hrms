@@ -133,7 +133,7 @@ export class PayrollService {
   deleteSalaryRule(id: string): Observable<ApiResponse<boolean>> {
     return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/payroll/rules/${id}`);
   }
-  getPayrollPeriods(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<PayrollPeriod[]>> {
+  getPayrollPeriods(page: number = 1, limit: number = 20, search?: string, status?: string): Observable<ApiResponse<PagedResult<PayrollPeriod>>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
@@ -142,7 +142,11 @@ export class PayrollService {
       params = params.set('search', search);
     }
 
-    return this.http.get<ApiResponse<PayrollPeriod[]>>(`${this.apiUrl}/payroll/periods`, { params });
+    if (status) {
+      params = params.set('status', status);
+    }
+
+    return this.http.get<ApiResponse<PagedResult<PayrollPeriod>>>(`${this.apiUrl}/payroll/periods`, { params });
   }
 
   getCurrentPayrollPeriod(): Observable<ApiResponse<PayrollPeriod>> {

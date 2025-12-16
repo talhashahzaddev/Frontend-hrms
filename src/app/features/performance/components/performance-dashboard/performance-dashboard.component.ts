@@ -83,6 +83,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   displayedTeamColumns: string[] = ['employeeName', 'cycleRatings', 'assessedSkills'];
 
   overallRating: number = 0;
+  currentRating: number = 0;
 
   // ⭐ For rating stars
   starRatings = [1, 2, 3, 4, 5];
@@ -242,7 +243,11 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
             console.log('Employee Appraisals:', this.employeeAppraisals);
 
             if (this.employeeAppraisals.length > 0) {
+              this.currentRating = this.employeeAppraisals[0].currentRating || 0;
               this.overallRating = this.employeeAppraisals[0].overallRating || 0;
+            } else {
+              this.currentRating = 0;
+              this.overallRating = 0;
             }
           } else {
             this.employeeAppraisals = [];
