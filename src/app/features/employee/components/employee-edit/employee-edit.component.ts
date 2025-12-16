@@ -36,9 +36,11 @@ export class EmployeeEditComponent implements OnInit {
   isLoading = false;
 
   employmentTypes = [
+   { value: '', label: 'All Types' },
     { value: 'full_time', label: 'Full Time' },
     { value: 'part_time', label: 'Part Time' },
-    { value: 'contract', label: 'Contract' }
+    { value: 'contract', label: 'Contract' },
+    { value: 'intern', label: 'Intern' }
   ];
 
   statuses = [
@@ -80,44 +82,43 @@ export class EmployeeEditComponent implements OnInit {
     this.loadDropdowns();
   }
 
-  initializeForm(): void {
-    const emp = this.data.employee;
 
-    this.employeeForm = this.fb.group({
-      employeeCode: [{ value: emp.employeeCode, disabled: true }],
-      firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
-      lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
-      email: [emp.email, [Validators.required, Validators.email]],
-      phone: [emp.phone, [Validators.pattern(/^[0-9]{10,15}$/)]],
-      dateOfBirth: [this.formatDateForInput(emp.dateOfBirth)],
-      gender: [emp.gender],
-      nationality: [emp.nationality],
-      maritalStatus: [emp.maritalStatus],
-      
-      address: this.fb.group({
-        street: [emp.address?.street || ''],
-        city: [emp.address?.city || ''],
-        state: [emp.address?.state || ''],
-        zip: [emp.address?.zip || '']
-      }),
-      
-      emergencyContact: this.fb.group({
-        name: [emp.emergencyContact?.name || ''],
-        email: [emp.emergencyContact?.email || '', [Validators.email]],
-        phone: [emp.emergencyContact?.phone || ''],
-        relationship: [emp.emergencyContact?.relationship || '']
-      }),
+initializeForm(): void {
+  const emp = this.data.employee;
 
-      departmentId: [emp.department?.departmentId || null, Validators.required],
-      positionId: [emp.position?.positionId || null, Validators.required],
-      reportingManagerId: [emp.manager?.employeeId || null],
-      employmentType: [emp.employmentType, Validators.required],
-      payType: [emp.payType],
-      basicSalary: [emp.basicSalary, [Validators.required, Validators.min(0)]],
-      hireDate: [this.formatDateForInput(emp.hireDate), Validators.required],
-      status: [emp.status, Validators.required]
-    });
-  }
+  this.employeeForm = this.fb.group({
+    employeeCode: [{ value: emp.employeeCode, disabled: true }],
+    firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
+    lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
+    email: [emp.email, [Validators.required, Validators.email]],
+    phone: [emp.phone, [Validators.pattern(/^[0-9]{10,15}$/)]],
+    dateOfBirth: [this.formatDateForInput(emp.dateOfBirth)],
+    gender: [emp.gender?.toLowerCase() || null],
+    departmentId: [emp.departmentId || null],
+    positionId: [emp.positionId || null],
+    reportingManagerId: [emp.reportingManagerId || null],
+    nationality: [emp.nationality],
+    maritalStatus: [emp.maritalStatus?.toLowerCase() || null],
+    employmentType: [emp.employmentType?.toLowerCase() || null],
+    payType: [emp.payType?.toLowerCase() || null],
+    basicSalary: [emp.basicSalary, [Validators.min(0)]],
+    hireDate: [this.formatDateForInput(emp.hireDate)],
+    status: [emp.status?.toLowerCase() || null],
+    address: this.fb.group({
+      street: [emp.address?.street || ''],
+      city: [emp.address?.city || ''],
+      state: [emp.address?.state || ''],
+      zip: [emp.address?.zip || '']
+    }),
+    emergencyContact: this.fb.group({
+      name: [emp.emergencyContact?.name || ''],
+      email: [emp.emergencyContact?.email || ''],
+      phone: [emp.emergencyContact?.phone || ''],
+      relationship: [emp.emergencyContact?.relationship || '']
+    })
+  });
+}
+
 
   loadDropdowns(): void {
     this.employeeService.getDepartments().subscribe({
@@ -148,35 +149,61 @@ export class EmployeeEditComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  onSave(): void {
-    if (this.employeeForm.invalid) {
-      this.employeeForm.markAllAsTouched();
-      this.showError('Please fill all required fields correctly');
-      return;
-    }
 
-    this.isLoading = true;
-    const formValue = this.employeeForm.getRawValue();
-    
-    const updatedEmployee: Employee = {
-      ...this.data.employee,
-      ...formValue,
-      fullName: `${formValue.firstName} ${formValue.lastName}`
-    };
-
-    this.employeeService.updateEmployee(+this.data.employee.employeeId, updatedEmployee).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.showSuccess('Employee updated successfully');
-        this.dialogRef.close(response);
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.showError('Failed to update employee. Please try again.');
-        console.error('Update error:', err);
-      }
-    });
+onSave(): void {
+  if (this.employeeForm.invalid) {
+    this.employeeForm.markAllAsTouched();
+    this.showError('Please fill all required fields correctly');
+    return;
   }
+
+  this.isLoading = true;
+
+  const formValue = this.employeeForm.getRawValue();
+  const formData = new FormData();
+
+  formData.append('EmployeeId', this.data.employee.employeeId);
+  formData.append('FirstName', formValue.firstName);
+  formData.append('LastName', formValue.lastName);
+  formData.append('Email', formValue.email);
+  formData.append('Phone', formValue.phone);
+
+  formData.append('DepartmentId', formValue.departmentId ?? '');
+  formData.append('PositionId', formValue.positionId ?? '');
+  formData.append('BasicSalary', formValue.basicSalary?.toString() ?? '');
+  formData.append('WorkLocation', formValue.workLocation ?? '');
+  formData.append('ReportingManagerId', formValue.reportingManagerId ?? '');
+formData.append('DateOfBirth', formValue.dateOfBirth ?? '');
+formData.append('Gender', formValue.gender ?? '');
+formData.append('Nationality', formValue.nationality ?? '');
+formData.append('MaritalStatus', formValue.maritalStatus ?? '');
+formData.append('EmploymentType', formValue.employmentType ?? '');
+formData.append('PayType', formValue.payType ?? '');
+formData.append('HireDate', formValue.hireDate ?? '');
+formData.append('Status', formValue.status ?? '');
+formData.append('EmployeeNumber', formValue.employeeCode ?? '');
+  formData.append('Address', JSON.stringify(formValue.address));
+  formData.append('EmergencyContact', JSON.stringify(formValue.emergencyContact));
+
+  // 👇 same trick as profile
+  formData.append('profileurl', new Blob(), '');
+
+  this.employeeService.updateEmployee(formData).subscribe({
+    next: (emp) => {
+      this.isLoading = false;
+      this.showSuccess('Employee updated successfully');
+      this.dialogRef.close(emp);
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.showError('Failed to update employee');
+      console.error(err);
+    }
+  });
+}
+
+
+
 
   onCancel(): void {
     if (this.employeeForm.dirty) {
@@ -217,3 +244,4 @@ export class EmployeeEditComponent implements OnInit {
     return '';
   }
 }
+

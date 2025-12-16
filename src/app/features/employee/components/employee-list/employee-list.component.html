@@ -281,12 +281,21 @@
               
               <mat-divider></mat-divider>
               
-              <button mat-menu-item 
+              <!-- <button mat-menu-item 
                       (click)="deleteEmployee(employee)" 
                       class="danger-action">
                 <mat-icon>delete</mat-icon>
                 <span>Delete</span>
-              </button>
+              </button> -->
+
+<button mat-menu-item 
+        (click)="deleteEmployee(employee)" 
+        [ngClass]="employee.status === 'deleted' ? 'recover-action' : 'danger-action'">
+  <mat-icon>{{ employee.status === 'deleted' ? 'restore' : 'delete' }}</mat-icon>
+  <span>{{ employee.status === 'deleted' ? 'Recover' : 'Delete' }}</span>
+</button>
+
+
             </mat-menu>
           </td>
         </ng-container>
