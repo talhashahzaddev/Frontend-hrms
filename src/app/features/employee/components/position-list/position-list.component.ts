@@ -561,5 +561,14 @@ togglePositionStatus(position: Position, newStatus: boolean): void {
       panelClass: ['error-snackbar']
     });
   }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    return !!(
+      this.searchControl.value?.trim() ||
+      this.departmentControl.value ||
+      this.statusControl.value
+    );
+  }
 }
 

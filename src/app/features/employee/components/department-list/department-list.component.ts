@@ -253,6 +253,15 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
       panelClass: ['error-snackbar']
     });
   }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    return !!(
+      this.searchControl.value?.trim() ||
+      this.statusControl.value ||
+      this.managerControl.value
+    );
+  }
 }
 
 

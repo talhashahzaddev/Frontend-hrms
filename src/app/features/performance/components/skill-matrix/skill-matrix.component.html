@@ -31,6 +31,7 @@
           <h3>Search & Filters</h3>
           <button mat-stroked-button 
                   (click)="clearSkillFilters()" 
+                  [disabled]="!hasSkillFiltersApplied()"
                   class="clear-filters-btn">
             <mat-icon>clear</mat-icon>
             Clear Filters
@@ -216,6 +217,7 @@
           <h3>Search & Filters</h3>
           <button mat-stroked-button 
                   (click)="clearEmployeeSkillFilters()" 
+                  [disabled]="!hasEmployeeSkillFiltersApplied()"
                   class="clear-filters-btn">
             <mat-icon>clear</mat-icon>
             Clear Filters

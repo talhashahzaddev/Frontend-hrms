@@ -98,7 +98,7 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
                 <mat-icon>filter_list</mat-icon>
                 Apply Filters
               </button>
-              <button mat-stroked-button (click)="clearFilters()">
+              <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
                 <mat-icon>clear</mat-icon>
                 Clear
               </button>
@@ -463,5 +463,12 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
       default:
         return undefined;
     }
+  }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    if (!this.filterForm) return false;
+    const values = this.filterForm.value;
+    return !!(values.search?.trim() || values.status);
   }
 }

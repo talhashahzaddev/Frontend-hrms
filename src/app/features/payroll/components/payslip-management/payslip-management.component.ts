@@ -123,7 +123,7 @@ import { PagedResult } from '../../../../core/models/common.models';
                 <mat-icon>filter_list</mat-icon>
                 Apply
               </button>
-              <button mat-stroked-button (click)="clearFilters()">
+              <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
                 <mat-icon>clear</mat-icon>
                 Clear
               </button>
@@ -1085,5 +1085,17 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
     }
     // Default fallback to USD
     return 'USD';
+  }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    if (!this.filterForm) return false;
+    const values = this.filterForm.value;
+    return !!(
+      values.payrollPeriodId ||
+      values.search?.trim() ||
+      values.status ||
+      values.department
+    );
   }
 }
