@@ -27,6 +27,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+
 @Component({
     selector: 'app-employee-list',
     imports: [
@@ -52,6 +53,8 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
     templateUrl: './employee-list.component.html',
     styleUrls: ['./employee-list.component.scss']
 })
+
+
 export class EmployeeListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
@@ -194,7 +197,8 @@ this.employees = response.employees.map(emp => ({
     ? emp.profilePictureUrl.startsWith('http')
       ? emp.profilePictureUrl
       : `${this.backendBaseUrl}${emp.profilePictureUrl}`
-    : undefined // ✅ use undefined instead of null
+    : undefined ,// ✅ use undefined instead of null
+    status: emp.status === 'delete' ? 'deleted' : emp.status // <-- key line
 }));
 
           this.totalCount = response.totalCount;
@@ -291,48 +295,61 @@ openEditDialog(employee: Employee): void {
     this.openEditDialog(employee);
   }
 
-
 deleteEmployee(employee: Employee): void {
-  // Determine action based on current status
   const isDeleted = employee.status === 'deleted';
   const action = isDeleted ? 'Recover' : 'Delete';
   const status = isDeleted ? 'active' : 'delete';
 
-  const dialogData: ConfirmDeleteData = {
-    title: `${action} Employee`,
-    message: `Are you sure you want to ${action.toLowerCase()} this employee?`,
-    itemName: `${employee.firstName} ${employee.lastName}`
-  };
+  if (isDeleted) {
+    // Directly recover without opening the dialog
+    this.employeeService.deleteEmployee(employee.employeeId, status)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          employee.status = 'active';
+          this.notificationService.showSuccess('Employee recovered successfully');
+        },
+        error: (error) => {
+          console.error('Failed to recover employee:', error);
+          this.notificationService.showError('Failed to recover employee');
+        }
+      });
+  } else {
+    // Show confirm dialog only for Delete
+    const confirmButtonText = 'Yes, Delete';
+    const dialogData: ConfirmDeleteData = {
+      title: `${action} Employee`,
+      message: `Are you sure you want to delete this employee?`,
+      itemName: `${employee.firstName} ${employee.lastName}`,
+      confirmButtonText
+    };
 
-  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-    width: '450px',
-    data: dialogData,
-    panelClass: 'confirm-delete-dialog-panel'
-  });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result === true) {
-      this.employeeService.deleteEmployee(employee.employeeId, status)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            // update employee status locally
-            employee.status = status === 'delete' ? 'deleted' : 'active';
-
-            this.notificationService.showSuccess(
-              `Employee ${status === 'delete' ? 'deleted' : 'recovered'} successfully`
-            );
-          },
-          error: (error) => {
-            console.error(`Failed to ${status === 'delete' ? 'delete' : 'recover'} employee:`, error);
-            this.notificationService.showError(
-              `Failed to ${status === 'delete' ? 'delete' : 'recover'} employee`
-            );
-          }
-        });
-    }
-  });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.employeeService.deleteEmployee(employee.employeeId, status)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              employee.status = 'deleted';
+              this.notificationService.showSuccess('Employee deleted successfully');
+            },
+            error: (error) => {
+              console.error('Failed to delete employee:', error);
+              this.notificationService.showError('Failed to delete employee');
+            }
+          });
+      }
+    });
+  }
 }
+
+
 
 
   toggleEmployeeStatus(employee: Employee): void {
