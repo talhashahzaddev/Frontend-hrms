@@ -38,7 +38,7 @@
   <!-- Quick Navigation (Stat Cards Style) -->
   <div class="quick-nav-grid">
     <!-- Assign Shift -->
-    <mat-card class="stat-card stat-card-primary" *ngIf="isAdminOrHR" (click)="openAssignShiftDialog()">
+    <mat-card class="stat-card stat-card-primary" *ngIf="isAdminOrHR || isManager" (click)="openAssignShiftDialog()">
       <mat-card-content>
         <div class="stat-item">
           <div class="stat-icon-wrapper">
@@ -143,11 +143,14 @@
       <mat-tab label="Requests">
         <div class="tab-content">
 <!-- MY REQUESTS (Manager's own requests) -->
-<div *ngIf="isManager || isEmployee || isHRManager ">
-  <h2 class="section-title">My Requests</h2>
+<div *ngIf="isManager || isEmployee || isHRManager" class="requests-section my-requests-section">
+  <div class="section-header">
+    <mat-icon class="section-icon">person</mat-icon>
+    <h2 class="section-title">My Requests</h2>
+  </div>
 
-  <div *ngIf="employeeShiftSwaps.length > 0; else noMyRequests">
-    <div *ngFor="let swap of employeeShiftSwaps" class="current-shift-card">
+  <div *ngIf="employeeShiftSwaps.length > 0; else noMyRequests" class="requests-list">
+    <div *ngFor="let swap of employeeShiftSwaps" class="request-card my-request-card">
       <div class="card-header">
         <h3>{{ swap.employeeName }}</h3>
         <mat-chip color="primary" selected>{{ swap.status || 'Pending' }}</mat-chip>
@@ -161,21 +164,24 @@
   </div>
 
   <ng-template #noMyRequests>
-    <div class="empty-state">
+    <div class="empty-state my-requests-empty">
       <mat-icon>hourglass_empty</mat-icon>
       <h3>No My Requests</h3>
-      <p>You haven’t made any shift swap requests yet.</p>
+      <p>You haven't made any shift swap requests yet.</p>
     </div>
   </ng-template>
 </div>
 
 
 <!-- TEAM REQUESTS (Requests coming to Manager/Admin) -->
-<div *ngIf="isManager || isAdminOrHR">
-  <h2 class="section-title">Team Requests</h2>
+<div *ngIf="isManager || isAdminOrHR" class="requests-section team-requests-section">
+  <div class="section-header">
+    <mat-icon class="section-icon">groups</mat-icon>
+    <h2 class="section-title">Team Requests</h2>
+  </div>
 
-  <div *ngIf="superAdminPendingSwaps.length > 0; else noTeamRequests">
-    <div *ngFor="let swap of superAdminPendingSwaps" class="current-shift-card">
+  <div *ngIf="superAdminPendingSwaps.length > 0; else noTeamRequests" class="requests-list">
+    <div *ngFor="let swap of superAdminPendingSwaps" class="request-card team-request-card">
       <div class="card-header">
         <h3>{{ swap.employeeName }}</h3>
         <mat-chip color="primary" selected>{{ swap.status || 'Pending' }}</mat-chip>
@@ -200,7 +206,7 @@
   </div>
 
   <ng-template #noTeamRequests>
-    <div class="empty-state">
+    <div class="empty-state team-requests-empty">
       <mat-icon>hourglass_empty</mat-icon>
       <h3>No Team Requests</h3>
       <p>There are no pending team requests to review.</p>

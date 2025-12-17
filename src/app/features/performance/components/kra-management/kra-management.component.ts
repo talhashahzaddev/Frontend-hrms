@@ -365,5 +365,12 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
   hasHRRole(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
   }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    if (!this.filterForm) return false;
+    const values = this.filterForm.value;
+    return !!(values.search?.trim() || values.positionId || values.status);
+  }
 }
 

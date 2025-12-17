@@ -935,5 +935,30 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
     this.loadManagerSelfAssessments();
   }
 
+  // Helper methods to check if filters are applied
+  hasFiltersApplied(): boolean {
+    if (!this.filterForm) return false;
+    const values = this.filterForm.value;
+    return !!(values.cycleId || values.employeeId || values.status || values.kraId || values.search?.trim());
+  }
+
+  hasSelfAssessmentFiltersApplied(): boolean {
+    if (!this.selfAssessmentFilterForm) return false;
+    const values = this.selfAssessmentFilterForm.value;
+    return !!(values.cycleId || values.kraId || values.search?.trim());
+  }
+
+  hasEmployeeSelfAssessmentFiltersApplied(): boolean {
+    if (!this.employeeSelfAssessmentFilterForm) return false;
+    const values = this.employeeSelfAssessmentFilterForm.value;
+    return !!(values.cycleId || values.employeeId || values.kraId || values.search?.trim());
+  }
+
+  hasMyAppraisalsFiltersApplied(): boolean {
+    if (!this.myAppraisalsFilterForm) return false;
+    const values = this.myAppraisalsFilterForm.value;
+    return !!(values.cycleId || values.status || values.search?.trim());
+  }
+
 }
 

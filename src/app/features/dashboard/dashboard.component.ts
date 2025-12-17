@@ -243,6 +243,9 @@ hasAnyRole(roles: string[]): boolean {
     this.router.navigate(['/attendance/reports'])
   }
 
+  scheduleLeave(): void {
+  this.router.navigate(['/leave/apply']);
+}
 
 
   private prepareChartConfigurations(): void {

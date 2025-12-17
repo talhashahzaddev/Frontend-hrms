@@ -27,6 +27,7 @@
       <h3>Search & Filters</h3>
       <button mat-stroked-button 
               (click)="clearFilters()" 
+              [disabled]="!hasFiltersApplied()"
               class="clear-filters-btn">
         <mat-icon>clear</mat-icon>
         Clear Filters
@@ -280,13 +281,13 @@
               </button>
               
               <mat-divider></mat-divider>
-              
-              <!-- <button mat-menu-item 
-                      (click)="deleteEmployee(employee)" 
-                      class="danger-action">
-                <mat-icon>delete</mat-icon>
-                <span>Delete</span>
-              </button> -->
+ 
+<!-- <button mat-menu-item 
+        (click)="deleteEmployee(employee)" 
+        [ngClass]="employee.status === 'deleted' ? 'recover-action' : 'danger-action'">
+  <mat-icon>{{ employee.status === 'deleted' ? 'restore' : 'delete' }}</mat-icon>
+  <span>{{ employee.status === 'deleted' ? 'Recover' : 'Delete' }}</span>
+</button> -->
 
 <button mat-menu-item 
         (click)="deleteEmployee(employee)" 

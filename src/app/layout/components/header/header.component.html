@@ -1,5 +1,5 @@
 <mat-toolbar class="header-toolbar">
-  
+
   <!-- Mobile Menu Button -->
   <button 
     mat-icon-button 
@@ -45,57 +45,50 @@
     </button>
 
     <!-- Notifications -->
-  
+    <div class="notification-container">
+      <button 
+        mat-icon-button 
+        class="action-button"
+        (click)="onNotificationsClick()"
+        matTooltip="Notifications"
+        aria-label="Notifications">
+        <mat-icon 
+          [matBadge]="notificationCount" 
+          [matBadgeHidden]="notificationCount === 0"
+          matBadgeColor="warn" 
+          matBadgeSize="small">
+          notifications
+        </mat-icon>
+      </button>
 
-    <!-- Notifications -->
-<!-- Notifications -->
-<div class="notification-container">
-  <button 
-    mat-icon-button 
-    class="action-button"
-    (click)="onNotificationsClick()"
-    matTooltip="Notifications"
-    aria-label="Notifications">
-    <mat-icon [matBadge]="notificationCount" 
-              [matBadgeHidden]="notificationCount === 0"
-              matBadgeColor="warn" 
-              matBadgeSize="small">
-      notifications
-    </mat-icon>
-  </button>
+      <!-- Dropdown -->
+      <div class="notification-panel" *ngIf="isNotificationOpen">
+        <app-notification-dialogue 
+          [isOpen]="isNotificationOpen"
+          (unreadCountChange)="notificationCount = $event">
+        </app-notification-dialogue>
+      </div>
+    </div>
 
-  <!-- Dropdown -->
-  <div class="notification-panel" *ngIf="isNotificationOpen">
-    <!-- Pass isOpen input and emit unread count -->
-    <app-notification-dialogue 
-      [isOpen]="isNotificationOpen"
-      (unreadCountChange)="notificationCount = $event">
-    </app-notification-dialogue>
-  </div>
-</div>
+    <!-- User Menu -->
+    <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
+      <div class="user-avatar-pic">
+        <p-avatar
+          *ngIf="profilePreviewUrl; else initials"
+          [image]="profilePreviewUrl"
+          shape="circle"
+          styleClass="user-avatar-large-content">
+        </p-avatar>
 
-
-
-<!-- user menu -->
-<button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
-  <div class="user-avatar-pic">
-    <p-avatar
-      *ngIf="profilePreviewUrl; else initials"
-      [image]="profilePreviewUrl"
-      shape="circle"
-      styleClass="user-avatar-large-content">
-    </p-avatar>
-
-    <ng-template #initials>
-      <p-avatar
-        [label]="getUserInitials()"
-        shape="circle"
-        styleClass="user-avatar-large-content">
-      </p-avatar>
-    </ng-template>
-  </div>
-</button>
-
+        <ng-template #initials>
+          <p-avatar
+            [label]="getUserInitials()"
+            shape="circle"
+            styleClass="user-avatar-large-content">
+          </p-avatar>
+        </ng-template>
+      </div>
+    </button>
 
   </div>
 
@@ -104,22 +97,22 @@
     <div class="user-menu-header">
       <div class="user-info">
         <div class="user-avatar-large">
-         <p-avatar 
-    *ngIf="profilePreviewUrl; else initialsLarge"
-    [image]="profilePreviewUrl"
-    size="large"
-    shape="circle"
-    styleClass="user-avatar-large-content">
-  </p-avatar>
+          <p-avatar 
+            *ngIf="profilePreviewUrl; else initialsLarge"
+            [image]="profilePreviewUrl"
+            size="large"
+            shape="circle"
+            styleClass="user-avatar-large-content">
+          </p-avatar>
 
-  <ng-template #initialsLarge>
-    <p-avatar 
-      [label]="getUserInitials()"
-      size="large"
-      shape="circle"
-      styleClass="user-avatar-large-content">
-    </p-avatar>
-  </ng-template>
+          <ng-template #initialsLarge>
+            <p-avatar 
+              [label]="getUserInitials()"
+              size="large"
+              shape="circle"
+              styleClass="user-avatar-large-content">
+            </p-avatar>
+          </ng-template>
         </div>
         <div class="user-details">
           <div class="user-name">{{ getUserDisplayName() }}</div>
@@ -128,21 +121,21 @@
         </div>
       </div>
     </div>
-    
+
     <mat-divider></mat-divider>
-    
+
     <button mat-menu-item (click)="onProfileClick()">
       <mat-icon>person</mat-icon>
       <span>My Profile</span>
     </button>
-    
+
     <button mat-menu-item (click)="onSettingsClick()">
       <mat-icon>settings</mat-icon>
       <span>Settings</span>
     </button>
-    
+
     <mat-divider></mat-divider>
-    
+
     <button mat-menu-item class="logout-item" (click)="onLogout()">
       <mat-icon>logout</mat-icon>
       <span>Logout</span>

@@ -365,9 +365,13 @@ onEditShift(shift: ShiftDto): void {
     const dialogRef = this.dialog.open(AssignShiftComponent, {
       width: '600px',
       maxWidth: '95vw',
+      maxHeight: 'none',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container'
+      panelClass: 'custom-dialog-container',
+      data: {
+        isManager: this.isManager && !this.isAdminOrHR // Pass true if user is only Manager (not HR Manager)
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

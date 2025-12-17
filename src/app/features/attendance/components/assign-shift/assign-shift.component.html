@@ -1,6 +1,6 @@
 
 <div class="dialog-header">
-  <h2>
+  <h2 style="color: white;">
     <mat-icon>assignment_ind</mat-icon>
     Assign Shift
   </h2>
@@ -37,7 +37,7 @@
 
 <div class="dialog-actions">
   <button mat-stroked-button mat-dialog-close>Cancel</button>
-  <button mat-flat-button color="primary" [disabled]="assignShiftForm.invalid || isSubmitting" (click)="onSubmit()">
+  <button mat-flat-button color="primary" class="submit-button" [disabled]="assignShiftForm.invalid || isSubmitting" (click)="onSubmit()">
     <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
     <span *ngIf="!isSubmitting">Assign Shift</span>
   </button>

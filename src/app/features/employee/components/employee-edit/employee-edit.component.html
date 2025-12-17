@@ -269,11 +269,30 @@
           <mat-icon matPrefix>person</mat-icon>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <!-- <mat-form-field appearance="outline">
           <mat-label>Relationship</mat-label>
           <input matInput formControlName="relationship">
           <mat-icon matPrefix>group</mat-icon>
-        </mat-form-field>
+        </mat-form-field> -->
+
+
+        <mat-form-field appearance="outline">
+  <mat-label>Relationship</mat-label>
+  <mat-select formControlName="relationship">
+    <mat-option value="">Select Relationship</mat-option>
+    <mat-option value="Spouse">Spouse</mat-option>
+    <mat-option value="Parent">Parent</mat-option>
+    <mat-option value="Sibling">Sibling</mat-option>
+    <mat-option value="Child">Child</mat-option>
+    <mat-option value="Friend">Friend</mat-option>
+  </mat-select>
+  <mat-icon matPrefix>group</mat-icon>
+</mat-form-field>
+
+        
+
+
+
       </div>
 
       <div class="form-row">
