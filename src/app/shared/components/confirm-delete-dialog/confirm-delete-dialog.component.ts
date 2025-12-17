@@ -8,6 +8,7 @@ export interface ConfirmDeleteData {
   title: string;
   message: string;
   itemName: string;
+   confirmButtonText?: string; 
 }
 
 @Component({

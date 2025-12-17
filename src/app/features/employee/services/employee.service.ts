@@ -123,17 +123,6 @@ updateEmployee(formData: FormData): Observable<Employee> {
     );
   }
 
-  // deleteEmployee(employeeId: string): Observable<void> {
-  //   return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${employeeId}`)
-  //     .pipe(
-  //       map(response => {
-  //         if (!response.success) {
-  //           throw new Error(response.message || 'Failed to delete employee');
-  //         }
-  //       })
-  //     );
-  // }
-
   deleteEmployee(employeeId: string, status?: string): Observable<void> {
   return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/${employeeId}?status=${status}`)
     .pipe(
