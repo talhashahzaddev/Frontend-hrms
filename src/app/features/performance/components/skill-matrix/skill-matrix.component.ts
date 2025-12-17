@@ -800,4 +800,17 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     this.pageSize = event.pageSize;
     this.loadEmployeeSkills(); // Reload with new pagination
   }
+
+  // Helper methods to check if filters are applied
+  hasSkillFiltersApplied(): boolean {
+    if (!this.skillFilterForm) return false;
+    const values = this.skillFilterForm.value;
+    return !!(values.search?.trim() || values.category || values.status);
+  }
+
+  hasEmployeeSkillFiltersApplied(): boolean {
+    if (!this.employeeSkillFilterForm) return false;
+    const values = this.employeeSkillFilterForm.value;
+    return !!(values.employeeId || values.search?.trim() || values.proficiencyLevel);
+  }
 }

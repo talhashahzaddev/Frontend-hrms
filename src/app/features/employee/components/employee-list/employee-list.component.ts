@@ -454,4 +454,15 @@ deleteEmployee(employee: Employee): void {
   getEmployeeFullName(employee: Employee): string {
     return `${employee.fullName}`;
   }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    return !!(
+      this.searchControl.value?.trim() ||
+      this.departmentControl.value ||
+      this.positionControl.value ||
+      this.statusControl.value ||
+      this.employmentTypeControl.value
+    );
+  }
 }

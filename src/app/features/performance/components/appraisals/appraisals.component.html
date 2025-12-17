@@ -42,6 +42,7 @@
       <h3>Search & Filters</h3>
       <button mat-stroked-button 
               (click)="clearSelfAssessmentFilters()" 
+              [disabled]="!hasSelfAssessmentFiltersApplied()"
               class="clear-filters-btn">
         <mat-icon>clear</mat-icon>
         Clear Filters
@@ -168,6 +169,7 @@
           <h3>Employee Appraisals - Search & Filters</h3>
           <button mat-stroked-button 
                   (click)="clearFilters()" 
+                  [disabled]="!hasFiltersApplied()"
                   class="clear-filters-btn">
             <mat-icon>clear</mat-icon>
             Clear Filters
@@ -363,6 +365,7 @@
           <h3>Search & Filters</h3>
           <button mat-stroked-button 
                   (click)="clearEmployeeSelfAssessmentFilters()" 
+                  [disabled]="!hasEmployeeSelfAssessmentFiltersApplied()"
                   class="clear-filters-btn">
             <mat-icon>clear</mat-icon>
             Clear Filters
@@ -562,6 +565,7 @@
       <h3>My Appraisals - Search & Filters</h3>
       <button mat-stroked-button 
               (click)="clearMyAppraisalsFilters()" 
+              [disabled]="!hasMyAppraisalsFiltersApplied()"
               class="clear-filters-btn">
         <mat-icon>clear</mat-icon>
         Clear Filters

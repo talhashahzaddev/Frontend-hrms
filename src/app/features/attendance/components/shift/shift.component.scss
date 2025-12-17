@@ -1220,3 +1220,171 @@
   margin-top: 8px;
   padding: 8px; /* minimal internal padding */
 }
+
+/* =======================================================
+   Requests Sections - Differentiated Styling
+======================================================= */
+.requests-section {
+  margin-bottom: 40px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #e5e7eb;
+
+  .section-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: -0.3px;
+  }
+}
+
+/* My Requests Section - Blue/Purple Theme */
+.my-requests-section {
+  .section-header {
+    border-bottom-color: #667eea;
+
+    .section-icon {
+      color: #667eea;
+    }
+
+    .section-title {
+      color: #667eea;
+    }
+  }
+
+  .my-request-card {
+    background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+    border: 2px solid #c7d2fe;
+    border-left: 4px solid #667eea;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+      border-color: #667eea;
+      transform: translateX(4px);
+    }
+
+    .card-header {
+      h3 {
+        color: #1f2937;
+      }
+    }
+
+    .card-body {
+      p {
+        color: #4b5563;
+      }
+    }
+  }
+
+  .my-requests-empty {
+    background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+    border: 2px dashed #c7d2fe;
+    border-radius: 12px;
+  }
+}
+
+/* Team Requests Section - Green/Teal Theme */
+.team-requests-section {
+  .section-header {
+    border-bottom-color: #10b981;
+
+    .section-icon {
+      color: #10b981;
+    }
+
+    .section-title {
+      color: #10b981;
+    }
+  }
+
+  .team-request-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+    border: 2px solid #bbf7d0;
+    border-left: 4px solid #10b981;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15);
+      border-color: #10b981;
+      transform: translateX(4px);
+    }
+
+    .card-header {
+      h3 {
+        color: #1f2937;
+      }
+    }
+
+    .card-body {
+      p {
+        color: #4b5563;
+      }
+    }
+
+    .approval-actions {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #d1fae5;
+    }
+  }
+
+  .team-requests-empty {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+    border: 2px dashed #bbf7d0;
+    border-radius: 12px;
+  }
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

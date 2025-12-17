@@ -1,6 +1,6 @@
 
 
-import { Component, OnInit, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,13 +8,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Employee } from '@/app/core/models/employee.models';
+import { PerformanceService } from '@/app/features/performance/services/performance.service';
 
 export interface ShiftDto {
   shiftId: string;
@@ -49,6 +50,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   employees: Employee[] = [];
   shifts: ShiftDto[] = [];
   isSubmitting = false;
+  isManager = false;
 
   private destroy$ = new Subject<void>();
 
@@ -57,8 +59,11 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private attendanceService: AttendanceService,
     private notification: NotificationService,
-    private dialogRef:MatDialogRef<AssignShiftComponent>
+    private dialogRef: MatDialogRef<AssignShiftComponent>,
+    private performanceService: PerformanceService,
+    @Inject(MAT_DIALOG_DATA) public data?: { isManager?: boolean }
   ) {
+    this.isManager = data?.isManager || false;
     this.assignShiftForm = this.fb.group({
       employeeId: ['', Validators.required],
       shiftId: ['', Validators.required]
@@ -71,14 +76,49 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   }
 
   private loadEmployees(): void {
-    this.employeeService.getEmployees()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          this.employees = res.employees || [];
-        },
-        error: () => this.notification.showError('Failed to load employees')
-      });
+    if (this.isManager) {
+      // Load only team employees for managers
+      this.performanceService.getMyTeamEmployees()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res) => {
+            if (res.success && res.data) {
+              // Map the response to Employee format
+              this.employees = res.data.map((emp: any) => ({
+                employeeId: emp.employeeId ? (typeof emp.employeeId === 'string' ? emp.employeeId : emp.employeeId.toString()) : '',
+                organizationId: '',
+                employeeCode: emp.employeeCode || '',
+                employeeNumber: emp.employeeCode || '',
+                firstName: emp.firstName || '',
+                lastName: emp.lastName || '',
+                fullName: emp.fullName || `${emp.firstName || ''} ${emp.lastName || ''}`.trim(),
+                email: emp.email || '',
+                phone: emp.phone,
+                hireDate: emp.hireDate ? (typeof emp.hireDate === 'string' ? emp.hireDate : new Date(emp.hireDate).toISOString().split('T')[0]) : '',
+                status: emp.status || 'active',
+                profilePictureUrl: emp.profilePictureUrl || '',
+                createdAt: '',
+                updatedAt: '',
+                workLocation: '',
+                basicSalary: 0
+              }));
+            } else {
+              this.employees = [];
+            }
+          },
+          error: () => this.notification.showError('Failed to load team employees')
+        });
+    } else {
+      // Load all employees for Admin/HR
+      this.employeeService.getEmployees()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res) => {
+            this.employees = res.employees || [];
+          },
+          error: () => this.notification.showError('Failed to load employees')
+        });
+    }
   }
 
   private loadShifts(): void {

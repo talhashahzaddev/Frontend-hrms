@@ -92,6 +92,7 @@ import {
             <button mat-stroked-button 
                     type="button" 
                     (click)="clearFilters()"
+                    [disabled]="!hasFiltersApplied()"
                     class="clear-button">
               <mat-icon>clear</mat-icon>
               Clear Filters
@@ -636,5 +637,12 @@ private backendBaseUrl = 'https://localhost:60485';
   getLeaveTypeColor(leaveTypeId: string): string {
     const leaveType = this.leaveTypes.find(lt => lt.leaveTypeId === leaveTypeId);
     return leaveType?.color || '#2196F3';
+  }
+
+  // Helper method to check if filters are applied
+  hasFiltersApplied(): boolean {
+    if (!this.filterForm) return false;
+    const values = this.filterForm.value;
+    return !!(values.search?.trim() || values.status);
   }
 }

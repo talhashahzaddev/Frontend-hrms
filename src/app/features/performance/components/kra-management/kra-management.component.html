@@ -28,6 +28,7 @@
       <h3>Search & Filters</h3>
       <button mat-stroked-button 
               (click)="clearFilters()" 
+              [disabled]="!hasFiltersApplied()"
               class="clear-filters-btn">
         <mat-icon>clear</mat-icon>
         Clear Filters
