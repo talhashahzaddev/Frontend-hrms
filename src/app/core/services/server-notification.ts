@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators'; 
 import {ServerNotification} from '../models/common.models'
+import { environment } from '../../../environments/environment';
+
 export interface ServerNotificationDto {
   id: string;
   message: string;
@@ -21,7 +23,8 @@ export interface SendNotificationDto {
 })
 export class ServerNotificationService {
 
-  private apiUrl = 'https://localhost:60485/api/Notification';
+  private readonly apiUrl = `${environment.apiUrl}/Notification`;
+  // private apiUrl = 'https://localhost:60485/api/Notification';
 
   constructor(private http: HttpClient) {}
 
