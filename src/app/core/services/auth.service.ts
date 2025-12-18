@@ -261,21 +261,17 @@ updateProfile(formData: FormData): Observable<User> {
 
 
 
-
-
-
   changePassword(request: ChangePasswordRequest): Observable<ApiResponse<boolean>> {
-    return this.http.put<ApiResponse<boolean>>(`${this.API_URL}/change-password`, request)
-      .pipe(
-        map(response => {
-          if (!response.success) {
-            throw new Error(response.message || 'Password change failed');
-          }
-          return response;
-        }),
-        catchError(this.handleError)
-      );
-  }
+  return this.http.put<ApiResponse<boolean>>(`${this.API_URL}/change-password`, request)
+    .pipe(
+      catchError(err => {
+        // Optional: map backend error to your ApiResponse type
+        const backendMessage = err?.error?.message || 'Failed to update password';
+        return throwError(() => new Error(backendMessage));
+      })
+    );
+}
+
 
   private setAuthData(authResponse: AuthResponse): void {
     const user: User = {

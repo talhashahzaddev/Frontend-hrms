@@ -310,30 +310,109 @@ if (this.selectedProfileFile) {
       });
   }
 
-  onChangePassword(): void {
-    if (!this.passwordForm.valid) return;
-    this.isPasswordLoading = true;
+onChangePassword(): void {
+  if (!this.passwordForm.valid) return;
+  this.isPasswordLoading = true;
 
-    const changePasswordRequest = {
-      currentPassword: this.passwordForm.get('currentPassword')?.value,
-      newPassword: this.passwordForm.get('newPassword')?.value
-    };
+  const changePasswordRequest = {
+    currentPassword: this.passwordForm.get('currentPassword')?.value,
+    newPassword: this.passwordForm.get('newPassword')?.value
+  };
 
-    this.authService.changePassword(changePasswordRequest)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.isPasswordLoading = false;
-          this.passwordForm.reset();
-          this.notificationService.showSuccess('Password updated successfully!');
-        },
-        error: (error) => {
-          this.isPasswordLoading = false;
-          const errorMessage = error?.error?.message || 'Failed to update password';
-          this.notificationService.showError(errorMessage);
+  this.authService.changePassword(changePasswordRequest)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (res) => {
+        this.isPasswordLoading = false;
+
+        // Reset form values
+        // this.passwordForm.reset({
+        //   currentPassword: '',
+        //   newPassword: '',
+        //   confirmPassword: ''
+        // });
+
+        // Clear validation states
+   
+       // Reset form values and state
+this.passwordForm.reset();
+
+// Clear errors manually for all controls
+Object.keys(this.passwordForm.controls).forEach(key => {
+  const control = this.passwordForm.get(key);
+  control?.setErrors(null);       // clear validators errors
+  control?.markAsPristine();      // mark control pristine
+  control?.markAsUntouched();     // mark control untouched
+});
+
+// Also clear any form-level errors (like your passwordMismatch)
+this.passwordForm.setErrors(null);
+
+        if (res.success) {
+          this.notificationService.showSuccess(res.message || 'Password updated successfully!');
+        } else {
+          this.notificationService.showWarning(res.message || 'New password must be different from old password.');
         }
-      });
-  }
+      },
+      error: (error) => {
+        this.isPasswordLoading = false;
+        const errorMessage = error?.message || 'Failed to update password';
+        this.notificationService.showError(errorMessage);
+      }
+    });
+}
+
+
+
+// onChangePassword(): void {
+//   if (!this.passwordForm.valid) return;
+//   this.isPasswordLoading = true;
+
+//   const changePasswordRequest = {
+//     currentPassword: this.passwordForm.get('currentPassword')?.value,
+//     newPassword: this.passwordForm.get('newPassword')?.value
+//   };
+
+//   this.authService.changePassword(changePasswordRequest)
+//     .pipe(takeUntil(this.destroy$))
+//     .subscribe({
+//       next: (res) => {
+//         this.isPasswordLoading = false;
+//       //   this.passwordForm.reset();
+//       //  this.passwordForm.markAsPristine();
+//       //   this.passwordForm.markAsUntouched();
+
+//       this.passwordForm.reset({
+//   currentPassword: '',
+//   newPassword: '',
+//   confirmPassword: ''
+// });
+// this.passwordForm.markAsPristine();
+// this.passwordForm.markAsUntouched();
+// Object.keys(this.passwordForm.controls).forEach(key => {
+//   const control = this.passwordForm.get(key);
+//   control?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+// });
+
+        
+//         if (res.success) {
+//           // Password changed successfully
+//           this.notificationService.showSuccess(res.message || 'Password updated successfully!');
+//         } else {
+//           // Backend returned a validation message (e.g., same password)
+//           this.notificationService.showWarning(res.message || 'New password must be different from old password.');
+//         }
+//       },
+//       error: (error) => {
+//         this.isPasswordLoading = false;
+//         // Real server/network errors
+//         const errorMessage = error?.message || 'Failed to update password';
+//         this.notificationService.showError(errorMessage);
+//       }
+//     });
+// }
+
+
 
   resetForm(): void {
     this.profileForm.reset();

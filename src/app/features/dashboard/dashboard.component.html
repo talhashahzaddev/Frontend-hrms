@@ -30,7 +30,7 @@
 
     <!-- Summary Cards -->
     <div class="stats-grid">
-      <mat-card *ngFor="let card of dashboardCards" class="stat-card stat-card-{{card.color}}">
+      <mat-card *ngFor="let card of dashboardCards" class="stat-card stat-card-{{card.color}}" id="summary-cards">
         <mat-card-content>
           <div class="stat-item">
             <div class="stat-icon-wrapper">
@@ -88,7 +88,7 @@
         </mat-card>
 
         <!-- Department Chart -->
-        <mat-card class="chart-card chart-card-accent" *ngIf="departmentChart">
+        <mat-card class="chart-card chart-card-accent" *ngIf="departmentChart" id="department-chart">
           <mat-card-header>
             <mat-card-title>
               <div class="card-title-wrapper">
@@ -109,7 +109,7 @@
         </mat-card>
 
         <!-- Recent Activities -->
-        <mat-card class="activities-card">
+        <mat-card class="activities-card" id="recent-activities">
           <mat-card-header>
             <mat-card-title>
               <div class="card-title-wrapper">
@@ -153,7 +153,7 @@
       <div class="right-column">
 
         <!-- Quick Actions -->
-        <mat-card class="quick-actions-card">
+        <mat-card class="quick-actions-card" id="quick-actions">
           <mat-card-header>
             <mat-card-title>
               <div class="card-title-wrapper">
@@ -193,7 +193,7 @@
         </mat-card>
 
         <!-- Upcoming Events -->
-        <mat-card class="events-card">
+        <mat-card class="events-card" id="upcoming-events">
           <mat-card-header>
             <mat-card-title>
               <div class="card-title-wrapper">
@@ -228,7 +228,7 @@
         </mat-card>
 
         <!-- Performance Stats -->
-        <mat-card class="performance-card" *ngIf="performanceStats">
+        <mat-card class="performance-card" *ngIf="performanceStats" id="performance-stats">
           <mat-card-header>
             <mat-card-title>
               <div class="card-title-wrapper">
