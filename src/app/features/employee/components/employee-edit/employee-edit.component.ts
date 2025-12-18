@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Employee, Department, Position } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-employee-edit',
@@ -72,6 +73,7 @@ export class EmployeeEditComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
+    private notificationService:NotificationService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EmployeeEditComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { employee: Employee }
@@ -191,19 +193,16 @@ formData.append('EmployeeNumber', formValue.employeeCode ?? '');
   this.employeeService.updateEmployee(formData).subscribe({
     next: (emp) => {
       this.isLoading = false;
-      this.showSuccess('Employee updated successfully');
+      this.notificationService.showSuccess('Employee Updated Sucessfully');
       this.dialogRef.close(emp);
     },
     error: (err) => {
       this.isLoading = false;
-      this.showError('Failed to update employee');
+    this.notificationService.showError('Failed to Update Employee');
       console.error(err);
     }
   });
 }
-
-
-
 
   onCancel(): void {
     if (this.employeeForm.dirty) {
