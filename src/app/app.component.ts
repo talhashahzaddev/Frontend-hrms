@@ -18,6 +18,7 @@ import { ToastModule } from 'primeng/toast';
 // App Components
 import { LayoutComponent } from './layout/layout.component';
 import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component';
+import { ChatWidgetComponent } from './shared/components/chat-widget/chat-widget.component';
 
 // Services
 import { AuthService } from './core/services/auth.service';
@@ -39,7 +40,8 @@ import { ThemeService } from './core/services/theme.service';
         MatBadgeModule,
         ToastModule,
         LayoutComponent,
-        LoadingSpinnerComponent
+        LoadingSpinnerComponent,
+        ChatWidgetComponent
     ],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
@@ -48,6 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'HRMS - Human Resource Management System';
   isLoading$ = this.loadingService.loading$;
   isAuthenticated$ = this.authService.isAuthenticated$;
+  isAiAssistantPage = false;
   
   private destroy$ = new Subject<void>();
 
@@ -90,12 +93,20 @@ export class AppComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe((event) => {
+        const url = (event as NavigationEnd).url;
+        
+        // Check if we're on the AI assistant page
+        this.isAiAssistantPage = url.includes('/ai-assistant');
+        
         // Update page title based on route
-        this.updatePageTitle((event as NavigationEnd).url);
+        this.updatePageTitle(url);
         
         // Scroll to top on route change
         window.scrollTo(0, 0);
       });
+    
+    // Check initial route
+    this.isAiAssistantPage = this.router.url.includes('/ai-assistant');
   }
 
 
