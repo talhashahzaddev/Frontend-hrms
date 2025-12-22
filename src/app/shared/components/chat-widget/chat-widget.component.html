@@ -7,9 +7,14 @@
           <i class="pi pi-comments" style="margin-right: 8px;"></i>
           <span>AI Assistant</span>
         </div>
-        <button class="close-button" (click)="closeChat()" aria-label="Close chat">
-          <i class="pi pi-times"></i>
-        </button>
+        <div class="header-actions">
+          <button class="expand-button" (click)="navigateToAiAssistant()" aria-label="Open full page" title="Open in full page">
+            <i class="pi pi-external-link"></i>
+          </button>
+          <button class="close-button" (click)="closeChat()" aria-label="Close chat">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -17,7 +22,7 @@
       <div *ngIf="messages.length === 0" class="empty-state">
         <i class="pi pi-comments" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
         <p>Start a conversation with AI Assistant</p>
-        <p class="hint">Ask questions about HRMS features, backend implementation, or API details.</p>
+        <p class="hint">Begin chatting with the AI Assistant to get help with your HRMS questions.</p>
       </div>
 
       <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'" [class.ai]="message.sender === 'ai'">

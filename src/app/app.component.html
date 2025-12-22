@@ -47,5 +47,5 @@
 </div>
 </div>
 
-<!-- Chat Widget - Show only when authenticated -->
-<app-chat-widget *ngIf="isAuthenticated$ | async"></app-chat-widget>
+<!-- Chat Widget - Show only when authenticated and not on AI Assistant page -->
+<app-chat-widget *ngIf="(isAuthenticated$ | async) && !isAiAssistantPage"></app-chat-widget>

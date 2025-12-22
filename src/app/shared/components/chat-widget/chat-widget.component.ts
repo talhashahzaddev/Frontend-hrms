@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ChatService, ChatMessage } from '../../services/chat.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -19,7 +20,10 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
   isLoading = false;
   private destroy$ = new Subject<void>();
 
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadMessages();
@@ -39,6 +43,14 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
 
   closeChat(): void {
     this.isOpen = false;
+  }
+
+  navigateToAiAssistant(): void {
+    // Close the chat widget
+    this.isOpen = false;
+    // Navigate to the main AI Assistant page
+    // The chat history will be preserved since both components use the same ChatService
+    this.router.navigate(['/ai-assistant']);
   }
 
   sendMessage(): void {

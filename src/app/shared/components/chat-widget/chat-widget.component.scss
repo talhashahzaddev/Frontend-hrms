@@ -84,6 +84,13 @@
   font-size: 16px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.expand-button,
 .close-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -95,10 +102,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s;
 
   &:hover {
     background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  i {
+    font-size: 16px;
   }
 }
 

@@ -10,7 +10,7 @@
         <span>Clear Chat</span>
       </button>
     </div>
-    <p class="header-subtitle">Ask questions about HRMS features, backend implementation, or API details.</p>
+    <!-- <p class="header-subtitle">Ask questions about HRMS features, backend implementation, or API details.</p> -->
   </div>
 
   <div class="chat-container">
@@ -34,14 +34,14 @@
             <i class="pi pi-question-circle"></i>
             <span>How can I check my performance?</span>
           </div>
-          <div class="suggestion-chip" (click)="newMessage = 'How do I manage employee attendance?'; sendMessage()">
+          <!-- <div class="suggestion-chip" (click)="newMessage = 'How do I manage employee attendance?'; sendMessage()">
             <i class="pi pi-question-circle"></i>
             <span>How do I manage employee attendance?</span>
           </div>
           <div class="suggestion-chip" (click)="newMessage = 'Explain the leave management system'; sendMessage()">
             <i class="pi pi-question-circle"></i>
             <span>Explain the leave management system</span>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -60,7 +60,7 @@
 
       <div *ngIf="isLoading" class="message ai">
         <div class="message-avatar">
-          <i class="pi pi-robot"></i>
+          <i class="pi pi-robot" aria-hidden="true"></i>
         </div>
         <div class="message-content">
           <div class="typing-indicator">
