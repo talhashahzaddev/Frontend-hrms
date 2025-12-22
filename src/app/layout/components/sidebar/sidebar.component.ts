@@ -114,6 +114,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals' },
         { label: 'Performance Reports', icon: 'analytics', route: '/performance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] }
       ]
+    },
+    {
+      label: 'AI Assistant',
+      icon: 'smart_toy',
+      route: '/ai-assistant'
     }
   ];
 

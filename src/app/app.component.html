@@ -46,3 +46,6 @@
     </button>
 </div>
 </div>
+
+<!-- Chat Widget - Show only when authenticated -->
+<app-chat-widget *ngIf="isAuthenticated$ | async"></app-chat-widget>

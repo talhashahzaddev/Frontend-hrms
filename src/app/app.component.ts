@@ -18,6 +18,7 @@ import { ToastModule } from 'primeng/toast';
 // App Components
 import { LayoutComponent } from './layout/layout.component';
 import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component';
+import { ChatWidgetComponent } from './shared/components/chat-widget/chat-widget.component';
 
 // Services
 import { AuthService } from './core/services/auth.service';
@@ -39,7 +40,8 @@ import { ThemeService } from './core/services/theme.service';
         MatBadgeModule,
         ToastModule,
         LayoutComponent,
-        LoadingSpinnerComponent
+        LoadingSpinnerComponent,
+        ChatWidgetComponent
     ],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']

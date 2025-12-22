@@ -92,6 +92,15 @@ export const appRoutes: Routes = [
       import('./features/performance/performance.routes').then(m => m.performanceRoutes)
   },
   
+  // AI Assistant Route (accessible to all roles)
+  {
+    path: 'ai-assistant',
+    canActivate: [AuthGuard],
+    loadComponent: () => 
+      import('./features/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
+    title: 'AI Assistant - HRMS'
+  },
+  
   // Profile Management
   {
     path: 'profile',
