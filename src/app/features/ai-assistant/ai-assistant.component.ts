@@ -44,13 +44,17 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.messages.push(response);
+          // Message is already added to service, just reload
+          this.messages = this.chatService.getMessages();
           this.isLoading = false;
           this.scrollToBottom();
         },
         error: (error) => {
           console.error('Error sending message:', error);
+          // Reload messages to show error message if service added it
+          this.messages = this.chatService.getMessages();
           this.isLoading = false;
+          this.scrollToBottom();
         }
       });
   }

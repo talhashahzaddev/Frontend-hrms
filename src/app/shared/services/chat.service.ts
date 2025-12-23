@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface ChatMessage {
   id: string;
@@ -8,6 +10,18 @@ export interface ChatMessage {
   sender: 'user' | 'ai';
   timestamp: Date;
   isLoading?: boolean;
+  intent?: string;
+  module?: string;
+}
+
+interface ChatRequestDto {
+  message: string;
+}
+
+interface ChatResponseDto {
+  responseText: string;
+  intent: string;
+  module: string;
 }
 
 @Injectable({
@@ -15,11 +29,12 @@ export interface ChatMessage {
 })
 export class ChatService {
   private messages: ChatMessage[] = [];
+  private readonly apiUrl = `${environment.apiUrl}/Chat`;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  // This will be connected to your backend API later
   sendMessage(message: string): Observable<ChatMessage> {
+    // Add user message to local storage immediately
     const userMessage: ChatMessage = {
       id: this.generateId(),
       text: message,
@@ -29,18 +44,45 @@ export class ChatService {
     
     this.messages.push(userMessage);
     
-    // TODO: Replace with actual API call
-    // Example: return this.http.post<ChatMessage>('/api/chat', { message });
-    
-    // For now, return mock response (frontend only)
-    const aiResponse: ChatMessage = {
-      id: this.generateId(),
-      text: 'This is a placeholder response. Backend integration will be implemented later.',
-      sender: 'ai' as const,
-      timestamp: new Date()
+    // Prepare request
+    const request: ChatRequestDto = {
+      message: message
     };
-    
-    return of(aiResponse).pipe(delay(1000));
+
+    // Call the API
+    return this.http.post<ChatResponseDto>(`${this.apiUrl}/message`, request).pipe(
+      map((response: ChatResponseDto) => {
+        // Convert API response to ChatMessage
+        const aiMessage: ChatMessage = {
+          id: this.generateId(),
+          text: response.responseText || 'No response received.',
+          sender: 'ai',
+          timestamp: new Date(),
+          intent: response.intent,
+          module: response.module
+        };
+        
+        // Add AI response to messages
+        this.messages.push(aiMessage);
+        
+        return aiMessage;
+      }),
+      catchError((error) => {
+        console.error('Error sending chat message:', error);
+        
+        // Add error message to chat
+        const errorMessage: ChatMessage = {
+          id: this.generateId(),
+          text: error.error?.responseText || error.message || 'An error occurred while processing your message. Please try again.',
+          sender: 'ai',
+          timestamp: new Date()
+        };
+        
+        this.messages.push(errorMessage);
+        
+        return throwError(() => error);
+      })
+    );
   }
 
   getMessages(): ChatMessage[] {
