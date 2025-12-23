@@ -474,16 +474,24 @@
             </ng-container>
 
             <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
+           <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let assessment">
-                <button mat-raised-button 
-                        color="primary" 
-                        (click)="openCreateAppraisalForEmployee(assessment)"
-                        class="create-appraisal-btn">
-                  <mat-icon>add</mat-icon>
-                  Create Appraisal
-                </button>
+              <td mat-cell *matCellDef="let appraisal">
+    
+              <!-- Show button only if not submitted -->
+              <button *ngIf="appraisal.status !== 'Submitted'"
+                mat-raised-button
+                color="primary"
+                (click)="openCreateAppraisalForEmployee(appraisal)"
+                class="create-appraisal-btn"
+              >
+                <mat-icon>add</mat-icon>
+                Create Appraisal
+              </button>
+              <!-- Show text if submitted -->
+              <span *ngIf="appraisal.status === 'Submitted'" class="appraisal-created-text">
+                Appraisal Created
+              </span>
               </td>
             </ng-container>
 

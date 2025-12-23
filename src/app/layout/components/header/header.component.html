@@ -23,16 +23,40 @@
 
   <!-- Header Actions -->
   <div class="header-actions">
-    
-    <!-- Search (Desktop only) -->
-    <button 
-      mat-icon-button 
-      class="action-button"
-      *ngIf="!isHandset"
-      matTooltip="Search"
-      aria-label="Search">
-      <mat-icon>search</mat-icon>
-    </button>
+
+<!-- Toolbar search icon -->
+<button 
+  mat-icon-button 
+  class="action-button"
+  *ngIf="!isHandset && !isSearchOpen"
+  matTooltip="Search"
+  aria-label="Search"
+  (click)="toggleSearch()">
+  <mat-icon>search</mat-icon>
+</button>
+
+<!-- Search input -->
+<div class="header-search" *ngIf="isSearchOpen">
+  <input
+    #searchInput
+    type="text"
+    placeholder="Search dashboard..."
+    [(ngModel)]="searchQuery"
+    (ngModelChange)="onSearchChange($event)"
+    (keydown.enter)="onSearch()"
+  />
+  <button mat-icon-button (click)="onSearch()">
+    <mat-icon>search</mat-icon>
+  </button>
+
+  <!-- Dropdown suggestions -->
+  <ul class="search-suggestions" *ngIf="filteredItems.length > 0">
+    <li *ngFor="let item of filteredItems" (click)="goToSection(item.id)">
+      {{ item.name }}
+    </li>
+  </ul>
+</div>
+
 
     <!-- Theme Toggle -->
     <button 

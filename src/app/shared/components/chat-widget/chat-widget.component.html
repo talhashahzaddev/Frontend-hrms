@@ -1,0 +1,76 @@
+<div class="chat-widget-container">
+  <!-- Chat Window -->
+  <div class="chat-window" [class.open]="isOpen" *ngIf="isOpen">
+    <div class="chat-header">
+      <div class="chat-header-content">
+        <div class="chat-title">
+          <i class="pi pi-comments" style="margin-right: 8px;"></i>
+          <span>AI Assistant</span>
+        </div>
+        <div class="header-actions">
+          <button class="expand-button" (click)="navigateToAiAssistant()" aria-label="Open full page" title="Open in full page">
+            <i class="pi pi-external-link"></i>
+          </button>
+          <button class="close-button" (click)="closeChat()" aria-label="Close chat">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div *ngIf="messages.length === 0" class="empty-state">
+        <i class="pi pi-comments" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
+        <p>Start a conversation with AI Assistant</p>
+        <p class="hint">Begin chatting with the AI Assistant to get help with your HRMS questions.</p>
+      </div>
+
+      <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'" [class.ai]="message.sender === 'ai'">
+        <div class="message-content">
+          <div class="message-text">{{ message.text }}</div>
+          <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="isLoading" class="message ai">
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-container">
+      <textarea
+        class="chat-input"
+        [(ngModel)]="newMessage"
+        (keydown)="onKeyPress($event)"
+        placeholder="Type your message..."
+        rows="1"
+        [disabled]="isLoading">
+      </textarea>
+      <button 
+        class="send-button" 
+        (click)="sendMessage()" 
+        [disabled]="!newMessage.trim() || isLoading"
+        aria-label="Send message">
+        <i class="pi pi-send"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Chat Button -->
+  <button 
+    class="chat-button" 
+    (click)="toggleChat()"
+    [class.open]="isOpen"
+    aria-label="Open chat">
+    <i class="pi pi-comments" *ngIf="!isOpen"></i>
+    <i class="pi pi-times" *ngIf="isOpen"></i>
+  </button>
+</div>
+
+

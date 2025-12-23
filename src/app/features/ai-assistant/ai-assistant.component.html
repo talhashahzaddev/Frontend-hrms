@@ -1,0 +1,95 @@
+<div class="ai-assistant-container">
+  <div class="ai-assistant-header">
+    <div class="header-content">
+      <div class="header-title">
+        <i class="pi pi-comments"></i>
+        <h1>AI Assistant</h1>
+      </div>
+      <button class="clear-button" (click)="clearChat()" *ngIf="messages.length > 0" aria-label="Clear chat">
+        <i class="pi pi-trash"></i>
+        <span>Clear Chat</span>
+      </button>
+    </div>
+    <!-- <p class="header-subtitle">Ask questions about HRMS features, backend implementation, or API details.</p> -->
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-messages" id="chat-messages">
+      <div *ngIf="messages.length === 0" class="empty-state">
+        <div class="empty-icon">
+          <i class="pi pi-comments"></i>
+        </div>
+        <h2>Start a conversation</h2>
+        <p>Begin chatting with the AI Assistant to get help with your HRMS questions.</p>
+        <div class="suggestions">
+          <div class="suggestion-chip" (click)="newMessage = 'Can you show me my absences?'; sendMessage()">
+            <i class="pi pi-question-circle"></i>
+            <span>Can you show me my absences?</span>
+          </div>
+          <div class="suggestion-chip" (click)="newMessage = 'How many leaves do I have left for this year?'; sendMessage()">
+            <i class="pi pi-question-circle"></i>
+            <span>How many leaves do I have left for this year?</span>
+          </div>
+          <div class="suggestion-chip" (click)="newMessage = 'How can I check my performance?'; sendMessage()">
+            <i class="pi pi-question-circle"></i>
+            <span>How can I check my performance?</span>
+          </div>
+          <!-- <div class="suggestion-chip" (click)="newMessage = 'How do I manage employee attendance?'; sendMessage()">
+            <i class="pi pi-question-circle"></i>
+            <span>How do I manage employee attendance?</span>
+          </div>
+          <div class="suggestion-chip" (click)="newMessage = 'Explain the leave management system'; sendMessage()">
+            <i class="pi pi-question-circle"></i>
+            <span>Explain the leave management system</span>
+          </div> -->
+        </div>
+      </div>
+
+      <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'" [class.ai]="message.sender === 'ai'">
+        <div class="message-avatar">
+          <i class="pi" [ngClass]="message.sender === 'user' ? 'pi-user' : 'pi-robot'"></i>
+        </div>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">{{ message.sender === 'user' ? 'You' : 'AI Assistant' }}</span>
+            <span class="message-time">{{ message.timestamp | date:'short' }}</span>
+          </div>
+          <div class="message-text">{{ message.text }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="isLoading" class="message ai">
+        <div class="message-avatar">
+          <i class="pi pi-robot" aria-hidden="true"></i>
+        </div>
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Input Elements -->
+  <div class="fixed-input-wrapper">
+    <textarea
+      class="chat-input"
+      [(ngModel)]="newMessage"
+      (keydown)="onKeyPress($event)"
+      placeholder="Type your message here..."
+      rows="1"
+      [disabled]="isLoading">
+    </textarea>
+    <button 
+      class="send-button" 
+      (click)="sendMessage()" 
+      [disabled]="!newMessage.trim() || isLoading"
+      aria-label="Send message">
+      <i class="pi pi-send"></i>
+    </button>
+  </div>
+</div>
+
