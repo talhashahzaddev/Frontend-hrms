@@ -33,16 +33,18 @@ export class ChatService {
 
   constructor(private http: HttpClient) {}
 
-  sendMessage(message: string): Observable<ChatMessage> {
-    // Add user message to local storage immediately
-    const userMessage: ChatMessage = {
-      id: this.generateId(),
-      text: message,
-      sender: 'user',
-      timestamp: new Date()
-    };
-    
-    this.messages.push(userMessage);
+  sendMessage(message: string, skipUserMessage: boolean = false): Observable<ChatMessage> {
+    // Add user message to local storage immediately (unless component handles it)
+    if (!skipUserMessage) {
+      const userMessage: ChatMessage = {
+        id: this.generateId(),
+        text: message,
+        sender: 'user',
+        timestamp: new Date()
+      };
+      
+      this.messages.push(userMessage);
+    }
     
     // Prepare request
     const request: ChatRequestDto = {

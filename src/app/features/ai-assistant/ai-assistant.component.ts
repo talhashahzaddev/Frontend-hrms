@@ -38,23 +38,47 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
 
     const messageText = this.newMessage.trim();
     this.newMessage = '';
+    
+    // Add user message immediately to show it right away
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+      text: messageText,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    this.messages.push(userMessage);
+    
+    // Show typing indicator
     this.isLoading = true;
+    
+    // Scroll to show typing indicator
+    this.scrollToBottom();
 
-    this.chatService.sendMessage(messageText)
+    // Call API (skip user message since we already added it)
+    this.chatService.sendMessage(messageText, true)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          // Message is already added to service, just reload
-          this.messages = this.chatService.getMessages();
+          // Reload messages to get AI response from service
+          // The user message is already in our local array, service adds AI response
+          const serviceMessages = this.chatService.getMessages();
+          // Merge to ensure we have all messages (user message + AI response)
+          this.messages = serviceMessages.length > this.messages.length 
+            ? serviceMessages 
+            : [...this.messages, response];
           this.isLoading = false;
-          this.scrollToBottom();
+          // Small delay to ensure DOM updates before scrolling
+          setTimeout(() => this.scrollToBottom(), 50);
         },
         error: (error) => {
           console.error('Error sending message:', error);
           // Reload messages to show error message if service added it
-          this.messages = this.chatService.getMessages();
+          const serviceMessages = this.chatService.getMessages();
+          this.messages = serviceMessages.length > this.messages.length 
+            ? serviceMessages 
+            : this.messages;
           this.isLoading = false;
-          this.scrollToBottom();
+          setTimeout(() => this.scrollToBottom(), 50);
         }
       });
   }
@@ -76,12 +100,15 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
   }
 
   private scrollToBottom(): void {
-    setTimeout(() => {
-      const chatMessages = document.getElementById('chat-messages');
-      if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-    }, 100);
+    // Use requestAnimationFrame for smoother scrolling
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }, 50);
+    });
   }
 }
 
