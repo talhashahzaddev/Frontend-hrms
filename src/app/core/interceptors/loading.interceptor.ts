@@ -54,7 +54,9 @@ import { LoadingService } from '@core/services/loading.service';
 export class LoadingInterceptor implements HttpInterceptor {
   private readonly excludeUrls = [
     '/auth/refresh',
-    '/attendance/today'
+    '/attendance/today',
+    '/Chat/message', // Exclude chat API to show typing indicator instead
+    '/chat/message' // Case-insensitive fallback
   ];
 
   constructor(private loadingService: LoadingService) {}
