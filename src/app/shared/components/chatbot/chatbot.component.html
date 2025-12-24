@@ -1,0 +1,128 @@
+<!-- Floating Chat Button -->
+<button 
+  class="chat-toggle-button"
+  mat-fab
+  (click)="toggleChat()"
+  [class.active]="isOpen"
+  matTooltip="Chat with AI Assistant"
+  matTooltipPosition="left"
+  aria-label="Toggle chat">
+  <mat-icon>{{ isOpen ? 'close' : 'chat' }}</mat-icon>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-window" [class.open]="isOpen" [class.minimized]="isMinimized">
+  
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="header-left">
+      <mat-icon class="bot-icon">smart_toy</mat-icon>
+      <div class="header-info">
+        <h3 class="chat-title">AI Assistant</h3>
+        <span class="chat-status">Online</span>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <button 
+        mat-icon-button 
+        class="header-button"
+        (click)="toggleMinimize()"
+        [matTooltip]="isMinimized ? 'Maximize' : 'Minimize'"
+        aria-label="Minimize chat">
+        <mat-icon>{{ isMinimized ? 'expand_more' : 'remove' }}</mat-icon>
+      </button>
+      <button 
+        mat-icon-button 
+        class="header-button"
+        (click)="clearChat()"
+        matTooltip="Clear chat"
+        aria-label="Clear chat">
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+      <button 
+        mat-icon-button 
+        class="header-button"
+        (click)="closeChat()"
+        matTooltip="Close chat"
+        aria-label="Close chat">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-messages" #messagesContainer>
+    <!-- Welcome Message -->
+    <div class="welcome-message" *ngIf="messages.length === 0">
+      <mat-icon class="welcome-icon">waving_hand</mat-icon>
+      <h4>Hello! I'm your AI assistant</h4>
+      <p>How can I help you today?</p>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-list" *ngIf="messages.length > 0">
+      <div 
+        *ngFor="let message of messages"
+        class="message"
+        [class.user-message]="message.isUser"
+        [class.bot-message]="!message.isUser">
+        
+        <div class="message-avatar" *ngIf="!message.isUser">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        
+        <div class="message-content">
+          <div class="message-bubble">
+            <p class="message-text">{{ message.text }}</p>
+          </div>
+          <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+        </div>
+        
+        <div class="message-avatar" *ngIf="message.isUser">
+          <mat-icon>person</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="message bot-message" *ngIf="isLoading">
+      <div class="message-avatar">
+        <mat-icon>smart_toy</mat-icon>
+      </div>
+      <div class="message-content">
+        <div class="message-bubble typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Input -->
+  <div class="chat-input">
+    <div class="input-container">
+      <input
+        #messageInput
+        type="text"
+        class="message-input"
+        [(ngModel)]="userMessage"
+        (keypress)="onKeyPress($event)"
+        [disabled]="isLoading"
+        placeholder="Type your message..."
+        aria-label="Type your message">
+      
+      <button
+        mat-icon-button
+        class="send-button"
+        (click)="sendMessage()"
+        [disabled]="!userMessage.trim() || isLoading"
+        matTooltip="Send message"
+        aria-label="Send message">
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+  </div>
+
+</div>

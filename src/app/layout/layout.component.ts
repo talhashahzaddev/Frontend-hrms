@@ -13,6 +13,7 @@ import { MatListModule } from '@angular/material/list';
 // Components
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { ChatbotComponent } from '../shared/components/chatbot/chatbot.component';
 
 // Services
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -28,7 +29,8 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
         MatIconModule,
         MatListModule,
         HeaderComponent,
-        SidebarComponent
+        SidebarComponent,
+        ChatbotComponent
     ],
     templateUrl: './layout.component.html',
     styleUrls: ['./layout.component.scss']
