@@ -23,7 +23,7 @@ import { NotificationService } from '@core/services/notification.service';
 import { User } from '@core/models/auth.models';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import {NotificationDialogueComponent} from '../../../features/notification-dialogue/notification-dialogue.component'
-
+import { environment } from '@/environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -65,7 +65,7 @@ searchItems = [
   notificationCount = 0; // Mock notification count
   slectedProfileFile: File | null = null;
   profilePreviewUrl: string | null = null;
-  private backendBaseUrl = 'https://localhost:60485';
+  private backendBaseUrl = `${environment.apiUrl}`;
 // Variables
 searchQuery = '';
 isSearchOpen = false;
@@ -193,36 +193,6 @@ goToSection(id: string) {
   this.filteredItems = [];
   this.isSearchOpen = false;
 }
-
-
-
-// onSearch() {
-//   if (!this.searchQuery) return;
-
-//   const query = this.searchQuery.toLowerCase();
-
-//   // Map search keywords to section IDs
-//   const sectionMap: { [key: string]: string } = {
-//     'quick action': 'quick-actions',
-//     'actions': 'quick-actions',
-//     'events': 'upcoming-events',
-//     'performance': 'performance-stats',
-//     'reports': 'quick-actions'
-//   };
-
-//   const targetId = Object.keys(sectionMap).find(key => query.includes(key));
-//   if (targetId) {
-//     const el = document.getElementById(sectionMap[targetId]);
-//     if (el) {
-//       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-//     }
-//   }
-
-//   // Reset
-//   this.searchQuery = '';
-//   this.isSearchOpen = false;
-// }
-
 
   getUserInitials(): string {
     if (!this.currentUser) return '';
