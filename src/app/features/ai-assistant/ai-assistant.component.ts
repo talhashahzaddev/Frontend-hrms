@@ -39,33 +39,24 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
     const messageText = this.newMessage.trim();
     this.newMessage = '';
     
-    // Add user message immediately to show it right away
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      text: messageText,
-      sender: 'user',
-      timestamp: new Date()
-    };
-    this.messages.push(userMessage);
-    
     // Show typing indicator
     this.isLoading = true;
     
-    // Scroll to show typing indicator
+    // Call API - service will add user message synchronously before API call
+    const messageObservable = this.chatService.sendMessage(messageText, false);
+    
+    // Immediately update UI with user message from service (added synchronously)
+    // This ensures the user message appears instantly before API response
+    this.messages = [...this.chatService.getMessages()];
     this.scrollToBottom();
-
-    // Call API (skip user message since we already added it)
-    this.chatService.sendMessage(messageText, true)
+    
+    // Subscribe to get AI response
+    messageObservable
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          // Reload messages to get AI response from service
-          // The user message is already in our local array, service adds AI response
-          const serviceMessages = this.chatService.getMessages();
-          // Merge to ensure we have all messages (user message + AI response)
-          this.messages = serviceMessages.length > this.messages.length 
-            ? serviceMessages 
-            : [...this.messages, response];
+          // Reload messages from service - it has both user and AI messages in correct order
+          this.messages = [...this.chatService.getMessages()];
           this.isLoading = false;
           // Small delay to ensure DOM updates before scrolling
           setTimeout(() => this.scrollToBottom(), 50);
@@ -73,10 +64,7 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error sending message:', error);
           // Reload messages to show error message if service added it
-          const serviceMessages = this.chatService.getMessages();
-          this.messages = serviceMessages.length > this.messages.length 
-            ? serviceMessages 
-            : this.messages;
+          this.messages = [...this.chatService.getMessages()];
           this.isLoading = false;
           setTimeout(() => this.scrollToBottom(), 50);
         }

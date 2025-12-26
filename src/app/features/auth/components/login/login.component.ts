@@ -60,33 +60,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // onSubmit(): void {
-  //   if (this.loginForm.valid && !this.isLoading) {
-  //     const credentials = this.loginForm.value;
-      
-  //     this.authService.login(credentials).subscribe({
-  //       next: (response) => {
-  //         this.notificationService.loginSuccess(response.firstName);
-          
-  //         // Check for redirect URL
-  //         const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
-  //         sessionStorage.removeItem('redirectUrl');
-          
-  //         this.router.navigate([redirectUrl]);
-  //       },
-  //       error: (error) => {
-  //         this.notificationService.error({
-  //           title: 'Login Failed',
-  //           message: error.message || 'Invalid email or password'
-  //         });
-  //       }
-  //     });
-  //   } else {
-  //     this.markFormGroupTouched();
-  //   }
-  // }
-
-
   onSubmit(): void {
   if (this.loginForm.valid && !this.isLoading) {
     const credentials = this.loginForm.value;

@@ -88,6 +88,11 @@ export class ChatWidgetComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearChat(): void {
+    this.chatService.clearMessages();
+    this.messages = [];
+  }
+
   private loadMessages(): void {
     this.messages = this.chatService.getMessages();
   }
