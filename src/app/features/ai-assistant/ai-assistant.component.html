@@ -47,20 +47,38 @@
 
       <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'" [class.ai]="message.sender === 'ai'">
         <div class="message-avatar">
-          <i class="pi" [ngClass]="message.sender === 'user' ? 'pi-user' : 'pi-robot'"></i>
+          <i class="pi" [ngClass]="message.sender === 'user' ? 'pi-user' : 'pi-android'"></i>
         </div>
         <div class="message-content">
           <div class="message-header">
             <span class="message-sender">{{ message.sender === 'user' ? 'You' : 'AI Assistant' }}</span>
             <span class="message-time">{{ message.timestamp | date:'short' }}</span>
           </div>
-          <div class="message-text">{{ message.text }}</div>
+          <div class="message-text">
+            <ng-container *ngIf="message.sender === 'ai'">
+              <ng-container *ngFor="let part of formatMessage(message.text)">
+                <ng-container [ngSwitch]="part.type">
+                  <span *ngSwitchCase="'text'">{{ part.content }}</span>
+                  <br *ngSwitchCase="'linebreak'" />
+                  <button 
+                    *ngSwitchCase="'url'"
+                    class="message-link-button"
+                    (click)="navigateToUrl(part.url!)"
+                    type="button">
+                    <i class="pi pi-external-link"></i>
+                    <span>{{ part.content }}</span>
+                  </button>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+            <span *ngIf="message.sender === 'user'">{{ message.text }}</span>
+          </div>
         </div>
       </div>
 
       <div *ngIf="isLoading" class="message ai">
         <div class="message-avatar">
-          <i class="pi pi-robot" aria-hidden="true"></i>
+          <i class="pi pi-android" aria-hidden="true"></i>
         </div>
         <div class="message-content">
           <div class="typing-indicator">
