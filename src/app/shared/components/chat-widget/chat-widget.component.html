@@ -8,6 +8,9 @@
           <span>AI Assistant</span>
         </div>
         <div class="header-actions">
+          <button class="clear-button" (click)="clearChat()" *ngIf="messages.length > 0" aria-label="Clear chat" title="Clear chat">
+            <i class="pi pi-trash"></i>
+          </button>
           <button class="expand-button" (click)="navigateToAiAssistant()" aria-label="Open full page" title="Open in full page">
             <i class="pi pi-external-link"></i>
           </button>
