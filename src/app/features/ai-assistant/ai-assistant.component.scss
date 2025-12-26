@@ -124,9 +124,18 @@
   overflow-x: hidden;
   padding: var(--spacing-lg);
   background: var(--gray-50);
+  padding-top: var(--spacing-xl); // Extra padding at top
   padding-bottom: var(--spacing-2xl); // Extra padding at bottom
   min-height: 400px;
   max-height: calc(100vh - 280px);
+  scroll-behavior: smooth;
+  
+  // Ensure all messages are visible
+  .message {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: flex !important;
+  }
   
   &::-webkit-scrollbar {
     width: 8px;
@@ -230,18 +239,26 @@
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
   animation: fadeIn 0.3s ease;
+  position: relative;
+  z-index: 1;
+  min-height: 60px; // Ensure minimum height for visibility
 
   &.user {
     flex-direction: row-reverse;
+    z-index: 2; // Ensure user messages are above AI messages
 
     .message-content {
       background: var(--gradient-primary);
       color: white;
       border-radius: 18px 18px 4px 18px;
+      position: relative;
+      z-index: 1;
     }
 
     .message-avatar {
       background: var(--gradient-primary);
+      position: relative;
+      z-index: 1;
     }
   }
 
@@ -408,14 +425,13 @@
 .fixed-input-wrapper {
   position: fixed;
   bottom: var(--spacing-lg);
-  // left: 50%;                  /* anchor to middle */
-  // transform: translateX(-50%);/* shift back by half */
-  width: 90%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2 * var(--spacing-md));
   max-width: 1200px;
   display: flex;
   gap: var(--spacing-md);
   align-items: flex-end;
-  justify-content: center;    /* center children horizontally */
   z-index: 100;
   padding: 0 var(--spacing-md);
   box-sizing: border-box;
@@ -493,6 +509,44 @@
 }
 
 // Responsive Design
+// Screens with fixed sidebar (1300px and above)
+// This covers all desktop sizes where sidebar is in "side" mode and fixed
+@media (min-width: 1300px) {
+  .fixed-input-wrapper {
+    // Start after sidebar, ensure it's always visible
+    left: 320px;
+    right: var(--spacing-md);
+    transform: none;
+    width: auto; // Let left and right define width
+    max-width: calc(100vw - 280px - var(--spacing-md));
+    min-width: 300px; // Ensure minimum width for usability
+    padding: 0 var(--spacing-md);
+    box-sizing: border-box;
+  }
+  
+  // For wider screens, center the input to match container (max 1200px)
+  @media (min-width: 1480px) {
+    .fixed-input-wrapper {
+      // Center 1200px container: start at sidebar + (available - 1200) / 2
+      left: calc(280px + (100vw - 280px - 1200px) / 2);
+      right: calc(100vw - 280px - 1200px - (100vw - 280px - 1200px) / 2);
+      width: auto;
+      max-width: 1200px;
+    }
+  }
+  
+  .chat-input {
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+  
+  .send-button {
+    flex-shrink: 0; // Ensure button is always visible
+  }
+}
+
 // Laptop screens (13-inch typically 1366px-1440px)
 @media (min-width: 1025px) and (max-width: 1440px) {
   .ai-assistant-container {
@@ -520,7 +574,8 @@
 
   .fixed-input-wrapper {
     bottom: var(--spacing-md);
-    // Centering is handled by base styles, only adjust bottom spacing
+    // For screens between 1025px-1299px, use default centering
+    // For screens 1300px-1440px, the above media query will override
   }
 }
 
