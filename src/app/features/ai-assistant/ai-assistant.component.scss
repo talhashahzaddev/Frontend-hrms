@@ -306,9 +306,15 @@
 
     .message-avatar {
       background: var(--gradient-primary);
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
       
       i {
-        color: white;
+        color: white !important;
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
     }
   }
@@ -373,6 +379,47 @@
 .message-text {
   font-size: 14px;
   line-height: 1.6;
+  white-space: pre-wrap; // Preserve line breaks
+  
+  // Link button styling for AI messages
+  .message-link-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    white-space: nowrap;
+    
+    i {
+      font-size: 14px;
+    }
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+      opacity: 0.95;
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    &:focus {
+      outline: 2px solid rgba(14, 165, 233, 0.3);
+      outline-offset: 2px;
+    }
+  }
 }
 
 // Typing Indicator
@@ -407,9 +454,12 @@
 
 // Ensure AI avatar shows in loading state - match regular message styling exactly
 .message.ai .message-avatar {
-  background: var(--gradient-primary);
-  min-width: 40px;
-  min-height: 40px;
+  background: var(--gradient-primary) !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   
   i {
     color: white !important;
@@ -423,7 +473,7 @@
     text-align: center !important;
   }
   
-  i.pi.pi-robot {
+  i.pi.pi-android {
     color: white !important;
     font-size: 20px !important;
     display: inline-block !important;
@@ -923,6 +973,16 @@
   .message-text {
     font-size: 13px;
     line-height: 1.5;
+    
+    .message-link-button {
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: 12px;
+      margin-top: var(--spacing-xs);
+      
+      i {
+        font-size: 12px;
+      }
+    }
   }
 
   .fixed-input-wrapper {
@@ -1140,6 +1200,16 @@
   .message-text {
     font-size: 12px;
     line-height: 1.4;
+    
+    .message-link-button {
+      padding: 6px var(--spacing-xs);
+      font-size: 11px;
+      margin-top: 4px;
+      
+      i {
+        font-size: 11px;
+      }
+    }
   }
 
   .typing-indicator {
