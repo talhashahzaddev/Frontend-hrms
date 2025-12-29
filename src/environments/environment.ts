@@ -10,4 +10,4 @@ export const environment = {
     userKey: 'user'
   }
 
-};
+}; 

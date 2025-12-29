@@ -73,7 +73,7 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error sending message:', error);
-          // Reload messages to show error message if service added it
+          // Reload messages to show error message - service already added it
           this.messages = [...this.chatService.getMessages()];
           this.isLoading = false;
           setTimeout(() => this.scrollToBottom(), 50);

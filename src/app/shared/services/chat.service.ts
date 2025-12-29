@@ -54,10 +54,16 @@ export class ChatService {
     // Call the API
     return this.http.post<ChatResponseDto>(`${this.apiUrl}/message`, request).pipe(
       map((response: ChatResponseDto) => {
+        // Check if response is valid and has content
+        if (!response || !response.responseText || response.responseText.trim() === '') {
+          // Throw error to be caught by catchError
+          throw new Error('EMPTY_RESPONSE');
+        }
+        
         // Convert API response to ChatMessage
         const aiMessage: ChatMessage = {
           id: this.generateId(),
-          text: response.responseText || 'No response received.',
+          text: response.responseText,
           sender: 'ai',
           timestamp: new Date(),
           intent: response.intent,
@@ -72,15 +78,20 @@ export class ChatService {
       catchError((error) => {
         console.error('Error sending chat message:', error);
         
-        // Add error message to chat
+        // Check if error message was already added (for empty response case)
+        // We add it here to handle all error cases consistently
         const errorMessage: ChatMessage = {
           id: this.generateId(),
-          text: error.error?.responseText || error.message || 'An error occurred while processing your message. Please try again.',
+          text: 'The server is not responding',
           sender: 'ai',
           timestamp: new Date()
         };
         
-        this.messages.push(errorMessage);
+        // Only add if not already present (check last message)
+        const lastMessage = this.messages[this.messages.length - 1];
+        if (!lastMessage || lastMessage.text !== 'The server is not responding' || lastMessage.sender !== 'ai') {
+          this.messages.push(errorMessage);
+        }
         
         return throwError(() => error);
       })
