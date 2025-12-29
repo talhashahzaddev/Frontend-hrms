@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -19,7 +19,8 @@ interface FormattedMessagePart {
   templateUrl: './ai-assistant.component.html',
   styleUrls: ['./ai-assistant.component.scss']
 })
-export class AiAssistantComponent implements OnInit, OnDestroy {
+export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;
   messages: ChatMessage[] = [];
   newMessage = '';
   isLoading = false;
@@ -36,6 +37,11 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
     setTimeout(() => this.scrollToBottom(), 100);
   }
 
+  ngAfterViewInit(): void {
+    // Adjust height on view init
+    setTimeout(() => this.adjustTextareaHeight(), 100);
+  }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
@@ -48,6 +54,9 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
 
     const messageText = this.newMessage.trim();
     this.newMessage = '';
+    
+    // Reset textarea height after sending
+    this.adjustTextareaHeight();
     
     // Show typing indicator
     this.isLoading = true;
@@ -240,6 +249,45 @@ export class AiAssistantComponent implements OnInit, OnDestroy {
       console.error('Invalid URL:', error);
       // Fallback: try to open as-is
       window.open(url, '_blank');
+    }
+  }
+
+  /**
+   * Adjust textarea height based on content
+   * Expands up to 6 rows, then uses scroll
+   */
+  adjustTextareaHeight(): void {
+    if (!this.chatInput?.nativeElement) {
+      return;
+    }
+
+    const textarea = this.chatInput.nativeElement;
+    
+    // Reset height to get accurate scrollHeight
+    textarea.style.height = 'auto';
+    
+    // Get computed styles for dynamic calculation
+    const computedStyle = window.getComputedStyle(textarea);
+    const lineHeight = parseFloat(computedStyle.lineHeight) || parseFloat(computedStyle.fontSize) * 1.5;
+    const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+    const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+    const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+    const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+    
+    // Calculate height for 6 rows
+    const padding = paddingTop + paddingBottom + borderTop + borderBottom;
+    const maxHeight = (lineHeight * 6) + padding;
+    
+    // Get the scroll height (content height)
+    const scrollHeight = textarea.scrollHeight;
+    
+    // Set height to scrollHeight, but cap at maxHeight
+    if (scrollHeight <= maxHeight) {
+      textarea.style.height = `${scrollHeight}px`;
+      textarea.style.overflowY = 'hidden';
+    } else {
+      textarea.style.height = `${maxHeight}px`;
+      textarea.style.overflowY = 'auto';
     }
   }
 }
