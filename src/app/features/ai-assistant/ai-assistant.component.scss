@@ -533,13 +533,16 @@
   font-size: 15px;
   font-family: inherit;
   resize: none;
-  max-height: 120px;
+  // Max height for 6 rows: line-height (22.5px) * 6 + padding (32px) = ~167px
+  max-height: 167px;
   min-height: 52px;
+  height: 52px; // Initial height for 1 row
   outline: none;
-  transition: all 0.3s ease;
+  transition: height 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   background: var(--gray-50);
   line-height: 1.5;
   box-shadow: var(--shadow-sm);
+  overflow-y: hidden; // Initially hidden, will be auto when max-height reached
 
   &::placeholder {
     color: var(--gray-400);
