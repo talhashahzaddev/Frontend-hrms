@@ -29,6 +29,9 @@ import { EmployeeService } from '../../../../features/employee/services/employee
 import { Subject, takeUntil } from 'rxjs';
 import { EmployeeSearchRequest,Employee } from '@/app/core/models/employee.models';
 import { PendingShiftSwap,ShiftDto,UpdateShiftDto } from '@/app/core/models/attendance.models';
+import { PerformanceService } from '@/app/features/performance/services/performance.service';
+
+
 @Component({
   selector: 'app-shift',
   standalone: true,
@@ -68,6 +71,7 @@ export class ShiftComponent implements OnInit {
     private dialog: MatDialog,
     private attendanceService: AttendanceService,
     private authService: AuthService,
+     private performanceService: PerformanceService,
     private employeeService: EmployeeService,
     private snackBar: MatSnackBar
   ) {}
@@ -152,34 +156,47 @@ if(this.isManager){
     });
 }
 
-
 private loadAllEmployees(): void {
   this.isLoading = true;
 
+  // 🔹 MANAGER → only team employees
+  if (this.isManager && !this.isAdminOrHR) {
+    this.performanceService.getMyTeamEmployees()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.allEmployees = res?.success ? res.data : [];
+          this.isLoading = false;
+        },
+        error: () => {
+          console.error('❌ Failed to load manager team employees');
+          this.allEmployees = [];
+          this.isLoading = false;
+        }
+      });
+    return;
+  }
+
+  // 🔹 SUPER ADMIN / HR → all employees
   const searchRequest: EmployeeSearchRequest = {
-    searchTerm: '', // empty => load all
-    departmentId: undefined,
-    positionId: undefined,
-    managerId: undefined,
-    employmentStatus: undefined,
-    employmentType: undefined,
+    searchTerm: '',
     isActive: true,
     sortBy: 'firstName',
     sortDirection: 'asc',
     page: 1,
-    pageSize: 1000 // adjust if you want more or fewer results
+    pageSize: 1000
   };
 
   this.employeeService.getEmployees(searchRequest)
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (response) => {
-        this. allEmployees = response.employees;  // ✅ matches your property
+        this.allEmployees = response.employees || [];
         this.isLoading = false;
-        console.log('✅ Loaded all employees:', this.employeesByShift);
       },
-      error: (error) => {
-        console.error('❌ Failed to load employees:', error);
+      error: () => {
+        console.error('❌ Failed to load employees');
+        this.allEmployees = [];
         this.isLoading = false;
       }
     });
