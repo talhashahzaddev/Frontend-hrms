@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators'; 
 import {ServerNotification} from '../models/common.models'
 import { environment } from '../../../environments/environment';
+import { BehaviorSubject } from 'rxjs';
 
 export interface ServerNotificationDto {
   id: string;
@@ -24,8 +25,8 @@ export interface SendNotificationDto {
 export class ServerNotificationService {
 
   private readonly apiUrl = `${environment.apiUrl}/Notification`;
-  // private apiUrl = 'https://localhost:60485/api/Notification';
-
+   private notificationsSubject = new BehaviorSubject<ServerNotification[]>([]);
+  notifications$ = this.notificationsSubject.asObservable();
   constructor(private http: HttpClient) {}
 
 
@@ -43,6 +44,15 @@ getNotifications(userId: string): Observable<ServerNotification[]> {
     {}
   );
 }
+ /** 🔥 ADD THIS */
+  loadNotifications(userId: string): void {
+    if (!userId) return;
+
+    this.getNotifications(userId).subscribe({
+      next: (data) => this.notificationsSubject.next(data || []),
+      error: (err) => console.error('Failed to load notifications', err)
+    });
+  }
 
 
   sendNotification(payload: SendNotificationDto): Observable<ServerNotificationDto> {

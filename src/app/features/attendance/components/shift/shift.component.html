@@ -220,7 +220,7 @@
       </mat-tab>
 
       <!-- Details Tab -->
-      <mat-tab label="Details" *ngIf="isAdminOrHR">
+      <mat-tab label="Details" *ngIf="isAdminOrHR ||isManager">
         <div class="tab-content">
           <h3>Select Shift</h3>
           <mat-form-field appearance="outline" class="w-100">
