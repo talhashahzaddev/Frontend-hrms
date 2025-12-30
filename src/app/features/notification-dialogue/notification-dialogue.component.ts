@@ -42,9 +42,22 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUserValue();
-    if (this.isOpen) {
-      this.loadNotifications();
-    }
+    // if (this.isOpen) {
+    //   this.loadNotifications();
+    // }
+
+     // Subscribe to notifications observable
+  this.serverNotificationService.notifications$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe((notifications: ServerNotification[]) => {
+      this.notification = notifications || [];
+      this.unreadCountChange.emit(this.unreadCount);
+    });
+
+  // If dialogue opens initially
+  if (this.isOpen) {
+    this.loadNotifications(); // optional: to refresh
+  }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -60,25 +73,10 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     return count;
   }
 
-
-  // get unreadCount(): number {
-  //   return this.notification.filter(n => !n.isRead).length;
-  // }
-
   loadNotifications(): void {
-    if (!this.currentUser?.userId) return;
-
-    this.serverNotificationService.getNotifications(this.currentUser.userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-               next: (res: ServerNotification[]) => {
-          this.notification = res || [];
-          this.unreadCountChange.emit(this.unreadCount); // emit after load
-        },
-
-        error: (err) => console.error('Failed to load notifications', err)
-      });
-  }
+  if (!this.currentUser?.userId) return;
+  this.serverNotificationService.loadNotifications(this.currentUser.userId);
+}
 
  
 onNotificationClick(notification: ServerNotification): void {

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { Subject, filter, takeUntil,take } from 'rxjs';
-
+import { ServerNotificationService } from './core/services/server-notification';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
+import { interval } from 'rxjs';
 
 // PrimeNG
 import { ToastModule } from 'primeng/toast';
@@ -58,13 +59,39 @@ export class AppComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private loadingService: LoadingService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private serverNotificationService: ServerNotificationService // add this
   ) {}
 
   ngOnInit(): void {
     this.initializeApp();
     this.handleRouteChanges();
-  }
+
+// 🔥 Subscribe to authentication/user changes
+  // this.authService.isAuthenticated$
+  //   .pipe(takeUntil(this.destroy$))
+  //   .subscribe(isAuth => {
+  //     if (isAuth) {
+  //       const user = this.authService.getCurrentUserValue();
+  //       if (user?.userId) {
+  //         this.serverNotificationService.loadNotifications(user.userId);
+  //       }
+  //     } else {
+  //       // Optional: clear notifications on logout
+  //       // this.serverNotificationService.clearNotifications();
+  //     }
+  //   });
+
+  // // Optional: refresh notifications every 60 seconds
+  // interval(60000)
+  //   .pipe(takeUntil(this.destroy$))
+  //   .subscribe(() => {
+  //     const user = this.authService.getCurrentUserValue();
+  //     if (user?.userId) this.serverNotificationService.loadNotifications(user.userId);
+  //   });
+
+   }
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
