@@ -12,6 +12,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { ServerNotificationService } from '@core/services/server-notification';
 
 // PrimeNG
 import { AvatarModule } from 'primeng/avatar';
@@ -79,6 +80,7 @@ isSearchOpen = false;
     private employeeService: EmployeeService,
     private authService: AuthService,
     private themeService: ThemeService,
+    private serverNotificationService: ServerNotificationService, // add this
     private notificationService: NotificationService,
     private router: Router
   ) {}
@@ -86,6 +88,21 @@ isSearchOpen = false;
   ngOnInit(): void {
     this.subscribeToUser();
     this.subscribeToTheme();
+ // Add this for notifications
+  // -----------------------------
+  this.serverNotificationService.notifications$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(notifs => {
+      // Update badge count immediately
+      this.notificationCount = notifs.filter(n => !n.isRead).length;
+    });
+
+  // Load notifications immediately if user exists
+  const user = this.authService.getCurrentUserValue();
+  if (user?.userId) {
+    this.serverNotificationService.loadNotifications(user.userId);
+  }
+
   }
 
   ngOnDestroy(): void {
