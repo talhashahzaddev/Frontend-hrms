@@ -21,6 +21,13 @@ import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
 import { NotificationService } from '@core/services/notification.service';
 import { User } from '@core/models/auth.models';
+
+interface SearchItem {
+  name: string;
+  route: string;
+  keywords: string[];
+  roles?: string[];
+}
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import {NotificationDialogueComponent} from '../../../features/notification-dialogue/notification-dialogue.component'
 import { environment } from '@/environments/environment';
@@ -52,15 +59,228 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isDarkMode = false;
 
   //Search variables
-filteredItems: { name: string, id: string }[] = [];
-
-searchItems = [
-  { name: 'Quick Action', id: 'quick-actions' },
-  { name: 'Upcoming Events', id: 'upcoming-events' },
-  { name: 'Performance Stats', id: 'performance-stats' },
-  { name: 'Department Chart', id: 'department-chart' },
-  { name: 'Recent Activities', id: 'recent-activities' }
-];
+  filteredItems: SearchItem[] = [];
+  
+  // All searchable items with routes, keywords, and role permissions
+  private allSearchItems: SearchItem[] = [
+    // Dashboard
+    {
+      name: 'Dashboard',
+      route: '/dashboard',
+      keywords: ['dashboard', 'home', 'main', 'overview'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    {
+      name: 'Dashboard',
+      route: '/performance/dashboard',
+      keywords: ['dashboard', 'home', 'main', 'overview', 'my performance'],
+      roles: ['Manager', 'Employee']
+    },
+    
+    // Attendance - Employee accessible
+    {
+      name: 'My Attendance',
+      route: '/attendance/dashboard',
+      keywords: ['attendance', 'my attendance', 'attendance dashboard', 'check in', 'check out'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Time Tracker',
+      route: '/attendance/time-tracker',
+      keywords: ['time tracker', 'tracker', 'time tracking', 'clock', 'timer'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Shifts',
+      route: '/attendance/shift',
+      keywords: ['shift', 'shifts', 'schedule', 'work schedule', 'shift management'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    
+    // Attendance - Manager/Admin only
+    {
+      name: 'Team Attendance',
+      route: '/attendance/team-attendance',
+      keywords: ['team attendance', 'team', 'employee attendance'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Attendance Reports',
+      route: '/attendance/reports',
+      keywords: ['attendance reports', 'reports', 'attendance report'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Attendance Calendar',
+      route: '/attendance/calendar',
+      keywords: ['attendance calendar', 'calendar'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    
+    // Leave - Employee accessible
+    {
+      name: 'My Leaves',
+      route: '/leave/dashboard',
+      keywords: ['leave', 'my leaves', 'leave dashboard', 'my leave', 'leaves'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Apply for Leave',
+      route: '/leave/apply',
+      keywords: ['apply leave', 'apply for leave', 'request leave', 'new leave', 'leave request'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Leave Calendar',
+      route: '/leave/calendar',
+      keywords: ['leave calendar', 'calendar', 'leave schedule'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    
+    // Leave - Manager/Admin only
+    {
+      name: 'Team Leaves',
+      route: '/leave/team',
+      keywords: ['team leaves', 'team leave', 'employee leaves'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Leave Types',
+      route: '/leave/types',
+      keywords: ['leave types', 'leave type', 'types of leave'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    
+    // Performance - Employee accessible
+    {
+      name: 'My Performance',
+      route: '/performance/dashboard',
+      keywords: ['performance', 'my performance', 'performance dashboard', 'my performance dashboard'],
+      roles: ['Employee']
+    },
+    {
+      name: 'Appraisals',
+      route: '/performance/appraisals',
+      keywords: ['appraisal', 'appraisals', 'review', 'performance review', 'evaluation'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Skills Matrix',
+      route: '/performance/skills',
+      keywords: ['skills', 'skill matrix', 'skills matrix', 'competencies', 'competency'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Goals & KRAs',
+      route: '/performance/goals',
+      keywords: ['goals', 'kra', 'kras', 'key result areas', 'objectives', 'targets', 'goals and kras'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    
+    // Performance - Manager/Admin only
+    {
+      name: 'Performance Reports',
+      route: '/performance/reports',
+      keywords: ['performance reports', 'reports', 'performance report'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Appraisal Cycles',
+      route: '/performance/cycles',
+      keywords: ['appraisal cycles', 'cycles', 'appraisal cycle'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    
+    // Employee Management - Admin/HR only
+    {
+      name: 'All Employees',
+      route: '/employees',
+      keywords: ['employees', 'employee list', 'all employees', 'staff', 'team members'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    {
+      name: 'Add Employee',
+      route: '/employees/add',
+      keywords: ['add employee', 'new employee', 'create employee', 'hire'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    {
+      name: 'Departments',
+      route: '/employees/departments',
+      keywords: ['departments', 'department', 'department list'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    {
+      name: 'Positions',
+      route: '/employees/positions',
+      keywords: ['positions', 'position', 'job positions', 'roles'],
+      roles: ['Super Admin', 'HR Manager']
+    },
+    
+    // Payroll - Super Admin only
+    {
+      name: 'Payroll Periods',
+      route: '/payroll/periods',
+      keywords: ['payroll periods', 'payroll period', 'periods', 'pay period', 'salary period'],
+      roles: ['Super Admin']
+    },
+    {
+      name: 'Process Payroll',
+      route: '/payroll/process',
+      keywords: ['process payroll', 'payroll process', 'run payroll', 'calculate payroll', 'generate payroll'],
+      roles: ['Super Admin']
+    },
+    {
+      name: 'Salary Components',
+      route: '/payroll/salary-component',
+      keywords: ['salary components', 'salary component', 'components', 'pay components', 'salary structure'],
+      roles: ['Super Admin']
+    },
+    {
+      name: 'Payroll Reports',
+      route: '/payroll/reports',
+      keywords: ['payroll reports', 'payroll report', 'salary reports', 'payroll analytics'],
+      roles: ['Super Admin']
+    },
+    {
+      name: 'Salary Slips',
+      route: '/payroll/slips',
+      keywords: ['salary slips', 'salary slip', 'payslips', 'payslip', 'pay slip', 'pay slips'],
+      roles: ['Super Admin']
+    },
+    
+    // Profile & Settings
+    {
+      name: 'My Profile',
+      route: '/profile',
+      keywords: ['profile', 'my profile', 'user profile', 'account'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    {
+      name: 'Settings',
+      route: '/settings',
+      keywords: ['settings', 'preferences', 'configuration', 'config'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+    
+    // AI Assistant
+    {
+      name: 'AI Assistant',
+      route: '/ai-assistant',
+      keywords: ['ai', 'assistant', 'ai assistant', 'chat', 'help', 'support'],
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    }
+  ];
+  
+  getSearchItems(): SearchItem[] {
+    if (!this.currentUser) return [];
+    
+    // Filter items based on user role
+    return this.allSearchItems.filter(item => {
+      if (!item.roles || item.roles.length === 0) return true;
+      return this.authService.hasAnyRole(item.roles);
+    });
+  }
 
   notificationCount = 0; // Mock notification count
   slectedProfileFile: File | null = null;
@@ -140,58 +360,75 @@ isSearchOpen = false;
     }
   }
 
-// Search and scroll to the section
-
-onSearch() {
-  const query = this.searchQuery.trim().toLowerCase();
-  if (!query) return;
-
-  // Map of keywords to IDs
-  const sectionMap: { [id: string]: string[] } = {
-    'quick-actions': ['quick action','quick','add ','add employee','schedule','leave', 'actions', 'report','approvals'],
-    'upcoming-events': ['events','up','upcomming events', 'upcoming event', 'upcoming events'],
-    'performance-stats': ['performance', 'performance stats'],
-    'department-chart':['chart','department chart'],
-    'recent-activities':['recent','acivities','recent activities']
-  };
-
-  // Find the ID whose keywords include the query
-  const targetId = Object.keys(sectionMap).find(id =>
-    sectionMap[id].some(keyword => query.includes(keyword))
-  );
-
-  if (targetId) {
-    const el = document.getElementById(targetId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      console.warn(`Section with ID "${targetId}" not found in DOM`);
+  // Search functionality
+  onSearch() {
+    const query = this.searchQuery.trim().toLowerCase();
+    if (!query) {
+      this.isSearchOpen = false;
+      return;
     }
-  } else {
-    console.warn(`No matching section found for "${query}"`);
+
+    // If there are filtered items, navigate to the first one
+    if (this.filteredItems.length > 0) {
+      this.navigateToRoute(this.filteredItems[0]);
+    } else {
+      // Try to find a match by keywords
+      const searchItems = this.getSearchItems();
+      const matchedItem = searchItems.find(item =>
+        item.keywords.some(keyword => 
+          query.includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(query)
+        )
+      );
+      
+      if (matchedItem) {
+        this.navigateToRoute(matchedItem);
+      }
+    }
   }
 
-  this.searchQuery = '';
-  this.isSearchOpen = false;
-}
-
-
-onSearchChange(query: string) {
-  if (!query) {
-    this.filteredItems = [];
-    return;
+  onSearchChange(query: string) {
+    if (!query) {
+      this.filteredItems = [];
+      return;
+    }
+    
+    const lowerQuery = query.toLowerCase().trim();
+    const searchItems = this.getSearchItems();
+    
+    // Filter items that match the query in name or keywords
+    this.filteredItems = searchItems
+      .filter(item => {
+        const nameMatch = item.name.toLowerCase().includes(lowerQuery);
+        const keywordMatch = item.keywords.some(keyword => 
+          keyword.toLowerCase().includes(lowerQuery) || 
+          lowerQuery.includes(keyword.toLowerCase())
+        );
+        return nameMatch || keywordMatch;
+      })
+      .slice(0, 8); // Limit to 8 results for better UX
   }
-  const lowerQuery = query.toLowerCase();
-  this.filteredItems = this.searchItems.filter(item =>
-    item.name.toLowerCase().includes(lowerQuery)
-  );
-}
-goToSection(id: string) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  this.searchQuery = '';
-  this.filteredItems = [];
-  this.isSearchOpen = false;
+
+  navigateToRoute(item: SearchItem) {
+    if (item.route) {
+      this.router.navigate([item.route]);
+      this.searchQuery = '';
+      this.filteredItems = [];
+      this.isSearchOpen = false;
+    }
+  }
+
+  goToSection(item: SearchItem) {
+    this.navigateToRoute(item);
+  }
+
+onSearchBlur() {
+  // Delay closing to allow click events on suggestions
+  setTimeout(() => {
+    // Don't close if there are suggestions visible
+    if (this.filteredItems.length === 0 && !this.searchQuery.trim()) {
+      this.isSearchOpen = false;
+    }
+  }, 200);
 }
 
   getUserInitials(): string {
@@ -210,7 +447,10 @@ goToSection(id: string) {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
-        this.currentUser = user;   
+        this.currentUser = user;
+        // Clear search when user changes
+        this.searchQuery = '';
+        this.filteredItems = [];
         if (this.currentUser?.userId) {
           this.loademployeeDetails(this.currentUser.userId);
         }
