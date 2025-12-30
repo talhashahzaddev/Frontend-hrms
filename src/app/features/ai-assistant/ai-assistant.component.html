@@ -94,9 +94,11 @@
   <!-- Fixed Input Elements -->
   <div class="fixed-input-wrapper">
     <textarea
+      #chatInput
       class="chat-input"
       [(ngModel)]="newMessage"
       (keydown)="onKeyPress($event)"
+      (input)="adjustTextareaHeight()"
       placeholder="Type your message here..."
       rows="1"
       [disabled]="isLoading">

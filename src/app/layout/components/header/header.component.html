@@ -24,44 +24,65 @@
   <!-- Header Actions -->
   <div class="header-actions">
 
-<!-- Toolbar search icon -->
-<button 
-  mat-icon-button 
-  class="action-button"
-  *ngIf="!isHandset && !isSearchOpen"
-  matTooltip="Search"
-  aria-label="Search"
-  (click)="toggleSearch()">
-  <mat-icon>search</mat-icon>
-</button>
+    <!-- Search Section -->
+    <div class="search-container">
+      <!-- Toolbar search icon -->
+      <button 
+        mat-icon-button 
+        class="search-trigger-button"
+        *ngIf="!isHandset && !isSearchOpen"
+        matTooltip="Search"
+        aria-label="Search"
+        (click)="toggleSearch()">
+        <mat-icon>search</mat-icon>
+      </button>
 
-<!-- Search input -->
-<div class="header-search" *ngIf="isSearchOpen">
-  <input
-    #searchInput
-    type="text"
-    placeholder="Search dashboard..."
-    [(ngModel)]="searchQuery"
-    (ngModelChange)="onSearchChange($event)"
-    (keydown.enter)="onSearch()"
-  />
-  <button mat-icon-button (click)="onSearch()">
-    <mat-icon>search</mat-icon>
-  </button>
+      <!-- Search input with enhanced styling -->
+      <div class="header-search" *ngIf="isSearchOpen">
+        <div class="search-input-wrapper">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            #searchInput
+            type="text"
+            placeholder="Search pages, attendance, leave, performance..."
+            class="search-input"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange($event)"
+            (keydown.enter)="onSearch()"
+            (blur)="onSearchBlur()"
+          />
+          <button 
+            mat-icon-button 
+            class="search-close-button"
+            (click)="toggleSearch()"
+            matTooltip="Close search"
+            aria-label="Close search">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
 
-  <!-- Dropdown suggestions -->
-  <ul class="search-suggestions" *ngIf="filteredItems.length > 0">
-    <li *ngFor="let item of filteredItems" (click)="goToSection(item.id)">
-      {{ item.name }}
-    </li>
-  </ul>
-</div>
-
+        <!-- Enhanced dropdown suggestions -->
+        <div class="search-suggestions" *ngIf="searchQuery.trim()">
+          <div 
+            class="suggestion-item" 
+            *ngFor="let item of filteredItems" 
+            (mousedown)="goToSection(item)"
+            (click)="goToSection(item)">
+            <mat-icon class="suggestion-icon">arrow_forward</mat-icon>
+            <span class="suggestion-text">{{ item.name }}</span>
+          </div>
+          <div class="no-results" *ngIf="filteredItems.length === 0">
+            <mat-icon class="no-results-icon">search_off</mat-icon>
+            <span>No results found for "{{ searchQuery }}"</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Theme Toggle -->
     <button 
       mat-icon-button 
-      class="action-button"
+      class="action-button theme-toggle-button"
       (click)="onThemeToggle()"
       [matTooltip]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
       aria-label="Toggle theme">
@@ -72,7 +93,8 @@
     <div class="notification-container">
       <button 
         mat-icon-button 
-        class="action-button"
+        class="action-button notification-button"
+        [class.has-notifications]="notificationCount > 0"
         (click)="onNotificationsClick()"
         matTooltip="Notifications"
         aria-label="Notifications">
@@ -95,7 +117,11 @@
     </div>
 
     <!-- User Menu -->
-    <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
+    <button 
+      mat-icon-button 
+      class="user-menu-button-pic" 
+      [matMenuTriggerFor]="userMenu" 
+      aria-label="User menu">
       <div class="user-avatar-pic">
         <p-avatar
           *ngIf="profilePreviewUrl; else initials"
@@ -112,6 +138,7 @@
           </p-avatar>
         </ng-template>
       </div>
+      <div class="user-status-indicator"></div>
     </button>
 
   </div>
