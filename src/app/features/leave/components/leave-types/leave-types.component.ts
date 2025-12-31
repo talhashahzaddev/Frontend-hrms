@@ -340,6 +340,31 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
               </div>
             </mat-checkbox>
           </div>
+
+          <!-- Conditional Carry Forward Days Input -->
+          <div class="form-row" *ngIf="form.get('carryForwardAllowed')?.value" style="margin-top: 20px;">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Maximum Carry Forward Days</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="maxCarryForwardDays" 
+                min="0" 
+                [max]="form.get('maxDaysPerYear')?.value || 365"
+                required />
+              <mat-icon matPrefix>event_repeat</mat-icon>
+              <mat-hint>Days that can be carried forward (must be ≤ Max Days Per Year)</mat-hint>
+              <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('required')">
+                Required when carry forward is allowed
+              </mat-error>
+              <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('min')">
+                Must be at least 0
+              </mat-error>
+              <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('max')">
+                Cannot exceed maximum days per year ({{ form.get('maxDaysPerYear')?.value }})
+              </mat-error>
+            </mat-form-field>
+          </div>
         </div>
 
       </mat-dialog-content>
@@ -731,14 +756,57 @@ export class AddLeaveTypeDialogTemplate {
     maxDaysPerYear: [15, [Validators.required, Validators.min(1)]],
     isPaid: [true],
     carryForwardAllowed: [false],
+    maxCarryForwardDays: [0, [Validators.min(0)]],
     color: [this.defaultColor, Validators.required]
   });
 
   private dialogRef = inject(MatDialogRef<AddLeaveTypeDialogTemplate>);
 
+  constructor() {
+    // Subscribe to carryForwardAllowed changes
+    this.form.get('carryForwardAllowed')?.valueChanges.subscribe(isAllowed => {
+      const maxCarryForwardControl = this.form.get('maxCarryForwardDays');
+      if (isAllowed) {
+        maxCarryForwardControl?.setValidators([Validators.required, Validators.min(0)]);
+        maxCarryForwardControl?.updateValueAndValidity();
+      } else {
+        maxCarryForwardControl?.clearValidators();
+        maxCarryForwardControl?.setValue(0);
+        maxCarryForwardControl?.updateValueAndValidity();
+      }
+    });
+
+    // Subscribe to maxDaysPerYear changes to validate maxCarryForwardDays
+    this.form.get('maxDaysPerYear')?.valueChanges.subscribe(maxDays => {
+      const maxCarryForwardControl = this.form.get('maxCarryForwardDays');
+      const currentValue = maxCarryForwardControl?.value;
+      
+      if (currentValue && maxDays && currentValue > maxDays) {
+        maxCarryForwardControl?.setErrors({ 'max': true });
+      }
+    });
+
+    // Add validation when maxCarryForwardDays changes
+    this.form.get('maxCarryForwardDays')?.valueChanges.subscribe(carryForwardDays => {
+      const maxDaysPerYear = this.form.get('maxDaysPerYear')?.value;
+      const maxCarryForwardControl = this.form.get('maxCarryForwardDays');
+      
+      if (carryForwardDays && maxDaysPerYear && carryForwardDays > maxDaysPerYear) {
+        maxCarryForwardControl?.setErrors({ 'max': true });
+      }
+    });
+  }
+
   submit(): void {
     if (this.form.valid) {
-      this.dialogRef.close(this.form.value);
+      const formValue = { ...this.form.value };
+      
+      // Only include maxCarryForwardDays if carryForwardAllowed is true
+      if (!formValue.carryForwardAllowed) {
+        delete formValue.maxCarryForwardDays;
+      }
+      
+      this.dialogRef.close(formValue);
     }
   }
 }
