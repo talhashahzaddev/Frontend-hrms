@@ -14,7 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -69,11 +69,11 @@ import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
                 <mat-icon class="stat-icon">event_available</mat-icon>
               </div>
               <div class="stat-details">
-                <div class="stat-label" [style.color]="'white'">{{ type.typeName }}</div>
-                <div class="stat-value" [style.color]="'white'">{{ type.maxDaysPerYear }}</div>
-                <div class="stat-footer" [style.color]="'white'">
-                  <mat-icon class="stat-indicator" [style.color]="'rgba(255, 255, 255, 0.9)'">event</mat-icon>
-                  <span [style.color]="'white'">Days per year</span>
+                <div class="stat-label">{{ type.typeName }}</div>
+                <div class="stat-value">{{ type.maxDaysPerYear }}</div>
+                <div class="stat-footer">
+                  <mat-icon class="stat-indicator">event</mat-icon>
+                  <span>Days per year</span>
                 </div>
               </div>
               <div class="card-actions">
@@ -199,7 +199,27 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   }
 
   editLeaveType(type: LeaveType): void {
-    this.notificationService.showInfo(`Edit leave type: ${type.typeName} will be implemented`);
+    const dialogRef = this.dialog.open(EditLeaveTypeDialogTemplate, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true,
+      data: { leaveType: type }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.leaveService.updateLeaveType(type.leaveTypeId, result).subscribe({
+          next: () => {
+            this.notificationService.showSuccess('Leave type updated successfully');
+            this.loadLeaveTypes();
+          },
+          error: (err) => {
+            console.error(err);
+            this.notificationService.showError('Failed to update leave type');
+          }
+        });
+      }
+    });
   }
 
   deleteLeaveType(type: LeaveType): void {
@@ -757,7 +777,9 @@ export class AddLeaveTypeDialogTemplate {
     isPaid: [true],
     carryForwardAllowed: [false],
     maxCarryForwardDays: [0, [Validators.min(0)]],
-    color: [this.defaultColor, Validators.required]
+    requiresApproval: [true],
+    color: [this.defaultColor, Validators.required],
+    isActive: [true]
   });
 
   private dialogRef = inject(MatDialogRef<AddLeaveTypeDialogTemplate>);
@@ -811,3 +833,514 @@ export class AddLeaveTypeDialogTemplate {
   }
 }
 
+/* ------------------------------------------------------------------
+   Inline Dialog Component for Editing Leave Type
+------------------------------------------------------------------- */
+@Component({
+  selector: 'edit-leave-type-dialog-template',
+  standalone: true,
+  template: `
+    <div class="dialog-header">
+      <h2 mat-dialog-title>
+        <mat-icon>edit</mat-icon>
+        Edit Leave Type
+      </h2>
+      <button mat-icon-button mat-dialog-close class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-dialog-content class="dialog-content">
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>info</mat-icon>
+            Basic Information
+          </h3>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Leave Type Name</mat-label>
+              <input matInput formControlName="typeName" placeholder="e.g., Annual Leave" required />
+              <mat-icon matPrefix>label</mat-icon>
+              <mat-hint>A descriptive name for this leave type</mat-hint>
+              <mat-error *ngIf="form.get('typeName')?.hasError('required')">
+                Leave type name is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea 
+                matInput 
+                formControlName="description" 
+                placeholder="Optional description for this leave type"
+                rows="3"></textarea>
+              <mat-icon matPrefix>description</mat-icon>
+              <mat-hint>Additional details about this leave type</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Configuration Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>settings</mat-icon>
+            Leave Configuration
+          </h3>
+
+          <div class="form-row two-columns">
+            <mat-form-field appearance="outline">
+              <mat-label>Maximum Days Per Year</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="maxDaysPerYear" 
+                min="1" 
+                max="365"
+                required />
+              <mat-icon matPrefix>event</mat-icon>
+              <mat-hint>Total days allowed per year</mat-hint>
+              <mat-error *ngIf="form.get('maxDaysPerYear')?.hasError('required')">
+                Required
+              </mat-error>
+              <mat-error *ngIf="form.get('maxDaysPerYear')?.hasError('min')">
+                Must be at least 1
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Color Theme</mat-label>
+              <mat-select formControlName="color" required>
+                <mat-option *ngFor="let c of colors" [value]="c.value">
+                  <div class="color-option">
+                    <span class="color-preview" [style.background-color]="c.value"></span>
+                    <span>{{ c.name }}</span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-icon matPrefix>palette</mat-icon>
+              <mat-hint>Visual identifier for this leave type</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Leave Policies Section -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>policy</mat-icon>
+            Leave Policies
+          </h3>
+
+          <div class="checkbox-group">
+            <mat-checkbox formControlName="isPaid" class="policy-checkbox">
+              <div class="checkbox-content">
+                <div class="checkbox-label">
+                  <mat-icon>attach_money</mat-icon>
+                  <strong>Paid Leave</strong>
+                </div>
+                <span class="checkbox-description">Employees receive salary during this leave</span>
+              </div>
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="carryForwardAllowed" class="policy-checkbox">
+              <div class="checkbox-content">
+                <div class="checkbox-label">
+                  <mat-icon>arrow_forward</mat-icon>
+                  <strong>Carry Forward Allowed</strong>
+                </div>
+                <span class="checkbox-description">Unused days can be carried to next year</span>
+              </div>
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="isActive" class="policy-checkbox">
+              <div class="checkbox-content">
+                <div class="checkbox-label">
+                  <mat-icon>toggle_on</mat-icon>
+                  <strong>Active</strong>
+                </div>
+                <span class="checkbox-description">Leave type is available for use</span>
+              </div>
+            </mat-checkbox>
+          </div>
+
+          <!-- Conditional Carry Forward Days Input -->
+          <div class="form-row" *ngIf="form.get('carryForwardAllowed')?.value" style="margin-top: 20px;">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Maximum Carry Forward Days</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                formControlName="maxCarryForwardDays" 
+                min="0" 
+                [max]="form.get('maxDaysPerYear')?.value || 365"
+                required />
+              <mat-icon matPrefix>event_repeat</mat-icon>
+              <mat-hint>Days that can be carried forward (must be ≤ Max Days Per Year)</mat-hint>
+              <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('required')">
+                Required when carry forward is allowed
+              </mat-error>
+              <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('min')">
+                Must be at least 0
+              </mat-error>
+              <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('max')">
+                Cannot exceed maximum days per year ({{ form.get('maxDaysPerYear')?.value }})
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+      </mat-dialog-content>
+
+      <div class="dialog-actions">
+        <button mat-stroked-button type="button" mat-dialog-close [disabled]="isSubmitting">
+          Cancel
+        </button>
+        <button 
+          mat-raised-button 
+          color="primary" 
+          class="submit-button"
+          type="submit"
+          [disabled]="form.invalid || isSubmitting">
+          <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+          Update Leave Type
+        </button>
+      </div>
+    </form>
+  `,
+  styles: [`
+    ::ng-deep .mat-mdc-dialog-container {
+      border-radius: 16px !important;
+      padding: 0 !important;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+
+      h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: white;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+          color: white;
+        }
+      }
+
+      .close-button {
+        color: white;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    .dialog-content {
+      padding: 28px !important;
+      min-width: 550px;
+      max-width: 700px;
+    }
+
+    .form-section {
+      padding: 24px 0;
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin: 0 0 20px;
+
+        mat-icon {
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
+          color: var(--primary-600);
+        }
+      }
+    }
+
+    .form-row {
+      margin-bottom: 16px;
+
+      &.two-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-form-field {
+      ::ng-deep {
+        &.mat-form-field-appearance-outline {
+          .mat-mdc-text-field-wrapper {
+            background-color: #f9fafb;
+          }
+
+          .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+              border-color: #e5e7eb;
+            }
+          }
+
+          &.mat-focused {
+            .mdc-text-field--outlined {
+              .mdc-notched-outline__leading,
+              .mdc-notched-outline__notch,
+              .mdc-notched-outline__trailing {
+                border-color: var(--primary-500);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .policy-checkbox {
+      ::ng-deep {
+        .mdc-form-field {
+          width: 100%;
+        }
+
+        .mdc-checkbox {
+          padding: 0 16px 0 0;
+          
+          .mdc-checkbox__background {
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .mdc-label {
+          width: 100%;
+          padding: 0;
+        }
+      }
+
+      .checkbox-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 16px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border-left: 3px solid var(--primary-500);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f3f4f6;
+        }
+
+        .checkbox-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.938rem;
+          color: var(--gray-900);
+
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: var(--primary-600);
+          }
+
+          strong {
+            font-weight: 600;
+          }
+        }
+
+        .checkbox-description {
+          font-size: 0.813rem;
+          color: var(--gray-600);
+          margin-left: 26px;
+        }
+      }
+    }
+
+    .color-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .color-preview {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        border: 2px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    mat-divider {
+      margin: 24px 0 !important;
+      border-color: #e5e7eb !important;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 20px 28px;
+      border-top: 1px solid #e5e7eb;
+      background: #fafbfc;
+
+      button {
+        min-width: 120px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0.3px;
+
+        &.submit-button {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          
+          &:hover:not(:disabled) {
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+            transform: translateY(-1px);
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+
+    // Error Messages
+    ::ng-deep mat-error {
+      font-size: 13px;
+      font-weight: 500;
+      color: #dc2626;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row.two-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+  `],
+  imports: [
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDividerModule,
+    CommonModule
+  ]
+})
+export class EditLeaveTypeDialogTemplate {
+  isSubmitting = false;
+
+  readonly colors: ColorOption[] = inject(LEAVE_COLOR_TOKEN);
+  readonly data = inject<{ leaveType: LeaveType }>(MAT_DIALOG_DATA);
+
+  readonly form = inject(FormBuilder).group({
+    typeName: [this.data.leaveType.typeName, Validators.required],
+    description: [this.data.leaveType.description || ''],
+    maxDaysPerYear: [this.data.leaveType.maxDaysPerYear, [Validators.required, Validators.min(1)]],
+    isPaid: [this.data.leaveType.isPaid],
+    carryForwardAllowed: [this.data.leaveType.carryForwardAllowed],
+    maxCarryForwardDays: [this.data.leaveType.maxCarryForwardDays || 0, [Validators.min(0)]],
+    requiresApproval: [this.data.leaveType.requiresApproval ?? true],
+    color: [this.data.leaveType.color, Validators.required],
+    isActive: [this.data.leaveType.isActive]
+  });
+
+  private dialogRef = inject(MatDialogRef<EditLeaveTypeDialogTemplate>);
+
+  constructor() {
+    // Subscribe to carryForwardAllowed changes
+    this.form.get('carryForwardAllowed')?.valueChanges.subscribe(isAllowed => {
+      const maxCarryForwardControl = this.form.get('maxCarryForwardDays');
+      if (isAllowed) {
+        maxCarryForwardControl?.setValidators([Validators.required, Validators.min(0)]);
+        maxCarryForwardControl?.updateValueAndValidity();
+      } else {
+        maxCarryForwardControl?.clearValidators();
+        maxCarryForwardControl?.setValue(0);
+        maxCarryForwardControl?.updateValueAndValidity();
+      }
+    });
+
+    // Subscribe to maxDaysPerYear changes to validate maxCarryForwardDays
+    this.form.get('maxDaysPerYear')?.valueChanges.subscribe(maxDays => {
+      const maxCarryForwardControl = this.form.get('maxCarryForwardDays');
+      const currentValue = maxCarryForwardControl?.value;
+      
+      if (currentValue && maxDays && currentValue > maxDays) {
+        maxCarryForwardControl?.setErrors({ 'max': true });
+      }
+    });
+
+    // Add validation when maxCarryForwardDays changes
+    this.form.get('maxCarryForwardDays')?.valueChanges.subscribe(carryForwardDays => {
+      const maxDaysPerYear = this.form.get('maxDaysPerYear')?.value;
+      const maxCarryForwardControl = this.form.get('maxCarryForwardDays');
+      
+      if (carryForwardDays && maxDaysPerYear && carryForwardDays > maxDaysPerYear) {
+        maxCarryForwardControl?.setErrors({ 'max': true });
+      }
+    });
+  }
+
+  submit(): void {
+    if (this.form.valid) {
+      const formValue = { ...this.form.value };
+      
+      // Only include maxCarryForwardDays if carryForwardAllowed is true
+      if (!formValue.carryForwardAllowed) {
+        delete formValue.maxCarryForwardDays;
+      }
+      
+      this.dialogRef.close(formValue);
+    }
+  }
+}
