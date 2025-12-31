@@ -360,6 +360,22 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
     );
   }
 
+  // 3️⃣ Update an existing leave type
+  updateLeaveType(leaveTypeId: string, request: CreateLeaveTypeRequest): Observable<string> {
+    return this.http.put<ApiResponse<string>>(
+      `${this.apiUrl}/types/${leaveTypeId}`,
+      request
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to update leave type');
+        }
+        // API returns leaveTypeId as string
+        return response.data!;
+      })
+    );
+  }
+
   // getLeaveSummary(startDate: string, endDate: string, departmentId?: string): Observable<LeaveSummary> {
   //   let params = new HttpParams()
   //     .set('startDate', startDate)

@@ -94,6 +94,30 @@ isLoadingSessions = false;
     this.destroy$.complete();
   }
 
+  // Role helpers
+  get isSuperAdmin(): boolean {
+    return this.authService.hasRole('Super Admin');
+  }
+  get isManager():boolean {
+    return this.authService.hasRole('Manager');
+  }
+
+  get isHRManager(): boolean {
+    return this.authService.hasRole('HR Manager');
+  }
+
+  get isAdminOrHR(): boolean {
+    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
+  get isEmployee(): boolean {
+    return this.authService.hasRole('Employee');
+  }
+
+  hasRole(role: string): boolean {
+    return this.authService.hasRole(role);
+  }
+  
   private getCurrentUser(): void {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
