@@ -232,6 +232,46 @@
     }
   }
 
+  .carry-forward-info {
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid rgba(255, 255, 255, 0.5);
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+
+    .carry-forward-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        opacity: 0.9;
+      }
+
+      div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .carry-label {
+          font-size: 12px;
+          opacity: 0.85;
+          font-weight: 500;
+        }
+
+        strong {
+          font-size: 14px;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
   .type-flags {
     display: flex;
     flex-wrap: wrap;

@@ -98,6 +98,17 @@ import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
               <p>{{ type.description }}</p>
             </div>
 
+            <!-- Carry Forward Info (only if allowed) -->
+            <div class="carry-forward-info" *ngIf="type.carryForwardAllowed && type.maxCarryForwardDays">
+              <div class="carry-forward-details">
+                <mat-icon>event_repeat</mat-icon>
+                <div>
+                  <span class="carry-label">Carry Forward:</span>
+                  <strong>{{ type.maxCarryForwardDays }} days</strong>
+                </div>
+              </div>
+            </div>
+
             <!-- Type Flags -->
             <div class="type-flags">
               <mat-chip *ngIf="type.isPaid" class="flag-chip flag-paid">
@@ -106,7 +117,7 @@ import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
               </mat-chip>
               <mat-chip *ngIf="type.carryForwardAllowed" class="flag-chip flag-carry">
                 <mat-icon>arrow_forward</mat-icon>
-                Carry Forward
+                Carry Forward ({{ type.maxCarryForwardDays }} days)
               </mat-chip>
               <mat-chip *ngIf="!type.isActive" class="flag-chip flag-inactive">
                 <mat-icon>block</mat-icon>
