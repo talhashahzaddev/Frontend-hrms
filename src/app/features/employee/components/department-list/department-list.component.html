@@ -149,6 +149,11 @@
                 <mat-icon>edit</mat-icon>
                 Edit
               </button>
+              <button mat-menu-item
+        (click)="viewDepartmentEmployees(department)">
+  <mat-icon>group</mat-icon>
+  View Employees
+</button>
               <mat-divider></mat-divider>
               <button mat-menu-item 
                       *ngIf="department.isActive"

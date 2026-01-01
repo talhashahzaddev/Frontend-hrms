@@ -22,6 +22,9 @@ import { Department, Employee } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 import { DepartmentFormDialogComponent } from '../department-form-dialog/department-form-dialog.component';
 import { ViewDepartmentDetailsComponent } from '../view-department-details/view-department-details.component';
+import { AttendanceService } from '@/app/features/attendance/services/attendance.service';
+import { DepartmentEmployeeViewComponent,DepartmentEmployeesViewData } from './view-department-employees';
+import { DepartmentEmployee } from '@/app/core/models/attendance.models';
 
 @Component({
   selector: 'app-department-list',
@@ -79,6 +82,7 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
   constructor(
     private employeeService: EmployeeService,
+    private attendanceService:AttendanceService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {}
@@ -181,6 +185,44 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(() => {});
   }
+
+
+
+//View Department Employees
+
+viewDepartmentEmployees(department: Department): void {
+
+  const dialogRef = this.dialog.open(DepartmentEmployeeViewComponent, {
+    width: '900px',
+    data: {
+      departmentId: department.departmentId,
+      departmentName: department.departmentName,
+      employees: []
+    }
+  });
+
+  dialogRef.componentInstance.isLoading = true;
+
+  this.attendanceService.getDepartmentEmployees(department.departmentId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (employees: DepartmentEmployee[]) => {
+        // ✅ employees is already the array
+        dialogRef.componentInstance.employeesDataSource.data = employees;
+        dialogRef.componentInstance.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading department employees:', error);
+        dialogRef.componentInstance.isLoading = false;
+        this.showError('Failed to load department employees');
+      }
+    });
+}
+
+
+
+
+
 
   editDepartment(department: Department): void {
     const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {

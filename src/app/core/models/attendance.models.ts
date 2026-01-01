@@ -15,11 +15,21 @@ export interface Attendance {
   notes?: string;
 }
 
+// export interface DepartmentEmployee {
+//   employeeId: string;
+//   firstName: string;
+//   lastName: string;
+// }
 export interface DepartmentEmployee {
   employeeId: string;
+  employeeCode: string;
   firstName: string;
   lastName: string;
+  email: string;
+  status: string;
+  hireDate: string | null; // ISO string from backend
 }
+
 
 export interface AttendanceSession {
   sessionId: string;         // GUID from backend

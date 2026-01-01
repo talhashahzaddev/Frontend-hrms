@@ -91,6 +91,27 @@ export interface Position {
   createdAt: string;
 }
 
+//Employee by Position 
+export interface PositionEmployeeDto {
+  positionId: string;
+  employeeId: string;
+  employeeCode: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  status: string;
+  hireDate: string; // ISO string from backend
+  positionTitle: string;
+}
+
+export interface PositionEmployeesMainDto {
+  positionId: string;
+  positionTitle: string;
+  employeeCount: number;
+  employees: PositionEmployeeDto[];
+}
+
+
 export interface Role {
   roleId: string;
   organizationId: string;
