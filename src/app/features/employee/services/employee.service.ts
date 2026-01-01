@@ -14,6 +14,7 @@ import {
   EmployeeSearchRequest,
   EmployeeListResponse,
   EmployeeStatistics,
+  PositionEmployeesMainDto,
   CreateDepartmentRequest,
   UpdateDepartmentRequest,
   CreatePositionRequest,
@@ -320,6 +321,32 @@ getPositions(departmentId?: string, search?: string, status?: string): Observabl
         })
       );
   }
+
+
+  
+
+
+
+
+  //Get employee by position
+getEmployeesByPosition(positionId: string): Observable<PositionEmployeesMainDto> {
+  return this.http
+    .get<ApiResponse<PositionEmployeesMainDto>>(`${this.apiUrl}/positions/${positionId}/employees`)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch employees for this position');
+        }
+        return response.data!;
+      })
+    );
+}
+
+
+
+
+
+
 
   createPosition(request: CreatePositionRequest): Observable<Position> {
     return this.http.post<ApiResponse<Position>>(`${this.apiUrl}/positions`, request)

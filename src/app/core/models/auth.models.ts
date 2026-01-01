@@ -10,6 +10,7 @@ export interface AuthResponse {
   lastName: string;
   roleName: string;
   organizationName: string;
+  domain?: string;
   token: string;
   refreshToken: string;
   tokenExpiration: string;
