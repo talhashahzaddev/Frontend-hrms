@@ -64,15 +64,46 @@ export class AuthService {
       .pipe(
         tap(() => {
           this.clearAuthData();
-          this.router.navigate(['/login']);
+          this.redirectToLoginSubdomain();
         }),
         catchError(() => {
           // Even if the API call fails, clear local data
           this.clearAuthData();
-          this.router.navigate(['/login']);
+          this.redirectToLoginSubdomain();
           return throwError(() => new Error('Logout failed'));
         })
       );
+  }
+
+  /**
+   * Redirects to the login subdomain
+   * Replaces current subdomain with "login" subdomain
+   */
+  private redirectToLoginSubdomain(): void {
+    const currentHost = window.location.hostname;
+    const currentProtocol = window.location.protocol;
+    const currentPort = window.location.port ? `:${window.location.port}` : '';
+    
+    // Extract base domain (e.g., "briskpeople.com" from "shahzad.briskpeople.com")
+    const hostParts = currentHost.split('.');
+    let baseDomain = '';
+    
+    if (hostParts.length >= 2) {
+      // Get the last two parts (e.g., "briskpeople.com")
+      baseDomain = hostParts.slice(-2).join('.');
+    } else {
+      // Fallback: if we can't extract, use a default base domain
+      // In production, this should be "briskpeople.com"
+      baseDomain = currentHost.includes('localhost') ? currentHost : 'briskpeople.com';
+    }
+    
+    // Construct login subdomain URL
+    const loginUrl = `${currentProtocol}//login.${baseDomain}${currentPort}/login`;
+    
+    console.log(`Redirecting to login subdomain: ${loginUrl}`);
+    
+    // Redirect to login subdomain
+    window.location.href = loginUrl;
   }
 
 
