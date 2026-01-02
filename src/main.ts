@@ -59,6 +59,8 @@ import { ErrorInterceptor } from './app/core/interceptors/error.interceptor';
 import { LoadingInterceptor } from './app/core/interceptors/loading.interceptor';
 
 import { environment } from './environments/environment';
+import { APP_INITIALIZER } from '@angular/core';
+import { domainInitializer } from './app/core/initializers/domain.initializer';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -138,6 +140,13 @@ bootstrapApplication(AppComponent, {
     
     // PrimeNG Services
     MessageService,
+    
+    // App Initializers - Domain validation runs BEFORE app loads
+    {
+      provide: APP_INITIALIZER,
+      useFactory: domainInitializer,
+      multi: true
+    },
     
     // HTTP Interceptors
     {
