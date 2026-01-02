@@ -83,6 +83,17 @@ export class LoginComponent implements OnInit, OnDestroy {
           }
         }
 
+        // Check if domain is returned and redirect to correct subdomain
+        if (response.domain) {
+          const subdomain = this.extractSubdomainFromDomain(response.domain);
+          if (subdomain) {
+            // Replace current subdomain with user's organization domain
+            this.redirectToSubdomain(subdomain, redirectUrl);
+            return;
+          }
+        }
+
+        // If no domain or subdomain extraction failed, use normal navigation
         this.router.navigate([redirectUrl]);
       },
       error: (error) => {
@@ -96,6 +107,90 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.markFormGroupTouched();
   }
 }
+
+  /**
+   * Extracts subdomain identifier from domain string
+   * Matches the backend normalization logic exactly
+   * Examples:
+   * - "myorg.com" -> "myorg"
+   * - "myorg" -> "myorg"
+   * - "www.myorg.com" -> "myorg"
+   */
+  private extractSubdomainFromDomain(domain: string): string | null {
+    if (!domain) return null;
+
+    try {
+      // Remove protocol if present
+      let cleanDomain = domain.replace(/^https?:\/\//, '');
+      
+      // Remove www
+      cleanDomain = cleanDomain.replace(/^www\./, '');
+      
+      // Remove trailing slash
+      cleanDomain = cleanDomain.replace(/\/+$/, '');
+      
+      // Extract subdomain (first part before first dot)
+      const parts = cleanDomain.split('.');
+      if (parts.length > 0) {
+        cleanDomain = parts[0];
+      }
+      
+      // Convert to lowercase
+      cleanDomain = cleanDomain.toLowerCase();
+      
+      // Remove all special characters except hyphens and alphanumeric
+      cleanDomain = cleanDomain.replace(/[^a-z0-9-]/g, '');
+      
+      // Remove spaces (though regex above should have handled this)
+      cleanDomain = cleanDomain.replace(/\s/g, '');
+      
+      // Remove consecutive hyphens
+      while (cleanDomain.includes('--')) {
+        cleanDomain = cleanDomain.replace(/--/g, '-');
+      }
+      
+      // Remove leading and trailing hyphens
+      cleanDomain = cleanDomain.replace(/^-+|-+$/g, '');
+      
+      return cleanDomain || null;
+    } catch (error) {
+      console.warn('Error extracting subdomain from domain:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Redirects to the correct subdomain URL
+   * Replaces current subdomain with the user's organization domain
+   */
+  private redirectToSubdomain(subdomain: string, path: string): void {
+    const currentHost = window.location.hostname;
+    const currentProtocol = window.location.protocol;
+    const currentPort = window.location.port ? `:${window.location.port}` : '';
+    
+    // Extract base domain (e.g., "briskpeople.com" from "login.briskpeople.com" or "shahzad.briskpeople.com")
+    const hostParts = currentHost.split('.');
+    let baseDomain = '';
+    
+    if (hostParts.length >= 2) {
+      // Get the last two parts (e.g., "briskpeople.com")
+      // This handles cases like "login.briskpeople.com" or "xyz.briskpeople.com"
+      baseDomain = hostParts.slice(-2).join('.');
+    } else {
+      // Fallback: if we can't extract, use a default base domain
+      // In production, this should be "briskpeople.com"
+      baseDomain = currentHost.includes('localhost') ? currentHost : 'briskpeople.com';
+    }
+    
+    // Construct new URL with user's subdomain
+    const newUrl = `${currentProtocol}//${subdomain}.${baseDomain}${currentPort}${path}`;
+    
+    console.log(`Redirecting to user's organization domain: ${newUrl}`);
+    console.log(`From: ${currentHost} -> To: ${subdomain}.${baseDomain}`);
+    
+    // Redirect to the new subdomain
+    window.location.href = newUrl;
+  }
 
 
   onForgotPassword(): void {
