@@ -44,6 +44,11 @@ export class DomainService {
   }
 
   /**
+   * Whitelisted subdomains that don't require validation
+   */
+  private readonly WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi'];
+
+  /**
    * Extracts subdomain from current window location
    * @returns The subdomain (e.g., "xyz" from "xyz.briskpeople.com")
    */
@@ -82,6 +87,14 @@ export class DomainService {
     }
     
     return null;
+  }
+
+  /**
+   * Checks if a subdomain is whitelisted (doesn't require validation)
+   */
+  isWhitelistedSubdomain(subdomain: string | null): boolean {
+    if (!subdomain) return false;
+    return this.WHITELISTED_SUBDOMAINS.includes(subdomain.toLowerCase());
   }
 
   private handleError(error: any): Observable<never> {
