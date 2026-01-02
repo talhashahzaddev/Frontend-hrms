@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 /**
  * Whitelisted subdomains that don't require validation
  */
-const WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi'];
+const WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi', 'login'];
 
 /**
  * Extracts subdomain from current window location
@@ -89,6 +89,7 @@ function showDomainErrorPage(subdomain: string, message: string): void {
         ">
           <p style="font-size: 14px; margin: 0; opacity: 0.9;">
             If you believe this is an error, please contact support.
+            info@briskpeople.com
           </p>
         </div>
       </div>
