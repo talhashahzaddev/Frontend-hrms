@@ -19,26 +19,26 @@ import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
 
 @Component({
-    selector: 'app-login',
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatCardModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
-        MatCheckboxModule,
-        MatProgressSpinnerModule
-    ],
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss']
+  selector: 'app-login',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule
+  ],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm!: FormGroup;
   hidePassword = true;
   isLoading = false;
-  
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -61,52 +61,68 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-  if (this.loginForm.valid && !this.isLoading) {
-    const credentials = this.loginForm.value;
+    if (this.loginForm.valid && !this.isLoading) {
+      const credentials = this.loginForm.value;
 
-    this.authService.login(credentials).subscribe({
-      next: (response) => {
-        this.notificationService.loginSuccess(response.firstName);
+      this.authService.login(credentials).subscribe({
+        next: (response) => {
+          // Check if domain is returned and redirect to correct subdomain
+          if (response.domain) {
+            const subdomain = this.extractSubdomainFromDomain(response.domain);
+            if (subdomain) {
+              // Store auth data in sessionStorage for retrieval after redirect
+              this.authService.storePendingAuth(response);
 
-        // Remove previously stored redirect URL (from guard)
-        let redirectUrl = sessionStorage.getItem('redirectUrl');
-        sessionStorage.removeItem('redirectUrl');
+              // Remove previously stored redirect URL (from guard)
+              let redirectUrl = sessionStorage.getItem('redirectUrl');
+              sessionStorage.removeItem('redirectUrl');
 
-        // Determine redirect based on role if no stored redirect
-        if (!redirectUrl) {
-          const user = this.authService.getCurrentUserValue(); // get logged-in user
+              // Determine redirect based on role if no stored redirect
+              if (!redirectUrl) {
+                if (response.roleName === 'Employee' || response.roleName === 'Manager') {
+                  redirectUrl = '/performance/dashboard';
+                } else {
+                  redirectUrl = '/dashboard';
+                }
+              }
 
-          if (user?.roleName === 'Employee' || user?.roleName === 'Manager') {
-            redirectUrl = '/performance/dashboard';
-          } else {
-            redirectUrl = '/dashboard';
+              // Redirect to user's organization subdomain
+              this.redirectToSubdomain(subdomain, redirectUrl);
+              return;
+            }
           }
-        }
 
-        // Check if domain is returned and redirect to correct subdomain
-        if (response.domain) {
-          const subdomain = this.extractSubdomainFromDomain(response.domain);
-          if (subdomain) {
-            // Replace current subdomain with user's organization domain
-            this.redirectToSubdomain(subdomain, redirectUrl);
-            return;
+          // No subdomain redirect needed - complete login normally
+          // This happens when user is already on their correct subdomain
+          this.notificationService.loginSuccess(response.firstName);
+
+          // Remove previously stored redirect URL (from guard)
+          let redirectUrl = sessionStorage.getItem('redirectUrl');
+          sessionStorage.removeItem('redirectUrl');
+
+          // Determine redirect based on role if no stored redirect
+          if (!redirectUrl) {
+            if (response.roleName === 'Employee' || response.roleName === 'Manager') {
+              redirectUrl = '/performance/dashboard';
+            } else {
+              redirectUrl = '/dashboard';
+            }
           }
-        }
 
-        // If no domain or subdomain extraction failed, use normal navigation
-        this.router.navigate([redirectUrl]);
-      },
-      error: (error) => {
-        this.notificationService.error({
-          title: 'Login Failed',
-          message: error.message || 'Invalid email or password'
-        });
-      }
-    });
-  } else {
-    this.markFormGroupTouched();
+          // Navigate to dashboard
+          this.router.navigate([redirectUrl]);
+        },
+        error: (error) => {
+          this.notificationService.error({
+            title: 'Login Failed',
+            message: error.message || 'Invalid email or password'
+          });
+        }
+      });
+    } else {
+      this.markFormGroupTouched();
+    }
   }
-}
 
   /**
    * Extracts subdomain identifier from domain string
@@ -122,36 +138,36 @@ export class LoginComponent implements OnInit, OnDestroy {
     try {
       // Remove protocol if present
       let cleanDomain = domain.replace(/^https?:\/\//, '');
-      
+
       // Remove www
       cleanDomain = cleanDomain.replace(/^www\./, '');
-      
+
       // Remove trailing slash
       cleanDomain = cleanDomain.replace(/\/+$/, '');
-      
+
       // Extract subdomain (first part before first dot)
       const parts = cleanDomain.split('.');
       if (parts.length > 0) {
         cleanDomain = parts[0];
       }
-      
+
       // Convert to lowercase
       cleanDomain = cleanDomain.toLowerCase();
-      
+
       // Remove all special characters except hyphens and alphanumeric
       cleanDomain = cleanDomain.replace(/[^a-z0-9-]/g, '');
-      
+
       // Remove spaces (though regex above should have handled this)
       cleanDomain = cleanDomain.replace(/\s/g, '');
-      
+
       // Remove consecutive hyphens
       while (cleanDomain.includes('--')) {
         cleanDomain = cleanDomain.replace(/--/g, '-');
       }
-      
+
       // Remove leading and trailing hyphens
       cleanDomain = cleanDomain.replace(/^-+|-+$/g, '');
-      
+
       return cleanDomain || null;
     } catch (error) {
       console.warn('Error extracting subdomain from domain:', error);
@@ -167,11 +183,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     const currentPort = window.location.port ? `:${window.location.port}` : '';
-    
+
     // Extract base domain (e.g., "briskpeople.com" from "login.briskpeople.com" or "shahzad.briskpeople.com")
     const hostParts = currentHost.split('.');
     let baseDomain = '';
-    
+
     if (hostParts.length >= 2) {
       // Get the last two parts (e.g., "briskpeople.com")
       // This handles cases like "login.briskpeople.com" or "xyz.briskpeople.com"
@@ -181,13 +197,13 @@ export class LoginComponent implements OnInit, OnDestroy {
       // In production, this should be "briskpeople.com"
       baseDomain = currentHost.includes('localhost') ? currentHost : 'briskpeople.com';
     }
-    
+
     // Construct new URL with user's subdomain
     const newUrl = `${currentProtocol}//${subdomain}.${baseDomain}${currentPort}${path}`;
-    
+
     console.log(`Redirecting to user's organization domain: ${newUrl}`);
     console.log(`From: ${currentHost} -> To: ${subdomain}.${baseDomain}`);
-    
+
     // Redirect to the new subdomain
     window.location.href = newUrl;
   }
@@ -196,7 +212,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   onForgotPassword(): void {
     this.router.navigate(['/forgot-password']);
   }
-  onsignup():void{
+  onsignup(): void {
     this.router.navigate(['/register']);
   }
 
@@ -206,20 +222,20 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   getErrorMessage(fieldName: string): string {
     const field = this.loginForm.get(fieldName);
-    
+
     if (field?.hasError('required')) {
       return `${this.getFieldDisplayName(fieldName)} is required`;
     }
-    
+
     if (field?.hasError('email')) {
       return 'Please enter a valid email address';
     }
-    
+
     if (field?.hasError('minlength')) {
       const minLength = field.errors?.['minlength'].requiredLength;
       return `Password must be at least ${minLength} characters long`;
     }
-    
+
     return '';
   }
 

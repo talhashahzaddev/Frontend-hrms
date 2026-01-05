@@ -24,9 +24,11 @@ export class AuthService {
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
+  private readonly PENDING_AUTH_KEY = 'pendingAuthData';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
+  private isRedirecting = false;
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
@@ -44,11 +46,6 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/login`, credentials)
       .pipe(
-        tap(response => {
-          if (response.success && response.data) {
-            this.setAuthData(response.data);
-          }
-        }),
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Login failed');
@@ -60,15 +57,17 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    // Clear auth data BEFORE redirecting to prevent race conditions
+    this.clearAuthData();
+    this.isRedirecting = true;
+    
     return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/logout`, {})
       .pipe(
         tap(() => {
-          this.clearAuthData();
           this.redirectToLoginSubdomain();
         }),
         catchError(() => {
-          // Even if the API call fails, clear local data
-          this.clearAuthData();
+          // Even if the API call fails, still redirect to login
           this.redirectToLoginSubdomain();
           return throwError(() => new Error('Logout failed'));
         })
@@ -150,6 +149,39 @@ export class AuthService {
           return this.handleError(error);
         })
       );
+  }
+
+  /**
+   * Stores auth data temporarily in sessionStorage for cross-subdomain transfer
+   * This is used when redirecting to a different subdomain during login
+   */
+  storePendingAuth(authResponse: AuthResponse): void {
+    sessionStorage.setItem(this.PENDING_AUTH_KEY, JSON.stringify(authResponse));
+  }
+
+  /**
+   * Completes the login process after subdomain redirect
+   * Retrieves auth data from sessionStorage and sets it in localStorage
+   */
+  completeLogin(): void {
+    const pendingAuthJson = sessionStorage.getItem(this.PENDING_AUTH_KEY);
+    if (pendingAuthJson) {
+      try {
+        const authResponse: AuthResponse = JSON.parse(pendingAuthJson);
+        this.setAuthData(authResponse);
+        sessionStorage.removeItem(this.PENDING_AUTH_KEY);
+      } catch (error) {
+        console.error('Failed to complete login:', error);
+        sessionStorage.removeItem(this.PENDING_AUTH_KEY);
+      }
+    }
+  }
+
+  /**
+   * Checks if there is pending auth data from a subdomain redirect
+   */
+  hasPendingAuth(): boolean {
+    return !!sessionStorage.getItem(this.PENDING_AUTH_KEY);
   }
 
   createUser(request: CreateUserRequest): Observable<User> {
@@ -315,6 +347,11 @@ updateProfile(formData: FormData): Observable<User> {
   }
 
   private loadStoredAuth(): void {
+    // Don't load auth if we're in the middle of a redirect
+    if (this.isRedirecting) {
+      return;
+    }
+
     const token = localStorage.getItem(this.TOKEN_KEY);
     const userJson = localStorage.getItem(this.USER_KEY);
     
