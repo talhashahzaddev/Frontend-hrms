@@ -68,10 +68,14 @@ export class LoginComponent implements OnInit, OnDestroy {
         next: (response) => {
           // Check if domain is returned and redirect to correct subdomain
           if (response.domain) {
-            const subdomain = this.extractSubdomainFromDomain(response.domain);
-            if (subdomain) {
-              // Store auth data in sessionStorage for retrieval after redirect
-              this.authService.storePendingAuth(response);
+            const targetSubdomain = this.extractSubdomainFromDomain(response.domain);
+            const currentSubdomain = this.getCurrentSubdomain();
+
+            // Only redirect if we're not already on the target subdomain
+            if (targetSubdomain && targetSubdomain !== currentSubdomain) {
+              // Encode auth data for transfer via URL
+              // We use URL transfer because sessionStorage is not shared across subdomains
+              const authData = encodeURIComponent(JSON.stringify(response));
 
               // Remove previously stored redirect URL (from guard)
               let redirectUrl = sessionStorage.getItem('redirectUrl');
@@ -86,14 +90,21 @@ export class LoginComponent implements OnInit, OnDestroy {
                 }
               }
 
+              // Append auth transfer param
+              const separator = redirectUrl.includes('?') ? '&' : '?';
+              redirectUrl += `${separator}auth_transfer=${authData}`;
+
               // Redirect to user's organization subdomain
-              this.redirectToSubdomain(subdomain, redirectUrl);
+              this.redirectToSubdomain(targetSubdomain, redirectUrl);
               return;
             }
           }
 
           // No subdomain redirect needed - complete login normally
           // This happens when user is already on their correct subdomain
+          // Set auth data directly since no redirect will occur
+          this.authService.setAuthDataDirectly(response);
+
           this.notificationService.loginSuccess(response.firstName);
 
           // Remove previously stored redirect URL (from guard)
@@ -176,6 +187,39 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Gets the current subdomain from the hostname
+   */
+  private getCurrentSubdomain(): string | null {
+    const currentHost = window.location.hostname;
+
+    // Handle plain localhost or IP (no subdomain)
+    if (currentHost === 'localhost' || currentHost.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+      return null;
+    }
+
+    const hostParts = currentHost.split('.');
+
+    // Handle localhost with subdomain (e.g., "login.localhost" or "codified.localhost")
+    if (currentHost.includes('localhost')) {
+      // If it's just "localhost", return null
+      if (hostParts.length <= 1) {
+        return null;
+      }
+      // Return the first part (e.g., "login" from "login.localhost")
+      return hostParts[0];
+    }
+
+    // Handle production domains
+    // If only 2 parts (e.g., "briskpeople.com"), no subdomain
+    if (hostParts.length <= 2) {
+      return null;
+    }
+
+    // Return the first part as the subdomain (e.g., "login" from "login.briskpeople.com")
+    return hostParts[0];
+  }
+
+  /**
    * Redirects to the correct subdomain URL
    * Replaces current subdomain with the user's organization domain
    */
@@ -184,25 +228,36 @@ export class LoginComponent implements OnInit, OnDestroy {
     const currentProtocol = window.location.protocol;
     const currentPort = window.location.port ? `:${window.location.port}` : '';
 
-    // Extract base domain (e.g., "briskpeople.com" from "login.briskpeople.com" or "shahzad.briskpeople.com")
-    const hostParts = currentHost.split('.');
-    let baseDomain = '';
+    let newHost = '';
 
-    if (hostParts.length >= 2) {
-      // Get the last two parts (e.g., "briskpeople.com")
-      // This handles cases like "login.briskpeople.com" or "xyz.briskpeople.com"
-      baseDomain = hostParts.slice(-2).join('.');
-    } else {
-      // Fallback: if we can't extract, use a default base domain
-      // In production, this should be "briskpeople.com"
-      baseDomain = currentHost.includes('localhost') ? currentHost : 'briskpeople.com';
+    // Handle localhost (including subdomains like login.localhost)
+    if (currentHost.includes('localhost')) {
+      // Always redirect to subdomain.localhost (not subdomain.login.localhost)
+      newHost = `${subdomain}.localhost`;
+    }
+    // Handle IP addresses
+    else if (currentHost.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+      newHost = `${subdomain}.${currentHost}`;
+    }
+    // Handle production domains
+    else {
+      const hostParts = currentHost.split('.');
+
+      if (hostParts.length >= 2) {
+        // Extract base domain (last two parts)
+        const baseDomain = hostParts.slice(-2).join('.');
+        newHost = `${subdomain}.${baseDomain}`;
+      } else {
+        // Fallback
+        newHost = `${subdomain}.${currentHost}`;
+      }
     }
 
     // Construct new URL with user's subdomain
-    const newUrl = `${currentProtocol}//${subdomain}.${baseDomain}${currentPort}${path}`;
+    const newUrl = `${currentProtocol}//${newHost}${currentPort}${path}`;
 
     console.log(`Redirecting to user's organization domain: ${newUrl}`);
-    console.log(`From: ${currentHost} -> To: ${subdomain}.${baseDomain}`);
+    console.log(`From: ${currentHost} -> To: ${newHost}`);
 
     // Redirect to the new subdomain
     window.location.href = newUrl;

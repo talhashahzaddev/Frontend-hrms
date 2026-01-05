@@ -102,20 +102,8 @@ export class AppComponent implements OnInit, OnDestroy {
     // Domain validation is now handled by APP_INITIALIZER before app loads
     // No need to validate here as it's already done
 
-    // Check for pending auth data from subdomain redirect
-    if (this.authService.hasPendingAuth()) {
-      this.authService.completeLogin();
-
-      // Get the user to show success notification
-      const user = this.authService.getCurrentUserValue();
-      if (user) {
-        // Small delay to ensure DOM is ready for notification
-        setTimeout(() => {
-          // You can add a notification here if needed
-          console.log(`Login completed for ${user.firstName}`);
-        }, 100);
-      }
-    }
+    // Domain validation is now handled by APP_INITIALIZER before app loads
+    // Pending auth is handled automatically by AuthService constructor checking URL params
 
     // Initialize theme
     this.themeService.initializeTheme();
