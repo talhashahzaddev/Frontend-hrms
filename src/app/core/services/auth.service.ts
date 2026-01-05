@@ -3,11 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, catchError, throwError, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
-import { 
-  LoginRequest, 
-  AuthResponse, 
-  RefreshTokenRequest, 
-  User, 
+import {
+  LoginRequest,
+  AuthResponse,
+  RefreshTokenRequest,
+  User,
   ApiResponse,
   CreateUserRequest,
   RegisterRequest,
@@ -24,9 +24,12 @@ export class AuthService {
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
+  private readonly PENDING_AUTH_KEY = 'pendingAuthData';
+  private readonly LOGOUT_REDIRECT_KEY = 'logoutRedirect';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
+  private isRedirecting = false;
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
@@ -38,17 +41,100 @@ export class AuthService {
     private http: HttpClient,
     private router: Router
   ) {
+    // Check for pending auth from subdomain redirect FIRST
+    // This must happen before loadStoredAuth() so the auth data is available
+    this.completePendingAuthIfExists();
+
+    // Then load any existing auth from localStorage
     this.loadStoredAuth();
+  }
+
+  /**
+   * Internal method to complete pending auth during construction
+   */
+  private completePendingAuthIfExists(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Check for logout action
+    if (urlParams.get('action') === 'logout') {
+      console.log('Logout redirect detected');
+      this.clearAuthData();
+      this.removeUrlParam('action');
+      return;
+    }
+
+    // Check for auth transfer data from URL
+    const authDataStr = urlParams.get('auth_transfer');
+    if (authDataStr) {
+      try {
+        const authResponse: AuthResponse = JSON.parse(decodeURIComponent(authDataStr));
+
+        const user: User = {
+          userId: authResponse.userId,
+          email: authResponse.email,
+          firstName: authResponse.firstName,
+          lastName: authResponse.lastName,
+          roleName: authResponse.roleName,
+          organizationName: authResponse.organizationName || " ",
+          isActive: true,
+          createdAt: new Date().toISOString()
+        };
+
+        localStorage.setItem(this.TOKEN_KEY, authResponse.token);
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, authResponse.refreshToken);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+
+        console.log('Completed login after subdomain redirect for user:', user.firstName);
+
+        // Clean up URL
+        this.removeUrlParam('auth_transfer');
+
+        // Update subject immediately
+        this.currentUserSubject.next(user);
+        this.tokenSubject.next(authResponse.token);
+      } catch (error) {
+        console.error('Failed to complete pending login from URL:', error);
+      }
+    }
+
+    // Fallback: Check sessionStorage (for same-domain redirects if any)
+    const pendingAuthJson = sessionStorage.getItem(this.PENDING_AUTH_KEY);
+    if (pendingAuthJson) {
+      try {
+        const authResponse: AuthResponse = JSON.parse(pendingAuthJson);
+        const user: User = {
+          userId: authResponse.userId,
+          email: authResponse.email,
+          firstName: authResponse.firstName,
+          lastName: authResponse.lastName,
+          roleName: authResponse.roleName,
+          organizationName: authResponse.organizationName || " ",
+          isActive: true,
+          createdAt: new Date().toISOString()
+        };
+
+        localStorage.setItem(this.TOKEN_KEY, authResponse.token);
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, authResponse.refreshToken);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+
+        sessionStorage.removeItem(this.PENDING_AUTH_KEY);
+        this.currentUserSubject.next(user);
+        this.tokenSubject.next(authResponse.token);
+      } catch (error) {
+        sessionStorage.removeItem(this.PENDING_AUTH_KEY);
+      }
+    }
+  }
+
+  private removeUrlParam(param: string): void {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(param);
+    window.history.replaceState({}, '', url.toString());
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/login`, credentials)
       .pipe(
-        tap(response => {
-          if (response.success && response.data) {
-            this.setAuthData(response.data);
-          }
-        }),
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Login failed');
@@ -60,15 +146,17 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+    // Clear auth data BEFORE redirecting to prevent race conditions
+    this.clearAuthData();
+    this.isRedirecting = true;
+
     return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/logout`, {})
       .pipe(
         tap(() => {
-          this.clearAuthData();
           this.redirectToLoginSubdomain();
         }),
         catchError(() => {
-          // Even if the API call fails, clear local data
-          this.clearAuthData();
+          // Even if the API call fails, still redirect to login
           this.redirectToLoginSubdomain();
           return throwError(() => new Error('Logout failed'));
         })
@@ -83,25 +171,40 @@ export class AuthService {
     const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     const currentPort = window.location.port ? `:${window.location.port}` : '';
-    
-    // Extract base domain (e.g., "briskpeople.com" from "shahzad.briskpeople.com")
-    const hostParts = currentHost.split('.');
+
     let baseDomain = '';
-    
-    if (hostParts.length >= 2) {
-      // Get the last two parts (e.g., "briskpeople.com")
-      baseDomain = hostParts.slice(-2).join('.');
-    } else {
-      // Fallback: if we can't extract, use a default base domain
-      // In production, this should be "briskpeople.com"
-      baseDomain = currentHost.includes('localhost') ? currentHost : 'briskpeople.com';
+    let loginHost = '';
+
+    // Handle localhost (including subdomains like codified.localhost)
+    if (currentHost.includes('localhost')) {
+      // Always redirect to login.localhost (not login.org.localhost)
+      loginHost = 'login.localhost';
     }
-    
-    // Construct login subdomain URL
-    const loginUrl = `${currentProtocol}//login.${baseDomain}${currentPort}/login`;
-    
+    // Handle IP addresses
+    else if (currentHost.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+      baseDomain = currentHost;
+      loginHost = `login.${baseDomain}`;
+    }
+    // Handle production domains
+    else {
+      const hostParts = currentHost.split('.');
+
+      if (hostParts.length >= 2) {
+        // Extract base domain (last two parts)
+        baseDomain = hostParts.slice(-2).join('.');
+        loginHost = `login.${baseDomain}`;
+      } else {
+        // Fallback
+        baseDomain = currentHost;
+        loginHost = `login.${baseDomain}`;
+      }
+    }
+
+    // Construct login subdomain URL with logout action
+    const loginUrl = `${currentProtocol}//${loginHost}${currentPort}/login?action=logout`;
+
     console.log(`Redirecting to login subdomain: ${loginUrl}`);
-    
+
     // Redirect to login subdomain
     window.location.href = loginUrl;
   }
@@ -110,19 +213,19 @@ export class AuthService {
   //Added here Reset Password Function 
 
   resetPassword(token: string, password: string): Observable<ApiResponse<boolean>> {
-  return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/reset-password`, {
-    token,
-    password
-  }).pipe(
-    map(response => {
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to reset password');
-      }
-      return response;
-    }),
-    catchError(this.handleError)
-  );
-}
+    return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/reset-password`, {
+      token,
+      password
+    }).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to reset password');
+        }
+        return response;
+      }),
+      catchError(this.handleError)
+    );
+  }
 
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
@@ -131,7 +234,7 @@ export class AuthService {
     }
 
     const request: RefreshTokenRequest = { refreshToken };
-    
+
     return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/refresh`, request)
       .pipe(
         tap(response => {
@@ -150,6 +253,46 @@ export class AuthService {
           return this.handleError(error);
         })
       );
+  }
+
+  /**
+   * Stores auth data temporarily in sessionStorage for cross-subdomain transfer
+   * This is used when redirecting to a different subdomain during login
+   */
+  storePendingAuth(authResponse: AuthResponse): void {
+    sessionStorage.setItem(this.PENDING_AUTH_KEY, JSON.stringify(authResponse));
+  }
+
+  /**
+   * Completes the login process after subdomain redirect
+   * Retrieves auth data from sessionStorage and sets it in localStorage
+   */
+  completeLogin(): void {
+    const pendingAuthJson = sessionStorage.getItem(this.PENDING_AUTH_KEY);
+    if (pendingAuthJson) {
+      try {
+        const authResponse: AuthResponse = JSON.parse(pendingAuthJson);
+        this.setAuthData(authResponse);
+        sessionStorage.removeItem(this.PENDING_AUTH_KEY);
+      } catch (error) {
+        console.error('Failed to complete login:', error);
+        sessionStorage.removeItem(this.PENDING_AUTH_KEY);
+      }
+    }
+  }
+
+  /**
+   * Sets authentication data directly (used when no subdomain redirect is needed)
+   */
+  setAuthDataDirectly(authResponse: AuthResponse): void {
+    this.setAuthData(authResponse);
+  }
+
+  /**
+   * Checks if there is pending auth data from a subdomain redirect
+   */
+  hasPendingAuth(): boolean {
+    return !!sessionStorage.getItem(this.PENDING_AUTH_KEY);
   }
 
   createUser(request: CreateUserRequest): Observable<User> {
@@ -181,7 +324,7 @@ export class AuthService {
   checkAuthStatus(): void {
     const token = this.getToken();
     const user = this.getStoredUser();
-    
+
     if (token && user && !this.isTokenExpired(token)) {
       this.currentUserSubject.next(user);
       this.tokenSubject.next(token);
@@ -247,38 +390,38 @@ export class AuthService {
       );
   }
 
-updateProfile(formData: FormData): Observable<User> {
-  return this.http.put<ApiResponse<User>>(`${this.API_URL}/profile`, formData)
-    .pipe(
-      tap(response => {
-        if (response.success && response.data) {
-          // ✅ Update the current user observable and local storage
-          this.currentUserSubject.next(response.data);
-          localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
-        }
-      }),
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Profile update failed');
-        }
-        return response.data!;
-      }),
-      catchError(this.handleError)
-    );
-}
+  updateProfile(formData: FormData): Observable<User> {
+    return this.http.put<ApiResponse<User>>(`${this.API_URL}/profile`, formData)
+      .pipe(
+        tap(response => {
+          if (response.success && response.data) {
+            // ✅ Update the current user observable and local storage
+            this.currentUserSubject.next(response.data);
+            localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
+          }
+        }),
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Profile update failed');
+          }
+          return response.data!;
+        }),
+        catchError(this.handleError)
+      );
+  }
 
 
 
   changePassword(request: ChangePasswordRequest): Observable<ApiResponse<boolean>> {
-  return this.http.put<ApiResponse<boolean>>(`${this.API_URL}/change-password`, request)
-    .pipe(
-      catchError(err => {
-        // Optional: map backend error to your ApiResponse type
-        const backendMessage = err?.error?.message || 'Failed to update password';
-        return throwError(() => new Error(backendMessage));
-      })
-    );
-}
+    return this.http.put<ApiResponse<boolean>>(`${this.API_URL}/change-password`, request)
+      .pipe(
+        catchError(err => {
+          // Optional: map backend error to your ApiResponse type
+          const backendMessage = err?.error?.message || 'Failed to update password';
+          return throwError(() => new Error(backendMessage));
+        })
+      );
+  }
 
 
   private setAuthData(authResponse: AuthResponse): void {
@@ -288,14 +431,14 @@ updateProfile(formData: FormData): Observable<User> {
       firstName: authResponse.firstName,
       lastName: authResponse.lastName,
       roleName: authResponse.roleName,
-      organizationName: authResponse.organizationName|| " " ,
+      organizationName: authResponse.organizationName || " ",
       isActive: true,
       createdAt: new Date().toISOString()
     };
 
 
 
-    
+
 
     localStorage.setItem(this.TOKEN_KEY, authResponse.token);
     localStorage.setItem(this.REFRESH_TOKEN_KEY, authResponse.refreshToken);
@@ -309,15 +452,20 @@ updateProfile(formData: FormData): Observable<User> {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
-    
+
     this.currentUserSubject.next(null);
     this.tokenSubject.next(null);
   }
 
   private loadStoredAuth(): void {
+    // Don't load auth if we're in the middle of a redirect
+    if (this.isRedirecting) {
+      return;
+    }
+
     const token = localStorage.getItem(this.TOKEN_KEY);
     const userJson = localStorage.getItem(this.USER_KEY);
-    
+
     if (token && userJson) {
       try {
         const user: User = JSON.parse(userJson);
@@ -361,7 +509,7 @@ updateProfile(formData: FormData): Observable<User> {
 
   private handleError(error: any): Observable<never> {
     let errorMessage = 'An error occurred';
-    
+
     if (error.error?.message) {
       errorMessage = error.error.message;
     } else if (error.message) {
@@ -369,7 +517,7 @@ updateProfile(formData: FormData): Observable<User> {
     } else if (error.error?.errors?.length > 0) {
       errorMessage = error.error.errors.join(', ');
     }
-    
+
     return throwError(() => new Error(errorMessage));
   }
 }

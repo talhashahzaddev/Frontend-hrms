@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { Subject, filter, takeUntil,take } from 'rxjs';
+import { Subject, filter, takeUntil, take } from 'rxjs';
 import { ServerNotificationService } from './core/services/server-notification';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -28,31 +28,31 @@ import { ThemeService } from './core/services/theme.service';
 
 
 @Component({
-    selector: 'app-root',
-    imports: [
-        CommonModule,
-        RouterOutlet,
-        MatToolbarModule,
-        MatSidenavModule,
-        MatIconModule,
-        MatButtonModule,
-        MatListModule,
-        MatMenuModule,
-        MatBadgeModule,
-        ToastModule,
-        LayoutComponent,
-        LoadingSpinnerComponent,
-        ChatWidgetComponent
-    ],
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+  selector: 'app-root',
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    MatToolbarModule,
+    MatSidenavModule,
+    MatIconModule,
+    MatButtonModule,
+    MatListModule,
+    MatMenuModule,
+    MatBadgeModule,
+    ToastModule,
+    LayoutComponent,
+    LoadingSpinnerComponent,
+    ChatWidgetComponent
+  ],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'HRMS - Human Resource Management System';
   isLoading$ = this.loadingService.loading$;
   isAuthenticated$ = this.authService.isAuthenticated$;
   isAiAssistantPage = false;
-  
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -61,36 +61,36 @@ export class AppComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     private themeService: ThemeService,
     private serverNotificationService: ServerNotificationService // add this
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializeApp();
     this.handleRouteChanges();
 
-// 🔥 Subscribe to authentication/user changes
-  // this.authService.isAuthenticated$
-  //   .pipe(takeUntil(this.destroy$))
-  //   .subscribe(isAuth => {
-  //     if (isAuth) {
-  //       const user = this.authService.getCurrentUserValue();
-  //       if (user?.userId) {
-  //         this.serverNotificationService.loadNotifications(user.userId);
-  //       }
-  //     } else {
-  //       // Optional: clear notifications on logout
-  //       // this.serverNotificationService.clearNotifications();
-  //     }
-  //   });
+    // 🔥 Subscribe to authentication/user changes
+    // this.authService.isAuthenticated$
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(isAuth => {
+    //     if (isAuth) {
+    //       const user = this.authService.getCurrentUserValue();
+    //       if (user?.userId) {
+    //         this.serverNotificationService.loadNotifications(user.userId);
+    //       }
+    //     } else {
+    //       // Optional: clear notifications on logout
+    //       // this.serverNotificationService.clearNotifications();
+    //     }
+    //   });
 
-  // // Optional: refresh notifications every 60 seconds
-  // interval(60000)
-  //   .pipe(takeUntil(this.destroy$))
-  //   .subscribe(() => {
-  //     const user = this.authService.getCurrentUserValue();
-  //     if (user?.userId) this.serverNotificationService.loadNotifications(user.userId);
-  //   });
+    // // Optional: refresh notifications every 60 seconds
+    // interval(60000)
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(() => {
+    //     const user = this.authService.getCurrentUserValue();
+    //     if (user?.userId) this.serverNotificationService.loadNotifications(user.userId);
+    //   });
 
-   }
+  }
 
 
   ngOnDestroy(): void {
@@ -101,16 +101,19 @@ export class AppComponent implements OnInit, OnDestroy {
   private initializeApp(): void {
     // Domain validation is now handled by APP_INITIALIZER before app loads
     // No need to validate here as it's already done
-    
+
+    // Domain validation is now handled by APP_INITIALIZER before app loads
+    // Pending auth is handled automatically by AuthService constructor checking URL params
+
     // Initialize theme
     this.themeService.initializeTheme();
-    
+
     // Check authentication status
     this.authService.checkAuthStatus();
-  
-    
- // Redirect user based on role
-  this.redirectUserOnInit();
+
+
+    // Redirect user based on role
+    this.redirectUserOnInit();
 
     // Set up error handling
     this.setupGlobalErrorHandling();
@@ -124,63 +127,63 @@ export class AppComponent implements OnInit, OnDestroy {
       )
       .subscribe((event) => {
         const url = (event as NavigationEnd).url;
-        
+
         // Check if we're on the AI assistant page
         this.isAiAssistantPage = url.includes('/ai-assistant');
-        
+
         // Update page title based on route
         this.updatePageTitle(url);
-        
+
         // Scroll to top on route change
         window.scrollTo(0, 0);
       });
-    
+
     // Check initial route
     this.isAiAssistantPage = this.router.url.includes('/ai-assistant');
   }
 
 
-private redirectUserOnInit(): void {
-  const user = this.authService.getCurrentUserValue();
+  private redirectUserOnInit(): void {
+    const user = this.authService.getCurrentUserValue();
 
-  if (!user) {
-    this.router.navigate(['/login']);
-    return;
-  }
+    if (!user) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  this.router.events
-    .pipe(
-      filter(event => event instanceof NavigationEnd),
-      take(1)
-    )
-    .subscribe((event: NavigationEnd) => {
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        take(1)
+      )
+      .subscribe((event: NavigationEnd) => {
 
-      const currentUrl = event.urlAfterRedirects;
+        const currentUrl = event.urlAfterRedirects;
 
-      const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
-      
-      // Employee is trying to access admin dashboard
-      if (!isAdmin && currentUrl.startsWith('/dashboard')) {
-        this.router.navigate(['/performance/dashboard']);
-        return;
-      }
+        const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
 
-      // Admin trying to access employee dashboard
-      if (isAdmin && currentUrl.startsWith('/performance')) {
-        this.router.navigate(['/dashboard']);
-        return;
-      }
-
-      // If user is on root or login page → role-based redirect
-      if (currentUrl === '/' || currentUrl === '/login') {
-        if (isAdmin) {
-          this.router.navigate(['/dashboard']);
-        } else {
+        // Employee is trying to access admin dashboard
+        if (!isAdmin && currentUrl.startsWith('/dashboard')) {
           this.router.navigate(['/performance/dashboard']);
+          return;
         }
-      }
-    });
-}
+
+        // Admin trying to access employee dashboard
+        if (isAdmin && currentUrl.startsWith('/performance')) {
+          this.router.navigate(['/dashboard']);
+          return;
+        }
+
+        // If user is on root or login page → role-based redirect
+        if (currentUrl === '/' || currentUrl === '/login') {
+          if (isAdmin) {
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.router.navigate(['/performance/dashboard']);
+          }
+        }
+      });
+  }
 
 
 
@@ -189,7 +192,7 @@ private redirectUserOnInit(): void {
       '/dashboard': 'Dashboard',
       '/employees': 'Employee Management',
       '/attendance': 'Attendance Tracking',
-      '/leave': 'Leave Management', 
+      '/leave': 'Leave Management',
       '/payroll': 'Payroll Management',
       '/performance': 'Performance Management',
       '/settings': 'Settings',
@@ -198,7 +201,7 @@ private redirectUserOnInit(): void {
 
     const baseTitle = 'HRMS';
     const routeTitle = Object.keys(routeTitles).find(route => url.startsWith(route));
-    
+
     if (routeTitle) {
       document.title = `${routeTitles[routeTitle]} - ${baseTitle}`;
     } else {
