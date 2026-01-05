@@ -118,27 +118,19 @@
         </mat-form-field>
 
         <!-- Department -->
-        <mat-form-field appearance="outline" class="form-field">
-          <mat-label>Department</mat-label>
-          <mat-icon matPrefix>domain</mat-icon>
-          <mat-select formControlName="departmentId">
-            <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-              {{ dept.departmentName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="form-field">
+  <mat-label>Department</mat-label>
+  <input matInput formControlName="departmentName">
+</mat-form-field>
+
 
      
 
-        <mat-form-field appearance="outline" class="form-field">
+       <mat-form-field appearance="outline" class="form-field">
   <mat-label>Position</mat-label>
-  <mat-icon matPrefix>work</mat-icon>
-  <mat-select formControlName="position" (selectionChange)="onPositionChange($event.value)">
-    <mat-option *ngFor="let pos of positions" [value]="pos">
-      {{ pos.positionTitle }}
-    </mat-option>
-  </mat-select>
+  <input matInput formControlName="position" >
 </mat-form-field>
+
 
 
         <!-- Reporting Manager -->
@@ -157,13 +149,9 @@
         <!-- Reporting Manager -->
 <mat-form-field appearance="outline" class="form-field">
   <mat-label>Manager</mat-label>
-  <mat-icon matPrefix>supervisor_account</mat-icon>
-  <mat-select formControlName="reportingManagerId">
-    <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
-      {{ mgr.firstName }} {{ mgr.lastName }}
-    </mat-option>
-  </mat-select>
+  <input matInput formControlName="managerName" >
 </mat-form-field>
+
 
 
         <!-- Basic Salary -->
