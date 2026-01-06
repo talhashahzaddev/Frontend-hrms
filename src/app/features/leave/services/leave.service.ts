@@ -330,6 +330,7 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
   }
 
   // 1️⃣ Fetch all leave requests for the currently logged-in employee
+
   getMyLeaveRequestsByToken(): Observable<LeaveRequest[]> {
   return this.http.get<ApiResponse<LeaveRequest[]>>(
     `${this.apiUrl}/getleaverequestbyemployeeid`
@@ -342,6 +343,20 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
     })
   );
 }
+
+// getMyLeaveRequestsByToken(): Observable<LeaveRequest[]> {
+//   return this.http.get<ApiResponse<LeaveRequest[]>>(
+//     `${this.apiUrl}/getleaverequestbyemployeeid`
+//   ).pipe(
+//     map(response => {
+//       if (!response.success) {
+//         // ✅ Backend message forward
+//         throw new Error(response.message || 'Failed to fetch leave requests');
+//       }
+//       return response.data!;
+//     })
+//   );
+// }
 
 
   // 2️⃣ Create a new custom leave type (Super Admin / Manager only)
