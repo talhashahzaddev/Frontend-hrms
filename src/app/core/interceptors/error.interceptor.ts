@@ -54,6 +54,13 @@ export class ErrorInterceptor implements HttpInterceptor {
         }
         break;
         
+        case 409:
+  // Conflict error (e.g., leave overlap) - handle here or skip notification if handled in component
+  // Optionally, you can set a message for logging
+  errorMessage = this.extractErrorMessage(error) || 'Conflict error occurred.';
+  // Do NOT call this.notificationService here if your component already shows it
+  break;
+
       case 422:
         errorMessage = this.extractErrorMessage(error) || 'Validation failed. Please check your input.';
         this.notificationService.validationError(errorMessage);

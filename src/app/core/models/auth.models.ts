@@ -78,12 +78,20 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+// export interface ApiResponse<T> {
+//    data?: T;
+//   success: boolean;
+//   message: string;
+//   errors?: string[];
+// }
 export interface ApiResponse<T> {
-   data?: T;
-  success: boolean;
-  message: string;
-  errors?: string[];
+  data?: T;          // The actual data returned
+  success: boolean;  // Whether the request was successful
+  message: string;   // Message from backend (error or success)
+  errors?: string[]; // Optional array of error messages
+  statusCode?: number; // HTTP status code from backend (like 409 for overlap)
 }
+
 
 export interface PagedResult<T> {
   data: T[];

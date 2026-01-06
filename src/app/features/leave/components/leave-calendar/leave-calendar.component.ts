@@ -233,28 +233,58 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
     const startDate = this.calendarDays[0].date.toISOString();
     const endDate = this.calendarDays[this.calendarDays.length - 1].date.toISOString();
     
-    this.leaveService.getLeaveCalendar(startDate, endDate)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.calendarEvents = response.map(event => ({
-            ...event,
-            status: event.status.toLowerCase(),
-            leaveTypeColor: this.getStatusColor(event.status)
-          }));
+    // this.leaveService.getLeaveCalendar(startDate, endDate)
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe({
+    //     next: (response) => {
+    //       this.calendarEvents = response.map(event => ({
+    //         ...event,
+    //         status: event.status.toLowerCase(),
+    //         leaveTypeColor: this.getStatusColor(event.status)
+    //       }));
 
-          this.distributeEventsToCalendar();
-          this.loadUpcomingLeaves();
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error loading calendar data:', error);
-          this.notificationService.showError('Failed to load calendar data');
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }
-      });
+    //       this.distributeEventsToCalendar();
+    //       this.loadUpcomingLeaves();
+    //       this.isLoading = false;
+    //       this.cdr.markForCheck();
+    //     },
+    //     error: (error) => {
+    //       console.error('Error loading calendar data:', error);
+    //       this.notificationService.showError('Failed to load calendar data');
+    //       this.isLoading = false;
+    //       this.cdr.markForCheck();
+    //     }
+    //   });
+
+
+    this.leaveService.getLeaveCalendar(startDate, endDate)
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: (response) => {
+      this.calendarEvents = response.map(event => ({
+        ...event,
+        status: event.status.toLowerCase(),
+        leaveTypeColor: this.getStatusColor(event.status)
+      }));
+
+      this.distributeEventsToCalendar();
+      this.loadUpcomingLeaves();
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    },
+    error: (error) => {
+      console.error('Error loading calendar data:', error);
+
+      // ✅ SHOW BACKEND MESSAGE
+      const errorMessage =
+        error?.message || 'Failed to load calendar data';
+
+      this.notificationService.showError(errorMessage);
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  });
+
   }
 
   private getStatusColor(status: string): string {

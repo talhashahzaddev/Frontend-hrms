@@ -201,8 +201,7 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
             this.loadLeaveTypes();
           },
           error: (err) => {
-            console.error(err);
-            this.notificationService.showError('Failed to create leave type');
+           const  errorMessage=err?.message || 'Failed to create leave type';
           }
         });
       }
@@ -225,8 +224,7 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
             this.loadLeaveTypes();
           },
           error: (err) => {
-            console.error(err);
-            this.notificationService.showError('Failed to update leave type');
+           const errorMessage=err?.message || 'Failed to update leave type';
           }
         });
       }

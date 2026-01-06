@@ -561,18 +561,27 @@ private backendBaseUrl = 'https://localhost:60485';
     this.currentUser = this.authService.getCurrentUserValue();
   }
 
+
   private loadInitialData(): void {
   this.isLoading = true;
 
   const requests: any = {
     leaveBalance: this.leaveService.getMyLeaveBalance().pipe(
-      catchError(() => of([]))
+      catchError((error) =>{const errorMessage=error?.message || 'Failed to fetch leave balance';
+         this.notificationService.showError(errorMessage); return of([]);})
     ),
     leaveTypes: this.leaveService.getLeaveTypes().pipe(
-      catchError(() => of([]))
+      catchError((errorMessage) => {const  errorMsg=errorMessage?.message || 'Failed to fetch Leave Types';
+      this.notificationService.showError( errorMsg); return of([]);})
     ),
     myRequests: this.leaveService.getMyLeaveRequestsByToken().pipe(
-      catchError(() => of([]))
+      catchError((error) => 
+      {
+        const  errorMessage=error?.message || 'Failed to fetch Leave Requests';
+        this.notificationService.showError(errorMessage)
+        return of([]);
+      } 
+      )
     )
   };
 
