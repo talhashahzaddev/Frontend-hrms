@@ -41,6 +41,14 @@ export interface CompanySubscriptionDto {
   endDate?: string;
 }
 
+export interface CompanySubscriptionDetailsDto {
+  planId: string;
+  planName: string;
+  billingCycle: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -76,6 +84,42 @@ export class PaymentService {
             throw new Error(response.message || 'Failed to create subscription');
           }
           return response.data;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Get company subscriptions by company ID
+   */
+  getCompanySubscriptionsByCompanyId(companyId: string): Observable<CompanySubscriptionDto[]> {
+    return this.http.get<ServiceResponse<CompanySubscriptionDto[]>>(`${this.API_URL}/company-subscriptions/company/${companyId}`)
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Failed to fetch company subscriptions');
+          }
+          return response.data;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Get detailed company subscription info (active) by company ID
+   */
+  getCompanySubscriptionDetailsByCompanyId(companyId: string): Observable<CompanySubscriptionDetailsDto | null> {
+    return this.http.get<ServiceResponse<CompanySubscriptionDetailsDto>>(`${this.API_URL}/company-subscription-details/${companyId}`)
+      .pipe(
+        map(response => {
+          // If response success but data is null, it means no active subscription found, which is a valid state (Trial)
+          if (response.success && !response.data) {
+            return null;
+          }
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch company subscription details');
+          }
+          return response.data!;
         }),
         catchError(this.handleError)
       );

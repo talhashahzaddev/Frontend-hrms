@@ -1,12 +1,7 @@
 <mat-toolbar class="header-toolbar">
 
   <!-- Mobile Menu Button -->
-  <button 
-    mat-icon-button 
-    class="menu-button"
-    *ngIf="isHandset"
-    (click)="onMenuToggle()"
-    aria-label="Toggle navigation">
+  <button mat-icon-button class="menu-button" *ngIf="isHandset" (click)="onMenuToggle()" aria-label="Toggle navigation">
     <mat-icon>menu</mat-icon>
   </button>
 
@@ -27,13 +22,8 @@
     <!-- Search Section -->
     <div class="search-container">
       <!-- Toolbar search icon -->
-      <button 
-        mat-icon-button 
-        class="search-trigger-button"
-        *ngIf="!isHandset && !isSearchOpen"
-        matTooltip="Search"
-        aria-label="Search"
-        (click)="toggleSearch()">
+      <button mat-icon-button class="search-trigger-button" *ngIf="!isHandset && !isSearchOpen" matTooltip="Search"
+        aria-label="Search" (click)="toggleSearch()">
         <mat-icon>search</mat-icon>
       </button>
 
@@ -41,21 +31,10 @@
       <div class="header-search" *ngIf="isSearchOpen">
         <div class="search-input-wrapper">
           <mat-icon class="search-icon">search</mat-icon>
-          <input
-            #searchInput
-            type="text"
-            placeholder="Search pages, attendance, leave, performance..."
-            class="search-input"
-            [(ngModel)]="searchQuery"
-            (ngModelChange)="onSearchChange($event)"
-            (keydown.enter)="onSearch()"
-            (blur)="onSearchBlur()"
-          />
-          <button 
-            mat-icon-button 
-            class="search-close-button"
-            (click)="toggleSearch()"
-            matTooltip="Close search"
+          <input #searchInput type="text" placeholder="Search pages, attendance, leave, performance..."
+            class="search-input" [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)"
+            (keydown.enter)="onSearch()" (blur)="onSearchBlur()" />
+          <button mat-icon-button class="search-close-button" (click)="toggleSearch()" matTooltip="Close search"
             aria-label="Close search">
             <mat-icon>close</mat-icon>
           </button>
@@ -63,10 +42,7 @@
 
         <!-- Enhanced dropdown suggestions -->
         <div class="search-suggestions" *ngIf="searchQuery.trim()">
-          <div 
-            class="suggestion-item" 
-            *ngFor="let item of filteredItems" 
-            (mousedown)="goToSection(item)"
+          <div class="suggestion-item" *ngFor="let item of filteredItems" (mousedown)="goToSection(item)"
             (click)="goToSection(item)">
             <mat-icon class="suggestion-icon">arrow_forward</mat-icon>
             <span class="suggestion-text">{{ item.name }}</span>
@@ -80,28 +56,17 @@
     </div>
 
     <!-- Theme Toggle -->
-    <button 
-      mat-icon-button 
-      class="action-button theme-toggle-button"
-      (click)="onThemeToggle()"
-      [matTooltip]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-      aria-label="Toggle theme">
+    <button mat-icon-button class="action-button theme-toggle-button" (click)="onThemeToggle()"
+      [matTooltip]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'" aria-label="Toggle theme">
       <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
     </button>
 
     <!-- Notifications -->
     <div class="notification-container">
-      <button 
-        mat-icon-button 
-        class="action-button notification-button"
-        [class.has-notifications]="notificationCount > 0"
-        (click)="onNotificationsClick()"
-        matTooltip="Notifications"
+      <button mat-icon-button class="action-button notification-button"
+        [class.has-notifications]="notificationCount > 0" (click)="onNotificationsClick()" matTooltip="Notifications"
         aria-label="Notifications">
-        <mat-icon 
-          [matBadge]="notificationCount" 
-          [matBadgeHidden]="notificationCount === 0"
-          matBadgeColor="warn" 
+        <mat-icon [matBadge]="notificationCount" [matBadgeHidden]="notificationCount === 0" matBadgeColor="warn"
           matBadgeSize="small">
           notifications
         </mat-icon>
@@ -109,32 +74,20 @@
 
       <!-- Dropdown -->
       <div class="notification-panel" *ngIf="isNotificationOpen">
-        <app-notification-dialogue 
-          [isOpen]="isNotificationOpen"
-          (unreadCountChange)="notificationCount = $event">
+        <app-notification-dialogue [isOpen]="isNotificationOpen" (unreadCountChange)="notificationCount = $event">
         </app-notification-dialogue>
       </div>
     </div>
 
     <!-- User Menu -->
-    <button 
-      mat-icon-button 
-      class="user-menu-button-pic" 
-      [matMenuTriggerFor]="userMenu" 
-      aria-label="User menu">
+    <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
       <div class="user-avatar-pic">
-        <p-avatar
-          *ngIf="profilePreviewUrl; else initials"
-          [image]="profilePreviewUrl"
-          shape="circle"
+        <p-avatar *ngIf="profilePreviewUrl; else initials" [image]="profilePreviewUrl" shape="circle"
           styleClass="user-avatar-large-content">
         </p-avatar>
 
         <ng-template #initials>
-          <p-avatar
-            [label]="getUserInitials()"
-            shape="circle"
-            styleClass="user-avatar-large-content">
+          <p-avatar [label]="getUserInitials()" shape="circle" styleClass="user-avatar-large-content">
           </p-avatar>
         </ng-template>
       </div>
@@ -148,27 +101,28 @@
     <div class="user-menu-header">
       <div class="user-info">
         <div class="user-avatar-large">
-          <p-avatar 
-            *ngIf="profilePreviewUrl; else initialsLarge"
-            [image]="profilePreviewUrl"
-            size="large"
-            shape="circle"
-            styleClass="user-avatar-large-content">
+          <p-avatar *ngIf="profilePreviewUrl; else initialsLarge" [image]="profilePreviewUrl" size="large"
+            shape="circle" styleClass="user-avatar-large-content">
           </p-avatar>
 
           <ng-template #initialsLarge>
-            <p-avatar 
-              [label]="getUserInitials()"
-              size="large"
-              shape="circle"
-              styleClass="user-avatar-large-content">
+            <p-avatar [label]="getUserInitials()" size="large" shape="circle" styleClass="user-avatar-large-content">
             </p-avatar>
           </ng-template>
         </div>
         <div class="user-details">
           <div class="user-name">{{ getUserDisplayName() }}</div>
           <div class="user-email">{{ currentUser?.email }}</div>
-          <div class="user-role">{{ currentUser?.roleName }}</div>
+          <div class="user-meta">
+            <div class="user-role">
+              <mat-icon>verified_user</mat-icon>
+              <span>{{ currentUser?.roleName }}</span>
+            </div>
+            <div class="user-plan" *ngIf="currentPlanName && currentUser?.roleName === 'Super Admin'">
+              <mat-icon>workspace_premium</mat-icon>
+              <span>{{ currentPlanName }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

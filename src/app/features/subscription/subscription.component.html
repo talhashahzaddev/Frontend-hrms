@@ -50,7 +50,7 @@
           <div class="pricing-grid">
             <mat-card *ngFor="let plan of displayedPlans; let i = index" [class.featured-plan]="plan.isPopular"
               [class.center-card]="isCenterCard(i)" class="pricing-card carousel-item"
-              [class.elevated]="plan.isPopular || false">
+              [class.elevated]="plan.isPopular || false" [class.current-plan-card]="plan.isCurrentPlan">
               <div class="pricing-header">
                 <div class="plan-name-row">
                   <h3>{{ plan.name }}</h3>
@@ -66,9 +66,12 @@
               </div>
 
               <div class="pricing-actions">
-                <button *ngIf="!plan.isCustom" mat-raised-button color="primary" [class.btn-outline]="!plan.isPopular"
-                  class="action-btn" (click)="selectPlan(plan)">
+                <button *ngIf="!plan.isCustom && !plan.isCurrentPlan" mat-raised-button color="primary"
+                  [class.btn-outline]="!plan.isPopular" class="action-btn" (click)="selectPlan(plan)">
                   Select Plan
+                </button>
+                <button *ngIf="plan.isCurrentPlan" mat-flat-button disabled class="action-btn current-plan-btn">
+                  Your Plan
                 </button>
                 <button *ngIf="plan.isCustom" mat-stroked-button color="primary" class="action-btn">
                   Contact Sales

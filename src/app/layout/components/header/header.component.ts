@@ -29,8 +29,9 @@ interface SearchItem {
   keywords: string[];
   roles?: string[];
 }
+import { PaymentService } from '@core/services/payment.service';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
-import {NotificationDialogueComponent} from '../../../features/notification-dialogue/notification-dialogue.component'
+import { NotificationDialogueComponent } from '../../../features/notification-dialogue/notification-dialogue.component'
 import { environment } from '@/environments/environment';
 
 @Component({
@@ -52,16 +53,17 @@ import { environment } from '@/environments/environment';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  
+
   @Input() isHandset = false;
   @Output() menuToggle = new EventEmitter<void>();
-@ViewChild('searchInput') searchInput!: ElementRef;
+  @ViewChild('searchInput') searchInput!: ElementRef;
   currentUser: User | null = null;
+  currentPlanName: string | null = null;
   isDarkMode = false;
 
   //Search variables
   filteredItems: SearchItem[] = [];
-  
+
   // All searchable items with routes, keywords, and role permissions
   private allSearchItems: SearchItem[] = [
     // Dashboard
@@ -77,7 +79,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['dashboard', 'home', 'main', 'overview', 'my performance'],
       roles: ['Manager', 'Employee']
     },
-    
+
     // Attendance - Employee accessible
     {
       name: 'My Attendance',
@@ -97,7 +99,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['shift', 'shifts', 'schedule', 'work schedule', 'shift management'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
-    
+
     // Attendance - Manager/Admin only
     {
       name: 'Team Attendance',
@@ -117,7 +119,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['attendance calendar', 'calendar'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
-    
+
     // Leave - Employee accessible
     {
       name: 'My Leaves',
@@ -137,7 +139,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['leave calendar', 'calendar', 'leave schedule'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
-    
+
     // Leave - Manager/Admin only
     {
       name: 'Team Leaves',
@@ -151,7 +153,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['leave types', 'leave type', 'types of leave'],
       roles: ['Super Admin', 'HR Manager']
     },
-    
+
     // Performance - Employee accessible
     {
       name: 'My Performance',
@@ -177,7 +179,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['goals', 'kra', 'kras', 'key result areas', 'objectives', 'targets', 'goals and kras'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
-    
+
     // Performance - Manager/Admin only
     {
       name: 'Performance Reports',
@@ -191,7 +193,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['appraisal cycles', 'cycles', 'appraisal cycle'],
       roles: ['Super Admin', 'HR Manager']
     },
-    
+
     // Employee Management - Admin/HR only
     {
       name: 'All Employees',
@@ -217,7 +219,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['positions', 'position', 'job positions', 'roles'],
       roles: ['Super Admin', 'HR Manager']
     },
-    
+
     // Payroll - Super Admin only
     {
       name: 'Payroll Periods',
@@ -249,7 +251,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['salary slips', 'salary slip', 'payslips', 'payslip', 'pay slip', 'pay slips'],
       roles: ['Super Admin']
     },
-    
+
     // Profile & Settings
     {
       name: 'My Profile',
@@ -263,7 +265,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       keywords: ['settings', 'preferences', 'configuration', 'config'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
-    
+
     // AI Assistant
     {
       name: 'AI Assistant',
@@ -272,10 +274,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     }
   ];
-  
+
   getSearchItems(): SearchItem[] {
     if (!this.currentUser) return [];
-    
+
     // Filter items based on user role
     return this.allSearchItems.filter(item => {
       if (!item.roles || item.roles.length === 0) return true;
@@ -287,9 +289,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   slectedProfileFile: File | null = null;
   profilePreviewUrl: string | null = null;
   private backendBaseUrl = `${environment.apiUrl}`;
-// Variables
-searchQuery = '';
-isSearchOpen = false;
+  // Variables
+  searchQuery = '';
+  isSearchOpen = false;
 
   private destroy$ = new Subject<void>();
 
@@ -299,29 +301,30 @@ isSearchOpen = false;
   constructor(
     private employeeService: EmployeeService,
     private authService: AuthService,
+    private paymentService: PaymentService,
     private themeService: ThemeService,
     private serverNotificationService: ServerNotificationService, // add this
     private notificationService: NotificationService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subscribeToUser();
     this.subscribeToTheme();
- // Add this for notifications
-  // -----------------------------
-  this.serverNotificationService.notifications$
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(notifs => {
-      // Update badge count immediately
-      this.notificationCount = notifs.filter(n => !n.isRead).length;
-    });
+    // Add this for notifications
+    // -----------------------------
+    this.serverNotificationService.notifications$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(notifs => {
+        // Update badge count immediately
+        this.notificationCount = notifs.filter(n => !n.isRead).length;
+      });
 
-  // Load notifications immediately if user exists
-  const user = this.authService.getCurrentUserValue();
-  if (user?.userId) {
-    this.serverNotificationService.loadNotifications(user.userId);
-  }
+    // Load notifications immediately if user exists
+    const user = this.authService.getCurrentUserValue();
+    if (user?.userId) {
+      this.serverNotificationService.loadNotifications(user.userId);
+    }
 
   }
 
@@ -392,11 +395,11 @@ isSearchOpen = false;
       // Try to find a match by keywords
       const searchItems = this.getSearchItems();
       const matchedItem = searchItems.find(item =>
-        item.keywords.some(keyword => 
+        item.keywords.some(keyword =>
           query.includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(query)
         )
       );
-      
+
       if (matchedItem) {
         this.navigateToRoute(matchedItem);
       }
@@ -408,16 +411,16 @@ isSearchOpen = false;
       this.filteredItems = [];
       return;
     }
-    
+
     const lowerQuery = query.toLowerCase().trim();
     const searchItems = this.getSearchItems();
-    
+
     // Filter items that match the query in name or keywords
     this.filteredItems = searchItems
       .filter(item => {
         const nameMatch = item.name.toLowerCase().includes(lowerQuery);
-        const keywordMatch = item.keywords.some(keyword => 
-          keyword.toLowerCase().includes(lowerQuery) || 
+        const keywordMatch = item.keywords.some(keyword =>
+          keyword.toLowerCase().includes(lowerQuery) ||
           lowerQuery.includes(keyword.toLowerCase())
         );
         return nameMatch || keywordMatch;
@@ -438,15 +441,15 @@ isSearchOpen = false;
     this.navigateToRoute(item);
   }
 
-onSearchBlur() {
-  // Delay closing to allow click events on suggestions
-  setTimeout(() => {
-    // Don't close if there are suggestions visible
-    if (this.filteredItems.length === 0 && !this.searchQuery.trim()) {
-      this.isSearchOpen = false;
-    }
-  }, 200);
-}
+  onSearchBlur() {
+    // Delay closing to allow click events on suggestions
+    setTimeout(() => {
+      // Don't close if there are suggestions visible
+      if (this.filteredItems.length === 0 && !this.searchQuery.trim()) {
+        this.isSearchOpen = false;
+      }
+    }, 200);
+  }
 
   getUserInitials(): string {
     if (!this.currentUser) return '';
@@ -470,6 +473,28 @@ onSearchBlur() {
         this.filteredItems = [];
         if (this.currentUser?.userId) {
           this.loademployeeDetails(this.currentUser.userId);
+        }
+
+        if (this.currentUser?.roleName === 'Super Admin') {
+          this.loadSubscriptionDetails();
+        } else {
+          this.currentPlanName = null;
+        }
+      });
+  }
+
+  private loadSubscriptionDetails(): void {
+    // Pass a dummy ID because the backend overwrites it with the logged-in user's organizationId
+    // The backend uses [Authorize], so it identifies the user and their organization automatically.
+    this.paymentService.getCompanySubscriptionDetailsByCompanyId('00000000-0000-0000-0000-000000000000')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (details) => {
+          this.currentPlanName = details ? details.planName : 'Trial Account';
+        },
+        error: (err) => {
+          console.error('Failed to load subscription details', err);
+          this.currentPlanName = 'Trial Account';
         }
       });
   }

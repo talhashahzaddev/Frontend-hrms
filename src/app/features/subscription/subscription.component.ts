@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, forkJoin, catchError } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,6 +20,7 @@ interface PricingPlan {
   features: string[];
   isPopular: boolean;
   isCustom: boolean;
+  isCurrentPlan?: boolean;
 }
 
 @Component({
@@ -44,6 +45,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   itemsPerPage: number = 3;
   isLoading: boolean = true;
   error: string | null = null;
+  activePlanId: string | null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -69,12 +71,38 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
 
-    this.paymentService.getActiveSubscriptionPlans()
+    const plans$ = this.paymentService.getActiveSubscriptionPlans();
+
+    // Pass a dummy ID because the backend overwrites it with the logged-in user's organizationId
+    const subscriptions$ = this.paymentService.getCompanySubscriptionsByCompanyId('00000000-0000-0000-0000-000000000000')
+      .pipe(
+        catchError(err => {
+          console.error('Error fetching subscriptions or not authorized:', err);
+          return []; // Return empty array to allow plans to load
+        })
+      );
+
+    forkJoin({
+      plans: plans$,
+      subscriptions: subscriptions$
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (apiPlans) => {
-          // Transform API plans to PricingPlan format
-          this.allPlans = apiPlans.map(plan => this.transformToPricingPlan(plan));
+        next: ({ plans, subscriptions }) => {
+          // 1. Process Active Subscriptions
+          const now = new Date();
+          const activeSubscription = subscriptions.find((sub: any) => {
+            if (!sub.endDate) return false;
+            const endDate = new Date(sub.endDate);
+            return endDate > now;
+          });
+
+          if (activeSubscription) {
+            this.activePlanId = activeSubscription.planId;
+          }
+
+          // 2. Process Plans
+          this.allPlans = plans.map(plan => this.transformToPricingPlan(plan));
 
           // Add custom plan template at the end if it doesn't exist
           const hasCustomPlan = this.allPlans.some(p => p.isCustom);
@@ -93,7 +121,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
                 '24/7 Premium Support'
               ],
               isPopular: false,
-              isCustom: true
+              isCustom: true,
+              isCurrentPlan: false
             });
           }
 
@@ -107,11 +136,9 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (err) => {
-          console.error('Error loading subscription plans:', err);
-          this.error = err.message || 'Failed to load subscription plans';
+          console.error('Error loading data:', err);
+          this.error = err.message || 'Failed to load data';
           this.isLoading = false;
-
-          // Fallback to default plans on error
           this.loadDefaultPlans();
         }
       });
@@ -129,7 +156,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
         description: 'Perfect for small teams getting started',
         features: ['Employee Directory', 'Leave Management', 'Basic Reporting', 'Standard Support'],
         isPopular: false,
-        isCustom: false
+        isCustom: false,
+        isCurrentPlan: false
       },
       {
         id: 'business',
@@ -141,7 +169,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
         description: 'For growing teams that need advanced features',
         features: ['All Starter features', 'Performance Management', 'Advanced Reporting', 'Priority Support'],
         isPopular: true,
-        isCustom: false
+        isCustom: false,
+        isCurrentPlan: false
       },
       {
         id: 'enterprise',
@@ -151,7 +180,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
         description: 'Custom solutions for large organizations',
         features: ['All Business features', 'Single Sign-On (SSO)', 'Custom Integrations', 'Dedicated Account Manager'],
         isPopular: false,
-        isCustom: true
+        isCustom: true,
+        isCurrentPlan: false
       }
     ];
     this.updateDisplayedPlans();
@@ -194,7 +224,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       description: this.getDescription(apiPlan),
       features: features,
       isPopular: false, // Will be set separately
-      isCustom: apiPlan.isCustom
+      isCustom: apiPlan.isCustom,
+      isCurrentPlan: this.activePlanId === apiPlan.planId
     };
   }
 
@@ -328,6 +359,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     // Backend controller didn't seem to enforce enum, just string. I'll send Title Case as it looks nicer in DB.
     // Actually user said "if monthly then monthly will go", so I will keep it as 'monthly'.
     // Wait, let's re-read carefully: "if monthly then monthly will go".
+    // I will keep it as is.
 
     const request = {
       planId: plan.id,
@@ -354,4 +386,3 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       });
   }
 }
-
