@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PaymentService, SubscriptionPlanDto } from '@core/services/payment.service';
 import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
 
 interface PricingPlan {
   id: string;
@@ -47,8 +48,9 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
 
   constructor(
     private paymentService: PaymentService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) { }
 
   ngOnInit(): void {
     this.loadSubscriptionPlans();
@@ -73,7 +75,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
         next: (apiPlans) => {
           // Transform API plans to PricingPlan format
           this.allPlans = apiPlans.map(plan => this.transformToPricingPlan(plan));
-          
+
           // Add custom plan template at the end if it doesn't exist
           const hasCustomPlan = this.allPlans.some(p => p.isCustom);
           if (!hasCustomPlan) {
@@ -108,7 +110,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
           console.error('Error loading subscription plans:', err);
           this.error = err.message || 'Failed to load subscription plans';
           this.isLoading = false;
-          
+
           // Fallback to default plans on error
           this.loadDefaultPlans();
         }
@@ -178,7 +180,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       features = this.getDefaultFeatures(apiPlan.name, apiPlan.maxUsers);
     }
 
-    const price = this.billingCycle === 'monthly' 
+    const price = this.billingCycle === 'monthly'
       ? (apiPlan.monthlyPrice || 0)
       : (apiPlan.annualPrice || 0);
 
@@ -200,21 +202,21 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     if (plan.isCustom) {
       return 'Custom solutions for large organizations';
     }
-    
+
     if (plan.maxUsers) {
       return `Perfect for teams up to ${plan.maxUsers} users`;
     }
-    
+
     return `Flexible pricing plan for your business needs`;
   }
 
   getDefaultFeatures(planName: string, maxUsers?: number): string[] {
     const baseFeatures = ['Employee Directory', 'Leave Management', 'Basic Reporting'];
-    
+
     if (maxUsers) {
       baseFeatures.unshift(`Up to ${maxUsers} users`);
     }
-    
+
     if (planName.toLowerCase().includes('starter') || planName.toLowerCase().includes('basic')) {
       return [...baseFeatures, 'Standard Support'];
     } else if (planName.toLowerCase().includes('business') || planName.toLowerCase().includes('professional')) {
@@ -222,7 +224,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     } else if (planName.toLowerCase().includes('enterprise') || planName.toLowerCase().includes('custom')) {
       return [...baseFeatures, 'Performance Management', 'Single Sign-On (SSO)', 'Custom Integrations', 'Dedicated Support'];
     }
-    
+
     return baseFeatures;
   }
 
@@ -230,7 +232,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     // Update prices based on billing cycle
     this.allPlans.forEach(plan => {
       if (!plan.isCustom) {
-        plan.price = this.billingCycle === 'monthly' 
+        plan.price = this.billingCycle === 'monthly'
           ? (plan.monthlyPrice || 0)
           : (plan.annualPrice || 0);
       }
@@ -290,7 +292,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
 
   isCenterCard(index: number): boolean {
     if (index < 0) return false;
-    
+
     if (this.itemsPerPage === 3) {
       return index === 1;
     } else if (this.itemsPerPage === 2) {
@@ -298,6 +300,58 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     } else {
       return index === 0;
     }
+  }
+
+  selectPlan(plan: PricingPlan): void {
+    if (plan.isCustom) return;
+
+    this.isLoading = true;
+    this.error = null;
+
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+
+    if (this.billingCycle === 'monthly') {
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      endDate.setFullYear(endDate.getFullYear() + 1);
+    }
+
+    // Set time to 11:59:59 PM
+    endDate.setHours(23, 59, 59, 0);
+
+    // Format billing cycle to match backend expectation (Title Case)
+    // The component uses 'monthly'/'annual' (lowercase)
+    // The backend comparison wasn't strict case-wise in my memory, but API usually prefers 'Monthly'/'Annual' or exact string.
+    // The prompt said: "if the Annual is selected... then the cycle will go annual and if monthly then monthly will go".
+    // I will capitalize it just in case, or send as is if backend handles it.
+    // Backend controller didn't seem to enforce enum, just string. I'll send Title Case as it looks nicer in DB.
+    // Actually user said "if monthly then monthly will go", so I will keep it as 'monthly'.
+    // Wait, let's re-read carefully: "if monthly then monthly will go".
+
+    const request = {
+      planId: plan.id,
+      status: 'Active',
+      billingCycle: this.billingCycle, // 'monthly' or 'annual'
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString()
+    };
+
+    this.paymentService.createCompanySubscription(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.notificationService.success({
+            message: 'Subscription created successfully!',
+            duration: 1000
+          });
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.notificationService.error(err.message || 'Failed to create subscription');
+        }
+      });
   }
 }
 

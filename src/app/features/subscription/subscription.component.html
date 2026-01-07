@@ -7,18 +7,14 @@
         <p class="hero-description">
           Choose the plan that fits your organization's needs. Toggle between monthly and annual billing.
         </p>
-        
+
         <!-- Billing Toggle -->
         <div class="billing-toggle">
-          <button 
-            [class.active]="billingCycle === 'monthly'"
-            (click)="onBillingCycleChange('monthly')"
+          <button [class.active]="billingCycle === 'monthly'" (click)="onBillingCycleChange('monthly')"
             class="toggle-btn">
             Monthly
           </button>
-          <button 
-            [class.active]="billingCycle === 'annual'"
-            (click)="onBillingCycleChange('annual')"
+          <button [class.active]="billingCycle === 'annual'" (click)="onBillingCycleChange('annual')"
             class="toggle-btn">
             Annual <span class="save-badge">Save 20%</span>
           </button>
@@ -44,24 +40,16 @@
       <!-- Pricing Carousel -->
       <div *ngIf="!isLoading && !error" class="pricing-carousel-container">
         <!-- Navigation Arrow Left -->
-        <button 
-          *ngIf="allPlans.length > itemsPerPage"
-          (click)="previous()"
-          [disabled]="!canGoPrevious()"
-          class="carousel-nav-btn carousel-nav-left"
-          mat-icon-button
-          aria-label="Previous plans">
+        <button *ngIf="allPlans.length > itemsPerPage" (click)="previous()" [disabled]="!canGoPrevious()"
+          class="carousel-nav-btn carousel-nav-left" mat-icon-button aria-label="Previous plans">
           <mat-icon>chevron_left</mat-icon>
         </button>
 
         <!-- Carousel Content -->
         <div class="pricing-carousel-wrapper">
           <div class="pricing-grid">
-            <mat-card 
-              *ngFor="let plan of displayedPlans; let i = index" 
-              [class.featured-plan]="plan.isPopular"
-              [class.center-card]="isCenterCard(i)"
-              class="pricing-card carousel-item"
+            <mat-card *ngFor="let plan of displayedPlans; let i = index" [class.featured-plan]="plan.isPopular"
+              [class.center-card]="isCenterCard(i)" class="pricing-card carousel-item"
               [class.elevated]="plan.isPopular || false">
               <div class="pricing-header">
                 <div class="plan-name-row">
@@ -76,21 +64,13 @@
                 </div>
                 <p class="plan-description">{{ plan.description }}</p>
               </div>
-              
+
               <div class="pricing-actions">
-                <button 
-                  *ngIf="!plan.isCustom"
-                  mat-raised-button
-                  color="primary"
-                  [class.btn-outline]="!plan.isPopular"
-                  class="action-btn">
+                <button *ngIf="!plan.isCustom" mat-raised-button color="primary" [class.btn-outline]="!plan.isPopular"
+                  class="action-btn" (click)="selectPlan(plan)">
                   Select Plan
                 </button>
-                <button 
-                  *ngIf="plan.isCustom"
-                  mat-stroked-button
-                  color="primary"
-                  class="action-btn">
+                <button *ngIf="plan.isCustom" mat-stroked-button color="primary" class="action-btn">
                   Contact Sales
                 </button>
               </div>
@@ -108,28 +88,19 @@
         </div>
 
         <!-- Navigation Arrow Right -->
-        <button 
-          *ngIf="allPlans.length > itemsPerPage"
-          (click)="next()"
-          [disabled]="!canGoNext()"
-          class="carousel-nav-btn carousel-nav-right"
-          mat-icon-button
-          aria-label="Next plans">
+        <button *ngIf="allPlans.length > itemsPerPage" (click)="next()" [disabled]="!canGoNext()"
+          class="carousel-nav-btn carousel-nav-right" mat-icon-button aria-label="Next plans">
           <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
 
       <!-- Carousel Indicators -->
       <div *ngIf="!isLoading && !error && allPlans.length > itemsPerPage" class="carousel-indicators">
-        <button
-          *ngFor="let indicator of getCarouselIndicators(); let i = index"
-          (click)="goToPage(i)"
-          [class.active]="i === getCurrentPageIndex()"
-          class="carousel-indicator"
+        <button *ngFor="let indicator of getCarouselIndicators(); let i = index" (click)="goToPage(i)"
+          [class.active]="i === getCurrentPageIndex()" class="carousel-indicator"
           [attr.aria-label]="'Go to page ' + (i + 1)">
         </button>
       </div>
     </div>
   </section>
 </div>
-
