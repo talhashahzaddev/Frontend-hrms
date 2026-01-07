@@ -112,9 +112,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }),
       workLocation: [''],
       departmentId: [''],
+      departmentName: [''],
       position: [''],
       positionId: [''],
       reportingManagerId: [''],
+      managerName: [''],
       roleId: ['']
     });
 
@@ -186,7 +188,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
           } else {
             this.profilePreviewUrl = null;
           }
-
+          const selectedManager = this.managers.find(m => m.employeeid === employee.reportingManagerId);
+          const selectedDepartment = this.departments.find(d => d.departmentId === employee.departmentId);
           const selectedPosition = this.positions.find(p => p.positionId === employee.positionId);
 
           // Patch form values with proper mapping
@@ -219,12 +222,22 @@ export class ProfileComponent implements OnInit, OnDestroy {
             },
 
             departmentId: employee.departmentId || '',
-            position: selectedPosition || '',
+            departmentName: employee.departmentName || '',
+            position: employee.positionTitle || '',
             positionId: employee.positionId || '',
             reportingManagerId: employee.reportingManagerId || '',
+            managerName: employee.reportingManagerName?.trim()    ? employee.reportingManagerName    : 'No Manager Assigned',
             roleId: selectedPosition?.roleId || '',
             profileurl: employee.profilePictureUrl || ''
           });
+          // Disable the Department field so it cannot be edited
+this.profileForm.get('employeeNumber')?.disable({ onlySelf: true });
+this.profileForm.get('departmentName')?.disable({ onlySelf: true });
+this.profileForm.get('managerName')?.disable({ onlySelf: true });
+this.profileForm.get('roleId')?.disable({ onlySelf: true });
+this.profileForm.get('basicSalary')?.disable({ onlySelf: true });
+this.profileForm.get('position')?.disable({ onlySelf: true });
+this.profileForm.get('hireDate')?.disable({ onlySelf: true });
         },
         error: (err) => {
           console.error('Failed to load employee details:', err);
@@ -255,7 +268,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (!this.profileForm.valid) return;
     this.isLoading = true;
 
-    const formValue = this.profileForm.value;
+    //const formValue = this.profileForm.value;
+    const formValue = this.profileForm.getRawValue();
     const formData = new FormData();
 
     // Scalar fields

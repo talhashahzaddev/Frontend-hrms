@@ -119,6 +119,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'AI Assistant',
       icon: 'smart_toy',
       route: '/ai-assistant'
+    },
+    {
+      label: 'Subscription',
+      icon: 'subscriptions',
+      route: '/subscription',
+      roles: ['Super Admin']
     }
   ];
 
