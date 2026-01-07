@@ -100,6 +100,16 @@ export const appRoutes: Routes = [
       import('./features/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
     title: 'AI Assistant - HRMS'
   },
+
+  // Subscription Route (Super Admin only)
+  {
+    path: 'subscription',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin'] },
+    loadComponent: () => 
+      import('./features/subscription/subscription.component').then(m => m.SubscriptionComponent),
+    title: 'Subscription Plans - HRMS'
+  },
   
   // Profile Management
   {

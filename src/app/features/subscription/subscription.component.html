@@ -1,0 +1,135 @@
+<div class="subscription-page">
+  <!-- Hero Section -->
+  <section class="page-hero section">
+    <div class="container">
+      <div class="hero-content text-center">
+        <h1>Subscription Plans</h1>
+        <p class="hero-description">
+          Choose the plan that fits your organization's needs. Toggle between monthly and annual billing.
+        </p>
+        
+        <!-- Billing Toggle -->
+        <div class="billing-toggle">
+          <button 
+            [class.active]="billingCycle === 'monthly'"
+            (click)="onBillingCycleChange('monthly')"
+            class="toggle-btn">
+            Monthly
+          </button>
+          <button 
+            [class.active]="billingCycle === 'annual'"
+            (click)="onBillingCycleChange('annual')"
+            class="toggle-btn">
+            Annual <span class="save-badge">Save 20%</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Cards -->
+  <section class="pricing-section section">
+    <div class="container">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Loading subscription plans...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !isLoading" class="error-container">
+        <p class="error-message">{{ error }}</p>
+      </div>
+
+      <!-- Pricing Carousel -->
+      <div *ngIf="!isLoading && !error" class="pricing-carousel-container">
+        <!-- Navigation Arrow Left -->
+        <button 
+          *ngIf="allPlans.length > itemsPerPage"
+          (click)="previous()"
+          [disabled]="!canGoPrevious()"
+          class="carousel-nav-btn carousel-nav-left"
+          mat-icon-button
+          aria-label="Previous plans">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- Carousel Content -->
+        <div class="pricing-carousel-wrapper">
+          <div class="pricing-grid">
+            <mat-card 
+              *ngFor="let plan of displayedPlans; let i = index" 
+              [class.featured-plan]="plan.isPopular"
+              [class.center-card]="isCenterCard(i)"
+              class="pricing-card carousel-item"
+              [class.elevated]="plan.isPopular || false">
+              <div class="pricing-header">
+                <div class="plan-name-row">
+                  <h3>{{ plan.name }}</h3>
+                  <span *ngIf="plan.isPopular" class="popular-badge">Recommended</span>
+                </div>
+                <div class="plan-price">
+                  <span class="price-amount">{{ getPriceLabel(plan) }}</span>
+                  <span *ngIf="!plan.isCustom" class="price-period">
+                    / user / {{ billingCycle === 'monthly' ? 'month' : 'year' }}
+                  </span>
+                </div>
+                <p class="plan-description">{{ plan.description }}</p>
+              </div>
+              
+              <div class="pricing-actions">
+                <button 
+                  *ngIf="!plan.isCustom"
+                  mat-raised-button
+                  color="primary"
+                  [class.btn-outline]="!plan.isPopular"
+                  class="action-btn">
+                  Select Plan
+                </button>
+                <button 
+                  *ngIf="plan.isCustom"
+                  mat-stroked-button
+                  color="primary"
+                  class="action-btn">
+                  Contact Sales
+                </button>
+              </div>
+
+              <div class="plan-divider"></div>
+
+              <div class="plan-features">
+                <div *ngFor="let feature of plan.features" class="feature-item">
+                  <mat-icon class="check-icon">check_circle</mat-icon>
+                  <span>{{ feature }}</span>
+                </div>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+
+        <!-- Navigation Arrow Right -->
+        <button 
+          *ngIf="allPlans.length > itemsPerPage"
+          (click)="next()"
+          [disabled]="!canGoNext()"
+          class="carousel-nav-btn carousel-nav-right"
+          mat-icon-button
+          aria-label="Next plans">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <!-- Carousel Indicators -->
+      <div *ngIf="!isLoading && !error && allPlans.length > itemsPerPage" class="carousel-indicators">
+        <button
+          *ngFor="let indicator of getCarouselIndicators(); let i = index"
+          (click)="goToPage(i)"
+          [class.active]="i === getCurrentPageIndex()"
+          class="carousel-indicator"
+          [attr.aria-label]="'Go to page ' + (i + 1)">
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
