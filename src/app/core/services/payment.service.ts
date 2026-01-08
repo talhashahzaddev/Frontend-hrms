@@ -47,6 +47,7 @@ export interface CompanySubscriptionDetailsDto {
   billingCycle: string;
   startDate?: string;
   endDate?: string;
+  isExpired: boolean;
 }
 
 @Injectable({

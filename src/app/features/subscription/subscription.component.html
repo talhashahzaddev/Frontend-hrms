@@ -50,7 +50,14 @@
           <div class="pricing-grid">
             <mat-card *ngFor="let plan of displayedPlans; let i = index" [class.featured-plan]="plan.isPopular"
               [class.center-card]="isCenterCard(i)" class="pricing-card carousel-item"
-              [class.elevated]="plan.isPopular || false" [class.current-plan-card]="plan.isCurrentPlan">
+              [class.elevated]="plan.isPopular || false" [class.current-plan-card]="plan.isCurrentPlan"
+              [class.expired-plan]="plan.isExpired">
+
+              <div *ngIf="plan.isExpired" class="renew-badge">
+                <mat-icon>warning</mat-icon>
+                <span>Renew Your Plan</span>
+              </div>
+
               <div class="pricing-header">
                 <div class="plan-name-row">
                   <h3>{{ plan.name }}</h3>
@@ -70,9 +77,18 @@
                   [class.btn-outline]="!plan.isPopular" class="action-btn" (click)="selectPlan(plan)">
                   Select Plan
                 </button>
-                <button *ngIf="plan.isCurrentPlan" mat-flat-button disabled class="action-btn current-plan-btn">
-                  Your Plan
-                </button>
+
+                <ng-container *ngIf="plan.isCurrentPlan">
+                  <button *ngIf="!plan.isExpired" mat-flat-button disabled class="action-btn current-plan-btn">
+                    Your Plan
+                  </button>
+                  <button *ngIf="plan.isExpired" mat-raised-button class="action-btn renew-btn"
+                    (click)="selectPlan(plan)">
+                    <mat-icon>refresh</mat-icon>
+                    Renew Plan
+                  </button>
+                </ng-container>
+
                 <button *ngIf="plan.isCustom" mat-stroked-button color="primary" class="action-btn">
                   Contact Sales
                 </button>

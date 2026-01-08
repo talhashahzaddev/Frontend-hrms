@@ -9,14 +9,14 @@
 
     <mat-card-content>
       <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
-        
+
         <!-- Basic Information Section -->
         <div class="form-section">
           <h3 class="section-title">
             <mat-icon>person</mat-icon>
             Basic Information
           </h3>
-          
+
           <div class="form-row">
             <mat-form-field appearance="outline">
               <mat-label>Employee Code</mat-label>
@@ -262,15 +262,23 @@
             <mat-icon>cancel</mat-icon>
             Cancel
           </button>
-          
-          <button mat-raised-button 
-                  color="primary" 
-                  type="submit" 
-                  [disabled]="employeeForm.invalid || isSubmitting">
+
+          <button mat-raised-button color="primary" type="submit"
+            *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeActionForm"
+            [disabled]="employeeForm.invalid || isSubmitting">
             <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
             <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update' : 'Create' }} Employee</span>
             <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Creating...' }}</span>
           </button>
+
+          <ng-template #upgradeActionForm>
+            <button mat-raised-button color="accent" type="button" routerLink="/subscription" class="upgrade-btn-form"
+              [class.renew]="isSubscriptionExpired">
+              <mat-icon>{{ isSubscriptionExpired ? 'history' : 'workspace_premium' }}</mat-icon>
+              {{ isSubscriptionExpired ? 'Renew your plan' : 'Upgrade your plan' }} to {{ isEditMode ? 'Update' :
+              'Create' }}
+            </button>
+          </ng-template>
         </div>
 
       </form>

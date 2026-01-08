@@ -20,38 +20,39 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith, combineLatest } from 'rxjs';
 
-import {EmployeeDialogueComponent} from '../employee-dialogue/employee-dialogue.component'
+import { EmployeeDialogueComponent } from '../employee-dialogue/employee-dialogue.component'
 import { EmployeeEditComponent } from '../employee-edit/employee-edit.component';
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { PaymentService } from '../../../../core/services/payment.service';
 
 
 @Component({
-    selector: 'app-employee-list',
-    imports: [
-        CommonModule,
-        RouterModule,
-        ReactiveFormsModule,
-        MatCardModule,
-        MatTableModule,
-        MatPaginatorModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatIconModule,
-        MatMenuModule,
-        MatChipsModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        MatCheckboxModule,
-        MatDividerModule,
-        MatDialogModule
-    ],
-    templateUrl: './employee-list.component.html',
-    styleUrls: ['./employee-list.component.scss']
+  selector: 'app-employee-list',
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatCheckboxModule,
+    MatDividerModule,
+    MatDialogModule
+  ],
+  templateUrl: './employee-list.component.html',
+  styleUrls: ['./employee-list.component.scss']
 })
 
 
@@ -62,7 +63,9 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   employees: Employee[] = [];
   departments: Department[] = [];
   positions: Position[] = [];
-  
+  hasActiveSubscription = true;
+  isSubscriptionExpired = false;
+
   // Table configuration
   displayedColumns: string[] = [
     'select',
@@ -75,20 +78,20 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     'status',
     'actions'
   ];
-  
+
   selection = new SelectionModel<Employee>(true, []);
-  
+
   // Loading states
   isLoading = false;
   isLoadingFilters = false;
-  
+
   // Pagination
   totalCount = 0;
   pageSize = 10;
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25, 50];
-  profilePreviewUrl:string|null=null;
-private backendBaseUrl = 'https://localhost:60485';
+  profilePreviewUrl: string | null = null;
+  private backendBaseUrl = 'https://localhost:60485';
 
   // Search and Filters
   searchControl = new FormControl('');
@@ -117,13 +120,31 @@ private backendBaseUrl = 'https://localhost:60485';
   constructor(
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
+    private paymentService: PaymentService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    this.checkSubscription();
     this.loadFilterOptions();
     this.setupSearch();
     this.loadEmployees();
+  }
+
+  private checkSubscription(): void {
+    // Pass dummy UUID as backend overwrites it with token's organizationId
+    this.paymentService.getCompanySubscriptionDetailsByCompanyId('00000000-0000-0000-0000-000000000000')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (details) => {
+          this.hasActiveSubscription = !!details;
+          this.isSubscriptionExpired = details ? details.isExpired : false;
+        },
+        error: () => {
+          this.hasActiveSubscription = false;
+          this.isSubscriptionExpired = false;
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -151,28 +172,28 @@ private backendBaseUrl = 'https://localhost:60485';
 
   private loadFilterOptions(): void {
     this.isLoadingFilters = true;
-    
+
     combineLatest([
       this.employeeService.getDepartments(),
       this.employeeService.getPositions()
     ]).pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: ([departments, positions]) => {
-        this.departments = departments;
-        this.positions = positions;
-        this.isLoadingFilters = false;
-      },
-      error: (error) => {
-        console.error('Failed to load filter options:', error);
-        this.notificationService.showError('Failed to load filter options');
-        this.isLoadingFilters = false;
-      }
-    });
+      .subscribe({
+        next: ([departments, positions]) => {
+          this.departments = departments;
+          this.positions = positions;
+          this.isLoadingFilters = false;
+        },
+        error: (error) => {
+          console.error('Failed to load filter options:', error);
+          this.notificationService.showError('Failed to load filter options');
+          this.isLoadingFilters = false;
+        }
+      });
   }
 
   private loadEmployees(): void {
     this.isLoading = true;
-    
+
     const searchRequest: EmployeeSearchRequest = {
       searchTerm: this.searchControl.value || undefined,
       departmentId: this.departmentControl.value || undefined,
@@ -189,22 +210,22 @@ private backendBaseUrl = 'https://localhost:60485';
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-         
+
           // this.employees = response.employees;
-this.employees = response.employees.map(emp => ({
-  ...emp,
-  profilePictureUrl: emp.profilePictureUrl
-    ? emp.profilePictureUrl.startsWith('http')
-      ? emp.profilePictureUrl
-      : `${this.backendBaseUrl}${emp.profilePictureUrl}`
-    : undefined ,// ✅ use undefined instead of null
-    status: emp.status === 'delete' ? 'deleted' : emp.status // <-- key line
-}));
+          this.employees = response.employees.map(emp => ({
+            ...emp,
+            profilePictureUrl: emp.profilePictureUrl
+              ? emp.profilePictureUrl.startsWith('http')
+                ? emp.profilePictureUrl
+                : `${this.backendBaseUrl}${emp.profilePictureUrl}`
+              : undefined,// ✅ use undefined instead of null
+            status: emp.status === 'delete' ? 'deleted' : emp.status // <-- key line
+          }));
 
           this.totalCount = response.totalCount;
           this.isLoading = false;
           this.selection.clear();
-          
+
         },
         error: (error) => {
           console.error('Failed to load employees:', error);
@@ -243,14 +264,14 @@ this.employees = response.employees.map(emp => ({
   }
 
 
-viewEmployee(employee: Employee): void {
-  this.dialog.open(EmployeeDialogueComponent, {
-    width: '700px',
-    data: { employee, viewOnly: true } // viewOnly = true for viewing
-  });
-}
+  viewEmployee(employee: Employee): void {
+    this.dialog.open(EmployeeDialogueComponent, {
+      width: '700px',
+      data: { employee, viewOnly: true } // viewOnly = true for viewing
+    });
+  }
 
-openEditDialog(employee: Employee): void {
+  openEditDialog(employee: Employee): void {
     const dialogRef = this.dialog.open(EmployeeEditComponent, {
       width: '1000px',
       maxWidth: '95vw',
@@ -265,7 +286,7 @@ openEditDialog(employee: Employee): void {
       if (result) {
         // Employee was updated successfully
         console.log('Employee updated:', result);
-        
+
         // Refresh your employee list or update the specific employee
         this.refreshEmployeeList();
         // OR
@@ -295,59 +316,59 @@ openEditDialog(employee: Employee): void {
     this.openEditDialog(employee);
   }
 
-deleteEmployee(employee: Employee): void {
-  const isDeleted = employee.status === 'deleted';
-  const action = isDeleted ? 'Recover' : 'Delete';
-  const status = isDeleted ? 'active' : 'delete';
+  deleteEmployee(employee: Employee): void {
+    const isDeleted = employee.status === 'deleted';
+    const action = isDeleted ? 'Recover' : 'Delete';
+    const status = isDeleted ? 'active' : 'delete';
 
-  if (isDeleted) {
-    // Directly recover without opening the dialog
-    this.employeeService.deleteEmployee(employee.employeeId, status)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          employee.status = 'active';
-          this.notificationService.showSuccess('Employee recovered successfully');
-        },
-        error: (error) => {
-          console.error('Failed to recover employee:', error);
-          this.notificationService.showError('Failed to recover employee');
+    if (isDeleted) {
+      // Directly recover without opening the dialog
+      this.employeeService.deleteEmployee(employee.employeeId, status)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            employee.status = 'active';
+            this.notificationService.showSuccess('Employee recovered successfully');
+          },
+          error: (error) => {
+            console.error('Failed to recover employee:', error);
+            this.notificationService.showError('Failed to recover employee');
+          }
+        });
+    } else {
+      // Show confirm dialog only for Delete
+      const confirmButtonText = 'Yes, Delete';
+      const dialogData: ConfirmDeleteData = {
+        title: `${action} Employee`,
+        message: `Are you sure you want to delete this employee?`,
+        itemName: `${employee.firstName} ${employee.lastName}`,
+        confirmButtonText
+      };
+
+      const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+        width: '450px',
+        data: dialogData,
+        panelClass: 'confirm-delete-dialog-panel'
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === true) {
+          this.employeeService.deleteEmployee(employee.employeeId, status)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                employee.status = 'deleted';
+                this.notificationService.showSuccess('Employee deleted successfully');
+              },
+              error: (error) => {
+                console.error('Failed to delete employee:', error);
+                this.notificationService.showError('Failed to delete employee');
+              }
+            });
         }
       });
-  } else {
-    // Show confirm dialog only for Delete
-    const confirmButtonText = 'Yes, Delete';
-    const dialogData: ConfirmDeleteData = {
-      title: `${action} Employee`,
-      message: `Are you sure you want to delete this employee?`,
-      itemName: `${employee.firstName} ${employee.lastName}`,
-      confirmButtonText
-    };
-
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '450px',
-      data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.employeeService.deleteEmployee(employee.employeeId, status)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              employee.status = 'deleted';
-              this.notificationService.showSuccess('Employee deleted successfully');
-            },
-            error: (error) => {
-              console.error('Failed to delete employee:', error);
-              this.notificationService.showError('Failed to delete employee');
-            }
-          });
-      }
-    });
+    }
   }
-}
 
 
 
@@ -355,7 +376,7 @@ deleteEmployee(employee: Employee): void {
   toggleEmployeeStatus(employee: Employee): void {
     const isActive = employee.status === 'active';
     const action = isActive ? 'deactivate' : 'activate';
-    const actionCall = isActive 
+    const actionCall = isActive
       ? this.employeeService.deactivateEmployee(employee.employeeId)
       : this.employeeService.activateEmployee(employee.employeeId);
 

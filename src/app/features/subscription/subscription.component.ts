@@ -21,6 +21,7 @@ interface PricingPlan {
   isPopular: boolean;
   isCustom: boolean;
   isCurrentPlan?: boolean;
+  isExpired?: boolean;
 }
 
 @Component({
@@ -46,6 +47,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
   error: string | null = null;
   activePlanId: string | null = null;
+  activeBillingCycle: string | null = null;
+  isSubscriptionExpired: boolean = false;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -74,7 +77,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     const plans$ = this.paymentService.getActiveSubscriptionPlans();
 
     // Pass a dummy ID because the backend overwrites it with the logged-in user's organizationId
-    const subscriptions$ = this.paymentService.getCompanySubscriptionsByCompanyId('00000000-0000-0000-0000-000000000000')
+    const subscriptions$ = this.paymentService.getCompanySubscriptionDetailsByCompanyId('00000000-0000-0000-0000-000000000000')
       .pipe(
         catchError(err => {
           console.error('Error fetching subscriptions or not authorized:', err);
@@ -89,16 +92,11 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({ plans, subscriptions }) => {
-          // 1. Process Active Subscriptions
-          const now = new Date();
-          const activeSubscription = subscriptions.find((sub: any) => {
-            if (!sub.endDate) return false;
-            const endDate = new Date(sub.endDate);
-            return endDate > now;
-          });
-
-          if (activeSubscription) {
-            this.activePlanId = activeSubscription.planId;
+          // 1. Process Active/Latest Subscription Details
+          if (subscriptions) {
+            this.activePlanId = subscriptions.planId;
+            this.activeBillingCycle = subscriptions.billingCycle?.toLowerCase();
+            this.isSubscriptionExpired = subscriptions.isExpired;
           }
 
           // 2. Process Plans
@@ -225,7 +223,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       features: features,
       isPopular: false, // Will be set separately
       isCustom: apiPlan.isCustom,
-      isCurrentPlan: this.activePlanId === apiPlan.planId
+      isCurrentPlan: this.activePlanId === apiPlan.planId && this.activeBillingCycle === this.billingCycle,
+      isExpired: this.activePlanId === apiPlan.planId && this.activeBillingCycle === this.billingCycle && this.isSubscriptionExpired
     };
   }
 
@@ -266,6 +265,15 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
         plan.price = this.billingCycle === 'monthly'
           ? (plan.monthlyPrice || 0)
           : (plan.annualPrice || 0);
+
+        // Update isCurrentPlan based on both planId AND billingCycle
+        plan.isCurrentPlan = this.activePlanId === plan.id &&
+          this.activeBillingCycle === this.billingCycle;
+
+        // Update isExpired for the displayed cycle
+        plan.isExpired = this.activePlanId === plan.id &&
+          this.activeBillingCycle === this.billingCycle &&
+          this.isSubscriptionExpired;
       }
     });
 
@@ -363,7 +371,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
 
     const request = {
       planId: plan.id,
-      status: 'Active',
+      status: 'active', // Lowercase to match typical DB conventions if needed
       billingCycle: this.billingCycle, // 'monthly' or 'annual'
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString()
@@ -373,11 +381,11 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.isLoading = false;
           this.notificationService.success({
             message: 'Subscription created successfully!',
             duration: 1000
           });
+          this.loadSubscriptionPlans();
         },
         error: (err) => {
           this.isLoading = false;
