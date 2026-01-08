@@ -501,6 +501,44 @@
       color: #d97706;
       border: 1px solid rgba(245, 158, 11, 0.2);
       box-shadow: 0 2px 4px rgba(245, 158, 11, 0.05);
+      white-space: normal;
+      width: fit-content;
+      max-width: 180px;
+      padding: 5px 12px;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0 6px;
+
+      &.expired {
+        background: rgba(220, 38, 38, 0.08) !important;
+        color: #dc2626 !important;
+        border-color: rgba(220, 38, 38, 0.2) !important;
+        box-shadow: 0 2px 4px rgba(220, 38, 38, 0.05) !important;
+        padding: 6px 10px;
+        max-width: 160px;
+
+        .plan-cycle {
+          flex-basis: 100%;
+          margin-left: 18px;
+          margin-top: 1px;
+        }
+      }
+
+      span {
+        display: inline-flex;
+        align-items: center;
+        line-height: 1.2;
+      }
+
+      .plan-cycle {
+        opacity: 0.85;
+        font-weight: 600;
+        text-transform: capitalize;
+        font-size: 0.65rem;
+        display: inline-flex;
+      }
     }
   }
 }
