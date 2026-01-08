@@ -70,6 +70,8 @@ export interface LeaveBalance {
   totalDays: number;
   usedDays: number;
   remainingDays: number;
+  carryForwardDays: number;
+  currentYearDays: number;
   color: string;
 }
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -40,6 +40,8 @@ import { User } from '../../../../core/models/auth.models';
   standalone: true,
   imports: [
     CommonModule,
+    NgIf,
+    NgFor,
     ReactiveFormsModule,
     RouterModule,
     MatCardModule,
@@ -175,6 +177,17 @@ import { User } from '../../../../core/models/auth.models';
                   <div class="stat-footer">
                     <mat-icon class="stat-indicator">{{getBalanceIcon(balance)}}</mat-icon>
                     <span>{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
+                  </div>
+                  <!-- Display carryforward days and current year days breakdown -->
+                  <div class="leave-breakdown">
+                    <div class="breakdown-item current-year-item">
+                      <span class="breakdown-label">Current Year:</span>
+                      <span class="breakdown-value">{{ balance.currentYearDays }}</span>
+                    </div>
+                    <div class="breakdown-item carry-forward-item" *ngIf="balance.carryForwardDays > 0">
+                      <span class="breakdown-label">Carry Forward:</span>
+                      <span class="breakdown-value">{{ balance.carryForwardDays }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
