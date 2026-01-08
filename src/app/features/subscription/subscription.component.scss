@@ -167,9 +167,11 @@
   border: 1px solid rgba(185, 223, 255, 0.3);
   border-radius: 16px;
   max-width: 100%;
+  position: relative;
+  overflow: hidden;
 
   &.elevated {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    // box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     border: 1px solid rgba(185, 223, 255, 0.4);
   }
 
@@ -239,6 +241,54 @@
     .check-icon {
       color: #4caf50;
     }
+  }
+
+  &.expired-plan {
+    background: linear-gradient(135deg, #fff5f5 0%, #fff1f1 100%) !important;
+    border: 2px solid #ef4444 !important;
+    box-shadow: 0 12px 40px rgba(239, 68, 68, 0.15) !important;
+
+    .plan-name-row h3 {
+      color: #991b1b;
+    }
+
+    .plan-price .price-amount {
+      color: #991b1b;
+    }
+
+    .check-icon {
+      color: #ef4444;
+    }
+
+    .pricing-header {
+      margin-top: 12px;
+    }
+  }
+}
+
+.renew-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  color: white;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -314,6 +364,24 @@
     &:disabled {
       color: white !important;
       background-color: #4caf50 !important;
+    }
+  }
+
+  .renew-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+
+    &:hover {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+      transform: translateY(-2px);
+    }
+
+    mat-icon {
+      margin-right: 8px;
     }
   }
 }

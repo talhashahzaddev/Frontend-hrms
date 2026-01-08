@@ -59,6 +59,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput!: ElementRef;
   currentUser: User | null = null;
   currentPlanName: string | null = null;
+  isSubscriptionExpired: boolean = false;
+  currentBillingCycle: string | null = null;
   isDarkMode = false;
 
   //Search variables
@@ -491,10 +493,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (details) => {
           this.currentPlanName = details ? details.planName : 'Trial Account';
+          this.isSubscriptionExpired = details ? details.isExpired : false;
+          this.currentBillingCycle = details ? details.billingCycle : null;
         },
         error: (err) => {
           console.error('Failed to load subscription details', err);
           this.currentPlanName = 'Trial Account';
+          this.isSubscriptionExpired = false;
+          this.currentBillingCycle = null;
         }
       });
   }

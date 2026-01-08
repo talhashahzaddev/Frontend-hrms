@@ -16,6 +16,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { Employee, Department, Position, CreateEmployeeRequest, UpdateEmployeeRequest } from '../../../../core/models/employee.models';
+import { PaymentService } from '../../../../core/services/payment.service';
 
 @Component({
   selector: 'app-employee-form',
@@ -41,6 +42,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   isEditMode = false;
   isSubmitting = false;
   isLoading = true;
+  hasActiveSubscription = true;
+  isSubscriptionExpired = false;
 
   departments: Department[] = [];
   positions: Position[] = [];
@@ -54,6 +57,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
+    private paymentService: PaymentService,
     private settingsService: SettingsService,
     private router: Router,
     private route: ActivatedRoute
@@ -62,6 +66,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.checkSubscription();
     // Get employee ID from route params if not provided as input
     if (!this.employeeId) {
       this.employeeId = this.route.snapshot.paramMap.get('id') || undefined;
@@ -69,17 +74,33 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
     this.isEditMode = !!this.employeeId;
     this.loadInitialData();
-    
+
     // Debug: Watch for changes in reportingManagerId
     this.employeeForm.get('reportingManagerId')?.valueChanges.subscribe(value => {
       console.log('Reporting Manager ID changed to:', value);
     });
-    
+
     // Debug: Check if the form control exists
     const reportingManagerControl = this.employeeForm.get('reportingManagerId');
     console.log('Reporting Manager control exists:', !!reportingManagerControl);
     console.log('Reporting Manager control value:', reportingManagerControl?.value);
     console.log('Reporting Manager control status:', reportingManagerControl?.status);
+  }
+
+  private checkSubscription(): void {
+    // Pass dummy UUID as backend overwrites it with token's organizationId
+    this.paymentService.getCompanySubscriptionDetailsByCompanyId('00000000-0000-0000-0000-000000000000')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (details) => {
+          this.hasActiveSubscription = !!details;
+          this.isSubscriptionExpired = details ? details.isExpired : false;
+        },
+        error: () => {
+          this.hasActiveSubscription = false;
+          this.isSubscriptionExpired = false;
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -156,11 +177,11 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         next: (results: any[]) => {
           // this.departments = results[0];
           // this.positions = results[1];
-        this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === results[3]?.employmentDetails?.departmentId));
-        this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === results[3]?.employmentDetails?.positionId));
+          this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === results[3]?.employmentDetails?.departmentId));
+          this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === results[3]?.employmentDetails?.positionId));
 
           this.managers = results[2];
-          
+
           // Debug logging for managers
           console.log('Managers loaded:', this.managers);
           if (this.managers.length > 0) {
@@ -168,7 +189,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
             console.log('First manager employeeId:', this.managers[0].employeeId);
             console.log('First manager employeeId type:', typeof this.managers[0].employeeId);
           }
-          
+
           // Debug: Check form control after managers are loaded
           const reportingManagerControl = this.employeeForm.get('reportingManagerId');
           console.log('After managers loaded - Reporting Manager control:', reportingManagerControl);
@@ -246,10 +267,10 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         sickDaysPerYear: 10,
         effectiveDate: formValue.hireDate.toISOString().split('T')[0],
         employmentStatus: 'active',
-//  Add these two:
+        //  Add these two:
         address: formValue.address,
-  emergencyContact: formValue.emergencyContact,
-  nationality: formValue.nationality,
+        emergencyContact: formValue.emergencyContact,
+        nationality: formValue.nationality,
 
 
       };
