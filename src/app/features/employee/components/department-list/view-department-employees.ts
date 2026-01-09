@@ -19,6 +19,8 @@ export interface DepartmentEmployee {
   email: string;
   status: string;
   hireDate: string | null;
+  position: string;
+  reportingManagerName: string;
 }
 
 /* =======================
@@ -115,6 +117,18 @@ export interface DepartmentEmployeesViewData {
           <td mat-cell *matCellDef="let emp">
             {{ emp.hireDate | date:'mediumDate' }}
           </td>
+        </ng-container>
+
+        <!-- Position -->
+        <ng-container matColumnDef="position">
+          <th mat-header-cell *matHeaderCellDef>Position</th>
+          <td mat-cell *matCellDef="let emp">{{ emp.position }}</td>
+        </ng-container>
+
+        <!-- Reporting Manager -->
+        <ng-container matColumnDef="reportingManager">
+          <th mat-header-cell *matHeaderCellDef>Reporting Manager</th>
+          <td mat-cell *matCellDef="let emp">{{ emp.reportingManagerName?.trim() || 'No Manager' }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -255,6 +269,8 @@ export class DepartmentEmployeeViewComponent {
     'employeeCode',
     'name',
     'email',
+    'position',
+    'reportingManager',
     'status',
     'hireDate'
   ];

@@ -244,10 +244,17 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch leave balance');
           }
-          return response.data!;
+
+          // Calculate current year days by subtracting carryforward days from total days
+          return response.data!.map(balance => ({
+            ...balance,
+            currentYearDays: balance.totalDays - balance.carryForwardDays
+          }));
         })
       );
-  }
+}
+
+
 
   // getEmployeeLeaveBalance(employeeId: string): Observable<LeaveBalance[]> {
   //   let params = new HttpParams().set('employeeId', employeeId);

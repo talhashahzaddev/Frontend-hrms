@@ -28,6 +28,8 @@ export interface DepartmentEmployee {
   email: string;
   status: string;
   hireDate: string | null; // ISO string from backend
+  position: string;
+  reportingManagerName: string;
 }
 
 

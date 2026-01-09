@@ -179,6 +179,57 @@
             height: 16px;
           }
         }
+
+        .leave-breakdown {
+          margin-top: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+
+          .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            padding: 12px 14px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            min-height: 40px;
+            transition: all 0.3s ease;
+            margin-bottom: 4px;
+
+            &.current-year-item {
+              box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+              
+              &:hover {
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+                transform: translateY(-1px);
+              }
+            }
+
+            &.carry-forward-item {
+              box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+              
+              &:hover {
+                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+                transform: translateY(-1px);
+              }
+            }
+
+            .breakdown-label {
+              color: #6b7280;
+              font-weight: 600;
+              flex-shrink: 0;
+              margin-right: 10px;
+            }
+
+            .breakdown-value {
+              color: #1f2937;
+              font-weight: 700;
+              white-space: nowrap;
+            }
+          }
+        }
       }
     }
 
@@ -483,6 +534,38 @@
 
             span {
               color: white !important;
+            }
+          }
+
+          .leave-breakdown {
+            .breakdown-item {
+              background: rgba(0, 0, 0, 0.15) !important;
+
+              &.current-year-item {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 3px rgba(255, 255, 255, 0.15) !important;
+                
+                &:hover {
+                  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
+                  transform: translateY(-1px);
+                }
+              }
+
+              &.carry-forward-item {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.15) !important;
+                
+                &:hover {
+                  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
+                  transform: translateY(-1px);
+                }
+              }
+
+              .breakdown-label {
+                color: rgba(255, 255, 255, 0.9) !important;
+              }
+
+              .breakdown-value {
+                color: white !important;
+              }
             }
           }
         }
