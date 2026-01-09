@@ -192,35 +192,31 @@
             align-items: center;
             font-size: 13px;
             padding: 12px 14px;
-            background: rgba(0, 0, 0, 0.08);
             border-radius: 8px;
             min-height: 40px;
             transition: all 0.3s ease;
             margin-bottom: 4px;
-
-            &.current-year-item {
-              box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.2);
-              
-              &:hover {
-                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.3);
-                transform: translateY(-1px);
-              }
-            }
-
-            &.carry-forward-item {
-              box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.2);
-              
-              &:hover {
-                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.3);
-                transform: translateY(-1px);
-              }
-            }
 
             .breakdown-label {
               color: #6b7280;
               font-weight: 600;
               flex-shrink: 0;
               margin-right: 10px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+
+              .breakdown-icon {
+                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                color: #9ca3af;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                vertical-align: middle;
+                margin-bottom: 1px;
+              }
             }
 
             .breakdown-value {
@@ -245,6 +241,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -275,6 +272,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -305,6 +303,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -335,6 +334,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -365,6 +365,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -539,32 +540,40 @@
 
           .leave-breakdown {
             .breakdown-item {
-              background: rgba(0, 0, 0, 0.15) !important;
-
-              &.current-year-item {
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 3px rgba(255, 255, 255, 0.15) !important;
-                
-                &:hover {
-                  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
-                  transform: translateY(-1px);
-                }
-              }
-
-              &.carry-forward-item {
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.15) !important;
-                
-                &:hover {
-                  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.2) !important;
-                  transform: translateY(-1px);
-                }
-              }
+              display: flex !important;
+              justify-content: flex-start !important;
+              align-items: center !important;
+              flex-wrap: nowrap !important;
+              gap: 8px !important;
 
               .breakdown-label {
-                color: rgba(255, 255, 255, 0.9) !important;
+                color: #ffffff !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+                font-size: 13px !important;
+                font-weight: 500 !important;
+
+                .breakdown-icon {
+                  color: rgba(255, 255, 255, 0.9) !important;
+                  font-size: 16px !important;
+                  width: 16px !important;
+                  height: 16px !important;
+                  line-height: 1 !important;
+                  flex-shrink: 0 !important;
+                  display: inline-flex !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+                }
               }
 
               .breakdown-value {
-                color: white !important;
+                color: #ffffff !important;
+                font-weight: 700 !important;
+                white-space: nowrap !important;
+                font-size: 13px !important;
               }
             }
           }
@@ -584,6 +593,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -614,6 +624,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -644,6 +655,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -674,6 +686,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -704,6 +717,7 @@
         }
 
         .stat-details {
+
           .stat-label,
           .stat-value {
             color: white;
@@ -768,25 +782,25 @@
 }
 
 // Requests Table
-  .table-container {
-    overflow-x: auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    margin-top: 16px;
+.table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-top: 16px;
 
-    .pagination-container {
-      padding: 16px;
-      border-top: 1px solid #e5e7eb;
-      background: #f9fafb;
+  .pagination-container {
+    padding: 16px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
 
-      ::ng-deep {
-        .mat-mdc-paginator {
-          background: transparent;
-        }
+    ::ng-deep {
+      .mat-mdc-paginator {
+        background: transparent;
       }
     }
   }
+}
 
 .leave-requests-table {
   width: 100%;
@@ -952,14 +966,18 @@
         flex-shrink: 0;
         box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
       }
+
       .employee-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: fill;     /* keeps full image visible without zoom/cropping */
-  border-radius: 12px;     /* matches your avatar rounding */
-  display: block;
-  background-color: #cfd8dc; /* optional: fill empty space if aspect ratio differs */
-}
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        /* keeps full image visible without zoom/cropping */
+        border-radius: 12px;
+        /* matches your avatar rounding */
+        display: block;
+        background-color: #cfd8dc;
+        /* optional: fill empty space if aspect ratio differs */
+      }
 
 
       .employee-details {
@@ -1236,6 +1254,7 @@
       font-size: 13px;
 
       ::ng-deep {
+
         .mat-mdc-header-cell,
         .mat-mdc-cell {
           padding: 12px 8px;
@@ -1291,7 +1310,7 @@
       }
     }
   }
-  
+
 
 }
 
@@ -1681,6 +1700,7 @@
 
     .team-leaves-table {
       ::ng-deep {
+
         .mat-mdc-header-cell,
         .mat-mdc-cell {
           padding: 12px 8px;

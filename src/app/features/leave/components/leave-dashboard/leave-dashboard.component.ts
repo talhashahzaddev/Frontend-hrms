@@ -40,8 +40,6 @@ import { User } from '../../../../core/models/auth.models';
   standalone: true,
   imports: [
     CommonModule,
-    NgIf,
-    NgFor,
     ReactiveFormsModule,
     RouterModule,
     MatCardModule,
@@ -178,14 +176,20 @@ import { User } from '../../../../core/models/auth.models';
                     <mat-icon class="stat-indicator">{{getBalanceIcon(balance)}}</mat-icon>
                     <span>{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
                   </div>
-                  <!-- Display carryforward days and current year days breakdown -->
+                  <!-- Display previous year and current year days breakdown -->
                   <div class="leave-breakdown">
                     <div class="breakdown-item current-year-item">
-                      <span class="breakdown-label">Current Year:</span>
+                      <span class="breakdown-label">
+                        <mat-icon class="breakdown-icon">today</mat-icon>
+                        Current Year:
+                      </span>
                       <span class="breakdown-value">{{ balance.currentYearDays }}</span>
                     </div>
                     <div class="breakdown-item carry-forward-item" *ngIf="balance.carryForwardDays > 0">
-                      <span class="breakdown-label">Carry Forward:</span>
+                      <span class="breakdown-label">
+                        <mat-icon class="breakdown-icon">history</mat-icon>
+                        Previous Year:
+                      </span>
                       <span class="breakdown-value">{{ balance.carryForwardDays }}</span>
                     </div>
                   </div>
