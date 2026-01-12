@@ -395,7 +395,11 @@ export class PayrollCalculationComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll periods:', error);
-          this.notificationService.showError('Failed to load payroll periods');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll periods';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -447,7 +451,11 @@ export class PayrollCalculationComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Calculation error:', error);
-          this.handleCalculationError('Failed to calculate payroll');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to calculate payroll';
+          this.handleCalculationError(errorMessage);
         }
       });
   }
@@ -529,6 +537,11 @@ export class PayrollCalculationComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading calculation summary:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load calculation summary';
+          this.notificationService.showError(errorMessage);
         }
       });
   }

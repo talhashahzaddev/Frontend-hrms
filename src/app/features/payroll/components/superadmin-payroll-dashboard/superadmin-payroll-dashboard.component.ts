@@ -32,6 +32,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollPeriod, PayrollEntry, PayrollStatus, PayrollEntryStatus } from '../../../../core/models/payroll.models';
 import { User } from '../../../../core/models/auth.models';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-superadmin-payroll-dashboard',
@@ -104,7 +105,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {
     this.filterForm = this.fb.group({
       periodId: [''],
@@ -124,7 +126,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading current user:', error);
-        this.showNotification('Failed to load user information.', 'error');
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load user information.';
+        this.showNotification(errorMessage, 'error');
       }
     });
   }
@@ -138,6 +141,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading organization currency:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load organization currency.';
+          this.showNotification(errorMessage, 'error');
           this.organizationCurrency = 'USD';
         }
       });
@@ -170,7 +175,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll statistics:', error);
-          this.showNotification('Failed to load payroll statistics.', 'error');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load payroll statistics.';
+          this.showNotification(errorMessage, 'error');
           this.loading = false;
         }
       });
@@ -196,7 +202,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll periods:', error);
-          this.showNotification('Failed to load payroll periods.', 'error');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load payroll periods.';
+          this.showNotification(errorMessage, 'error');
         }
       });
   }
@@ -218,7 +225,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading recent entries:', error);
-          this.showNotification('Failed to load recent entries.', 'error');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load recent entries.';
+          this.showNotification(errorMessage, 'error');
         }
       });
   }
@@ -235,7 +243,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading department breakdown:', error);
-          this.showNotification('Failed to load payroll statistics.', 'error');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load payroll statistics.';
+          this.showNotification(errorMessage, 'error');
         }
       });
   }
@@ -304,7 +313,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error approving entry:', error);
-          this.showNotification('Failed to approve payroll entry.', 'error');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to approve payroll entry.';
+          this.showNotification(errorMessage, 'error');
           this.loading = false;
         }
       });
@@ -323,7 +333,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error rejecting entry:', error);
-          this.showNotification('Failed to reject payroll entry.', 'error');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to reject payroll entry.';
+          this.showNotification(errorMessage, 'error');
           this.loading = false;
         }
       });
@@ -350,7 +361,8 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         console.error('Error exporting payroll data:', error);
-        this.showNotification('Failed to export payroll data', 'error');
+        const errorMessage = error?.error?.message || error?.message || 'Failed to export payroll data';
+        this.showNotification(errorMessage, 'error');
         this.loading = false;
       }
     });
@@ -410,11 +422,15 @@ export class SuperadminPayrollDashboardComponent implements OnInit, OnDestroy {
   }
 
   private showNotification(message: string, type: 'success' | 'error' | 'info') {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      horizontalPosition: 'right',
-      verticalPosition: 'top',
-      panelClass: [`snackbar-${type}`]
-    });
+    switch (type) {
+      case 'success':
+        this.notificationService.showSuccess(message);
+        break;
+      case 'error':
+        this.notificationService.showError(message);
+        break;
+      default:
+        this.notificationService.showInfo(message);
+    }
   }
 }

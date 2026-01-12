@@ -250,7 +250,8 @@ export class LeaveCalendarComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading calendar data:', error);
-          this.notificationService.showError('Failed to load calendar data');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load calendar data';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }

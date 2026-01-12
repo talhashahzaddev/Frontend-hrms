@@ -23,6 +23,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.models';
 import { User } from '../../../../core/models/auth.models';
 
@@ -86,7 +87,7 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private settingsService: SettingsService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar,
+    private notificationService: NotificationService,
     private dialog: MatDialog,
     private router: Router
   ) {
@@ -142,7 +143,7 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
 
   loadSalaryHistory(): void {
     if (!this.currentUser) {
-      this.showError('User not found. Please login again.');
+      this.notificationService.showError('User not found. Please login again.');
       return;
     }
 
@@ -164,7 +165,11 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         console.error('Error loading salary history:', error);
-        this.showError('Failed to load salary history. Please try again.');
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Failed to load salary history. Please try again.';
+        this.notificationService.showError(errorMessage);
         this.loading = false;
       }
     });
@@ -179,6 +184,11 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           console.error('Error loading payroll periods:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll periods.';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -255,7 +265,11 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
         },
         error: (error: any) => {
           console.error('Error downloading payslip:', error);
-          this.showError('Failed to download payslip. Please try again.');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to download payslip. Please try again.';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -273,7 +287,7 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
 
   exportToExcel(): void {
     // TODO: Implement Excel export functionality
-    this.showInfo('Excel export feature coming soon!');
+    this.notificationService.showInfo('Excel export feature coming soon!');
   }
 
   refreshData(): void {
@@ -297,16 +311,10 @@ export class EmployeeSalaryHistoryComponent implements OnInit, OnDestroy {
   }
 
   private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
+    this.notificationService.showError(message);
   }
 
   private showInfo(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['info-snackbar']
-    });
+    this.notificationService.showInfo(message);
   }
 }

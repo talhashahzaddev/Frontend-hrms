@@ -396,7 +396,11 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll data:', error);
-          this.notificationService.showError('Failed to load payroll data');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll data';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -436,7 +440,11 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
         error: (error) => {
           this.isLoading = false;
           console.error('Error calculating payroll:', error);
-          this.notificationService.showError('Failed to calculate payroll');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to calculate payroll';
+          this.notificationService.showError(errorMessage);
           this.cdr.markForCheck();
         }
       });
@@ -459,11 +467,15 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
             this.notificationService.showSuccess('Payroll processed successfully');
             this.loadInitialData();
           },
-          error: (error) => {
-            console.error('Error processing payroll:', error);
-            this.notificationService.showError('Failed to process payroll');
-          }
-        });
+        error: (error) => {
+          console.error('Error processing payroll:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to process payroll';
+          this.notificationService.showError(errorMessage);
+        }
+      });
     }
   }
 
@@ -489,7 +501,11 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Export error:', error);
-          this.notificationService.showError('Failed to export payroll report');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to export payroll report';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -511,7 +527,11 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Download error:', error);
-          this.notificationService.showError('Failed to download payslip');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to download payslip';
+          this.notificationService.showError(errorMessage);
         }
       });
   }

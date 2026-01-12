@@ -345,6 +345,11 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading periods:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll periods';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -374,7 +379,11 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payslips:', error);
-          this.notificationService.showError('Failed to load payslips');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payslips';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -427,7 +436,11 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Download error:', error);
-          this.notificationService.showError('Failed to download payslip');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to download payslip';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -442,7 +455,11 @@ export class EmployeePayslipComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Email error:', error);
-          this.notificationService.showError('Failed to email payslip');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to email payslip';
+          this.notificationService.showError(errorMessage);
         }
       });
   }

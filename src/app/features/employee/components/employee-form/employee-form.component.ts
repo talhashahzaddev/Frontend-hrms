@@ -313,9 +313,28 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       console.log('Final request object:', request);
       console.log('Final reportingManagerId in request:', request.reportingManagerId);
 
-  //   
-  
-  const operation = this.isEditMode
+      // const operation = this.isEditMode
+      //   ? this.employeeService.updateEmployee(formValue)
+      //   : this.employeeService.createEmployee(request as CreateEmployeeRequest);
+
+      // operation
+      //   .pipe(takeUntil(this.destroy$))
+      //   .subscribe({
+      //     next: () => {
+      //       this.notificationService.showSuccess(
+      //         `Employee ${this.isEditMode ? 'updated' : 'created'} successfully`
+      //       );
+      //       this.router.navigate(['/employees']);
+      //     },
+      //     error: (error) => {
+      //       console.error('Error saving employee:', error);
+      //       this.notificationService.showError(
+      //         `Failed to ${this.isEditMode ? 'update' : 'create'} employee`
+      //       );
+      //       this.isSubmitting = false;
+      //     }
+      //   });
+const operation = this.isEditMode
   ? this.employeeService.updateEmployee(formValue)
   : this.employeeService.createEmployee(request as CreateEmployeeRequest);
 

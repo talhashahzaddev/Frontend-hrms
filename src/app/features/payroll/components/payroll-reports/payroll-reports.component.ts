@@ -263,6 +263,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading periods:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll periods';
+          this.notificationService.showError(errorMessage);
           if (callback) {
             callback();
           }
@@ -280,6 +285,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading departments:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load departments';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -367,7 +377,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Export error:', error);
-          this.notificationService.showError('Failed to export report');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to export report';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -495,6 +509,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error loading report data:', error);
           this.isLoading = false;
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load report data';
+          this.notificationService.showError(errorMessage);
           this.cdr.markForCheck();
         }
       });
@@ -517,6 +536,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading statistics:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load statistics';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -534,6 +558,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading department breakdown:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load department breakdown';
+          this.notificationService.showError(errorMessage);
         }
       });
   }

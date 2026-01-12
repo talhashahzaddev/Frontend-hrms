@@ -286,7 +286,8 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading leave data:', error);
-          this.notificationService.showError('Failed to load leave data');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load leave data';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
         }
       });
