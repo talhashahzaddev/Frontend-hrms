@@ -129,7 +129,11 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.assignShiftForm.invalid) return;
+    if (this.assignShiftForm.invalid) {
+      this.markFormGroupTouched(this.assignShiftForm);
+      this.notification.showError('Please correct the highlighted fields');
+      return;
+    }
 
     this.isSubmitting = true;
     const payload = this.assignShiftForm.value;
@@ -145,9 +149,9 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
         this.dialogRef.close('assigned');
           
         },
-        error: (err) => {
-          console.error(err);
-          this.notification.showError('Failed to assign shift');
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to assign shift';
+          this.notification.showError(errorMessage);
           this.isSubmitting = false;
         }
       });
@@ -156,5 +160,15 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 }

@@ -91,7 +91,11 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.swapForm.invalid || !this.currentUser) return;
+    if (this.swapForm.invalid || !this.currentUser) {
+      this.markFormGroupTouched(this.swapForm);
+      this.notification.showError('Please correct the highlighted fields');
+      return;
+    }
 
     this.isSubmitting = true;
 
@@ -109,9 +113,9 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
           this.isSubmitting = false;
           this.dialogRef.close('swapped');
         },
-        error: (err) => {
-          console.error(err);
-          this.notification.showError('Failed to submit shift swap request');
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to submit shift swap request';
+          this.notification.showError(errorMessage);
           this.isSubmitting = false;
         }
       });
@@ -134,12 +138,25 @@ private loadCurrentShift(): void {
 
         console.log('Current shift loaded:', this.currentShift);
       },
-      error: (err) => console.error(err)
+      error: (error) => {
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load current shift';
+        this.notification.showError(errorMessage);
+      }
     });
 }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 }

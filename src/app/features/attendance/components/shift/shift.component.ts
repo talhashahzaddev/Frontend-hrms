@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 // Material Imports
@@ -16,7 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 // Components and Services
 import { AssignShiftComponent } from '../assign-shift/assign-shift.component';
@@ -48,7 +47,6 @@ import { PerformanceService } from '@/app/features/performance/services/performa
     MatChipsModule,
     MatTabsModule,
     MatDialogModule,
-    MatSnackBarModule
   ],
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss']
@@ -73,7 +71,7 @@ export class ShiftComponent implements OnInit {
     private authService: AuthService,
      private performanceService: PerformanceService,
     private employeeService: EmployeeService,
-    private snackBar: MatSnackBar
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -135,7 +133,10 @@ if(this.isManager){
   loadAllShifts(): void {
     this.attendanceService.getShifts().subscribe({
       next: (data: any[]) => (this.shifts = data),
-      error: (err: any) => console.error('Error loading shifts:', err)
+      error: (error: any) => {
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load shifts';
+        this.notification.showError(errorMessage);
+      }
     });
   }
 
@@ -152,7 +153,10 @@ if(this.isManager){
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (employees: EmployeeShift[]) => (this.employeesByShift = employees),
-      error: (err: any) => console.error('Error loading employees:', err)
+      error: (error: any) => {
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load employees';
+        this.notification.showError(errorMessage);
+      }
     });
 }
 
@@ -168,8 +172,8 @@ private loadAllEmployees(): void {
           this.allEmployees = res?.success ? res.data : [];
           this.isLoading = false;
         },
-        error: () => {
-          console.error('❌ Failed to load manager team employees');
+      error: () => {
+          this.notification.showError('Failed to load team employees');
           this.allEmployees = [];
           this.isLoading = false;
         }
@@ -195,7 +199,7 @@ private loadAllEmployees(): void {
         this.isLoading = false;
       },
       error: () => {
-        console.error('❌ Failed to load employees');
+        this.notification.showError('Failed to load employees');
         this.allEmployees = [];
         this.isLoading = false;
       }
@@ -210,7 +214,10 @@ private loadSuperAdminPendingSwaps(): void {
       this.superAdminPendingSwaps = response.data; // assign data
       console.log('Super Admin pending swaps:', this.superAdminPendingSwaps);
     },
-    error: (err: any) => console.error('Error loading admin pending swaps:', err)
+    error: (error: any) => {
+      const errorMessage = error?.error?.message || error?.message || 'Failed to load pending swaps';
+      this.notification.showError(errorMessage);
+    }
   });
 }
 
@@ -232,11 +239,15 @@ approveRequest(swap: PendingShiftSwap): void {
         console.log('Shift swap approved:', res.message);
         this.superAdminPendingSwaps = this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
         this.loadSuperAdminPendingSwaps(); // ✅ reload updated list
+        this.notification.showSuccess('Shift swap approved');
       } else {
-        console.error('Failed to approve:', res.message);
+        this.notification.showError(res.message || 'Failed to approve shift swap');
       }
     },
-    error: (err) => console.error('Error approving shift swap:', err)
+    error: (error) => {
+      const errorMessage = error?.error?.message || error?.message || 'Error approving shift swap';
+      this.notification.showError(errorMessage);
+    }
   });
 }
 
@@ -259,11 +270,15 @@ rejectRequest(swap: PendingShiftSwap): void {
         console.log('Shift swap rejected:', res.message);
         this.superAdminPendingSwaps = this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
         this.loadSuperAdminPendingSwaps(); // ✅ reload updated list
+        this.notification.showSuccess('Shift swap rejected');
       } else {
-        console.error('Failed to reject:', res.message);
+        this.notification.showError(res.message || 'Failed to reject shift swap');
       }
     },
-    error: (err) => console.error('Error rejecting shift swap:', err)
+    error: (error) => {
+      const errorMessage = error?.error?.message || error?.message || 'Error rejecting shift swap';
+      this.notification.showError(errorMessage);
+    }
   });
 }
 
@@ -276,7 +291,10 @@ rejectRequest(swap: PendingShiftSwap): void {
       this.employeeShiftSwaps = response.data; // ✅ assign the data array
       console.log('Employee shift swaps:', this.employeeShiftSwaps);
     },
-    error: (err: any) => console.error('Error loading employee shift swaps:', err)
+    error: (error: any) => {
+      const errorMessage = error?.error?.message || error?.message || 'Failed to load employee shift swaps';
+      this.notification.showError(errorMessage);
+    }
   });
 }
 private loadEmployeeCurrentShift(): void {
@@ -287,7 +305,10 @@ this.attendanceService.getCurrentShift(this.currentUser.userId).subscribe({
     if (!res?.data) return;
     this.currentShift = res.data; // ✅ assign the nested object
   },
-  error: (err) => console.error(err)
+  error: (error) => {
+    const errorMessage = error?.error?.message || error?.message || 'Failed to load current shift';
+    this.notification.showError(errorMessage);
+  }
 });
 
  }
@@ -319,18 +340,12 @@ onDeleteShift(shift: ShiftDto): void {
     if (result === true) {
       this.attendanceService.deleteShift(shift.shiftId).subscribe({
         next: (res: any) => {
-          this.snackBar.open('Shift deleted successfully', 'Close', { 
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
+          this.notification.showSuccess('Shift deleted successfully');
           this.loadAllShifts(); // refresh table
         },
         error: (err) => {
-          console.error('Error deleting shift:', err);
-          this.snackBar.open('Failed to delete shift', 'Close', { 
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          });
+          const errorMessage = err?.error?.message || err?.message || 'Failed to delete shift';
+          this.notification.showError(errorMessage);
         }
       });
     }

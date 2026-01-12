@@ -130,47 +130,50 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-  // this.submitted = true;
-
-  // Proceed only if both forms are valid
+  this.submitted = true;
   if (this.userForm.valid && this.organizationForm.valid) {
     this.isLoading = true;
-
     const organizationData = this.organizationForm.value;
     const userData = this.userForm.value;
-
     const registerRequest: RegisterRequest = {
       companyName: organizationData.companyName,
       companySize: organizationData.companySize,
       website: organizationData.website,
-      currency: organizationData.currency || 'USD', // Include currency, default to USD
+      currency: organizationData.currency || 'USD',
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
       password: userData.password
     };
-
     this.authService.register(registerRequest)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: () => {
           this.isLoading = false;
-          this.notificationService.showSuccess(
-            'Registration successful! Welcome to your new HRMS system.'
-          );
+          this.notificationService.showSuccess('Registration successful! Welcome to your new HRMS system.');
           const redirectUrl = sessionStorage.getItem('redirectUrl') || '/dashboard';
           sessionStorage.removeItem('redirectUrl');
           this.router.navigate([redirectUrl]);
         },
         error: (error) => {
           this.isLoading = false;
-          const errorMessage = error?.error?.message || 'Registration failed. Please try again.';
-          this.notificationService.showError(errorMessage);
+          const status = (error && typeof error === 'object' && 'status' in error) ? (error as any).status : 0;
+          const errorMessage = error?.error?.message || error?.message || '';
+          if (status === 400 && /already exists/i.test(errorMessage)) {
+            const emailCtrl = this.userForm.get('email');
+            emailCtrl?.setErrors({ conflict: true });
+            emailCtrl?.markAsTouched();
+            this.notificationService.showError('A user with this email already exists');
+          } else {
+            this.notificationService.showError(errorMessage || 'Registration failed. Please try again.');
+          }
         }
       });
+  } else {
+    this.markFormGroupTouched(this.userForm);
+    this.markFormGroupTouched(this.organizationForm);
+    this.notificationService.showError('Please correct the highlighted fields');
   }
-
-  // ❌ No "else" section — no popup, no markFormGroupTouched, no warnings triggered
 }
 
 
@@ -209,6 +212,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
     if (control?.hasError('invalidUrl')) {
       return 'Please enter a valid URL';
+    }
+    if (fieldName === 'email' && control?.hasError('conflict')) {
+      return 'A user with this email already exists';
     }
     if (this.userForm.hasError('passwordMismatch') && fieldName === 'confirmPassword') {
       return 'Passwords do not match';

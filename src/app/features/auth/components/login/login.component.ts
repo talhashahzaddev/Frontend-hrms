@@ -38,6 +38,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginForm!: FormGroup;
   hidePassword = true;
   isLoading = false;
+  private isSubmitting = false;
 
   private destroy$ = new Subject<void>();
 
@@ -61,27 +62,24 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid && !this.isLoading) {
-      const credentials = this.loginForm.value;
-
-      this.authService.login(credentials).subscribe({
+    if (this.loginForm.invalid || this.isSubmitting) {
+      this.markFormGroupTouched();
+      this.notificationService.showError('Please correct the highlighted fields');
+      return;
+    }
+    this.isSubmitting = true;
+    const credentials = this.loginForm.value;
+    this.authService.login(credentials)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
         next: (response) => {
-          // Check if domain is returned and redirect to correct subdomain
           if (response.domain) {
             const targetSubdomain = this.extractSubdomainFromDomain(response.domain);
             const currentSubdomain = this.getCurrentSubdomain();
-
-            // Only redirect if we're not already on the target subdomain
             if (targetSubdomain && targetSubdomain !== currentSubdomain) {
-              // Encode auth data for transfer via URL
-              // We use URL transfer because sessionStorage is not shared across subdomains
               const authData = encodeURIComponent(JSON.stringify(response));
-
-              // Remove previously stored redirect URL (from guard)
               let redirectUrl = sessionStorage.getItem('redirectUrl');
               sessionStorage.removeItem('redirectUrl');
-
-              // Determine redirect based on role if no stored redirect
               if (!redirectUrl) {
                 if (response.roleName === 'Employee' || response.roleName === 'Manager') {
                   redirectUrl = '/performance/dashboard';
@@ -89,29 +87,17 @@ export class LoginComponent implements OnInit, OnDestroy {
                   redirectUrl = '/dashboard';
                 }
               }
-
-              // Append auth transfer param
               const separator = redirectUrl.includes('?') ? '&' : '?';
               redirectUrl += `${separator}auth_transfer=${authData}`;
-
-              // Redirect to user's organization subdomain
+              this.isSubmitting = false;
               this.redirectToSubdomain(targetSubdomain, redirectUrl);
               return;
             }
           }
-
-          // No subdomain redirect needed - complete login normally
-          // This happens when user is already on their correct subdomain
-          // Set auth data directly since no redirect will occur
           this.authService.setAuthDataDirectly(response);
-
           this.notificationService.loginSuccess(response.firstName);
-
-          // Remove previously stored redirect URL (from guard)
           let redirectUrl = sessionStorage.getItem('redirectUrl');
           sessionStorage.removeItem('redirectUrl');
-
-          // Determine redirect based on role if no stored redirect
           if (!redirectUrl) {
             if (response.roleName === 'Employee' || response.roleName === 'Manager') {
               redirectUrl = '/performance/dashboard';
@@ -119,20 +105,22 @@ export class LoginComponent implements OnInit, OnDestroy {
               redirectUrl = '/dashboard';
             }
           }
-
-          // Navigate to dashboard
+          this.isSubmitting = false;
           this.router.navigate([redirectUrl]);
         },
         error: (error) => {
-          this.notificationService.error({
-            title: 'Login Failed',
-            message: error.message || 'Invalid email or password'
-          });
+          const status = (error && typeof error === 'object' && 'status' in error) ? (error as any).status : 0;
+          const message = error?.error?.message || error?.message || '';
+          if (status === 401 || /invalid email or password/i.test(message)) {
+            this.setPasswordAuthError('Invalid email or password');
+          } else if (status === 404 || /email not found/i.test(message)) {
+            this.setEmailAuthError('Email not found');
+          } else {
+            this.notificationService.showError(message || 'Login failed. Please try again.');
+          }
+          this.isSubmitting = false;
         }
       });
-    } else {
-      this.markFormGroupTouched();
-    }
   }
 
   /**
@@ -291,7 +279,21 @@ export class LoginComponent implements OnInit, OnDestroy {
       return `Password must be at least ${minLength} characters long`;
     }
 
+    if (field?.hasError('invalidCredentials')) {
+      return 'Invalid email or password';
+    }
+    if (field?.hasError('notFound')) {
+      return 'Email not found';
+    }
+
     return '';
+  }
+
+  private setEmailAuthError(message?: string): void {
+    const control = this.loginForm.get('email');
+    control?.setErrors({ notFound: true });
+    control?.markAsTouched();
+    this.notificationService.showError(message || 'Email not found');
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -328,5 +330,12 @@ export class LoginComponent implements OnInit, OnDestroy {
       password: 'Password'
     };
     return fieldNames[fieldName] || fieldName;
+  }
+
+  private setPasswordAuthError(message?: string): void {
+    const control = this.loginForm.get('password');
+    control?.setErrors({ invalidCredentials: true });
+    control?.markAsTouched();
+    this.notificationService.showError(message || 'Incorrect password');
   }
 }
