@@ -66,6 +66,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeApp();
     this.handleRouteChanges();
+    this.setFavicon();
 
     // 🔥 Subscribe to authentication/user changes
     // this.authService.isAuthenticated$
@@ -133,6 +134,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
         // Update page title based on route
         this.updatePageTitle(url);
+
+        // Ensure favicon is set after navigation
+        this.setFavicon();
 
         // Scroll to top on route change
         window.scrollTo(0, 0);
@@ -206,6 +210,44 @@ export class AppComponent implements OnInit, OnDestroy {
       document.title = `${routeTitles[routeTitle]} - ${baseTitle}`;
     } else {
       document.title = baseTitle;
+    }
+  }
+
+  private setFavicon(): void {
+    // Remove ALL existing favicon links (including favicon.ico references)
+    const existingLinks = document.querySelectorAll('link[rel*="icon"], link[rel*="shortcut"]');
+    existingLinks.forEach(link => link.remove());
+
+    // Get base href to construct correct path
+    const baseHref = document.querySelector('base')?.getAttribute('href') || '/';
+    const faviconPath = `${baseHref}hub.png?v=${Date.now()}`; // Cache busting
+
+    // Create and add new favicon links with priority order
+    const faviconSizes = [
+      { sizes: '512x512', rel: 'icon' },
+      { sizes: '192x192', rel: 'icon' },
+      { sizes: '32x32', rel: 'icon' },
+      { sizes: '16x16', rel: 'icon' },
+      { rel: 'icon' }, // Default icon without sizes
+      { rel: 'shortcut icon' },
+      { sizes: '180x180', rel: 'apple-touch-icon' }
+    ];
+
+    faviconSizes.forEach(fav => {
+      const link = document.createElement('link');
+      link.rel = fav.rel || 'icon';
+      link.type = 'image/png';
+      link.href = faviconPath;
+      if (fav.sizes) {
+        link.setAttribute('sizes', fav.sizes);
+      }
+      document.head.appendChild(link);
+    });
+
+    // Force browser to reload favicon by updating the link
+    const faviconLink = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+    if (faviconLink) {
+      faviconLink.href = faviconPath;
     }
   }
 
