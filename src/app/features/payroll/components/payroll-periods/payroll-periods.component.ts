@@ -331,7 +331,11 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll periods:', error);
-          this.notificationService.showError('Failed to load payroll periods');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll periods';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -403,7 +407,11 @@ export class PayrollPeriodsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Export error:', error);
-          this.notificationService.showError('Failed to export report');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to export report';
+          this.notificationService.showError(errorMessage);
         }
       });
   }

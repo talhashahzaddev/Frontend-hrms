@@ -36,6 +36,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   forgotPasswordForm!: FormGroup;
   isLoading = false;
   isEmailSent = false;
+  private isSubmitting = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -59,34 +60,40 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.forgotPasswordForm.valid) {
-      this.isLoading = true;
-      
-      const forgotPasswordRequest: ForgotPasswordRequest = {
-        email: this.forgotPasswordForm.get('email')?.value
-      };
-
-      this.authService.forgotPassword(forgotPasswordRequest)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            this.isLoading = false;
-            this.isEmailSent = true;
-            this.notificationService.showSuccess(
-              'Password reset instructions have been sent to your email address.'
-            );
-          },
-          error: (error) => {
-            this.isLoading = false;
-            const errorMessage = error?.error?.message || 
-              'Failed to send reset instructions. Please try again.';
-            this.notificationService.showError(errorMessage);
-          }
-        });
-    } else {
+    if (this.forgotPasswordForm.invalid || this.isSubmitting) {
       this.markFormGroupTouched();
       this.notificationService.showError('Please enter a valid email address.');
+      return;
     }
+    this.isSubmitting = true;
+    this.isLoading = true;
+    const forgotPasswordRequest: ForgotPasswordRequest = {
+      email: this.forgotPasswordForm.get('email')?.value
+    };
+    this.authService.forgotPassword(forgotPasswordRequest)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.isEmailSent = true;
+          this.isSubmitting = false;
+          this.notificationService.showSuccess('Password reset instructions have been sent to your email address.');
+        },
+        error: (error) => {
+          this.isLoading = false;
+          const status = (error && typeof error === 'object' && 'status' in error) ? (error as any).status : 0;
+          const errorMessage = error?.error?.message || error?.message || '';
+          if (status === 404 || /email not found/i.test(errorMessage)) {
+            const control = this.forgotPasswordForm.get('email');
+            control?.setErrors({ notFound: true });
+            control?.markAsTouched();
+            this.notificationService.showError('Email not found');
+          } else {
+            this.notificationService.showError(errorMessage || 'Failed to send reset instructions. Please try again.');
+          }
+          this.isSubmitting = false;
+        }
+      });
   }
 
   private markFormGroupTouched(): void {
@@ -106,6 +113,9 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     }
     if (control?.hasError('maxlength')) {
       return 'Email must not exceed 255 characters';
+    }
+    if (control?.hasError('notFound')) {
+      return 'Email not found';
     }
     return '';
   }

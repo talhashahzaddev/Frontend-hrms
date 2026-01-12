@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AttendanceService } from '../../services/attendance.service';
 import { AttendanceCalendarData } from '../../../../core/models/attendance.models';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 interface CalendarCell {
   date: Date;
@@ -35,7 +36,7 @@ export class AttendanceCalendarComponent implements OnInit {
   daysGrid: CalendarCell[] = [];
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  constructor(private attendanceService: AttendanceService) {}
+  constructor(private attendanceService: AttendanceService, private notification: NotificationService) {}
 
   ngOnInit(): void {
     this.buildAndLoad(this.currentYear, this.currentMonth);
@@ -99,7 +100,10 @@ export class AttendanceCalendarComponent implements OnInit {
             }
           });
         },
-        error: (err) => console.error('Error loading attendance calendar:', err)
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance calendar';
+          this.notification.showError(errorMessage);
+        }
       });
   }
 

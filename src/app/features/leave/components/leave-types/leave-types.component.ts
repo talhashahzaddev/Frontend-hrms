@@ -178,8 +178,10 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.cdr.markForCheck();
         },
-        error: () => {
-          this.notificationService.showError('Failed to load leave types');
+        error: (error) => {
+          console.error('Error loading leave types:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load leave types';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -193,18 +195,21 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result) {
-        this.leaveService.createCustomLeaveType(result).subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave type created successfully');
-            this.loadLeaveTypes();
-          },
-          error: (err) => {
-            console.error(err);
-            this.notificationService.showError('Failed to create leave type');
-          }
-        });
+        this.leaveService.createCustomLeaveType(result)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Leave type created successfully');
+              this.loadLeaveTypes();
+            },
+            error: (error) => {
+              console.error(error);
+              const errorMessage = error?.error?.message || error?.message || 'Failed to create leave type';
+              this.notificationService.showError(errorMessage);
+            }
+          });
       }
     });
   }
@@ -217,18 +222,21 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
       data: { leaveType: type }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result) {
-        this.leaveService.updateLeaveType(type.leaveTypeId, result).subscribe({
-          next: () => {
-            this.notificationService.showSuccess('Leave type updated successfully');
-            this.loadLeaveTypes();
-          },
-          error: (err) => {
-            console.error(err);
-            this.notificationService.showError('Failed to update leave type');
-          }
-        });
+        this.leaveService.updateLeaveType(type.leaveTypeId, result)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.notificationService.showSuccess('Leave type updated successfully');
+              this.loadLeaveTypes();
+            },
+            error: (error) => {
+              console.error(error);
+              const errorMessage = error?.error?.message || error?.message || 'Failed to update leave type';
+              this.notificationService.showError(errorMessage);
+            }
+          });
       }
     });
   }

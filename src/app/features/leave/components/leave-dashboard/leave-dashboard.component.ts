@@ -181,14 +181,14 @@ import { User } from '../../../../core/models/auth.models';
                     <div class="breakdown-item current-year-item">
                       <span class="breakdown-label">
                         <mat-icon class="breakdown-icon">today</mat-icon>
-                        Current Year:
+                        Current Year Leaves:
                       </span>
                       <span class="breakdown-value">{{ balance.currentYearDays }}</span>
                     </div>
                     <div class="breakdown-item carry-forward-item" *ngIf="balance.carryForwardDays > 0">
                       <span class="breakdown-label">
                         <mat-icon class="breakdown-icon">history</mat-icon>
-                        Previous Year:
+                        Previous Year Leaves:
                       </span>
                       <span class="breakdown-value">{{ balance.carryForwardDays }}</span>
                     </div>
@@ -556,6 +556,8 @@ private backendBaseUrl = 'https://localhost:60485';
         },
         error: (error) => {
           console.error('Error loading team remaining leaves:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load team remaining leaves';
+          this.notificationService.showError(errorMessage);
           this.isLoadingTeamLeaves = false;
           this.cdr.markForCheck();
         }
@@ -636,7 +638,8 @@ private backendBaseUrl = 'https://localhost:60485';
       },
       error: (error) => {
         console.error('Error loading leave data:', error);
-        this.notificationService.showError('Failed to load leave data');
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load leave data';
+        this.notificationService.showError(errorMessage);
         this.isLoading = false;
         this.cdr.markForCheck();
       }
@@ -700,7 +703,8 @@ private backendBaseUrl = 'https://localhost:60485';
         },
         error: (error) => {
           console.error('Error approving request:', error);
-          this.notificationService.showError('Failed to approve leave request');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to approve leave request';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -717,7 +721,7 @@ private backendBaseUrl = 'https://localhost:60485';
       }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result && result.rejected) {
         this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
           .pipe(takeUntil(this.destroy$))
@@ -728,7 +732,8 @@ private backendBaseUrl = 'https://localhost:60485';
             },
             error: (error) => {
               console.error('Error rejecting request:', error);
-              this.notificationService.showError('Failed to reject leave request');
+              const errorMessage = error?.error?.message || error?.message || 'Failed to reject leave request';
+              this.notificationService.showError(errorMessage);
             }
           });
       }

@@ -142,7 +142,11 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading periods:', error);
-          this.notificationService.showError('Failed to load payroll periods');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll periods';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -170,7 +174,11 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading processing history:', error);
-          this.notificationService.showError('Failed to load processing history');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load processing history';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -187,7 +195,11 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading salary rules:', error);
-          this.notificationService.showError('Failed to load salary rules');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load salary rules';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -202,7 +214,11 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading departments:', error);
-          this.notificationService.showError('Failed to load departments');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load departments';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -344,7 +360,11 @@ export class PayrollProcessingComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Processing error:', error);
           this.isProcessing = false;
-          this.notificationService.showError('Failed to calculate payroll');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to calculate payroll';
+          this.notificationService.showError(errorMessage);
           this.cdr.markForCheck();
         }
       });

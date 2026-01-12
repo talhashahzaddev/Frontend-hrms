@@ -19,6 +19,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { AttendanceCalendarComponent } from '../attendancce-calendar/attendance-calendar';
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import {
   TimeTrackingSession,
   AttendanceSummary,
@@ -111,7 +112,8 @@ listEndDateControl = new FormControl(new Date()); // Today
   
   constructor(
     public attendanceService: AttendanceService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -151,7 +153,8 @@ listEndDateControl = new FormControl(new Date()); // Today
           this.currentSession = session;
         },
         error: (error) => {
-          console.error('Error loading current session:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load current session';
+          this.notification.showError(errorMessage);
         }
       });
   }
@@ -171,7 +174,8 @@ listEndDateControl = new FormControl(new Date()); // Today
         this.updateQuickStats(summary);
       },
       error: (error) => {
-        console.error('Error loading attendance summary:', error);
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance summary';
+        this.notification.showError(errorMessage);
       }
     });
   }
@@ -209,7 +213,7 @@ listEndDateControl = new FormControl(new Date()); // Today
 
 loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
   if (!this.listStartDateControl.value || !this.listEndDateControl.value) {
-    alert('Please select both start and end dates');
+    this.notification.showError('Please select both start and end dates');
     return;
   }
 
@@ -252,7 +256,8 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
       this.isLoadingList = false;
     },
     error: (err) => {
-      console.error('Error fetching employee attendance:', err);
+      const errorMessage = err?.error?.message || err?.message || 'Failed to fetch employee attendance';
+      this.notification.showError(errorMessage);
       this.isLoadingList = false;
     }
   });
@@ -273,7 +278,8 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
           this.buildCalendarWeeks();
         },
         error: (error) => {
-          console.error('Error loading calendar data:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load calendar data';
+          this.notification.showError(errorMessage);
           this.buildCalendarWeeks(); // Build empty calendar
         }
       });
@@ -366,7 +372,8 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
           this.isLoadingList = false;
         },
         error: (error) => {
-          console.error('Error loading attendance list:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance list';
+          this.notification.showError(errorMessage);
           this.isLoadingList = false;
         }
       });

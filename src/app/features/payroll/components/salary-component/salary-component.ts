@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, FormControl, FormGroupDirective, NgForm } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,8 +13,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
+import { Subject, takeUntil } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { 
   SalaryComponent as SalaryComponentModel, 
   SalaryRule, 
@@ -57,11 +58,10 @@ class CustomErrorStateMatcher implements ErrorStateMatcher {
     MatProgressSpinnerModule,
     MatButtonModule,
     MatDialogModule,
-    MatSnackBarModule,
     TitleCasePipe
   ]
 })
-export class SalaryComponent implements OnInit {
+export class SalaryComponent implements OnInit, OnDestroy {
   salaryComponents: SalaryComponentModel[] = [];
   salaryRules: SalaryRule[] = [];
   departments: Department[] = [];
@@ -75,6 +75,7 @@ export class SalaryComponent implements OnInit {
   ruleDisplayedColumns: string[] = ['name', 'componentName', 'value', 'department', 'position', 'isActive', 'actions'];
   componentFormSubmitted = false;
   ruleFormSubmitted = false;
+  private destroy$ = new Subject<void>();
   
   // Custom error state matchers
   componentErrorStateMatcher: CustomErrorStateMatcher;
@@ -84,8 +85,8 @@ export class SalaryComponent implements OnInit {
     private payrollService: PayrollService,
     private employeeService: EmployeeService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private notificationService: NotificationService
   ) {
     // Initialize custom error state matchers
     this.componentErrorStateMatcher = new CustomErrorStateMatcher(() => this.componentFormSubmitted);
@@ -136,52 +137,79 @@ export class SalaryComponent implements OnInit {
     this.loadDepartments();
     this.loadPositions();
   }
+  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   loadSalaryComponents(): void {
     this.loading = true;
-    this.payrollService.getSalaryComponents().subscribe(
-      response => {
-        this.salaryComponents = response.data;
-        this.loading = false;
-      },
-      error => {
-        this.snackBar.open('Failed to load salary components', 'Close', { duration: 3000 });
-        this.loading = false;
-      }
-    );
+    this.payrollService.getSalaryComponents()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.salaryComponents = response.data;
+          } else {
+            const errorMessage = response.message || 'Failed to load salary components';
+            this.notificationService.showError(errorMessage);
+          }
+          this.loading = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load salary components';
+          this.notificationService.showError(errorMessage);
+          this.loading = false;
+        }
+      });
   }
 
   loadSalaryRules(): void {
-    this.payrollService.getSalaryRules().subscribe(
-      response => {
-        this.salaryRules = response.data;
-      },
-      error => {
-        this.snackBar.open('Failed to load salary rules', 'Close', { duration: 3000 });
-      }
-    );
+    this.payrollService.getSalaryRules()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.salaryRules = response.data;
+          } else {
+            const errorMessage = response.message || 'Failed to load salary rules';
+            this.notificationService.showError(errorMessage);
+          }
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load salary rules';
+          this.notificationService.showError(errorMessage);
+        }
+      });
   }
 
   loadDepartments(): void {
-    this.employeeService.getDepartments().subscribe(
-      departments => {
-        this.departments = departments;
-      },
-      error => {
-        this.snackBar.open('Failed to load departments', 'Close', { duration: 3000 });
-      }
-    );
+    this.employeeService.getDepartments()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (departments) => {
+          this.departments = departments;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load departments';
+          this.notificationService.showError(errorMessage);
+        }
+      });
   }
 
   loadPositions(): void {
-    this.employeeService.getPositions().subscribe(
-      positions => {
-        this.positions = positions;
-      },
-      error => {
-        this.snackBar.open('Failed to load positions', 'Close', { duration: 3000 });
-      }
-    );
+    this.employeeService.getPositions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (positions) => {
+          this.positions = positions;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load positions';
+          this.notificationService.showError(errorMessage);
+        }
+      });
   }
 
   private updateAbsentTaxName(): void {
@@ -236,12 +264,10 @@ export class SalaryComponent implements OnInit {
     const calculationType = this.componentForm.get('calculationType')?.value;
     
     if (isAbsentTax && !this.selectedComponent && !this.canCreateAbsentTaxComponent(calculationType)) {
-      this.snackBar.open(
+      this.notificationService.showWarning(
         calculationType === 'fixed' 
           ? 'Absent Tax Fixed Amount component already exists. You can only create one Fixed Amount and one Percentage component.'
-          : 'Absent Tax Percentage component already exists. You can only create one Fixed Amount and one Percentage component.',
-        'Close',
-        { duration: 5000 }
+          : 'Absent Tax Percentage component already exists. You can only create one Fixed Amount and one Percentage component.'
       );
       return;
     }
@@ -252,30 +278,48 @@ export class SalaryComponent implements OnInit {
 
     if (this.selectedComponent) {
       // Update existing component
-      this.payrollService.updateSalaryComponent(this.selectedComponent.componentId, formData).subscribe(
-        response => {
-          this.snackBar.open('Salary component updated successfully', 'Close', { duration: 3000 });
-          this.resetForm();
-          this.loadSalaryComponents();
-        },
-        error => {
-          this.snackBar.open('Failed to update salary component', 'Close', { duration: 3000 });
-          this.loading = false;
-        }
-      );
+      this.payrollService.updateSalaryComponent(this.selectedComponent.componentId, formData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.notificationService.showSuccess('Salary component updated successfully');
+              this.resetForm();
+              this.loadSalaryComponents();
+            } else {
+              const errorMessage = response.message || 'Failed to update salary component';
+              this.notificationService.showError(errorMessage);
+              this.loading = false;
+            }
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || 'Failed to update salary component';
+            this.notificationService.showError(errorMessage);
+            this.loading = false;
+          }
+        });
     } else {
       // Create new component
-      this.payrollService.createSalaryComponent(formData).subscribe(
-        response => {
-          this.snackBar.open('Salary component created successfully', 'Close', { duration: 3000 });
-          this.resetForm();
-          this.loadSalaryComponents();
-        },
-        error => {
-          this.snackBar.open('Failed to create salary component', 'Close', { duration: 3000 });
-          this.loading = false;
-        }
-      );
+      this.payrollService.createSalaryComponent(formData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.notificationService.showSuccess('Salary component created successfully');
+              this.resetForm();
+              this.loadSalaryComponents();
+            } else {
+              const errorMessage = response.message || 'Failed to create salary component';
+              this.notificationService.showError(errorMessage);
+              this.loading = false;
+            }
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || 'Failed to create salary component';
+            this.notificationService.showError(errorMessage);
+            this.loading = false;
+          }
+        });
     }
   }
 
@@ -317,16 +361,25 @@ export class SalaryComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         this.loading = true;
-        this.payrollService.deleteSalaryComponent(component.componentId).subscribe(
-          response => {
-            this.snackBar.open('Salary component deleted successfully', 'Close', { duration: 3000 });
-            this.loadSalaryComponents();
-          },
-          error => {
-            this.snackBar.open('Failed to delete salary component', 'Close', { duration: 3000 });
-            this.loading = false;
-          }
-        );
+        this.payrollService.deleteSalaryComponent(component.componentId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success) {
+                this.notificationService.showSuccess('Salary component deleted successfully');
+                this.loadSalaryComponents();
+              } else {
+                const errorMessage = response.message || 'Failed to delete salary component';
+                this.notificationService.showError(errorMessage);
+                this.loading = false;
+              }
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || error?.message || 'Failed to delete salary component';
+              this.notificationService.showError(errorMessage);
+              this.loading = false;
+            }
+          });
       }
     });
   }
@@ -407,30 +460,48 @@ export class SalaryComponent implements OnInit {
 
     if (this.selectedRule) {
       // Update existing rule
-      this.payrollService.updateSalaryRule(this.selectedRule.ruleId, formData).subscribe(
-        response => {
-          this.snackBar.open('Salary rule updated successfully', 'Close', { duration: 3000 });
-          this.resetRuleForm();
-          this.loadSalaryRules();
-        },
-        error => {
-          this.snackBar.open('Failed to update salary rule', 'Close', { duration: 3000 });
-          this.loading = false;
-        }
-      );
+      this.payrollService.updateSalaryRule(this.selectedRule.ruleId, formData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.notificationService.showSuccess('Salary rule updated successfully');
+              this.resetRuleForm();
+              this.loadSalaryRules();
+            } else {
+              const errorMessage = response.message || 'Failed to update salary rule';
+              this.notificationService.showError(errorMessage);
+              this.loading = false;
+            }
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || 'Failed to update salary rule';
+            this.notificationService.showError(errorMessage);
+            this.loading = false;
+          }
+        });
     } else {
       // Create new rule
-      this.payrollService.createSalaryRule(formData).subscribe(
-        response => {
-          this.snackBar.open('Salary rule created successfully', 'Close', { duration: 3000 });
-          this.resetRuleForm();
-          this.loadSalaryRules();
-        },
-        error => {
-          this.snackBar.open('Failed to create salary rule', 'Close', { duration: 3000 });
-          this.loading = false;
-        }
-      );
+      this.payrollService.createSalaryRule(formData)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.notificationService.showSuccess('Salary rule created successfully');
+              this.resetRuleForm();
+              this.loadSalaryRules();
+            } else {
+              const errorMessage = response.message || 'Failed to create salary rule';
+              this.notificationService.showError(errorMessage);
+              this.loading = false;
+            }
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || 'Failed to create salary rule';
+            this.notificationService.showError(errorMessage);
+            this.loading = false;
+          }
+        });
     }
   }
 
@@ -464,16 +535,25 @@ export class SalaryComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === true) {
         this.loading = true;
-        this.payrollService.deleteSalaryRule(rule.ruleId).subscribe(
-          response => {
-            this.snackBar.open('Salary rule deleted successfully', 'Close', { duration: 3000 });
-            this.loadSalaryRules();
-          },
-          error => {
-            this.snackBar.open('Failed to delete salary rule', 'Close', { duration: 3000 });
-            this.loading = false;
-          }
-        );
+        this.payrollService.deleteSalaryRule(rule.ruleId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (response) => {
+              if (response.success) {
+                this.notificationService.showSuccess('Salary rule deleted successfully');
+                this.loadSalaryRules();
+              } else {
+                const errorMessage = response.message || 'Failed to delete salary rule';
+                this.notificationService.showError(errorMessage);
+                this.loading = false;
+              }
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || error?.message || 'Failed to delete salary rule';
+              this.notificationService.showError(errorMessage);
+              this.loading = false;
+            }
+          });
       }
     });
   }

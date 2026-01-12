@@ -491,6 +491,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading periods:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load payroll periods';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -505,6 +507,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading departments:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load departments';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -543,7 +547,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll entries:', error);
-          this.notificationService.showError('Failed to load payslips');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load payslips';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -681,7 +686,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Download error:', error);
-          // If download fails, try to generate PDF from entry data
+          const errorMessage = error?.error?.message || error?.message || 'Failed to download payslip';
+          this.notificationService.showError(errorMessage);
           this.generatePdfFromEntry(entry);
         }
       });
@@ -857,7 +863,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       this.notificationService.showSuccess('Payslip downloaded as PDF successfully');
     }).catch((error) => {
       console.error('Error loading jsPDF:', error);
-      this.notificationService.showError('Failed to generate PDF. Please ensure jspdf and jspdf-autotable are installed.');
+      const errorMessage = error?.error?.message || error?.message || 'Failed to generate PDF';
+      this.notificationService.showError(errorMessage);
     });
   }
 
@@ -870,7 +877,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Email error:', error);
-          this.notificationService.showError('Failed to email payslip');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to email payslip';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -885,7 +893,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Regeneration error:', error);
-          this.notificationService.showError('Failed to regenerate payslip');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to regenerate payslip';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -925,7 +934,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       })
       .catch(error => {
         console.error('Bulk generation error:', error);
-        this.notificationService.showError(error?.error?.message || 'Failed to generate some payslips. Please try again.');
+        const errorMessage = error?.error?.message || error?.message || 'Failed to generate some payslips. Please try again.';
+        this.notificationService.showError(errorMessage);
         this.isLoading = false;
         this.cdr.markForCheck();
       });
@@ -964,7 +974,8 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       })
       .catch(error => {
         console.error('Bulk email error:', error);
-        this.notificationService.showError(error?.error?.message || 'Failed to email some payslips. Please try again.');
+        const errorMessage = error?.error?.message || error?.message || 'Failed to email some payslips. Please try again.';
+        this.notificationService.showError(errorMessage);
         this.isLoading = false;
         this.cdr.markForCheck();
       });

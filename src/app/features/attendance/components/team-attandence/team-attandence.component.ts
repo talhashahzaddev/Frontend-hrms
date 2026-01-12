@@ -15,7 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
@@ -111,7 +111,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private authService: AuthService,
     private dialog: MatDialog  ,
-    private snackBar: MatSnackBar
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -143,7 +143,8 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
           this.departments = departments;
         },
         error: (error) => {
-          console.error('Error loading departments:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load departments';
+          this.notification.showError(errorMessage);
         }
       });
   }
@@ -161,10 +162,11 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
         next: (stats) => {
           this.dailyStats = stats;
         },
-        error: (error) => {
-          console.error('Error loading daily stats:', error);
-        }
-      });
+      error: (error) => {
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load daily stats';
+        this.notification.showError(errorMessage);
+      }
+    });
   }
 
   private setupFilters(): void {
@@ -208,8 +210,8 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading attendance data:', error);
-        this.showError('Failed to load attendance data');
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance data';
+        this.notification.showError(errorMessage);
         this.isLoading = false;
       }
     });
@@ -254,13 +256,13 @@ viewAttendanceDetails(attendance: Attendance): void {
   approveAttendance(attendance: Attendance): void {
     // TODO: Implement attendance approval
     console.log('Approve attendance:', attendance);
-    this.showSuccess('Attendance approved successfully');
+    this.notification.showSuccess('Attendance approved successfully');
   }
 
   rejectAttendance(attendance: Attendance): void {
     // TODO: Implement attendance rejection
     console.log('Reject attendance:', attendance);
-    this.showSuccess('Attendance rejected');
+    this.notification.showSuccess('Attendance rejected');
   }
 
   exportReport(): void {
@@ -277,11 +279,11 @@ viewAttendanceDetails(attendance: Attendance): void {
           link.download = `team-attendance-${startDate}-to-${endDate}.xlsx`;
           link.click();
           window.URL.revokeObjectURL(url);
-          this.showSuccess('Report exported successfully');
+          this.notification.showSuccess('Report exported successfully');
         },
         error: (error) => {
-          console.error('Export error:', error);
-          this.showError('Failed to export report');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to export report';
+          this.notification.showError(errorMessage);
         }
       });
   }
@@ -293,17 +295,5 @@ viewAttendanceDetails(attendance: Attendance): void {
     return `${hrs}h ${mins}m`;
   }
 
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
+ 
 }

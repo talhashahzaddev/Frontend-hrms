@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/materia
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject, takeUntil } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
@@ -53,7 +53,7 @@ export class ViewDetailsDialogueComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private attendanceService: AttendanceService,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -76,9 +76,9 @@ export class ViewDetailsDialogueComponent implements OnInit, OnDestroy {
           this.loadCurrentSession();
           this.loadTodaySessions();
         },
-        error: (err) => {
-          console.error('Error fetching user:', err);
-          this.showError('Failed to load user.');
+      error: (err) => {
+          const errorMessage = err?.error?.message || err?.message || 'Failed to load user.';
+          this.notification.showError(errorMessage);
           this.isLoadingUser = false;
         }
       });
@@ -93,9 +93,9 @@ export class ViewDetailsDialogueComponent implements OnInit, OnDestroy {
           this.currentSession = session ?? null;
           this.isLoadingSession = false;
         },
-        error: (err) => {
-          console.error('Error loading current session:', err);
-          this.showError('Failed to load current session.');
+      error: (err) => {
+          const errorMessage = err?.error?.message || err?.message || 'Failed to load current session.';
+          this.notification.showError(errorMessage);
           this.isLoadingSession = false;
         }
       });
@@ -114,8 +114,8 @@ const workDate = this.data.workDate;
         this.isLoadingTodaySessions = false;
       },
       error: (err) => {
-        console.error('Error loading today sessions:', err);
-        this.showError('Failed to load today\'s sessions.');
+        const errorMessage = err?.error?.message || err?.message || "Failed to load today's sessions.";
+        this.notification.showError(errorMessage);
         this.isLoadingTodaySessions = false;
       }
     });
@@ -136,11 +136,5 @@ const workDate = this.data.workDate;
     this.dialogRef.close();
   }
 
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
-  }
+ 
 }

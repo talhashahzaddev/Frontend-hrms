@@ -478,8 +478,8 @@
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let appraisal">
     
-              <!-- Show button only if not submitted -->
-              <button *ngIf="appraisal.status !== 'Submitted'"
+              <!-- Show button if no appraisal exists for employee & cycle -->
+              <button *ngIf="!hasAppraisalFor(appraisal.employeeId, appraisal.cycleId)"
                 mat-raised-button
                 color="primary"
                 (click)="openCreateAppraisalForEmployee(appraisal)"
@@ -488,8 +488,8 @@
                 <mat-icon>add</mat-icon>
                 Create Appraisal
               </button>
-              <!-- Show text if submitted -->
-              <span *ngIf="appraisal.status === 'Submitted'" class="appraisal-created-text">
+              <!-- Show text if appraisal exists -->
+              <span *ngIf="hasAppraisalFor(appraisal.employeeId, appraisal.cycleId)" class="appraisal-created-text">
                 Appraisal Created
               </span>
               </td>

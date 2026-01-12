@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Subject, takeUntil } from 'rxjs';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollEntry, PayrollPeriod } from '../../../../core/models/payroll.models';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-payslip-preview-dialog',
@@ -441,9 +442,10 @@ export class PayslipPreviewDialogComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialogRef: MatDialogRef<PayslipPreviewDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { entry: PayrollEntry; period?: PayrollPeriod; organizationCurrency?: string; onDownload?: () => void },
-    private settingsService: SettingsService
-  ) {
+  @Inject(MAT_DIALOG_DATA) public data: { entry: PayrollEntry; period?: PayrollPeriod; organizationCurrency?: string; onDownload?: () => void },
+  private settingsService: SettingsService,
+  private notificationService: NotificationService
+) {
     this.entry = data.entry;
     this.period = data.period;
     this.onDownload = data.onDownload;
@@ -486,6 +488,8 @@ export class PayslipPreviewDialogComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error loading organization currency:', error);
+            const errorMessage = error?.error?.message || error?.message || 'Failed to load organization currency';
+            this.notificationService.showError(errorMessage);
             this.organizationCurrency = 'USD'; // Default to USD on error
           }
         });

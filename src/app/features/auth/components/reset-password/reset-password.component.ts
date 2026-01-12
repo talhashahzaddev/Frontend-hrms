@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Subject, takeUntil } from 'rxjs';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -27,12 +28,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
   resetPasswordForm!: FormGroup;
   token!: string;
   isLoading = false;
   hidePassword = true;
   hideConfirmPassword = true;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -66,24 +68,37 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit(): void {
     if (this.resetPasswordForm.invalid) {
+      this.markFormGroupTouched(this.resetPasswordForm);
       this.notificationService.showError('Please fill valid password fields.');
       return;
     }
-
     this.isLoading = true;
     const newPassword = this.resetPasswordForm.value.password;
+    this.authService.resetPassword(this.token, newPassword)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.notificationService.showSuccess('Password reset successfully!');
+          this.router.navigate(['/login']);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          const msg = error?.error?.message || error?.message || 'Failed to reset password.';
+          this.notificationService.showError(msg);
+        }
+      });
+  }
 
-    this.authService.resetPassword(this.token, newPassword).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.notificationService.showSuccess('Password reset successfully!');
-        this.router.navigate(['/login']);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        const msg = error?.message || 'Failed to reset password.';
-        this.notificationService.showError(msg);
-      }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
     });
   }
 }

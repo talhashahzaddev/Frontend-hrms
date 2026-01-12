@@ -101,7 +101,11 @@ export class CreateShiftComponent {
 
   /** Handle both create & update */
   onSubmit(): void {
-    if (!this.shiftForm.valid) return;
+    if (!this.shiftForm.valid) {
+      this.markFormGroupTouched(this.shiftForm);
+      this.notification.showError('Please correct the highlighted fields');
+      return;
+    }
     this.isSubmitting = true;
 
     const formValue = this.shiftForm.value;
@@ -126,8 +130,8 @@ export class CreateShiftComponent {
         },
         error: (error) => {
           this.isSubmitting = false;
-          console.error('Error updating shift:', error);
-          this.notification.showError('Failed to update shift');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to update shift';
+          this.notification.showError(errorMessage);
         }
       });
 
@@ -151,10 +155,20 @@ export class CreateShiftComponent {
         },
         error: (error) => {
           this.isSubmitting = false;
-          console.error('Error creating shift:', error);
-          this.notification.showError('Failed to create shift');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to create shift';
+          this.notification.showError(errorMessage);
         }
       });
     }
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 }
