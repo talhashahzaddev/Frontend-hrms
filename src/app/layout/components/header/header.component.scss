@@ -326,6 +326,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    /* Target PrimeNG avatar wrapper */
+    ::ng-deep p-avatar {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
   }
 
   .user-status-indicator {
@@ -362,18 +373,39 @@
     height: 100% !important;
     border-radius: 50% !important;
     overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
 
     /* ✨ Remove border and use soft background when no image */
     background: var(--gradient-primary) !important;
     color: white !important;
     font-weight: 700 !important;
-    font-size: 0.875rem !important;
+    font-size: 1.25rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     text-transform: uppercase !important;
     opacity: 1 !important;
     transition: all 0.3s ease !important;
+    letter-spacing: 0.02em !important;
+    line-height: 1 !important;
+
+    /* Target PrimeNG avatar internal elements */
+    .p-avatar-text,
+    .p-avatar-label,
+    span {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      font-size: 1.25rem !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+      letter-spacing: 0.02em !important;
+    }
 
     &:hover {
       transform: scale(1.05);

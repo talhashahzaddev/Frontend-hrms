@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, forkJoin, catchError } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
@@ -50,6 +50,7 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   activeBillingCycle: string | null = null;
   isSubscriptionExpired: boolean = false;
   private destroy$ = new Subject<void>();
+  private windowWidth: number = window.innerWidth;
 
   constructor(
     private paymentService: PaymentService,
@@ -58,7 +59,33 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.updateItemsPerPage();
     this.loadSubscriptionPlans();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any): void {
+    this.windowWidth = event.target.innerWidth;
+    const oldItemsPerPage = this.itemsPerPage;
+    this.updateItemsPerPage();
+    
+    // Reset current index if items per page changed
+    if (oldItemsPerPage !== this.itemsPerPage) {
+      this.currentIndex = 0;
+      this.updateDisplayedPlans();
+    }
+  }
+
+  private updateItemsPerPage(): void {
+    if (this.windowWidth <= 480) {
+      this.itemsPerPage = 1;
+    } else if (this.windowWidth <= 768) {
+      this.itemsPerPage = 1;
+    } else if (this.windowWidth <= 1024) {
+      this.itemsPerPage = 2;
+    } else {
+      this.itemsPerPage = 3;
+    }
   }
 
   ngOnDestroy(): void {
