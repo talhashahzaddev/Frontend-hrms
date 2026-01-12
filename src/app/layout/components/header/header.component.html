@@ -131,15 +131,15 @@
 
     <mat-divider></mat-divider>
 
-    <button mat-menu-item (click)="onProfileClick()">
+    <a mat-menu-item [routerLink]="['/profile']" (click)="onProfileClick()">
       <mat-icon>person</mat-icon>
       <span>My Profile</span>
-    </button>
+    </a>
 
-    <button mat-menu-item (click)="onSettingsClick()">
+    <a mat-menu-item [routerLink]="['/settings']" (click)="onSettingsClick()">
       <mat-icon>settings</mat-icon>
       <span>Settings</span>
-    </button>
+    </a>
 
     <mat-divider></mat-divider>
 
