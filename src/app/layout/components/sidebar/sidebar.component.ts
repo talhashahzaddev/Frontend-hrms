@@ -1,6 +1,6 @@
 import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { Subject, takeUntil, filter } from 'rxjs';
 
 // Material Modules
@@ -27,6 +27,7 @@ interface MenuItem {
     selector: 'app-sidebar',
     imports: [
         CommonModule,
+        RouterModule,
         MatListModule,
         MatIconModule,
         MatExpansionModule,
@@ -144,10 +145,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   onMenuItemClick(item: MenuItem): void {
-    if (item.route) {
-      this.router.navigate([item.route]);
-      this.menuItemClick.emit();
-    }
+    // routerLink will handle navigation, but we still emit the event
+    // for closing mobile sidebar if needed
+    this.menuItemClick.emit();
   }
 
   isActiveRoute(route: string): boolean {

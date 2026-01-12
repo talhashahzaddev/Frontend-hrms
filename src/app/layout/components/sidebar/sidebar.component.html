@@ -21,10 +21,11 @@
       <ng-container *ngFor="let item of getFilteredMenuItems()">
         
         <!-- Single Menu Item (No Children) -->
-        <mat-list-item 
+        <a mat-list-item 
           *ngIf="!item.children || item.children.length === 0"
           class="nav-item"
           [class.active]="isActiveRoute(item.route!)"
+          [routerLink]="item.route"
           (click)="onMenuItemClick(item)"
           role="menuitem">
           
@@ -35,7 +36,7 @@
                 class="nav-badge">
             {{ item.badge }}
           </span>
-        </mat-list-item>
+        </a>
 
         <!-- Expandable Menu Item (With Children) -->
         <div *ngIf="item.children && item.children.length > 0" class="nav-group">
@@ -55,10 +56,11 @@
             <!-- Sub Menu Items -->
             <div class="nav-sub-items">
               <mat-list class="sub-nav-list">
-                <mat-list-item
+                <a mat-list-item
                   *ngFor="let child of getFilteredChildren(item.children)"
                   class="nav-sub-item"
                   [class.active]="isActiveRoute(child.route!)"
+                  [routerLink]="child.route"
                   (click)="onMenuItemClick(child)"
                   role="menuitem">
                   
@@ -69,7 +71,7 @@
                         class="nav-badge">
                     {{ child.badge }}
                   </span>
-                </mat-list-item>
+                </a>
               </mat-list>
             </div>
           </mat-expansion-panel>
