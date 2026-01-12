@@ -53,6 +53,20 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  // Getter for filtered positions based on selected department
+  get filteredPositions(): Position[] {
+    const selectedDepartmentId = this.employeeForm.get('departmentId')?.value;
+    if (!selectedDepartmentId) {
+      return [];
+    }
+    return this.positions.filter(pos => pos.departmentId === selectedDepartmentId);
+  }
+
+  // Check if position dropdown should be disabled
+  get isPositionDisabled(): boolean {
+    return !this.employeeForm.get('departmentId')?.value;
+  }
+
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
@@ -74,6 +88,26 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
     this.isEditMode = !!this.employeeId;
     this.loadInitialData();
+
+    // Watch for changes in departmentId to filter positions and clear position if needed
+    this.employeeForm.get('departmentId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((departmentId) => {
+        const positionControl = this.employeeForm.get('positionId');
+        const currentPositionId = positionControl?.value;
+        
+        // If department changes, check if current position belongs to new department
+        if (departmentId && currentPositionId) {
+          const currentPosition = this.positions.find(p => p.positionId === currentPositionId);
+          if (currentPosition && currentPosition.departmentId !== departmentId) {
+            // Clear position if it doesn't belong to the selected department
+            positionControl?.setValue('', { emitEvent: false });
+          }
+        } else if (!departmentId) {
+          // Clear position if no department is selected
+          positionControl?.setValue('', { emitEvent: false });
+        }
+      });
 
     // Debug: Watch for changes in reportingManagerId
     this.employeeForm.get('reportingManagerId')?.valueChanges.subscribe(value => {
