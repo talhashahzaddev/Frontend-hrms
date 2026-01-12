@@ -54,6 +54,42 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscribeToLoading();
+    this.setFavicon();
+  }
+
+  private setFavicon(): void {
+    // Remove ALL existing favicon links
+    const existingLinks = document.querySelectorAll('link[rel*="icon"], link[rel*="shortcut"]');
+    existingLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && (href.includes('favicon.ico') || !href.includes('hub.png'))) {
+        link.remove();
+      }
+    });
+
+    // Get base href to construct correct path
+    const baseHref = document.querySelector('base')?.getAttribute('href') || '/';
+    const faviconPath = `${baseHref}hub.png`;
+
+    // Ensure favicon is set
+    let faviconLink = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+    if (!faviconLink) {
+      faviconLink = document.createElement('link');
+      faviconLink.rel = 'icon';
+      faviconLink.type = 'image/png';
+      document.head.appendChild(faviconLink);
+    }
+    faviconLink.href = faviconPath;
+
+    // Also set shortcut icon
+    let shortcutLink = document.querySelector('link[rel="shortcut icon"]') as HTMLLinkElement;
+    if (!shortcutLink) {
+      shortcutLink = document.createElement('link');
+      shortcutLink.rel = 'shortcut icon';
+      shortcutLink.type = 'image/png';
+      document.head.appendChild(shortcutLink);
+    }
+    shortcutLink.href = faviconPath;
   }
 
   ngOnDestroy(): void {
