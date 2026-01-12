@@ -72,6 +72,7 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
   employees: Employee[] = [];
   appraisalCycles: AppraisalCycle[] = [];
   appraisals: EmployeeAppraisal[] = [];
+  createdAppraisalKeys: Set<string> = new Set<string>();
   employeeAppraisals: EmployeeAppraisalForEmployee[] = [];
   employeeAppraisalsDataSource = new MatTableDataSource<EmployeeAppraisalForEmployee>([]);
   isLoadingEmployeeAppraisals = false;
@@ -374,6 +375,11 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
             const paginatedData = response.data as any;
             this.appraisals = paginatedData.items || paginatedData.data || [];
             this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
+            this.createdAppraisalKeys = new Set<string>();
+            (this.appraisals || []).forEach(a => {
+              const key = `${a.employeeId}|${a.cycleId}`;
+              this.createdAppraisalKeys.add(key);
+            });
           }
           this.isLoading = false;
           this.cdr.markForCheck();
@@ -895,6 +901,11 @@ export class AppraisalsComponent implements OnInit, OnDestroy {
           this.createAppraisal(result);
         }
       });
+  }
+
+  hasAppraisalFor(employeeId: string, cycleId: string): boolean {
+    const key = `${employeeId}|${cycleId}`;
+    return this.createdAppraisalKeys.has(key);
   }
 
   loadManagerSelfAssessments(): void {

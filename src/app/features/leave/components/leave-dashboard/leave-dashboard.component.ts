@@ -181,14 +181,14 @@ import { User } from '../../../../core/models/auth.models';
                     <div class="breakdown-item current-year-item">
                       <span class="breakdown-label">
                         <mat-icon class="breakdown-icon">today</mat-icon>
-                        Current Year:
+                        Current Year Leaves:
                       </span>
                       <span class="breakdown-value">{{ balance.currentYearDays }}</span>
                     </div>
                     <div class="breakdown-item carry-forward-item" *ngIf="balance.carryForwardDays > 0">
                       <span class="breakdown-label">
                         <mat-icon class="breakdown-icon">history</mat-icon>
-                        Previous Year:
+                        Previous Year Leaves:
                       </span>
                       <span class="breakdown-value">{{ balance.carryForwardDays }}</span>
                     </div>
