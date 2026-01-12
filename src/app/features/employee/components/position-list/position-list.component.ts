@@ -113,7 +113,11 @@ export class PositionListComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading filter data:', error);
-        this.showError('Failed to load filter data');
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Failed to load filter data';
+        this.showError(errorMessage);
         this.isLoading = false;
       }
     });
@@ -141,16 +145,20 @@ export class PositionListComponent implements OnInit, OnDestroy {
     this.employeeService.getPositions(departmentId, search, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (positions) => {
-          this.positions = positions;
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error fetching positions:', error);
-          this.showError('Failed to fetch positions');
-          this.isLoading = false;
-        }
-      });
+      next: (positions) => {
+        this.positions = positions;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching positions:', error);
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Failed to fetch positions';
+        this.showError(errorMessage);
+        this.isLoading = false;
+      }
+    });
   }
 
   clearFilters(): void {
@@ -254,7 +262,11 @@ viewEmployees(position: Position): void {
         // Hide spinner
         dialogRef.componentInstance.isLoading = false;
 
-        this.showError('Failed to load employees for this position');
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Failed to load employees for this position';
+        this.showError(errorMessage);
       }
     });
 }
@@ -281,7 +293,11 @@ togglePositionStatus(position: Position, newStatus: boolean): void {
       },
       error: (error) => {
         console.error(`Error ${action}ing position:`, error);
-        this.showError(`Failed to ${action} position`);
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          `Failed to ${action} position`;
+        this.showError(errorMessage);
       }
     });
 }
@@ -296,17 +312,21 @@ togglePositionStatus(position: Position, newStatus: boolean): void {
       this.employeeService.deletePosition(position.positionId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
-            this.fetchPositions();
-            this.showSuccess('Position deleted successfully');
-          },
-          error: (error) => {
-            console.error('Error deleting position:', error);
-            this.showError('Failed to delete position');
-          }
-        });
-    }
+      next: () => {
+        this.fetchPositions();
+        this.showSuccess('Position deleted successfully');
+      },
+      error: (error) => {
+        console.error('Error deleting position:', error);
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Failed to delete position';
+        this.showError(errorMessage);
+      }
+    });
   }
+}
 
   private showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {

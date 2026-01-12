@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 
 import { Department, Employee, CreateDepartmentRequest, UpdateDepartmentRequest } from '../../../../core/models/employee.models';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeService } from '../../services/employee.service';
 
 export interface DepartmentDialogData {
@@ -46,7 +47,8 @@ export class DepartmentFormDialogComponent implements OnDestroy {
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private dialogRef: MatDialogRef<DepartmentFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: DepartmentDialogData
+    @Inject(MAT_DIALOG_DATA) public data: DepartmentDialogData,
+    private notificationService: NotificationService
   ) {
     this.departmentForm = this.createForm();
     
@@ -103,12 +105,16 @@ export class DepartmentFormDialogComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (department) => {
+          this.notificationService.showSuccess('Department created successfully');
           this.dialogRef.close(department);
         },
         error: (error) => {
-          console.error('Error creating department:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to create department';
+          this.notificationService.showError(errorMessage);
           this.isSubmitting = false;
-          // TODO: Show error message to user
         }
       });
   }
@@ -126,12 +132,16 @@ export class DepartmentFormDialogComponent implements OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (department) => {
+          this.notificationService.showSuccess('Department updated successfully');
           this.dialogRef.close(department);
         },
         error: (error) => {
-          console.error('Error updating department:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to update department';
+          this.notificationService.showError(errorMessage);
           this.isSubmitting = false;
-          // TODO: Show error message to user
         }
       });
   }

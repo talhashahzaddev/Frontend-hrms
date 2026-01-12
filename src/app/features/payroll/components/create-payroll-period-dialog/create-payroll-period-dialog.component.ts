@@ -279,7 +279,8 @@ export class CreatePayrollPeriodDialogComponent {
         .subscribe({
           next: (response) => {
             if (response.success) {
-              this.notificationService.showSuccess('Payroll period created successfully');
+              const successMessage = response?.message || 'Payroll period created successfully';
+              this.notificationService.showSuccess(successMessage);
               this.dialogRef.close(response.data);
             } else {
               this.notificationService.showError(response.message || 'Failed to create payroll period');
@@ -287,8 +288,11 @@ export class CreatePayrollPeriodDialogComponent {
             this.isSubmitting = false;
           },
           error: (error) => {
-            console.error('Error creating period:', error);
-            this.notificationService.showError('Failed to create payroll period');
+            const errorMessage =
+              error?.error?.message ||
+              error?.message ||
+              'Failed to create payroll period';
+            this.notificationService.showError(errorMessage);
             this.isSubmitting = false;
           }
         });
@@ -303,7 +307,8 @@ export class CreatePayrollPeriodDialogComponent {
         .subscribe({
           next: (response) => {
             if (response.success) {
-              this.notificationService.showSuccess('Payroll period updated successfully');
+              const successMessage = response?.message || 'Payroll period updated successfully';
+              this.notificationService.showSuccess(successMessage);
               this.dialogRef.close(response.data);
             } else {
               this.notificationService.showError(response.message || 'Failed to update payroll period');
@@ -311,8 +316,11 @@ export class CreatePayrollPeriodDialogComponent {
             this.isSubmitting = false;
           },
           error: (error) => {
-            console.error('Error updating period:', error);
-            this.notificationService.showError('Failed to update payroll period');
+            const errorMessage =
+              error?.error?.message ||
+              error?.message ||
+              'Failed to update payroll period';
+            this.notificationService.showError(errorMessage);
             this.isSubmitting = false;
           }
         });

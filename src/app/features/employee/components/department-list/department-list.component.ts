@@ -111,7 +111,11 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading managers:', error);
-          this.showError('Failed to load managers');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load managers';
+          this.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -145,7 +149,11 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error fetching departments:', error);
-          this.showError('Failed to fetch departments');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to fetch departments';
+          this.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -214,7 +222,11 @@ viewDepartmentEmployees(department: Department): void {
       error: (error) => {
         console.error('Error loading department employees:', error);
         dialogRef.componentInstance.isLoading = false;
-        this.showError('Failed to load department employees');
+        const errorMessage =
+          error?.error?.message ||
+          error?.message ||
+          'Failed to load department employees';
+        this.showError(errorMessage);
       }
     });
 }
@@ -256,7 +268,11 @@ viewDepartmentEmployees(department: Department): void {
         },
         error: (error) => {
           console.error(`Error ${action}ing department:`, error);
-          this.showError(`Failed to ${action} department`);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            `Failed to ${action} department`;
+          this.showError(errorMessage);
         }
       });
   }
@@ -268,17 +284,21 @@ viewDepartmentEmployees(department: Department): void {
 
     if (confirm(confirmMessage)) {
       this.employeeService.deleteDepartment(department.departmentId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.fetchDepartments();
-            this.showSuccess('Department deleted successfully');
-          },
-          error: (error) => {
-            console.error('Error deleting department:', error);
-            this.showError('Failed to delete department');
-          }
-        });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.fetchDepartments();
+          this.showSuccess('Department deleted successfully');
+        },
+        error: (error) => {
+          console.error('Error deleting department:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to delete department';
+          this.showError(errorMessage);
+        }
+      });
     }
   }
 

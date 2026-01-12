@@ -418,7 +418,11 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading payroll entries:', error);
-          this.notificationService.showError('Failed to load payroll entries');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to load payroll entries';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
           this.cdr.markForCheck();
         }
@@ -481,7 +485,11 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error approving entry:', error);
-          this.notificationService.showError('Failed to approve payroll entry');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to approve payroll entry';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -496,11 +504,15 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
             this.notificationService.showSuccess('Payroll entry rejected');
             this.loadPayrollEntries();
           },
-          error: (error) => {
-            console.error('Error rejecting entry:', error);
-            this.notificationService.showError('Failed to reject payroll entry');
-          }
-        });
+        error: (error) => {
+          console.error('Error rejecting entry:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to reject payroll entry';
+          this.notificationService.showError(errorMessage);
+        }
+      });
     }
   }
 
@@ -514,7 +526,11 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error marking as paid:', error);
-          this.notificationService.showError('Failed to mark as paid');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to mark as paid';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -534,7 +550,11 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Download error:', error);
-          this.notificationService.showError('Failed to download payslip');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to download payslip';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -552,7 +572,11 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error approving entries:', error);
-          this.notificationService.showError('Failed to approve selected entries');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to approve selected entries';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
@@ -569,7 +593,11 @@ export class PayrollEntriesComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error marking as paid:', error);
-          this.notificationService.showError('Failed to mark selected entries as paid');
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to mark selected entries as paid';
+          this.notificationService.showError(errorMessage);
         }
       });
   }
