@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, interval } from 'rxjs';
 
 
@@ -21,6 +20,7 @@ import { MatTableModule } from '@angular/material/table';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { 
   TimeTrackingSession, 
   Attendance,
@@ -77,7 +77,7 @@ isLoadingSessions = false;
   constructor(
     private attendanceService: AttendanceService,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -163,7 +163,8 @@ isLoadingSessions = false;
         this.isLoadingSessions = false;
       },
       error: (error) => {
-        console.error('Error loading today sessions:', error);
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load today sessions';
+        this.notification.showError(errorMessage);
         this.isLoadingSessions = false;
       }
     });
@@ -187,8 +188,9 @@ formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string 
         next: (session) => {
           this.currentSession = session;
         },
-        error: (error) => {
-          console.error('Error loading current session:', error);
+      error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load current session';
+          this.notification.showError(errorMessage);
         }
       });
   }
@@ -201,8 +203,9 @@ formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string 
         next: (attendances) => {
           this.todayAttendance = attendances.length > 0 ? attendances[0] : null;
         },
-        error: (error) => {
-          console.error('Error loading today attendance:', error);
+      error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load today attendance';
+          this.notification.showError(errorMessage);
         }
       });
   }
@@ -234,7 +237,8 @@ private loadRecentAttendance(): void {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading recent attendance:', error);
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load recent attendance';
+        this.notification.showError(errorMessage);
         this.isLoading = false;
       }
     });
@@ -262,15 +266,15 @@ applyDateFilter(): void {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.showSuccess('Clocked in successfully!');
+          this.notification.showSuccess('Clocked in successfully!');
           this.loadCurrentSession();
           this.loadTodayAttendance();
           this.loadTodaySessions();
           this.isClockActionLoading = false;
         },
         error: (error) => {
-          console.error('Clock in error:', error);
-          this.showError('Failed to clock in. Please try again.');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to clock in. Please try again.';
+          this.notification.showError(errorMessage);
           this.isClockActionLoading = false;
         }
       });
@@ -291,7 +295,7 @@ applyDateFilter(): void {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.showSuccess('Clocked out successfully!');
+          this.notification.showSuccess('Clocked out successfully!');
           this.loadCurrentSession();
           this.loadTodayAttendance();
           this.loadRecentAttendance();
@@ -299,8 +303,8 @@ applyDateFilter(): void {
           this.isClockActionLoading = false;
         },
         error: (error) => {
-          console.error('Clock out error:', error);
-          this.showError('Failed to clock out. Please try again.');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to clock out. Please try again.';
+          this.notification.showError(errorMessage);
           this.isClockActionLoading = false;
         }
       });
@@ -320,17 +324,5 @@ applyDateFilter(): void {
     return `${hrs}h ${mins}m`;
   }
 
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
+ 
 }

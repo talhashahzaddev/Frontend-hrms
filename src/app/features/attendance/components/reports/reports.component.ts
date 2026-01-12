@@ -14,7 +14,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
@@ -93,7 +93,7 @@ departmentEmployees: DepartmentEmployee[] = [];
   constructor(
     private attendanceService: AttendanceService,
     private employeeService: EmployeeService,
-    private snackBar: MatSnackBar
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -146,8 +146,8 @@ this.attendanceService.getDepartmentEmployees(departmentId)
       this.employeeControl.setValue(''); // reset selected employee if needed
     },
     error: (err) => {
-      console.error('Error loading employees:', err);
-      this.showError('Failed to load employees for department');
+      const errorMessage = err?.error?.message || err?.message || 'Failed to load employees for department';
+      this.notification.showError(errorMessage);
     }
   });
 
@@ -177,11 +177,11 @@ this.attendanceService.getDepartmentEmployees(departmentId)
         next: (report) => {
           this.reportData = report;
           this.isLoading = false;
-          this.showSuccess('Report generated successfully');
+          this.notification.showSuccess('Report generated successfully');
         },
         error: (error) => {
-          console.error('Error generating report:', error);
-          this.showError('Failed to generate report');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to generate report';
+          this.notification.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -220,8 +220,8 @@ this.attendanceService.getDepartmentEmployees(departmentId)
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error loading page:', error);
-          this.showError('Failed to load page');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load page';
+          this.notification.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -285,11 +285,11 @@ this.attendanceService.getDepartmentEmployees(departmentId)
           link.download = `attendance-report-${startDate}-to-${endDate}.${format}`;
           link.click();
           window.URL.revokeObjectURL(url);
-          this.showSuccess(`Report exported as ${format.toUpperCase()}`);
+          this.notification.showSuccess(`Report exported as ${format.toUpperCase()}`);
         },
         error: (error) => {
-          console.error('Export error:', error);
-          this.showError('Failed to export report');
+          const errorMessage = error?.error?.message || error?.message || 'Failed to export report';
+          this.notification.showError(errorMessage);
         }
       });
   }
@@ -304,17 +304,5 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     return `${hrs}h ${mins}m`;
   }
 
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
+ 
 }

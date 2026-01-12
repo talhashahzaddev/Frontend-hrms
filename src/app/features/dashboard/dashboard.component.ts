@@ -121,7 +121,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private getCurrentUser(): void {
     this.authService.getCurrentUser()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(user => this.currentUser = user);
+      .subscribe({
+        next: user => this.currentUser = user,
+        error: () => {
+          this.currentUser = null;
+          this.notificationService.showError('Failed to load user information');
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   // Role helpers for DashboardComponent (or any component)
@@ -152,26 +159,74 @@ hasRole(role: string): boolean {
 // Check multiple roles at once
 hasAnyRole(roles: string[]): boolean {
   return this.authService.hasAnyRole(roles);
-}
-
-
-
-
+  }
+  
+  
+  
   private loadDashboardData(): void {
+    if (this.isLoading) return;
     this.isLoading = true;
-
+  
     forkJoin({
-      summary: this.dashboardService.getDashboardSummary().pipe(catchError(() => of(null))),
-      attendanceStats: this.dashboardService.getAttendanceStats(this.selectedPeriod).pipe(catchError(() => of(null))),
-      leaveStats: this.dashboardService.getLeaveStats(this.selectedPeriod).pipe(catchError(() => of(null))),
-      payrollStats: this.dashboardService.getPayrollStats(this.selectedPeriod).pipe(catchError(() => of(null))),
-      performanceStats: this.dashboardService.getPerformanceStats().pipe(catchError(() => of(null))),
-      recentActivities: this.dashboardService.getRecentActivities(10).pipe(catchError(() => of([]))),
-      employeeGrowth: this.dashboardService.getEmployeeGrowth().pipe(catchError(() => of(null))),
-      departmentStats: this.dashboardService.getDepartmentStats().pipe(catchError(() => of([]))),
-      upcomingEvents: this.dashboardService.getUpcomingEvents(5).pipe(catchError(() => of([])))
+      summary: this.dashboardService.getDashboardSummary().pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load dashboard summary'));
+          return of(null);
+        })
+      ),
+      attendanceStats: this.dashboardService.getAttendanceStats(this.selectedPeriod).pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load attendance stats'));
+          return of(null);
+        })
+      ),
+      leaveStats: this.dashboardService.getLeaveStats(this.selectedPeriod).pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load leave stats'));
+          return of(null);
+        })
+      ),
+      payrollStats: this.dashboardService.getPayrollStats(this.selectedPeriod).pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load payroll stats'));
+          return of(null);
+        })
+      ),
+      performanceStats: this.dashboardService.getPerformanceStats().pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load performance stats'));
+          return of(null);
+        })
+      ),
+      recentActivities: this.dashboardService.getRecentActivities(10).pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load recent activities'));
+          return of([]);
+        })
+      ),
+      employeeGrowth: this.dashboardService.getEmployeeGrowth().pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load employee growth'));
+          return of(null);
+        })
+      ),
+      departmentStats: this.dashboardService.getDepartmentStats().pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load department stats'));
+          return of([]);
+        })
+      ),
+      upcomingEvents: this.dashboardService.getUpcomingEvents(5).pipe(
+        catchError(error => {
+          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load upcoming events'));
+          return of([]);
+        })
+      )
     })
-    .pipe(finalize(() => this.isLoading = false))
+    .pipe(takeUntil(this.destroy$), finalize(() => {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }))
     .subscribe({
       next: data => {
         this.dashboardSummary = data.summary;
@@ -190,11 +245,12 @@ hasAnyRole(roles: string[]): boolean {
         this.cdr.markForCheck();
       },
       error: error => {
-        console.error('Failed to load dashboard data:', error);
-        this.notificationService.showError('Failed to load dashboard data');
+        this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load dashboard data'));
       }
     });
   }
+
+  
 
   
   private prepareDashboardCards(): void {
@@ -315,7 +371,12 @@ hasAnyRole(roles: string[]): boolean {
     return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   refreshDashboard(): void {
-  this.loadDashboardData(); // or whatever method you already use to fetch dashboard data
+  this.loadDashboardData();
+}
+
+private extractErrorMessage(error: any, fallback: string): string {
+  const message = error?.error?.message || error?.message || fallback;
+  return typeof message === 'string' && message.trim() !== '' ? message : fallback;
 }
 
 }
