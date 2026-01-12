@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef } from '@angular/core';
@@ -39,6 +39,7 @@ import { environment } from '@/environments/environment';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
@@ -354,11 +355,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onProfileClick(): void {
-    this.router.navigate(['/profile']);
+    // routerLink will handle navigation, this is just for any additional logic if needed
+    // The menu will close automatically when clicking on mat-menu-item
   }
 
   onSettingsClick(): void {
-    this.router.navigate(['/settings']);
+    // routerLink will handle navigation, this is just for any additional logic if needed
+    // The menu will close automatically when clicking on mat-menu-item
   }
 
   onLogout(): void {
