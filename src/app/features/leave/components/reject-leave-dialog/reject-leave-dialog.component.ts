@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 export interface RejectLeaveDialogData {
   employeeName: string;
@@ -117,6 +118,7 @@ export class RejectLeaveDialogComponent {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<RejectLeaveDialogComponent>,
+    private notificationService: NotificationService,
     @Inject(MAT_DIALOG_DATA) public data: RejectLeaveDialogData
   ) {
     this.rejectForm = this.fb.group({
@@ -129,8 +131,10 @@ export class RejectLeaveDialogComponent {
   }
 
   onReject(): void {
-    if (!this.rejectForm.valid) return;
-
+    if (!this.rejectForm.valid) {
+      this.notificationService.showError('Please fill in all required fields');
+      return;
+    }
     this.isSubmitting = true;
     const reason = this.rejectForm.get('reason')?.value;
     this.dialogRef.close({ rejected: true, reason });

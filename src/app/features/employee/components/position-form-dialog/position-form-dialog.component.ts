@@ -12,6 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { Position, Department, Role, CreatePositionRequest, UpdatePositionRequest } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 export interface PositionDialogData {
   mode: 'create' | 'edit';
@@ -47,7 +48,8 @@ export class PositionFormDialogComponent implements OnDestroy {
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private dialogRef: MatDialogRef<PositionFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: PositionDialogData
+    @Inject(MAT_DIALOG_DATA) public data: PositionDialogData,
+    private notificationService: NotificationService
   ) {
     this.positionForm = this.createForm();
     
@@ -88,59 +90,44 @@ export class PositionFormDialogComponent implements OnDestroy {
     this.isSubmitting = true;
     const formValue = this.positionForm.value;
 
-    if (this.data.mode === 'create') {
-      this.createPosition(formValue);
-    } else {
-      this.updatePosition(formValue);
-    }
-  }
-
-  private createPosition(formValue: any): void {
-    const request: CreatePositionRequest = {
+    const createRequest: CreatePositionRequest = {
       positionTitle: formValue.positionTitle.trim(),
       departmentId: formValue.departmentId || undefined,
       roleId: formValue.roleId || undefined,
       description: formValue.description?.trim() || undefined
     };
 
-    this.employeeService.createPosition(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (position) => {
-          this.dialogRef.close(position);
-        },
-        error: (error) => {
-          console.error('Error creating position:', error);
-          this.isSubmitting = false;
-          // TODO: Show error message to user
-        }
-      });
-  }
-
-  private updatePosition(formValue: any): void {
-    if (!this.data.position) return;
-
-    const request: UpdatePositionRequest = {
+    const updateRequest: UpdatePositionRequest = {
       positionTitle: formValue.positionTitle.trim(),
       departmentId: formValue.departmentId || undefined,
       roleId: formValue.roleId || undefined,
       description: formValue.description?.trim() || undefined
     };
 
-    this.employeeService.updatePosition(this.data.position.positionId, request)
+    const operation = this.data.mode === 'edit' && this.data.position
+      ? this.employeeService.updatePosition(this.data.position.positionId, updateRequest)
+      : this.employeeService.createPosition(createRequest);
+
+    operation
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (position) => {
+          this.notificationService.showSuccess(
+            `Position ${this.data.mode === 'edit' ? 'updated' : 'created'} successfully`
+          );
           this.dialogRef.close(position);
         },
         error: (error) => {
-          console.error('Error updating position:', error);
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            `Failed to ${this.data.mode === 'edit' ? 'update' : 'create'} position`;
+          this.notificationService.showError(errorMessage);
           this.isSubmitting = false;
-          // TODO: Show error message to user
         }
       });
   }
-
+ 
   private markFormGroupTouched(): void {
     Object.keys(this.positionForm.controls).forEach(key => {
       const control = this.positionForm.get(key);
