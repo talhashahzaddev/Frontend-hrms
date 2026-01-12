@@ -8,6 +8,7 @@
       "resources": {
         "files": [
           "/favicon.ico",
+          "/hub.png",
           "/index.html",
           "/manifest.json",
           "/*.css",

@@ -5,7 +5,63 @@
   <title>HRMS - Human Resource Management System</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="hub.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="hub.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="hub.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="hub.png">
+  <link rel="shortcut icon" type="image/png" href="hub.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="hub.png">
+  
+  <!-- Force favicon update script - runs immediately -->
+  <script>
+    (function() {
+      function setHubFavicon() {
+        // Remove ALL existing favicon links first
+        const allFavicons = document.querySelectorAll('link[rel*="icon"], link[rel*="shortcut"]');
+        allFavicons.forEach(function(link) {
+          link.remove();
+        });
+        
+        // Get base href
+        const baseElement = document.querySelector('base');
+        const baseHref = baseElement ? baseElement.getAttribute('href') : '/';
+        const faviconPath = baseHref + 'hub.png';
+        
+        // Create multiple favicon links for better browser support
+        const faviconConfigs = [
+          { rel: 'icon', sizes: '512x512', type: 'image/png' },
+          { rel: 'icon', sizes: '192x192', type: 'image/png' },
+          { rel: 'icon', sizes: '32x32', type: 'image/png' },
+          { rel: 'icon', sizes: '16x16', type: 'image/png' },
+          { rel: 'icon', type: 'image/png' },
+          { rel: 'shortcut icon', type: 'image/png' },
+          { rel: 'apple-touch-icon', sizes: '180x180', type: 'image/png' }
+        ];
+        
+        faviconConfigs.forEach(function(config) {
+          const link = document.createElement('link');
+          link.rel = config.rel;
+          link.type = config.type;
+          link.href = faviconPath;
+          if (config.sizes) {
+            link.setAttribute('sizes', config.sizes);
+          }
+          document.head.appendChild(link);
+        });
+      }
+      
+      // Run immediately
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setHubFavicon);
+      } else {
+        setHubFavicon();
+      }
+      
+      // Also run after a short delay to override any Angular changes
+      setTimeout(setHubFavicon, 100);
+      setTimeout(setHubFavicon, 500);
+    })();
+  </script>
   
   <!-- Preconnect to external resources -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
