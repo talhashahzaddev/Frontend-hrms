@@ -46,7 +46,7 @@ export class DomainService {
   /**
    * Whitelisted subdomains that don't require validation
    */
-  private readonly WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi'];
+  private readonly WHITELISTED_SUBDOMAINS = ['frontend-hrms-phi','reset-password'];
 
   /**
    * Extracts subdomain from current window location
