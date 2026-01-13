@@ -21,10 +21,10 @@
       <ng-container *ngFor="let item of getFilteredMenuItems()">
         
         <!-- Single Menu Item (No Children) -->
-        <a mat-list-item 
+        <a mat-list-item [disableRipple]="true"
           *ngIf="!item.children || item.children.length === 0"
           class="nav-item"
-          [class.active]="isActiveRoute(item.route!)"
+          [class.active]="isActiveRoute(item.route!, true)"
           [routerLink]="item.route"
           (click)="onMenuItemClick(item)"
           role="menuitem">
@@ -57,9 +57,10 @@
             <div class="nav-sub-items">
               <mat-list class="sub-nav-list">
                 <a mat-list-item
+                  [disableRipple]="true"
                   *ngFor="let child of getFilteredChildren(item.children)"
                   class="nav-sub-item"
-                  [class.active]="isActiveRoute(child.route!)"
+                  [class.active]="isActiveRoute(child.route!, child.exact)"
                   [routerLink]="child.route"
                   (click)="onMenuItemClick(child)"
                   role="menuitem">
@@ -88,5 +89,6 @@
       </div>
     </div>
   </div>
+  
 
 </div>
