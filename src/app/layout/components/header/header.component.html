@@ -62,22 +62,29 @@
     </button>
 
     <!-- Notifications -->
-    <div class="notification-container">
-      <button mat-icon-button class="action-button notification-button"
-        [class.has-notifications]="notificationCount > 0" (click)="onNotificationsClick()" matTooltip="Notifications"
-        aria-label="Notifications">
-        <mat-icon [matBadge]="notificationCount" [matBadgeHidden]="notificationCount === 0" matBadgeColor="warn"
-          matBadgeSize="small">
-          notifications
-        </mat-icon>
-      </button>
+   <!-- Notifications -->
+<div class="notification-container" #notificationContainer>
+  <button mat-icon-button
+          class="action-button notification-button"
+          [class.has-notifications]="notificationCount > 0"
+          (click)="onNotificationsClick()"
+          matTooltip="Notifications"
+          aria-label="Notifications">
+    <mat-icon [matBadge]="notificationCount"
+              [matBadgeHidden]="notificationCount === 0"
+              matBadgeColor="warn"
+              matBadgeSize="small">
+      notifications
+    </mat-icon>
+  </button>
 
-      <!-- Dropdown -->
-      <div class="notification-panel" *ngIf="isNotificationOpen">
-        <app-notification-dialogue [isOpen]="isNotificationOpen" (unreadCountChange)="notificationCount = $event">
-        </app-notification-dialogue>
-      </div>
-    </div>
+  <!-- Notification Dialog -->
+  <app-notification-dialogue
+    [isOpen]="isNotificationOpen"
+    (unreadCountChange)="notificationCount = $event"
+    (close)="closeNotifications()">
+  </app-notification-dialogue>
+</div>
 
     <!-- User Menu -->
     <button mat-icon-button class="user-menu-button-pic" [matMenuTriggerFor]="userMenu" aria-label="User menu">
