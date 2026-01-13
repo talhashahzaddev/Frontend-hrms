@@ -137,4 +137,11 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
       email: 'admin@democompany.com'
     });
   }
+
+  onsignup(): void {
+    const parent = (window as any)?.APP_SETTINGS?.parentUrl || 'https://www.briskpeople.com';
+    const base = typeof parent === 'string' ? parent.replace(/\/+$/, '') : 'https://www.briskpeople.com';
+    const url = `${base}/sign-up`;
+    window.location.href = url;
+  }
 }

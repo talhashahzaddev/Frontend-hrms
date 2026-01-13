@@ -148,45 +148,72 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   private redirectUserOnInit(): void {
-    const user = this.authService.getCurrentUserValue();
+    let hasChecked = false;
 
-    if (!user) {
-      this.router.navigate(['/login']);
-      return;
-    }
+    // Function to check route and redirect if needed
+    const checkAndRedirect = (url: string) => {
+      if (hasChecked) return; // Prevent duplicate checks
+      hasChecked = true;
 
+      const user = this.authService.getCurrentUserValue();
+      const currentPath = url.split('?')[0]; // Get path without query params
+
+      // List of auth routes that don't require authentication
+      const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+
+      // Check if current route is an auth route
+      const isAuthRoute = authRoutes.some(route => currentPath.startsWith(route));
+
+      if (!user) {
+        // Only redirect to login if NOT already on an auth page
+        if (!isAuthRoute) {
+          this.router.navigate(['/login']);
+        }
+        return;
+      }
+
+      // User is authenticated - handle role-based redirects
+      const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
+
+      // Employee is trying to access admin dashboard
+      if (!isAdmin && currentPath.startsWith('/dashboard')) {
+        this.router.navigate(['/performance/dashboard']);
+        return;
+      }
+
+      // Admin trying to access employee dashboard
+      if (isAdmin && currentPath.startsWith('/performance')) {
+        this.router.navigate(['/dashboard']);
+        return;
+      }
+
+      // If user is on root or login page → role-based redirect
+      if (currentPath === '/' || currentPath === '/login') {
+        if (isAdmin) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/performance/dashboard']);
+        }
+      }
+    };
+
+    // Subscribe to NavigationEnd events (this will catch the initial navigation)
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
         take(1)
       )
       .subscribe((event: NavigationEnd) => {
-
-        const currentUrl = event.urlAfterRedirects;
-
-        const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
-
-        // Employee is trying to access admin dashboard
-        if (!isAdmin && currentUrl.startsWith('/dashboard')) {
-          this.router.navigate(['/performance/dashboard']);
-          return;
-        }
-
-        // Admin trying to access employee dashboard
-        if (isAdmin && currentUrl.startsWith('/performance')) {
-          this.router.navigate(['/dashboard']);
-          return;
-        }
-
-        // If user is on root or login page → role-based redirect
-        if (currentUrl === '/' || currentUrl === '/login') {
-          if (isAdmin) {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.router.navigate(['/performance/dashboard']);
-          }
-        }
+        checkAndRedirect(event.urlAfterRedirects);
       });
+
+    // Fallback: Check immediately if NavigationEnd already fired
+    // Use setTimeout to ensure router is initialized
+    setTimeout(() => {
+      if (!hasChecked) {
+        checkAndRedirect(this.router.url || window.location.pathname);
+      }
+    }, 100);
   }
 
 

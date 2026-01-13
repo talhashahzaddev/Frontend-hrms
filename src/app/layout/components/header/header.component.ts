@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { ViewChild, ElementRef } from '@angular/core';
+import { ViewChild, ElementRef, HostListener } from '@angular/core';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -58,6 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isHandset = false;
   @Output() menuToggle = new EventEmitter<void>();
   @ViewChild('searchInput') searchInput!: ElementRef;
+  @ViewChild('notificationContainer') notificationContainer!: ElementRef;
   currentUser: User | null = null;
   currentPlanName: string | null = null;
   isSubscriptionExpired: boolean = false;
@@ -352,6 +353,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // ⭐ OPTIONAL: Close function if needed later ⭐
   closeNotifications(): void {
     this.isNotificationOpen = false;
+  }
+  
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.isNotificationOpen) return;
+    const target = event.target as Node;
+    if (!this.notificationContainer?.nativeElement.contains(target)) {
+      this.isNotificationOpen = false;
+    }
   }
 
   onProfileClick(): void {
