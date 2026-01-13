@@ -1,50 +1,35 @@
-<div class="notification-dialogue" *ngIf="isOpen">
-  <!-- Header -->
+<div class="notification-dialogue" *ngIf="isOpen" (click)="$event.stopPropagation()">
   <div class="header">
     <span>Notifications</span>
     <button mat-button (click)="markAllAsRead()" [disabled]="unreadCount === 0">
       Mark all as read
     </button>
   </div>
-
   <mat-divider></mat-divider>
-
-  <!-- Notifications List -->
   <div class="notification-list" *ngIf="notification.length > 0; else noNotifications">
-    <div *ngFor="let n of notification" 
-         class="notification-item" 
+    <div *ngFor="let n of notification"
+         class="notification-item"
          [class.unread]="!n.isRead"
          (click)="onNotificationClick(n)">
       <mat-icon class="notification-icon">notifications</mat-icon>
       <div class="content">
         <div class="title">{{ n.title }}</div>
         <div class="message">{{ n.message }}</div>
-        <div class="time">{{ n.createdAt| date:'short' }}</div>
-        
-
-       <!-- NEW: Accept/Reject based on module type - Only show for unread notifications -->
+        <div class="time">{{ n.createdAt | date:'short' }}</div>
         <div *ngIf="n.notificationType === 'Request' && n.moduletype && !n.isRead"
              class="action-buttons">
-
           <button mat-button color="primary"
                   (click)="handleAction(n, 'accept'); $event.stopPropagation()">
             Accept
           </button>
-
           <button mat-button color="warn"
                   (click)="handleAction(n, 'reject'); $event.stopPropagation()">
             Reject
           </button>
-
         </div>
-
       </div>
     </div>
   </div>
-
-
-
-  <!-- No notifications fallback -->
   <ng-template #noNotifications>
     <div class="no-notifications">No notifications</div>
   </ng-template>

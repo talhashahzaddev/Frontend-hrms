@@ -15,6 +15,7 @@ import { Output, EventEmitter } from '@angular/core';
 import { RejectLeaveDialogComponent } from '../leave/components/reject-leave-dialog/reject-leave-dialog.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { LeaveRequest } from '../../core/models/leave.models';
+
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
@@ -25,6 +26,7 @@ import { LeaveRequest } from '../../core/models/leave.models';
 export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isOpen = false;
 @Output() unreadCountChange = new EventEmitter<number>();
+@Output() close = new EventEmitter<void>();
 
   notification: ServerNotification[] = [];
   currentUser: any = null;
@@ -65,6 +67,8 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
       this.loadNotifications();
     }
   }
+
+  
 
 
   get unreadCount(): number {

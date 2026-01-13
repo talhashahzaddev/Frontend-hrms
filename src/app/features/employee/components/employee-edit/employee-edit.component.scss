@@ -175,6 +175,10 @@
       display: flex;
       align-items: center;
     }
+    
+    .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix {
+      padding-left: 36px;
+    }
 
     /* Notch Border */
     .mdc-notched-outline__leading,
@@ -222,6 +226,12 @@
       font-weight: 500;
       font-size: 15px;
     }
+    
+    .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix .mat-mdc-form-field-label {
+      left: 36px;
+      right: auto;
+      transform-origin: left top;
+    }
 
     /* Prefix Icon */
     .mat-mdc-form-field-icon-prefix {
@@ -234,6 +244,10 @@
         height: 20px;
         transition: color 0.3s ease;
       }
+    }
+    
+    .mat-mdc-form-field-prefix {
+      margin-left: 8px;
     }
 
     &.mat-focused .mat-mdc-form-field-icon-prefix mat-icon {
@@ -504,6 +518,10 @@
           }
         }
       }
+    }
+    
+    ::ng-deep mat-form-field.mat-mdc-form-field.mat-form-field-appearance-outline .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix {
+      padding-left: 40px;
     }
   }
 
