@@ -118,7 +118,7 @@ export interface CreatePayrollPeriodDialogData {
             </div>
             <div class="preview-item" *ngIf="periodForm.get('payDate')?.value">
               <mat-icon>payments</mat-icon>
-              <span>Pay Date: {{ periodForm.get('payDate')?.value | date:'mediumDate' }}</span>
+              <span>Pay Date: {{ periodForm.get('payDate')?.value | date:'dd-MM-yyyy' }}</span>
             </div>
           </div>
         </div>
@@ -350,9 +350,15 @@ export class CreatePayrollPeriodDialogComponent {
     const endDate = this.periodForm.get('endDate')?.value;
 
     if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const sd = String(s.getDate()).padStart(2, '0');
+      const sm = String(s.getMonth() + 1).padStart(2, '0');
+      const sy = s.getFullYear();
+      const ed = String(e.getDate()).padStart(2, '0');
+      const em = String(e.getMonth() + 1).padStart(2, '0');
+      const ey = e.getFullYear();
+      return `${sd}-${sm}-${sy} - ${ed}-${em}-${ey}`;
     }
 
     return '';

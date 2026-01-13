@@ -469,7 +469,11 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString();
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   getEmployeeFullName(employee: Employee): string {

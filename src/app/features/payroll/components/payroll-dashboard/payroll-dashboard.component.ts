@@ -87,11 +87,11 @@ import { User } from '../../../../core/models/auth.models';
             <div class="period-info">
               <div class="info-item">
                 <label>Period:</label>
-                <span>{{ currentPeriod.startDate | date:'mediumDate' }} - {{ currentPeriod.endDate | date:'mediumDate' }}</span>
+                <span>{{ currentPeriod.startDate | date:'dd-MM-yyyy' }} - {{ currentPeriod.endDate | date:'dd-MM-yyyy' }}</span>
               </div>
               <div class="info-item">
                 <label>Pay Date:</label>
-                <span>{{ (currentPeriod.payDate | date:'mediumDate') || 'Not set' }}</span>
+                <span>{{ (currentPeriod.payDate | date:'dd-MM-yyyy') || 'Not set' }}</span>
               </div>
               <div class="info-item">
                 <label>Status:</label>
@@ -162,7 +162,7 @@ import { User } from '../../../../core/models/auth.models';
                     <mat-card-content>
                       <div class="payslip-header-info">
                         <h4>{{ latestPayslip.periodName }}</h4>
-                        <p>Pay Date: {{ latestPayslip.payDate | date:'mediumDate' }}</p>
+                        <p>Pay Date: {{ latestPayslip.payDate | date:'dd-MM-yyyy' }}</p>
                       </div>
 
                       <div class="payslip-details">
@@ -237,7 +237,7 @@ import { User } from '../../../../core/models/auth.models';
                     <ng-container matColumnDef="dates">
                       <mat-header-cell *matHeaderCellDef>Period Dates</mat-header-cell>
                       <mat-cell *matCellDef="let period">
-                        {{ period.startDate | date:'mediumDate' }} - {{ period.endDate | date:'mediumDate' }}
+                        {{ period.startDate | date:'dd-MM-yyyy' }} - {{ period.endDate | date:'dd-MM-yyyy' }}
                       </mat-cell>
                     </ng-container>
 

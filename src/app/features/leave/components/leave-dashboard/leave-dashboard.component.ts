@@ -225,9 +225,9 @@ import { User } from '../../../../core/models/auth.models';
                     <mat-header-cell *matHeaderCellDef>Duration</mat-header-cell>
                     <mat-cell *matCellDef="let request">
                       <div class="dates-cell">
-                        <div>{{ request.startDate | date:'mediumDate' }}</div>
+                        <div>{{ request.startDate | date:'dd-MM-yyyy' }}</div>
                         <div class="date-separator">to</div>
-                        <div>{{ request.endDate | date:'mediumDate' }}</div>
+                        <div>{{ request.endDate | date:'dd-MM-yyyy' }}</div>
                         <div class="days-count">({{ request.daysRequested }} days)</div>
                       </div>
                     </mat-cell>
@@ -246,7 +246,7 @@ import { User } from '../../../../core/models/auth.models';
                   <ng-container matColumnDef="submitted">
                     <mat-header-cell *matHeaderCellDef>Submitted</mat-header-cell>
                     <mat-cell *matCellDef="let request">
-                      {{ request.submittedAt | date:'short' }}
+                      {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}
                     </mat-cell>
                   </ng-container>
 
