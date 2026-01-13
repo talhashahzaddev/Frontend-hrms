@@ -21,6 +21,7 @@ interface MenuItem {
   roles?: string[];
   badge?: number;
   expanded?: boolean;
+  exact?: boolean;
 }
 
 @Component({
@@ -63,7 +64,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'people',
       roles: ['Super Admin', 'HR Manager'],
       children: [
-        { label: 'All Employees', icon: 'group', route: '/employees' },
+        { label: 'All Employees', icon: 'group', route: '/employees', exact: true },
         { label: 'Add Employee', icon: 'person_add', route: '/employees/add', roles: ['Super Admin', 'HR Manager'] },
         { label: 'Departments', icon: 'apartment', route: '/employees/departments', roles: ['Super Admin', 'HR Manager'] },
         { label: 'Positions', icon: 'work', route: '/employees/positions', roles: ['Super Admin', 'HR Manager'] }
@@ -137,6 +138,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscribeToUser();
     this.subscribeToRouterEvents();
+    // Ensure active state is correct on initial load (before first NavigationEnd)
+    this.activeRoute = this.router.url;
   }
 
   ngOnDestroy(): void {
@@ -150,16 +153,19 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.menuItemClick.emit();
   }
 
-  isActiveRoute(route: string): boolean {
-    return this.activeRoute === route || this.activeRoute.startsWith(route + '/');
+  isActiveRoute(route: string, exact = false): boolean {
+    if (!route) return false;
+    return exact
+      ? this.activeRoute === route
+      : (this.activeRoute === route || this.activeRoute.startsWith(route + '/'));
   }
 
   isParentActive(item: MenuItem): boolean {
     if (!item.children) return false;
-    
-    return item.children.some(child => 
-      child.route && this.isActiveRoute(child.route)
-    );
+    return item.children.some(child => {
+      if (!child.route) return false;
+      return this.activeRoute === child.route || this.activeRoute.startsWith(child.route + '/');
+    });
   }
 
   hasPermission(item: MenuItem): boolean {

@@ -292,7 +292,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.router.navigate(['/forgot-password']);
   }
   onsignup(): void {
-    this.router.navigate(['/register']);
+    const parent = (window as any)?.APP_SETTINGS?.parentUrl || 'https://www.briskpeople.com';
+    const base = typeof parent === 'string' ? parent.replace(/\/+$/, '') : 'https://www.briskpeople.com';
+    const url = `${base}/sign-up`;
+    window.location.href = url;
   }
 
   togglePasswordVisibility(): void {
