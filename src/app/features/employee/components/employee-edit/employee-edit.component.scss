@@ -177,7 +177,7 @@
     }
     
     .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix {
-      padding-left: 36px;
+      padding-left: 60px;
     }
 
     /* Notch Border */
@@ -228,7 +228,7 @@
     }
     
     .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix .mat-mdc-form-field-label {
-      left: 36px;
+      left: 60px;
       right: auto;
       transform-origin: left top;
     }
@@ -448,6 +448,7 @@
   }
 }
 
+
 /* ============================
    Responsive Design
 =============================== */
@@ -521,7 +522,10 @@
     }
     
     ::ng-deep mat-form-field.mat-mdc-form-field.mat-form-field-appearance-outline .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix {
-      padding-left: 40px;
+      padding-left: 64px;
+    }
+    ::ng-deep mat-form-field.mat-mdc-form-field.mat-form-field-appearance-outline .mat-mdc-form-field-icon-prefix + .mat-mdc-form-field-infix .mat-mdc-form-field-label {
+      left: 64px;
     }
   }
 
@@ -549,3 +553,87 @@
     }
   }
 }
+
+
+
+
+
+/* =====================================================
+   HARD FIX: Prefix Icon Overlap (MDC – Empty State)
+   ===================================================== */
+
+::ng-deep .mat-mdc-form-field.mat-form-field-appearance-outline {
+
+  /* 🔥 Reserve space for prefix icon (MDC way) */
+  --mdc-outlined-text-field-leading-width: 60px;
+  --mdc-outlined-text-field-leading-space: 12px;
+
+  /* Input & select text */
+  .mdc-text-field__input,
+  .mat-mdc-select-value {
+    padding-left: 0 !important;
+  }
+
+  /* Infix container */
+  .mat-mdc-form-field-infix {
+    padding-left: 60px !important;
+  }
+
+  /* Label – EMPTY STATE */
+  .mdc-floating-label {
+    left: 60px !important;
+    right: auto !important;
+  }
+
+  /* Label – FLOATING STATE */
+  &.mat-focused .mdc-floating-label,
+  &.mat-form-field-should-float .mdc-floating-label {
+    transform: translateY(-1.6em) scale(0.75) translateX(-8px) !important;
+  }
+
+  /* Prefix icon positioning */
+  .mat-mdc-form-field-icon-prefix {
+    margin-left: 12px;
+    margin-right: 8px;
+    align-self: center;
+  }
+}
+
+
+@media (max-width: 768px) {
+  ::ng-deep .mat-mdc-form-field.mat-form-field-appearance-outline {
+    --mdc-outlined-text-field-leading-width: 64px;
+
+    .mat-mdc-form-field-infix {
+      padding-left: 64px !important;
+    }
+
+    .mdc-floating-label {
+      left: 64px !important;
+    }
+  }
+}
+/* =====================================================
+   FIX: mat-select value vertical alignment
+   ===================================================== */
+
+// ::ng-deep .mat-mdc-form-field.mat-form-field-appearance-outline {
+
+//   /* Fix SELECT text vertical position */
+//   .mat-mdc-select-value {
+//     display: flex;
+//     align-items: center;
+//   }
+
+//   .mat-mdc-select-value-text {
+//     position: relative;
+//     top: -1px; /* 👈 adjust if needed (-2px / 0px) */
+//   }
+// }
+// @media (max-width: 768px) {
+//   ::ng-deep .mat-mdc-form-field.mat-form-field-appearance-outline {
+//     .mat-mdc-select-value-text {
+//       top: 0;
+//     }
+//   }
+// }

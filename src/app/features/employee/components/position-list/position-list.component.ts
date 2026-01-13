@@ -14,7 +14,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
 
 import { Position, Department, Role } from '../../../../core/models/employee.models';
@@ -22,6 +21,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { PositionFormDialogComponent } from '../position-form-dialog/position-form-dialog.component';
 import { PositionDetailsViewComponent } from '../position-form-dialog/position-details-view.component';
 import{PositionEmployeeViewComponent,PositionEmployeesViewData} from '../position-form-dialog/position-employee-viewDetails.component'
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-position-list',
@@ -82,7 +82,7 @@ export class PositionListComponent implements OnInit, OnDestroy {
   constructor(
     private employeeService: EmployeeService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -112,12 +112,8 @@ export class PositionListComponent implements OnInit, OnDestroy {
         this.fetchPositions();
       },
       error: (error) => {
-        console.error('Error loading filter data:', error);
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          'Failed to load filter data';
-        this.showError(errorMessage);
+        const errorMessage = error?.error?.message || error?.message || 'Failed to load filter data';
+        this.notificationService.showError(errorMessage);
         this.isLoading = false;
       }
     });
@@ -150,12 +146,8 @@ export class PositionListComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error fetching positions:', error);
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          'Failed to fetch positions';
-        this.showError(errorMessage);
+        const errorMessage = error?.error?.message || error?.message || 'Failed to fetch positions';
+        this.notificationService.showError(errorMessage);
         this.isLoading = false;
       }
     });
@@ -180,7 +172,7 @@ export class PositionListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.fetchPositions();
-        this.showSuccess('Position created successfully');
+        this.notificationService.showSuccess('Position created successfully');
       }
     });
   }
@@ -212,7 +204,7 @@ export class PositionListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.fetchPositions();
-        this.showSuccess('Position updated successfully');
+        this.notificationService.showSuccess('Position updated successfully');
       }
     });
   }
@@ -266,7 +258,7 @@ viewEmployees(position: Position): void {
           error?.error?.message ||
           error?.message ||
           'Failed to load employees for this position';
-        this.showError(errorMessage);
+        this.notificationService.showError(errorMessage);
       }
     });
 }
@@ -289,15 +281,14 @@ togglePositionStatus(position: Position, newStatus: boolean): void {
         // Optimistic UI update
         position.isActive = newStatus;
 
-        this.showSuccess(`Position ${action}d successfully`);
+        this.notificationService.showSuccess(`Position ${action}d successfully`);
       },
       error: (error) => {
-        console.error(`Error ${action}ing position:`, error);
         const errorMessage =
           error?.error?.message ||
           error?.message ||
           `Failed to ${action} position`;
-        this.showError(errorMessage);
+        this.notificationService.showError(errorMessage);
       }
     });
 }
@@ -314,33 +305,18 @@ togglePositionStatus(position: Position, newStatus: boolean): void {
         .subscribe({
       next: () => {
         this.fetchPositions();
-        this.showSuccess('Position deleted successfully');
+        this.notificationService.showSuccess('Position deleted successfully');
       },
       error: (error) => {
-        console.error('Error deleting position:', error);
         const errorMessage =
           error?.error?.message ||
           error?.message ||
           'Failed to delete position';
-        this.showError(errorMessage);
+        this.notificationService.showError(errorMessage);
       }
     });
   }
 }
-
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
-    });
-  }
-
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
-    });
-  }
 
   // Helper method to check if filters are applied
   hasFiltersApplied(): boolean {
