@@ -48,6 +48,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     // Get token from URL query string ?token=xxxx
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
     this.initializeForm();
+    this.setupPasswordValidation();
   }
 
   private initializeForm(): void {
@@ -64,6 +65,22 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     const password = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
     return password === confirm ? null : { mismatch: true };
+  }
+
+  private setupPasswordValidation(): void {
+    // Trigger validation when either password field changes
+    this.resetPasswordForm.get('password')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.resetPasswordForm.get('confirmPassword')?.updateValueAndValidity({ emitEvent: false });
+      });
+
+    this.resetPasswordForm.get('confirmPassword')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Trigger form-level validation
+        this.resetPasswordForm.updateValueAndValidity({ emitEvent: false });
+      });
   }
 
   onSubmit(): void {
@@ -100,5 +117,32 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       const control = formGroup.get(key);
       control?.markAsTouched();
     });
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const control = this.resetPasswordForm.get(fieldName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  getErrorMessage(fieldName: string): string {
+    const control = this.resetPasswordForm.get(fieldName);
+    if (control?.hasError('required')) {
+      return `${fieldName === 'password' ? 'Password' : 'Confirm password'} is required`;
+    }
+    if (control?.hasError('minlength')) {
+      return 'Password must be at least 8 characters';
+    }
+    if (fieldName === 'confirmPassword' && this.resetPasswordForm.hasError('mismatch')) {
+      return 'Passwords do not match';
+    }
+    return '';
+  }
+
+  hasMismatchError(): boolean {
+    const confirmControl = this.resetPasswordForm.get('confirmPassword');
+    return this.resetPasswordForm.hasError('mismatch') && 
+           confirmControl !== null &&
+           (confirmControl.touched || confirmControl.dirty) &&
+           confirmControl.value !== '';
   }
 }
