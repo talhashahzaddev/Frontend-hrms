@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { Subject, filter, takeUntil, take } from 'rxjs';
+import { Subject, filter, takeUntil, take, map, combineLatest } from 'rxjs';
 import { ServerNotificationService } from './core/services/server-notification';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -51,7 +51,35 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'HRMS - Human Resource Management System';
   isLoading$ = this.loadingService.loading$;
   isAuthenticated$ = this.authService.isAuthenticated$;
+  isLoggingOut$ = this.authService.isLoggingOut$;
   isAiAssistantPage = false;
+
+  // Computed observable for loading message
+  // Show "Signing out..." only when explicitly logging out
+  // Otherwise show "Logging in..." when loading and not authenticated
+  loadingTitle$ = combineLatest([this.isLoggingOut$, this.isLoading$, this.isAuthenticated$]).pipe(
+    map(([isLoggingOut, isLoading, isAuthenticated]) => {
+      if (isLoggingOut) {
+        return 'Signing out...';
+      } else if (isLoading && !isAuthenticated) {
+        return 'Logging in...';
+      } else {
+        return 'Loading...';
+      }
+    })
+  );
+  
+  loadingMessage$ = combineLatest([this.isLoggingOut$, this.isLoading$, this.isAuthenticated$]).pipe(
+    map(([isLoggingOut, isLoading, isAuthenticated]) => {
+      if (isLoggingOut) {
+        return 'Please wait while we sign you out';
+      } else if (isLoading && !isAuthenticated) {
+        return 'Please wait while we sign you in';
+      } else {
+        return 'Please wait while we process your request';
+      }
+    })
+  );
 
   private destroy$ = new Subject<void>();
 
