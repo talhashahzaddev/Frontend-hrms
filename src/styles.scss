@@ -520,4 +520,18 @@ a {
   }
 }
 
+// CDK Overlay Container - Critical for zoom functionality
+// DO NOT add position, transform, or other layout properties here
+// The ui-scale.service applies inverse zoom to fix coordinate calculations
+.cdk-overlay-container {
+  // Ensure overlay container doesn't interfere with zoom calculations
+  // The service will dynamically apply inverse zoom to counteract body zoom
+  pointer-events: none;
+  
+  // Allow child overlays to receive pointer events
+  .cdk-overlay-pane {
+    pointer-events: auto;
+  }
+}
+
 
