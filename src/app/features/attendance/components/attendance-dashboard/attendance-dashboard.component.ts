@@ -121,6 +121,7 @@ listEndDateControl = new FormControl(new Date()); // Today
     this.setupTimeUpdater();
     this.loadCurrentSession();
     this.loadAttendanceSummary();
+    this.loadEmployeeAttendance();
     this.generateCalendar();
   }
 
