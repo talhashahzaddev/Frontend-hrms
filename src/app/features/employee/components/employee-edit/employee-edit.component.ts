@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Employee, Department, Position } from '../../../../core/models/employee.models';
+import { Subject, takeUntil } from 'rxjs';
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -29,12 +30,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
   templateUrl: './employee-edit.component.html',
   styleUrls: ['./employee-edit.component.scss']
 })
-export class EmployeeEditComponent implements OnInit {
+export class EmployeeEditComponent implements OnInit, OnDestroy {
   employeeForm!: FormGroup;
   departments: Department[] = [];
   positions: Position[] = [];
   managers: Employee[] = [];
   isLoading = false;
+  private destroy$ = new Subject<void>();
 
   employmentTypes = [
    { value: '', label: 'All Types' },
@@ -82,6 +84,23 @@ export class EmployeeEditComponent implements OnInit {
   ngOnInit(): void {
     this.initializeForm();
     this.loadDropdowns();
+
+    // Filter positions by department selection and clear invalid position
+    this.employeeForm.get('departmentId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((departmentId) => {
+        const positionControl = this.employeeForm.get('positionId');
+        const currentPositionId = positionControl?.value;
+        if (departmentId && currentPositionId) {
+          const currentPosition = this.positions.find(p => p.positionId === currentPositionId);
+          if (currentPosition && currentPosition.departmentId !== departmentId) {
+            positionControl?.setValue(null, { emitEvent: false });
+          }
+        }
+        if (!departmentId) {
+          positionControl?.setValue(null, { emitEvent: false });
+        }
+      });
   }
 
 
@@ -120,7 +139,6 @@ initializeForm(): void {
     })
   });
 }
-
 
   loadDropdowns(): void {
     this.employeeService.getDepartments().subscribe({
@@ -241,6 +259,20 @@ formData.append('EmployeeNumber', formValue.employeeCode ?? '');
     if (field.hasError('min')) return 'Value must be greater than 0';
 
     return '';
+  }
+
+  get filteredPositions(): Position[] {
+    const deptId = this.employeeForm?.get('departmentId')?.value;
+    return deptId ? this.positions.filter(p => p.departmentId === deptId) : [];
+  }
+
+  get isPositionDisabled(): boolean {
+    return !this.employeeForm?.get('departmentId')?.value;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
 

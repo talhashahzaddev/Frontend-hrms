@@ -134,12 +134,13 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Position</mat-label>
-          <mat-select formControlName="positionId" required>
-            <mat-option *ngFor="let pos of positions" [value]="pos.positionId">
+          <mat-select formControlName="positionId" required [disabled]="isPositionDisabled">
+            <mat-option *ngFor="let pos of filteredPositions" [value]="pos.positionId">
               {{ pos.positionTitle }}
             </mat-option>
           </mat-select>
           <mat-icon matPrefix>assignment_ind</mat-icon>
+          <mat-hint *ngIf="isPositionDisabled">Please select a department first</mat-hint>
           <mat-error>Position is required</mat-error>
         </mat-form-field>
 

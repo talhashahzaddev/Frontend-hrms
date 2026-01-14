@@ -155,7 +155,7 @@ import {
                 <div class="request-dates">
                   <div class="date-badge">
                     <mat-icon>event</mat-icon>
-                    <span>{{ request.startDate | date:'MMM d' }} - {{ request.endDate | date:'MMM d, y' }}</span>
+                    <span>{{ request.startDate | date:'dd-MM-yyyy' }} - {{ request.endDate | date:'dd-MM-yyyy' }}</span>
                   </div>
                   <div class="days-badge">
                     {{ request.daysRequested }} {{ request.daysRequested === 1 ? 'day' : 'days' }}
@@ -171,7 +171,7 @@ import {
               <div class="item-footer">
                 <div class="submitted-info">
                   <mat-icon>schedule</mat-icon>
-                  <span>Submitted {{ request.submittedAt | date:'short' }}</span>
+                  <span>Submitted {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}</span>
                 </div>
                 <div class="action-buttons">
                   <button mat-stroked-button 
@@ -243,9 +243,9 @@ import {
                 <mat-header-cell *matHeaderCellDef>Duration</mat-header-cell>
                 <mat-cell *matCellDef="let request">
                   <div class="dates-cell">
-                    <div>{{ request.startDate | date:'mediumDate' }}</div>
+                    <div>{{ request.startDate | date:'dd-MM-yyyy' }}</div>
                     <div class="date-separator">to</div>
-                    <div>{{ request.endDate | date:'mediumDate' }}</div>
+                    <div>{{ request.endDate | date:'dd-MM-yyyy' }}</div>
                     <div class="days-count">({{ request.daysRequested }} days)</div>
                   </div>
                 </mat-cell>
@@ -264,7 +264,7 @@ import {
               <ng-container matColumnDef="submitted">
                 <mat-header-cell *matHeaderCellDef>Submitted</mat-header-cell>
                 <mat-cell *matCellDef="let request">
-                  {{ request.submittedAt | date:'short' }}
+                  {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}
                 </mat-cell>
               </ng-container>
 

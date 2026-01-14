@@ -150,7 +150,7 @@ import { User } from '../../../../core/models/auth.models';
                 <mat-cell *matCellDef="let payslip">
                   <div class="period-info">
                     <div class="period-name">{{ payslip.periodId }}</div>
-                    <div class="pay-date">Created: {{ payslip.createdAt | date:'mediumDate' }}</div>
+                    <div class="pay-date">Created: {{ payslip.createdAt | date:'dd-MM-yyyy' }}</div>
                   </div>
                 </mat-cell>
               </ng-container>

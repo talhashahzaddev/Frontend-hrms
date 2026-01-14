@@ -22,6 +22,7 @@ import { AuthService } from '@core/services/auth.service';
 import { ThemeService } from '@core/services/theme.service';
 import { NotificationService } from '@core/services/notification.service';
 import { User } from '@core/models/auth.models';
+import { UiScaleService } from '@core/services/ui-scale.service';
 
 interface SearchItem {
   name: string;
@@ -64,6 +65,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isSubscriptionExpired: boolean = false;
   currentBillingCycle: string | null = null;
   isDarkMode = false;
+  scalePercent = 100;
+  zoomOptions = [70, 80, 90, 100, 110, 120, 130, 150];
+  recommendedZoom = 90;
 
   //Search variables
   filteredItems: SearchItem[] = [];
@@ -309,12 +313,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private themeService: ThemeService,
     private serverNotificationService: ServerNotificationService, // add this
     private notificationService: NotificationService,
+    private uiScaleService: UiScaleService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
     this.subscribeToUser();
     this.subscribeToTheme();
+    this.uiScaleService.initializeScale();
+    this.uiScaleService.scale$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(v => {
+        this.scalePercent = v;
+      });
     // Add this for notifications
     // -----------------------------
     this.serverNotificationService.notifications$
@@ -343,6 +354,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   onThemeToggle(): void {
     this.themeService.toggleTheme();
+  }
+  onZoomIn(): void {
+    this.uiScaleService.increase();
+  }
+  onZoomOut(): void {
+    this.uiScaleService.decrease();
+  }
+  setZoom(value: number): void {
+    this.uiScaleService.setScale(value);
   }
 
   // ⭐ UPDATED METHOD ⭐

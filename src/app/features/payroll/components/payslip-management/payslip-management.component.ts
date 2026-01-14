@@ -274,7 +274,7 @@ import { PagedResult } from '../../../../core/models/common.models';
                             {{ getPayslipStatus(entry) | titlecase }}
                           </mat-chip>
                           <small *ngIf="entry.paidAt">
-                            Paid: {{ entry.paidAt | date:'mediumDate' }}
+                            Paid: {{ entry.paidAt | date:'dd-MM-yyyy' }}
                           </small>
                         </div>
                       </mat-cell>
@@ -714,7 +714,11 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
       // Helper functions
       const formatDate = (date?: string): string => {
         if (!date) return 'N/A';
-        return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).toString().padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
       };
 
       const formatCurrency = (amount: number): string => {
@@ -1065,8 +1069,11 @@ export class PayslipManagementComponent implements OnInit, OnDestroy {
 
   formatDate(dateString: string): string {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const d = new Date(dateString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   getPeriodTotalGross(periodId: string): number {

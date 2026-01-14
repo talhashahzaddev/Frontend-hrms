@@ -462,8 +462,11 @@ export class PayrollReportsComponent implements OnInit, OnDestroy {
 
   formatDate(dateString: string | Date): string {
     if (!dateString) return '';
-    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const d = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).toString().padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   getPeriodTotalGross(periodId: string): number {

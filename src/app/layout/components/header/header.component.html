@@ -55,6 +55,23 @@
       </div>
     </div>
 
+    <div class="zoom-dropdown">
+      <button mat-button class="zoom-trigger" [matMenuTriggerFor]="zoomMenu" matTooltip="Zoom" aria-label="Zoom">
+        <mat-icon class="zoom-icon">zoom_in</mat-icon>
+        <span class="zoom-label">{{ scalePercent }}%</span>
+        <mat-icon class="arrow-icon">arrow_drop_down</mat-icon>
+      </button>
+    </div>
+    <mat-menu #zoomMenu="matMenu" class="zoom-menu">
+      <button mat-menu-item class="zoom-item" *ngFor="let opt of zoomOptions" (click)="setZoom(opt)">
+        <span class="check-slot">
+          <mat-icon *ngIf="scalePercent === opt">check</mat-icon>
+        </span>
+        <span class="option-label">{{ opt }}%</span>
+        <span class="recommended-badge" *ngIf="opt === recommendedZoom">recommended</span>
+      </button>
+    </mat-menu>
+
     <!-- Theme Toggle -->
     <button mat-icon-button class="action-button theme-toggle-button" (click)="onThemeToggle()"
       [matTooltip]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'" aria-label="Toggle theme">
