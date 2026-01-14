@@ -24,6 +24,8 @@
   justify-content: center;
   padding: var(--spacing-lg);
   position: relative;
+  opacity: 1; // Ensure background is visible immediately
+  transition: opacity 0.2s ease;
   
   // Animated background pattern
   &::before {
@@ -47,6 +49,8 @@
   max-width: 480px;
   z-index: 1;
   position: relative;
+  opacity: 1; // Ensure wrapper is visible immediately
+  transition: opacity 0.3s ease;
 }
 
 // Offline Indicator
