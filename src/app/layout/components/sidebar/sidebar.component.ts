@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { Subject, takeUntil, filter } from 'rxjs';
@@ -6,7 +6,7 @@ import { Subject, takeUntil, filter } from 'rxjs';
 // Material Modules
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Services
@@ -42,6 +42,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   currentUser: User | null = null;
   activeRoute = '';
+  activeItemKey: string | null = null;
+  @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
   
   private destroy$ = new Subject<void>();
 
@@ -140,6 +142,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subscribeToRouterEvents();
     // Ensure active state is correct on initial load (before first NavigationEnd)
     this.activeRoute = this.router.url;
+    this.setActiveItemByRoute(this.activeRoute);
   }
 
   ngOnDestroy(): void {
@@ -147,9 +150,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onMenuItemClick(item: MenuItem): void {
-    // routerLink will handle navigation, but we still emit the event
-    // for closing mobile sidebar if needed
+  onMenuItemClick(item: MenuItem, parent?: MenuItem): void {
+    this.activeItemKey = this.getItemKey(item);
+    if (!parent && (!item.children || item.children.length === 0)) {
+      this.collapseAllGroups();
+    }
     this.menuItemClick.emit();
   }
 
@@ -160,12 +165,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
       : (this.activeRoute === route || this.activeRoute.startsWith(route + '/'));
   }
 
+  isActiveItem(item: MenuItem): boolean {
+    return this.activeItemKey === this.getItemKey(item);
+  }
+
   isParentActive(item: MenuItem): boolean {
     if (!item.children) return false;
     return item.children.some(child => {
       if (!child.route) return false;
       return this.activeRoute === child.route || this.activeRoute.startsWith(child.route + '/');
     });
+  }
+  
+  isGroupContainsActive(item: MenuItem): boolean {
+    if (!item.children) return false;
+    const children = this.getFilteredChildren(item.children);
+    return children.some(child => this.isActiveItem(child));
   }
 
   hasPermission(item: MenuItem): boolean {
@@ -184,6 +199,36 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return children.filter(child => this.hasPermission(child));
   }
 
+  private getItemKey(item: MenuItem): string {
+    return `${item.route || ''}|${item.label}`;
+  }
+
+  private setActiveItemByRoute(url: string): void {
+    // Build a visible menu list and pick the first match by route
+    const visibleItems = this.getFilteredMenuItems();
+    // Check top-level single items
+    for (const item of visibleItems) {
+      if (!item.children || item.children.length === 0) {
+        if (item.route && this.isActiveRoute(item.route, true)) {
+          this.activeItemKey = this.getItemKey(item);
+          return;
+        }
+      }
+    }
+    // Check children items within groups
+    for (const parent of visibleItems) {
+      const children = parent.children ? this.getFilteredChildren(parent.children) : [];
+      for (const child of children) {
+        if (child.route && this.isActiveRoute(child.route, !!child.exact)) {
+          this.activeItemKey = this.getItemKey(child);
+          return;
+        }
+      }
+    }
+    // If no match found, clear active
+    this.activeItemKey = null;
+  }
+
   private subscribeToUser(): void {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
@@ -200,6 +245,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       )
       .subscribe((event) => {
         this.activeRoute = (event as NavigationEnd).url;
+        this.setActiveItemByRoute(this.activeRoute);
       });
+  }
+
+  private collapseAllGroups(): void {
+    if (this.panels) {
+      this.panels.forEach(p => p.close());
+    }
   }
 }
