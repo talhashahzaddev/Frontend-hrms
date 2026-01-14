@@ -248,19 +248,21 @@ viewDepartmentEmployees(department: Department): void {
     });
   }
 
-  toggleDepartmentStatus(department: Department, newStatus: boolean): void {
+toggleDepartmentStatus(department: Department, newStatus: boolean): void {
   const isActivating = newStatus;
   const action = isActivating ? 'Activate' : 'Deactivate';
-  const dialogData: ConfirmDeleteData = {
+
+  const dialogData: ConfirmDeleteData = {  // ✅ changed interface
     title: `${action} Department`,
     message: `Are you sure you want to ${action.toLowerCase()} this department?`,
-    itemName: department.departmentName
+    itemName: department.departmentName,
+    confirmButtonText: `Yes, ${action}`   // ✅ dynamic button text
   };
 
-  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, { // ✅ updated component
     width: '450px',
     data: dialogData,
-    panelClass: 'confirm-delete-dialog-panel'
+    panelClass: 'confirm-action-dialog-panel'
   });
 
   dialogRef.afterClosed().subscribe(result => {
@@ -280,6 +282,7 @@ viewDepartmentEmployees(department: Department): void {
     }
   });
 }
+
 
 
   deleteDepartment(department: Department): void {

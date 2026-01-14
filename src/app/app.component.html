@@ -1,14 +1,19 @@
 <!-- Main App Container -->
-<div class="app-container" [class.loading]="isLoading$ | async">
+<div class="app-container" [class.loading]="(isLoading$ | async) || (isLoggingOut$ | async)">
 
   <!-- Global Loading Spinner -->
-  <app-loading-spinner *ngIf="isLoading$ | async"></app-loading-spinner>
+  <app-loading-spinner 
+    *ngIf="(isLoading$ | async) || (isLoggingOut$ | async)"
+    [title]="(loadingTitle$ | async) || 'Loading...'"
+    [message]="(loadingMessage$ | async) || 'Please wait while we process your request'">
+  </app-loading-spinner>
 
   <!-- Main Layout Container -->
   <div class="main-content">
     
     <!-- Authenticated Layout -->
-    <app-layout *ngIf="isAuthenticated$ | async; else unauthenticated">
+    <!-- Keep authenticated layout visible during logout to prevent screen shrinking -->
+    <app-layout *ngIf="(isAuthenticated$ | async) || (isLoggingOut$ | async); else unauthenticated">
       <router-outlet></router-outlet>
     </app-layout>
 

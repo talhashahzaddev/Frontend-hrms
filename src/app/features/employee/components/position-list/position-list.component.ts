@@ -15,7 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
-
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Position, Department, Role } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 import { PositionFormDialogComponent } from '../position-form-dialog/position-form-dialog.component';
@@ -264,59 +264,84 @@ viewEmployees(position: Position): void {
 }
 
 
- 
+
 togglePositionStatus(position: Position, newStatus: boolean): void {
-  const action = newStatus ? 'activate' : 'deactivate';
-  const confirmMessage = `Are you sure you want to ${action} "${position.positionTitle}"?`;
+  const isActivating = newStatus;
+  const action = isActivating ? 'Activate' : 'Deactivate';
 
-  if (!confirm(confirmMessage)) {
-    return;
-  }
+  const dialogData: ConfirmDeleteData = {
+    title: `${action} Position`,
+    message: `Are you sure you want to ${action.toLowerCase()} "${position.positionTitle}"?`,
+    itemName: position.positionTitle,
+    confirmButtonText: `Yes, ${action}` // ✅ dynamic button text
+  };
 
-  this.employeeService
-    .updatePositionStatus(position.positionId, newStatus)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: () => {
-        // Optimistic UI update
-        position.isActive = newStatus;
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-action-dialog-panel'
+  });
 
-        this.notificationService.showSuccess(`Position ${action}d successfully`);
-      },
-      error: (error) => {
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          `Failed to ${action} position`;
-        this.notificationService.showError(errorMessage);
-      }
-    });
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.employeeService
+        .updatePositionStatus(position.positionId, newStatus)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            // Update UI
+            position.isActive = newStatus;
+
+            this.notificationService.showSuccess(`Position ${action.toLowerCase()}d successfully`);
+          },
+          error: (error) => {
+            const errorMessage =
+              error?.error?.message ||
+              error?.message ||
+              `Failed to ${action.toLowerCase()} position`;
+            this.notificationService.showError(errorMessage);
+          }
+        });
+    }
+  });
 }
 
+deletePosition(position: Position): void {
+  const dialogData: ConfirmDeleteData = {
+    title: 'Delete Position',
+    message: `Are you sure you want to delete "${position.positionTitle}"?`,
+    itemName: position.positionTitle,
+    confirmButtonText: 'Yes, Delete' // ✅ dynamic button text
+  };
 
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-action-dialog-panel'
+  });
 
-
-  deletePosition(position: Position): void {
-    const confirmMessage = `Are you sure you want to delete "${position.positionTitle}"? This action cannot be undone.`;
-
-    if (confirm(confirmMessage)) {
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
       this.employeeService.deletePosition(position.positionId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-      next: () => {
-        this.fetchPositions();
-        this.notificationService.showSuccess('Position deleted successfully');
-      },
-      error: (error) => {
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          'Failed to delete position';
-        this.notificationService.showError(errorMessage);
-      }
-    });
-  }
+          next: () => {
+            this.fetchPositions();
+            this.notificationService.showSuccess('Position deleted successfully');
+          },
+          error: (error) => {
+            const errorMessage =
+              error?.error?.message ||
+              error?.message ||
+              'Failed to delete position';
+            this.notificationService.showError(errorMessage);
+          }
+        });
+    }
+  });
 }
+
+
 
   // Helper method to check if filters are applied
   hasFiltersApplied(): boolean {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -34,10 +34,11 @@ import { LoadingService } from '@core/services/loading.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   loginForm!: FormGroup;
   hidePassword = true;
   isLoading = false;
+  isReady = false; // Add ready state to prevent white card flash
   private isSubmitting = false;
 
   private destroy$ = new Subject<void>();
@@ -55,6 +56,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscribeToLoading();
     this.setFavicon();
+  }
+
+  ngAfterViewInit(): void {
+    // Show card after view is initialized to prevent white card flash
+    // Use requestAnimationFrame for smooth transition
+    requestAnimationFrame(() => {
+      this.isReady = true;
+    });
   }
 
   private setFavicon(): void {

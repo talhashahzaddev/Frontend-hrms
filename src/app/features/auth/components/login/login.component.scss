@@ -16,7 +16,16 @@
   border: 1px solid var(--gray-200);
   box-shadow: 0 24px 60px -24px rgba(30, 64, 175, 0.35);
   overflow: hidden;
-  animation: slideInUp 0.45s ease;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  
+  // Show card smoothly when ready
+  &.ready {
+    opacity: 1;
+    transform: translateY(0);
+    animation: slideInUp 0.45s ease;
+  }
 }
 
 .login-header {

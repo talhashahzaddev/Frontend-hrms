@@ -395,14 +395,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onLogout(): void {
+    // Show loading immediately to prevent screen shrinking
+    // The auth service will handle the logout and redirect
     this.authService.logout().subscribe({
       next: () => {
-        this.notificationService.logoutSuccess();
-        this.router.navigate(['/login']);
+        // Redirect is handled by authService
       },
       error: (error) => {
+        // Even if there's an error, redirect is still handled by authService
         console.error('Logout error:', error);
-        this.router.navigate(['/login']);
       }
     });
   }

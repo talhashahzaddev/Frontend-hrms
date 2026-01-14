@@ -54,7 +54,7 @@ export interface ConfirmDeleteData {
         </button>
         <button mat-raised-button color="warn" (click)="onConfirm()" class="confirm-button">
           <mat-icon>check</mat-icon>
-          Yes, Delete
+        {{ data.confirmButtonText || 'Yes, Delete' }}
         </button>
       </mat-dialog-actions>
     </div>
