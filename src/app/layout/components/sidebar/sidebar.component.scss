@@ -183,23 +183,6 @@
     
     &.mat-expanded {
       background: var(--gray-50);
-      
-      .mat-expansion-panel-header .nav-group-title .nav-label {
-        color: var(--primary-700);
-        font-weight: 700;
-        position: relative;
-      }
-      
-      .mat-expansion-panel-header .nav-group-title::after {
-        content: '';
-        position: absolute;
-        left: var(--spacing-md);
-        right: var(--spacing-md);
-        bottom: -2px;
-        height: 2px;
-        background: var(--gradient-primary);
-        border-radius: var(--radius-full);
-      }
     }
     
     .mat-expansion-panel-header {

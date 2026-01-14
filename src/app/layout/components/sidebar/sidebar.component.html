@@ -16,68 +16,68 @@
   <!-- Navigation Menu -->
   <nav class="sidebar-nav">
     <mat-nav-list class="nav-list">
-      
-      <!-- Menu Items -->
-      <ng-container *ngFor="let item of getFilteredMenuItems()">
-        
-        <!-- Single Menu Item (No Children) -->
-        <a mat-list-item [disableRipple]="true"
-          *ngIf="!item.children || item.children.length === 0"
-          class="nav-item"
-          [class.active]="isActiveRoute(item.route!, true)"
-          [routerLink]="item.route"
-          (click)="onMenuItemClick(item)"
-          role="menuitem">
+      <mat-accordion class="nav-accordion" [multi]="false">
+        <!-- Menu Items -->
+        <ng-container *ngFor="let item of getFilteredMenuItems()">
           
-          <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
-          <span matListItemTitle class="nav-label">{{ item.label }}</span>
-          
-          <span matListItemMeta *ngIf="item.badge && item.badge > 0" 
-                class="nav-badge">
-            {{ item.badge }}
-          </span>
-        </a>
+          <!-- Single Menu Item (No Children) -->
+          <a mat-list-item [disableRipple]="true"
+            *ngIf="!item.children || item.children.length === 0"
+            class="nav-item"
+            [class.active]="isActiveItem(item)"
+            [routerLink]="item.route"
+            (click)="onMenuItemClick(item)"
+            role="menuitem">
+            
+            <mat-icon matListItemIcon class="nav-icon">{{ item.icon }}</mat-icon>
+            <span matListItemTitle class="nav-label">{{ item.label }}</span>
+            
+            <span matListItemMeta *ngIf="item.badge && item.badge > 0" 
+                  class="nav-badge">
+              {{ item.badge }}
+            </span>
+          </a>
 
-        <!-- Expandable Menu Item (With Children) -->
-        <div *ngIf="item.children && item.children.length > 0" class="nav-group">
-          
-          <mat-expansion-panel 
-            class="nav-expansion-panel"
-            [expanded]="isParentActive(item)"
-            hideToggle>
+          <!-- Expandable Menu Item (With Children) -->
+          <div *ngIf="item.children && item.children.length > 0" class="nav-group">
             
-            <mat-expansion-panel-header class="nav-group-header">
-              <mat-panel-title class="nav-group-title">
-                <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
-                <span class="nav-label">{{ item.label }}</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            
-            <!-- Sub Menu Items -->
-            <div class="nav-sub-items">
-              <mat-list class="sub-nav-list">
-                <a mat-list-item
-                  [disableRipple]="true"
-                  *ngFor="let child of getFilteredChildren(item.children)"
-                  class="nav-sub-item"
-                  [class.active]="isActiveRoute(child.route!, child.exact)"
-                  [routerLink]="child.route"
-                  (click)="onMenuItemClick(child)"
-                  role="menuitem">
-                  
-                  <mat-icon matListItemIcon class="nav-sub-icon">{{ child.icon }}</mat-icon>
-                  <span matListItemTitle class="nav-sub-label">{{ child.label }}</span>
-                  
-                  <span matListItemMeta *ngIf="child.badge && child.badge > 0" 
-                        class="nav-badge">
-                    {{ child.badge }}
-                  </span>
-                </a>
-              </mat-list>
-            </div>
-          </mat-expansion-panel>
-        </div>
-      </ng-container>
+            <mat-expansion-panel 
+              class="nav-expansion-panel"
+              hideToggle>
+              
+              <mat-expansion-panel-header class="nav-group-header">
+                <mat-panel-title class="nav-group-title">
+                  <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+                  <span class="nav-label">{{ item.label }}</span>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              
+              <!-- Sub Menu Items -->
+              <div class="nav-sub-items">
+                <mat-list class="sub-nav-list">
+                  <a mat-list-item
+                    [disableRipple]="true"
+                    *ngFor="let child of getFilteredChildren(item.children)"
+                    class="nav-sub-item"
+                    [class.active]="isActiveItem(child)"
+                    [routerLink]="child.route"
+                    (click)="onMenuItemClick(child, item)"
+                    role="menuitem">
+                    
+                    <mat-icon matListItemIcon class="nav-sub-icon">{{ child.icon }}</mat-icon>
+                    <span matListItemTitle class="nav-sub-label">{{ child.label }}</span>
+                    
+                    <span matListItemMeta *ngIf="child.badge && child.badge > 0" 
+                          class="nav-badge">
+                      {{ child.badge }}
+                    </span>
+                  </a>
+                </mat-list>
+              </div>
+            </mat-expansion-panel>
+          </div>
+        </ng-container>
+      </mat-accordion>
     </mat-nav-list>
   </nav>
 
