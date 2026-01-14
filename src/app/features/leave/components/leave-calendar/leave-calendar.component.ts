@@ -47,7 +47,7 @@ interface CalendarDay {
           <button mat-icon-button (click)="previousMonth()" [disabled]="isLoading">
             <mat-icon>chevron_left</mat-icon>
           </button>
-          <h2 class="month-year">{{ currentMonth | date:'MMMM yyyy' }}</h2>
+          <h2 class="month-year">{{ currentMonth | date:'MM-yyyy' }}</h2>
           <button mat-icon-button (click)="nextMonth()" [disabled]="isLoading">
             <mat-icon>chevron_right</mat-icon>
           </button>
@@ -134,13 +134,13 @@ interface CalendarDay {
           <div class="upcoming-list">
             <div *ngFor="let event of upcomingLeaves" class="upcoming-item">
               <div class="upcoming-date">
-                <div class="date-day">{{ event.startDate | date:'d' }}</div>
-                <div class="date-month">{{ event.startDate | date:'MMM' }}</div>
+                <div class="date-day">{{ event.startDate | date:'dd' }}</div>
+                <div class="date-month">{{ event.startDate | date:'MM' }}</div>
               </div>
               <div class="upcoming-details">
                 <h4>{{ event.employeeName }}</h4>
                 <p>{{ event.leaveTypeName }}</p>
-                <span class="duration">{{ event.startDate | date:'mediumDate' }} - {{ event.endDate | date:'mediumDate' }}</span>
+                <span class="duration">{{ event.startDate | date:'dd-MM-yyyy' }} - {{ event.endDate | date:'dd-MM-yyyy' }}</span>
               </div>
               <div class="upcoming-status">
                 <mat-icon 

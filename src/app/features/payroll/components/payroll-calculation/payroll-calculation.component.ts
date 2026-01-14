@@ -98,7 +98,7 @@ interface DepartmentSummary {
               <mat-label>Payroll Period</mat-label>
               <mat-select formControlName="periodId" required>
                 <mat-option *ngFor="let period of availablePeriods" [value]="period.periodId">
-                  {{ period.periodName }} ({{ period.startDate | date:'mediumDate' }} - {{ period.endDate | date:'mediumDate' }})
+                  {{ period.periodName }} ({{ period.startDate | date:'dd-MM-yyyy' }} - {{ period.endDate | date:'dd-MM-yyyy' }})
                   <span class="period-status" [ngClass]="'status-' + period.status">
                     {{ period.status | titlecase }}
                   </span>
@@ -115,15 +115,15 @@ interface DepartmentSummary {
                 </div>
                 <div class="detail-item">
                   <label>Start Date:</label>
-                  <span>{{ selectedPeriod.startDate | date:'mediumDate' }}</span>
+                  <span>{{ selectedPeriod.startDate | date:'dd-MM-yyyy' }}</span>
                 </div>
                 <div class="detail-item">
                   <label>End Date:</label>
-                  <span>{{ selectedPeriod.endDate | date:'mediumDate' }}</span>
+                  <span>{{ selectedPeriod.endDate | date:'dd-MM-yyyy' }}</span>
                 </div>
                 <div class="detail-item">
                   <label>Pay Date:</label>
-                  <span>{{ (selectedPeriod.payDate | date:'mediumDate') || 'Not set' }}</span>
+                  <span>{{ (selectedPeriod.payDate | date:'dd-MM-yyyy') || 'Not set' }}</span>
                 </div>
                 <div class="detail-item">
                   <label>Status:</label>
@@ -224,7 +224,7 @@ interface DepartmentSummary {
                 <div class="summary-label">Total Net Amount</div>
               </div>
               <div class="summary-item">
-                <div class="summary-value">{{ calculationResult.calculatedAt | date:'medium' }}</div>
+                <div class="summary-value">{{ calculationResult.calculatedAt | date:'dd-MM-yyyy HH:mm' }}</div>
                 <div class="summary-label">Calculated At</div>
               </div>
             </div>

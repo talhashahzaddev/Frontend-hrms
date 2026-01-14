@@ -1,6 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, LOCALE_ID } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -8,6 +8,8 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { registerLocaleData } from '@angular/common';
+import localeGb from '@angular/common/locales/en-GB';
 
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -24,7 +26,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -61,6 +63,8 @@ import { LoadingInterceptor } from './app/core/interceptors/loading.interceptor'
 import { environment } from './environments/environment';
 import { APP_INITIALIZER } from '@angular/core';
 import { domainInitializer } from './app/core/initializers/domain.initializer';
+
+registerLocaleData(localeGb);
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -163,6 +167,8 @@ bootstrapApplication(AppComponent, {
       provide: HTTP_INTERCEPTORS,
       useClass: LoadingInterceptor,
       multi: true
-    }
+    },
+    { provide: LOCALE_ID, useValue: 'en-GB' },
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
   ]
 }).catch(err => console.error(err));

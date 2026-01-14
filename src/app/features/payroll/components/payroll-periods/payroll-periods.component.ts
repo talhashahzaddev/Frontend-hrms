@@ -118,7 +118,7 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
                 <mat-cell *matCellDef="let period">
                   <div class="period-info">
                     <strong>{{ period.periodName }}</strong>
-                    <small>Created: {{ period.createdAt | date:'short' }}</small>
+                    <small>Created: {{ period.createdAt | date:'dd-MM-yyyy HH:mm' }}</small>
                   </div>
                 </mat-cell>
               </ng-container>
@@ -127,9 +127,9 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
                 <mat-header-cell *matHeaderCellDef>Period Dates</mat-header-cell>
                 <mat-cell *matCellDef="let period">
                   <div class="date-range">
-                    <div>{{ period.startDate | date:'mediumDate' }}</div>
+                    <div>{{ period.startDate | date:'dd-MM-yyyy' }}</div>
                     <mat-icon class="date-separator">arrow_forward</mat-icon>
-                    <div>{{ period.endDate | date:'mediumDate' }}</div>
+                    <div>{{ period.endDate | date:'dd-MM-yyyy' }}</div>
                   </div>
                 </mat-cell>
               </ng-container>
@@ -137,7 +137,7 @@ import { PaginatedResponse } from '../../../../core/models/common.models';
               <ng-container matColumnDef="payDate">
                 <mat-header-cell *matHeaderCellDef>Pay Date</mat-header-cell>
                 <mat-cell *matCellDef="let period">
-                  {{ period.payDate ? (period.payDate | date:'mediumDate') : 'Not set' }}
+                  {{ period.payDate ? (period.payDate | date:'dd-MM-yyyy') : 'Not set' }}
                 </mat-cell>
               </ng-container>
 
