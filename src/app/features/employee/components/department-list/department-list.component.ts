@@ -14,8 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
 
 import { Department, Employee } from '../../../../core/models/employee.models';
@@ -25,6 +24,8 @@ import { ViewDepartmentDetailsComponent } from '../view-department-details/view-
 import { AttendanceService } from '@/app/features/attendance/services/attendance.service';
 import { DepartmentEmployeeViewComponent,DepartmentEmployeesViewData } from './view-department-employees';
 import { DepartmentEmployee } from '@/app/core/models/attendance.models';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-department-list',
@@ -43,7 +44,8 @@ import { DepartmentEmployee } from '@/app/core/models/attendance.models';
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDialogModule
   ],
   templateUrl: './department-list.component.html',
   styleUrls: ['./department-list.component.scss']
@@ -84,7 +86,7 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private attendanceService:AttendanceService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -110,12 +112,8 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
           this.fetchDepartments();
         },
         error: (error) => {
-          console.error('Error loading managers:', error);
-          const errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            'Failed to load managers';
-          this.showError(errorMessage);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load managers';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -148,12 +146,8 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error fetching departments:', error);
-          const errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            'Failed to fetch departments';
-          this.showError(errorMessage);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to fetch departments';
+          this.notificationService.showError(errorMessage);
           this.isLoading = false;
         }
       });
@@ -177,7 +171,7 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.fetchDepartments();
-        this.showSuccess('Department created successfully');
+        this.notificationService.showSuccess('Department created successfully');
       }
     });
   }
@@ -226,7 +220,7 @@ viewDepartmentEmployees(department: Department): void {
           error?.error?.message ||
           error?.message ||
           'Failed to load department employees';
-        this.showError(errorMessage);
+        // this.showError(errorMessage);
       }
     });
 }
@@ -249,70 +243,73 @@ viewDepartmentEmployees(department: Department): void {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.fetchDepartments();
-        this.showSuccess('Department updated successfully');
+        this.notificationService.showSuccess('Department updated successfully');
       }
     });
   }
 
   toggleDepartmentStatus(department: Department, newStatus: boolean): void {
-  const action = newStatus ? 'activate' : 'deactivate';
-  const confirmMessage = `Are you sure you want to ${action} "${department.departmentName}"?`;
+  const isActivating = newStatus;
+  const action = isActivating ? 'Activate' : 'Deactivate';
+  const dialogData: ConfirmDeleteData = {
+    title: `${action} Department`,
+    message: `Are you sure you want to ${action.toLowerCase()} this department?`,
+    itemName: department.departmentName
+  };
 
-  if (confirm(confirmMessage)) {
-    this.employeeService.updateDepartmentStatus(department.departmentId, newStatus)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.fetchDepartments();
-          this.showSuccess(`Department ${action}d successfully`);
-        },
-        error: (error) => {
-          console.error(`Error ${action}ing department:`, error);
-          const errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            `Failed to ${action} department`;
-          this.showError(errorMessage);
-        }
-      });
-  }
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-delete-dialog-panel'
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result === true) {
+      this.employeeService.updateDepartmentStatus(department.departmentId, newStatus)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.fetchDepartments();
+            this.notificationService.showSuccess(`Department ${action.toLowerCase()}d successfully`);
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || `Failed to ${action.toLowerCase()} department`;
+            this.notificationService.showError(errorMessage);
+          }
+        });
+    }
+  });
 }
 
 
   deleteDepartment(department: Department): void {
-    const confirmMessage = `Are you sure you want to delete "${department.departmentName}"? This action cannot be undone.`;
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Department',
+      message: 'Are you sure you want to delete this department?',
+      itemName: department.departmentName
+    };
 
-    if (confirm(confirmMessage)) {
-      this.employeeService.deleteDepartment(department.departmentId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.fetchDepartments();
-          this.showSuccess('Department deleted successfully');
-        },
-        error: (error) => {
-          console.error('Error deleting department:', error);
-          const errorMessage =
-            error?.error?.message ||
-            error?.message ||
-            'Failed to delete department';
-          this.showError(errorMessage);
-        }
-      });
-    }
-  }
-
-  private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass: ['success-snackbar']
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
     });
-  }
 
-  private showError(message: string): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass: ['error-snackbar']
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.employeeService.deleteDepartment(department.departmentId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.fetchDepartments();
+              this.notificationService.showSuccess('Department deleted successfully');
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || error?.message || 'Failed to delete department';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      }
     });
   }
 
