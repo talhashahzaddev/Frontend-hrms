@@ -3,13 +3,19 @@
 // Profile Component Styles (Hubstaff-inspired)
 .profile-container {
   padding: var(--spacing-lg);
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 72px); // Adjust based on your header height
   background: var(--gray-50);
+  
+  // Ensure background covers entire viewport area
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-content {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 1000px; // Prevent horizontal stretching on wide screens
+  width: 100%;
+  margin: 0 auto; // Center the content
+  flex: 1; // Allow content to grow and fill available space
 }
 
 // Header Section
@@ -425,6 +431,10 @@
 @media (max-width: 768px) {
   .profile-container {
     padding: var(--spacing-md);
+  }
+  
+  .profile-content {
+    max-width: 100%; // Full width on mobile/tablet
   }
   
   .profile-header {
