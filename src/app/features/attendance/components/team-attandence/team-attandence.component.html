@@ -1,28 +1,6 @@
 <!-- Team Attendance Container -->
 <div class="team-attendance-container">
-  
-  <!-- Header Section -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
-        <mat-icon>groups</mat-icon>
-        Team Attendance
-      </h1>
-      <p class="page-subtitle">Monitor and manage your team's attendance</p>
-    </div>
-    
-    <div class="header-actions">
-      <button mat-flat-button 
-              (click)="exportReport()" 
-              class="export-button"
-              [disabled]="isLoading">
-        <mat-icon>download</mat-icon>
-        Export Report
-      </button>
-    </div>
-  </div>
 
-  <!-- Filters Section -->
   <mat-card class="filters-card">
     <div class="filters-header">
       <h3>Filters & Search</h3>
@@ -33,7 +11,7 @@
         Clear Filters
       </button>
     </div>
-    
+        
     <div class="filters-content">
       <!-- Date Range -->
       <mat-form-field appearance="outline" class="date-field">
@@ -88,6 +66,13 @@
               class="apply-filter-btn">
         <mat-icon>filter_list</mat-icon>
         Apply Filters
+      </button>
+      <button mat-flat-button 
+              (click)="exportReport()" 
+              class="export-button"
+              [disabled]="isLoading">
+        <mat-icon>download</mat-icon>
+        Export
       </button>
       <!-- <button mat-stroked-button 
               (click)="clearFilters()" 
