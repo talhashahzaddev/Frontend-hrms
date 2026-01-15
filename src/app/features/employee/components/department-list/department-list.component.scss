@@ -324,20 +324,7 @@
           color: #6b7280;
         }
 
-        .add-first-department {
-          height: 44px;
-          padding: 0 24px !important;
-          border-radius: 12px !important;
-          font-weight: 600 !important;
-          background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-          color: white !important;
-          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
-          }
-        }
+        // .add-first-department button styling is handled by global .empty-state button styles in styles.scss
       }
     }
   }

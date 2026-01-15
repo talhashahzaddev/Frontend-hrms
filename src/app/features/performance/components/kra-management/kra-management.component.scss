@@ -328,6 +328,7 @@
           line-height: 1.4;
           display: -webkit-box;
           -webkit-line-clamp: 2;
+          line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
@@ -421,34 +422,7 @@
         color: #6b7280;
       }
 
-      .create-first-kra {
-        height: 44px;
-        padding: 0 24px !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        font-size: 14px !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px !important;
-        margin: 0 auto !important;
-
-        mat-icon {
-          font-size: 20px !important;
-          width: 20px !important;
-          height: 20px !important;
-          margin: 0 !important;
-          flex-shrink: 0;
-        }
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-        }
-      }
+      // .create-first-kra button styling is handled by global .empty-state button styles in styles.scss
     }
 
     // Loading Spinner

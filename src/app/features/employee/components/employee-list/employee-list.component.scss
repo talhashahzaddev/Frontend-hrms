@@ -476,22 +476,15 @@
           color: #6b7280;
         }
 
-        .add-first-employee {
-          height: 44px;
-          padding: 0 24px !important;
-          border-radius: 12px !important;
-          font-weight: 600 !important;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-          color: white !important;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-          }
-        }
+        // .add-first-employee button styling is handled by global .empty-state button styles in styles.scss
 
         .upgrade-button-empty {
+          // Use compact button styling but preserve orange color for upgrade action
+          width: auto !important;
+          max-width: fit-content !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
           height: 44px;
           padding: 0 24px !important;
           border-radius: 12px !important;
@@ -499,9 +492,13 @@
           background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
           color: white !important;
           box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+          margin: 0 auto !important;
+          gap: 8px !important;
 
           mat-icon {
-            margin-right: 8px;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
           }
 
           &:hover {
