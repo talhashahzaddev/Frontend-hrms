@@ -9,7 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { Subject, takeUntil, interval } from 'rxjs';
 
 
-
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { MatFormFieldModule } from '@angular/material/form-field'; 
 import { MatInputModule } from '@angular/material/input'; 
 import { MatDatepickerModule } from '@angular/material/datepicker'; 
@@ -17,6 +17,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { FormsModule } from '@angular/forms'; 
 import { MatTableModule } from '@angular/material/table';
 
+import { MatDialog } from '@angular/material/dialog';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -77,6 +78,7 @@ isLoadingSessions = false;
   constructor(
     private attendanceService: AttendanceService,
     private authService: AuthService,
+    private dialog: MatDialog,
     private notification: NotificationService
   ) {}
 
@@ -252,6 +254,25 @@ applyDateFilter(): void {
 
 
   clockIn(): void {
+const dialogData: ConfirmDeleteData = {
+    title: 'Clock In',
+    message: 'Are you sure you want to clock in?',
+    itemName: 'a new session',
+    confirmButtonText: 'Yes, Clock In'
+  };
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-action-dialog-panel'
+  });
+
+
+  dialogRef.afterClosed().subscribe(result=>{
+
+    if(!result){
+      return;
+    }
+    
     this.isClockActionLoading = true;
     
     const request: ClockInOutRequest = {
@@ -278,11 +299,62 @@ applyDateFilter(): void {
           this.isClockActionLoading = false;
         }
       });
+  })
   }
-
-  clockOut(): void {
-    this.isClockActionLoading = true;
+  // clockOut(): void {
+  //   this.isClockActionLoading = true;
     
+  //   const request: ClockInOutRequest = {
+  //     action: 'out',
+  //     location: {
+  //       source: 'web_app',
+  //       timestamp: new Date().toISOString()
+  //     }
+  //   };
+
+  //   this.attendanceService.checkOut(request)
+  //     .pipe(takeUntil(this.destroy$))
+  //     .subscribe({
+  //       next: () => {
+  //         this.notification.showSuccess('Clocked out successfully!');
+  //         this.loadCurrentSession();
+  //         this.loadTodayAttendance();
+  //         this.loadRecentAttendance();
+  //         this.loadTodaySessions();
+  //         this.isClockActionLoading = false;
+  //       },
+  //       error: (error) => {
+  //         const errorMessage = error?.error?.message || error?.message || 'Failed to clock out. Please try again.';
+  //         this.notification.showError(errorMessage);
+  //         this.isClockActionLoading = false;
+  //       }
+  //     });
+  // }
+
+clockOut(): void {
+
+  const dialogData: ConfirmDeleteData = {
+    title: 'Clock Out',
+    message: 'Are you sure you want to clock out?',
+    itemName: 'your current session',
+    confirmButtonText: 'Yes, Clock Out'
+  };
+
+  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+    width: '450px',
+    data: dialogData,
+    panelClass: 'confirm-action-dialog-panel'
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+
+    if (result !== true) {
+      return; // ❌ User cancelled
+    }
+
+    // ✅ User confirmed → proceed with clock out
+    this.isClockActionLoading = true;
+
     const request: ClockInOutRequest = {
       action: 'out',
       location: {
@@ -303,12 +375,20 @@ applyDateFilter(): void {
           this.isClockActionLoading = false;
         },
         error: (error) => {
-          const errorMessage = error?.error?.message || error?.message || 'Failed to clock out. Please try again.';
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to clock out. Please try again.';
           this.notification.showError(errorMessage);
           this.isClockActionLoading = false;
         }
       });
-  }
+
+  });
+}
+
+
+
 
   formatElapsedTime(hours: number): string {
     const totalMinutes = Math.floor(hours * 60);
