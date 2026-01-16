@@ -57,7 +57,7 @@
     </mat-card>
 
     <!-- Swap Shift -->
-    <mat-card class="stat-card stat-card-success" (click)="openSwapShift()">
+    <mat-card class="stat-card stat-card-success" (click)="openSwapShift()" *ngIf="isSuperAdmin">
       <mat-card-content>
         <div class="stat-item">
           <div class="stat-icon-wrapper">
