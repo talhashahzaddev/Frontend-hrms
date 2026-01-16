@@ -128,6 +128,13 @@ export const appRoutes: Routes = [
       import('./features/settings/settings.routes').then(m => m.settingsRoutes)
   },
   
+  // Verify Email Route
+  {
+    path: 'verify-email',
+    loadComponent: () => 
+      import('./features/auth/components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
+  },
+  
   // Error Pages
   {
     path: '404',
