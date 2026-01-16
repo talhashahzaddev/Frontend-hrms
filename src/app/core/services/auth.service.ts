@@ -544,4 +544,7 @@ export class AuthService {
 
     return throwError(() => new Error(errorMessage));
   }
+  verifyEmail(token: string) {
+    return this.http.get<any>(`${this.API_URL}/verify-email?token=${token}`);
+  }
 }
