@@ -503,10 +503,7 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
     const errors: string[] = [];
     
     // Check if start date is in the future
-    if (new Date(request.startDate) <= new Date()) {
-      errors.push('Leave start date must be in the future');
-    }
-
+ 
     // Check if end date is after start date
     if (new Date(request.endDate) < new Date(request.startDate)) {
       errors.push('Leave end date must be after start date');
