@@ -12,12 +12,79 @@
 
     <!-- Welcome Header -->
     <div class="dashboard-header">
-      <div class="welcome-section">
+      <!-- Super Admin Onboarding Section -->
+      <div *ngIf="isSuperAdmin && !isOnboardingComplete" class="onboarding-wrapper">
+        <mat-expansion-panel 
+          class="onboarding-main-panel"
+          [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <div class="onboarding-panel-header">
+                <h2 class="onboarding-title">Welcome to Brisk People! Let's get started.</h2>
+                <div class="progress-container">
+                  <div class="progress-info">
+                    <span class="progress-label">Progress:</span>
+                    <span class="progress-percentage">{{ onboardingProgress }}%</span>
+                  </div>
+                  <mat-progress-bar 
+                    mode="determinate" 
+                    [value]="onboardingProgress"
+                    class="onboarding-progress-bar">
+                  </mat-progress-bar>
+                </div>
+              </div>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <div class="onboarding-section">
+            <mat-accordion class="onboarding-steps" multi="false">
+              <mat-expansion-panel 
+                *ngFor="let step of onboardingSteps; let i = index" 
+                [expanded]="i === 0 && !step.completed"
+                class="onboarding-step"
+                [ngClass]="{ 'step-completed': step.completed, 'step-pending': !step.completed }">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    <div class="step-header">
+                      <div class="step-number-wrapper">
+                        <span class="step-number" [ngClass]="{ 'completed': step.completed }">
+                          <mat-icon *ngIf="step.completed" class="check-icon">check_circle</mat-icon>
+                          <span *ngIf="!step.completed">{{ step.id }}</span>
+                        </span>
+                      </div>
+                      <div class="step-title-content">
+                        <span class="step-title-text">Step {{ step.id }}. {{ step.title }}</span>
+                        <span *ngIf="step.completed" class="step-completed-badge">
+                          <mat-icon>check_circle</mat-icon>
+                          Completed
+                        </span>
+                      </div>
+                    </div>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="step-content">
+                  <p class="step-description" [ngClass]="{ 'completed-message': step.completed }">
+                    <span *ngIf="step.completed" class="congratulations-text">
+                      <mat-icon>celebration</mat-icon>
+                      Congratulations! 
+                    </span>
+                    {{ step.description }}
+                  </p>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
+        </mat-expansion-panel>
+      </div>
+
+      <!-- Regular Welcome Section (for non-Super Admin or completed onboarding) -->
+      <div *ngIf="!isSuperAdmin || isOnboardingComplete" class="welcome-section">
         <h2 class="welcome-title">
           👋 Welcome, {{ currentUser?.firstName || 'User' }}
         </h2>
-        <p class="welcome-subtitle">Here’s your dashboard overview</p>
+        <p class="welcome-subtitle">Here's your dashboard overview</p>
       </div>
+      
       <div class="header-actions">
         <button mat-stroked-button class="period-button">
           <mat-icon>calendar_today</mat-icon> This Month
