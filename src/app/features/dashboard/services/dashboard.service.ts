@@ -15,7 +15,8 @@ import {
   RecentActivity,
   EmployeeGrowth,
   DepartmentStats,
-  UpcomingEvents
+  UpcomingEvents,
+  OnboardingStatus
 } from '../../../core/models/dashboard.models';
 
 
@@ -215,5 +216,24 @@ getEmployeeGrowth(period: string = '12m'): Observable<EmployeeGrowth> {
     })
   );
 }
+
+  /**
+   * Get onboarding status for Super Admin
+   */
+  getOnboardingStatus(): Observable<OnboardingStatus> {
+    return this.http.get<ServiceResponse<OnboardingStatus>>(`${this.apiUrl}/onboarding-status`).pipe(
+      map(res => res.data),
+      catchError(err => {
+        console.error('Failed to load onboarding status:', err);
+        return of({
+          signUp: true,
+          createTeam: false,
+          defineLeaveTypes: false,
+          markAttendance: false,
+          processPayroll: false
+        } as OnboardingStatus);
+      })
+    );
+  }
 
 }

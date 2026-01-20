@@ -108,7 +108,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     {
       id: 1,
       title: 'Sign Up',
-      description: 'Congratulations! You have taken the first step to better managing your human resources',
+      description: 'You have taken the first step to better managing your human resources',
       completed: true
     },
     {
@@ -167,11 +167,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.authService.getCurrentUser()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: user => this.currentUser = user,
+        next: user => {
+          this.currentUser = user;
+          // Load onboarding status if Super Admin
+          if (this.isSuperAdmin) {
+            this.loadOnboardingStatus();
+          }
+        },
         error: () => {
           this.currentUser = null;
           this.notificationService.showError('Failed to load user information');
           this.cdr.markForCheck();
+        }
+      });
+  }
+
+  private loadOnboardingStatus(): void {
+    this.dashboardService.getOnboardingStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (status) => {
+          // Update onboarding steps based on API response
+          this.onboardingSteps[0].completed = status.signUp; // Sign Up (always true)
+          this.onboardingSteps[1].completed = status.createTeam;
+          this.onboardingSteps[2].completed = status.defineLeaveTypes;
+          this.onboardingSteps[3].completed = status.markAttendance;
+          this.onboardingSteps[4].completed = status.processPayroll;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Failed to load onboarding status:', error);
+          // Keep default values on error
         }
       });
   }
