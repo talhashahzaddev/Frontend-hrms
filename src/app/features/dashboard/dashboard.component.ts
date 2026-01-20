@@ -114,19 +114,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     {
       id: 2,
       title: 'Create your Team',
-      description: 'Create Departments, Positions and add your employees',
+      description: 'Ist create departments,2nd create positions and then add your employees',
       completed: false
     },
     {
       id: 3,
-      title: 'Define Leave Types',
-      description: 'Add leave types and start tracking employee time-off',
+      title: 'Mark Attendance',
+      description: 'Create shifts and assign to employees. Employees should mark attendance or review their clock-ins and outs',
       completed: false
     },
     {
       id: 4,
-      title: 'Mark Attendance',
-      description: 'Create shifts and assign to employees. Employees should mark attendance or review their clock-ins and outs',
+      title: 'Define Leave Types',
+      description: 'Add leave types and start tracking employee time-off',
       completed: false
     },
     {
