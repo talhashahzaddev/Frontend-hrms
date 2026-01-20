@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { Subject, takeUntil, forkJoin, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { NgChartsModule } from 'ng2-charts';
@@ -61,6 +62,7 @@ interface ChartConfig {
         MatChipsModule,
         MatDividerModule,
         MatTabsModule,
+        MatExpansionModule,
         NgChartsModule
     ],
     templateUrl: './dashboard.component.html',
@@ -101,6 +103,49 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   starRatings = [1, 2, 3, 4, 5];
 
+  // Onboarding steps for Super Admin
+  onboardingSteps = [
+    {
+      id: 1,
+      title: 'Sign Up',
+      description: 'You have taken the first step to better managing your human resources',
+      completed: true
+    },
+    {
+      id: 2,
+      title: 'Create your Team',
+      description: 'Create Departments, Positions and add your employees',
+      completed: false
+    },
+    {
+      id: 3,
+      title: 'Define Leave Types',
+      description: 'Add leave types and start tracking employee time-off',
+      completed: false
+    },
+    {
+      id: 4,
+      title: 'Mark Attendance',
+      description: 'Create shifts and assign to employees. Employees should mark attendance or review their clock-ins and outs',
+      completed: false
+    },
+    {
+      id: 5,
+      title: 'Process Payroll',
+      description: 'Define salary structures and process payroll with just a single click',
+      completed: false
+    }
+  ];
+
+  get onboardingProgress(): number {
+    const completedSteps = this.onboardingSteps.filter(step => step.completed).length;
+    return Math.round((completedSteps / this.onboardingSteps.length) * 100);
+  }
+
+  get isOnboardingComplete(): boolean {
+    return this.onboardingSteps.every(step => step.completed);
+  }
+
   constructor(
     private dashboardService: DashboardService,
     private authService: AuthService,
@@ -122,11 +167,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.authService.getCurrentUser()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: user => this.currentUser = user,
+        next: user => {
+          this.currentUser = user;
+          // Load onboarding status if Super Admin
+          if (this.isSuperAdmin) {
+            this.loadOnboardingStatus();
+          }
+        },
         error: () => {
           this.currentUser = null;
           this.notificationService.showError('Failed to load user information');
           this.cdr.markForCheck();
+        }
+      });
+  }
+
+  private loadOnboardingStatus(): void {
+    this.dashboardService.getOnboardingStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (status) => {
+          // Update onboarding steps based on API response
+          this.onboardingSteps[0].completed = status.signUp; // Sign Up (always true)
+          this.onboardingSteps[1].completed = status.createTeam;
+          this.onboardingSteps[2].completed = status.defineLeaveTypes;
+          this.onboardingSteps[3].completed = status.markAttendance;
+          this.onboardingSteps[4].completed = status.processPayroll;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Failed to load onboarding status:', error);
+          // Keep default values on error
         }
       });
   }
@@ -136,7 +207,7 @@ get isAdmin(): boolean {
   return this.authService.hasRole('Admin');
 }
 get isSuperAdmin(): boolean {
-  return this.authService.hasRole('Admin');
+  return this.authService.hasRole('Super Admin');
 }
 
 get isHR(): boolean {
