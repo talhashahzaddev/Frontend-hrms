@@ -13,24 +13,37 @@ export class ProgressBarService {
 
   private progressTimer: any;
   private currentProgress = 0;
+  private startTime: number = 0;
+  private readonly animationDuration = 2000; // 2 seconds to reach 90%
 
   /**
    * Start the progress bar (for navigation or API calls)
    */
   start(): void {
+    // Reset any existing progress
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+    }
+    
     this.visibleSubject.next(true);
     this.currentProgress = 0;
     this.progressSubject.next(0);
+    this.startTime = Date.now();
     
-    // Simulate progress incrementally
+    // Smooth animation from 0 to 90%
     this.progressTimer = setInterval(() => {
-      if (this.currentProgress < 90) {
-        // Increment progress slowly
-        const increment = Math.random() * 15;
-        this.currentProgress = Math.min(this.currentProgress + increment, 90);
-        this.progressSubject.next(this.currentProgress);
+      const elapsed = Date.now() - this.startTime;
+      const progress = Math.min((elapsed / this.animationDuration) * 90, 90);
+      
+      if (progress < 90) {
+        this.currentProgress = progress;
+        this.progressSubject.next(progress);
+      } else {
+        // Stop at 90% and wait for complete()
+        clearInterval(this.progressTimer);
+        this.progressTimer = null;
       }
-    }, 200);
+    }, 16); // ~60fps for smooth animation
   }
 
   /**
@@ -42,7 +55,8 @@ export class ProgressBarService {
       this.progressTimer = null;
     }
     
-    // Quickly complete to 100%
+    // Smoothly complete to 100%
+    this.currentProgress = 100;
     this.progressSubject.next(100);
     
     // Hide after a short delay

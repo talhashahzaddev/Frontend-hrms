@@ -29,8 +29,9 @@ import { ProgressBarService } from '@core/services/progress-bar.service';
       background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
       background-size: 200% 100%;
       animation: shimmer 2s infinite;
-      transition: width 0.3s ease;
+      transition: width 0.2s linear;
       box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      transform-origin: left;
     }
 
     @keyframes shimmer {
