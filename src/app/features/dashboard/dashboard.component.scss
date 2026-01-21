@@ -870,13 +870,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 400px;
+  min-height: calc(100vh - 200px);
+  width: 100%;
   gap: var(--spacing-lg);
   
   p {
     color: var(--gray-600);
     font-size: 1rem;
     margin: 0;
+    text-align: center;
   }
 }
 
