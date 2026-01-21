@@ -150,7 +150,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
-      dateOfBirth: [''],
+      dateOfBirth: ['',[Validators.required]],
       gender: [''],
       maritalStatus: [''],
       nationality: [''],
