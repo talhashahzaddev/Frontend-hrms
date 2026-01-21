@@ -442,8 +442,10 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
 
       const request: CreateLeaveRequest = {
         leaveTypeId: formValue.leaveTypeId,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        // startDate: startDate.toISOString(),
+        // endDate: endDate.toISOString(),
+        startDate: formatDateOnly(startDate), // ✅ use formatDateOnly
+      endDate: formatDateOnly(endDate),  
         reason: formValue.reason || ''
       };
 

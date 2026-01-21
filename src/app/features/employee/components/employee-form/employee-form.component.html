@@ -65,6 +65,8 @@
             <mat-form-field appearance="outline">
               <mat-label>Date of Birth</mat-label>
               <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
+              <mat-error *ngIf="employeeForm.get('dateOfBirth')?.hasError('required')">
+                Date of birth is required</mat-error>
               <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
               <mat-datepicker #dobPicker></mat-datepicker>
             </mat-form-field>

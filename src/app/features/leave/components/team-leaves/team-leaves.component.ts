@@ -366,7 +366,7 @@ private backendBaseUrl = 'https://localhost:60485';
     this.isHRManager = this.authService.hasAnyRole(['HR Manager', 'Super Admin']);
     // Update displayed columns based on role
     if (this.isHRManager) {
-      this.displayedColumns = ['employee', 'leaveType', 'dates', 'status', 'submitted'];
+      this.displayedColumns = ['employee', 'leaveType', 'dates', 'status', 'submitted','actions'];
     }
   }
 
