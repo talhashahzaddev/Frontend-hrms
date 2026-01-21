@@ -1,6 +1,9 @@
 <!-- Main App Container -->
 <div class="app-container" [class.loading]="(isLoading$ | async) || (isLoggingOut$ | async)">
 
+  <!-- Progress Bar at the top -->
+  <app-progress-bar></app-progress-bar>
+
   <!-- Global Loading Spinner -->
   <app-loading-spinner 
     *ngIf="(isLoading$ | async) || (isLoggingOut$ | async)"

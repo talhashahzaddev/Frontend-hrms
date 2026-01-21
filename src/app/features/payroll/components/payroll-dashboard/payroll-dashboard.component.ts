@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -331,7 +332,8 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notificationService: NotificationService,
     private settingsService: SettingsService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -412,7 +414,7 @@ export class PayrollDashboardComponent implements OnInit, OnDestroy {
   }
 
   navigateToCalculation(): void {
-    window.location.href = '/payroll/calculate';
+    this.router.navigate(['/payroll/calculate']);
   }
 
   calculatePayroll(periodId?: string): void {

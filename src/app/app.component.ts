@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Subject, filter, takeUntil, take, map, combineLatest } from 'rxjs';
 import { ServerNotificationService } from './core/services/server-notification';
 // Material Modules
@@ -20,11 +20,13 @@ import { ToastModule } from 'primeng/toast';
 import { LayoutComponent } from './layout/layout.component';
 import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component';
 import { ChatWidgetComponent } from './shared/components/chat-widget/chat-widget.component';
+import { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
 
 // Services
 import { AuthService } from './core/services/auth.service';
 import { LoadingService } from './core/services/loading.service';
 import { ThemeService } from './core/services/theme.service';
+import { ProgressBarService } from './core/services/progress-bar.service';
 
 
 @Component({
@@ -42,7 +44,8 @@ import { ThemeService } from './core/services/theme.service';
     ToastModule,
     LayoutComponent,
     LoadingSpinnerComponent,
-    ChatWidgetComponent
+    ChatWidgetComponent,
+    ProgressBarComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -88,12 +91,14 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private loadingService: LoadingService,
     private themeService: ThemeService,
-    private serverNotificationService: ServerNotificationService // add this
+    private serverNotificationService: ServerNotificationService,
+    private progressBarService: ProgressBarService
   ) { }
 
   ngOnInit(): void {
     this.initializeApp();
     this.handleRouteChanges();
+    this.setupRouterProgress();
     this.setFavicon();
 
     // 🔥 Subscribe to authentication/user changes
@@ -146,6 +151,27 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Set up error handling
     this.setupGlobalErrorHandling();
+  }
+
+  /**
+   * Setup progress bar for router navigation
+   */
+  private setupRouterProgress(): void {
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        if (event instanceof NavigationStart) {
+          // Start progress bar on navigation start
+          this.progressBarService.start();
+        } else if (
+          event instanceof NavigationEnd ||
+          event instanceof NavigationCancel ||
+          event instanceof NavigationError
+        ) {
+          // Complete progress bar when navigation ends
+          this.progressBarService.complete();
+        }
+      });
   }
 
   private handleRouteChanges(): void {
