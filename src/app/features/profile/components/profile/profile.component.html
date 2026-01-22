@@ -252,12 +252,19 @@
             <input matInput formControlName="phone">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="form-field">
+          <mat-form-field appearance="outline">
             <mat-label>Relationship</mat-label>
-            <input matInput formControlName="relationship">
+            <mat-select formControlName="relationship">
+              <mat-option value="Spouse">Spouse</mat-option>
+              <mat-option value="Parent">Parent</mat-option>
+              <mat-option value="Sibling">Sibling</mat-option>
+              <mat-option value="Child">Child</mat-option>
+              <mat-option value="Friend">Friend</mat-option>
+              <mat-option value="Other">Other</mat-option>
+            </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="form-field">
+          <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
             <input matInput formControlName="email">
           </mat-form-field>
