@@ -223,10 +223,6 @@ formData.append('EmployeeNumber', formValue.employeeCode ?? '');
 }
 
   onCancel(): void {
-    if (this.employeeForm.dirty) {
-      const confirmClose = confirm('You have unsaved changes. Do you want to discard them?');
-      if (!confirmClose) return;
-    }
     this.dialogRef.close();
   }
 
