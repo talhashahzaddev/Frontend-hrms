@@ -1,0 +1,195 @@
+<div class="calendar-container">
+
+    <!-- Header -->
+    <div class="calendar-header">
+        <!-- Top Row: Title + Navigation -->
+        <div class="header-top">
+            <h1 class="page-title">
+                <mat-icon>calendar_month</mat-icon>
+                Calendar
+            </h1>
+            <div class="calendar-controls">
+                <button mat-icon-button (click)="previousMonth()" [disabled]="isLoading">
+                    <mat-icon>chevron_left</mat-icon>
+                </button>
+                <h2 class="month-year">{{ currentMonthYear }}</h2>
+                <button mat-icon-button (click)="nextMonth()" [disabled]="isLoading">
+                    <mat-icon>chevron_right</mat-icon>
+                </button>
+                <button mat-stroked-button (click)="goToToday()" [disabled]="isLoading">
+                    <mat-icon>today</mat-icon>
+                    Today
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Legend + Filter -->
+        <div class="header-bottom">
+            <!-- Color Legend -->
+            <div class="calendar-legend">
+                <!-- Attendance Icons -->
+                <div class="legend-section">
+                    <span class="legend-section-title">Attendance:</span>
+                    <div class="legend-item">
+                        <mat-icon class="legend-icon present">check_circle</mat-icon>
+                        <span class="legend-label">Present</span>
+                    </div>
+                    <div class="legend-item">
+                        <mat-icon class="legend-icon absent">cancel</mat-icon>
+                        <span class="legend-label">Absent</span>
+                    </div>
+                    <div class="legend-item">
+                        <mat-icon class="legend-icon late">schedule</mat-icon>
+                        <span class="legend-label">Late or Half Day</span>
+                    </div>
+                </div>
+
+                <!-- Leave Status - Status Examples -->
+                <div class="legend-section">
+                    <span class="legend-section-title">Leave Statuses: </span>
+                    <!-- Approved: Blue Bar (No Icon) -->
+                    <div class="legend-item">
+                        <div class="legend-badge-example approved">
+                            <span class="badge-text">Approved</span>
+                        </div>
+                    </div>
+                    <!-- Pending: Blue Bar + Hourglass -->
+                    <div class="legend-item">
+                        <div class="legend-badge-example pending">
+                            <span class="badge-text">Pending</span>
+                            <mat-icon class="status-icon">hourglass_empty</mat-icon>
+                        </div>
+                    </div>
+                    <!-- Rejected: Blue Bar + Red Block -->
+                    <div class="legend-item">
+                        <div class="legend-badge-example rejected">
+                            <span class="badge-text">Rejected</span>
+                            <mat-icon class="status-icon">block</mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Holiday -->
+                <div class="legend-section">
+                    <span class="legend-section-title">Special:</span>
+                    <div class="legend-item">
+                        <span class="legend-badge holiday">Holiday</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Dropdown -->
+            <mat-form-field class="filter-field" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Filter Events</mat-label>
+                <mat-select [(value)]="eventFilter" (selectionChange)="onFilterChange()">
+                    <mat-option *ngFor="let option of filterOptions" [value]="option.value">
+                        {{ option.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <mat-card class="calendar-card">
+        <div *ngIf="!isLoading" class="calendar-grid">
+
+            <!-- Day Headers -->
+            <div class="calendar-header-row">
+                <div class="day-header" *ngFor="let day of weekDays">{{ day }}</div>
+            </div>
+
+            <!-- Calendar Days -->
+            <div class="calendar-body">
+                <div *ngFor="let day of calendarDays" class="calendar-day" [class.other-month]="!day.isCurrentMonth"
+                    [class.today]="day.isToday" [class.weekend]="day.isWeekend" [class.has-holiday]="hasHoliday(day)"
+                    (contextmenu)="onRightClick($event, day)">
+
+                    <div class="day-number">{{ day.dayNumber }}</div>
+
+                    <!-- Attendance Status Icon + Label (Top Right) -->
+                    <div class="attendance-status" *ngIf="getAttendanceEvent(day) as attendance">
+                        <div class="status-container" [ngClass]="getAttendanceIconClass(attendance)"
+                            [matTooltip]="getEventTooltip(attendance)" matTooltipPosition="above">
+                            <mat-icon>{{ getAttendanceIcon(attendance) }}</mat-icon>
+                            <span class="status-label">{{ getAttendanceLabel(attendance) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Leave/Holiday Events (Badges with Dynamic Type Colors) -->
+                    <div class="day-events" *ngIf="getLeaveEvents(day).length > 0">
+                        <div *ngFor="let event of getLeaveEvents(day) | slice:0:2" class="event-badge"
+                            [class.badge-holiday]="event.type === 'HOLIDAY'"
+                            [style.border-left-color]="event.color || '#2563eb'"
+                            [style.background-color]="getTransparentColor(event.color)"
+                            [matTooltip]="getEventTooltip(event)" matTooltipPosition="above">
+                            <span class="badge-text">{{ event.title }}</span>
+                            <!-- Status Icons -->
+                            <mat-icon *ngIf="event.status === 'pending'"
+                                class="status-icon pending">hourglass_empty</mat-icon>
+                            <mat-icon *ngIf="event.status === 'rejected'" class="status-icon rejected">block</mat-icon>
+                        </div>
+
+                        <div *ngIf="getLeaveEvents(day).length > 2" class="more-events">
+                            +{{ getLeaveEvents(day).length - 2 }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoading" class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Loading calendar...</p>
+        </div>
+    </mat-card>
+
+    <!-- Context Menu -->
+    <div style="visibility: hidden; position: fixed;" [style.left]="contextMenuPosition.x"
+        [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+    </div>
+
+    <mat-menu #contextMenu="matMenu" class="calendar-context-menu">
+        <ng-template matMenuContent>
+
+            <!-- Apply for Leave -->
+            <button mat-menu-item (click)="applyForLeave()" *ngIf="!hasExistingLeave(selectedDay)"
+                [disabled]="!canApplyLeave()">
+                <mat-icon>event_available</mat-icon>
+                <span>Apply for Leave</span>
+            </button>
+
+            <!-- Clock In -->
+            <button mat-menu-item (click)="clockIn()" [disabled]="!canClockIn()" *ngIf="!isPastDate()">
+                <mat-icon>login</mat-icon>
+                <span>Clock In</span>
+            </button>
+
+            <!-- Clock Out -->
+            <button mat-menu-item (click)="clockOut()" [disabled]="!canClockOut()" *ngIf="!isPastDate()">
+                <mat-icon>logout</mat-icon>
+                <span>Clock Out</span>
+            </button>
+
+
+            <!-- Swap Shift Request -->
+            <button mat-menu-item (click)="initiateSwapRequest()" *ngIf="!isSuperAdmin" [disabled]="!canSwapShift()">
+                <mat-icon>swap_horiz</mat-icon>
+                <span>Swap Shift Request</span>
+            </button>
+
+            <mat-divider></mat-divider>
+
+            <!-- View Day Details -->
+            <!-- View Day Details -->
+            <button mat-menu-item (click)="viewAttendanceDetailsFromSelectedDay()">
+                <mat-icon>info</mat-icon>
+                <span>View Day Details</span>
+            </button>
+
+        </ng-template>
+    </mat-menu>
+
+</div>
