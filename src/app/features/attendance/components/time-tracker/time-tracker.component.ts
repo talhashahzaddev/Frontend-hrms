@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { CommentDialogComponent } from '../../../../shared/components/comment-dialog/comment-dialog.component';
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,22 +12,22 @@ import { Subject, takeUntil, interval } from 'rxjs';
 
 
 
-import { MatFormFieldModule } from '@angular/material/form-field'; 
-import { MatInputModule } from '@angular/material/input'; 
-import { MatDatepickerModule } from '@angular/material/datepicker'; 
-import { MatNativeDateModule } from '@angular/material/core'; 
-import { FormsModule } from '@angular/forms'; 
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 
 
 import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { 
-  TimeTrackingSession, 
+import {
+  TimeTrackingSession,
   Attendance,
-  AttendanceSessionDto, 
-  ClockInOutRequest 
+  AttendanceSessionDto,
+  ClockInOutRequest
 } from '../../../../core/models/attendance.models';
 import { User } from '../../../../core/models/auth.models';
 import { map } from 'rxjs/operators';
@@ -34,13 +36,13 @@ import { map } from 'rxjs/operators';
   selector: 'app-time-tracker',
   standalone: true,
   imports: [
-    MatFormFieldModule,   
-    MatInputModule,       
-    MatDatepickerModule,  
-FormsModule,          
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    FormsModule,
     MatTableModule,
 
-    MatNativeDateModule, 
+    MatNativeDateModule,
     CommonModule,
     RouterModule,
     MatCardModule,
@@ -62,11 +64,11 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   recentAttendance: Attendance[] = [];
   currentTime = new Date();
   // Date filter for recent attendance
-filterStartDate: Date | null = null;
-filterEndDate: Date | null = null;
-// New: Today's sessions
-todaySessions: AttendanceSessionDto[] = [];
-isLoadingSessions = false;
+  filterStartDate: Date | null = null;
+  filterEndDate: Date | null = null;
+  // New: Today's sessions
+  todaySessions: AttendanceSessionDto[] = [];
+  isLoadingSessions = false;
   // Loading states
   isLoading = false;
   isClockActionLoading = false;
@@ -77,8 +79,9 @@ isLoadingSessions = false;
   constructor(
     private attendanceService: AttendanceService,
     private authService: AuthService,
-    private notification: NotificationService
-  ) {}
+    private notification: NotificationService,
+    private dialog: MatDialog
+  ) { }
 
   ngOnInit(): void {
     this.getCurrentUser();
@@ -98,7 +101,7 @@ isLoadingSessions = false;
   get isSuperAdmin(): boolean {
     return this.authService.hasRole('Super Admin');
   }
-  get isManager():boolean {
+  get isManager(): boolean {
     return this.authService.hasRole('Manager');
   }
 
@@ -117,7 +120,7 @@ isLoadingSessions = false;
   hasRole(role: string): boolean {
     return this.authService.hasRole(role);
   }
-  
+
   private getCurrentUser(): void {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
@@ -154,31 +157,31 @@ isLoadingSessions = false;
   }
 
   private loadTodaySessions(): void {
-  this.isLoadingSessions = true;
-  this.attendanceService.getTodaySessions()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (sessions) => {
-        this.todaySessions = sessions || [];
-        this.isLoadingSessions = false;
-      },
-      error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Failed to load today sessions';
-        this.notification.showError(errorMessage);
-        this.isLoadingSessions = false;
-      }
-    });
-}
+    this.isLoadingSessions = true;
+    this.attendanceService.getTodaySessions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (sessions) => {
+          this.todaySessions = sessions || [];
+          this.isLoadingSessions = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load today sessions';
+          this.notification.showError(errorMessage);
+          this.isLoadingSessions = false;
+        }
+      });
+  }
 
 
-formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string {
-  const start = new Date(checkIn).getTime();
-  const end = checkOut ? new Date(checkOut).getTime() : new Date().getTime();
-  const diffMs = end - start;
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-  return `${hours}h ${minutes}m`;
-}
+  formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string {
+    const start = new Date(checkIn).getTime();
+    const end = checkOut ? new Date(checkOut).getTime() : new Date().getTime();
+    const diffMs = end - start;
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+  }
 
 
   private loadCurrentSession(): void {
@@ -188,7 +191,7 @@ formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string 
         next: (session) => {
           this.currentSession = session;
         },
-      error: (error) => {
+        error: (error) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to load current session';
           this.notification.showError(errorMessage);
         }
@@ -203,57 +206,57 @@ formatSessionDuration(checkIn: string | Date, checkOut?: string | Date): string 
         next: (attendances) => {
           this.todayAttendance = attendances.length > 0 ? attendances[0] : null;
         },
-      error: (error) => {
+        error: (error) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to load today attendance';
           this.notification.showError(errorMessage);
         }
       });
   }
 
-private formatLocalDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = (date.getMonth() + 1).toString().padStart(2, '0');
-  const d = date.getDate().toString().padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
+  private formatLocalDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
 
 
-private loadRecentAttendance(): void {
-  this.isLoading = true;
+  private loadRecentAttendance(): void {
+    this.isLoading = true;
 
-  const startDate = this.filterStartDate
-    ? this.formatLocalDate(this.filterStartDate)
-    : this.formatLocalDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+    const startDate = this.filterStartDate
+      ? this.formatLocalDate(this.filterStartDate)
+      : this.formatLocalDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
 
-  const endDate = this.filterEndDate
-    ? this.formatLocalDate(this.filterEndDate)
-    : this.formatLocalDate(new Date());
+    const endDate = this.filterEndDate
+      ? this.formatLocalDate(this.filterEndDate)
+      : this.formatLocalDate(new Date());
 
-  this.attendanceService.getMyAttendance(startDate, endDate)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (attendances) => {
-        this.recentAttendance = attendances.slice(0, 5);
-        this.isLoading = false;
-      },
-      error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Failed to load recent attendance';
-        this.notification.showError(errorMessage);
-        this.isLoading = false;
-      }
-    });
-}
+    this.attendanceService.getMyAttendance(startDate, endDate)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (attendances) => {
+          this.recentAttendance = attendances.slice(0, 5);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load recent attendance';
+          this.notification.showError(errorMessage);
+          this.isLoading = false;
+        }
+      });
+  }
 
-applyDateFilter(): void {
-  this.loadRecentAttendance();
-}
+  applyDateFilter(): void {
+    this.loadRecentAttendance();
+  }
 
 
 
 
   clockIn(): void {
     this.isClockActionLoading = true;
-    
+
     const request: ClockInOutRequest = {
       action: 'in',
       location: {
@@ -281,33 +284,50 @@ applyDateFilter(): void {
   }
 
   clockOut(): void {
-    this.isClockActionLoading = true;
-    
-    const request: ClockInOutRequest = {
-      action: 'out',
-      location: {
-        source: 'web_app',
-        timestamp: new Date().toISOString()
+    // Open comment dialog
+    const dialogRef = this.dialog.open(CommentDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Clock Out',
+        label: 'Day Updates / Comments',
+        placeholder: 'E.g., completed API integration...',
+        required: false
       }
-    };
+    });
 
-    this.attendanceService.checkOut(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Clocked out successfully!');
-          this.loadCurrentSession();
-          this.loadTodayAttendance();
-          this.loadRecentAttendance();
-          this.loadTodaySessions();
-          this.isClockActionLoading = false;
+    dialogRef.afterClosed().subscribe(comment => {
+      // If user cancelled, do nothing
+      if (comment === undefined) return;
+
+      this.isClockActionLoading = true;
+
+      const request: ClockInOutRequest = {
+        action: 'out',
+        location: {
+          source: 'web_app',
+          timestamp: new Date().toISOString()
         },
-        error: (error) => {
-          const errorMessage = error?.error?.message || error?.message || 'Failed to clock out. Please try again.';
-          this.notification.showError(errorMessage);
-          this.isClockActionLoading = false;
-        }
-      });
+        notes: comment
+      };
+
+      this.attendanceService.checkOut(request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Clocked out successfully!');
+            this.loadCurrentSession();
+            this.loadTodayAttendance();
+            this.loadRecentAttendance();
+            this.loadTodaySessions();
+            this.isClockActionLoading = false;
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || 'Failed to clock out. Please try again.';
+            this.notification.showError(errorMessage);
+            this.isClockActionLoading = false;
+          }
+        });
+    });
   }
 
   formatElapsedTime(hours: number): string {
@@ -324,5 +344,5 @@ applyDateFilter(): void {
     return `${hrs}h ${mins}m`;
   }
 
- 
+
 }

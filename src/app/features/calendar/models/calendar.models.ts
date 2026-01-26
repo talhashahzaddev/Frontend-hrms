@@ -14,6 +14,7 @@ export interface CalendarEventDetails {
     totalHours?: string;
     overtimeHours?: number;
     sessionsCount?: number;
+    notes?: string;
 
     // Leave details
     leaveType?: string;

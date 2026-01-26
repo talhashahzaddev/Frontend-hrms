@@ -76,6 +76,15 @@
       </span>
     </div>
 
+    <!-- DAILY UPDATE / NOTES SECTION -->
+    <div *ngIf="attendanceEvent.details?.notes" class="daily-update-card">
+      <div class="update-header">
+        <mat-icon>assignment</mat-icon>
+        <span>Daily Update</span>
+      </div>
+      <p class="update-text">{{ attendanceEvent.details!.notes }}</p>
+    </div>
+
     <div class="stats-cards">
       <div class="stat-card">
         <mat-icon class="check-in">login</mat-icon>

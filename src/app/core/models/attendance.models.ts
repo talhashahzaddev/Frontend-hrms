@@ -11,7 +11,7 @@ export interface Attendance {
   totalHours: number;
   overtimeHours: number;
   status: string;
-  sessionsCount:number;
+  sessionsCount: number;
   notes?: string;
 }
 
@@ -98,6 +98,7 @@ export interface CheckOutRequest {
 export interface ClockInOutRequest {
   action: string;
   location?: { [key: string]: any };
+  notes?: string;
 }
 
 export interface ManualAttendanceRequest {
@@ -229,17 +230,18 @@ export interface AttendanceCalendarData {
   totalHours: number;
   isWorkingDay: boolean;
   isHoliday: boolean;
+  notes?: string;
 }
 
 
 export interface UpdateShiftDto {
-  shiftId: string;         
-  shiftName: string;       
-  startTime: string;       
-  endTime: string;         
-  breakDuration?: number;  
-  daysofWeek?: number[];  
-  timezone?: string;       
+  shiftId: string;
+  shiftName: string;
+  startTime: string;
+  endTime: string;
+  breakDuration?: number;
+  daysofWeek?: number[];
+  timezone?: string;
 }
 
 
@@ -283,11 +285,11 @@ export interface PendingShiftSwap {
   status: string; // approved | rejected | pending
 }
 
-export interface approvedshiftRequest{
-  requestId:string;
-  approvedBy:string;
-  isApproved:boolean;
-  rejectionReason:string;
+export interface approvedshiftRequest {
+  requestId: string;
+  approvedBy: string;
+  isApproved: boolean;
+  rejectionReason: string;
 }
 
 
