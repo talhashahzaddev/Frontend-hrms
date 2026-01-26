@@ -1,0 +1,23 @@
+<div class="prompt-dialog">
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+
+    <mat-dialog-content>
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select Date Range</mat-label>
+            <mat-date-range-input [rangePicker]="picker">
+                <input matStartDate [(ngModel)]="startDate" placeholder="Start date" readonly>
+                <input matEndDate [(ngModel)]="endDate" placeholder="End date">
+            </mat-date-range-input>
+            <mat-hint>Start: {{ data.value | date:'MMM d, y' }}</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="onConfirm()" [disabled]="!startDate || !endDate">
+            Confirm
+        </button>
+    </mat-dialog-actions>
+</div>
