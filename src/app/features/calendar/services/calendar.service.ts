@@ -83,7 +83,8 @@ export class CalendarService {
                         details: {
                             checkInTime: att.checkInTime,
                             checkOutTime: att.checkOutTime,
-                            totalHours: att.totalHours?.toString()
+                            totalHours: att.totalHours?.toString(),
+                            notes: att.notes
                         }
                     });
                 });

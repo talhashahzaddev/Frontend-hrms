@@ -43,6 +43,17 @@
       </div>
     </div>
 
+    <!-- DAILY UPDATE / NOTES SECTION -->
+    <div class="detail-section" *ngIf="data.notes">
+      <div class="daily-update-card">
+        <div class="update-header">
+          <mat-icon>assignment</mat-icon>
+          <span>Daily Update</span>
+        </div>
+        <p class="update-text">{{ data.notes }}</p>
+      </div>
+    </div>
+
     <mat-divider></mat-divider>
 
     <!-- Check In / Check Out Section (row) -->

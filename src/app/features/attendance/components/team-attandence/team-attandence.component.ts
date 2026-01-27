@@ -15,6 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -25,10 +26,10 @@ import { ViewDetailsDialogueComponent } from '../view-details-dialogue/view-deta
 import { AttendanceService } from '../../services/attendance.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { 
-  Attendance, 
+import {
+  Attendance,
   DailyAttendanceStats,
-  AttendanceSearchRequest 
+  AttendanceSearchRequest
 } from '../../../../core/models/attendance.models';
 import { Department } from '../../../../core/models/employee.models';
 import { User } from '../../../../core/models/auth.models';
@@ -49,11 +50,12 @@ import { User } from '../../../../core/models/auth.models';
     MatIconModule,
     MatMenuModule,
     MatChipsModule,
-    MatPaginatorModule, 
+    MatPaginatorModule,
     MatProgressSpinnerModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatDividerModule
+    MatDividerModule,
+    MatTooltipModule
   ],
   templateUrl: './team-attandence.component.html',
   styleUrls: ['./team-attandence.component.scss']
@@ -71,7 +73,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   pageSize = 10;
   // Current user
   currentUser: User | null = null;
-  
+
   // Table configuration
   displayedColumns: string[] = [
     'employee',
@@ -84,10 +86,10 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     'notes',
     'actions'
   ];
-  
+
   // Loading states
   isLoading = false;
-  
+
   // Filters
   startDateControl = new FormControl(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
   endDateControl = new FormControl(new Date());
@@ -110,9 +112,9 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     private attendanceService: AttendanceService,
     private employeeService: EmployeeService,
     private authService: AuthService,
-    private dialog: MatDialog  ,
+    private dialog: MatDialog,
     private notification: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.getCurrentUser();
@@ -150,10 +152,10 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: any) {
-  this.currentPage = event.pageIndex + 1;   // because paginator starts from 0
-  this.pageSize = event.pageSize;
-  this.loadAttendanceData();
-}
+    this.currentPage = event.pageIndex + 1;   // because paginator starts from 0
+    this.pageSize = event.pageSize;
+    this.loadAttendanceData();
+  }
 
   private loadDailyStats(): void {
     this.attendanceService.getDailyAttendanceStats()
@@ -162,11 +164,11 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
         next: (stats) => {
           this.dailyStats = stats;
         },
-      error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Failed to load daily stats';
-        this.notification.showError(errorMessage);
-      }
-    });
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load daily stats';
+          this.notification.showError(errorMessage);
+        }
+      });
   }
 
   private setupFilters(): void {
@@ -178,48 +180,48 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   private loadAttendanceData(): void {
-  this.isLoading = true;
+    this.isLoading = true;
 
-  const formatLocalDate = (date: Date | null) => {
-    if (!date) return '';
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  };
+    const formatLocalDate = (date: Date | null) => {
+      if (!date) return '';
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
 
-  const startDate = formatLocalDate(this.startDateControl.value);
-  const endDate = formatLocalDate(this.endDateControl.value);
+    const startDate = formatLocalDate(this.startDateControl.value);
+    const endDate = formatLocalDate(this.endDateControl.value);
 
-  const searchRequest: AttendanceSearchRequest = {
-    startDate,
-    endDate,
-    departmentId: this.departmentControl.value || undefined,
-    status: this.statusControl.value || undefined,
-    page: this.currentPage,
-    pageSize: this.pageSize
-  };
+    const searchRequest: AttendanceSearchRequest = {
+      startDate,
+      endDate,
+      departmentId: this.departmentControl.value || undefined,
+      status: this.statusControl.value || undefined,
+      page: this.currentPage,
+      pageSize: this.pageSize
+    };
 
-  this.attendanceService.getAttendances(searchRequest)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (response) => {
-        this.attendanceRecords = response.attendances;
-        this.totalRecords = response.totalCount;
-        this.filterAttendanceData();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance data';
-        this.notification.showError(errorMessage);
-        this.isLoading = false;
-      }
-    });
-}
+    this.attendanceService.getAttendances(searchRequest)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.attendanceRecords = response.attendances;
+          this.totalRecords = response.totalCount;
+          this.filterAttendanceData();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance data';
+          this.notification.showError(errorMessage);
+          this.isLoading = false;
+        }
+      });
+  }
 
-private filterAttendanceData(): void {
-  this.filteredAttendance = [...this.attendanceRecords];
-}
+  private filterAttendanceData(): void {
+    this.filteredAttendance = [...this.attendanceRecords];
+  }
 
 
   clearFilters(): void {
@@ -229,23 +231,24 @@ private filterAttendanceData(): void {
     this.statusControl.setValue('');
   }
 
-viewAttendanceDetails(attendance: Attendance): void {
-  this.dialog.open(ViewDetailsDialogueComponent, {
-    width: '600px',
-    panelClass: 'attendance-details-dialog',
-    data: {
-      employeeId: attendance.employeeId,
-      employeeName: attendance.employeeName,
-      workDate: attendance.workDate,
-      checkInTime: attendance.checkInTime,
-      checkOutTime: attendance.checkOutTime,
-      totalHours: this.formatHours(attendance.totalHours),
-      overtimeHours: attendance.overtimeHours,
-      status: attendance.status,
+  viewAttendanceDetails(attendance: Attendance): void {
+    this.dialog.open(ViewDetailsDialogueComponent, {
+      width: '600px',
+      panelClass: 'attendance-details-dialog',
+      data: {
+        employeeId: attendance.employeeId,
+        employeeName: attendance.employeeName,
+        workDate: attendance.workDate,
+        checkInTime: attendance.checkInTime,
+        checkOutTime: attendance.checkOutTime,
+        totalHours: this.formatHours(attendance.totalHours),
+        overtimeHours: attendance.overtimeHours,
+        status: attendance.status,
+        notes: attendance.notes
 
-    }
-  });
-}
+      }
+    });
+  }
 
 
   editAttendance(attendance: Attendance): void {
@@ -295,5 +298,5 @@ viewAttendanceDetails(attendance: Attendance): void {
     return `${hrs}h ${mins}m`;
   }
 
- 
+
 }

@@ -21,10 +21,13 @@ import { CalendarEvent } from './models/calendar.models';
 import { NotificationService } from '../../core/services/notification.service';
 import { AttendanceService } from '../attendance/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
+import { EmployeeService } from '../employee/services/employee.service';
+import { Employee } from '../../core/models/employee.models';
 import { PromptDialogComponent } from '../../shared/components/prompt-dialog/prompt-dialog.component';
 // import { DayDetailsDialogComponent } from '../../shared/components/day-details-dialogs/day-details-dialog.component';
 // import { CalendarDetailsDialogComponent } from '../../shared/components/calendar-details-dialog/calendar-details-dialog.component';
 import { CalendarDetailsDialogueComponent } from '../../shared/components/calendar-details-dialog/view-details-dialogue.component';
+import { CommentDialogComponent } from '../../shared/components/comment-dialog/comment-dialog.component';
 
 interface CalendarDay {
     date: Date;
@@ -60,6 +63,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     private destroy$ = new Subject<void>();
 
+    userInfo: Employee | null = null;
+    hireDate: Date | null = null;
+
     currentMonth = new Date();
     calendarDays: CalendarDay[] = [];
     weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -85,12 +91,33 @@ export class CalendarComponent implements OnInit, OnDestroy {
         private attendanceService: AttendanceService,
         private router: Router,
         private dialog: MatDialog,
-        private authService: AuthService
+        private authService: AuthService,
+        private employeeService: EmployeeService
     ) { }
 
     ngOnInit(): void {
+        this.loadUserInfo();
         this.generateCalendar();
         this.loadCalendarData();
+    }
+
+    private loadUserInfo(): void {
+        const currentUser = this.authService.getCurrentUserValue();
+        if (currentUser && currentUser.userId) {
+            this.employeeService.getEmployee(currentUser.userId)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                    next: (employee) => {
+                        this.userInfo = employee;
+                        if (employee.hireDate) {
+                            this.hireDate = new Date(employee.hireDate);
+                            // Re-distribute to apply filter if data is already loaded
+                            this.distributeEventsToCalendar();
+                        }
+                    },
+                    error: (err) => console.error('Failed to load employee info', err)
+                });
+        }
     }
 
     ngOnDestroy(): void {
@@ -232,7 +259,23 @@ export class CalendarComponent implements OnInit, OnDestroy {
                 }
 
                 // Compare using local date strings to ignore time/TZ offsets entirely
-                return eventTargetDate.toDateString() === dayDateString;
+                const isMatch = eventTargetDate.toDateString() === dayDateString;
+                if (!isMatch) return false;
+
+                // FILTER: Hide 'Absent' status if date is before Hire Date
+                if (this.hireDate && event.type === 'ATTENDANCE' && event.status.toLowerCase() === 'absent') {
+                    // Normalize dates to ignore exact time
+                    const eventTime = new Date(day.date);
+                    eventTime.setHours(0, 0, 0, 0);
+                    const hireTime = new Date(this.hireDate);
+                    hireTime.setHours(0, 0, 0, 0);
+
+                    if (eventTime < hireTime) {
+                        return false;
+                    }
+                }
+
+                return true;
             });
         });
     }
@@ -479,23 +522,40 @@ export class CalendarComponent implements OnInit, OnDestroy {
     clockOut(): void {
         if (!this.selectedDay) return;
 
-        const request = {
-            action: 'out',
-            location: {
-                source: 'web_app',
-                timestamp: new Date().toISOString()
+        // Open comment dialog
+        const dialogRef = this.dialog.open(CommentDialogComponent, {
+            width: '400px',
+            data: {
+                title: 'Clock Out',
+                label: 'Day Updates / Comments',
+                placeholder: 'E.g., completed API integration...',
+                required: false
             }
-        };
+        });
 
-        this.attendanceService.checkOut(request).subscribe({
-            next: () => {
-                this.notificationService.showSuccess('Checked out successfully!');
-                this.loadCalendarData(); // Refresh calendar
-            },
-            error: (error: any) => {
-                const errorMessage = error?.error?.message || 'Failed to check out';
-                this.notificationService.showError(errorMessage);
-            }
+        dialogRef.afterClosed().subscribe(comment => {
+            // If user cancelled (undefined), do nothing. Empty string is valid.
+            if (comment === undefined) return;
+
+            const request = {
+                action: 'out',
+                location: {
+                    source: 'web_app',
+                    timestamp: new Date().toISOString()
+                },
+                notes: comment
+            };
+
+            this.attendanceService.checkOut(request).subscribe({
+                next: () => {
+                    this.notificationService.showSuccess('Checked out successfully!');
+                    this.loadCalendarData(); // Refresh calendar
+                },
+                error: (error: any) => {
+                    const errorMessage = error?.error?.message || 'Failed to check out';
+                    this.notificationService.showError(errorMessage);
+                }
+            });
         });
     }
 
