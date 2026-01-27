@@ -12,6 +12,11 @@ import { Employee, Department, Position } from '../../../../core/models/employee
 import { Subject, takeUntil } from 'rxjs';
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
+
+
 
 @Component({
   selector: 'app-employee-edit',
@@ -25,7 +30,9 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatButtonModule,
     MatSelectModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+     MatDatepickerModule,
+  MatNativeDateModule
   ],
   templateUrl: './employee-edit.component.html',
   styleUrls: ['./employee-edit.component.scss']
@@ -113,7 +120,7 @@ initializeForm(): void {
     lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
     email: [emp.email, [Validators.required, Validators.email]],
     phone: [emp.phone, [Validators.pattern(/^[0-9]{10,15}$/)]],
-    dateOfBirth: [this.formatDateForInput(emp.dateOfBirth)],
+    dateOfBirth: [emp.dateOfBirth ? new Date(emp.dateOfBirth) : null],
     gender: [emp.gender?.toLowerCase() || null],
     departmentId: [emp.departmentId || null],
     positionId: [emp.positionId || null],
@@ -123,7 +130,7 @@ initializeForm(): void {
     employmentType: [emp.employmentType?.toLowerCase() || null],
     payType: [emp.payType?.toLowerCase() || null],
     basicSalary: [emp.basicSalary, [Validators.min(0)]],
-    hireDate: [this.formatDateForInput(emp.hireDate)],
+    hireDate: [emp.hireDate ? new Date(emp.hireDate) : null],
     status: [emp.status?.toLowerCase() || null],
     address: this.fb.group({
       street: [emp.address?.street || ''],
@@ -193,13 +200,13 @@ onSave(): void {
   formData.append('BasicSalary', formValue.basicSalary?.toString() ?? '');
   formData.append('WorkLocation', formValue.workLocation ?? '');
   formData.append('ReportingManagerId', formValue.reportingManagerId ?? '');
-formData.append('DateOfBirth', formValue.dateOfBirth ?? '');
+formData.append('DateOfBirth', formValue.dateOfBirth ? this.formatDate(formValue.dateOfBirth) : '');
 formData.append('Gender', formValue.gender ?? '');
 formData.append('Nationality', formValue.nationality ?? '');
 formData.append('MaritalStatus', formValue.maritalStatus ?? '');
 formData.append('EmploymentType', formValue.employmentType ?? '');
 formData.append('PayType', formValue.payType ?? '');
-formData.append('HireDate', formValue.hireDate ?? '');
+formData.append('HireDate', formValue.hireDate ? this.formatDate(formValue.hireDate) : '');
 formData.append('Status', formValue.status ?? '');
 formData.append('EmployeeNumber', formValue.employeeCode ?? '');
   formData.append('Address', JSON.stringify(formValue.address));
@@ -256,6 +263,12 @@ formData.append('EmployeeNumber', formValue.employeeCode ?? '');
 
     return '';
   }
+
+private formatDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+
 
   get filteredPositions(): Position[] {
     const deptId = this.employeeForm?.get('departmentId')?.value;

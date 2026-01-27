@@ -1,3 +1,6 @@
+
+
+
 <div class="dialog-header">
   <h2 mat-dialog-title>
     <mat-icon>edit</mat-icon>
@@ -79,11 +82,27 @@
       </div>
       
       <div class="form-row">
+     
+
         <mat-form-field appearance="outline">
-          <mat-label>Date of Birth</mat-label>
-          <input matInput type="date" formControlName="dateOfBirth">
-          <mat-icon matPrefix>cake</mat-icon>
-        </mat-form-field>
+  <mat-label>Date of Birth</mat-label>
+
+  <input
+    matInput
+    [matDatepicker]="dobPicker"
+    formControlName="dateOfBirth"
+  />
+
+  <mat-icon matPrefix>cake</mat-icon>
+
+  <mat-datepicker-toggle
+    matIconSuffix
+    [for]="dobPicker">
+  </mat-datepicker-toggle>
+
+  <mat-datepicker #dobPicker></mat-datepicker>
+</mat-form-field>
+
 
         <mat-form-field appearance="outline">
           <mat-label>Gender</mat-label>
@@ -179,12 +198,38 @@
           <mat-error>Status is required</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <!-- <mat-form-field appearance="outline">
           <mat-label>Hire Date</mat-label>
           <input matInput type="date" formControlName="hireDate" required>
           <mat-icon matPrefix>event</mat-icon>
           <mat-error>Hire date is required</mat-error>
-        </mat-form-field>
+        </mat-form-field> -->
+
+        <mat-form-field appearance="outline">
+  <mat-label>Hire Date</mat-label>
+
+  <input
+    matInput
+    [matDatepicker]="hirePicker"
+    formControlName="hireDate"
+    readonly
+  />
+
+  <mat-datepicker-toggle
+    matIconSuffix
+    [for]="hirePicker">
+  </mat-datepicker-toggle>
+
+  <mat-datepicker #hirePicker></mat-datepicker>
+
+  <mat-error *ngIf="employeeForm.get('hireDate')?.hasError('required')">
+    Hire date is required
+  </mat-error>
+</mat-form-field>
+
+
+
+
       </div>
     </div>
 
