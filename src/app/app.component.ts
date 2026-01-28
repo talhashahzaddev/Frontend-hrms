@@ -202,47 +202,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   private redirectUserOnInit(): void {
-    // Only handle authenticated user redirects here
-    // Let route guards handle unauthenticated user redirects to prevent race conditions
-    this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        take(1)
-      )
-      .subscribe((event: NavigationEnd) => {
-        const user = this.authService.getCurrentUserValue();
-        
-        // Only process redirects for authenticated users
-        if (!user) {
-          return; // Let route guards handle unauthenticated users
-        }
+  this.router.events
+    .pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$) // keeps subscription alive until component destroyed
+    )
+    .subscribe((event: NavigationEnd) => {
+      const user = this.authService.getCurrentUserValue();
+      if (!user) return; // user not logged in, let guards handle it
 
-        const currentUrl = event.urlAfterRedirects;
-        const currentPath = currentUrl.split('?')[0];
-        const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
+      const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
+      const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
 
-        // Employee is trying to access admin dashboard
-        if (!isAdmin && currentPath.startsWith('/dashboard')) {
-          this.router.navigate(['/performance/dashboard']);
-          return;
-        }
-
-        // Admin trying to access employee dashboard
-        if (isAdmin && currentPath.startsWith('/performance')) {
-          this.router.navigate(['/dashboard']);
-          return;
-        }
-
-        // If user is on root or login page → role-based redirect
-        if (currentPath === '/' || currentPath === '/login') {
-          if (isAdmin) {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.router.navigate(['/performance/dashboard']);
-          }
-        }
-      });
-  }
+      // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
+      if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
+        this.router.navigate(['/performance/dashboard']);
+      }
+    });
+}
 
 
 

@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
+// import { RoleRedirectGuard } from './core/guards/role-redirect.guard';
+// import { EmptyRouteComponent } from './shared/components/Empty-Component/empty-route.component';
 
 export const appRoutes: Routes = [
   // Redirect empty path to dashboard
@@ -39,9 +41,6 @@ export const appRoutes: Routes = [
       import('./features/auth/components/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
   },
 
-
-
-
   // Protected Routes (require authentication)
   {
     path: 'dashboard',
@@ -50,7 +49,6 @@ export const appRoutes: Routes = [
       import('../app/features/dashboard/dashboard.component').then(m => m.DashboardComponent),
     title: 'Dashboard - HRMS'
   },
-
   // Employee Management Routes
   {
     path: 'employees',
