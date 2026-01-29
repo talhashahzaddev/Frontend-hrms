@@ -494,70 +494,112 @@ export class CalendarComponent implements OnInit, OnDestroy {
         });
     }
 
-    // Menu Action: Clock In
     clockIn(): void {
-        if (!this.selectedDay) return;
+    if (!this.selectedDay) return;
 
-        const request = {
-            action: 'in',
-            location: {
-                source: 'web_app',
-                timestamp: new Date().toISOString()
-            }
-        };
+    const currentUser = this.authService.getCurrentUserValue();
+    const employeeId = currentUser?.userId;
 
-        this.attendanceService.checkIn(request).subscribe({
-            next: () => {
-                this.notificationService.showSuccess('Checked in successfully!');
-                this.loadCalendarData(); // Refresh calendar
-            },
-            error: (error: any) => {
-                const errorMessage = error?.error?.message || 'Failed to check in';
-                this.notificationService.showError(errorMessage);
-            }
-        });
+    if (!employeeId) {
+        this.notificationService.showError('Employee not found');
+        return;
     }
-
-    // Menu Action: Clock Out
-    clockOut(): void {
-        if (!this.selectedDay) return;
-
-        // Open comment dialog
-        const dialogRef = this.dialog.open(CommentDialogComponent, {
-            width: '400px',
-            data: {
-                title: 'Clock Out',
-                label: 'Day Updates / Comments',
-                placeholder: 'E.g., completed API integration...',
-                required: false
+    this.attendanceService.getCurrentShiftByEmployee(employeeId).subscribe({
+        next: (shiftId) => {
+            if (!shiftId) {
+                this.notificationService.showError('No active shift assigned');
+                return;
             }
-        });
-
-        dialogRef.afterClosed().subscribe(comment => {
-            // If user cancelled (undefined), do nothing. Empty string is valid.
-            if (comment === undefined) return;
 
             const request = {
-                action: 'out',
+                action: 'in',
+                shiftId: shiftId, // ✅ FIX
                 location: {
                     source: 'web_app',
                     timestamp: new Date().toISOString()
-                },
-                notes: comment
+                }
             };
 
-            this.attendanceService.checkOut(request).subscribe({
+            this.attendanceService.checkIn(request).subscribe({
                 next: () => {
-                    this.notificationService.showSuccess('Checked out successfully!');
-                    this.loadCalendarData(); // Refresh calendar
+                    this.notificationService.showSuccess('Checked in successfully!');
+                    this.loadCalendarData();
                 },
                 error: (error: any) => {
-                    const errorMessage = error?.error?.message || 'Failed to check out';
+                    const errorMessage = error?.error?.message || 'Failed to check in';
                     this.notificationService.showError(errorMessage);
                 }
             });
-        });
+        },
+        error: () => {
+            this.notificationService.showError('Failed to load current shift');
+        }
+    });
+}
+
+
+    // Menu Action: Clock Out
+    clockOut(): void {
+    if (!this.selectedDay) return;
+    const currentUser = this.authService.getCurrentUserValue();
+    const employeeId = currentUser?.userId;
+
+    if (!employeeId) {
+        this.notificationService.showError('Employee not found');
+        return;
     }
+
+    this.attendanceService.getCurrentShiftByEmployee(employeeId).subscribe({
+  next: (shiftId) => {
+    if (!shiftId) {
+      this.notificationService.showError('No active shift assigned');
+      return;
+    }
+
+    // Open comment dialog
+    const dialogRef = this.dialog.open(CommentDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Clock Out',
+        label: 'Day Updates / Comments',
+        placeholder: 'E.g., completed API integration...',
+        required: false
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(comment => {
+      // If user cancelled (undefined), do nothing. Empty string is valid.
+      if (comment === undefined) return;
+
+      const request = {
+        action: 'out',
+        shiftId: shiftId, // ✅ FIX
+        location: {
+          source: 'web_app',
+          timestamp: new Date().toISOString()
+        },
+        notes: comment
+      };
+
+      this.attendanceService.checkOut(request).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Checked out successfully!');
+          this.loadCalendarData();
+        },
+        error: (error: any) => {
+          const errorMessage = error?.error?.message || 'Failed to check out';
+          this.notificationService.showError(errorMessage);
+        }
+      });
+    });
+  },
+  error: () => {
+    this.notificationService.showError('Failed to load current shift');
+  }
+});
+
+}
+
 
     // Menu Action: View Day Details
     // viewDayDetails(): void {

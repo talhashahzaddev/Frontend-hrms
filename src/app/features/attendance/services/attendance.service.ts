@@ -173,6 +173,24 @@ export class AttendanceService {
       );
   }
 
+getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
+  return this.http
+    .get<ApiResponse<{ shiftId: string }>>(
+      `${this.apiUrl}/CurrentShift/${employeeId}`
+    )
+    .pipe(
+      map(res => {
+        if (!res.success) {
+          throw new Error(res.message || 'Failed to load shift');
+        }
+        return res.data?.shiftId ?? null;
+      })
+    );
+}
+
+
+
+
   getMyAttendanceSummary(startDate: string, endDate: string): Observable<AttendanceSummary> {
     const params = new HttpParams()
       .set('startDate', startDate)

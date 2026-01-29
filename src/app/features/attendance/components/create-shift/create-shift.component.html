@@ -1,4 +1,3 @@
-
 <!-- Create/Edit Shift Dialog -->
 <div class="dialog-header">
   <h2>
@@ -50,6 +49,20 @@
         </mat-select>
       </mat-form-field>
     </div>
+
+    <!-- Margin Hours (Manager / HR only) -->
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Margin Hours</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="marginHours"
+          min="0"
+          max="5"
+          placeholder="e.g. 1.5"
+        />
+        <mat-hint>Allowed clock-in window ± Margin Hours</mat-hint>
+      </mat-form-field>
 
     <!-- Days of Week -->
     <mat-form-field appearance="outline" class="full-width">

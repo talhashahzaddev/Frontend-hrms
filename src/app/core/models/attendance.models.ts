@@ -4,6 +4,7 @@ export interface Attendance {
   employeeName: string;
   workDate: string;
   date: string;
+  shiftId?: string;
   checkInTime?: string;
   checkOutTime?: string;
   checkInLocation?: string;
@@ -73,6 +74,7 @@ export interface Shift {
   gracePeriod: number; // in minutes
   workingDays: string[]; // ['monday', 'tuesday', etc.]
   createdAt: string;
+  marginHours?: number;
 }
 
 export interface AttendanceRecord {
@@ -97,6 +99,7 @@ export interface CheckOutRequest {
 
 export interface ClockInOutRequest {
   action: string;
+  shiftId : string | null ; 
   location?: { [key: string]: any };
   notes?: string;
 }
@@ -235,13 +238,14 @@ export interface AttendanceCalendarData {
 
 
 export interface UpdateShiftDto {
-  shiftId: string;
-  shiftName: string;
-  startTime: string;
-  endTime: string;
-  breakDuration?: number;
-  daysofWeek?: number[];
+  shiftId: string;         
+  shiftName: string;       
+  startTime: string;       
+  endTime: string;         
+  breakDuration?: number;  
+  daysofWeek?: number[];  
   timezone?: string;
+  marginHours?: number;       
 }
 
 
@@ -254,6 +258,8 @@ export interface ShiftDto {
   daysOfWeek: number[];
   timezone: string;
   isActive: boolean;
+  marginHours?: number; 
+
 }
 
 // assign-shift-request.model.ts
