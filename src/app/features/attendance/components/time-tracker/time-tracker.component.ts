@@ -90,6 +90,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     this.loadRecentAttendance();
     this.loadTodaySessions();
     this.setupTimeUpdater();
+    this.loadCurrentShift();
   }
 
   ngOnDestroy(): void {
@@ -120,6 +121,20 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   hasRole(role: string): boolean {
     return this.authService.hasRole(role);
   }
+currentShiftId: string | null = null;
+
+  loadCurrentShift(): void {
+  this.attendanceService
+    .getCurrentShiftByEmployee(this.currentUser?.userId)
+    .subscribe({
+      next: (shiftId) => {
+        this.currentShiftId = shiftId;
+      },
+      error: (err) => {
+        this.currentShiftId = null;
+      }
+    });
+}
 
   private getCurrentUser(): void {
     this.authService.currentUser$
@@ -204,7 +219,10 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (attendances) => {
-          this.todayAttendance = attendances.length > 0 ? attendances[0] : null;
+                      this.todayAttendance = attendances.length > 0 ? attendances[0] : null;
+            if (this.todayAttendance?.shiftId) {
+              this.currentShiftId = this.todayAttendance.shiftId; // now it will be set
+            }
         },
         error: (error) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to load today attendance';
@@ -255,10 +273,15 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 
 
   clockIn(): void {
+     if (!this.currentShiftId) {
+    this.notification.showError('No shift assigned for today.');
+    return; // stop if no shiftId
+  }
     this.isClockActionLoading = true;
 
     const request: ClockInOutRequest = {
       action: 'in',
+      shiftId: this.currentShiftId,
       location: {
         source: 'web_app',
         timestamp: new Date().toISOString()
@@ -268,8 +291,9 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     this.attendanceService.checkIn(request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
-          this.notification.showSuccess('Clocked in successfully!');
+        next: (response:any) => {
+          const successMessage=response?.message || 'Clocked in successfully!'
+          this.notification.showSuccess(successMessage);
           this.loadCurrentSession();
           this.loadTodayAttendance();
           this.loadTodaySessions();
@@ -284,6 +308,10 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   }
 
   clockOut(): void {
+    if (!this.currentShiftId) {
+    this.notification.showError('No shift assigned for today.');
+    return; // stop if no shiftId
+  }
     // Open comment dialog
     const dialogRef = this.dialog.open(CommentDialogComponent, {
       width: '400px',
@@ -303,18 +331,19 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
 
       const request: ClockInOutRequest = {
         action: 'out',
+        shiftId: this.currentShiftId, 
         location: {
           source: 'web_app',
           timestamp: new Date().toISOString()
         },
         notes: comment
       };
-
       this.attendanceService.checkOut(request)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
-            this.notification.showSuccess('Clocked out successfully!');
+          next: (response:any) => {
+          const successMessage=response?.message || 'Clocked out successfully!'
+          this.notification.showSuccess(successMessage);
             this.loadCurrentSession();
             this.loadTodayAttendance();
             this.loadRecentAttendance();
