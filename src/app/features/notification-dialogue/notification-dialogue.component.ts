@@ -30,6 +30,7 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   notification: ServerNotification[] = [];
   currentUser: any = null;
+  actionProcessed = new Set<string>(); // Track which notifications had actions clicked
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -125,6 +126,9 @@ onNotificationClick(notification: ServerNotification): void {
   // 🚀 NEW SWITCH-CASE FUNCTION FOR MODULE TYPE HANDLING
   // -------------------------------------------------------
   handleAction(n: ServerNotification, action: 'accept' | 'reject'): void {
+    // Mark action as processed immediately to hide buttons
+    this.actionProcessed.add(n.notificationid);
+    
     const moduleType = n.moduletype?.toLowerCase();
 
     switch (moduleType) {
@@ -141,6 +145,8 @@ onNotificationClick(notification: ServerNotification): void {
 
       default:
         console.warn("Unknown module type:", moduleType);
+        // Remove from processed if unknown module
+        this.actionProcessed.delete(n.notificationid);
         break;
     }
   }
