@@ -82,6 +82,17 @@
   gap: 1.25rem;
 }
 
+/* Hide Edge/IE password reveal button */
+input::-ms-reveal {
+    display: none;
+}
+
+/* For Chrome/Edge */
+input::-ms-clear {
+    display: none;
+}
+
+
 .form-field {
   width: 100%;
 }
