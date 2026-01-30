@@ -16,7 +16,7 @@
         <div class="title">{{ n.title }}</div>
         <div class="message">{{ n.message }}</div>
         <div class="time">{{ n.createdAt | date:'dd-MM-yyyy HH:mm' }}</div>
-        <div *ngIf="n.notificationType === 'Request' && n.moduletype && !n.isRead"
+        <div *ngIf="n.notificationType === 'Request' && n.moduletype && !n.isRead && !actionProcessed.has(n.notificationid)"
              class="action-buttons">
           <button mat-button color="primary"
                   (click)="handleAction(n, 'accept'); $event.stopPropagation()">
