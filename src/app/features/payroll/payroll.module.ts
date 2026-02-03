@@ -37,11 +37,9 @@ import { payrollRoutes } from './payroll.routes';
 import { SalaryComponent } from './components/salary-component/salary-component';
 
 @NgModule({
-  declarations: [
-    // All components are now standalone
-    SalaryComponent
-  ],
+  declarations: [],
   imports: [
+    SalaryComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

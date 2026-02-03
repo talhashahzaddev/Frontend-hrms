@@ -118,6 +118,14 @@ export const appRoutes: Routes = [
     title: 'Subscription Plans - HRMS'
   },
 
+  // Expense Management Routes (HR Manager, Employee)
+  {
+    path: 'expense',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/expense/expense.routes').then(m => m.expenseRoutes),
+  },
+
   // Profile Management
   {
     path: 'profile',

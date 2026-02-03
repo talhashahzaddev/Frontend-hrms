@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   PerformanceSummary,
@@ -31,7 +31,9 @@ import {
   ConsolidateAppraisalRequest,
   EmployeePerformanceHistory,
   EmployeeAppraisalForEmployee,
-  TeamPerformanceOverview
+  TeamPerformanceOverview,
+  Goal,
+  CreateGoalRequest
 } from '../../../core/models/performance.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
 
@@ -472,5 +474,22 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
   // Team Performance Overview
   getTeamPerformanceOverview(): Observable<ApiResponse<TeamPerformanceOverview>> {
     return this.http.get<ApiResponse<TeamPerformanceOverview>>(`${this.apiUrl}/Performance/team-performance-overview`);
+  }
+
+  // Goals (stub until backend API is available)
+  getAllGoals(): Observable<ApiResponse<Goal[]>> {
+    return of({ success: true, data: [], message: '' });
+  }
+
+  getGoalsByEmployeeId(employeeId: string): Observable<ApiResponse<Goal[]>> {
+    return of({ success: true, data: [], message: '' });
+  }
+
+  completeGoal(goalId: string): Observable<ApiResponse<Goal>> {
+    return of({ success: true, data: {} as Goal, message: '' });
+  }
+
+  createGoal(request: CreateGoalRequest): Observable<ApiResponse<Goal>> {
+    return of({ success: true, data: {} as Goal, message: '' });
   }
 }
