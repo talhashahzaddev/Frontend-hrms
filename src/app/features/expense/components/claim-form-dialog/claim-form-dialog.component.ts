@@ -21,7 +21,6 @@ import {
 } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { CloudinaryUploadService } from '../../../../core/services/cloudinary-upload.service';
 
 export interface ClaimDialogData {
   mode: 'create' | 'edit';
@@ -60,13 +59,16 @@ export class ClaimFormDialogComponent implements OnDestroy {
   readonly acceptedReceiptTypes = '.pdf,.jpg,.jpeg,.png,.gif';
   readonly maxReceiptSizeMb = 5;
 
+  private static readonly MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
+  private static readonly ALLOWED_RECEIPT_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
+  private static readonly ALLOWED_RECEIPT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+
   constructor(
     private fb: FormBuilder,
     private expenseService: ExpenseService,
     private dialogRef: MatDialogRef<ClaimFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ClaimDialogData,
-    private notificationService: NotificationService,
-    private cloudinaryUpload: CloudinaryUploadService
+    private notificationService: NotificationService
   ) {
     this.claimForm = this.fb.group({
       categoryId: [null as string | null, Validators.required],
@@ -109,11 +111,26 @@ export class ClaimFormDialogComponent implements OnDestroy {
     receiptInput.click();
   }
 
+  private validateReceiptFile(file: File): { valid: boolean; error?: string } {
+    if (!file?.name) return { valid: false, error: 'No file selected' };
+    const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
+    if (!ClaimFormDialogComponent.ALLOWED_RECEIPT_EXTENSIONS.includes(ext)) {
+      return { valid: false, error: 'Allowed formats: PDF, JPG, JPEG, PNG, GIF' };
+    }
+    if (!ClaimFormDialogComponent.ALLOWED_RECEIPT_TYPES.includes(file.type) && file.type !== 'image/jpg') {
+      return { valid: false, error: 'Invalid file type' };
+    }
+    if (file.size > ClaimFormDialogComponent.MAX_RECEIPT_BYTES) {
+      return { valid: false, error: 'File size must be 5 MB or less' };
+    }
+    return { valid: true };
+  }
+
   onReceiptFileSelected(event: Event, input: HTMLInputElement): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    const validation = this.cloudinaryUpload.validateFile(file);
+    const validation = this.validateReceiptFile(file);
     if (!validation.valid) {
       this.notificationService.showError(validation.error ?? 'Invalid file');
       return;
@@ -122,7 +139,7 @@ export class ClaimFormDialogComponent implements OnDestroy {
     this.isUploadingReceipt = true;
     this.receiptFileName = file.name;
 
-    this.cloudinaryUpload
+    this.expenseService
       .uploadReceipt(file)
       .pipe(takeUntil(this.destroy$))
       .subscribe({

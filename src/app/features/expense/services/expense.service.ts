@@ -18,6 +18,7 @@ import {
 })
 export class ExpenseService {
   private readonly apiUrl = `${environment.apiUrl}/Expense`;
+  private readonly uploadsUrl = `${environment.apiUrl}/uploads`;
 
   constructor(private http: HttpClient) {}
 
@@ -126,5 +127,20 @@ export class ExpenseService {
       .pipe(
         map((res) => res.success && res.data === true)
       );
+  }
+
+  /** Upload receipt file through uploads API; returns the hosted URL. */
+  uploadReceipt(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string }>(`${this.uploadsUrl}/files`, formData).pipe(
+      map((res) => {
+        if (!res?.url) {
+          throw new Error('Upload failed');
+        }
+        return res.url;
+      })
+    );
   }
 }

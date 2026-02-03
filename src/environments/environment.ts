@@ -8,9 +8,5 @@ export const environment = {
     tokenKey: 'token',
     refreshTokenKey: 'refresh_token',
     userKey: 'user'
-  },
-  cloudinary: {
-    cloudName: '',
-    uploadPreset: ''
   }
 }; 
