@@ -1,0 +1,96 @@
+<!-- Expense Category List Container -->
+<div class="category-list-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>category</mat-icon>
+        Expense Categories
+      </h1>
+      <p class="page-subtitle">Manage expense claim categories</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button
+              (click)="openCreateDialog()"
+              class="add-button">
+        <mat-icon>add</mat-icon>
+        Add Category
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Search</h3>
+      <button mat-stroked-button
+              (click)="clearFilters()"
+              [disabled]="!hasFiltersApplied()"
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear
+      </button>
+    </div>
+    <div class="filters-content">
+      <mat-form-field class="search-field">
+        <mat-label>Search categories</mat-label>
+        <input matInput
+               [formControl]="searchControl"
+               placeholder="Search by name...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading categories...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="filteredCategories" class="category-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Category Name</th>
+          <td mat-cell *matCellDef="let cat">{{ cat.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let cat">
+            {{ cat.createdAt | date:'MMM d, y' }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let cat">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="editCategory(cat)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <button mat-menu-item (click)="deleteCategory(cat)" class="danger-action">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div *ngIf="filteredCategories.length === 0" class="empty-state">
+        <mat-icon>category</mat-icon>
+        <h3>No Categories Found</h3>
+        <p *ngIf="hasFiltersApplied()">No categories match your search.</p>
+        <p *ngIf="!hasFiltersApplied()">Add your first expense category to get started.</p>
+        <button *ngIf="!hasFiltersApplied()" mat-flat-button (click)="openCreateDialog()" class="add-first-btn">
+          <mat-icon>add</mat-icon>
+          Add Category
+        </button>
+      </div>
+    </div>
+  </mat-card>
+</div>

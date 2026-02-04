@@ -134,6 +134,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'subscriptions',
       route: '/subscription',
       roles: ['Super Admin']
+    },
+    {
+      label: 'Expense',
+      icon: 'receipt_long',
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee'],
+      children: [
+        { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, roles: ['Super Admin', 'HR Manager'] },
+        { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true }
+      ]
     }
   ];
 

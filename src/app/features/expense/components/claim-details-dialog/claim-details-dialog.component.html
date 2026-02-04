@@ -1,0 +1,105 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>receipt_long</mat-icon>
+    Claim Details
+  </h2>
+  <button mat-icon-button (click)="close()" class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading claim details...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="claim && !loading" class="details">
+    <!-- Amount highlight -->
+    <div class="amount-card">
+      <span class="amount-label">Claim amount</span>
+      <span class="amount-value">{{ claim.amount | currency }}</span>
+    </div>
+
+    <!-- Section: Overview -->
+    <section class="detail-section">
+      <h3 class="section-title">Overview</h3>
+      <div class="detail-row">
+        <span class="label">Title</span>
+        <span class="value">{{ claim.title }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Category</span>
+        <span class="value">{{ claim.categoryName || '—' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="claim.description">
+        <span class="label">Description</span>
+        <span class="value description-text">{{ claim.description }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Bill date</span>
+        <span class="value">{{ claim.billDate | date:'mediumDate' }}</span>
+      </div>
+    </section>
+
+    <!-- Section: Payment -->
+    <section class="detail-section" *ngIf="claim.paymentMethod || claim.merchant">
+      <h3 class="section-title">Payment</h3>
+      <div class="detail-row" *ngIf="claim.paymentMethod">
+        <span class="label">Payment method</span>
+        <span class="value">{{ claim.paymentMethod }}</span>
+      </div>
+      <div class="detail-row" *ngIf="claim.merchant">
+        <span class="label">Merchant</span>
+        <span class="value">{{ claim.merchant }}</span>
+      </div>
+    </section>
+
+    <!-- Section: Status -->
+    <section class="detail-section">
+      <h3 class="section-title">Status</h3>
+      <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value">
+          <span [class]="'status-chip ' + getStatusClass(claim.status)">{{ claim.status || 'Pending' }}</span>
+        </span>
+      </div>
+      <div class="detail-row" *ngIf="claim.employeeName">
+        <span class="label">Employee</span>
+        <span class="value">{{ claim.employeeName }}</span>
+      </div>
+      <div class="detail-row" *ngIf="claim.approvedName">
+        <span class="label">Approved by</span>
+        <span class="value">{{ claim.approvedName }}</span>
+      </div>
+    </section>
+
+    <!-- Section: Receipt & dates -->
+    <section class="detail-section">
+      <h3 class="section-title">Receipt &amp; dates</h3>
+      <div class="detail-row" *ngIf="claim.receiptUrl">
+        <span class="label">Receipt</span>
+        <span class="value">
+          <a [href]="claim.receiptUrl" target="_blank" rel="noopener" class="receipt-link">Open receipt</a>
+        </span>
+      </div>
+      <div class="detail-row" *ngIf="claim.createdAt">
+        <span class="label">Created</span>
+        <span class="value">{{ claim.createdAt | date:'medium' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="claim.updatedAt">
+        <span class="label">Updated</span>
+        <span class="value">{{ claim.updatedAt | date:'medium' }}</span>
+      </div>
+    </section>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-flat-button (click)="close()" class="close-btn">Close</button>
+</mat-dialog-actions>

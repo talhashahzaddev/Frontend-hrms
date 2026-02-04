@@ -470,3 +470,31 @@ export interface CycleRating {
   cycleName: string;
   rating?: number;
 }
+
+// Goals (for Goals & KRAs component; backend API may be added later)
+export enum GoalStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
+}
+
+export interface Goal {
+  goalId: string;
+  employeeId: string;
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  status: GoalStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateGoalRequest {
+  employeeId: string;
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+}

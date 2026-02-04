@@ -1,0 +1,251 @@
+// Expense Category List - same style as position-list
+.category-list-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-content {
+      flex: 1;
+
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
+
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: #667eea;
+        }
+      }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    .header-actions .add-button {
+      height: 48px;
+      padding: 0 28px !important;
+      border-radius: 12px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+      }
+    }
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .clear-filters-btn {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        color: #667eea !important;
+        border-color: rgba(102, 126, 234, 0.3) !important;
+      }
+    }
+
+    .filters-content {
+      padding: 24px;
+
+      .search-field {
+        width: 100%;
+        max-width: 400px;
+      }
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        background: white;
+        border-radius: 12px;
+      }
+
+      mat-icon {
+        color: #667eea !important;
+      }
+    }
+  }
+
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 20px;
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+
+      .category-table {
+        width: 100%;
+
+        ::ng-deep .mat-mdc-header-row {
+          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+          .mat-mdc-header-cell {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 16px 12px;
+          }
+        }
+
+        ::ng-deep .mat-mdc-row {
+          &:hover {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%);
+          }
+
+          .mat-mdc-cell {
+            padding: 20px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #374151;
+          }
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #cbd5e1;
+          margin-bottom: 16px;
+        }
+
+        h3 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        p {
+          margin: 0 0 24px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+
+        .add-first-btn {
+          background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+          color: white !important;
+
+          mat-icon {
+            margin-right: 8px;
+          }
+        }
+      }
+    }
+  }
+
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 12px !important;
+
+    .mat-mdc-menu-item {
+      border-radius: 8px !important;
+
+      mat-icon {
+        margin-right: 12px;
+        color: #8b5cf6;
+      }
+
+      &.danger-action {
+        color: #dc2626 !important;
+
+        mat-icon {
+          color: #dc2626 !important;
+        }
+
+        &:hover {
+          background: rgba(220, 38, 38, 0.1) !important;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .category-list-container {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+
+      .header-actions .add-button {
+        width: 100%;
+      }
+    }
+  }
+}
