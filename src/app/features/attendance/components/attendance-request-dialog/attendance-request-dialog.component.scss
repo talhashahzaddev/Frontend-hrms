@@ -1,0 +1,285 @@
+// Attendance Request Dialog - Professional & Beautiful Styling
+.attendance-request-dialog {
+  display: flex;
+  flex-direction: column;
+  min-width: 600px;
+  max-width: 700px;
+  background: #ffffff;
+
+  // Dialog Header
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0;
+
+    .header-content {
+      flex: 1;
+
+      .dialog-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 24px;
+        font-weight: 700;
+        color: white;
+
+        mat-icon {
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      .dialog-subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+      }
+    }
+
+    .close-btn {
+      color: white !important;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+      }
+    }
+  }
+
+  // Original Values Section
+  .original-values-section {
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+    border-bottom: 2px solid #e5e7eb;
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #667eea;
+      }
+    }
+
+    .original-values-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+
+      .value-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+
+        .label {
+          font-size: 12px;
+          font-weight: 600;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .value {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1f2937;
+
+          &.status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 12px;
+            font-size: 12px;
+            text-transform: uppercase;
+            width: fit-content;
+          }
+        }
+      }
+    }
+  }
+
+  // Request Form
+  .request-form {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: #667eea;
+      }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-form-field {
+      ::ng-deep {
+        .mat-mdc-form-field-subscript-wrapper {
+          margin-top: 4px;
+        }
+
+        .mat-mdc-text-field-wrapper {
+          background: #f9fafb;
+        }
+
+        .mdc-text-field--focused {
+          .mat-mdc-text-field-wrapper {
+            background: white;
+          }
+        }
+
+        mat-hint {
+          font-size: 11px;
+          color: #6b7280;
+        }
+
+        mat-error {
+          font-size: 12px;
+          font-weight: 500;
+        }
+      }
+    }
+
+    textarea {
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+  }
+
+  // Dialog Actions
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    background: #f9fafb;
+    border-top: 1px solid #e5e7eb;
+
+    button {
+      height: 44px;
+      padding: 0 24px !important;
+      border-radius: 8px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+
+      .btn-spinner {
+        margin-right: 8px;
+        display: inline-block;
+
+        ::ng-deep circle {
+          stroke: white;
+        }
+      }
+
+      &[color="primary"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+      }
+
+      &[mat-stroked-button] {
+        border: 2px solid #e5e7eb !important;
+        color: #6b7280 !important;
+
+        &:hover:not(:disabled) {
+          background: #f9fafb !important;
+          border-color: #667eea !important;
+          color: #667eea !important;
+        }
+      }
+    }
+  }
+}
+
+// Global Dialog Panel Class
+::ng-deep .attendance-request-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .attendance-request-dialog {
+    min-width: 100%;
+    max-width: 100%;
+
+    .original-values-section {
+      .original-values-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .request-form {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dialog-actions {
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

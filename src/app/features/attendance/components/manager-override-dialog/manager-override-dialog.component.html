@@ -1,0 +1,96 @@
+<div class="manager-override-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>edit</mat-icon>
+    Manager Override
+  </h2>
+
+  <mat-dialog-content>
+    <div class="record-info">
+      <div class="info-row">
+        <span class="label">Employee:</span>
+        <span class="value">{{ data.employeeName }}</span>
+      </div>
+      <div class="info-row">
+        <span class="label">Date:</span>
+        <span class="value">{{ formatDate(data.record.workDate) }}</span>
+      </div>
+    </div>
+
+    <div class="current-values">
+      <h4>Current Record</h4>
+      <div class="current-grid">
+        <div class="current-item">
+          <mat-icon>login</mat-icon>
+          <span>{{ data.record.originalCheckIn ? parseTimeFromDateTime(data.record.originalCheckIn) : '—' }}</span>
+        </div>
+        <div class="current-item">
+          <mat-icon>logout</mat-icon>
+          <span>{{ data.record.originalCheckOut ? parseTimeFromDateTime(data.record.originalCheckOut) : '—' }}</span>
+        </div>
+        <div class="current-item">
+          <mat-icon>assignment</mat-icon>
+          <span>{{ data.record.originalStatus }}</span>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="overrideForm" class="override-form">
+      <h4>New Values</h4>
+      
+      <div class="time-row">
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Check-In Time</mat-label>
+          <input matInput type="time" formControlName="checkIn">
+          <mat-icon matPrefix>login</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Check-Out Time</mat-label>
+          <input matInput type="time" formControlName="checkOut">
+          <mat-icon matPrefix>logout</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          @for (option of statusOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>assignment</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes (Optional)</mat-label>
+        <textarea matInput formControlName="notes" rows="2" placeholder="Additional notes..."></textarea>
+        <mat-icon matPrefix>note</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Reason for Override *</mat-label>
+        <textarea matInput formControlName="reason" rows="3" 
+          placeholder="Please explain the reason for this override..."></textarea>
+        <mat-icon matPrefix>info</mat-icon>
+        @if (overrideForm.get('reason')?.hasError('required') && overrideForm.get('reason')?.touched) {
+          <mat-error>Reason is required</mat-error>
+        }
+        @if (overrideForm.get('reason')?.hasError('minlength') && overrideForm.get('reason')?.touched) {
+          <mat-error>Reason must be at least 10 characters</mat-error>
+        }
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="onCancel()" [disabled]="isSubmitting">
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="isSubmitting || overrideForm.invalid">
+      @if (isSubmitting) {
+        <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
+      }
+      Apply Override
+    </button>
+  </mat-dialog-actions>
+</div>

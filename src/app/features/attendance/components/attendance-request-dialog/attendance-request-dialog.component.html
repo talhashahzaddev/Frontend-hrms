@@ -1,0 +1,135 @@
+<div class="attendance-request-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <h2 class="dialog-title">
+        <mat-icon>request_page</mat-icon>
+        Request Attendance Correction
+      </h2>
+      <p class="dialog-subtitle">{{ data.employeeName }} - {{ data.workDate | date:'fullDate' }}</p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Original Values Section -->
+  <div class="original-values-section">
+    <h3 class="section-title">
+      <mat-icon>history</mat-icon>
+      Original Record
+    </h3>
+    <div class="original-values-grid">
+      <div class="value-item">
+        <span class="label">Date:</span>
+        <span class="value">{{ data.workDate | date:'mediumDate' }}</span>
+      </div>
+      <div class="value-item">
+        <span class="label">Check-In:</span>
+        <span class="value">{{ formatDateForDisplay(data.originalCheckIn || '') }}</span>
+      </div>
+      <div class="value-item">
+        <span class="label">Check-Out:</span>
+        <span class="value">{{ formatDateForDisplay(data.originalCheckOut || '') }}</span>
+      </div>
+      <div class="value-item">
+        <span class="label">Status:</span>
+        <span class="value status-badge">{{ data.originalStatus }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Form -->
+  <form [formGroup]="requestForm" class="request-form">
+    <h3 class="section-title">
+      <mat-icon>edit</mat-icon>
+      Requested Changes
+    </h3>
+
+    <div class="form-row">
+      <!-- Requested Check-In -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Requested Check-In Time</mat-label>
+        <input 
+          matInput 
+          type="datetime-local"
+          formControlName="requestedCheckIn"
+          placeholder="Select check-in time">
+        <mat-icon matSuffix>schedule</mat-icon>
+        <mat-hint>Leave empty if no change required</mat-hint>
+      </mat-form-field>
+
+      <!-- Requested Check-Out -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Requested Check-Out Time</mat-label>
+        <input 
+          matInput 
+          type="datetime-local"
+          formControlName="requestedCheckOut"
+          placeholder="Select check-out time">
+        <mat-icon matSuffix>schedule</mat-icon>
+        <mat-hint>Leave empty if no change required</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <!-- Requested Status -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Requested Status</mat-label>
+      <mat-select formControlName="requestedStatus">
+        <mat-option value="">No Change</mat-option>
+        <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+          {{ status.label }}
+        </mat-option>
+      </mat-select>
+      <mat-icon matSuffix>flag</mat-icon>
+      <mat-hint>Select new status or leave unchanged</mat-hint>
+    </mat-form-field>
+
+    <!-- Reason for Edit (Required) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reason for Edit *</mat-label>
+      <textarea 
+        matInput 
+        formControlName="reasonForEdit"
+        rows="4"
+        placeholder="Explain why this correction is needed (minimum 10 characters)"
+        required></textarea>
+      <mat-icon matSuffix>comment</mat-icon>
+      <mat-error *ngIf="requestForm.get('reasonForEdit')?.touched">
+        {{ getErrorMessage('reasonForEdit') }}
+      </mat-error>
+      <mat-hint>Required: Provide detailed reason for the correction</mat-hint>
+    </mat-form-field>
+
+    <!-- Additional Notes (Optional) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Additional Notes (Optional)</mat-label>
+      <textarea 
+        matInput 
+        formControlName="requestedNotes"
+        rows="3"
+        placeholder="Any additional information"></textarea>
+      <mat-icon matSuffix>note</mat-icon>
+    </mat-form-field>
+  </form>
+
+  <!-- Dialog Actions -->
+  <div class="dialog-actions">
+    <button 
+      mat-stroked-button 
+      (click)="cancel()"
+      [disabled]="isSubmitting">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="isSubmitting || requestForm.invalid">
+      <mat-spinner *ngIf="isSubmitting" diameter="20" class="btn-spinner"></mat-spinner>
+      <mat-icon *ngIf="!isSubmitting">send</mat-icon>
+      {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+    </button>
+  </div>
+</div>

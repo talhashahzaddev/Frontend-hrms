@@ -1,0 +1,265 @@
+<div class="review-detail-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="employee-info">
+        <div class="avatar-circle">
+          {{ pkg.employeeName | slice:0:1 }}
+        </div>
+        <div class="info-text">
+          <h2 class="employee-name">{{ pkg.employeeName }}</h2>
+          <span class="position">{{ pkg.designation || 'Employee' }} &bull; {{ pkg.department }}</span>
+        </div>
+      </div>
+      <button type="button" class="btn btn-ghost btn-icon" (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="month-badge">
+      <mat-icon>calendar_today</mat-icon>
+      <span>{{ getMonthYearDisplay() }}</span>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading attendance records...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (loadError && !isLoading) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ loadError }}</p>
+      <button class="btn btn-primary btn-sm" (click)="refreshData()">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- Content when loaded -->
+  @if (!isLoading && !loadError) {
+    <!-- Summary Stats -->
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-value">{{ pkg.pendingRequestCount || 0 }}</span>
+        <span class="stat-label">Pending</span>
+      </div>
+      <div class="stat-item approved">
+        <span class="stat-value">{{ pkg.approvedCount || 0 }}</span>
+        <span class="stat-label">Approved</span>
+      </div>
+      <div class="stat-item rejected">
+        <span class="stat-value">{{ pkg.rejectedCount || 0 }}</span>
+        <span class="stat-label">Rejected</span>
+      </div>
+      <div class="stat-item finalized">
+        <span class="stat-value">{{ pkg.finalizedDays || 0 }}</span>
+        <span class="stat-label">Finalized</span>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- No Data Message -->
+    @if (!hasAnyRecords()) {
+      <div class="no-data-container">
+        <mat-icon>event_busy</mat-icon>
+        <h3>No attendance data found for this period</h3>
+        <p>There are no attendance records available for {{ getMonthYearDisplay() }}.</p>
+      </div>
+    }
+
+    <!-- Full Month Records Table -->
+    @if (hasAnyRecords() || monthlyRecords.length > 0) {
+      <div class="dialog-content">
+        <div class="table-container">
+          <table mat-table [dataSource]="monthlyRecords" class="monthly-records-table">
+
+            <!-- Day Column -->
+            <ng-container matColumnDef="day">
+              <th mat-header-cell *matHeaderCellDef>Day</th>
+              <td mat-cell *matCellDef="let record" [class.weekend-cell]="record.isWeekend">
+                <div class="day-cell">
+                  <span class="day-number">{{ record.dayOfMonth }}</span>
+                  <span class="day-name">{{ record.dayName }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Original Times Column -->
+            <ng-container matColumnDef="original">
+              <th mat-header-cell *matHeaderCellDef>Original</th>
+              <td mat-cell *matCellDef="let record" [class.no-record]="!record.hasRecord">
+                @if (record.hasRecord) {
+                <div class="time-data">
+                  <span class="time-value" [class.strikethrough]="hasRequestedChanges(record)">
+                    {{ formatTime(record.originalCheckIn) }} - {{ formatTime(record.originalCheckOut) }}
+                  </span>
+                  <span class="badge" [ngClass]="getStatusClass(record.originalStatus)">
+                    {{ record.originalStatus | titlecase }}
+                  </span>
+                </div>
+              } @else {
+                <span class="no-record-text">No Record</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Requested Changes Column -->
+          <ng-container matColumnDef="requested">
+            <th mat-header-cell *matHeaderCellDef>Requested</th>
+            <td mat-cell *matCellDef="let record">
+              @if (hasRequestedChanges(record)) {
+                <div class="time-data requested">
+                  <span class="time-value bold-primary">
+                    {{ formatTime(record.requestedCheckIn) || formatTime(record.originalCheckIn) }} - 
+                    {{ formatTime(record.requestedCheckOut) || formatTime(record.originalCheckOut) }}
+                  </span>
+                  @if (record.requestedStatus) {
+                    <span class="badge" [ngClass]="getStatusClass(record.requestedStatus)">
+                      {{ record.requestedStatus | titlecase }}
+                    </span>
+                  }
+                </div>
+              } @else if (record.hasRecord) {
+                <span class="no-change-text">—</span>
+              } @else {
+                <span class="no-record-text">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Employee Justification Column -->
+          <ng-container matColumnDef="reason">
+            <th mat-header-cell *matHeaderCellDef>Employee Justification</th>
+            <td mat-cell *matCellDef="let record">
+              @if (record.reasonForEdit) {
+                <div class="reason-cell">
+                  <span class="reason-text" [matTooltip]="record.reasonForEdit" matTooltipPosition="above">
+                    {{ record.reasonForEdit.length > 40 ? (record.reasonForEdit | slice:0:40) + '...' : record.reasonForEdit }}
+                  </span>
+                </div>
+              } @else {
+                <span class="no-reason-text">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Review Status</th>
+            <td mat-cell *matCellDef="let record">
+              @if (isPendingRequest(record)) {
+                <span class="badge badge-warning">
+                  <mat-icon class="badge-icon">hourglass_top</mat-icon>
+                  Pending
+                </span>
+              } @else if (record.isFinalized) {
+                <span class="badge badge-success">
+                  <mat-icon class="badge-icon">check_circle</mat-icon>
+                  Finalized
+                </span>
+              } @else if (record.requestStatus === 'approved') {
+                <span class="badge badge-info">
+                  <mat-icon class="badge-icon">thumb_up</mat-icon>
+                  Approved
+                </span>
+              } @else if (record.requestStatus === 'rejected') {
+                <span class="badge badge-error">
+                  <mat-icon class="badge-icon">thumb_down</mat-icon>
+                  Rejected
+                </span>
+              } @else if (record.hasRecord) {
+                <span class="badge badge-secondary">
+                  <mat-icon class="badge-icon">schedule</mat-icon>
+                  Ready
+                </span>
+              } @else {
+                <span>—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let record">
+              @if (record.hasRecord && !record.isFinalized) {
+                <div class="action-buttons">
+                  <!-- Pending Request Actions: Show Approve/Reject for requestStatus === 'pending' -->
+                  @if (isPendingRequest(record) && record.requestId) {
+                    <button class="btn btn-primary btn-sm"
+                            (click)="approveRequest(record)"
+                            [disabled]="isProcessing(record.requestId)"
+                            matTooltip="Approve Request">
+                      @if (isProcessing(record.requestId)) {
+                        <mat-spinner diameter="14"></mat-spinner>
+                      } @else {
+                        <mat-icon>check</mat-icon>
+                      }
+                      <span>Approve</span>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm"
+                            (click)="rejectRequest(record)"
+                            [disabled]="isProcessing(record.requestId)"
+                            matTooltip="Reject Request">
+                      <mat-icon>close</mat-icon>
+                      <span>Reject</span>
+                    </button>
+                  }
+
+                  <!-- Manager Edit (Override) for untouched days: requestStatus === 'none' and not finalized -->
+                  @if (isUntouchedRecord(record)) {
+                    <button class="btn btn-outline-secondary btn-sm"
+                            (click)="openManagerOverride(record)"
+                            matTooltip="Manager Override - Edit this record">
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit</span>
+                    </button>
+                  }
+                </div>
+              } @else if (record.isFinalized) {
+                <!-- Finalized indicator -->
+                <span class="finalized-text">
+                  <mat-icon>lock</mat-icon>
+                  Locked
+                </span>
+              } @else {
+                <!-- No record indicator -->
+                <span>—</span>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              [class.highlight-row]="shouldHighlightRow(row)"
+              [class.weekend-row]="row.isWeekend"
+              [class.finalized-row]="row.isFinalized"
+              [class.no-record-row]="!row.hasRecord"></tr>
+        </table>
+      </div>
+    </div>
+    }
+  }
+
+  <!-- Dialog Footer -->
+  <mat-divider></mat-divider>
+  <div class="dialog-footer">
+    <button class="btn btn-outline-primary btn-sm" (click)="refreshData()" [disabled]="isLoading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+    <button class="btn btn-secondary" (click)="closeDialog()">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
+  </div>
+</div>

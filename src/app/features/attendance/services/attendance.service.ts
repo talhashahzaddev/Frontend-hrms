@@ -24,7 +24,22 @@ import {
   EmployeeShift,
   PendingShiftSwap,
   approvedshiftRequest,
-  AttendanceStatus
+  AttendanceStatus,
+  MonthlyTimesheetSummary,
+  EmployeeTimesheetDto,
+  TimesheetSearchRequest,
+  TimesheetResponse,
+  MonthlyTimesheetCreateDto,
+  AttendanceUpdateRequestDto,
+  FinalizedTimesheetRecordDto,
+  FinalizedTimesheetDto,
+  ProcessAttendanceRequestDto,
+  PendingAttendanceRequest,
+  EmployeeSubmissionPackage,
+  CorrectionRecord,
+  EmployeeReviewPackage,
+  DailyReviewRecord,
+  ManagerOverrideDto
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -154,6 +169,24 @@ export class AttendanceService {
           }
         })
       );
+  }
+
+  getManualAttendanceRecords(searchDto: any): Observable<Attendance[]> {
+    let params = new HttpParams()
+        .set('startDate', searchDto.startDate)
+        .set('endDate', searchDto.endDate);
+    
+    if (searchDto.employeeId) {
+        params = params.set('employeeId', searchDto.employeeId);
+    }
+
+    return this.http.get<ApiResponse<Attendance[]>>(`${this.apiUrl}/manual`, { params })
+      .pipe(map(res => res.data!));
+  }
+
+  updateManualAttendance(updateDto: any): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/manual`, updateDto)
+        .pipe(map(res => res.success));
   }
 
   // Employee-specific operations
@@ -553,5 +586,253 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       case AttendanceStatus.PENDING_APPROVAL: return 'warning';
       default: return 'secondary';
     }
+  }
+
+  // Timesheet Methods - Snapshot-based
+  // GET /api/attendance/timesheet - Returns list of monthly timesheet snapshots
+  getMonthlyTimesheets(startDate?: string, endDate?: string): Observable<MonthlyTimesheetSummary[]> {
+    let params = new HttpParams();
+    
+    // Only add date parameters if they are valid non-empty strings
+    if (startDate && startDate.trim() !== '') {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate && endDate.trim() !== '') {
+      params = params.set('endDate', endDate);
+    }
+
+    // Construct the full URL for logging
+    const baseUrl = `${this.apiUrl}/timesheet`;
+    const queryString = params.toString();
+    const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    
+    console.log('📊 Fetching timesheets from:', fullUrl);
+    console.log('📅 Date range:', { startDate: startDate || 'N/A', endDate: endDate || 'N/A' });
+
+    return this.http.get<ApiResponse<MonthlyTimesheetSummary[]>>(`${this.apiUrl}/timesheet`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch timesheets');
+          }
+          console.log('✅ Received', response.data?.length || 0, 'timesheet snapshots');
+          return response.data || [];
+        })
+      );
+  }
+
+  // Alias method for fetching all monthly snapshots without date filtering
+  getSnapshots(): Observable<MonthlyTimesheetSummary[]> {
+    return this.getMonthlyTimesheets(); // Call without parameters to get all snapshots
+  }
+
+  // GET /api/attendance/timesheet/details?timesheetId={timesheetId}
+  // Returns detailed employee records for a specific timesheet snapshot
+  getTimesheetDetails(timesheetId: string): Observable<EmployeeTimesheetDto[]> {
+    if (!timesheetId || timesheetId.trim() === '') {
+      throw new Error('Timesheet ID is required');
+    }
+
+    const params = new HttpParams().set('timesheetId', timesheetId);
+    const fullUrl = `${this.apiUrl}/timesheet/details?timesheetId=${timesheetId}`;
+    
+    console.log('📋 Fetching timesheet details from:', fullUrl);
+
+    return this.http.get<ApiResponse<EmployeeTimesheetDto[]>>(
+      `${this.apiUrl}/timesheet/details`,
+      { params }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch timesheet details');
+        }
+        console.log('✅ Received details for', response.data?.length || 0, 'employees');
+        return response.data || [];
+      })
+    );
+  }
+
+  // Snapshot Management Methods
+  // POST /api/attendance/timesheet/snapshot - Creates a new monthly timesheet snapshot
+  createSnapshot(dto: MonthlyTimesheetCreateDto): Observable<FinalizedTimesheetDto> {
+    console.log('📸 Creating snapshot:', dto);
+    
+    return this.http.post<ApiResponse<FinalizedTimesheetDto>>(
+      `${this.apiUrl}/timesheet/snapshot`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create timesheet snapshot');
+        }
+        console.log('✅ Snapshot created successfully:', response.data);
+        return response.data!;
+      })
+    );
+  }
+
+  submitEditRequest(dto: AttendanceUpdateRequestDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/request-update`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to submit edit request');
+        }
+        return response.data || true;
+      })
+    );
+  }
+
+  // POST /api/attendance/timesheet/submit-approvals - Employee submits draft edits for approval
+  submitTimesheetApprovals(timesheetId: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/submit-approvals`,
+      { timesheetId }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to submit timesheet approvals');
+        }
+        return response.data || true;
+      })
+    );
+  }
+
+  // POST /api/attendance/timesheet/finalize-batch - Finalizes a timesheet snapshot for payroll
+  finalizeBatch(timesheetId: string): Observable<boolean> {
+    console.log('🔒 Finalizing batch for timesheetId:', timesheetId);
+    
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/finalize-batch`,
+      { timesheetId: timesheetId } // Match backend FinalizeBatchRequestDto structure
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to finalize timesheet batch');
+        }
+        console.log('✅ Batch finalized successfully');
+        return response.data || true;
+      })
+    );
+  }
+
+  // Get pending attendance correction requests for manager (grouped by employee)
+  getPendingAttendanceRequests(): Observable<EmployeeSubmissionPackage[]> {
+    return this.http.get<ApiResponse<EmployeeSubmissionPackage[]>>(
+      `${this.apiUrl}/pending-requests`
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch pending requests');
+        }
+        return response.data || [];
+      })
+    );
+  }
+
+  // Process (approve/reject) attendance correction request
+  processEditRequest(dto: ProcessAttendanceRequestDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/process-request`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to process attendance request');
+        }
+        return response.data || false;
+      })
+    );
+  }
+
+  // Approve all pending correction requests for a timesheet
+  approveAllPendingRequests(timesheetId: string, employeeId?: string): Observable<{ approvedCount: number }> {
+    const body: { timesheetId: string; employeeId?: string } = { timesheetId };
+    if (employeeId) {
+      body.employeeId = employeeId;
+    }
+    return this.http.post<ApiResponse<{ approvedCount: number }>>(
+      `${this.apiUrl}/timesheet/approve-all`,
+      body
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to approve pending requests');
+        }
+        return response.data || { approvedCount: 0 };
+      })
+    );
+  }
+
+  // Get manager review dashboard with all employee packages
+  getManagerReviewDashboard(timesheetId: string): Observable<EmployeeReviewPackage[]> {
+    return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
+      `${this.apiUrl}/timesheet/manager-review-dashboard`,
+      { params: { timesheetId } }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch manager review dashboard');
+        }
+        return response.data || [];
+      })
+    );
+  }
+
+  // Get single employee review package for the detail dialog
+  // API returns array with one element when employeeId is provided
+  getEmployeeReviewPackage(timesheetId: string, employeeId: string): Observable<EmployeeReviewPackage> {
+    if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
+      throw new Error('Invalid timesheetId provided');
+    }
+    
+    return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
+      `${this.apiUrl}/timesheet/review-dashboard`,
+      { params: { timesheetId, employeeId } }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch employee review data');
+        }
+        // API returns array, get first element
+        const packages = response.data || [];
+        if (packages.length === 0) {
+          throw new Error('No attendance data found for this employee');
+        }
+        return packages[0];
+      })
+    );
+  }
+
+  // Finalize all approved records for a specific employee
+  finalizeEmployeeApprovals(timesheetId: string, employeeId: string): Observable<{ finalizedCount: number }> {
+    return this.http.post<ApiResponse<{ finalizedCount: number }>>(
+      `${this.apiUrl}/timesheet/finalize-employee`,
+      { timesheetId, employeeId }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to finalize employee approvals');
+        }
+        return response.data || { finalizedCount: 0 };
+      })
+    );
+  }
+
+  // Apply manager override for a specific attendance record
+  applyManagerOverride(dto: ManagerOverrideDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/manager-override`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to apply manager override');
+        }
+        return response.data || true;
+      })
+    );
   }
 }

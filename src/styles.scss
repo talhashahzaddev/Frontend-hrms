@@ -589,4 +589,27 @@ a {
   }
 }
 
+// Timesheet Detail Dialog - Fix scrolling issue
+.timesheet-detail-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    overflow: hidden !important;
+
+    .mat-mdc-dialog-surface {
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    .mat-mdc-dialog-content {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-height: none !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 !important;
+    }
+  }
+}
 

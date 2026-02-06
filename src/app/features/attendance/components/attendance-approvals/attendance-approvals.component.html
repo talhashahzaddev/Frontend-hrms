@@ -1,0 +1,166 @@
+<div class="attendance-approvals-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon-wrapper">
+        <mat-icon class="header-icon">rate_review</mat-icon>
+      </div>
+      <div class="header-text">
+        <h1>Master Review Dashboard</h1>
+        <p>Review complete monthly attendance, approve corrections, and finalize employee records</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" (click)="loadManagerReviewDashboard()" [disabled]="isLoading">
+      <mat-icon>refresh</mat-icon>
+      <span>Refresh</span>
+    </button>
+  </div>
+
+  <!-- Global Stats Bar -->
+  <div class="global-stats-bar">
+    <div class="stat-card pending">
+      <div class="stat-icon">
+        <mat-icon>hourglass_top</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ getTotalPendingCount() }}</span>
+        <span class="stat-label">Pending Requests</span>
+      </div>
+    </div>
+    <div class="stat-card records">
+      <div class="stat-icon">
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ getTotalRecordsCount() }}</span>
+        <span class="stat-label">Total Records</span>
+      </div>
+    </div>
+    <div class="stat-card employees">
+      <div class="stat-icon">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ employeePackages.length }}</span>
+        <span class="stat-label">Employees</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading review dashboard...</p>
+    </div>
+  }
+
+  <!-- Employee Summary Cards -->
+  @if (!isLoading && employeePackages.length > 0) {
+    <div class="employee-grid">
+      @for (pkg of employeePackages; track pkg.employeeId) {
+        <div class="employee-summary-card" [class.has-pending]="hasPendingRequests(pkg)">
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="employee-avatar">
+              {{ pkg.employeeName | slice:0:1 }}
+            </div>
+            <div class="employee-info">
+              <h3 class="employee-name">{{ pkg.employeeName }}</h3>
+              <span class="employee-meta">
+                {{ pkg.employeeCode }}
+                @if (pkg.department) {
+                  <span class="divider">&bull;</span>
+                  {{ pkg.department }}
+                }
+              </span>
+            </div>
+            <div class="month-badge">
+              <mat-icon>calendar_month</mat-icon>
+              <span>{{ getMonthYearDisplay(pkg) }}</span>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Quick Stats Row -->
+          <div class="stats-row">
+            <div class="stat-pill pending" [class.has-items]="pkg.pendingRequestCount > 0">
+              <mat-icon>hourglass_top</mat-icon>
+              <span class="value">{{ pkg.pendingRequestCount }}</span>
+              <span class="label">Pending</span>
+            </div>
+            <div class="stat-pill approved">
+              <mat-icon>check_circle</mat-icon>
+              <span class="value">{{ pkg.approvedCount }}</span>
+              <span class="label">Approved</span>
+            </div>
+            <div class="stat-pill rejected">
+              <mat-icon>cancel</mat-icon>
+              <span class="value">{{ pkg.rejectedCount }}</span>
+              <span class="label">Rejected</span>
+            </div>
+            <div class="stat-pill finalized">
+              <mat-icon>lock</mat-icon>
+              <span class="value">{{ pkg.finalizedDays }}</span>
+              <span class="label">Finalized</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Review Progress</span>
+              <span class="progress-value">{{ getProgressPercentage(pkg) }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgressPercentage(pkg)"></div>
+            </div>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="card-actions">
+            <button class="btn btn-outline-primary btn-md" (click)="viewEmployeeDetails(pkg)">
+              <mat-icon>visibility</mat-icon>
+              <span>View Details</span>
+            </button>
+            <button class="btn btn-primary btn-md"
+                    (click)="finalizeEmployeeApprovals(pkg)"
+                    [disabled]="isPackageProcessing(pkg.employeeId) || !canFinalize(pkg)"
+                    [matTooltip]="!canFinalize(pkg) ? 'Clear all pending requests before finalizing' : 'Finalize all approved records'">
+              @if (isPackageProcessing(pkg.employeeId)) {
+                <mat-spinner diameter="16"></mat-spinner>
+              } @else {
+                <mat-icon>check_circle</mat-icon>
+              }
+              <span>Finalize</span>
+            </button>
+          </div>
+
+          <!-- Pending Alert Banner (when has pending requests) -->
+          @if (hasPendingRequests(pkg)) {
+            <div class="pending-alert">
+              <mat-icon>warning</mat-icon>
+              <span>{{ pkg.pendingRequestCount }} correction request(s) require your attention</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && employeePackages.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <mat-icon>check_circle_outline</mat-icon>
+      </div>
+      <h3>All Caught Up!</h3>
+      <p>No attendance records require review at this time.</p>
+      <button class="btn btn-outline-primary" (click)="loadManagerReviewDashboard()">
+        <mat-icon>refresh</mat-icon>
+        <span>Refresh Dashboard</span>
+      </button>
+    </div>
+  }
+</div>

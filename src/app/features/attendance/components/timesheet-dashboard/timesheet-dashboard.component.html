@@ -1,0 +1,164 @@
+<div class="timesheet-dashboard-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">date_range</mat-icon>
+      <div class="header-text">
+        <h1>Monthly Timesheet Snapshots</h1>
+        <p>Create, manage, and finalize monthly attendance snapshots for payroll processing</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (!isEmployee()) {
+        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" [disabled]="isLoading">
+          <mat-icon>add_circle</mat-icon>
+          Create New Snapshot
+        </button>
+      }
+      <button mat-icon-button (click)="refreshData()" [disabled]="isLoading" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading snapshots...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && timesheets.length === 0) {
+    <div class="empty-state">
+      <mat-icon>event_busy</mat-icon>
+      <h3>No Timesheet Snapshots</h3>
+      @if (isEmployee()) {
+        <p>No timesheet snapshots are available yet.</p>
+        <p class="hint-text">Please contact your manager for more information.</p>
+      } @else {
+        <p>You haven't created any monthly timesheet snapshots yet.</p>
+        <p class="hint-text">Click <strong>Create New Snapshot</strong> to get started.</p>
+        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()">
+          <mat-icon>add_circle</mat-icon>
+          Create First Snapshot
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Snapshots Grid -->
+  @if (!isLoading && timesheets.length > 0) {
+    <div class="snapshots-grid">
+      <mat-card *ngFor="let snapshot of timesheets" class="snapshot-card">
+        <mat-card-header>
+          <div class="snapshot-header-content">
+            <div class="snapshot-title-section">
+              <h2 class="snapshot-name">{{ snapshot.timesheetName }}</h2>
+              <p class="snapshot-period">{{ getMonthYearDisplay(snapshot) }}</p>
+            </div>
+            <mat-chip [ngClass]="getStatusChipClass(snapshot.status)" class="status-chip">
+              <mat-icon class="chip-icon">{{ snapshot.status === 'Finalized' ? 'lock' : 'edit' }}</mat-icon>
+              {{ snapshot.status || 'Draft' }}
+            </mat-chip>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="snapshot-stats">
+            <div class="stat-item">
+              <mat-icon class="stat-icon">{{ isEmployee() ? 'badge' : 'groups' }}</mat-icon>
+              <div class="stat-details">
+                <span class="stat-value">{{ getEmployeeCodeValue(snapshot) }}</span>
+                <span class="stat-label">{{ getEmployeeCodeLabel(snapshot) }}</span>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <mat-icon class="stat-icon attendance">assessment</mat-icon>
+              <div class="stat-details">
+                <span class="stat-value">
+                  {{ snapshot.attendancePercentage > 0 ? (snapshot.attendancePercentage | number:'1.1-1') : ((snapshot.totalPresentDays / (snapshot.totalPresentDays + snapshot.totalAbsentDays)) * 100 | number:'1.1-1') }}%
+                </span>
+                <span class="stat-label">{{ getAttendanceRateLabel() }}</span>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <mat-icon class="stat-icon present">check_circle</mat-icon>
+              <div class="stat-details">
+                <span class="stat-value">{{ snapshot.totalPresentDays }}</span>
+                <span class="stat-label">Present Days</span>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <mat-icon class="stat-icon absent">cancel</mat-icon>
+              <div class="stat-details">
+                <span class="stat-value">{{ snapshot.totalAbsentDays }}</span>
+                <span class="stat-label">Absent Days</span>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <mat-icon class="stat-icon late">schedule</mat-icon>
+              <div class="stat-details">
+                <span class="stat-value">{{ snapshot.totalLateDays }}</span>
+                <span class="stat-label">Late Days</span>
+              </div>
+            </div>
+
+            <div class="stat-item">
+              <mat-icon class="stat-icon hours">access_time</mat-icon>
+              <div class="stat-details">
+                <span class="stat-value">{{ snapshot.totalHoursWorked | number:'1.1-1' }}</span>
+                <span class="stat-label">Total Hours</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button 
+            mat-button 
+            color="primary" 
+            (click)="openTimesheetDetailDialog(snapshot)"
+            matTooltip="View detailed employee records">
+            <mat-icon>visibility</mat-icon>
+            View Details
+          </button>
+          
+          @if (!isEmployee() && snapshot.status !== 'Finalized') {
+            <button 
+              mat-button 
+              (click)="finalizeSnapshot(snapshot)"
+              matTooltip="Finalize for payroll processing">
+              <mat-icon>lock</mat-icon>
+              Finalize
+            </button>
+          }
+
+          @if (!isEmployee()) {
+            <button 
+              mat-icon-button 
+              [matMenuTriggerFor]="menu"
+              matTooltip="More actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="openTimesheetDetailDialog(snapshot)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit Records</span>
+              </button>
+              <button mat-menu-item (click)="deleteSnapshot(snapshot)">
+                <mat-icon>delete</mat-icon>
+                <span>Delete Snapshot</span>
+              </button>
+            </mat-menu>
+          }
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  }
+</div>
