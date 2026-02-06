@@ -12,6 +12,7 @@ import {
   UpdateExpenseRequest,
   ServiceResponse
 } from '../../../core/models/expense.models';
+import { PagedResult } from '../../../core/models/common.models';
 
 @Injectable({
   providedIn: 'root'
@@ -75,13 +76,44 @@ export class ExpenseService {
       );
   }
 
-  // Claims (expenses) - Get my expenses, CRUD
-  getMyExpenses(): Observable<ExpenseDto[]> {
+  // Claims (expenses) - Get my expenses (paged), CRUD
+  getMyExpenses(pageNumber: number = 1, pageSize: number = 10): Observable<PagedResult<ExpenseDto>> {
+    const params: Record<string, string> = {
+      pageNumber: String(pageNumber),
+      pageSize: String(pageSize)
+    };
     return this.http
-      .get<ServiceResponse<ExpenseDto[]>>(`${this.apiUrl}/expenses/me`)
+      .get<ServiceResponse<PagedResult<ExpenseDto>>>(`${this.apiUrl}/expenses/me`, { params })
       .pipe(
         map((res) => {
-          if (!res.success || !res.data) return [];
+          if (!res.success || !res.data) {
+            return { data: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  /** Get all expenses (Super Admin) with pagination. Optional: employeeId, status. */
+  getExpenses(
+    employeeId?: string | null,
+    status?: string | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedResult<ExpenseDto>> {
+    const params: Record<string, string> = {
+      pageNumber: String(pageNumber),
+      pageSize: String(pageSize)
+    };
+    if (employeeId != null && employeeId !== '') params['employeeId'] = employeeId;
+    if (status != null && status !== '') params['status'] = status;
+    return this.http
+      .get<ServiceResponse<PagedResult<ExpenseDto>>>(`${this.apiUrl}/expenses`, { params })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return { data: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
+          }
           return res.data;
         })
       );
@@ -102,6 +134,20 @@ export class ExpenseService {
         map((res) => {
           if (!res.success || !res.data) {
             throw new Error(res.message || 'Failed to create expense');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  /** Approve or reject a claim (Super Admin). Action: 'approve' | 'reject'. */
+  requestAction(expenseId: string, action: 'approve' | 'reject'): Observable<ExpenseDto> {
+    return this.http
+      .put<ServiceResponse<ExpenseDto>>(`${this.apiUrl}/expenses/${expenseId}/request-action`, { action })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || `Failed to ${action} claim`);
           }
           return res.data;
         })
