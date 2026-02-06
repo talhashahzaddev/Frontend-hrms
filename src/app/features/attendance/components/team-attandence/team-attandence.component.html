@@ -261,6 +261,13 @@
             <span *ngIf="!attendance.notes" class="no-notes">--</span>
           </td>
         </ng-container>
+        <!-- IP Address Column -->
+            <ng-container matColumnDef="ipAddress">
+              <th mat-header-cell *matHeaderCellDef>IP Address</th>
+              <td mat-cell *matCellDef="let attendance">
+                {{ attendance.location || '--' }}
+              </td>
+            </ng-container>
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">

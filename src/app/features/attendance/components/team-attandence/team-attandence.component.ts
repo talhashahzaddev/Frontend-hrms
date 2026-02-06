@@ -84,6 +84,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     'totalHours',
     'status',
     'notes',
+    'ipAddress',
     'actions'
   ];
 

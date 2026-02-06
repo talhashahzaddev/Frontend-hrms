@@ -78,7 +78,8 @@ export class CreateShiftComponent {
       breakDuration: [0, [Validators.min(0)]],
       daysofWeek: [[], Validators.required],
       timezone: [''],
-      marginHours: [0, [Validators.min(0), Validators.max(5)]]
+      marginHours: [0, [Validators.min(0), Validators.max(5)]],
+      applyMarginhours: []
     });
 
     // If data is passed, we are in edit mode
@@ -98,7 +99,9 @@ export class CreateShiftComponent {
       breakDuration: data.breakDuration,
       daysofWeek: data.daysofWeek,
       timezone: data.timezone,
-      marginHours: data.marginHours ?? 0 // <-- add this
+      marginHours: data.marginHours ?? 0,
+      applyMarginhours: data.applyMarginhours ?? true
+
 
     });
   }
@@ -124,7 +127,8 @@ export class CreateShiftComponent {
         breakDuration: formValue.breakDuration,
         daysofWeek: formValue.daysofWeek,
         timezone: formValue.timezone,
-        marginHours: formValue.marginHours ?? 0 // <-- send marginHours
+        marginHours: formValue.marginHours ?? 0,
+        applyMarginhours: formValue.applyMarginhours 
 
       };
 
@@ -150,7 +154,8 @@ export class CreateShiftComponent {
         breakDuration: formValue.breakDuration,
         daysofWeek: formValue.daysofWeek,
         timezone: formValue.timezone,
-        marginHours: formValue.marginHours ?? 0// <-- send marginHours
+        marginHours: formValue.marginHours ?? 0,// <-- send marginHours
+        applyMarginhours: formValue.applyMarginhours
 
       };
 

@@ -378,7 +378,9 @@ export class ShiftComponent implements OnInit {
         endTime: shift.endTime,
         breakDuration: shift.breakDuration,
         daysofWeek: shift.daysOfWeek,
-        timezone: shift.timezone
+        timezone: shift.timezone,
+        marginHours: shift.marginHours ?? 0,
+        applyMarginhours: shift.applyMarginhours
       }
     });
 
