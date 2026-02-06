@@ -1,0 +1,104 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>repeat</mat-icon>
+    Recurring Expense Details
+  </h2>
+  <button mat-icon-button (click)="close()" class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading details...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="item && !loading" class="details">
+    <div class="amount-card">
+      <span class="amount-label">Amount</span>
+      <span class="amount-value">{{ item.amount | currency }}</span>
+    </div>
+
+    <section class="detail-section">
+      <h3 class="section-title">Overview</h3>
+      <div class="detail-row">
+        <span class="label">Title</span>
+        <span class="value">{{ item.title }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Category</span>
+        <span class="value">{{ item.categoryName || '—' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="item.description">
+        <span class="label">Description</span>
+        <span class="value description-text">{{ item.description }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Rotation</span>
+        <span class="value">{{ item.rotation }}</span>
+      </div>
+      <div class="detail-row" *ngIf="item.dayOfMonth">
+        <span class="label">Day of month</span>
+        <span class="value">{{ item.dayOfMonth }}</span>
+      </div>
+    </section>
+
+    <section class="detail-section" *ngIf="item.paymentMethod || item.merchant">
+      <h3 class="section-title">Payment</h3>
+      <div class="detail-row" *ngIf="item.paymentMethod">
+        <span class="label">Payment method</span>
+        <span class="value">{{ item.paymentMethod }}</span>
+      </div>
+      <div class="detail-row" *ngIf="item.merchant">
+        <span class="label">Merchant</span>
+        <span class="value">{{ item.merchant }}</span>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <h3 class="section-title">Status</h3>
+      <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value">
+          <span [class]="'status-chip ' + getStatusClass(item.status)">{{ item.status || 'Pending' }}</span>
+        </span>
+      </div>
+      <div class="detail-row" *ngIf="item.employeeName">
+        <span class="label">Employee</span>
+        <span class="value">{{ item.employeeName }}</span>
+      </div>
+      <div class="detail-row" *ngIf="item.approvedByName">
+        <span class="label">Approved by</span>
+        <span class="value">{{ item.approvedByName }}</span>
+      </div>
+    </section>
+
+    <section class="detail-section" *ngIf="item.receiptUrl || item.createdAt || item.updatedAt">
+      <h3 class="section-title">Receipt &amp; dates</h3>
+      <div class="detail-row" *ngIf="item.receiptUrl">
+        <span class="label">Receipt</span>
+        <span class="value">
+          <a [href]="item.receiptUrl" target="_blank" rel="noopener" class="receipt-link">Open receipt</a>
+        </span>
+      </div>
+      <div class="detail-row" *ngIf="item.createdAt">
+        <span class="label">Created</span>
+        <span class="value">{{ item.createdAt | date:'medium' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="item.updatedAt">
+        <span class="label">Updated</span>
+        <span class="value">{{ item.updatedAt | date:'medium' }}</span>
+      </div>
+    </section>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-flat-button (click)="close()" class="close-btn">Close</button>
+</mat-dialog-actions>

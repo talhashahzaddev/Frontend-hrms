@@ -1,0 +1,80 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>repeat</mat-icon>
+    {{ data.mode === 'create' ? 'Create Recurring Expense' : 'Edit Recurring Expense' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form" class="recurring-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category *</mat-label>
+      <mat-select formControlName="categoryId" placeholder="Select category">
+        <mat-option *ngFor="let cat of data.categories" [value]="cat.categoryId">
+          {{ cat.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('categoryId')?.hasError('required')">
+        Category is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title *</mat-label>
+      <input matInput formControlName="title" placeholder="e.g. Internet subscription" maxlength="150">
+      <mat-hint>Max 150 characters</mat-hint>
+      <mat-error *ngIf="form.get('title')?.hasError('required')">Title is required</mat-error>
+      <mat-error *ngIf="form.get('title')?.hasError('maxlength')">Max 150 characters</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" placeholder="Optional details" rows="3" maxlength="500"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Amount *</mat-label>
+      <input matInput type="number" formControlName="amount" placeholder="0.00" min="0.01" step="0.01">
+      <mat-error *ngIf="form.get('amount')?.hasError('required')">Amount is required</mat-error>
+      <mat-error *ngIf="form.get('amount')?.hasError('min')">Amount must be at least 0.01</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Rotation *</mat-label>
+      <mat-select formControlName="rotation" placeholder="e.g. Monthly">
+        <mat-option *ngFor="let opt of rotationOptions" [value]="opt.value">
+          {{ opt.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('rotation')?.hasError('required')">Rotation is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Day of month</mat-label>
+      <input matInput formControlName="dayOfMonth" placeholder="e.g. 1, 15 (optional)" maxlength="20">
+      <mat-hint>Optional – e.g. 1 for 1st of month</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Payment Method</mat-label>
+      <input matInput formControlName="paymentMethod" placeholder="e.g. Card, Direct debit" maxlength="50">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Merchant</mat-label>
+      <input matInput formControlName="merchant" placeholder="Vendor name" maxlength="150">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isSubmitting" class="submit-btn">
+    <mat-spinner *ngIf="isSubmitting" diameter="20" class="btn-spinner"></mat-spinner>
+    <mat-icon *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'add' : 'save' }}</mat-icon>
+    {{ isSubmitting ? (data.mode === 'create' ? 'Creating...' : 'Saving...') : (data.mode === 'create' ? 'Create Recurring' : 'Save Changes') }}
+  </button>
+</mat-dialog-actions>

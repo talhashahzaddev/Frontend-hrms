@@ -1,0 +1,406 @@
+// Recurring List - same style as claim-list
+.recurring-list-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-actions .add-button {
+      height: 48px;
+      padding: 0 28px !important;
+      border-radius: 12px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+      mat-icon { margin-right: 8px; }
+      &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important; }
+    }
+
+    .header-content {
+      flex: 1;
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
+        mat-icon { font-size: 36px; width: 36px; height: 36px; color: #667eea; }
+      }
+      .page-subtitle { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
+    }
+  }
+
+  .view-tabs {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 24px;
+    margin-bottom: 28px;
+    padding: 12px 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+
+    .view-tab {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 32px;
+      min-height: 48px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #6b7280;
+      background: #f9fafb;
+      cursor: pointer;
+      outline: none;
+      transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+
+      mat-icon { font-size: 22px; width: 22px; height: 22px; color: inherit; }
+
+      &:hover {
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.08);
+        border-color: rgba(102, 126, 234, 0.4);
+      }
+
+      &.active {
+        color: white !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border-color: transparent !important;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        mat-icon { color: white !important; }
+      }
+    }
+  }
+
+  .view-content-wrapper {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+
+  .view-slider {
+    display: flex;
+    width: 200%;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.slide-all {
+      transform: translateX(-50%);
+    }
+  }
+
+  .view-panel {
+    flex: 0 0 50%;
+    width: 50%;
+    min-width: 50%;
+  }
+
+  .recurring-requests-section {
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      mat-icon { font-size: 28px; width: 28px; height: 28px; color: #667eea; }
+    }
+    .section-subtitle {
+      margin: 0 0 24px;
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      gap: 16px;
+      p { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
+    }
+  }
+
+  .pending-approvals-section {
+    h3 { font-size: 20px; font-weight: 600; color: #1f2937; margin: 0 0 24px; }
+  }
+
+  .approval-card {
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    margin-bottom: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: #667eea;
+      transform: translateY(-2px);
+      &::before { transform: scaleX(1); }
+    }
+
+    .approval-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
+
+      .employee-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        .employee-avatar {
+          width: 56px; height: 56px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 20px;
+          flex-shrink: 0;
+        }
+        .employee-details h4 { font-size: 18px; font-weight: 600; color: #1f2937; margin: 0 0 4px; }
+        .employee-details p { font-size: 14px; color: #6b7280; margin: 0; }
+      }
+
+      .claim-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 14px;
+        color: #374151;
+        font-weight: 500;
+        .claim-title { font-weight: 600; color: #1f2937; }
+        .amount-badge {
+          padding: 6px 12px;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
+          color: #667eea;
+          border-radius: 20px;
+          font-weight: 600;
+          border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .rotation-badge { color: #6b7280; }
+      }
+    }
+
+    .claim-description {
+      padding: 16px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .approval-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      button {
+        font-weight: 600;
+        border-radius: 8px;
+        height: 40px;
+        padding: 0 20px !important;
+        font-size: 14px !important;
+        mat-icon { margin-right: 6px; font-size: 18px; width: 18px; height: 18px; }
+      }
+      .btn-details {
+        color: #b45309 !important;
+        border-color: rgba(245, 158, 11, 0.5) !important;
+        background: rgba(245, 158, 11, 0.08) !important;
+      }
+      .approve-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      }
+    }
+  }
+
+  .recurring-requests-section .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    mat-icon { font-size: 64px; width: 64px; height: 64px; color: #cbd5e1; margin-bottom: 16px; }
+    h3 { margin: 0 0 8px; font-size: 20px; font-weight: 600; color: #1f2937; }
+    p { margin: 0; font-size: 14px; color: #6b7280; }
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    .filters-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      h3 { margin: 0; font-size: 18px; font-weight: 600; color: #1f2937; }
+      .clear-filters-btn {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        color: #667eea !important;
+        border-color: rgba(102, 126, 234, 0.3) !important;
+      }
+    }
+    .filters-content {
+      padding: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 20px;
+      .search-field { max-width: 280px; min-width: 200px; flex: 1 1 auto; }
+      .filter-field { min-width: 140px; }
+      ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper { background: white; border-radius: 12px; }
+      mat-icon { color: #667eea !important; }
+    }
+  }
+
+  .table-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+    overflow: hidden;
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 20px;
+      p { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
+    }
+    .table-container {
+      overflow-x: auto;
+      .recurring-table {
+        width: 100%;
+        .category-name { font-weight: 500; color: #374151; }
+        .show-details-btn {
+          border-radius: 8px !important;
+          font-weight: 600 !important;
+          font-size: 13px !important;
+          color: #b45309 !important;
+          background: rgba(245, 158, 11, 0.12) !important;
+          border: 1px solid rgba(245, 158, 11, 0.4) !important;
+          mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; color: #b45309 !important; }
+        }
+        .amount { font-weight: 600; color: #1f2937; }
+        ::ng-deep .mat-mdc-header-row {
+          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+          .mat-mdc-header-cell {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 16px 12px;
+          }
+        }
+        ::ng-deep .mat-mdc-row {
+          &:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+          }
+          .mat-mdc-cell { padding: 20px 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #374151; }
+        }
+      }
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        mat-icon { font-size: 64px; width: 64px; height: 64px; color: #cbd5e1; margin-bottom: 16px; }
+        h3 { margin: 0 0 8px; font-size: 20px; font-weight: 600; color: #1f2937; }
+        p { margin: 0 0 24px; font-size: 14px; color: #6b7280; }
+        .add-first-btn {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          color: white !important;
+          mat-icon { margin-right: 8px; }
+        }
+      }
+    }
+  }
+
+  ::ng-deep mat-chip {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    &.status-pending { background: rgba(245, 158, 11, 0.15) !important; color: #d97706 !important; }
+    &.status-success { background: rgba(16, 185, 129, 0.15) !important; color: #059669 !important; }
+    &.status-warn { background: rgba(239, 68, 68, 0.15) !important; color: #dc2626 !important; }
+  }
+
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 12px !important;
+    .mat-mdc-menu-item {
+      border-radius: 8px !important;
+      mat-icon { margin-right: 12px; color: #667eea; }
+      &.danger-action { color: #dc2626 !important; mat-icon { color: #dc2626 !important; } }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .recurring-list-container {
+    padding: 16px;
+    .page-header { flex-direction: column; gap: 16px; }
+    .view-tabs {
+      flex-direction: column;
+      .view-tab { width: 100%; padding: 12px 20px; font-size: 14px; }
+    }
+  }
+}

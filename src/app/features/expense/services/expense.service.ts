@@ -10,7 +10,10 @@ import {
   ExpenseDto,
   CreateExpenseRequest,
   UpdateExpenseRequest,
-  ServiceResponse
+  ServiceResponse,
+  RecurringExpenseDto,
+  CreateRecurringExpenseRequest,
+  UpdateRecurringExpenseRequest
 } from '../../../core/models/expense.models';
 import { PagedResult } from '../../../core/models/common.models';
 
@@ -188,5 +191,105 @@ export class ExpenseService {
         return res.url;
       })
     );
+  }
+
+  // ==================== Recurring Expenses ====================
+  /** Get my recurring expenses (paged). Super Admin & HR Manager. */
+  getMyRecurringExpenses(pageNumber: number = 1, pageSize: number = 10): Observable<PagedResult<RecurringExpenseDto>> {
+    const params: Record<string, string> = {
+      pageNumber: String(pageNumber),
+      pageSize: String(pageSize)
+    };
+    return this.http
+      .get<ServiceResponse<PagedResult<RecurringExpenseDto>>>(`${this.apiUrl}/recurring/me`, { params })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return { data: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  /** Get all recurring expenses (Super Admin only). Optional: employeeId, status. */
+  getRecurringExpenses(
+    employeeId?: string | null,
+    status?: string | null,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<PagedResult<RecurringExpenseDto>> {
+    const params: Record<string, string> = {
+      pageNumber: String(pageNumber),
+      pageSize: String(pageSize)
+    };
+    if (employeeId != null && employeeId !== '') params['employeeId'] = employeeId;
+    if (status != null && status !== '') params['status'] = status;
+    return this.http
+      .get<ServiceResponse<PagedResult<RecurringExpenseDto>>>(`${this.apiUrl}/recurring`, { params })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return { data: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  getRecurringExpenseById(id: string): Observable<RecurringExpenseDto | null> {
+    return this.http
+      .get<ServiceResponse<RecurringExpenseDto>>(`${this.apiUrl}/recurring/${id}`)
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : null))
+      );
+  }
+
+  /** Approve or reject a recurring expense (Super Admin). */
+  recurringRequestAction(recurringExpenseId: string, action: 'approve' | 'reject'): Observable<RecurringExpenseDto> {
+    return this.http
+      .put<ServiceResponse<RecurringExpenseDto>>(`${this.apiUrl}/recurring/${recurringExpenseId}/request-action`, { action })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || `Failed to ${action} recurring expense`);
+          }
+          return res.data;
+        })
+      );
+  }
+
+  createRecurringExpense(request: CreateRecurringExpenseRequest): Observable<RecurringExpenseDto> {
+    return this.http
+      .post<ServiceResponse<RecurringExpenseDto>>(`${this.apiUrl}/recurring`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to create recurring expense');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  updateRecurringExpense(id: string, request: UpdateRecurringExpenseRequest): Observable<RecurringExpenseDto> {
+    return this.http
+      .put<ServiceResponse<RecurringExpenseDto>>(`${this.apiUrl}/recurring/${id}`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to update recurring expense');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  deleteRecurringExpense(id: string): Observable<boolean> {
+    return this.http
+      .delete<ServiceResponse<boolean>>(`${this.apiUrl}/recurring/${id}`)
+      .pipe(
+        map((res) => res.success && res.data === true)
+      );
   }
 }
