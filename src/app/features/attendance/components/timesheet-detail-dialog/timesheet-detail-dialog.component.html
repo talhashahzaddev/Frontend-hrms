@@ -199,6 +199,15 @@
                           [matTooltip]="record.hasDraftRequest ? 'Edit existing draft correction' : 'Request correction for this day'">
                           <mat-icon>edit</mat-icon>
                         </button>
+                      } @else if (canManagerOverride(record)) {
+                        <!-- Task 2: Manager override for placeholder rows with no record -->
+                        <button 
+                          mat-icon-button 
+                          color="accent"
+                          (click)="requestDailyCorrection(employees[0], record)"
+                          matTooltip="Add attendance record for this day (Manager Override)">
+                          <mat-icon>edit</mat-icon>
+                        </button>
                       } @else if (record.is_finalized) {
                         <mat-icon class="disabled-icon" matTooltip="Record is finalized - cannot edit">lock</mat-icon>
                       } @else if (record.hasPendingRequest) {
@@ -492,6 +501,16 @@
                               <mat-icon>edit</mat-icon>
                             </button>
                           }
+                          @if (canManagerOverride(record)) {
+                            <!-- Task 2: Manager override for placeholder rows with no record -->
+                            <button 
+                              mat-icon-button 
+                              color="accent"
+                              (click)="requestDailyCorrection(employee, record)"
+                              matTooltip="Add attendance record for this day (Manager Override)">
+                              <mat-icon>edit</mat-icon>
+                            </button>
+                          }
                           @if (record.is_finalized) {
                             <mat-icon class="disabled-icon" matTooltip="Record is finalized - cannot edit">lock</mat-icon>
                           }
@@ -515,6 +534,7 @@
         *matRowDef="let row; columns: displayedColumns;"
         class="employee-row"
         [class.expanded-row]="isExpanded(row)"
+        [class.attention-alert]="needsAttentionAlert(row)"
         (click)="toggleRow(row)"></tr>
       <tr 
         mat-row 

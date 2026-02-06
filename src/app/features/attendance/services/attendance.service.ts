@@ -39,7 +39,8 @@ import {
   CorrectionRecord,
   EmployeeReviewPackage,
   DailyReviewRecord,
-  ManagerOverrideDto
+  ManagerOverrideDto,
+  OrgSubmissionProgress
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -766,10 +767,42 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
+  // Task 1: Get organization submission progress for compliance tracking
+  getOrgSubmissionProgress(month: number, year: number): Observable<OrgSubmissionProgress> {
+    const params = new HttpParams()
+      .set('month', month.toString())
+      .set('year', year.toString());
+    
+    return this.http.get<ApiResponse<OrgSubmissionProgress>>(
+      `${this.apiUrl}/timesheet/org-progress`,
+      { params }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch organization progress');
+        }
+        // Calculate rates if not provided by backend
+        const data = response.data!;
+        if (data.submissionRate === undefined && data.totalEmployees > 0) {
+          data.submissionRate = ((data.finalizedCount + data.submittedCount) / data.totalEmployees) * 100;
+        }
+        if (data.complianceRate === undefined && data.totalEmployees > 0) {
+          data.complianceRate = (data.finalizedCount / data.totalEmployees) * 100;
+        }
+        return data;
+      })
+    );
+  }
+
   // Get manager review dashboard with all employee packages
   getManagerReviewDashboard(timesheetId: string): Observable<EmployeeReviewPackage[]> {
+    // Validate timesheetId before making network call
+    if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
+      throw new Error('Invalid Timesheet ID');
+    }
+    
     return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
-      `${this.apiUrl}/timesheet/manager-review-dashboard`,
+      `${this.apiUrl}/timesheet/review-dashboard`,
       { params: { timesheetId } }
     ).pipe(
       map(response => {

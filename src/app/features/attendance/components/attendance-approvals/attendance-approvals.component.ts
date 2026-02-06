@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,8 +16,10 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { AttendanceService } from '../../services/attendance.service';
@@ -24,7 +27,9 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { 
   EmployeeReviewPackage, 
   DailyReviewRecord, 
-  ProcessAttendanceRequestDto 
+  ProcessAttendanceRequestDto,
+  MonthlyTimesheetSummary,
+  OrgSubmissionProgress
 } from '../../../../core/models/attendance.models';
 import { RejectRequestDialogComponent } from '../reject-request-dialog/reject-request-dialog.component';
 import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../manager-override-dialog/manager-override-dialog.component';
@@ -42,6 +47,7 @@ import { EmployeeReviewDetailDialogComponent, EmployeeReviewDetailDialogData } f
     MatTableModule,
     MatChipsModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
     MatTooltipModule,
     MatMenuModule,
     MatFormFieldModule,
@@ -50,7 +56,9 @@ import { EmployeeReviewDetailDialogComponent, EmployeeReviewDetailDialogData } f
     MatDialogModule,
     MatExpansionModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    MatSidenavModule,
+    MatListModule
   ],
   templateUrl: './attendance-approvals.component.html',
   styleUrls: ['./attendance-approvals.component.scss']
@@ -63,6 +71,17 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   isLoading = false;
   processingRequestIds = new Set<string>(); // Track which individual requests are being processed
   processingPackageIds = new Set<string>(); // Track which packages are being finalized
+  
+  // Task 1: Org-Wide Compliance Progress
+  orgProgress: OrgSubmissionProgress | null = null;
+  currentMonth: number = new Date().getMonth() + 1;
+  currentYear: number = new Date().getFullYear();
+  
+  // Task 3: Historical Periods Toggle
+  showHistoryDrawer = false;
+  archivedSnapshots: MonthlyTimesheetSummary[] = [];
+  isLoadingSnapshots = false;
+  
   displayedColumns: string[] = [
     'workDate',
     'original',
@@ -79,6 +98,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadManagerReviewDashboard();
+    this.loadOrgProgress();
   }
 
   ngOnDestroy(): void {
@@ -86,23 +106,161 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // Task 1: Load org-wide submission progress
+  loadOrgProgress(): void {
+    this.attendanceService.getOrgSubmissionProgress(this.currentMonth, this.currentYear)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (progress) => {
+          this.orgProgress = progress;
+        },
+        error: (error) => {
+          console.error('Error loading org progress:', error);
+          // Non-critical, don't show error to user
+        }
+      });
+  }
+
+  // Task 3: Toggle history drawer
+  toggleHistoryDrawer(): void {
+    this.showHistoryDrawer = !this.showHistoryDrawer;
+    if (this.showHistoryDrawer && this.archivedSnapshots.length === 0) {
+      this.loadArchivedSnapshots();
+    }
+  }
+
+  // Task 3: Load historical snapshots
+  loadArchivedSnapshots(): void {
+    this.isLoadingSnapshots = true;
+    this.attendanceService.getSnapshots()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (snapshots) => {
+          // Filter to only show past months (archived)
+          this.archivedSnapshots = snapshots.filter(s => 
+            s.year < this.currentYear || 
+            (s.year === this.currentYear && s.month < this.currentMonth)
+          );
+          this.isLoadingSnapshots = false;
+        },
+        error: (error) => {
+          console.error('Error loading archived snapshots:', error);
+          this.isLoadingSnapshots = false;
+        }
+      });
+  }
+
+  // Task 1: Select a historical period - update ID binding immediately
+  selectHistoricalPeriod(snapshot: MonthlyTimesheetSummary): void {
+    // Task 1: Immediately update selectedTimesheetId with the snapshot's ID
+    const emptyGuid = '00000000-0000-0000-0000-000000000000';
+    if (!snapshot.timesheetId || snapshot.timesheetId === emptyGuid) {
+      console.error('❌ Invalid timesheetId in snapshot:', snapshot);
+      this.notificationService.showError('Cannot load this period: Invalid timesheet ID.');
+      return;
+    }
+    
+    console.log('📅 Switching to historical period:', {
+      month: snapshot.month,
+      year: snapshot.year,
+      timesheetId: snapshot.timesheetId
+    });
+    
+    this.selectedTimesheetId = snapshot.timesheetId;
+    this.currentMonth = snapshot.month;
+    this.currentYear = snapshot.year;
+    this.showHistoryDrawer = false;
+    this.isLoading = true;
+    
+    // Task 2: Explicitly trigger the dashboard reload with the new ID
+    this.loadReviewDashboard(snapshot.timesheetId);
+    this.loadOrgProgress();
+  }
+
+  // Reset to current month (clears selectedTimesheetId so loadManagerReviewDashboard fetches latest)
+  resetToCurrentMonth(): void {
+    console.log('🔄 Resetting to current month...');
+    this.selectedTimesheetId = '';
+    this.currentMonth = new Date().getMonth() + 1;
+    this.currentYear = new Date().getFullYear();
+    this.loadManagerReviewDashboard();
+    this.loadOrgProgress();
+  }
+
+  // Check if viewing a historical (non-current) period
+  isViewingHistoricalPeriod(): boolean {
+    const now = new Date();
+    return this.currentMonth !== (now.getMonth() + 1) || this.currentYear !== now.getFullYear();
+  }
+
   loadManagerReviewDashboard(): void {
     this.isLoading = true;
     
-    // First get the active timesheet, then load the review dashboard
+    // Task 1 & 2: If we already have a valid selectedTimesheetId (from historical selection),
+    // use it directly instead of fetching snapshots again
+    const emptyGuid = '00000000-0000-0000-0000-000000000000';
+    if (this.selectedTimesheetId && this.selectedTimesheetId !== emptyGuid) {
+      console.log('📋 Using existing selectedTimesheetId:', this.selectedTimesheetId);
+      this.loadReviewDashboard(this.selectedTimesheetId);
+      return;
+    }
+    
+    // First get snapshots to ensure we have valid timesheetIds
+    this.attendanceService.getSnapshots()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (snapshots) => {
+          // Get the most recent snapshot's timesheetId
+          if (snapshots.length > 0) {
+            const latestSnapshot = snapshots[0]; // Assuming sorted by date desc
+            this.selectedTimesheetId = latestSnapshot.timesheetId;
+            // Also update current month/year to match the snapshot
+            this.currentMonth = latestSnapshot.month;
+            this.currentYear = latestSnapshot.year;
+            
+            // Validate timesheetId before proceeding
+            const emptyGuid = '00000000-0000-0000-0000-000000000000';
+            if (!this.selectedTimesheetId || this.selectedTimesheetId === emptyGuid) {
+              console.warn('⚠️ WARNING: selectedTimesheetId is null or empty GUID from snapshots', {
+                timesheetId: this.selectedTimesheetId,
+                snapshot: latestSnapshot
+              });
+              this.loadFallbackWithPendingRequests();
+              return;
+            }
+            
+            console.log('📋 Loading review dashboard with timesheetId:', this.selectedTimesheetId);
+            this.loadReviewDashboard(this.selectedTimesheetId);
+          } else {
+            // Fallback to pending requests if no snapshots
+            this.loadFallbackWithPendingRequests();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading snapshots:', error);
+          // Fallback to pending requests method
+          this.loadFallbackWithPendingRequests();
+        }
+      });
+  }
+
+  private loadFallbackWithPendingRequests(): void {
     this.attendanceService.getPendingAttendanceRequests()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (packages) => {
           // Extract timesheetId from packages if available
           if (packages.length > 0 && packages[0].timesheetId) {
-            this.selectedTimesheetId = packages[0].timesheetId;
-            this.loadReviewDashboard(this.selectedTimesheetId);
-          } else {
-            // Fallback to using getPendingAttendanceRequests data converted to review format
-            this.employeePackages = this.convertToReviewPackages(packages);
-            this.isLoading = false;
+            const emptyGuid = '00000000-0000-0000-0000-000000000000';
+            if (packages[0].timesheetId !== emptyGuid) {
+              this.selectedTimesheetId = packages[0].timesheetId;
+              this.loadReviewDashboard(this.selectedTimesheetId);
+              return;
+            }
           }
+          // Fallback to using getPendingAttendanceRequests data converted to review format
+          this.employeePackages = this.convertToReviewPackages(packages);
+          this.isLoading = false;
         },
         error: (error) => {
           console.error('Error loading pending requests:', error);
@@ -152,9 +310,9 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       employeeCode: pkg.employeeCode,
       department: pkg.department,
       designation: pkg.designation,
-      timesheetId: pkg.timesheetId,
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
+      timesheetId: pkg.timesheetId || this.selectedTimesheetId,
+      month: this.currentMonth,
+      year: this.currentYear,
       totalRecords: pkg.corrections?.length || 0,
       pendingRequestCount: pkg.corrections?.length || 0,
       approvedCount: 0,
@@ -422,13 +580,32 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   // Open the employee review detail dialog
   viewEmployeeDetails(pkg: EmployeeReviewPackage): void {
-    // Use pkg.timesheetId if available, otherwise fall back to selectedTimesheetId
-    const timesheetId = pkg.timesheetId || this.selectedTimesheetId;
+    // Task 3: Prioritize the component's selectedTimesheetId (reflects current view state)
+    // Only fall back to pkg.timesheetId if selectedTimesheetId is invalid
+    const emptyGuid = '00000000-0000-0000-0000-000000000000';
+    const hasValidSelectedId = this.selectedTimesheetId && this.selectedTimesheetId !== emptyGuid;
+    const hasValidPkgId = pkg.timesheetId && pkg.timesheetId !== emptyGuid;
     
+    // Use selectedTimesheetId first (current view state), then pkg.timesheetId as fallback
+    let timesheetId = hasValidSelectedId ? this.selectedTimesheetId : (hasValidPkgId ? pkg.timesheetId : '');
+    
+    if (timesheetId === emptyGuid) timesheetId = '';
+    
+    // If no valid timesheetId, we can still open the dialog if we have the package data
+    // This allows viewing details for pending requests even without a finalized snapshot
     if (!timesheetId) {
-      this.notificationService.showError('Cannot open details: No valid timesheet found');
-      return;
+      console.warn('⚠️ No valid timesheetId found. Opening dialog in fallback mode with package data.', {
+        pkgTimesheetId: pkg.timesheetId,
+        selectedTimesheetId: this.selectedTimesheetId,
+        employeeId: pkg.employeeId
+      });
     }
+    
+    console.log('📋 Opening employee detail dialog with:', {
+      timesheetId: timesheetId,
+      employeeId: pkg.employeeId,
+      employeeName: pkg.employeeName
+    });
     
     const dialogData: EmployeeReviewDetailDialogData = {
       package: pkg,
@@ -437,11 +614,12 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     };
 
     const dialogRef = this.dialog.open(EmployeeReviewDetailDialogComponent, {
-      width: '1000px',
-      maxWidth: '95vw',
+      width: '90vw',
+      maxWidth: '1200px', // Increased max-width for better visibility
       maxHeight: '90vh',
       panelClass: 'review-detail-dialog-panel',
-      data: dialogData
+      data: dialogData,
+      autoFocus: false // Prevent auto-focusing which might cause scrolling issues
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -471,5 +649,134 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   // Check if package can be finalized
   canFinalize(pkg: EmployeeReviewPackage): boolean {
     return pkg.pendingRequestCount === 0 && pkg.approvedCount > 0;
+  }
+
+  // ============================================================
+  // Task 2: Employee Status Symbol Helpers
+  // ============================================================
+  
+  /**
+   * Get the status icon for an employee package
+   * ⚪ Untouched (no activity yet)
+   * 🔵 In Progress (has drafts or pending)
+   * 🟡 Pending Review (submitted, awaiting manager action)
+   * 🔒 Finalized (locked for payroll)
+   */
+  getEmployeeStatusIcon(pkg: EmployeeReviewPackage): string {
+    if (pkg.isFinalized) {
+      return 'lock';
+    }
+    if (pkg.hasPendingRequest) {
+      return 'hourglass_top';
+    }
+    if (pkg.hasDraftRequest) {
+      return 'edit_note';
+    }
+    if (pkg.isUntouched) {
+      return 'radio_button_unchecked';
+    }
+    // Default for in-progress records
+    if (pkg.pendingRequestCount > 0 || pkg.approvedCount > 0) {
+      return 'pending';
+    }
+    return 'radio_button_unchecked';
+  }
+
+  /**
+   * Get the CSS class for the status icon
+   */
+  getEmployeeStatusClass(pkg: EmployeeReviewPackage): string {
+    if (pkg.isFinalized) {
+      return 'status-finalized';
+    }
+    if (pkg.hasPendingRequest) {
+      return 'status-pending-review';
+    }
+    if (pkg.hasDraftRequest) {
+      return 'status-in-progress';
+    }
+    if (pkg.isUntouched) {
+      return 'status-untouched';
+    }
+    if (pkg.pendingRequestCount > 0 || pkg.approvedCount > 0) {
+      return 'status-in-progress';
+    }
+    return 'status-untouched';
+  }
+
+  /**
+   * Get the tooltip text for status icon
+   */
+  getEmployeeStatusTooltip(pkg: EmployeeReviewPackage): string {
+    if (pkg.isFinalized) {
+      return 'Finalized - Locked for payroll';
+    }
+    if (pkg.hasPendingRequest) {
+      return 'Pending Review - Awaiting manager action';
+    }
+    if (pkg.hasDraftRequest) {
+      return 'In Progress - Has draft corrections';
+    }
+    if (pkg.isUntouched) {
+      return 'Untouched - No attendance activity';
+    }
+    if (pkg.pendingRequestCount > 0) {
+      return `${pkg.pendingRequestCount} request(s) pending`;
+    }
+    return 'No activity';
+  }
+
+  // ============================================================
+  // Task 5: Heat Map Border Helpers
+  // ============================================================
+  
+  /**
+   * Get border class for heat map visual indicators
+   * Red border near month end if untouched
+   * Green border if finalized
+   * Yellow border if pending review
+   */
+  getHeatMapBorderClass(pkg: EmployeeReviewPackage): string {
+    if (pkg.isFinalized) {
+      return 'heat-border-finalized';
+    }
+    if (pkg.hasPendingRequest) {
+      return 'heat-border-pending';
+    }
+    if (pkg.isUntouched && this.isNearMonthEnd()) {
+      return 'heat-border-urgent';
+    }
+    if (pkg.hasDraftRequest) {
+      return 'heat-border-draft';
+    }
+    return '';
+  }
+
+  /**
+   * Check if current date is within last 5 days of the month
+   */
+  isNearMonthEnd(): boolean {
+    const today = new Date();
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    return today.getDate() >= lastDayOfMonth - 5;
+  }
+
+  /**
+   * Get attendance percentage display
+   */
+  getAttendanceDisplay(pkg: EmployeeReviewPackage): string {
+    if (pkg.attendancePercentage !== undefined && pkg.attendancePercentage !== null) {
+      return `${pkg.attendancePercentage.toFixed(0)}%`;
+    }
+    return '—';
+  }
+
+  /**
+   * Get current month/year as a display string
+   */
+  getCurrentPeriodDisplay(): string {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${monthNames[this.currentMonth - 1]} ${this.currentYear}`;
   }
 }

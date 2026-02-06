@@ -70,7 +70,8 @@
             <div class="stat-item">
               <mat-icon class="stat-icon">{{ isEmployee() ? 'badge' : 'groups' }}</mat-icon>
               <div class="stat-details">
-                <span class="stat-value">{{ getEmployeeCodeValue(snapshot) }}</span>
+                <!-- Task 3: Use totalEmployees field from API response for full roster count -->
+                <span class="stat-value">{{ isEmployee() ? getEmployeeCodeValue(snapshot) : snapshot.totalEmployees }}</span>
                 <span class="stat-label">{{ getEmployeeCodeLabel(snapshot) }}</span>
               </div>
             </div>

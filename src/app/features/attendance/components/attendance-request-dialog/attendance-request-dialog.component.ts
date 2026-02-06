@@ -13,17 +13,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { AttendanceUpdateRequestDto } from '../../../../core/models/attendance.models';
+import { AttendanceUpdateRequestDto, ManualAttendanceRequest } from '../../../../core/models/attendance.models';
 
 export interface AttendanceRequestDialogData {
-  attendanceId: string;
+  attendanceId?: string; // Optional - null for 'create' mode
   timesheetId?: string; // Optional timesheetId for snapshot-based corrections
+  employeeId?: string; // Required for 'create' mode
   employeeName: string;
   workDate: string;
   originalCheckIn?: string;
   originalCheckOut?: string;
-  originalStatus: string;
+  originalStatus?: string;
   originalNotes?: string;
+  mode: 'create' | 'edit'; // Task 3: Mode to determine dialog behavior
 }
 
 @Component({
@@ -57,6 +59,11 @@ export class AttendanceRequestDialogComponent implements OnInit {
     { value: 'absent', label: 'Absent' }
   ];
 
+  // Task 3: Check if dialog is in create mode
+  get isCreateMode(): boolean {
+    return this.data.mode === 'create';
+  }
+
   constructor(
     public dialogRef: MatDialogRef<AttendanceRequestDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AttendanceRequestDialogData,
@@ -74,7 +81,24 @@ export class AttendanceRequestDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Pre-fill form with original values if available
+    // Task 3: For create mode, initialize with default values for the selected date
+    if (this.isCreateMode) {
+      // Pre-fill with sensible defaults for a new record
+      const workDate = new Date(this.data.workDate);
+      const defaultCheckIn = new Date(workDate);
+      defaultCheckIn.setHours(9, 0, 0, 0); // Default 9:00 AM
+      const defaultCheckOut = new Date(workDate);
+      defaultCheckOut.setHours(18, 0, 0, 0); // Default 6:00 PM
+      
+      this.requestForm.patchValue({
+        requestedCheckIn: this.formatDateTimeLocal(defaultCheckIn),
+        requestedCheckOut: this.formatDateTimeLocal(defaultCheckOut),
+        requestedStatus: 'present' // Default to present for new records
+      });
+      return;
+    }
+    
+    // Edit mode: Pre-fill form with original values if available
     if (this.data.originalCheckIn) {
       this.requestForm.patchValue({
         requestedCheckIn: this.parseDateTime(this.data.originalCheckIn)
@@ -95,6 +119,16 @@ export class AttendanceRequestDialogComponent implements OnInit {
         requestedNotes: this.data.originalNotes
       });
     }
+  }
+
+  // Helper to format Date to datetime-local input format
+  formatDateTimeLocal(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
   parseDateTime(dateTimeString: string): string {
@@ -163,10 +197,55 @@ export class AttendanceRequestDialogComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-
     const formValue = this.requestForm.value;
+
+    // Task 2: Route to Create or Edit API based on mode
+    if (this.isCreateMode) {
+      this.submitCreateRequest(formValue);
+    } else {
+      this.submitEditRequest(formValue);
+    }
+  }
+
+  // Task 2: Create new attendance record (POST /api/Attendance/manual)
+  private submitCreateRequest(formValue: any): void {
+    if (!this.data.employeeId) {
+      this.notificationService.showError('Employee ID is required for creating new records');
+      this.isSubmitting = false;
+      return;
+    }
+
+    const createDto: ManualAttendanceRequest = {
+      employeeId: this.data.employeeId,
+      workDate: this.data.workDate,
+      date: this.data.workDate,
+      checkInTime: formValue.requestedCheckIn ? this.formatDateTime(formValue.requestedCheckIn) : '',
+      checkOutTime: formValue.requestedCheckOut ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
+      status: formValue.requestedStatus || 'present',
+      notes: formValue.requestedNotes || undefined,
+      reason: formValue.reasonForEdit || 'Manager override - added missing attendance record'
+    };
+
+    this.attendanceService.createManualAttendance(createDto)
+      .subscribe({
+        next: (result) => {
+          // Task 4: Return the new attendanceId for state refresh
+          this.notificationService.showSuccess('Attendance record created successfully');
+          this.isSubmitting = false;
+          this.dialogRef.close({ success: true, attendanceId: result.attendanceId, mode: 'create' });
+        },
+        error: (error) => {
+          console.error('Error creating attendance record:', error);
+          this.notificationService.showError(error?.message || 'Failed to create attendance record. Please try again.');
+          this.isSubmitting = false;
+        }
+      });
+  }
+
+  // Edit existing attendance record
+  private submitEditRequest(formValue: any): void {
     const requestDto: AttendanceUpdateRequestDto = {
-      attendanceId: this.data.attendanceId,
+      attendanceId: this.data.attendanceId!,
       requestedCheckIn: formValue.requestedCheckIn ? this.formatDateTime(formValue.requestedCheckIn) : undefined,
       requestedCheckOut: formValue.requestedCheckOut ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
       requestedStatus: formValue.requestedStatus || undefined,
@@ -179,7 +258,7 @@ export class AttendanceRequestDialogComponent implements OnInit {
         next: () => {
           this.notificationService.showSuccess('Attendance correction request submitted successfully');
           this.isSubmitting = false;
-          this.dialogRef.close({ success: true });
+          this.dialogRef.close({ success: true, mode: 'edit' });
         },
         error: (error) => {
           console.error('Error submitting request:', error);

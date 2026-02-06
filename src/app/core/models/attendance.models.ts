@@ -538,6 +538,12 @@ export interface EmployeeReviewPackage {
   finalizedCount: number;
   finalizedDays: number;
   dailyRecords: DailyReviewRecord[];
+  // Task 2: Status flags for roster card symbols
+  hasDraftRequest?: boolean; // 🔵 In-Progress (Blue Edit Icon)
+  hasPendingRequest?: boolean; // 🟡 Needs Review (Yellow Clock)
+  isFinalized?: boolean; // 🔒 Finalized (Red Lock)
+  isUntouched?: boolean; // ⚪ Untouched (Grey Circle) - 0 logs and no requests
+  attendancePercentage?: number; // For heat map border calculation
 }
 
 // Manager override request DTO
@@ -549,4 +555,18 @@ export interface ManagerOverrideDto {
   status?: string;
   notes?: string;
   reason: string;
+}
+
+// Task 1: Organization Submission Progress for compliance tracking
+export interface OrgSubmissionProgress {
+  month: number;
+  year: number;
+  totalEmployees: number;
+  submittedCount: number;
+  finalizedCount: number;
+  pendingReviewCount: number;
+  untouchedCount: number;
+  inProgressCount: number;
+  submissionRate: number; // (FinalizedCount + SubmittedCount) / TotalEmployees
+  complianceRate: number; // FinalizedCount / TotalEmployees
 }

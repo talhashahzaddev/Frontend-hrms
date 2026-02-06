@@ -70,6 +70,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   isSubmittingApprovals = false;
   isApprovingAll = false;
   currentUserRole = '';
+  currentTimesheetId: string = '';
 
   // Pagination
   pageSize = 10;
@@ -114,6 +115,18 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Task 1: Store the timesheetId passed from the dashboard
+    this.currentTimesheetId = this.data.timesheetId;
+
+    // Task 3: Validation - warn if timesheetId is null or empty GUID
+    const emptyGuid = '00000000-0000-0000-0000-000000000000';
+    if (!this.currentTimesheetId || this.currentTimesheetId === emptyGuid) {
+      console.warn('⚠️ WARNING: currentTimesheetId is null or empty GUID. The ID may be leaking from the Dashboard Card.', {
+        timesheetId: this.currentTimesheetId,
+        dialogData: this.data
+      });
+    }
+
     this.currentUserRole = this.data.userRole || '';
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
@@ -132,8 +145,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   loadTimesheetDetails(): void {
     this.isLoading = true;
-    // Use timesheetId to fetch employee details
-    this.attendanceService.getTimesheetDetails(this.data.timesheetId)
+    // Use currentTimesheetId (stored from dialog data) to fetch employee details
+    this.attendanceService.getTimesheetDetails(this.currentTimesheetId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (employees) => {
@@ -243,7 +256,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       maxWidth: '95vw',
       data: {
         employeeId: employee.employeeId,
-        timesheetId: this.data.timesheetId,
+        timesheetId: this.currentTimesheetId,
         employeeName: employee.employeeName,
         dailyRecords: employee.dailyRecords
       },
@@ -261,42 +274,84 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   requestDailyCorrection(employee: EmployeeTimesheetDto, record: any): void {
-    if (!record.attendanceId) {
-      this.notificationService.showWarning('Cannot edit a record that does not exist');
-      return;
-    }
-
-    // Open the attendance request dialog with the specific day's data
-    const dialogRef = this.dialog.open(AttendanceRequestDialogComponent, {
-      width: '700px',
-      maxWidth: '95vw',
-      data: {
-        attendanceId: record.attendanceId,
-        timesheetId: this.data.timesheetId,
-        employeeName: employee.employeeName,
-        workDate: record.date,
-        originalCheckIn: record.checkInTime,
-        originalCheckOut: record.checkOutTime,
-        originalStatus: record.status,
-        originalNotes: record.notes
-      },
-      panelClass: 'attendance-request-dialog-panel'
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result?.success) {
-          this.notificationService.showSuccess('Correction request submitted successfully');
-          this.loadTimesheetDetails();
-        }
+    // Task 1: Intelligent Action Dispatcher
+    // Determine mode based on whether attendanceId exists
+    const isCreateMode = !record.attendanceId;
+    
+    if (isCreateMode) {
+      // Task 1: New Manual Entry flow for placeholder/no-record days
+      console.log('📝 Opening dialog in CREATE mode for:', {
+        employeeId: employee.employeeId,
+        workDate: record.date
       });
+      
+      const dialogRef = this.dialog.open(AttendanceRequestDialogComponent, {
+        width: '700px',
+        maxWidth: '95vw',
+        data: {
+          mode: 'create', // Task 3: Create mode
+          employeeId: employee.employeeId, // Required for creating new records
+          timesheetId: this.currentTimesheetId,
+          employeeName: employee.employeeName,
+          workDate: record.date,
+          // No original values for create mode
+          originalCheckIn: null,
+          originalCheckOut: null,
+          originalStatus: 'No Record',
+          originalNotes: null
+        },
+        panelClass: 'attendance-request-dialog-panel'
+      });
+
+      dialogRef.afterClosed()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(result => {
+          if (result?.success) {
+            // Task 4: Refresh UI after successful create
+            const message = result.mode === 'create' 
+              ? 'Attendance record created successfully' 
+              : 'Correction request submitted successfully';
+            this.notificationService.showSuccess(message);
+            this.loadTimesheetDetails(); // Refresh to show new record
+          }
+        });
+    } else {
+      // Existing Update/Correction flow
+      console.log('✏️ Opening dialog in EDIT mode for attendanceId:', record.attendanceId);
+      
+      const dialogRef = this.dialog.open(AttendanceRequestDialogComponent, {
+        width: '700px',
+        maxWidth: '95vw',
+        data: {
+          mode: 'edit', // Task 3: Edit mode
+          attendanceId: record.attendanceId,
+          timesheetId: this.currentTimesheetId,
+          employeeName: employee.employeeName,
+          workDate: record.date,
+          originalCheckIn: record.checkInTime,
+          originalCheckOut: record.checkOutTime,
+          originalStatus: record.status,
+          originalNotes: record.notes
+        },
+        panelClass: 'attendance-request-dialog-panel'
+      });
+
+      dialogRef.afterClosed()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(result => {
+          if (result?.success) {
+            this.notificationService.showSuccess('Correction request submitted successfully');
+            this.loadTimesheetDetails(); // Task 4: Refresh UI
+          }
+        });
+    }
   }
 
   finalizeRecord(employee: EmployeeTimesheetDto): void {
     if (confirm(`Are you sure you want to finalize all records for ${employee.employeeName}?`)) {
       // Call service to finalize employee's timesheet for this month
-      this.attendanceService.finalizeBatch(employee.employeeId)
+      // Use currentTimesheetId for the finalize-batch API
+      this.attendanceService.finalizeBatch(this.currentTimesheetId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -342,7 +397,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     if (this.isSubmittingApprovals || !this.canSubmitBatch()) return;
 
     this.isSubmittingApprovals = true;
-    this.attendanceService.submitTimesheetApprovals(this.data.timesheetId)
+    // Task 2: Use stored currentTimesheetId for batch submission
+    this.attendanceService.submitTimesheetApprovals(this.currentTimesheetId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -420,23 +476,27 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   /**
    * Generates a complete array of daily records for the entire month
    * Fills in missing days with 'No Record' status
+   * Task 1: Always generates rows even when dailyRecords is empty or undefined
    */
   getDailyRecordsForMonth(employee: EmployeeTimesheetDto): any[] {
     const daysInMonth = new Date(this.data.year, this.data.month, 0).getDate();
     const allDays: any[] = [];
+    
+    // Handle empty or undefined dailyRecords - still generate all days as placeholders
+    const employeeRecords = employee.dailyRecords || [];
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${this.data.year}-${String(this.data.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       
       // Find if there's a record for this day
-      const existingRecord = employee.dailyRecords?.find(r => 
+      const existingRecord = employeeRecords.find(r => 
         r.date === dateStr || new Date(r.date).getDate() === day
       );
 
       if (existingRecord) {
         allDays.push(existingRecord);
       } else {
-        // Create a placeholder for missing day
+        // Create a placeholder for missing day - Task 1: status 'No Record', checkInTime null
         allDays.push({
           date: dateStr,
           checkInTime: null,
@@ -445,12 +505,45 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           totalHours: 0,
           notes: 'No attendance record',
           is_finalized: false,
-          hasPendingRequest: false
+          hasPendingRequest: false,
+          hasDraftRequest: false,
+          isPlaceholder: true // Mark as placeholder for manager override visibility
         });
       }
     }
 
     return allDays;
+  }
+
+  /**
+   * Task 2: Check if manager can add/override a record for a day
+   * Returns true for placeholder rows (no record) when user is manager/admin
+   */
+  canManagerOverride(record: any): boolean {
+    return this.isManagerOrAdmin() && 
+           !record.is_finalized && 
+           !record.hasPendingRequest && 
+           (record.status === 'No Record' || record.isPlaceholder);
+  }
+
+  /**
+   * Task 4: Check if employee needs attention alert
+   * Returns true if employee has 0% attendance or missing records for more than 50% of the month
+   */
+  needsAttentionAlert(employee: EmployeeTimesheetDto): boolean {
+    // Check for 0% attendance
+    if (employee.attendancePercentage === 0) {
+      return true;
+    }
+    
+    // Check for missing records > 50% of the month
+    const daysInMonth = new Date(this.data.year, this.data.month, 0).getDate();
+    const recordCount = employee.dailyRecords?.filter(r => 
+      r.status !== 'No Record' && r.checkInTime !== null
+    ).length || 0;
+    const missingPercentage = ((daysInMonth - recordCount) / daysInMonth) * 100;
+    
+    return missingPercentage > 50;
   }
 
   formatDate(dateStr: string): string {
@@ -509,7 +602,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     this.isApprovingAll = true;
     const employeeId = this.expandedEmployee?.employeeId;
 
-    this.attendanceService.approveAllPendingRequests(this.data.timesheetId, employeeId)
+    this.attendanceService.approveAllPendingRequests(this.currentTimesheetId, employeeId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {

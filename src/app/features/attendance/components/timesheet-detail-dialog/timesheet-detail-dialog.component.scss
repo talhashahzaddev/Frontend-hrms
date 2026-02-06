@@ -861,6 +861,30 @@
   &.expanded-row {
     background-color: rgba(102, 126, 234, 0.08);
   }
+
+  // Task 4: Attention alert for employees with 0% attendance or >50% missing records
+  &.attention-alert {
+    border-left: 4px solid #dc2626;
+    background-color: rgba(220, 38, 38, 0.04);
+    
+    &:hover {
+      background-color: rgba(220, 38, 38, 0.08);
+    }
+
+    td:first-child {
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background-color: #dc2626;
+      }
+    }
+  }
 }
 
 .detail-row {

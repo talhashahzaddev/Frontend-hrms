@@ -3,8 +3,8 @@
   <div class="dialog-header">
     <div class="header-content">
       <h2 class="dialog-title">
-        <mat-icon>request_page</mat-icon>
-        Request Attendance Correction
+        <mat-icon>{{ isCreateMode ? 'add_circle' : 'request_page' }}</mat-icon>
+        {{ isCreateMode ? 'Add Attendance Record' : 'Request Attendance Correction' }}
       </h2>
       <p class="dialog-subtitle">{{ data.employeeName }} - {{ data.workDate | date:'fullDate' }}</p>
     </div>
@@ -13,7 +13,8 @@
     </button>
   </div>
 
-  <!-- Original Values Section -->
+  <!-- Original Values Section - Task 3: Only show in edit mode -->
+  @if (!isCreateMode) {
   <div class="original-values-section">
     <h3 class="section-title">
       <mat-icon>history</mat-icon>
@@ -38,12 +39,21 @@
       </div>
     </div>
   </div>
+  }
+
+  <!-- Create Mode Info Banner -->
+  @if (isCreateMode) {
+  <div class="create-mode-banner">
+    <mat-icon>info</mat-icon>
+    <span>Creating a new attendance record for this day. This employee has no existing record.</span>
+  </div>
+  }
 
   <!-- Request Form -->
   <form [formGroup]="requestForm" class="request-form">
     <h3 class="section-title">
-      <mat-icon>edit</mat-icon>
-      Requested Changes
+      <mat-icon>{{ isCreateMode ? 'add' : 'edit' }}</mat-icon>
+      {{ isCreateMode ? 'New Attendance Record' : 'Requested Changes' }}
     </h3>
 
     <div class="form-row">
@@ -128,8 +138,8 @@
       (click)="onSubmit()"
       [disabled]="isSubmitting || requestForm.invalid">
       <mat-spinner *ngIf="isSubmitting" diameter="20" class="btn-spinner"></mat-spinner>
-      <mat-icon *ngIf="!isSubmitting">send</mat-icon>
-      {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+      <mat-icon *ngIf="!isSubmitting">{{ isCreateMode ? 'add_circle' : 'send' }}</mat-icon>
+      {{ isSubmitting ? (isCreateMode ? 'Creating...' : 'Submitting...') : (isCreateMode ? 'Create Record' : 'Submit Request') }}
     </button>
   </div>
 </div>

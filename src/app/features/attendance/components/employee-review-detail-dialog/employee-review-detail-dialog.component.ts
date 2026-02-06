@@ -82,10 +82,12 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Load fresh data from API if timesheetId and employeeId are provided
-    if (this.data.timesheetId && this.data.employeeId) {
+    const emptyGuid = '00000000-0000-0000-0000-000000000000';
+    if (this.data.timesheetId && this.data.timesheetId !== emptyGuid && this.data.employeeId) {
       this.loadEmployeeReviewData();
     } else {
-      // Fall back to using passed data
+      // Fall back to using passed data immediately if no valid timesheetId
+      console.warn('⚠️ No valid timesheetId provided, using passed package data.');
       this.buildMonthlyRecords();
     }
   }
@@ -100,6 +102,20 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadError = null;
 
+    // Validate IDs before making the API call
+    const emptyGuid = '00000000-0000-0000-0000-000000000000';
+    if (!this.data.timesheetId || this.data.timesheetId === emptyGuid) {
+      // Should not happen due to check in ngOnInit, but safe guard
+      this.isLoading = false;
+      this.buildMonthlyRecords();
+      return;
+    }
+
+    console.log('📋 Loading employee review data:', {
+      timesheetId: this.data.timesheetId,
+      employeeId: this.data.employeeId
+    });
+
     this.attendanceService.getEmployeeReviewPackage(this.data.timesheetId, this.data.employeeId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -107,18 +123,26 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
           this.pkg = pkg;
           this.buildMonthlyRecords();
           this.isLoading = false;
+          console.log('✅ Loaded employee review data with', this.monthlyRecords.length, 'days');
         },
         error: (error) => {
           console.error('Error loading employee review data:', error);
-          this.loadError = error?.error?.message || error?.message || 'Failed to load employee review data';
-          this.isLoading = false;
           
           // Fall back to passed data if API fails
           if (this.data.package) {
+            console.log('⚠️ Falling back to passed package data after API error.');
             this.pkg = this.data.package;
             this.buildMonthlyRecords();
-            this.loadError = null;
+            this.loadError = null; // Clear error since we have fallback data
+          } else {
+            // Only show error if we have NO data at all
+            if (error?.message?.includes('Invalid')) {
+              this.loadError = 'No attendance data found for this period.';
+            } else {
+              this.loadError = error?.error?.message || error?.message || 'Failed to load employee review data';
+            }
           }
+          this.isLoading = false;
         }
       });
   }

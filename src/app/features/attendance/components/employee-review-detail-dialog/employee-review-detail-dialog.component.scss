@@ -1,10 +1,12 @@
 .review-detail-dialog {
   display: flex;
   flex-direction: column;
-  max-height: 85vh;
+  max-height: 100%; /* Let the dialog container control the height */
+  height: 100%;
   background: var(--surface, #ffffff);
   border-radius: 16px;
   overflow: hidden;
+  max-width: 100%;
 }
 
 // Loading Container
@@ -203,10 +205,12 @@
   padding: 1rem;
 
   .table-container {
-    max-height: 50vh;
+    flex: 1;
     overflow-y: auto;
     border-radius: 12px;
     border: 1px solid var(--border-light, #e2e8f0);
+    /* Remove fixed max-height to allow flex to control it */
+    min-height: 200px; 
 
     &::-webkit-scrollbar {
       width: 6px;
