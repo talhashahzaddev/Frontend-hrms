@@ -131,11 +131,11 @@
                       <mat-icon>visibility</mat-icon>
                       View details
                     </button>
-                    <button mat-menu-item (click)="editClaim(row)">
+                    <button mat-menu-item (click)="editClaim(row)" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                       <mat-icon>edit</mat-icon>
                       Edit
                     </button>
-                    <button mat-menu-item (click)="deleteClaim(row)" class="danger-action">
+                    <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                       <mat-icon>delete</mat-icon>
                       Delete
                     </button>
@@ -386,11 +386,11 @@
                   <mat-icon>visibility</mat-icon>
                   View details
                 </button>
-                <button mat-menu-item (click)="editClaim(row)">
+                <button mat-menu-item (click)="editClaim(row)" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                   <mat-icon>edit</mat-icon>
                   Edit
                 </button>
-                <button mat-menu-item (click)="deleteClaim(row)" class="danger-action">
+                <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                   <mat-icon>delete</mat-icon>
                   Delete
                 </button>

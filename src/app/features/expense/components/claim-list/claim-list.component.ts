@@ -377,6 +377,11 @@ export class ClaimListComponent implements OnInit, OnDestroy {
     return (s[0] || '?').toUpperCase();
   }
 
+  /** True when claim status is Pending (Edit/Delete allowed only for Pending). */
+  isClaimPending(claim: ExpenseDto): boolean {
+    return (claim?.status || '').toString().toLowerCase() === 'pending';
+  }
+
   viewClaimDetails(claim: ExpenseDto): void {
     this.dialog.open(ClaimDetailsDialogComponent, {
       width: '520px',

@@ -334,6 +334,11 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
     return (s[0] || '?').toUpperCase();
   }
 
+  /** True when recurring expense status is Pending (Edit/Delete allowed only for Pending). */
+  isRecurringPending(item: RecurringExpenseDto): boolean {
+    return (item?.status || '').toString().toLowerCase() === 'pending';
+  }
+
   viewRecurringDetails(item: RecurringExpenseDto): void {
     this.dialog.open(RecurringDetailsDialogComponent, {
       width: '520px',

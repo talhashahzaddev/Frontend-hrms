@@ -117,11 +117,11 @@
                       <mat-icon>visibility</mat-icon>
                       View details
                     </button>
-                    <button mat-menu-item (click)="editRecurring(row)">
+                    <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
                       <mat-icon>edit</mat-icon>
                       Edit
                     </button>
-                    <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action">
+                    <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
                       <mat-icon>delete</mat-icon>
                       Delete
                     </button>
@@ -344,11 +344,11 @@
                   <mat-icon>visibility</mat-icon>
                   View details
                 </button>
-                <button mat-menu-item (click)="editRecurring(row)">
+                <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
                   <mat-icon>edit</mat-icon>
                   Edit
                 </button>
-                <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action">
+                <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
                   <mat-icon>delete</mat-icon>
                   Delete
                 </button>
