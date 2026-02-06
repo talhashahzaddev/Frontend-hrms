@@ -299,5 +299,15 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     return `${hrs}h ${mins}m`;
   }
 
+  parseIP(ipString: string): string | null {
+  try {
+    const obj = JSON.parse(ipString);
+    return obj.ip || null;
+  } catch (e) {
+    return ipString || null; // fallback if it's already plain string
+  }
+}
+
+
 
 }

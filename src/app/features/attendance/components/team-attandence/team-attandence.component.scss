@@ -31,6 +31,29 @@
     }
   }
 
+  .ip-line {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* space between icon and IP */
+}
+
+.checkin-icon {
+  width: 10px;
+  height: 10px;
+  background-color: green;
+  border-radius: 50%; /* makes it a circle */
+  display: inline-block;
+}
+
+.checkout-icon {
+  width: 10px;
+  height: 10px;
+  background-color: red; /* or blue if you prefer */
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
   // Filters Card
   .filters-card {
     margin-bottom: 24px;

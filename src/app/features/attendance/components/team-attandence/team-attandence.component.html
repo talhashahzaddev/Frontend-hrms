@@ -261,14 +261,20 @@
             <span *ngIf="!attendance.notes" class="no-notes">--</span>
           </td>
         </ng-container>
-        <!-- IP Address Column -->
-            <ng-container matColumnDef="ipAddress">
-              <th mat-header-cell *matHeaderCellDef>IP Address</th>
-              <td mat-cell *matCellDef="let attendance">
-                {{ attendance.location || '--' }}
-              </td>
-            </ng-container>
-
+                <!-- IP Address Column -->
+                <ng-container matColumnDef="ipAddress">
+                  <th mat-header-cell *matHeaderCellDef>IP Address</th>
+                  <td mat-cell *matCellDef="let attendance">
+                    <div class="ip-line">
+                      <span class="checkin-icon"></span>
+                      {{ parseIP(attendance.checkinip) || '--' }}
+                    </div>
+                    <div class="ip-line">
+                      <span class="checkout-icon"></span>
+                      {{ parseIP(attendance.checkoutip) || '--' }}
+                    </div>
+                  </td>
+                </ng-container>
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>

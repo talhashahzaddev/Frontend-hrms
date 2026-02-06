@@ -16,6 +16,9 @@ export interface Attendance {
   notes?: string;
   ipAddress?: string;
   location?: string;
+  checkinip?: string;
+  checkoutip?: string;
+
 }
 
 // export interface DepartmentEmployee {
