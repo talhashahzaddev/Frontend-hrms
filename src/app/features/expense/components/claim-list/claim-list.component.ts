@@ -21,6 +21,7 @@ import { ExpenseDto, ExpenseCategoryDto } from '../../../../core/models/expense.
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { ClaimFormDialogComponent } from '../claim-form-dialog/claim-form-dialog.component';
 import { ClaimDetailsDialogComponent } from '../claim-details-dialog/claim-details-dialog.component';
 import {
@@ -97,11 +98,14 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   pendingClaims: ExpenseDto[] = [];
   isLoadingPending = false;
 
+  organizationCurrency = 'USD';
+
   constructor(
     private expenseService: ExpenseService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private settingsService: SettingsService
   ) {}
 
   get isSuperAdmin(): boolean {
@@ -109,6 +113,7 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadCategories();
     this.loadClaims();
     if (this.isSuperAdmin) {
@@ -138,6 +143,15 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency: string) => (this.organizationCurrency = currency || 'USD'),
+        error: () => (this.organizationCurrency = 'USD')
+      });
   }
 
   private loadCategories(): void {

@@ -22,7 +22,7 @@
   <div *ngIf="item && !loading" class="details">
     <div class="amount-card">
       <span class="amount-label">Amount</span>
-      <span class="amount-value">{{ item.amount | currency }}</span>
+      <span class="amount-value">{{ item.amount | currency:organizationCurrency }}</span>
     </div>
 
     <section class="detail-section">

@@ -19,6 +19,7 @@ import { RecurringExpenseDto, ExpenseCategoryDto } from '../../../../core/models
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { RecurringDetailsDialogComponent } from '../recurring-details-dialog/recurring-details-dialog.component';
 import { RecurringFormDialogComponent } from '../recurring-form-dialog/recurring-form-dialog.component';
 import {
@@ -89,11 +90,14 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   pendingRecurring: RecurringExpenseDto[] = [];
   isLoadingPending = false;
 
+  organizationCurrency = 'USD';
+
   constructor(
     private expenseService: ExpenseService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private settingsService: SettingsService
   ) {}
 
   get isSuperAdmin(): boolean {
@@ -101,6 +105,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadOrganizationCurrency();
     this.loadCategories();
     this.loadMyRecurring();
     if (this.isSuperAdmin) {
@@ -130,6 +135,15 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private loadOrganizationCurrency(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => (this.organizationCurrency = currency || 'USD'),
+        error: () => (this.organizationCurrency = 'USD')
+      });
   }
 
   private loadCategories(): void {

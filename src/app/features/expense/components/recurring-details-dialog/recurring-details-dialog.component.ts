@@ -9,6 +9,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { RecurringExpenseDto } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 
 export interface RecurringDetailsDialogData {
   recurringExpenseId: string;
@@ -33,15 +34,23 @@ export class RecurringDetailsDialogComponent implements OnInit {
   item: RecurringExpenseDto | null = null;
   loading = true;
   error: string | null = null;
+  organizationCurrency = 'USD';
 
   constructor(
     private dialogRef: MatDialogRef<RecurringDetailsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: RecurringDetailsDialogData,
     private expenseService: ExpenseService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => (this.organizationCurrency = currency || 'USD'),
+        error: () => (this.organizationCurrency = 'USD')
+      });
     this.expenseService
       .getRecurringExpenseById(this.data.recurringExpenseId)
       .pipe(takeUntil(this.destroy$))

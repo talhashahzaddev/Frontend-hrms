@@ -105,7 +105,7 @@
               <ng-container matColumnDef="amount">
                 <th mat-header-cell *matHeaderCellDef>Amount</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="amount">{{ row.amount | currency }}</span>
+                  <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="billDate">
@@ -241,7 +241,7 @@
               <ng-container matColumnDef="amount">
                 <th mat-header-cell *matHeaderCellDef>Amount</th>
                 <td mat-cell *matCellDef="let row">
-                  <span class="amount">{{ row.amount | currency }}</span>
+                  <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="billDate">
@@ -360,7 +360,7 @@
           <ng-container matColumnDef="amount">
             <th mat-header-cell *matHeaderCellDef>Amount</th>
             <td mat-cell *matCellDef="let row">
-              <span class="amount">{{ row.amount | currency }}</span>
+              <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
             </td>
           </ng-container>
           <ng-container matColumnDef="billDate">
@@ -452,7 +452,7 @@
           </div>
           <div class="claim-meta">
             <span class="claim-title">{{ request.title }}</span>
-            <span class="amount-badge">{{ request.amount | currency }}</span>
+            <span class="amount-badge">{{ request.amount | currency:organizationCurrency }}</span>
             <span class="bill-date">{{ request.billDate | date:'mediumDate' }}</span>
           </div>
         </div>
