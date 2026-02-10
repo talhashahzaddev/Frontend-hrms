@@ -142,7 +142,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, roles: ['Super Admin', 'HR Manager'] },
         { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true },
-        { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, roles: ['Super Admin', 'HR Manager'] }
+        { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, roles: ['Super Admin', 'HR Manager'] },
+        { label: 'Reports', icon: 'summarize', route: '/expense/pie-report', exact: true, roles: ['Super Admin'] }
       ]
     }
   ];

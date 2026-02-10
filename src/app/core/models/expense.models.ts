@@ -114,3 +114,10 @@ export interface UpdateRecurringExpenseRequest {
   merchant?: string | null;
   receiptUrl?: string | null;
 }
+
+/** Pie report item: category cost (categoryId, categoryName, totalCost). */
+export interface ExpensePieReportItemDto {
+  categoryId: string;
+  categoryName: string;
+  totalCost: number;
+}

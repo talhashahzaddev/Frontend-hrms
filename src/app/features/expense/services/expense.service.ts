@@ -13,7 +13,8 @@ import {
   ServiceResponse,
   RecurringExpenseDto,
   CreateRecurringExpenseRequest,
-  UpdateRecurringExpenseRequest
+  UpdateRecurringExpenseRequest,
+  ExpensePieReportItemDto
 } from '../../../core/models/expense.models';
 import { PagedResult } from '../../../core/models/common.models';
 
@@ -290,6 +291,33 @@ export class ExpenseService {
       .delete<ServiceResponse<boolean>>(`${this.apiUrl}/recurring/${id}`)
       .pipe(
         map((res) => res.success && res.data === true)
+      );
+  }
+
+  /**
+   * Get expense pie report (Super Admin): category-wise cost.
+   * Optional: fromDate, toDate (ISO date string); expense, recurring (boolean).
+   * If no dates, API uses current year.
+   */
+  getExpensePieReport(params: {
+    fromDate?: string | null;
+    toDate?: string | null;
+    expense?: boolean | null;
+    recurring?: boolean | null;
+  } = {}): Observable<ExpensePieReportItemDto[]> {
+    const queryParams: Record<string, string> = {};
+    if (params.fromDate != null && params.fromDate !== '') queryParams['fromDate'] = params.fromDate;
+    if (params.toDate != null && params.toDate !== '') queryParams['toDate'] = params.toDate;
+    if (params.expense != null) queryParams['expense'] = String(params.expense);
+    if (params.recurring != null) queryParams['recurring'] = String(params.recurring);
+
+    return this.http
+      .get<ServiceResponse<ExpensePieReportItemDto[]>>(`${this.apiUrl}/pie-report`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) return [];
+          return res.data;
+        })
       );
   }
 }
