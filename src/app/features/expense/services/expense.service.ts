@@ -14,7 +14,9 @@ import {
   RecurringExpenseDto,
   CreateRecurringExpenseRequest,
   UpdateRecurringExpenseRequest,
-  ExpensePieReportItemDto
+  ExpensePieReportItemDto,
+  ExpenseLineChartItemDto,
+  ExpenseBarChartItemDto
 } from '../../../core/models/expense.models';
 import { PagedResult } from '../../../core/models/common.models';
 
@@ -313,6 +315,54 @@ export class ExpenseService {
 
     return this.http
       .get<ServiceResponse<ExpensePieReportItemDto[]>>(`${this.apiUrl}/pie-report`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) return [];
+          return res.data;
+        })
+      );
+  }
+
+  /**
+   * Get expense line chart (Super Admin): cost per month for a year.
+   * Params: year (optional, default current), expense, recurring (boolean).
+   */
+  getExpenseLineChart(params: {
+    year?: number | null;
+    expense?: boolean;
+    recurring?: boolean;
+  } = {}): Observable<ExpenseLineChartItemDto[]> {
+    const queryParams: Record<string, string> = {};
+    if (params.year != null) queryParams['year'] = String(params.year);
+    if (params.expense != null) queryParams['expense'] = String(params.expense);
+    if (params.recurring != null) queryParams['recurring'] = String(params.recurring);
+
+    return this.http
+      .get<ServiceResponse<ExpenseLineChartItemDto[]>>(`${this.apiUrl}/line-chart`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) return [];
+          return res.data;
+        })
+      );
+  }
+
+  /**
+   * Get expense bar chart (Super Admin): cost per year for last N years.
+   * Params: years (optional, default 5), expense, recurring (boolean).
+   */
+  getExpenseBarChart(params: {
+    years?: number | null;
+    expense?: boolean;
+    recurring?: boolean;
+  } = {}): Observable<ExpenseBarChartItemDto[]> {
+    const queryParams: Record<string, string> = {};
+    if (params.years != null) queryParams['years'] = String(params.years);
+    if (params.expense != null) queryParams['expense'] = String(params.expense);
+    if (params.recurring != null) queryParams['recurring'] = String(params.recurring);
+
+    return this.http
+      .get<ServiceResponse<ExpenseBarChartItemDto[]>>(`${this.apiUrl}/bar-chart`, { params: queryParams })
       .pipe(
         map((res) => {
           if (!res.success || !res.data) return [];

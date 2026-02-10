@@ -121,3 +121,16 @@ export interface ExpensePieReportItemDto {
   categoryName: string;
   totalCost: number;
 }
+
+/** Line chart item: cost per month (month 1-12). */
+export interface ExpenseLineChartItemDto {
+  month: number;
+  monthName: string;
+  cost: number;
+}
+
+/** Bar chart item: cost per year. */
+export interface ExpenseBarChartItemDto {
+  year: number;
+  cost: number;
+}
