@@ -4,19 +4,19 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Subject, takeUntil } from 'rxjs';
 
-import { ExpenseDto } from '../../../../core/models/expense.models';
+import { RecurringExpenseDto } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
-import { Subject, takeUntil } from 'rxjs';
 
-export interface ClaimDetailsDialogData {
-  expenseId: string;
+export interface RecurringDetailsDialogData {
+  recurringExpenseId: string;
 }
 
 @Component({
-  selector: 'app-claim-details-dialog',
+  selector: 'app-recurring-details-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -25,20 +25,20 @@ export interface ClaimDetailsDialogData {
     MatIconModule,
     MatProgressSpinnerModule
   ],
-  templateUrl: './claim-details-dialog.component.html',
-  styleUrls: ['./claim-details-dialog.component.scss']
+  templateUrl: './recurring-details-dialog.component.html',
+  styleUrls: ['./recurring-details-dialog.component.scss']
 })
-export class ClaimDetailsDialogComponent implements OnInit {
+export class RecurringDetailsDialogComponent implements OnInit {
   private destroy$ = new Subject<void>();
 
-  claim: ExpenseDto | null = null;
+  item: RecurringExpenseDto | null = null;
   loading = true;
   error: string | null = null;
   organizationCurrency = 'USD';
 
   constructor(
-    private dialogRef: MatDialogRef<ClaimDetailsDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ClaimDetailsDialogData,
+    private dialogRef: MatDialogRef<RecurringDetailsDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: RecurringDetailsDialogData,
     private expenseService: ExpenseService,
     private notificationService: NotificationService,
     private settingsService: SettingsService
@@ -52,16 +52,16 @@ export class ClaimDetailsDialogComponent implements OnInit {
         error: () => (this.organizationCurrency = 'USD')
       });
     this.expenseService
-      .getExpenseById(this.data.expenseId)
+      .getRecurringExpenseById(this.data.recurringExpenseId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (expense) => {
-          this.claim = expense;
+        next: (recurring) => {
+          this.item = recurring;
           this.loading = false;
         },
         error: (err) => {
-          this.error = err?.error?.message || err?.message || 'Failed to load claim details';
-          this.notificationService.showError(this.error ?? 'Failed to load claim details');
+          this.error = err?.error?.message || err?.message || 'Failed to load recurring expense details';
+          this.notificationService.showError(this.error ?? 'Failed to load details');
           this.loading = false;
         }
       });
@@ -69,7 +69,7 @@ export class ClaimDetailsDialogComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const s = (status || '').toLowerCase();
-    if (s === 'approved' || s === 'paid') return 'status-success';
+    if (s === 'approved') return 'status-success';
     if (s === 'rejected') return 'status-warn';
     return 'status-pending';
   }

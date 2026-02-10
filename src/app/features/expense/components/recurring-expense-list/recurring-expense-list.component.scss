@@ -1,5 +1,5 @@
-// Claims List - same style as category-list
-.claim-list-container {
+// Recurring List - same style as claim-list
+.recurring-list-container {
   padding: 24px;
   max-width: 1600px;
   margin: 0 auto;
@@ -15,6 +15,21 @@
     background: white;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-actions .add-button {
+      height: 48px;
+      padding: 0 28px !important;
+      border-radius: 12px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+      mat-icon { margin-right: 8px; }
+      &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important; }
+    }
+
     .header-content {
       flex: 1;
       .page-title {
@@ -30,22 +45,8 @@
       }
       .page-subtitle { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
     }
-    .header-actions .add-button {
-      height: 48px;
-      padding: 0 28px !important;
-      border-radius: 12px !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-      mat-icon { margin-right: 8px; }
-      &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important; }
-    }
   }
 
-  // View tabs: My Claims (left) / All Claims (right)
   .view-tabs {
     display: flex;
     justify-content: space-between;
@@ -76,16 +77,8 @@
       cursor: pointer;
       outline: none;
       transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      -webkit-appearance: none;
-      appearance: none;
-      font-family: inherit;
 
-      mat-icon {
-        font-size: 22px;
-        width: 22px;
-        height: 22px;
-        color: inherit;
-      }
+      mat-icon { font-size: 22px; width: 22px; height: 22px; color: inherit; }
 
       &:hover {
         color: #667eea;
@@ -98,19 +91,11 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         border-color: transparent !important;
         box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-
-        mat-icon {
-          color: white !important;
-        }
-
-        &:hover {
-          box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
-        }
+        mat-icon { color: white !important; }
       }
     }
   }
 
-  // Sliding content area
   .view-content-wrapper {
     overflow: hidden;
     position: relative;
@@ -133,8 +118,7 @@
     min-width: 50%;
   }
 
-  // Claim Requests (Super Admin) – card style like leave Team Requests
-  .claim-requests-section {
+  .recurring-requests-section {
     margin-top: 40px;
     padding-top: 32px;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -147,12 +131,7 @@
       font-size: 24px;
       font-weight: 700;
       color: #1f2937;
-      mat-icon {
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
-        color: #667eea;
-      }
+      mat-icon { font-size: 28px; width: 28px; height: 28px; color: #667eea; }
     }
     .section-subtitle {
       margin: 0 0 24px;
@@ -173,12 +152,7 @@
   }
 
   .pending-approvals-section {
-    h3 {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1f2937;
-      margin: 0 0 24px;
-    }
+    h3 { font-size: 20px; font-weight: 600; color: #1f2937; margin: 0 0 24px; }
   }
 
   .approval-card {
@@ -194,9 +168,7 @@
     &::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
+      top: 0; left: 0; bottom: 0;
       width: 4px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       transform: scaleX(0);
@@ -207,9 +179,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       border-color: #667eea;
       transform: translateY(-2px);
-      &::before {
-        transform: scaleX(1);
-      }
+      &::before { transform: scaleX(1); }
     }
 
     .approval-header {
@@ -224,10 +194,8 @@
         display: flex;
         align-items: center;
         gap: 16px;
-
         .employee-avatar {
-          width: 56px;
-          height: 56px;
+          width: 56px; height: 56px;
           border-radius: 12px;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
@@ -237,23 +205,9 @@
           font-weight: 600;
           font-size: 20px;
           flex-shrink: 0;
-          box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
-
-        .employee-details {
-          h4 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0 0 4px;
-          }
-          p {
-            font-size: 14px;
-            color: #6b7280;
-            margin: 0;
-            font-weight: 500;
-          }
-        }
+        .employee-details h4 { font-size: 18px; font-weight: 600; color: #1f2937; margin: 0 0 4px; }
+        .employee-details p { font-size: 14px; color: #6b7280; margin: 0; }
       }
 
       .claim-meta {
@@ -264,11 +218,7 @@
         font-size: 14px;
         color: #374151;
         font-weight: 500;
-
-        .claim-title {
-          font-weight: 600;
-          color: #1f2937;
-        }
+        .claim-title { font-weight: 600; color: #1f2937; }
         .amount-badge {
           padding: 6px 12px;
           background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
@@ -277,9 +227,7 @@
           font-weight: 600;
           border: 1px solid rgba(102, 126, 234, 0.2);
         }
-        .bill-date {
-          color: #6b7280;
-        }
+        .rotation-badge { color: #6b7280; }
       }
     }
 
@@ -292,68 +240,35 @@
       font-size: 14px;
       color: #374151;
       line-height: 1.6;
-      strong {
-        color: #1f2937;
-        font-weight: 600;
-      }
     }
 
     .approval-actions {
       display: flex;
       gap: 12px;
       justify-content: flex-end;
-
       button {
         font-weight: 600;
         border-radius: 8px;
         height: 40px;
         padding: 0 20px !important;
         font-size: 14px !important;
-        transition: all 0.3s ease;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        line-height: 1 !important;
-        mat-icon {
-          margin-right: 6px;
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
+        mat-icon { margin-right: 6px; font-size: 18px; width: 18px; height: 18px; }
       }
-
       .btn-details {
         color: #b45309 !important;
         border-color: rgba(245, 158, 11, 0.5) !important;
         background: rgba(245, 158, 11, 0.08) !important;
-        &:hover {
-          background: rgba(245, 158, 11, 0.15) !important;
-        }
       }
-
       .approve-button {
-        height: 40px !important;
-        padding: 0 24px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         color: white !important;
         border: none !important;
         box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
-        }
-        mat-icon {
-          color: white !important;
-          margin-right: 8px;
-        }
       }
     }
   }
 
-  .claim-requests-section .empty-state {
+  .recurring-requests-section .empty-state {
     text-align: center;
     padding: 48px 24px;
     background: white;
@@ -386,24 +301,13 @@
     }
     .filters-content {
       padding: 24px;
-      .search-field { width: 100%; max-width: 400px; }
-      ::ng-deep .mat-mdc-text-field-wrapper { background: white; border-radius: 12px; }
-      mat-icon { color: #667eea !important; }
-    }
-    .filters-content-all-claims {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
       gap: 20px;
       .search-field { max-width: 280px; min-width: 200px; flex: 1 1 auto; }
-      .filter-field {
-        min-width: 140px;
-        &.date-field { min-width: 160px; }
-      }
-      ::ng-deep .mat-mdc-form-field {
-        .mat-mdc-text-field-wrapper { background: white; border-radius: 12px; }
-        .mat-mdc-select-value, .mat-mdc-floating-label { color: #374151; }
-      }
+      .filter-field { min-width: 140px; }
+      ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper { background: white; border-radius: 12px; }
       mat-icon { color: #667eea !important; }
     }
   }
@@ -424,7 +328,7 @@
     }
     .table-container {
       overflow-x: auto;
-      .claim-table {
+      .recurring-table {
         width: 100%;
         .category-name { font-weight: 500; color: #374151; }
         .show-details-btn {
@@ -434,17 +338,7 @@
           color: #b45309 !important;
           background: rgba(245, 158, 11, 0.12) !important;
           border: 1px solid rgba(245, 158, 11, 0.4) !important;
-          mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-            margin-right: 6px;
-            color: #b45309 !important;
-          }
-          &:hover {
-            background: rgba(245, 158, 11, 0.2) !important;
-            border-color: rgba(245, 158, 11, 0.6) !important;
-          }
+          mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; color: #b45309 !important; }
         }
         .amount { font-weight: 600; color: #1f2937; }
         ::ng-deep .mat-mdc-header-row {
@@ -485,18 +379,9 @@
   ::ng-deep mat-chip {
     font-size: 12px !important;
     font-weight: 600 !important;
-    &.status-pending {
-      background: rgba(245, 158, 11, 0.15) !important;
-      color: #d97706 !important;
-    }
-    &.status-success {
-      background: rgba(16, 185, 129, 0.15) !important;
-      color: #059669 !important;
-    }
-    &.status-warn {
-      background: rgba(239, 68, 68, 0.15) !important;
-      color: #dc2626 !important;
-    }
+    &.status-pending { background: rgba(245, 158, 11, 0.15) !important; color: #d97706 !important; }
+    &.status-success { background: rgba(16, 185, 129, 0.15) !important; color: #059669 !important; }
+    &.status-warn { background: rgba(239, 68, 68, 0.15) !important; color: #dc2626 !important; }
   }
 
   ::ng-deep .mat-mdc-menu-panel {
@@ -510,9 +395,9 @@
 }
 
 @media (max-width: 768px) {
-  .claim-list-container {
+  .recurring-list-container {
     padding: 16px;
-    .page-header { flex-direction: column; gap: 16px; .header-actions .add-button { width: 100%; } }
+    .page-header { flex-direction: column; gap: 16px; }
     .view-tabs {
       flex-direction: column;
       .view-tab { width: 100%; padding: 12px 20px; font-size: 14px; }
