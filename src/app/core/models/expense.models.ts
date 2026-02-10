@@ -114,3 +114,23 @@ export interface UpdateRecurringExpenseRequest {
   merchant?: string | null;
   receiptUrl?: string | null;
 }
+
+/** Pie report item: category cost (categoryId, categoryName, totalCost). */
+export interface ExpensePieReportItemDto {
+  categoryId: string;
+  categoryName: string;
+  totalCost: number;
+}
+
+/** Line chart item: cost per month (month 1-12). */
+export interface ExpenseLineChartItemDto {
+  month: number;
+  monthName: string;
+  cost: number;
+}
+
+/** Bar chart item: cost per year. */
+export interface ExpenseBarChartItemDto {
+  year: number;
+  cost: number;
+}

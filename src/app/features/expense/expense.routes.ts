@@ -23,5 +23,11 @@ export const expenseRoutes: Routes = [
     loadComponent: () =>
       import('@features/expense/components/recurring-expense-list/recurring-expense-list.component').then(m => m.RecurringExpenseListComponent),
     title: 'Recurring Expenses - HRMS'
+  },
+  {
+    path: 'expense-report',
+    loadComponent: () =>
+      import('@features/expense/components/expense-report/expense-report.component').then(m => m.ExpenseReportComponent),
+    title: 'Reports - HRMS'
   }
 ];
