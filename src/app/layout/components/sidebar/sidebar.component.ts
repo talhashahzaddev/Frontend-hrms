@@ -145,7 +145,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, roles: ['Super Admin', 'HR Manager'] },
         { label: 'Reports', icon: 'summarize', route: '/expense/expense-report', exact: true, roles: ['Super Admin'] }
       ]
-    }
+    },
+    {
+      label: 'News',
+      icon: 'event_available',
+      children: [
+        { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' }
+      ]
+    },
+    
   ];
 
   constructor(

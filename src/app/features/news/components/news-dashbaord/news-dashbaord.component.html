@@ -1,0 +1,156 @@
+<div class="news-dashboard-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>article</mat-icon>
+      <!-- Show title based on role -->
+      {{ (isEmployee || isManager) ? 'My News' : 'News Management' }}
+    </h1>
+
+    <!-- Header Actions (Create button) -->
+    <div class="header-actions" *ngIf="!isEmployee && !isManager">
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Create News
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters (only for Admins / HR / Super Admin) -->
+  <!-- Filters (only for Admins / HR / Super Admin) -->
+  <mat-card class="filters-card" *ngIf="!isEmployee && !isManager">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="loadNews()">
+
+        <!-- Search Field -->
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput formControlName="search" placeholder="Search news..." (keyup.enter)="loadNews()">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Status Field -->
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status" (selectionChange)="loadNews()">
+            <mat-option value="">All Statuses</mat-option>
+            <mat-option value="Draft">Draft</mat-option>
+            <mat-option value="Published">Published</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Filter Buttons -->
+        <div class="filter-actions">
+          <!-- Optional Apply Filters button if you want manual click -->
+          <button mat-raised-button color="primary" type="button" (click)="loadNews()">
+            <mat-icon>filter_list</mat-icon>
+            Apply Filters
+          </button>
+
+          <!-- Clear button resets filters and fetches all news -->
+          <button mat-stroked-button type="button" (click)="clearFilters()"
+            [disabled]="!filterForm.value.search && !filterForm.value.status">
+            <mat-icon>clear</mat-icon>
+            Clear
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+
+  <!-- News Table (always visible) -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="newsDataSource" class="news-table">
+          <!-- Title Column -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let news">{{ news.title }}</td>
+          </ng-container>
+
+          <!-- Category Column -->
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let news">{{ news.category }}</td>
+          </ng-container>
+
+          <!-- Status Column -->
+
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let news">
+              <!-- Toggle switch only editable for Admin / HR -->
+              <label class="switch" *ngIf="!isEmployee && !isManager" (click)="$event.stopPropagation()">
+                <input type="checkbox" [checked]="news.status === 'Published'" (click)="$event.stopPropagation()"
+                  (change)="onStatusToggle(news)" [disabled]="isLoading">
+                <span class="slider"></span>
+              </label>
+
+              <!-- Read-only status for Employee / Manager -->
+              <span *ngIf="isEmployee || isManager" class="toggle-label"
+                [ngClass]="{'published': news.status === 'Published', 'draft': news.status !== 'Published'}">
+                {{ news.status }}
+              </span>
+
+              <!-- Label next to switch for Admin/HR -->
+              <span *ngIf="!isEmployee && !isManager" class="toggle-label"
+                [ngClass]="{'published': news.status === 'Published', 'draft': news.status !== 'Published'}">
+                {{ news.status }}
+              </span>
+            </td>
+          </ng-container>
+
+
+
+          <!-- Published At Column -->
+          <ng-container matColumnDef="publishedAt">
+            <th mat-header-cell *matHeaderCellDef>Published At</th>
+            <td mat-cell *matCellDef="let news">{{ news.publishedAt | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <!-- Actions Column -->
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let news">
+              <!-- Show actions only for Admin / HR -->
+              <ng-container>
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions"
+                  (click)="$event.stopPropagation()">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="$event.stopPropagation(); openEditDialog(news)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Edit</span>
+                  </button>
+                  <button mat-menu-item (click)="$event.stopPropagation(); deleteNews(news.newsId)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </ng-container>
+            </td>
+          </ng-container>
+
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="openViewDialog(row)"
+            [ngClass]="{'news-read': row.isRead, 'news-unread': !row.isRead}"></tr>
+        </table>
+
+        <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[5,10,20]"
+          (page)="onPageChange($event)">
+        </mat-paginator>
+
+        <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="40"></mat-progress-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

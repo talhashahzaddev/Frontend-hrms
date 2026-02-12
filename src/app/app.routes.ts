@@ -98,6 +98,12 @@ export const appRoutes: Routes = [
       import('./features/calendar/calendar.routes').then(m => m.calendarRoutes),
     title: 'Calendar - HRMS'
   },
+   {
+    path: 'news',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/news/news.routes').then(m => m.newsRoutes),
+    title: 'Company News - HRMS'},
 
   // AI Assistant Route (accessible to all roles)
   {
