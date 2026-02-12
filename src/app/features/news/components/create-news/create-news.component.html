@@ -1,0 +1,109 @@
+<form [formGroup]="newsForm" (ngSubmit)="onSubmit()">
+	<div class="dialog-header">
+		<h2 mat-dialog-title>
+			<mat-icon>article</mat-icon>
+			{{ data.isEditMode ? 'Edit News' : 'Create News' }}
+		</h2>
+		<button mat-icon-button mat-dialog-close class="close-button">
+			<mat-icon>close</mat-icon>
+		</button>
+	</div>
+
+	<mat-dialog-content class="dialog-content">
+		<div class="form-row">
+			<mat-form-field appearance="outline" class="full-width">
+				<mat-label>Title *</mat-label>
+				<mat-icon matPrefix>title</mat-icon>
+				<input matInput formControlName="title" placeholder="Enter news title">
+				<mat-error *ngIf="newsForm.get('title')?.hasError('required')">Title is required</mat-error>
+			</mat-form-field>
+		</div>
+		<div class="form-row">
+			<mat-form-field appearance="outline" class="full-width">
+				<mat-label>Description *</mat-label>
+				<mat-icon matPrefix>description</mat-icon>
+				<textarea matInput formControlName="description" placeholder="Enter news description"
+					rows="3"></textarea>
+				<mat-error *ngIf="newsForm.get('description')?.hasError('required')">Description is required</mat-error>
+			</mat-form-field>
+		</div>
+		<div class="form-row two-columns">
+			<mat-form-field appearance="outline">
+				<mat-label>Category *</mat-label>
+				<mat-icon matPrefix>category</mat-icon>
+				<input matInput formControlName="category" placeholder="Enter category">
+				<mat-error *ngIf="newsForm.get('category')?.hasError('required')">Category is required</mat-error>
+			</mat-form-field>
+			<mat-form-field appearance="outline">
+				<mat-label>Status *</mat-label>
+				<mat-icon matPrefix>flag</mat-icon>
+				<mat-select formControlName="status">
+					<mat-option value="Draft">Draft</mat-option>
+					<mat-option value="Published">Published</mat-option>
+				</mat-select>
+				<mat-error *ngIf="newsForm.get('status')?.hasError('required')">Status is required</mat-error>
+			</mat-form-field>
+		</div>
+
+		<div class="form-row two-columns">
+			<mat-form-field appearance="outline" class="half-width">
+				<mat-label>Visible To *</mat-label>
+				<mat-icon matPrefix>visibility</mat-icon>
+				<mat-select formControlName="visibleTo">
+					<mat-option value="Everyone">Everyone</mat-option>
+					<mat-option value="Selected">Selected Employees</mat-option>
+				</mat-select>
+				<mat-error *ngIf="newsForm.get('visibleTo')?.hasError('required')">Visibility is required</mat-error>
+			</mat-form-field>
+			<ng-container *ngIf="showEmployeeDropdown">
+				<mat-form-field appearance="outline" class="half-width nested-employee-field">
+					<mat-label>Select Employees</mat-label>
+					<mat-icon matPrefix>group</mat-icon>
+					<mat-select formControlName="selectedEmployees" multiple>
+						<mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+							{{ emp.fullName }} ({{ emp.employeeCode }})
+						</mat-option>
+					</mat-select>
+				</mat-form-field>
+			</ng-container>
+		</div>
+
+		<div class="form-row">
+			<div class="image-input-container full-width">
+				<label for="imageInput">
+					<mat-icon>image</mat-icon>
+					Upload Image
+				</label>
+				<input id="imageInput" type="file" accept="image/*" [disabled]="isUploadingImage" #imageInputRef
+					(change)="onFileChange($event, imageInputRef)" />
+				<div *ngIf="isUploadingImage" class="upload-progress">
+					<mat-spinner diameter="24"></mat-spinner>
+					<span>Uploading...</span>
+				</div>
+				<div *ngIf="imageFileName && !isUploadingImage" class="file-info">
+					<mat-icon>insert_drive_file</mat-icon>
+					<span>{{ imageFileName }}</span>
+					<button mat-icon-button type="button" (click)="clearImage()" aria-label="Remove image">
+						<mat-icon>close</mat-icon>
+					</button>
+				</div>
+				<div class="image-preview" *ngIf="imagePreview">
+					<span>Preview:</span>
+					<img [src]="imagePreview" alt="Image preview" />
+				</div>
+			</div>
+		</div>
+	</mat-dialog-content>
+
+	<div class="dialog-actions">
+		<button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSubmitting">
+			Cancel
+		</button>
+		<button mat-raised-button color="primary" class="submit-button" type="submit"
+			[disabled]="newsForm.invalid || isSubmitting || isUploadingImage">
+			<mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+			<mat-icon *ngIf="!isSubmitting">save</mat-icon>
+			{{ isSubmitting ? 'Saving...' : (data.isEditMode ? 'Update News' : 'Create News') }}
+		</button>
+	</div>
+</form>
