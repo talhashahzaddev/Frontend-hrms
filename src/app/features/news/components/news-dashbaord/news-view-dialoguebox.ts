@@ -17,46 +17,49 @@ import { NewsDto } from '@/app/core/models/news.models';
     MatChipsModule
   ],
   template: `
+
   <div class="news-dialog-container">
 
-  <!-- Header -->
-  <div class="news-dialog-header">
-    <span class="dialog-title"> {{ data.news.title }}</span>
-
-    <button mat-icon-button mat-dialog-close class="close-btn">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-
-  <!-- News Details -->
-  <div class="news-details-section">
-    <div class="news-meta">
-      <div class="meta-item">
-        <span class="meta-label">Category</span>
-        <mat-chip class="news-category-chip">
-          {{ data.news.category }}
-        </mat-chip>
+    <!-- Header -->
+    <div class="news-dialog-header">
+      <div class="header-title-group">
+        <span class="dialog-title">{{ data.news.title }}</span>
+        <span class="dialog-author">Author :{{ data.news.authorName || 'Unknown' }}</span>
       </div>
+      <button mat-icon-button mat-dialog-close class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
 
-      <div class="meta-item">
-        <span class="meta-label">Status</span>
-        <mat-chip class="news-status-chip"
-                  [ngClass]="{
-                    'published': data.news.status === 'Published',
-                    'draft': data.news.status !== 'Published'
-                  }">
-          {{ data.news.status }}
-        </mat-chip>
-      </div>
+    <!-- News Details -->
+    <div class="news-details-section">
+      <div class="news-meta">
+        <div class="meta-item">
+          <span class="meta-label">Category</span>
+          <mat-chip class="news-category-chip">
+            {{ data.news.category }}
+          </mat-chip>
+        </div>
 
-      <div class="meta-item date">
-        <span class="meta-label">Published</span>
-        <span class="meta-value">
-          {{ data.news.publishedAt ? (data.news.publishedAt | date:'mediumDate') : 'Not published' }}
-        </span>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <mat-chip class="news-status-chip"
+                    [ngClass]="{
+                      'published': data.news.status === 'Published',
+                      'draft': data.news.status !== 'Published'
+                    }">
+            {{ data.news.status }}
+          </mat-chip>
+        </div>
+
+        <div class="meta-item date">
+          <span class="meta-label">Published</span>
+          <span class="meta-value">
+            {{ data.news.publishedAt ? (data.news.publishedAt | date:'mediumDate') : 'Not published' }}
+          </span>
+        </div>
       </div>
     </div>
-  </div>
 
   <!-- Image -->
   <div class="news-image-section" *ngIf="data.news.imageUrl">
@@ -88,44 +91,87 @@ import { NewsDto } from '@/app/core/models/news.models';
   `,
 
   styles: [`
+
   .news-dialog-container {
-  width: 100%;
-  max-width: 720px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  ::ng-deep .mat-mdc-dialog-container {
+    border-radius: 16px !important;
+    padding: 0 !important;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    max-width: 700px !important;
+    width: 90vw !important;
+    background: transparent !important;
+  }
 
 /* Header */
+
+
 .news-dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 24px 28px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
+
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: calc(100% - 48px);
+}
+
+
 .dialog-title {
-  font-size: 1.2rem;
+  font-size: 22px;
   font-weight: 700;
-  color: #ffffff;
+  color: #fff;
   margin: 0;
   line-height: 1.3;
-  max-width: calc(100% - 48px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+
+.dialog-author {
+  font-size: 0.85rem;
+  color: #e0e7ff;
+  font-weight: 400;
+  margin-top: 2px;
+  opacity: 0.95;
+  letter-spacing: 0.1px;
+}
+
+
 .close-btn {
-  color: #ffffff;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
 }
 
 /* Details */
+
 .news-details-section {
-  padding: 20px;
+  padding: 28px 28px 0 28px;
 }
 
 .news-meta {
@@ -176,11 +222,12 @@ import { NewsDto } from '@/app/core/models/news.models';
 }
 
 /* --- IMAGE CHANGES START HERE --- */
+
 .news-image-section {
-  padding: 0 20px 20px;
+  padding: 0 28px 20px 28px;
   display: flex;
-  justify-content: center; /* Keeps small images centered */
-  background: #ffffff;
+  justify-content: center;
+  background: #fff;
 }
 
 .news-image {
@@ -206,8 +253,9 @@ import { NewsDto } from '@/app/core/models/news.models';
 /* --- IMAGE CHANGES END HERE --- */
 
 /* Description */
+
 .news-description-section {
-  padding: 0 20px 20px;
+  padding: 0 28px 28px 28px;
 }
 
 .news-description-section h3 {
@@ -225,29 +273,33 @@ import { NewsDto } from '@/app/core/models/news.models';
 }
 
 /* Actions */
+
 .news-dialog-actions {
-  padding: 16px 20px;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: flex-end;
-  background: #fafafa;
+  gap: 12px;
 }
 
 /* Mobile */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .news-details-section,
   .news-image-section,
   .news-description-section,
   .news-dialog-actions {
     padding: 14px;
   }
-
   .dialog-title {
     font-size: 1rem;
   }
-
   .news-image {
-    max-height: 50vh; /* Shorter on mobile for better UX */
+    max-height: 50vh;
+  }
+  .news-dialog-actions {
+    flex-direction: column;
+    gap: 12px;
   }
 }
 

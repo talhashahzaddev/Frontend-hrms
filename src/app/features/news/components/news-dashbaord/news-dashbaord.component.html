@@ -105,8 +105,11 @@
             </td>
           </ng-container>
 
-
-
+           <!-- VisibleTo Column -->
+           <ng-container matColumnDef="VisibleTo">
+            <th mat-header-cell *matHeaderCellDef>Visible To</th>
+            <td mat-cell *matCellDef="let news">{{ news.visibleTo }}</td>
+          </ng-container>
           <!-- Published At Column -->
           <ng-container matColumnDef="publishedAt">
             <th mat-header-cell *matHeaderCellDef>Published At</th>
