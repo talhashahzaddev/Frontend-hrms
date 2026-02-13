@@ -18,7 +18,15 @@ export interface Attendance {
   location?: string;
   checkinip?: string;
   checkoutip?: string;
+  checkinLocationType?: string;
+  checkoutLocationType?: string;
+}
 
+export interface OfficeIP {
+  id: string;
+  ipAddressValue: string;
+  name: string;
+  createdAt: string;
 }
 
 // export interface DepartmentEmployee {

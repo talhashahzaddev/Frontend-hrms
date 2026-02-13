@@ -1,7 +1,19 @@
 <div class="settings-general-container">
   <div class="settings-header">
+    <div class="header-top">
     <h1 class="settings-title">General Settings</h1>
-    <p class="settings-subtitle">Manage your organization's general configuration</p>
+
+    <button class="btn btn-primary"
+            (click)="openManageOfficeIPsDialog()"
+            *ngIf="isSuperAdmin">
+      <mat-icon>settings</mat-icon>
+      Manage Office IPs
+    </button>
+  </div>
+
+    <p class="settings-description">
+      Configure your organization's general settings, including default currency and other preferences.
+    </p>
   </div>
 
   <div *ngIf="!isSuperAdmin" class="access-denied">
