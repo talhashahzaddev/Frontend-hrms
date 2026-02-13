@@ -20,11 +20,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { NewsViewDialogueboxComponent } from './news-view-dialoguebox';
 import { AuthService } from '@/app/core/services/auth.service';
 import { MatMenuModule } from '@angular/material/menu';
-
-
-
-
-
+import { is } from 'date-fns/locale';
 @Component({
   selector: 'app-news-dashbaord',
   standalone: true,
@@ -55,7 +51,7 @@ export class NewsDashbaordComponent implements OnInit {
   newsList: NewsDto[] = [];
   filteredNews: NewsDto[] = [];
   newsDataSource = new MatTableDataSource<NewsDto>([]);
-  displayedColumns: string[] = ['title', 'category', 'status', 'publishedAt', 'actions'];
+  displayedColumns: string[] = ['title', 'category', 'status', 'publishedAt'];
   // Toggle status for a news item
   onStatusToggle(news: NewsDto): void {
     const newStatus = news.status === 'Published' ? 'Draft' : 'Published';
@@ -102,6 +98,11 @@ export class NewsDashbaordComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadNews();
+    
+  if (this.isAdminOrHR) {
+    this.displayedColumns.push('VisibleTo');
+    this.displayedColumns.push('actions');
+  }
   }
 
   // Role helpers

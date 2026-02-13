@@ -14,6 +14,7 @@ export interface NewsDto {
   description: string;
   createdBy: string;
   category: string;
+  authorName:string;
   imageUrl?: string;
   publishedAt?: Date | string;
   status: string;
