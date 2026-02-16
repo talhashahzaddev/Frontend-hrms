@@ -1,7 +1,7 @@
 // Openings page - same style as claim-list
 .openings-container {
-  padding: 24px;
-  max-width: 1600px;
+  padding: 12px;
+  max-width: 1400px;
   margin: 0 auto;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
@@ -10,91 +10,56 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 24px;
-    padding: 24px;
+    margin-bottom: 12px;
+    padding: 12px 16px;
     background: white;
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
     .header-content {
       flex: 1;
+
       .page-title {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 0 0 8px;
-        font-size: 32px;
+        gap: 8px;
+        margin: 0 0 2px;
+        font-size: 20px;
         font-weight: 700;
         color: #1f2937;
         letter-spacing: -0.5px;
-        mat-icon { font-size: 36px; width: 36px; height: 36px; color: #667eea; }
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: #667eea;
+        }
       }
-      .page-subtitle { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: #6b7280;
+        font-weight: 500;
+      }
     }
+
     .header-actions .add-button {
-      height: 48px;
-      padding: 0 28px !important;
-      border-radius: 12px !important;
-      font-size: 15px !important;
+      height: 36px;
+      padding: 0 16px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
       font-weight: 600 !important;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
       color: white !important;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
       transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-      mat-icon { margin-right: 8px; }
-      &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important; }
-    }
-  }
-}
 
-// Filters card - same style as claim-list
-.filters-card {
-  margin-bottom: 24px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+      mat-icon {
+        margin-right: 8px;
+      }
 
-  mat-card-content {
-    padding: 20px 24px !important;
-  }
-}
-
-.filters-form {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-
-  .search-field {
-    min-width: 240px;
-    flex: 1;
-  }
-  .filter-field {
-    min-width: 140px;
-  }
-  .filter-field.date-field {
-    min-width: 180px;
-  }
-  .filter-actions {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    button {
-      border-radius: 12px !important;
-      font-weight: 600 !important;
-      mat-icon { margin-right: 6px; }
-    }
-    .apply-filters-btn {
-      height: 48px;
-      padding: 0 28px !important;
-      border-radius: 12px !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-      mat-icon { margin-right: 8px; }
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
@@ -103,8 +68,115 @@
   }
 }
 
-::ng-deep .filters-card .mat-mdc-form-field-subscript-wrapper {
-  display: none;
+// Filters card - same style as claim-list
+.filters-card {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  mat-card-content {
+    padding: 12px 16px !important;
+  }
+}
+
+.filters-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  .search-field {
+    min-width: 240px;
+    flex: 1;
+  }
+
+  .filter-field {
+    min-width: 140px;
+  }
+
+  .filter-field.date-field {
+    min-width: 180px;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    button {
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      font-size: 12px !important;
+
+      mat-icon {
+        margin-right: 4px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .apply-filters-btn {
+      height: 36px;
+      padding: 0 16px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+      }
+    }
+  }
+}
+
+::ng-deep .filters-card {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 36px !important;
+    padding: 0 12px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 36px !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    min-height: 36px !important;
+  }
+
+  .mdc-floating-label {
+    font-size: 13px !important;
+    top: 18px !important;
+  }
+
+  .mdc-floating-label--float-above {
+    transform: translateY(-24px) scale(0.85) !important;
+  }
+
+  input.mat-mdc-input-element {
+    font-size: 13px !important;
+  }
+
+  .mat-mdc-select-value {
+    font-size: 13px !important;
+  }
 }
 
 // Loading state
@@ -112,13 +184,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 48px 24px;
+  gap: 12px;
+  padding: 32px 20px;
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   color: #6b7280;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -126,13 +198,13 @@
 .jobs-feed-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .jobs-feed {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
 
 .jobs-pagination {
@@ -146,14 +218,17 @@
     background: transparent;
     border-radius: 16px;
   }
+
   ::ng-deep .mat-mdc-paginator-container {
     padding: 0 16px;
-    font-size: 14px;
+    font-size: 12px;
     color: #6b7280;
   }
+
   ::ng-deep .mat-mdc-paginator-page-size {
     align-items: center;
   }
+
   ::ng-deep .mat-mdc-paginator-range-actions button {
     color: #667eea;
   }
@@ -161,9 +236,9 @@
 
 .job-post-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 24px;
+  padding: 12px 16px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.25s ease;
 
@@ -175,15 +250,15 @@
 .job-post-header {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .job-post-avatar {
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   display: flex;
@@ -191,9 +266,9 @@
   justify-content: center;
 
   mat-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -203,8 +278,8 @@
 }
 
 .job-post-title {
-  margin: 0 0 6px;
-  font-size: 20px;
+  margin: 0 0 4px;
+  font-size: 16px;
   font-weight: 700;
   color: #1f2937;
   letter-spacing: -0.3px;
@@ -213,14 +288,14 @@
 
 .job-post-meta {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   color: #6b7280;
   font-weight: 500;
   line-height: 1.4;
 
   &.job-post-date {
-    margin-top: 4px;
-    font-size: 13px;
+    margin-top: 2px;
+    font-size: 11px;
     color: #9ca3af;
   }
 }
@@ -236,9 +311,9 @@
 
 .status-chip {
   display: inline-block;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
 
@@ -259,15 +334,15 @@
 }
 
 .job-post-body {
-  margin-bottom: 16px;
-  padding-top: 12px;
+  margin-bottom: 12px;
+  padding-top: 8px;
   border-top: 1px solid #f3f4f6;
 
   .job-intro {
     margin: 0;
-    font-size: 15px;
+    font-size: 13px;
     color: #374151;
-    line-height: 1.6;
+    line-height: 1.5;
     white-space: pre-wrap;
   }
 }
@@ -275,26 +350,26 @@
 .job-post-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .job-tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 4px;
+  padding: 6px 10px;
   background: #f9fafb;
-  border-radius: 10px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 600;
   color: #4b5563;
   border: 1px solid #e5e7eb;
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
     color: #667eea;
   }
 }
@@ -304,13 +379,13 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 16px;
+  gap: 10px;
+  padding-top: 12px;
   border-top: 1px solid #f3f4f6;
 }
 
 .job-last-date {
-  font-size: 13px;
+  font-size: 11px;
   color: #6b7280;
   font-weight: 500;
 }
@@ -320,43 +395,63 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+
   .action-btn {
-    border-radius: 10px !important;
-    font-size: 13px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
     font-weight: 600 !important;
+    padding: 0 10px !important;
+
     mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
       margin-right: 4px;
       vertical-align: middle;
     }
   }
-  .view-btn { border-color: #667eea; color: #667eea; }
-  .edit-btn { border-color: #059669; color: #059669; }
-  .delete-btn { border-color: #dc2626; color: #dc2626; }
+
+  .view-btn {
+    border-color: #667eea;
+    color: #667eea;
+  }
+
+  .edit-btn {
+    border-color: #059669;
+    color: #059669;
+  }
+
+  .delete-btn {
+    border-color: #dc2626;
+    color: #dc2626;
+  }
 }
 
 .apply-btn {
+  height: 32px !important;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: white !important;
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+  font-size: 11px !important;
+  padding: 0 12px !important;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
+
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    margin-right: 6px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
   }
 }
 
 // Empty state
 .empty-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 48px 24px;
+  padding: 32px 20px;
   text-align: center;
 
   mat-card-content {
@@ -367,22 +462,22 @@
   }
 
   .empty-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
     color: #d1d5db;
   }
 
   .empty-text {
     margin: 0;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
     color: #374151;
   }
 
   .empty-subtext {
     margin: 0;
-    font-size: 14px;
+    font-size: 12px;
     color: #6b7280;
   }
 
@@ -392,6 +487,9 @@
     color: white !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
-    mat-icon { margin-right: 8px; }
+
+    mat-icon {
+      margin-right: 8px;
+    }
   }
 }
