@@ -1,16 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Subject, takeUntil } from 'rxjs';
 import { SettingsService, OrganizationSettings } from '../../services/settings.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { ManageOfficeIPsDialogComponent } from '../../../attendance/components/manage-office-ips-dialog/manage-office-ips-dialog.component';
 
 @Component({
   selector: 'app-settings-general',
@@ -23,7 +25,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   templateUrl: './settings-general.component.html',
   styleUrls: ['./settings-general.component.scss']
@@ -44,7 +47,8 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private settingsService: SettingsService,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private dialog: MatDialog
   ) {
     this.settingsForm = this.fb.group({
       currency: ['', Validators.required]
@@ -143,5 +147,14 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     if (!currencyCode) return '';
     const currency = this.availableCurrencies.find(c => c.code === currencyCode);
     return currency ? currency.symbol : '';
+  }
+
+  openManageOfficeIPsDialog(): void {
+    this.dialog.open(ManageOfficeIPsDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      panelClass: 'manage-office-ips-dialog',
+      data: {}
+    });
   }
 }
