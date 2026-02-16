@@ -162,7 +162,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' }
       ]
     },
-    
+    {
+      label: 'Jobs',
+      icon: 'work',
+      children: [
+        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings' }
+      ]
+    }
   ];
 
   constructor(
