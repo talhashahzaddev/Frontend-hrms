@@ -103,7 +103,17 @@ export const appRoutes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./features/news/news.routes').then(m => m.newsRoutes),
-    title: 'Company News - HRMS'},
+    title: 'Company News - HRMS'
+  },
+
+  // Jobs Module Routes (all roles)
+  {
+    path: 'jobs',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/jobs/jobs.routes').then(m => m.jobsRoutes),
+    title: 'Jobs - HRMS'
+  },
 
   // AI Assistant Route (accessible to all roles)
   {

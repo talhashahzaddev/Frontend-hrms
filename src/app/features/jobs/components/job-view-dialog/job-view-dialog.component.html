@@ -1,0 +1,107 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>work</mat-icon>
+    Job Details
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading...</p>
+  </div>
+
+  <div class="error-state" *ngIf="!isLoading && error">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="job-details" *ngIf="!isLoading && job">
+    <div class="detail-section">
+      <h3 class="detail-title">{{ job.jobRoleName }}</h3>
+      <p class="detail-meta" *ngIf="getMetaLine(job)">{{ getMetaLine(job) }}</p>
+      <span class="status-chip" [class.status-open]="job.status === 'Open'" [class.status-closed]="job.status === 'Closed'" [class.status-draft]="job.status === 'Draft'">
+        {{ job.status }}
+      </span>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-row">
+        <span class="detail-label">Department</span>
+        <span class="detail-value">{{ job.departmentName || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Location</span>
+        <span class="detail-value">{{ job.location || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Work mode</span>
+        <span class="detail-value">{{ job.workMode || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Employment type</span>
+        <span class="detail-value">{{ job.employmentType || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Experience</span>
+        <span class="detail-value">{{ getExperienceText(job) }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">CTC</span>
+        <span class="detail-value">{{ getCtcText(job) }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Vacancies</span>
+        <span class="detail-value">{{ job.vacancies }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Posted as</span>
+        <span class="detail-value">{{ job.postedAs || '—' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section dates-section">
+      <h4 class="detail-heading">Dates</h4>
+      <div class="dates-list">
+        <div class="detail-row standalone">
+          <span class="detail-label">Posted date</span>
+          <span class="detail-value">{{ job.postedDate ? (job.postedDate | date:'mediumDate') : '—' }}</span>
+        </div>
+        <div class="detail-row standalone">
+          <span class="detail-label">Last date to apply</span>
+          <span class="detail-value">{{ job.lastDate ? (job.lastDate | date:'mediumDate') : '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section" *ngIf="job.externalLink">
+      <span class="detail-label">External link</span>
+      <a [href]="job.externalLink" target="_blank" rel="noopener noreferrer" class="detail-link">{{ job.externalLink }}</a>
+    </div>
+
+    <div class="detail-section" *ngIf="job.jobIntroduction">
+      <h4 class="detail-heading">Introduction</h4>
+      <p class="detail-text">{{ job.jobIntroduction }}</p>
+    </div>
+    <div class="detail-section" *ngIf="job.responsibilities">
+      <h4 class="detail-heading">Responsibilities</h4>
+      <p class="detail-text">{{ job.responsibilities }}</p>
+    </div>
+    <div class="detail-section" *ngIf="job.skillset">
+      <h4 class="detail-heading">Skillset</h4>
+      <p class="detail-text">{{ job.skillset }}</p>
+    </div>
+
+    <div class="detail-section" *ngIf="job.createdByName">
+      <span class="detail-label">Created by</span>
+      <span class="detail-value">{{ job.createdByName }}</span>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-flat-button mat-dialog-close class="close-btn">Close</button>
+</mat-dialog-actions>
