@@ -1,7 +1,7 @@
 // Openings page - same style as claim-list
 .openings-container {
   padding: 12px;
-  max-width: 1400px;
+  max-width: auto;
   margin: 0 auto;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
@@ -202,9 +202,13 @@
 }
 
 .jobs-feed {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 12px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .jobs-pagination {
