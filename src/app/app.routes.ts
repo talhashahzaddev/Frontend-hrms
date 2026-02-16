@@ -64,7 +64,14 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('./features/attendance/attendance.routes').then(m => m.attendanceRoutes)
   },
-
+  // Assets Management Routes
+  {
+    path: 'assets',
+    canActivate: [AuthGuard],
+    loadChildren: () => 
+      import('./features/assets/assets.routes').then(m => m.assetsRoutes)
+  },
+  
   // Leave Management Routes
   {
     path: 'leave',

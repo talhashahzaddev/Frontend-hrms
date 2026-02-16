@@ -1,0 +1,65 @@
+<div class="container">
+    <!-- Header Section -->
+    <div class="header-card">
+        <div class="header-content">
+            <div class="header-left">
+                <h1><i class="fas fa-box"></i> Asset Types</h1>
+                <p>Manage your asset categories and types.</p>
+            </div>
+            <div class="header-right">
+                <button class="create-btn" (click)="openCreateDialog()">
+                    <i class="fas fa-plus"></i> Create Asset Type
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Asset Types Table -->
+    <div class="table-section">
+        <div class="table-header">
+            <h2>All Asset Types</h2>
+            <div class="filter-controls">
+                <mat-form-field appearance="outline" class="search-field">
+                    <mat-label>Search Asset Types</mat-label>
+                    <input matInput (keyup)="onSearchChange($event)" placeholder="Search by name, description...">
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+                <button mat-stroked-button class="clear-filters-btn" (click)="clearFilters()">
+                    <i class="fas fa-times"></i> Clear Filters
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="asset-table">
+                <thead>
+                    <tr>
+                        <th>ASSET TYPE</th>
+                        <th>DESCRIPTION</th>
+                        <th>CREATED DATE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let item of filteredTypes; let i = index">
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.description || 'No description' }}</td>
+                            <td>{{ item.createdAt | date:'mediumDate' }}</td>
+                            <td>
+                                <button class="action-btn edit-btn" (click)="openEditDialog(item)" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" (click)="delete(item)" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+        <div class="hint" *ngIf="filteredTypes.length === 0">
+            {{ searchQuery ? 'No asset types found matching your search.' : 'No asset types created yet.' }}
+        </div>
+    </div>
+</div>
