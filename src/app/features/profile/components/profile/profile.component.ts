@@ -64,7 +64,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   selectedProfileFile: File | null = null;
   profilePreviewUrl: string | ArrayBuffer | null = null;
-
+isUploadingProfileImage: boolean = false;
   private backendBaseUrl = 'https://localhost:60485';
 
   constructor(
@@ -117,7 +117,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       positionId: [''],
       reportingManagerId: [''],
       managerName: [''],
-      roleId: ['']
+      roleId: [''],
+      profileurl: ['']
     });
 
     this.passwordForm = this.formBuilder.group({
@@ -246,15 +247,49 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
       });
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedProfileFile = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => this.profilePreviewUrl = reader.result;
-      reader.readAsDataURL(this.selectedProfileFile);
+  // onFileSelected(event: Event): void {
+  //   const input = event.target as HTMLInputElement;
+  //   if (input.files && input.files.length > 0) {
+  //     this.selectedProfileFile = input.files[0];
+  //     const reader = new FileReader();
+  //     reader.onload = () => this.profilePreviewUrl = reader.result;
+  //     reader.readAsDataURL(this.selectedProfileFile);
+  //   }
+  // }
+
+  onFileSelected(event: Event, input?: HTMLInputElement): void {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  this.selectedProfileFile = file;
+
+  // Preview
+  const reader = new FileReader();
+  reader.onload = () => {
+    this.profilePreviewUrl = reader.result as string;
+  };
+  reader.readAsDataURL(file);
+
+
+  // Upload using your existing service
+  this.authService.uploadProfilePic(file).subscribe({
+    next: (url: string) => {
+      // Save URL in form (use 'profileurl' key)
+      this.profileForm.patchValue({ profileurl: url });
+      this.isUploadingProfileImage = false;
+      this.notificationService.showSuccess('Profile image uploaded successfully');
+    },
+    error: (err: any) => {
+      this.notificationService.showError(err?.message || 'Profile image upload failed');
+      this.isUploadingProfileImage = false;
+      this.profilePreviewUrl = null;
+      this.profileForm.patchValue({ profileurl: '' });
+      this.selectedProfileFile = null;
     }
-  }
+  });
+
+  if (input) input.value = '';
+}
+
 
   onPositionChange(selectedPosition: any) {
     if (!selectedPosition) return;
@@ -299,20 +334,16 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
     if (formValue.dateOfBirth) formData.append('DateOfBirth', new Date(formValue.dateOfBirth).toISOString());
 
 
-// Profile picture
-if (this.selectedProfileFile) {
-  formData.append('profileurl', this.selectedProfileFile); // new file
- } 
 
-
-    
+    // Profile picture URL (always send, regardless of file selection)
+    formData.append('profileurl', formValue.profileurl || '');
+    console.log('Image URL from form:', formValue.profileurl);
 
   this.authService.updateProfile(formData)
   .pipe(takeUntil(this.destroy$))
   .subscribe({
     next: (res: any) => {
       this.isLoading = false;
-
       // Handle backend success=false even if HTTP 200
       if (res?.success === false) {
         this.notificationService.showError(res.message || 'Failed to update profile');
@@ -353,8 +384,6 @@ if (this.selectedProfileFile) {
   });
 
 
-
-
   }
 
 onChangePassword(): void {
@@ -371,17 +400,6 @@ onChangePassword(): void {
     .subscribe({
       next: (res) => {
         this.isPasswordLoading = false;
-
-        // Reset form values
-        // this.passwordForm.reset({
-        //   currentPassword: '',
-        //   newPassword: '',
-        //   confirmPassword: ''
-        // });
-
-        // Clear validation states
-   
-       // Reset form values and state
 this.passwordForm.reset();
 
 // Clear errors manually for all controls
@@ -408,58 +426,6 @@ this.passwordForm.setErrors(null);
       }
     });
 }
-
-
-
-// onChangePassword(): void {
-//   if (!this.passwordForm.valid) return;
-//   this.isPasswordLoading = true;
-
-//   const changePasswordRequest = {
-//     currentPassword: this.passwordForm.get('currentPassword')?.value,
-//     newPassword: this.passwordForm.get('newPassword')?.value
-//   };
-
-//   this.authService.changePassword(changePasswordRequest)
-//     .pipe(takeUntil(this.destroy$))
-//     .subscribe({
-//       next: (res) => {
-//         this.isPasswordLoading = false;
-//       //   this.passwordForm.reset();
-//       //  this.passwordForm.markAsPristine();
-//       //   this.passwordForm.markAsUntouched();
-
-//       this.passwordForm.reset({
-//   currentPassword: '',
-//   newPassword: '',
-//   confirmPassword: ''
-// });
-// this.passwordForm.markAsPristine();
-// this.passwordForm.markAsUntouched();
-// Object.keys(this.passwordForm.controls).forEach(key => {
-//   const control = this.passwordForm.get(key);
-//   control?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-// });
-
-        
-//         if (res.success) {
-//           // Password changed successfully
-//           this.notificationService.showSuccess(res.message || 'Password updated successfully!');
-//         } else {
-//           // Backend returned a validation message (e.g., same password)
-//           this.notificationService.showWarning(res.message || 'New password must be different from old password.');
-//         }
-//       },
-//       error: (error) => {
-//         this.isPasswordLoading = false;
-//         // Real server/network errors
-//         const errorMessage = error?.message || 'Failed to update password';
-//         this.notificationService.showError(errorMessage);
-//       }
-//     });
-// }
-
-
 
   resetForm(): void {
     this.profileForm.reset();
