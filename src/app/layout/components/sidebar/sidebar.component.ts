@@ -25,17 +25,17 @@ interface MenuItem {
 }
 
 @Component({
-    selector: 'app-sidebar',
-    imports: [
-        CommonModule,
-        RouterModule,
-        MatListModule,
-        MatIconModule,
-        MatExpansionModule,
-        MatTooltipModule
-    ],
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.scss']
+  selector: 'app-sidebar',
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatListModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatTooltipModule
+  ],
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   @Output() menuItemClick = new EventEmitter<void>();
@@ -44,7 +44,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   activeRoute = '';
   activeItemKey: string | null = null;
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
-  
+
   private destroy$ = new Subject<void>();
 
   menuItems: MenuItem[] = [
@@ -80,7 +80,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Time Tracker', icon: 'timer', route: '/attendance/time-tracker' },
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', roles: ['Super Admin', 'HR Manager', 'Manager'] },
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] },
-         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift' },
+        { label: 'Shifts', icon: 'access_time', route: '/attendance/shift' },
       ]
     },
     {
@@ -120,6 +120,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
+      label: 'Calendar',
+      icon: 'calendar_month',
+      route: '/calendar'
+    },
+    {
       label: 'AI Assistant',
       icon: 'smart_toy',
       route: '/ai-assistant'
@@ -129,13 +134,32 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'subscriptions',
       route: '/subscription',
       roles: ['Super Admin']
-    }
+    },
+    {
+      label: 'Expense',
+      icon: 'receipt_long',
+      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee'],
+      children: [
+        { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, roles: ['Super Admin', 'HR Manager'] },
+        { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true },
+        { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, roles: ['Super Admin', 'HR Manager'] },
+        { label: 'Reports', icon: 'summarize', route: '/expense/expense-report', exact: true, roles: ['Super Admin'] }
+      ]
+    },
+    {
+      label: 'News',
+      icon: 'event_available',
+      children: [
+        { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' }
+      ]
+    },
+    
   ];
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subscribeToUser();
@@ -176,7 +200,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       return this.activeRoute === child.route || this.activeRoute.startsWith(child.route + '/');
     });
   }
-  
+
   isGroupContainsActive(item: MenuItem): boolean {
     if (!item.children) return false;
     const children = this.getFilteredChildren(item.children);
@@ -187,7 +211,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (!item.roles || item.roles.length === 0) {
       return true;
     }
-    
+
     return this.authService.hasAnyRole(item.roles);
   }
 

@@ -44,7 +44,10 @@ export class ErrorInterceptor implements HttpInterceptor {
       case 403:
         errorMessage = 'You do not have permission to perform this action.';
         this.notificationService.permissionDenied();
-        this.router.navigate(['/403']);
+        // Only navigate to 403 page for non-API 403 (e.g. route guard). For API 403, stay on current page and show toast.
+        if (!this.isApiCall(error.url)) {
+          this.router.navigate(['/403']);
+        }
         break;
         
       case 404:

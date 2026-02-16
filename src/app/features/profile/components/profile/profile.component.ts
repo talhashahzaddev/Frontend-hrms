@@ -307,21 +307,54 @@ if (this.selectedProfileFile) {
 
     
 
-    this.authService.updateProfile(formData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.notificationService.showSuccess('Profile updated successfully!');
-          if (this.currentUser?.userId) this.loadEmployeeDetail(this.currentUser.userId);
-        },
-        error: (error) => {
-          this.isLoading = false;
-          console.error('Update failed:', error);
-          const message = error?.error?.message || 'Failed to update profile';
-          this.notificationService.showError(message);
+  this.authService.updateProfile(formData)
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: (res: any) => {
+      this.isLoading = false;
+
+      // Handle backend success=false even if HTTP 200
+      if (res?.success === false) {
+        this.notificationService.showError(res.message || 'Failed to update profile');
+        return;
+      }
+
+      // Otherwise success
+      this.notificationService.showSuccess('Profile updated successfully!');
+      if (this.currentUser?.userId) this.loadEmployeeDetail(this.currentUser.userId);
+    },
+    error: (error: any) => {
+      this.isLoading = false;
+
+      // Default fallback message
+      let message = 'Failed to update profile';
+
+      if (error) {
+        // Backend returns JSON error
+        if (error.error) {
+          // Case 1: error.error is object
+          if (typeof error.error === 'object' && error.error.message) {
+            message = error.error.message;
+          }
+          // Case 2: error.error is string
+          else if (typeof error.error === 'string') {
+            message = error.error;
+          }
         }
-      });
+        // Sometimes Angular wraps the message differently
+        else if (error.message) {
+          message = error.message;
+        }
+      }
+
+      this.notificationService.showError(message);
+      console.error('Update failed:', error);
+    }
+  });
+
+
+
+
   }
 
 onChangePassword(): void {

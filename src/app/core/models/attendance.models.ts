@@ -4,6 +4,7 @@ export interface Attendance {
   employeeName: string;
   workDate: string;
   date: string;
+  shiftId?: string;
   checkInTime?: string;
   checkOutTime?: string;
   checkInLocation?: string;
@@ -11,8 +12,21 @@ export interface Attendance {
   totalHours: number;
   overtimeHours: number;
   status: string;
-  sessionsCount:number;
+  sessionsCount: number;
   notes?: string;
+  ipAddress?: string;
+  location?: string;
+  checkinip?: string;
+  checkoutip?: string;
+  checkinLocationType?: string;
+  checkoutLocationType?: string;
+}
+
+export interface OfficeIP {
+  id: string;
+  ipAddressValue: string;
+  name: string;
+  createdAt: string;
 }
 
 // export interface DepartmentEmployee {
@@ -73,6 +87,8 @@ export interface Shift {
   gracePeriod: number; // in minutes
   workingDays: string[]; // ['monday', 'tuesday', etc.]
   createdAt: string;
+  marginHours?: number;
+  applyMarginhours?: boolean;
 }
 
 export interface AttendanceRecord {
@@ -97,7 +113,9 @@ export interface CheckOutRequest {
 
 export interface ClockInOutRequest {
   action: string;
+  shiftId : string | null ; 
   location?: { [key: string]: any };
+  notes?: string;
 }
 
 export interface ManualAttendanceRequest {
@@ -229,6 +247,7 @@ export interface AttendanceCalendarData {
   totalHours: number;
   isWorkingDay: boolean;
   isHoliday: boolean;
+  notes?: string;
 }
 
 
@@ -239,7 +258,9 @@ export interface UpdateShiftDto {
   endTime: string;         
   breakDuration?: number;  
   daysofWeek?: number[];  
-  timezone?: string;       
+  timezone?: string;
+  marginHours?: number;
+  applyMarginhours?: boolean;       
 }
 
 
@@ -252,6 +273,9 @@ export interface ShiftDto {
   daysOfWeek: number[];
   timezone: string;
   isActive: boolean;
+  marginHours?: number;
+  applyMarginhours?: boolean; 
+
 }
 
 // assign-shift-request.model.ts
@@ -283,11 +307,11 @@ export interface PendingShiftSwap {
   status: string; // approved | rejected | pending
 }
 
-export interface approvedshiftRequest{
-  requestId:string;
-  approvedBy:string;
-  isApproved:boolean;
-  rejectionReason:string;
+export interface approvedshiftRequest {
+  requestId: string;
+  approvedBy: string;
+  isApproved: boolean;
+  rejectionReason: string;
 }
 
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, throwError, map } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError, map, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
 import {
@@ -30,6 +30,10 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
   private isRedirecting = false;
+  private isLoggingOut = false;
+  private isLoggingOutSubject = new BehaviorSubject<boolean>(false);
+  
+  public isLoggingOut$ = this.isLoggingOutSubject.asObservable();
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
@@ -146,21 +150,41 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    // Clear auth data BEFORE redirecting to prevent race conditions
-    this.clearAuthData();
+    // Set flags to prevent layout breaking and show loading
+    this.isLoggingOut = true;
     this.isRedirecting = true;
+    this.isLoggingOutSubject.next(true);
 
-    return this.http.post<ApiResponse<boolean>>(`${this.API_URL}/logout`, {})
+    // Make API call in background (fire and forget) - don't wait for response
+    // This ensures smooth logout without delay
+    this.http.post<ApiResponse<boolean>>(`${this.API_URL}/logout`, {})
       .pipe(
-        tap(() => {
-          this.redirectToLoginSubdomain();
-        }),
         catchError(() => {
-          // Even if the API call fails, still redirect to login
-          this.redirectToLoginSubdomain();
+          // Silently handle errors - we're redirecting anyway
           return throwError(() => new Error('Logout failed'));
         })
-      );
+      )
+      .subscribe({
+        next: () => {
+          // API call succeeded, but we're already redirecting
+        },
+        error: () => {
+          // API call failed, but we're already redirecting
+        }
+      });
+
+    // Small delay to ensure loading overlay is visible before redirect
+    // This prevents the screen from shrinking
+    setTimeout(() => {
+      // Clear auth data and redirect immediately for smooth logout experience
+      this.clearAuthData();
+      
+      // Redirect immediately - no delay for smooth transition
+      this.redirectToLoginSubdomain();
+    }, 100);
+
+    // Return an observable that completes immediately
+    return of(true);
   }
 
   /**
@@ -205,8 +229,8 @@ export class AuthService {
 
     console.log(`Redirecting to login subdomain: ${loginUrl}`);
 
-    // Redirect to login subdomain
-    window.location.href = loginUrl;
+    // Use replace instead of href for faster, smoother redirect without adding to history
+    window.location.replace(loginUrl);
   }
 
 
@@ -519,5 +543,8 @@ export class AuthService {
     }
 
     return throwError(() => new Error(errorMessage));
+  }
+  verifyEmail(token: string) {
+    return this.http.get<any>(`${this.API_URL}/verify-email?token=${token}`);
   }
 }

@@ -149,3 +149,19 @@
     }
   }
 }
+// Ensure page-content is positioned for zoom
+.page-content {
+  position: relative;
+  transform-origin: top left;
+  overflow: auto; // Allow scrolling when zoomed
+  min-height: calc(100vh - 72px); // Subtract header height
+  
+  // Smooth zoom transition
+  transition: zoom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Ensure content wrapper doesn't break layout when zoomed
+.content-wrapper {
+  position: relative;
+  width: 100%;
+}

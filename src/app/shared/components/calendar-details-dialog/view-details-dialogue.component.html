@@ -1,0 +1,146 @@
+<div class="dialog-header">
+  <div class="header-content">
+    <h2 mat-dialog-title> Day Details </h2>
+    <span class="date-badge">{{ data.date | date:'fullDate' }}</span>
+  </div>
+  <button mat-icon-button (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content custom-scrollbar">
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- LEAVE DETAILS SECTION -->
+  <div *ngIf="isLeave" class="section-container leave-section">
+    <div class="section-header">
+      <mat-icon class="section-icon">event_busy</mat-icon>
+      <h3>Leave Details</h3>
+      <div class="status-chip" [ngClass]="leaveStatusClass">
+        <mat-icon>{{ leaveStatusIcon }}</mat-icon>
+        <span>{{ leaveEvent?.status | titlecase }}</span>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <div class="detail-item">
+        <span class="label">Leave Type</span>
+        <span class="value">{{ leaveEvent?.details?.leaveType || leaveEvent?.title || 'Time Off' }}</span>
+      </div>
+      <div class="detail-item full-width">
+        <span class="label">Reason</span>
+        <span class="value reason-text">{{ leaveEvent?.details?.reason || 'No reason provided' }}</span>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+  </div>
+
+  <!-- SHIFT DETAILS SECTION -->
+  <div class="section-container shift-section">
+    <div class="section-header">
+      <mat-icon class="section-icon">schedule</mat-icon>
+      <h3>Shift Details</h3>
+    </div>
+
+    <div *ngIf="currentShift; else noShift" class="shift-details">
+      <div class="detail-item">
+        <span class="label">Shift Name</span>
+        <span class="value highlight">{{ currentShift.shiftName }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Timings</span>
+        <div class="time-range">
+          <span class="time">{{ formatShiftTime(currentShift.startTime) }}</span>
+          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+          <span class="time">{{ formatShiftTime(currentShift.endTime) }}</span>
+        </div>
+      </div>
+    </div>
+    <ng-template #noShift>
+      <p class="no-data-text">No shift assigned.</p>
+    </ng-template>
+    <mat-divider></mat-divider>
+  </div>
+
+  <!-- ATTENDANCE DETAILS SECTION -->
+  <div *ngIf="attendanceEvent" class="section-container attendance-section">
+    <div class="section-header">
+      <mat-icon class="section-icon">fingerprint</mat-icon>
+      <h3>Attendance</h3>
+      <span class="status-badge" [ngClass]="attendanceEvent.status.toLowerCase()">
+        {{ attendanceEvent.status }}
+      </span>
+    </div>
+
+    <!-- DAILY UPDATE / NOTES SECTION -->
+    <div *ngIf="attendanceEvent.details?.notes" class="daily-update-card">
+      <div class="update-header">
+        <mat-icon>assignment</mat-icon>
+        <span>Daily Update</span>
+      </div>
+      <p class="update-text">{{ attendanceEvent.details!.notes }}</p>
+    </div>
+
+    <div class="stats-cards">
+      <div class="stat-card">
+        <mat-icon class="check-in">login</mat-icon>
+        <div class="stat-info">
+          <span class="label">Check In</span>
+          <span class="value">{{ (attendanceEvent.details?.checkInTime | date:'shortTime') || '--:--' }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <mat-icon class="check-out">logout</mat-icon>
+        <div class="stat-info">
+          <span class="label">Check Out</span>
+          <span class="value">{{ (attendanceEvent.details?.checkOutTime | date:'shortTime') || '--:--' }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <mat-icon class="hours">timer</mat-icon>
+        <div class="stat-info">
+          <span class="label">Total Hours</span>
+          <span class="value">{{ attendanceEvent.details?.totalHours || '0h' }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <mat-icon class="overtime">av_timer</mat-icon>
+        <div class="stat-info">
+          <span class="label">Overtime</span>
+          <span class="value">{{ attendanceEvent.details?.overtimeHours || 0 }}h</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESSIONS LIST (Matches TimeTracker Logic) -->
+    <div class="sessions-list" *ngIf="todaySessions.length > 0">
+      <h4>Sessions</h4>
+      <div class="session-item" *ngFor="let session of todaySessions">
+        <div class="session-time">
+          <span class="start">{{ session.checkInTime | date:'shortTime' }}</span>
+          <span class="separator">-</span>
+          <span class="end">{{ (session.checkOutTime | date:'shortTime') || 'Ongoing' }}</span>
+        </div>
+        <div class="session-duration">
+          <mat-icon>schedule</mat-icon>
+          <span>{{ formatSessionDuration(session.checkInTime, session.checkOutTime) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Attendance State (if not leave and not attendance) -->
+  <div *ngIf="!attendanceEvent && !isLeave" class="empty-state">
+    <mat-icon>event_note</mat-icon>
+    <p>No activity recorded for this day.</p>
+  </div>
+
+</mat-dialog-content>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="closeDialog()">Close</button>
+</div>

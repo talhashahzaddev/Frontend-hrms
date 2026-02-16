@@ -37,22 +37,23 @@
 
 .org-details {
   flex: 1;
-  
+
   .org-name {
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--gray-900);
     margin-bottom: 2px;
   }
-  
+
   .user-role {
     font-size: 0.75rem;
-    color: var(--primary-600);
-    background: var(--primary-100);
+    color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
     padding: 2px var(--spacing-sm);
     border-radius: var(--radius-full);
     display: inline-block;
-    font-weight: 500;
+    font-weight: 600;
+    border: 1px solid rgba(102, 126, 234, 0.2);
   }
 }
 
@@ -61,20 +62,20 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-md) 0;
-  
+
   // Custom scrollbar
   &::-webkit-scrollbar {
     width: 4px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: var(--gray-300);
     border-radius: var(--radius-full);
-    
+
     &:hover {
       background: var(--gray-400);
     }
@@ -84,7 +85,7 @@
 // Navigation List
 .nav-list {
   padding: 0;
-  
+
   ::ng-deep .mat-mdc-list-base {
     padding: 0;
   }
@@ -99,7 +100,7 @@
   min-height: 44px;
   position: relative;
   overflow: hidden;
-  
+
   /* underline/indicator (no height shift) */
   &::after {
     content: '';
@@ -108,35 +109,37 @@
     right: var(--spacing-md);
     bottom: 6px;
     height: 2px;
-    background: var(--gradient-primary);
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     border-radius: var(--radius-full);
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 200ms ease;
     pointer-events: none;
   }
-  
+
   &:hover {
     background: var(--gray-100);
   }
-  
+
   &.active {
-    color: var(--primary-700);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+    color: #667eea;
     font-weight: 700;
-    
+
     &::after {
       transform: scaleX(1);
     }
-    
+
     .nav-icon {
-      color: var(--primary-600);
+      color: #667eea;
     }
-    
+
     .nav-label {
+      color: #667eea;
       font-weight: 700;
     }
   }
-  
+
   .nav-icon {
     color: var(--gray-500);
     font-size: 1.25rem;
@@ -145,14 +148,14 @@
     margin-right: var(--spacing-md);
     transition: color 200ms ease;
   }
-  
+
   .nav-label {
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--gray-700);
     transition: color 200ms ease;
   }
-  
+
   .nav-badge {
     background: var(--error);
     color: white;
@@ -171,39 +174,39 @@
 // Navigation Groups (Expandable)
 .nav-group {
   margin: 0 var(--spacing-sm) var(--spacing-xs);
-  
+
   ::ng-deep .mat-expansion-panel {
     background: transparent;
     box-shadow: none;
     border-radius: var(--radius-lg);
-    
+
     &:hover {
       background: var(--gray-50);
     }
-    
+
     &.mat-expanded {
       background: var(--gray-50);
     }
-    
+
     .mat-expansion-panel-header {
       padding: 0 var(--spacing-md);
       height: 44px;
       border-radius: var(--radius-lg);
-      
+
       &:hover {
         background: transparent;
       }
-      
+
       .mat-content {
         margin-right: 0;
         align-items: center;
       }
     }
-    
+
     .mat-expansion-panel-body {
       padding: 0;
     }
-    
+
     .mat-expansion-indicator {
       &::after {
         color: var(--gray-400);
@@ -218,14 +221,14 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    
+
     .nav-icon {
       color: var(--gray-500);
       font-size: 1.25rem;
       width: 1.25rem;
       height: 1.25rem;
     }
-    
+
     .nav-label {
       font-size: 0.875rem;
       font-weight: 500;
@@ -250,91 +253,52 @@
 .nav-sub-item {
   margin: 0 0 2px;
   border-radius: var(--radius-md);
-  transition: color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  border-left: 3px solid transparent;
+  transition: all 200ms ease;
   cursor: pointer;
   min-height: 44px;
   padding-left: var(--spacing-md);
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    left: -1px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 20px;
-    background: transparent;
-    border-radius: 0 2px 2px 0;
-    transition: all 0.2s ease;
-  }
-  
+
+
+
   &:hover {
     background: var(--gray-100);
-    
-    &::before {
-      background: var(--primary-300);
-    }
-    
-    /* subtle underline on hover for sub-items */
-    &::after {
-      transform: scaleX(0.6);
-    }
+    border-left-color: rgba(102, 126, 234, 0.4);
   }
-  
+
   &.active {
-    color: var(--primary-700);
+    border-left-color: #667eea;
+    border-left-width: 3px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+    color: #667eea;
     font-weight: 700;
-    
-    &::before {
-      background: var(--primary-700);
-    }
-    
-    &::after {
-      transform: scaleX(1);
-    }
-    
+
     .nav-sub-icon {
-      color: var(--primary-700);
+      color: #667eea;
     }
-    
+
     .nav-sub-label {
       font-weight: 700;
-      color: var(--primary-700);
+      color: #667eea;
     }
   }
-  
-  /* underline/indicator (no height shift) */
-  &::after {
-    content: '';
-    position: absolute;
-    left: var(--spacing-md);
-    right: var(--spacing-md);
-    bottom: 6px;
-    height: 2px;
-    background: var(--gradient-primary);
-    border-radius: var(--radius-full);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform 200ms ease;
-    pointer-events: none;
-  }
-  
+
   .nav-sub-icon {
     color: var(--gray-400);
     font-size: 1rem;
     width: 1rem;
     height: 1rem;
     margin-right: var(--spacing-md);
+    transition: color 200ms ease;
   }
-  
+
   .nav-sub-label {
     font-size: 0.8125rem;
     font-weight: 500;
     color: var(--gray-600);
+    transition: color 200ms ease;
   }
-  
+
   .nav-badge {
     background: var(--error);
     color: white;
@@ -374,27 +338,27 @@
   .sidebar-header {
     padding: var(--spacing-md);
   }
-  
+
   .org-details {
     .org-name {
       font-size: 0.8125rem;
     }
-    
+
     .user-role {
       font-size: 0.6875rem;
     }
   }
-  
+
   .nav-item,
   .nav-sub-item {
     min-height: 40px;
   }
-  
+
   .nav-item .nav-label,
   .nav-group-title .nav-label {
     font-size: 0.8125rem;
   }
-  
+
   .nav-sub-item .nav-sub-label {
     font-size: 0.75rem;
   }
@@ -406,65 +370,93 @@
     background: var(--gray-800);
     color: var(--gray-300);
   }
-  
+
   .sidebar-header {
     background: var(--gray-900);
     border-bottom-color: var(--gray-700);
   }
-  
+
   .org-details {
     .org-name {
       color: var(--gray-100);
     }
+
+    .user-role {
+      color: #a78bfa;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.15) 100%);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
   }
-  
+
   .nav-item {
     &:hover {
       background: var(--gray-700);
     }
-    
+
     &.active {
-      background: var(--primary-900);
-      color: var(--primary-200);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.15) 100%);
+      color: #a78bfa;
+
+      &::after {
+        background: linear-gradient(90deg, #a78bfa 0%, #c084fc 100%);
+      }
+
+      .nav-icon {
+        color: #a78bfa;
+      }
+
+      .nav-label {
+        color: #a78bfa;
+      }
     }
-    
+
     .nav-label {
       color: var(--gray-300);
     }
-    
+
     .nav-icon {
       color: var(--gray-400);
     }
   }
-  
+
   .nav-sub-items {
     border-left-color: var(--gray-700);
   }
-  
+
   .nav-sub-item {
     &:hover {
       background: var(--gray-700);
+      border-left-color: rgba(167, 139, 250, 0.4);
     }
-    
+
     &.active {
-      background: var(--primary-900);
-      color: var(--primary-200);
+      border-left-color: #a78bfa;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.15) 100%);
+      color: #a78bfa;
+
+      .nav-sub-icon {
+        color: #a78bfa;
+      }
+
+      .nav-sub-label {
+        color: #a78bfa;
+      }
     }
-    
+
     .nav-sub-label {
       color: var(--gray-400);
     }
-    
+
     .nav-sub-icon {
       color: var(--gray-500);
     }
   }
-  
+
   .sidebar-footer {
     background: var(--gray-900);
     border-top-color: var(--gray-700);
   }
-  
+
   .version-text {
     color: var(--gray-400);
   }

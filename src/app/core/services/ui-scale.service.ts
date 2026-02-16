@@ -47,15 +47,17 @@ export class UiScaleService {
     this.scaleSubject.next(percent);
     const factor = percent / 100;
     
-    // Apply zoom to body instead of html to prevent coordinate system conflicts
-    this.renderer.setStyle(document.body, 'zoom', String(factor));
+    // Remove any global zoom
+    this.renderer.removeStyle(document.body, 'zoom');
+    this.renderer.removeStyle(document.documentElement, 'zoom');
     
-    // Apply inverse zoom to CDK overlay container to fix positioning
-    // This counteracts the body zoom and keeps overlays positioned correctly
-    const overlayContainer = document.querySelector('.cdk-overlay-container');
-    if (overlayContainer) {
-      const inverseFactor = 1 / factor;
-      this.renderer.setStyle(overlayContainer, 'zoom', String(inverseFactor));
+    // Target ONLY the page content (excludes header and sidebar)
+    const pageContent = document.querySelector('.page-content');
+    
+    if (pageContent) {
+      // Apply zoom with smooth transition
+      this.renderer.setStyle(pageContent, 'zoom', String(factor));
+      this.renderer.setStyle(pageContent, 'transition', 'zoom 0.2s cubic-bezier(0.4, 0, 0.2, 1)');
     }
   }
 

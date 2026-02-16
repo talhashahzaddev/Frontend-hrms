@@ -9,5 +9,4 @@ export const environment = {
     refreshTokenKey: 'refresh_token',
     userKey: 'user'
   }
-
 }; 

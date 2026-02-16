@@ -1,0 +1,28 @@
+.prompt-dialog {
+    min-width: 300px;
+    padding: 8px;
+
+    h2 {
+        margin: 0 0 16px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    mat-dialog-content {
+        padding: 24px 0 16px; // Added 24px top padding
+        min-height: 80px;
+        overflow: visible; // Ensure label isn't clipped
+
+        .full-width {
+            width: 100%;
+            margin-top: 8px; // Prevent label clipping
+        }
+    }
+
+    mat-dialog-actions {
+        padding: 0;
+        margin: 0;
+        gap: 8px;
+    }
+}

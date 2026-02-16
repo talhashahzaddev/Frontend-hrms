@@ -21,6 +21,7 @@ import { EmployeeService } from '@/app/features/employee/services/employee.servi
 import { NotificationService } from '../../../../core/services/notification.service';
 
 import { CreateGoalRequest, GoalStatus, Goal } from '../../../../core/models/performance.models';
+import { ApiResponse } from '../../../../core/models/common.models';
 import { User } from '@/app/core/models/auth.models';
 import { Employee } from '@/app/core/models/employee.models';
 
@@ -141,7 +142,7 @@ private loadAllGoals(): void {
     this.performanceService.getAllGoals()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => {
+        next: (res: ApiResponse<Goal[]>) => {
           this.allGoals = res.success && res.data ? res.data : [];
           this.isLoadingGoals = false;
         },
@@ -155,7 +156,7 @@ private loadAllGoals(): void {
     this.performanceService.getGoalsByEmployeeId(this.currentUser.userId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => {
+        next: (res: ApiResponse<Goal[]>) => {
           this.allGoals = res.success && res.data ? res.data : [];
           this.isLoadingGoals = false;
         },
@@ -175,11 +176,11 @@ onSubmitStatus(goal: Goal, status: 'IN_PROGRESS' | 'COMPLETED'): void {
     this.performanceService.completeGoal(goal.goalId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => {
+        next: () => {
           this.notificationService.showSuccess('Goal marked as completed!');
           this.loadAllGoals(); // refresh the list
         },
-        error: (err) => {
+        error: (err: unknown) => {
           console.error(err);
           this.notificationService.showError('Failed to mark goal as completed');
         }

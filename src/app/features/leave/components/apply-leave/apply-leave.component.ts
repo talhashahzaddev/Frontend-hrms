@@ -212,7 +212,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   leaveForm!: FormGroup;
   leaveTypes: LeaveType[] = [];
   leaveBalances: LeaveBalance[] = [];
-  
+
   isLoading = true;
   isSubmitting = false;
   isEditMode = false;
@@ -276,12 +276,28 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
         next: (data: any) => {
           this.leaveTypes = data.leaveTypes || [];
           this.leaveBalances = Array.isArray(data.leaveBalances) ? data.leaveBalances : [];
-          
+
           // If editing, populate form with request data
           if (this.isEditMode && data.leaveRequest) {
             this.populateFormForEdit(data.leaveRequest);
+          } else {
+            // Check for query params from calendar navigation
+            this.route.queryParams
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(params => {
+                if (params['startDate'] && params['endDate']) {
+                  this.leaveForm.patchValue({
+                    startDate: new Date(params['startDate']),
+                    endDate: new Date(params['endDate'])
+                  });
+                  // Trigger date change to calculate days
+                  setTimeout(() => {
+                    this.onDateChange();
+                  }, 100);
+                }
+              });
           }
-          
+
           this.isLoading = false;
         },
         error: (error) => {
@@ -308,7 +324,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
 
   onLeaveTypeChange(): void {
     const leaveTypeId = this.leaveForm.get('leaveTypeId')?.value;
-    
+
     // Find balance by matching leaveTypeId with the type's name
     // Since LeaveBalance uses leaveTypeName, we need to find the type first
     const selectedType = this.leaveTypes.find(t => t.leaveTypeId === leaveTypeId);
@@ -318,7 +334,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     } else {
       this.selectedLeaveBalance = 0;
     }
-    
+
     this.validateBalance();
   }
 
@@ -329,7 +345,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
-      
+
       if (end >= start) {
         this.calculatedDays = this.leaveService.calculateLeaveDays(
           start.toISOString(),
@@ -378,24 +394,24 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
       formatDateOnly(end),
       excludeRequestId
     ).pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (hasOverlap) => {
-        console.log('Overlap check result:', hasOverlap, 'for dates:', formatDateOnly(start), 'to', formatDateOnly(end));
-        this.showOverlapWarning = hasOverlap;
-        this.isCheckingOverlap = false;
-      },
-      error: (error) => {
-        console.error('Error checking leave overlap:', error);
-        this.isCheckingOverlap = false;
-        // Don't show warning on error, let backend handle it
-        this.showOverlapWarning = false;
-      }
-    });
+      .subscribe({
+        next: (hasOverlap) => {
+          console.log('Overlap check result:', hasOverlap, 'for dates:', formatDateOnly(start), 'to', formatDateOnly(end));
+          this.showOverlapWarning = hasOverlap;
+          this.isCheckingOverlap = false;
+        },
+        error: (error) => {
+          console.error('Error checking leave overlap:', error);
+          this.isCheckingOverlap = false;
+          // Don't show warning on error, let backend handle it
+          this.showOverlapWarning = false;
+        }
+      });
   }
 
   private validateBalance(): void {
     const leaveTypeId = this.leaveForm.get('leaveTypeId')?.value;
-    
+
     if (leaveTypeId && this.calculatedDays > 0) {
       // Find the selected type and then match with balance
       const selectedType = this.leaveTypes.find(t => t.leaveTypeId === leaveTypeId);
@@ -415,7 +431,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     // Find type name first, then match with balance
     const selectedType = this.leaveTypes.find(t => t.leaveTypeId === leaveTypeId);
     if (!selectedType) return null;
-    
+
     const balance = this.leaveBalances.find(b => b.leaveTypeName === selectedType.typeName);
     return balance ? balance.remainingDays : null;
   }
@@ -442,8 +458,10 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
 
       const request: CreateLeaveRequest = {
         leaveTypeId: formValue.leaveTypeId,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        // startDate: startDate.toISOString(),
+        // endDate: endDate.toISOString(),
+        startDate: formatDateOnly(startDate), // ✅ use formatDateOnly
+      endDate: formatDateOnly(endDate),  
         reason: formValue.reason || ''
       };
 
@@ -454,40 +472,40 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
         formatDateOnly(endDate),
         excludeRequestId
       ).pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (hasOverlap) => {
-          if (hasOverlap) {
-            this.showOverlapWarning = true;
-            this.isSubmitting = false;
-            this.notificationService.showError('You have already applied for leave during this period. Please select different dates.');
-            return;
-          }
+        .subscribe({
+          next: (hasOverlap) => {
+            if (hasOverlap) {
+              this.showOverlapWarning = true;
+              this.isSubmitting = false;
+              this.notificationService.showError('You have already applied for leave during this period. Please select different dates.');
+              return;
+            }
 
-          // Validate before submission
-          const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
-          
-          if (validationErrors.length > 0) {
-            this.notificationService.showError(validationErrors[0]);
-            this.isSubmitting = false;
-            return;
-          }
+            // Validate before submission
+            const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
 
-          this.submitLeaveRequest(request);
-        },
-        error: (error) => {
-          console.error('Error in final overlap check:', error);
-          // Continue with submission, backend will catch it
-          const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
-          
-          if (validationErrors.length > 0) {
-            this.notificationService.showError(validationErrors[0]);
-            this.isSubmitting = false;
-            return;
-          }
+            if (validationErrors.length > 0) {
+              this.notificationService.showError(validationErrors[0]);
+              this.isSubmitting = false;
+              return;
+            }
 
-          this.submitLeaveRequest(request);
-        }
-      });
+            this.submitLeaveRequest(request);
+          },
+          error: (error) => {
+            console.error('Error in final overlap check:', error);
+            // Continue with submission, backend will catch it
+            const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
+
+            if (validationErrors.length > 0) {
+              this.notificationService.showError(validationErrors[0]);
+              this.isSubmitting = false;
+              return;
+            }
+
+            this.submitLeaveRequest(request);
+          }
+        });
     }
   }
 

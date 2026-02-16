@@ -150,7 +150,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
-      dateOfBirth: [''],
+      dateOfBirth: ['',[Validators.required]],
       gender: [''],
       maritalStatus: [''],
       nationality: [''],
@@ -283,10 +283,14 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
         lastName: formValue.lastName,
         email: formValue.email,
         phone: formValue.phone,
-        dateOfBirth: formValue.dateOfBirth ? formValue.dateOfBirth.toISOString().split('T')[0] : undefined,
+        // dateOfBirth: formValue.dateOfBirth ? formValue.dateOfBirth.toISOString().split('T')[0] : undefined,
+        dateOfBirth: formValue.dateOfBirth ? this.formatDateOnly(formValue.dateOfBirth) : undefined,
+
         gender: formValue.gender,
         maritalStatus: formValue.maritalStatus,
-        hireDate: formValue.hireDate.toISOString().split('T')[0],
+        // hireDate: formValue.hireDate.toISOString().split('T')[0],
+        hireDate: this.formatDateOnly(formValue.hireDate),
+
         departmentId: formValue.departmentId,
         positionId: formValue.positionId,
         reportingManagerId: formValue.reportingManagerId || undefined,
@@ -343,6 +347,76 @@ operation
       this.notificationService.showError('Please fill in all required fields');
     }
   }
+
+
+onDateBlur(event: FocusEvent, fieldName: 'dateOfBirth' | 'hireDate'): void {
+  const input = event.target as HTMLInputElement;
+  const value = input.value;
+
+  if (!value) return;
+
+  // Get the correct form control
+  const control = this.employeeForm.get(fieldName);
+  if (!control) return;
+
+  // If already a Date (from calendar), do nothing
+  if (control.value instanceof Date) {
+    return;
+  }
+
+
+  const parsedDate = this.parseDDMMYYYY(value);
+
+  if (parsedDate) {
+    control.setValue(parsedDate);
+  } else {
+    control.setErrors({ invalidDate: true });
+  }
+}
+
+
+
+
+private parseDDMMYYYY(value: string): Date | null {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+
+  const parts = value.split('/');
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const day = Number(parts[0]);
+  const month = Number(parts[1]) - 1;
+  const year = Number(parts[2]);
+
+  // Validate year length
+  if (parts[2].length !== 4) {
+    return null;
+  }
+
+
+  const date = new Date(year, month, day);
+   // Validate real date
+  if (isNaN(date.getTime()) || date.getDate() !== day || date.getMonth() !== month || date.getFullYear() !== year) {
+    return null;
+  }
+
+  // Validate real date
+  return isNaN(date.getTime()) ? null : date;
+}
+
+
+private formatDateOnly(date: Date): string {
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-based
+  const year = date.getFullYear();
+  return `${year}-${month}-${day}`; // format: YYYY-MM-DD
+}
+
+
+
 
   onCancel(): void {
     this.router.navigate(['/employees']);

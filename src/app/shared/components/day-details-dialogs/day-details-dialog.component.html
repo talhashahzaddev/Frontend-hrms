@@ -1,0 +1,63 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <div class="header-content">
+            <mat-icon>schedule</mat-icon>
+            <h2>Attendance Details</h2>
+        </div>
+        <button mat-icon-button (click)="onClose()"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <mat-dialog-content>
+        <div *ngIf="isLoading" class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading details...</p>
+        </div>
+
+        <div *ngIf="!isLoading" class="content-body">
+            <div class="info-group">
+                <label>EMPLOYEE</label>
+                <span>{{ userName }}</span>
+            </div>
+            <div class="info-group">
+                <label>DATE</label>
+                <span>{{ formattedDate }}</span>
+            </div>
+            <div class="info-group">
+                <label>STATUS</label>
+                <span class="status-badge" [class.present]="details.summary.status === 'Present'">
+                    {{ details.summary.status }}
+                </span>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="stats-grid">
+                <div class="stat">
+                    <label><mat-icon>login</mat-icon> CHECK IN</label>
+                    <strong>{{ details.summary.firstCheckIn }}</strong>
+                </div>
+                <div class="stat">
+                    <label><mat-icon>logout</mat-icon> CHECK OUT</label>
+                    <strong>{{ details.summary.lastCheckOut }}</strong>
+                </div>
+                <div class="stat">
+                    <label><mat-icon>schedule</mat-icon> TOTAL HOURS</label>
+                    <strong>{{ details.summary.totalHours }}</strong>
+                </div>
+                <div class="stat">
+                    <label><mat-icon>trending_up</mat-icon> OVERTIME</label>
+                    <strong>{{ details.summary.overtime }}</strong>
+                </div>
+            </div>
+
+            <div class="sessions-list" *ngIf="details.sessions.length > 0">
+                <h3>Today's Sessions</h3>
+                <div class="session-item" *ngFor="let s of details.sessions">
+                    <div class="time"><mat-icon>login</mat-icon> {{ s.checkIn }}</div>
+                    <mat-icon class="arrow">arrow_forward</mat-icon>
+                    <div class="time"><mat-icon>logout</mat-icon> {{ s.checkOut }}</div>
+                </div>
+            </div>
+        </div>
+    </mat-dialog-content>
+</div>

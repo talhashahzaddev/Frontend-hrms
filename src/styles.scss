@@ -378,7 +378,18 @@ a {
     margin-top: 0.25rem;
   }
 }
-
+.custom-dialog {
+  padding: 20px;
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
 // Table Styles
 .table {
   width: 100%;
@@ -519,6 +530,15 @@ a {
     box-shadow: var(--shadow-lg);
   }
 }
+.header-top {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;            
+}
+
+.settings-title {
+  margin: 0; 
+}
 
 // CDK Overlay Container - Critical for zoom functionality
 // DO NOT add position, transform, or other layout properties here
@@ -531,6 +551,61 @@ a {
   // Allow child overlays to receive pointer events
   .cdk-overlay-pane {
     pointer-events: auto;
+  }
+}
+
+/* =======================================================
+   Global Empty State Button Styling
+   - Applies to all empty state buttons across the app
+   - Ensures compact, centered buttons with purple gradient
+   - Preserves the existing color scheme
+======================================================= */
+.empty-state {
+  // Ensure buttons within empty states are compact and centered
+  button {
+    // Force compact button width (not full-width)
+    width: auto !important;
+    max-width: fit-content !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    // Standard button padding
+    padding: 0 24px !important;
+    height: 44px !important;
+    
+    // Typography
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    
+    // Preserve purple/gradient background (do NOT change color)
+    // Individual components may override with their own gradient
+    // This ensures consistency across all empty states
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+    color: white !important;
+    
+    // Spacing & Styling
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+    gap: 8px !important;
+    margin: 0 auto !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    // Icon styling
+    mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      margin: 0 !important;
+      color: white !important;
+    }
+    
+    // Hover effect
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+    }
   }
 }
 

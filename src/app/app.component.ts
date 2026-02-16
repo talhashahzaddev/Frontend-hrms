@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
-import { Subject, filter, takeUntil, take } from 'rxjs';
+import { RouterOutlet, Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
+import { Subject, filter, takeUntil, take, map, combineLatest } from 'rxjs';
 import { ServerNotificationService } from './core/services/server-notification';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -20,11 +20,13 @@ import { ToastModule } from 'primeng/toast';
 import { LayoutComponent } from './layout/layout.component';
 import { LoadingSpinnerComponent } from './shared/components/loading-spinner/loading-spinner.component';
 import { ChatWidgetComponent } from './shared/components/chat-widget/chat-widget.component';
+import { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
 
 // Services
 import { AuthService } from './core/services/auth.service';
 import { LoadingService } from './core/services/loading.service';
 import { ThemeService } from './core/services/theme.service';
+import { ProgressBarService } from './core/services/progress-bar.service';
 
 
 @Component({
@@ -42,7 +44,8 @@ import { ThemeService } from './core/services/theme.service';
     ToastModule,
     LayoutComponent,
     LoadingSpinnerComponent,
-    ChatWidgetComponent
+    ChatWidgetComponent,
+    ProgressBarComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -51,7 +54,35 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'HRMS - Human Resource Management System';
   isLoading$ = this.loadingService.loading$;
   isAuthenticated$ = this.authService.isAuthenticated$;
+  isLoggingOut$ = this.authService.isLoggingOut$;
   isAiAssistantPage = false;
+
+  // Computed observable for loading message
+  // Show "Signing out..." only when explicitly logging out
+  // Otherwise show "Logging in..." when loading and not authenticated
+  loadingTitle$ = combineLatest([this.isLoggingOut$, this.isLoading$, this.isAuthenticated$]).pipe(
+    map(([isLoggingOut, isLoading, isAuthenticated]) => {
+      if (isLoggingOut) {
+        return 'Signing out...';
+      } else if (isLoading && !isAuthenticated) {
+        return 'Logging in...';
+      } else {
+        return 'Loading...';
+      }
+    })
+  );
+  
+  loadingMessage$ = combineLatest([this.isLoggingOut$, this.isLoading$, this.isAuthenticated$]).pipe(
+    map(([isLoggingOut, isLoading, isAuthenticated]) => {
+      if (isLoggingOut) {
+        return 'Please wait while we sign you out';
+      } else if (isLoading && !isAuthenticated) {
+        return 'Please wait while we sign you in';
+      } else {
+        return 'Please wait while we process your request';
+      }
+    })
+  );
 
   private destroy$ = new Subject<void>();
 
@@ -60,12 +91,14 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private loadingService: LoadingService,
     private themeService: ThemeService,
-    private serverNotificationService: ServerNotificationService // add this
+    private serverNotificationService: ServerNotificationService,
+    private progressBarService: ProgressBarService
   ) { }
 
   ngOnInit(): void {
     this.initializeApp();
     this.handleRouteChanges();
+    this.setupRouterProgress();
     this.setFavicon();
 
     // 🔥 Subscribe to authentication/user changes
@@ -120,6 +153,27 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setupGlobalErrorHandling();
   }
 
+  /**
+   * Setup progress bar for router navigation
+   */
+  private setupRouterProgress(): void {
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        if (event instanceof NavigationStart) {
+          // Start progress bar on navigation start
+          this.progressBarService.start();
+        } else if (
+          event instanceof NavigationEnd ||
+          event instanceof NavigationCancel ||
+          event instanceof NavigationError
+        ) {
+          // Complete progress bar when navigation ends
+          this.progressBarService.complete();
+        }
+      });
+  }
+
   private handleRouteChanges(): void {
     this.router.events
       .pipe(
@@ -148,47 +202,24 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   private redirectUserOnInit(): void {
-    // Only handle authenticated user redirects here
-    // Let route guards handle unauthenticated user redirects to prevent race conditions
-    this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        take(1)
-      )
-      .subscribe((event: NavigationEnd) => {
-        const user = this.authService.getCurrentUserValue();
-        
-        // Only process redirects for authenticated users
-        if (!user) {
-          return; // Let route guards handle unauthenticated users
-        }
+  this.router.events
+    .pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntil(this.destroy$) // keeps subscription alive until component destroyed
+    )
+    .subscribe((event: NavigationEnd) => {
+      const user = this.authService.getCurrentUserValue();
+      if (!user) return; // user not logged in, let guards handle it
 
-        const currentUrl = event.urlAfterRedirects;
-        const currentPath = currentUrl.split('?')[0];
-        const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
+      const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
+      const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
 
-        // Employee is trying to access admin dashboard
-        if (!isAdmin && currentPath.startsWith('/dashboard')) {
-          this.router.navigate(['/performance/dashboard']);
-          return;
-        }
-
-        // Admin trying to access employee dashboard
-        if (isAdmin && currentPath.startsWith('/performance')) {
-          this.router.navigate(['/dashboard']);
-          return;
-        }
-
-        // If user is on root or login page → role-based redirect
-        if (currentPath === '/' || currentPath === '/login') {
-          if (isAdmin) {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.router.navigate(['/performance/dashboard']);
-          }
-        }
-      });
-  }
+      // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
+      if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
+        this.router.navigate(['/performance/dashboard']);
+      }
+    });
+}
 
 
 

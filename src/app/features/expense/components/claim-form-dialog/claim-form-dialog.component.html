@@ -1,0 +1,108 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>receipt_long</mat-icon>
+    {{ data.mode === 'create' ? 'Create Claim' : 'Edit Claim' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="claimForm" class="claim-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category *</mat-label>
+      <mat-select formControlName="categoryId" placeholder="Select category">
+        <mat-option *ngFor="let cat of data.categories" [value]="cat.categoryId">
+          {{ cat.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="claimForm.get('categoryId')?.hasError('required')">
+        Category is required
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title *</mat-label>
+      <input matInput formControlName="title" placeholder="e.g. Office supplies" maxlength="150">
+      <mat-hint>Max 150 characters</mat-hint>
+      <mat-error *ngIf="claimForm.get('title')?.hasError('required')">Title is required</mat-error>
+      <mat-error *ngIf="claimForm.get('title')?.hasError('maxlength')">Max 150 characters</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" placeholder="Optional details" rows="3" maxlength="500"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Amount *</mat-label>
+      <input matInput type="number" formControlName="amount" placeholder="0.00" min="0.01" step="0.01">
+      <mat-error *ngIf="claimForm.get('amount')?.hasError('required')">Amount is required</mat-error>
+      <mat-error *ngIf="claimForm.get('amount')?.hasError('min')">Amount must be at least 0.01</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Bill Date *</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="billDate" placeholder="Choose date">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="claimForm.get('billDate')?.hasError('required')">Bill date is required</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Payment Method</mat-label>
+      <input matInput formControlName="paymentMethod" placeholder="e.g. Card, Cash" maxlength="50">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Merchant</mat-label>
+      <input matInput formControlName="merchant" placeholder="Vendor name" maxlength="150">
+    </mat-form-field>
+
+    <!-- Receipt: file upload (PDF, JPG, PNG up to 5 MB) → backend stores URL in form -->
+    <div class="receipt-upload full-width">
+      <label class="receipt-label">Receipt</label>
+      <p class="receipt-hint">PDF, JPG, JPEG, PNG or GIF. Max {{ maxReceiptSizeMb }} MB.</p>
+      <input #receiptInput
+             type="file"
+             [accept]="acceptedReceiptTypes"
+             (change)="onReceiptFileSelected($event, receiptInput)"
+             class="receipt-file-input"
+             hidden>
+      <div class="receipt-actions">
+        <button mat-stroked-button type="button"
+                (click)="triggerReceiptInput(receiptInput)"
+                [disabled]="isUploadingReceipt">
+          <mat-icon>upload_file</mat-icon>
+          {{ isUploadingReceipt ? 'Uploading...' : (currentReceiptUrl ? 'Replace receipt' : 'Choose receipt') }}
+        </button>
+        <mat-spinner *ngIf="isUploadingReceipt" diameter="24" class="receipt-spinner"></mat-spinner>
+        <button mat-icon-button type="button"
+                *ngIf="currentReceiptUrl && !isUploadingReceipt"
+                (click)="clearReceipt()"
+                matTooltip="Remove receipt">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="receipt-current" *ngIf="currentReceiptUrl && !isUploadingReceipt">
+        <mat-icon>attach_file</mat-icon>
+        <span class="receipt-name">{{ receiptFileName || 'Receipt' }}</span>
+        <a [href]="currentReceiptUrl" target="_blank" rel="noopener" class="receipt-link">Open</a>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close type="button">Cancel</button>
+  <button mat-flat-button
+          [disabled]="claimForm.invalid || isSubmitting"
+          (click)="onSubmit()"
+          class="submit-button">
+    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <span *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'Create Claim' : 'Update Claim' }}</span>
+    <span *ngIf="isSubmitting">{{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}</span>
+  </button>
+</mat-dialog-actions>

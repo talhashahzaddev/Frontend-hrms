@@ -91,25 +91,33 @@
     </div>
   </div>
 
-  <!-- Fixed Input Elements -->
-  <div class="fixed-input-wrapper">
-    <textarea
-      #chatInput
-      class="chat-input"
-      [(ngModel)]="newMessage"
-      (keydown)="onKeyPress($event)"
-      (input)="adjustTextareaHeight()"
-      placeholder="Type your message here..."
-      rows="1"
-      [disabled]="isLoading">
-    </textarea>
-    <button 
-      class="send-button" 
-      (click)="sendMessage()" 
-      [disabled]="!newMessage.trim() || isLoading"
-      aria-label="Send message">
-      <i class="pi pi-send"></i>
-    </button>
+    <!-- Input Section -->
+  <div class="input-container">
+    <div class="input-wrapper">
+      <textarea
+        #chatInput
+        class="chat-input"
+        [(ngModel)]="newMessage"
+        (keydown)="onKeyPress($event)"
+        (input)="adjustTextareaHeight()"
+        placeholder="Ask me anything about HR, leaves, attendance..."
+        rows="1"
+        [disabled]="isLoading"
+        aria-label="Type your message">
+      </textarea>
+      <button 
+        class="send-button" 
+        (click)="sendMessage()" 
+        [disabled]="!newMessage.trim() || isLoading"
+        aria-label="Send message"
+        [class.active]="newMessage.trim()">
+        <i class="pi" [ngClass]="isLoading ? 'pi-spin pi-spinner' : 'pi-send'"></i>
+      </button>
+    </div>
+    <div class="input-hint">
+      <i class="pi pi-info-circle"></i>
+      <span>Press Enter to send, Shift+Enter for new line</span>
+    </div>
   </div>
 </div>
 

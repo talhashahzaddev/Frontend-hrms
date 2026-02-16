@@ -64,7 +64,9 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Date of Birth</mat-label>
-              <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth">
+              <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" (blur)="onDateBlur($event,'dateOfBirth')">
+              <mat-error *ngIf="employeeForm.get('dateOfBirth')?.hasError('required')">
+                Date of birth is required</mat-error>
               <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
               <mat-datepicker #dobPicker></mat-datepicker>
             </mat-form-field>
@@ -100,7 +102,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Hire Date</mat-label>
-              <input matInput [matDatepicker]="hirePicker" formControlName="hireDate">
+              <input matInput [matDatepicker]="hirePicker" formControlName="hireDate"   (blur)="onDateBlur($event, 'hireDate')">
               <mat-datepicker-toggle matIconSuffix [for]="hirePicker"></mat-datepicker-toggle>
               <mat-datepicker #hirePicker></mat-datepicker>
               <mat-error *ngIf="employeeForm.get('hireDate')?.hasError('required')">

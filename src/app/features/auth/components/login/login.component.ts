@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -34,10 +34,11 @@ import { LoadingService } from '@core/services/loading.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   loginForm!: FormGroup;
   hidePassword = true;
   isLoading = false;
+  isReady = false; // Add ready state to prevent white card flash
   private isSubmitting = false;
 
   private destroy$ = new Subject<void>();
@@ -55,6 +56,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscribeToLoading();
     this.setFavicon();
+  }
+
+  ngAfterViewInit(): void {
+    // Show card after view is initialized to prevent white card flash
+    // Use requestAnimationFrame for smooth transition
+    requestAnimationFrame(() => {
+      this.isReady = true;
+    });
   }
 
   private setFavicon(): void {
@@ -97,67 +106,163 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onSubmit(): void {
-    if (this.loginForm.invalid || this.isSubmitting) {
-      this.markFormGroupTouched();
-      this.notificationService.showError('Please correct the highlighted fields');
-      return;
-    }
-    this.isSubmitting = true;
-    const credentials = this.loginForm.value;
-    this.authService.login(credentials)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.domain) {
-            const targetSubdomain = this.extractSubdomainFromDomain(response.domain);
-            const currentSubdomain = this.getCurrentSubdomain();
-            if (targetSubdomain && targetSubdomain !== currentSubdomain) {
-              const authData = encodeURIComponent(JSON.stringify(response));
-              let redirectUrl = sessionStorage.getItem('redirectUrl');
-              sessionStorage.removeItem('redirectUrl');
-              if (!redirectUrl) {
-                if (response.roleName === 'Employee' || response.roleName === 'Manager') {
-                  redirectUrl = '/performance/dashboard';
-                } else {
-                  redirectUrl = '/dashboard';
-                }
-              }
-              const separator = redirectUrl.includes('?') ? '&' : '?';
-              redirectUrl += `${separator}auth_transfer=${authData}`;
-              this.isSubmitting = false;
-              this.redirectToSubdomain(targetSubdomain, redirectUrl);
-              return;
-            }
-          }
-          this.authService.setAuthDataDirectly(response);
-          this.notificationService.loginSuccess(response.firstName);
-          let redirectUrl = sessionStorage.getItem('redirectUrl');
-          sessionStorage.removeItem('redirectUrl');
-          if (!redirectUrl) {
-            if (response.roleName === 'Employee' || response.roleName === 'Manager') {
-              redirectUrl = '/performance/dashboard';
-            } else {
-              redirectUrl = '/dashboard';
-            }
-          }
-          this.isSubmitting = false;
-          this.router.navigate([redirectUrl]);
-        },
-        error: (error) => {
-          const status = (error && typeof error === 'object' && 'status' in error) ? (error as any).status : 0;
-          const message = error?.error?.message || error?.message || '';
-          if (status === 401 || /invalid email or password/i.test(message)) {
-            this.setPasswordAuthError('Invalid email or password');
-          } else if (status === 404 || /email not found/i.test(message)) {
-            this.setEmailAuthError('Email not found');
-          } else {
-            this.notificationService.showError(message || 'Login failed. Please try again.');
-          }
-          this.isSubmitting = false;
-        }
-      });
+  // onSubmit(): void {
+  //   if (this.loginForm.invalid || this.isSubmitting) {
+  //     this.markFormGroupTouched();
+  //     this.notificationService.showError('Please correct the highlighted fields');
+  //     return;
+  //   }
+  //   this.isSubmitting = true;
+  //   const credentials = this.loginForm.value;
+  //   this.authService.login(credentials)
+  //     .pipe(takeUntil(this.destroy$))
+  //     .subscribe({
+  //       next: (response) => {
+  //         if (response.domain) {
+  //           const targetSubdomain = this.extractSubdomainFromDomain(response.domain);
+  //           const currentSubdomain = this.getCurrentSubdomain();
+  //           if (targetSubdomain && targetSubdomain !== currentSubdomain) {
+  //             const authData = encodeURIComponent(JSON.stringify(response));
+  //             let redirectUrl = sessionStorage.getItem('redirectUrl');
+  //             sessionStorage.removeItem('redirectUrl');
+  //             if (!redirectUrl) {
+  //               if (response.roleName === 'Employee' || response.roleName === 'Manager') {
+  //                 redirectUrl = '/performance/dashboard';
+  //               } else {
+  //                 redirectUrl = '/dashboard';
+  //               }
+  //             }
+  //             const separator = redirectUrl.includes('?') ? '&' : '?';
+  //             redirectUrl += `${separator}auth_transfer=${authData}`;
+  //             this.isSubmitting = false;
+  //             this.redirectToSubdomain(targetSubdomain, redirectUrl);
+  //             return;
+  //           }
+  //         }
+  //         this.authService.setAuthDataDirectly(response);
+  //         this.notificationService.loginSuccess(response.firstName);
+  //         let redirectUrl = sessionStorage.getItem('redirectUrl');
+  //         sessionStorage.removeItem('redirectUrl');
+  //         if (!redirectUrl) {
+  //           if (response.roleName === 'Employee' || response.roleName === 'Manager') {
+  //             redirectUrl = '/performance/dashboard';
+  //           } else {
+  //             redirectUrl = '/dashboard';
+  //           }
+  //         }
+  //         this.isSubmitting = false;
+  //         this.router.navigate([redirectUrl]);
+  //       },
+  //       error: (error) => {
+  //         const status = (error && typeof error === 'object' && 'status' in error) ? (error as any).status : 0;
+  //         const message = error?.error?.message || error?.message || '';
+  //         if (status === 401 || /invalid email or password/i.test(message)) {
+  //           this.setPasswordAuthError('Invalid email or password');
+  //         } else if (status === 404 || /email not found/i.test(message)) {
+  //           this.setEmailAuthError('Email not found');
+  //         } else {
+  //           this.notificationService.showError(message || 'Login failed. Please try again.');
+  //         }
+  //         this.isSubmitting = false;
+  //       }
+  //     });
+  // }
+
+onSubmit(): void {
+  if (this.loginForm.invalid || this.isSubmitting) {
+    this.markFormGroupTouched();
+    this.notificationService.showError('Please correct the highlighted fields');
+    return;
   }
+
+  this.isSubmitting = true;
+  const credentials = this.loginForm.value;
+
+  this.authService.login(credentials)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response) => {
+
+        /* 🔹 SUBDOMAIN LOGIC — UNTOUCHED */
+        if (response.domain) {
+          const targetSubdomain = this.extractSubdomainFromDomain(response.domain);
+          const currentSubdomain = this.getCurrentSubdomain();
+
+          if (targetSubdomain && targetSubdomain !== currentSubdomain) {
+            const authData = encodeURIComponent(JSON.stringify(response));
+
+            let redirectUrl = sessionStorage.getItem('redirectUrl');
+            sessionStorage.removeItem('redirectUrl');
+
+            if (!redirectUrl) {
+              redirectUrl =
+                response.roleName === 'Employee' || response.roleName === 'Manager'
+                  ? '/performance/dashboard'
+                  : '/dashboard';
+            }
+
+            // ✅ normalize employee dashboard
+            if (redirectUrl === '/dashboard' && (response.roleName === 'Employee' || response.roleName === 'Manager')) {
+              redirectUrl = '/performance/dashboard';
+            }
+
+            const separator = redirectUrl.includes('?') ? '&' : '?';
+            redirectUrl += `${separator}auth_transfer=${authData}`;
+
+            this.isSubmitting = false;
+            this.redirectToSubdomain(targetSubdomain, redirectUrl);
+            return;
+          }
+        }
+
+        /* 🔹 AUTH SET — UNTOUCHED */
+        this.authService.setAuthDataDirectly(response);
+        this.notificationService.loginSuccess(response.firstName);
+
+        /* 🔹 REDIRECT LOGIC (FIXED) */
+        let redirectUrl = sessionStorage.getItem('redirectUrl');
+        sessionStorage.removeItem('redirectUrl');
+
+        if (!redirectUrl) {
+          redirectUrl =
+            response.roleName === 'Employee' || response.roleName === 'Manager'
+              ? '/performance/dashboard'
+              : '/dashboard';
+        }
+
+        // ✅ FORCE employee dashboard mapping
+        if (
+          redirectUrl === '/dashboard' &&
+          (response.roleName === 'Employee' || response.roleName === 'Manager')
+        ) {
+          redirectUrl = '/performance/dashboard';
+        }
+
+        this.isSubmitting = false;
+
+        // ✅ IMPORTANT FIX
+        this.router.navigateByUrl(redirectUrl);
+      },
+
+      error: (error) => {
+        const status = error?.status || 0;
+        const message = error?.error?.message || error?.message || '';
+
+        if (status === 401 || /invalid email or password/i.test(message)) {
+          this.setPasswordAuthError('Invalid email or password');
+        } else if (status === 404 || /email not found/i.test(message)) {
+          this.setEmailAuthError('Email not found');
+        } else {
+          this.notificationService.showError(message || 'Login failed. Please try again.');
+        }
+
+        this.isSubmitting = false;
+      }
+    });
+}
+
+
+
 
   /**
    * Extracts subdomain identifier from domain string

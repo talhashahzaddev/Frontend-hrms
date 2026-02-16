@@ -43,6 +43,7 @@ export class CreateShiftComponent {
   isSubmitting = false;
   isEditMode = false;
   shiftId: string = '';
+  userRole: string = '';
 
   days = [
     { value: 1, label: 'Monday' },
@@ -68,7 +69,7 @@ export class CreateShiftComponent {
     private attendanceService: AttendanceService,
     private overlayContainer: OverlayContainer,
     private notification: NotificationService,
-    @Inject(MAT_DIALOG_DATA) public data?: any // optional, contains shift for edit
+    @Inject(MAT_DIALOG_DATA) public data?: any,// optional, contains shift for edit
   ) {
     this.shiftForm = this.fb.group({
       shiftName: ['', [Validators.required, Validators.minLength(3)]],
@@ -76,7 +77,9 @@ export class CreateShiftComponent {
       endTime: ['', Validators.required],
       breakDuration: [0, [Validators.min(0)]],
       daysofWeek: [[], Validators.required],
-      timezone: ['']
+      timezone: [''],
+      marginHours: [0, [Validators.min(0), Validators.max(5)]],
+      applyMarginhours: []
     });
 
     // If data is passed, we are in edit mode
@@ -95,7 +98,11 @@ export class CreateShiftComponent {
       endTime: data.endTime?.substring(0, 5),
       breakDuration: data.breakDuration,
       daysofWeek: data.daysofWeek,
-      timezone: data.timezone
+      timezone: data.timezone,
+      marginHours: data.marginHours ?? 0,
+      applyMarginhours: data.applyMarginhours ?? true
+
+
     });
   }
 
@@ -119,7 +126,10 @@ export class CreateShiftComponent {
         endTime: formValue.endTime ? `${formValue.endTime}:00` : '',
         breakDuration: formValue.breakDuration,
         daysofWeek: formValue.daysofWeek,
-        timezone: formValue.timezone
+        timezone: formValue.timezone,
+        marginHours: formValue.marginHours ?? 0,
+        applyMarginhours: formValue.applyMarginhours 
+
       };
 
       this.attendanceService.updateShift(this.shiftId, updateDto).subscribe({
@@ -143,7 +153,10 @@ export class CreateShiftComponent {
         endTime: formValue.endTime + ':00',
         breakDuration: formValue.breakDuration,
         daysofWeek: formValue.daysofWeek,
-        timezone: formValue.timezone
+        timezone: formValue.timezone,
+        marginHours: formValue.marginHours ?? 0,// <-- send marginHours
+        applyMarginhours: formValue.applyMarginhours
+
       };
 
       this.attendanceService.createShift(request).subscribe({

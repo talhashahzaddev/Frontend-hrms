@@ -93,3 +93,11 @@ export interface UpcomingEvents {
   eventType: string;
   priority: string;
 }
+
+export interface OnboardingStatus {
+  signUp: boolean;
+  createTeam: boolean;
+  defineLeaveTypes: boolean;
+  markAttendance: boolean;
+  processPayroll: boolean;
+}

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -362,7 +363,8 @@ export class PayrollCalculationComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private payrollService: PayrollService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) {
     this.periodForm = this.fb.group({
       periodId: ['', Validators.required]
@@ -594,7 +596,9 @@ export class PayrollCalculationComponent implements OnInit, OnDestroy {
 
   viewPayrollEntries(): void {
     if (this.calculationResult) {
-      window.location.href = `/payroll/entries?periodId=${this.calculationResult.periodId}`;
+      this.router.navigate(['/payroll/entries'], {
+        queryParams: { periodId: this.calculationResult.periodId }
+      });
     }
   }
 

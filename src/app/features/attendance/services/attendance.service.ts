@@ -24,7 +24,8 @@ import {
   EmployeeShift,
   PendingShiftSwap,
   approvedshiftRequest,
-  AttendanceStatus
+  AttendanceStatus,
+  OfficeIP
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 
@@ -33,6 +34,7 @@ import { ApiResponse } from '../../../core/models/auth.models';
 })
 export class AttendanceService {
   private readonly apiUrl = `${environment.apiUrl}/Attendance`;
+  private readonly ipUrl = `${environment.apiUrl}/IpAddress`;
 
   constructor(private http: HttpClient) { }
 
@@ -77,13 +79,13 @@ export class AttendanceService {
 
   getAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
     let params = new HttpParams();
-    
+
     if (searchRequest.employeeId) params = params.set('employeeId', searchRequest.employeeId);
     if (searchRequest.departmentId) params = params.set('departmentId', searchRequest.departmentId);
     if (searchRequest.status) params = params.set('status', searchRequest.status);
     if (searchRequest.sortBy) params = params.set('sortBy', searchRequest.sortBy);
     if (searchRequest.sortDirection) params = params.set('sortDirection', searchRequest.sortDirection);
-    
+
     params = params.set('startDate', searchRequest.startDate);
     params = params.set('endDate', searchRequest.endDate);
     params = params.set('page', searchRequest.page.toString());
@@ -173,6 +175,24 @@ export class AttendanceService {
       );
   }
 
+getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
+  return this.http
+    .get<ApiResponse<{ shiftId: string }>>(
+      `${this.apiUrl}/CurrentShift/${employeeId}`
+    )
+    .pipe(
+      map(res => {
+        if (!res.success) {
+          throw new Error(res.message || 'Failed to load shift');
+        }
+        return res.data?.shiftId ?? null;
+      })
+    );
+}
+
+
+
+
   getMyAttendanceSummary(startDate: string, endDate: string): Observable<AttendanceSummary> {
     const params = new HttpParams()
       .set('startDate', startDate)
@@ -188,78 +208,76 @@ export class AttendanceService {
         })
       );
   }
-//Today chhhn
+  //Today chhhn
 
-getTodaySessions(): Observable<AttendanceSessionDto[]> {
-  return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
-    .pipe(map(res => res.data || []));
-}
-
-
-
-getTodaySessionsById(employeeId: string, workDate?: string | Date): Observable<AttendanceSessionDto[]> {
-  let url = `${this.apiUrl}/employeeSession/${employeeId}`;
-  
-  if (workDate) {
-    const dateStr = (workDate instanceof Date) 
-      ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
-      : workDate; // assume string is already formatted
-    url += `?date=${dateStr}`;
+  getTodaySessions(): Observable<AttendanceSessionDto[]> {
+    return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
+      .pipe(map(res => res.data || []));
   }
 
-  return this.http.get<ApiResponse<AttendanceSessionDto[]>>(url)
-    .pipe(map(res => res.data || []));
-}
 
-// getEmployeeAttendanceSessions(
-//   pageNumber: number = 1,
-//   pageSize: number = 10,
-//   startDate: Date,
-//   endDate: Date
-// ): Observable<AttendanceSession[]> {
+  getTodaySessionsById(employeeId: string, workDate?: string | Date): Observable<AttendanceSessionDto[]> {
+    let url = `${this.apiUrl}/employeeSession/${employeeId}`;
 
-//   let params = new HttpParams()
-//     .set('pageNumber', pageNumber.toString())
-//     .set('pageSize', pageSize.toString())
-//     .set('startDate', startDate.toISOString())   // required
-//     .set('endDate', endDate.toISOString());      // required
+    if (workDate) {
+      const dateStr = (workDate instanceof Date)
+        ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
+        : workDate; // assume string is already formatted
+      url += `?date=${dateStr}`;
+    }
 
-//   return this.http.get<AttendanceSession[]>(this.apiUrl + '/EmployeeAllAttendance', { params });
-// }
+    return this.http.get<ApiResponse<AttendanceSessionDto[]>>(url)
+      .pipe(map(res => res.data || []));
+  }
 
 
-getEmployeeAttendanceSessions(
-  pageNumber: number = 1,
-  pageSize: number = 10,
-  startDate: Date,
-  endDate: Date
-): Observable<AttendanceListResponse> {
+  getCalendarSessionsById(employeeId: string, workDate?: string | Date): Observable<AttendanceSessionDto[]> {
+    let url = `${this.apiUrl}/employeeSessionforcalendar/${employeeId}`;
 
-  let params = new HttpParams()
-    .set('pageNumber', pageNumber.toString())
-    .set('pageSize', pageSize.toString())
-    .set('startDate', startDate.toISOString())
-    .set('endDate', endDate.toISOString());
+    if (workDate) {
+      const dateStr = (workDate instanceof Date)
+        ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
+        : workDate; // assume string is already formatted
+      url += `?date=${dateStr}`;
+    }
 
-  return this.http.get<ApiResponse<any>>(this.apiUrl + '/EmployeeAllAttendance', { params })
-    .pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to fetch employee attendance sessions');
-        }
-        const data = response.data!;
-        return {
-          attendances: data.data,
-          totalCount: data.totalCount,
-          page: data.page,
-          pageSize: data.pageSize,
-          totalPages: data.totalPages,
-          hasNextPage: data.hasNextPage,
-          hasPreviousPage: data.hasPreviousPage
-        };
-      })
-    );
-}
+    return this.http.get<ApiResponse<AttendanceSessionDto[]>>(url)
+      .pipe(map(res => res.data || []));
+  }
+
+
+  getEmployeeAttendanceSessions(
+    pageNumber: number = 1,
+    pageSize: number = 10,
+    startDate: Date,
+    endDate: Date
+  ): Observable<AttendanceListResponse> {
+
+    let params = new HttpParams()
+      .set('pageNumber', pageNumber.toString())
+      .set('pageSize', pageSize.toString())
+      .set('startDate', startDate.toISOString())
+      .set('endDate', endDate.toISOString());
+
+    return this.http.get<ApiResponse<any>>(this.apiUrl + '/EmployeeAllAttendance', { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch employee attendance sessions');
+          }
+          const data = response.data!;
+          return {
+            attendances: data.data,
+            totalCount: data.totalCount,
+            page: data.page,
+            pageSize: data.pageSize,
+            totalPages: data.totalPages,
+            hasNextPage: data.hasNextPage,
+            hasPreviousPage: data.hasPreviousPage
+          };
+        })
+      );
+  }
 
   getEmployeeAttendance(employeeId: string, startDate: string, endDate: string): Observable<Attendance[]> {
     const params = new HttpParams()
@@ -283,7 +301,7 @@ getEmployeeAttendanceSessions(
     if (year) params = params.set('year', year.toString());
     if (month) params = params.set('month', month.toString());
 
-    const url = employeeId 
+    const url = employeeId
       ? `${this.apiUrl}/calendar/employee/${employeeId}`
       : `${this.apiUrl}/my-calendar`;
 
@@ -314,21 +332,21 @@ getEmployeeAttendanceSessions(
 
 
   getDepartmentEmployees(departmentId: string): Observable<DepartmentEmployee[]> {
-  const params = new HttpParams().set('departmentId', departmentId);
+    const params = new HttpParams().set('departmentId', departmentId);
 
-  return this.http.get<ApiResponse<DepartmentEmployee[]>>(
-    `${this.apiUrl}/departmentEmployees`,
-    { params }
-  )
-  .pipe(
-    map(response => {
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to fetch department employees');
-      }
-      return response.data!;
-    })
-  );
-}
+    return this.http.get<ApiResponse<DepartmentEmployee[]>>(
+      `${this.apiUrl}/departmentEmployees`,
+      { params }
+    )
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch department employees');
+          }
+          return response.data!;
+        })
+      );
+  }
 
 
   // Reports
@@ -361,102 +379,109 @@ getEmployeeAttendanceSessions(
 
     if (employeeId) params = params.set('employeeId', employeeId);
 
-    return this.http.get(`${this.apiUrl}/export`, { 
-      params, 
-      responseType: 'blob' 
+    return this.http.get(`${this.apiUrl}/export`, {
+      params,
+      responseType: 'blob'
     });
   }
 
-  
-//\create Shift 
+
+  //\create Shift 
 
 
-createShift(request: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}/shift`, request);
-}
+  createShift(request: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/shift`, request);
+  }
 
 
-getShifts(): Observable<ShiftDto[]> {
-  return this.http.get<ApiResponse<ShiftDto[]>>(`${this.apiUrl}/shifts`)
-    .pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to fetch shifts');
-        }
-        return response.data || [];
-      })
-    );
-}
+  getShifts(): Observable<ShiftDto[]> {
+    return this.http.get<ApiResponse<ShiftDto[]>>(`${this.apiUrl}/shifts`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch shifts');
+          }
+          return response.data || [];
+        })
+      );
+  }
 
 
-assignShift(request: { employeeId: string; shiftId: string }): Observable<void> {
-  return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/assign-shift`, request)
-    .pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to assign shift');
-        }
-        // No data needed, just return void
-      })
-    );
-}
+  assignShift(request: { employeeId: string; shiftId: string }): Observable<void> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/assign-shift`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to assign shift');
+          }
+          // No data needed, just return void
+        })
+      );
+  }
 
   /** ✅ Get Employees by Shift ID */
-getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
-  return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
-    .pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to fetch employees for shift');
-        }
-        return response.data || [];
-      })
-    );
-}
+  getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
+    return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch employees for shift');
+          }
+          return response.data || [];
+        })
+      );
+  }
 
-// ✅ Shift Swap API using model
+  // ✅ Shift Swap API using model
   createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap`, shiftSwap);
   }
 
-      /** ✅ Update an existing shift */
-updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
-  return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
-}
+  /** ✅ Update an existing shift */
+  updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
+    return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
+  }
 
 
-deleteShift(shiftId:string):Observable<any>{
-  return this.http.delete(`${this.apiUrl}/shift/${shiftId}`);
-}
+  deleteShift(shiftId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/shift/${shiftId}`);
+  }
 
 
-  
-getEmployeeShiftSwaps(employeeId: string): Observable<PendingShiftSwap[]> {
-  return this.http.get<PendingShiftSwap[]>(
-    `${this.apiUrl}/shiftswap/eemployeeShifts/${employeeId}`
-  );
-}
 
-// Get all pending shift swap requests for Super Admin
-getPendingShiftSwapsForAdmin(): Observable<PendingShiftSwap[]> {
-  return this.http.get<PendingShiftSwap[]>(`${this.apiUrl}/shiftswap/pending`);
-}
+  getEmployeeShiftSwaps(employeeId: string): Observable<PendingShiftSwap[]> {
+    return this.http.get<PendingShiftSwap[]>(
+      `${this.apiUrl}/shiftswap/eemployeeShifts/${employeeId}`
+    );
+  }
 
-// Get current shift for an employee by ID
-getCurrentShift(employeeId: string): Observable<ShiftDto> {
-  return this.http.get<ShiftDto>(`${this.apiUrl}/CurrentShift/${employeeId}`);
-}
+  // Get all pending shift swap requests for Super Admin
+  getPendingShiftSwapsForAdmin(): Observable<PendingShiftSwap[]> {
+    return this.http.get<PendingShiftSwap[]>(`${this.apiUrl}/shiftswap/pending`);
+  }
 
-//Approve or Reject Shift Swap Request
-approvedshiftRequest(request:approvedshiftRequest):Observable<any>{
-  return this.http.post(`${this.apiUrl}/shiftswap/approve`,request);
-}
+  // Get current shift for an employee by ID
+  // Get current shift for an employee by ID
+  getCurrentShift(employeeId: string): Observable<ShiftDto> {
+    return this.http.get<ShiftDto>(`${this.apiUrl}/CurrentShift/${employeeId}`);
+  }
+
+  // New method for Calendar/Dialog that needs unwrapped data
+  getCurrentShiftDetails(employeeId: string): Observable<ShiftDto> {
+    return this.http.get<ApiResponse<ShiftDto>>(`${this.apiUrl}/CurrentShift/${employeeId}`)
+      .pipe(map(response => response.data!));
+  }
+
+  //Approve or Reject Shift Swap Request
+  approvedshiftRequest(request: approvedshiftRequest): Observable<any> {
+    return this.http.post(`${this.apiUrl}/shiftswap/approve`, request);
+  }
 
 
   // Department Attendance (for managers)
   getDepartmentAttendance(departmentId: string, date?: string): Observable<Attendance[]> {
     const params = date ? new HttpParams().set('date', date) : new HttpParams();
-    
+
     return this.http.get<ApiResponse<Attendance[]>>(`${this.apiUrl}/department/${departmentId}`, { params })
       .pipe(
         map(response => {
@@ -530,5 +555,52 @@ approvedshiftRequest(request:approvedshiftRequest):Observable<any>{
       case AttendanceStatus.PENDING_APPROVAL: return 'warning';
       default: return 'secondary';
     }
+  }
+  // Office IP Management
+  getOfficeIPs(): Observable<OfficeIP[]> {
+    return this.http.get<ApiResponse<OfficeIP[]>>(`${this.ipUrl}/office-ips`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch office IPs');
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  createOfficeIP(officeIP: Omit<OfficeIP, 'id' | 'createdAt' | 'updatedAt'>): Observable<OfficeIP> {
+    return this.http.post<ApiResponse<OfficeIP>>(`${this.ipUrl}/create-ip`, officeIP)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create office IP');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  updateOfficeIP(id: string, officeIP: Partial<OfficeIP>): Observable<OfficeIP> {
+    return this.http.put<ApiResponse<OfficeIP>>(`${this.ipUrl}/update/${id}`, officeIP)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to update office IP');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  deleteOfficeIP(id: string): Observable<void> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.ipUrl}/delete/${id}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to delete office IP');
+          }
+        })
+      );
   }
 }
