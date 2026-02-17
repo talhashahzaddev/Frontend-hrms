@@ -166,7 +166,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Jobs',
       icon: 'work',
       children: [
-        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings' }
+        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings' },
+        { label: 'Applied Jobs', icon: 'how_to_reg', route: '/jobs/applied' }
       ]
     }
   ];

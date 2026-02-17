@@ -1,0 +1,427 @@
+// Applied Jobs page - same style and color as openings
+.openings-container {
+  padding: 12px;
+  max-width: auto;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  .tabs-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .applied-jobs-tabs {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    ::ng-deep .mat-mdc-tab-header {
+      padding: 0 16px;
+    }
+    ::ng-deep .mat-mdc-tab-labels {
+      justify-content: flex-start;
+      gap: 24px;
+    }
+    ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .tab-label {
+      padding: 0 4px;
+    }
+    .tab-content {
+      padding: 12px 0 0;
+      min-height: 200px;
+    }
+    .my-applications-tab .filters-card,
+    .received-tab .filters-card {
+      margin-bottom: 12px;
+    }
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-content {
+      flex: 1;
+
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 2px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: #667eea;
+        }
+      }
+
+      .page-subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.filters-card {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+
+  mat-card-content {
+    padding: 12px 16px !important;
+  }
+}
+
+.filters-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  .filter-field {
+    min-width: 140px;
+  }
+  .filter-field.date-field {
+    min-width: 160px;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    button {
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      font-size: 12px !important;
+
+      mat-icon {
+        margin-right: 4px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .apply-filters-btn {
+      height: 36px;
+      padding: 0 16px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
+      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+
+      mat-icon {
+        margin-right: 8px;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+      }
+    }
+  }
+}
+
+::ng-deep .filters-card {
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    height: 36px !important;
+    padding: 0 12px !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 36px !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    min-height: 36px !important;
+  }
+
+  .mdc-floating-label {
+    font-size: 13px !important;
+    top: 18px !important;
+  }
+
+  .mdc-floating-label--float-above {
+    transform: translateY(-24px) scale(0.85) !important;
+  }
+
+  .mat-mdc-select-value {
+    font-size: 13px !important;
+  }
+}
+
+.jobs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.jobs-feed-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jobs-feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 12px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jobs-pagination {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 8px 0;
+  overflow: hidden;
+
+  ::ng-deep .mat-mdc-paginator {
+    background: transparent;
+    border-radius: 16px;
+  }
+
+  ::ng-deep .mat-mdc-paginator-container {
+    padding: 0 16px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  ::ng-deep .mat-mdc-paginator-page-size {
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-paginator-range-actions button {
+    color: #667eea;
+  }
+}
+
+.job-post-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.25s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+  }
+}
+
+.job-post-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.job-post-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.job-post-heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-post-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.job-post-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  line-height: 1.4;
+
+  &.job-post-date {
+    margin-top: 2px;
+    font-size: 11px;
+    color: #9ca3af;
+  }
+}
+
+.job-post-status {
+  flex-shrink: 0;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &.status-applied {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
+    color: #059669;
+  }
+}
+
+.job-post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.job-last-date {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.job-post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  .action-btn {
+    height: 32px !important;
+    border-radius: 8px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 0 10px !important;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+  }
+
+  .view-btn {
+    border-color: #667eea;
+    color: #667eea;
+  }
+
+  .edit-btn {
+    border-color: #059669;
+    color: #059669;
+  }
+
+  .delete-btn {
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+}
+
+.add-button.empty-action {
+  height: 36px;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
+
+  mat-icon {
+    margin-right: 8px;
+  }
+}
+
+.empty-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 32px 20px;
+  text-align: center;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .empty-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #d1d5db;
+  }
+
+  .empty-text {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .empty-subtext {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}

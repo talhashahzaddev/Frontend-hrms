@@ -15,6 +15,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateJobDialogComponent } from '../create-job-dialog/create-job-dialog.component';
+import { ApplyJobDialogComponent } from '../apply-job-dialog/apply-job-dialog.component';
 import { JobViewDialogComponent } from '../job-view-dialog/job-view-dialog.component';
 import {
   ConfirmDeleteDialogComponent,
@@ -155,6 +156,15 @@ export class OpeningsComponent implements OnInit {
       width: '560px',
       maxHeight: '90vh',
       data: { jobId: job.jobId }
+    });
+  }
+
+  openApplyJobDialog(job: JobOpeningDto): void {
+    this.dialog.open(ApplyJobDialogComponent, {
+      width: '560px',
+      maxHeight: '90vh',
+      panelClass: 'apply-job-dialog-panel',
+      data: { job }
     });
   }
 

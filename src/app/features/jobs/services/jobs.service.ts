@@ -9,7 +9,13 @@ import {
   UpdateJobOpeningRequest,
   ServiceResponse,
   PagedResult,
-  JobOpeningsFilterParams
+  JobOpeningsFilterParams,
+  CreateJobApplicationRequest,
+  UpdateJobApplicationRequest,
+  JobApplicationDto,
+  StageMasterDto,
+  MyJobApplicationsFilterParams,
+  ReceivedJobApplicationsFilterParams
 } from '../../../core/models/jobs.models';
 
 @Injectable({
@@ -90,6 +96,114 @@ export class JobsService {
       .delete<ServiceResponse<boolean>>(`${this.apiUrl}/openings/${id}`)
       .pipe(
         map((res) => res.success === true && res.data === true)
+      );
+  }
+
+  createJobApplication(request: CreateJobApplicationRequest): Observable<JobApplicationDto> {
+    return this.http
+      .post<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to submit application');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  getJobApplicationById(id: string): Observable<JobApplicationDto | null> {
+    return this.http
+      .get<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications/${id}`)
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : null))
+      );
+  }
+
+  updateJobApplication(id: string, request: UpdateJobApplicationRequest): Observable<JobApplicationDto> {
+    return this.http
+      .put<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications/${id}`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to update application');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  deleteJobApplication(id: string): Observable<boolean> {
+    return this.http
+      .delete<ServiceResponse<boolean>>(`${this.apiUrl}/applications/${id}`)
+      .pipe(
+        map((res) => res.success === true && res.data === true)
+      );
+  }
+
+  getStages(): Observable<StageMasterDto[]> {
+    return this.http
+      .get<ServiceResponse<StageMasterDto[]>>(`${this.apiUrl}/stages`)
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : []))
+      );
+  }
+
+  getMyJobApplicationsPaged(params: MyJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
+    const { page = 1, pageSize = 10, stageId, status } = params;
+    const queryParams: Record<string, string | number> = {
+      pageNumber: page,
+      pageSize
+    };
+    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    if (status != null && status !== '') queryParams['status'] = status;
+    return this.http
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/me`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return {
+              data: [],
+              totalCount: 0,
+              page: 1,
+              pageSize: pageSize,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false
+            };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  getReceivedJobApplicationsPaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId } = params;
+    const queryParams: Record<string, string | number> = {
+      pageNumber: page,
+      pageSize
+    };
+    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
+    if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
+    if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
+    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    return this.http
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/received`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return {
+              data: [],
+              totalCount: 0,
+              page: 1,
+              pageSize: pageSize,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false
+            };
+          }
+          return res.data;
+        })
       );
   }
 }
