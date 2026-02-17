@@ -6,6 +6,40 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
 
+  .tabs-wrapper {
+    margin-bottom: 12px;
+  }
+
+  .applied-jobs-tabs {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    ::ng-deep .mat-mdc-tab-header {
+      padding: 0 16px;
+    }
+    ::ng-deep .mat-mdc-tab-labels {
+      justify-content: flex-start;
+      gap: 24px;
+    }
+    ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .tab-label {
+      padding: 0 4px;
+    }
+    .tab-content {
+      padding: 12px 0 0;
+      min-height: 200px;
+    }
+    .my-applications-tab .filters-card,
+    .received-tab .filters-card {
+      margin-bottom: 12px;
+    }
+  }
+
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -66,6 +100,9 @@
 
   .filter-field {
     min-width: 140px;
+  }
+  .filter-field.date-field {
+    min-width: 160px;
   }
 
   .filter-actions {

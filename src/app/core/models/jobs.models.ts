@@ -158,3 +158,12 @@ export interface MyJobApplicationsFilterParams {
   stageId?: string | null;
   status?: string | null;
 }
+
+export interface ReceivedJobApplicationsFilterParams {
+  page?: number;
+  pageSize?: number;
+  search?: string | null;
+  applyDateFrom?: string | null; // ISO date string
+  applyDateTo?: string | null;   // ISO date string
+  stageId?: string | null;
+}
