@@ -188,16 +188,6 @@
 
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Asset Code</mat-label>
-              <input matInput formControlName="code" placeholder="Enter asset code">
-              <mat-error *ngIf="dialogForm.get('code')?.invalid && dialogForm.get('code')?.touched">
-                Code must be less than 50 characters
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="form-field">
               <mat-label>Purchase Date</mat-label>
               <input matInput [matDatepicker]="picker" formControlName="purchaseDate" placeholder="Select purchase date">
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -208,7 +198,10 @@
           <div class="form-row">
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Status</mat-label>
-              <input matInput formControlName="status" placeholder="Enter status">
+              <mat-select formControlName="status">
+                <mat-option value="">-- Select Status --</mat-option>
+                <mat-option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</mat-option>
+              </mat-select>
               <mat-error *ngIf="dialogForm.get('status')?.invalid && dialogForm.get('status')?.touched">
                 Status must be less than 50 characters
               </mat-error>
@@ -278,7 +271,7 @@
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Employee*</mat-label>
               <mat-select formControlName="employeeId">
-                <mat-option *ngFor="let employee of filteredEmployees" [value]="employee.id">
+                <mat-option *ngFor="let employee of filteredEmployees" [value]="employee.employeeId">
                   {{ employee.firstName }} {{ employee.lastName }} - {{ employee.email }}
                 </mat-option>
               </mat-select>
