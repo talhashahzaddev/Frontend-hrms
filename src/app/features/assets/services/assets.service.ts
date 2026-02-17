@@ -96,9 +96,9 @@ export class AssetsService {
     return {
       id: assetId,
       name: item.name || item.Name || '',
-      code: item.code || item.Code,
+      code: item.code || item.Code || item.assetTag || item.AssetTag || '',
       assetTypeId: typeId,
-      typeName: item.typeName || item.TypeName || type?.name,
+      typeName: item.typeName || item.TypeName || item.assetTypeName || item.AssetTypeName || type?.name || '',
       purchaseDate: item.purchaseDate || item.PurchaseDate,
       status: item.status || item.Status,
       notes: item.notes || item.Notes,
@@ -281,6 +281,74 @@ export class AssetsService {
   // =========================
   private syncFromServer(): void {
     this.getFromServer().subscribe();
+  }
+
+  // =========================
+  // ASSET ASSIGNMENT
+  // =========================
+  assignAsset(assetId: string, employeeId: string, assignDate: string, returnDate?: string): Observable<any> {
+    console.log('================================');
+    console.log('🔍 ASSET ASSIGNMENT REQUEST');
+    console.log('================================');
+    console.log('Asset ID:', assetId);
+    console.log('Employee ID:', employeeId);
+    console.log('Assign Date:', assignDate);
+    console.log('Return Date:', returnDate || 'null');
+
+    if (!assetId || String(assetId).trim() === '') {
+      return throwError(() => new Error('Asset ID is required'));
+    }
+    if (!employeeId || String(employeeId).trim() === '') {
+      return throwError(() => new Error('Employee ID is required'));
+    }
+
+    // Match backend AssignAssetRequest structure
+    const assignmentPayload = {
+      assetId: String(assetId).trim(),
+      employeeId: String(employeeId).trim(),
+      assignDate,
+      returnDate: returnDate ? String(returnDate).trim() : null
+    };
+
+    console.log('📦 Sending payload:', JSON.stringify(assignmentPayload, null, 2));
+
+    // Correct endpoint from backend controller
+    const endpoint = `${this.apiUrl}/asset-assignments/assign`;
+    console.log('🚀 Attempting: POST', endpoint);
+    console.log('================================');
+
+    return this.http.post<any>(endpoint, assignmentPayload).pipe(
+      tap((resp: any) => {
+        console.log('✅ SUCCESS!');
+        console.log('Response:', JSON.stringify(resp, null, 2));
+        console.log('================================');
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('❌ FAILED');
+        console.error('Status:', error.status);
+        console.error('Status Text:', error.statusText);
+        console.error('Response:', error.error);
+        console.error('================================');
+
+        let errorMsg = 'Failed to assign asset';
+
+        if (error.status === 401 || error.status === 403) {
+          errorMsg = 'You are not authorized to assign assets. Required roles: Super Admin or HR Manager';
+        } else if (error.status === 400) {
+          errorMsg = error.error?.message || 'Invalid asset or employee data';
+        } else if (error.status === 404) {
+          errorMsg = 'Asset or employee not found';
+        } else if (error.status === 500) {
+          errorMsg = error.error?.message || 'Server error while assigning asset';
+        } else if (error.error?.message) {
+          errorMsg = error.error.message;
+        } else if (error.error?.errors && Array.isArray(error.error.errors)) {
+          errorMsg = error.error.errors[0] || errorMsg;
+        }
+
+        return throwError(() => new Error(errorMsg));
+      })
+    );
   }
 
   // =========================

@@ -16,6 +16,8 @@ import { RouterModule } from '@angular/router';
 import { Asset, AssetType } from '../../../../core/models/assets.models';
 import { AssetTypeService } from '../../services/asset-type.service';
 import { AssetsService } from '../../services/assets.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
+import { EmployeeSearchRequest } from '../../../../core/models/employee.models';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
 
@@ -66,12 +68,21 @@ export class CreateAssetComponent implements OnInit {
   dateFromFilter: Date | null = null;
   dateToFilter: Date | null = null;
 
+  // Status dropdown options
+  statusOptions = [
+    { value: 'Available', label: 'Available' },
+    { value: 'Assigned', label: 'Assigned' },
+    { value: 'Maintenance', label: 'Maintenance' },
+    { value: 'Retired', label: 'Retired' }
+  ];
+
   displayedColumns: string[] = ['name', 'type', 'code', 'purchaseDate', 'status', 'actions'];
 
   constructor(
     private fb: FormBuilder,
     private assetTypeService: AssetTypeService,
     private assetsService: AssetsService,
+    private employeeService: EmployeeService,
     private notification: NotificationService,
     private loading: LoadingService,
     private dialog: MatDialog
@@ -79,19 +90,9 @@ export class CreateAssetComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializeForms();
-    // DEBUG: Clear old localStorage data to ensure fresh start
-    console.log('Clearing assets from localStorage for debugging');
-    localStorage.removeItem('assets');
-    
     this.loadAssetTypes();
     this.loadAssets();
-    // mock employees (used by assign dialog)
-    this.employees = [
-      { id: '1', firstName: 'John', lastName: 'Doe', email: 'john.doe@company.com' },
-      { id: '2', firstName: 'Jane', lastName: 'Smith', email: 'jane.smith@company.com' },
-      { id: '3', firstName: 'Mike', lastName: 'Johnson', email: 'mike.johnson@company.com' }
-    ];
-    this.filteredEmployees = [...this.employees];
+    this.loadEmployees();
   }
 
   private initializeForms(): void {
@@ -99,7 +100,6 @@ export class CreateAssetComponent implements OnInit {
       name: ['', [Validators.required, Validators.maxLength(200)]],
       assetTag: ['', [Validators.required, Validators.maxLength(100)]],
       typeId: ['', Validators.required],
-      code: ['', Validators.maxLength(50)],
       purchaseDate: [null],
       status: ['', Validators.maxLength(50)],
       notes: ['', Validators.maxLength(1000)]
@@ -131,6 +131,29 @@ export class CreateAssetComponent implements OnInit {
         this.filteredAssets = [...items];
       },
       error: err => console.error('Failed to load assets', err)
+    });
+  }
+
+  private loadEmployees(): void {
+    const searchRequest: EmployeeSearchRequest = {
+      searchTerm: undefined,
+      page: 1,
+      pageSize: 1000, // Load all employees for the dropdown
+      sortBy: 'firstName',
+      sortDirection: 'asc'
+    };
+
+    this.employeeService.getEmployees(searchRequest).subscribe({
+      next: (response) => {
+        console.log('✅ Loaded employees from backend:', response.employees);
+        this.employees = response.employees;
+        this.filteredEmployees = [...response.employees];
+      },
+      error: err => {
+        console.error('❌ Failed to load employees from backend', err);
+        this.employees = [];
+        this.filteredEmployees = [];
+      }
     });
   }
 
@@ -257,25 +280,85 @@ deleteAsset(asset: Asset): void {
   }
 
   openAssignDialog(asset: any): void {
+    console.log('🔍 Opening assign dialog for asset:', asset);
+    console.log('Asset ID:', asset?.id);
+    console.log('Asset name:', asset?.name);
+    
+    if (!asset || !asset.id) {
+      this.notification.error('Asset information is missing. Please refresh and try again.');
+      console.error('❌ Invalid asset object:', asset);
+      return;
+    }
+    
     this.selectedAsset = asset;
     this.assignForm.reset({ employeeId: '', assignDate: new Date(), returnDate: null });
     this.assignDialogRef = this.dialog.open(this.assignDialogTemplate, { width: '500px' });
   }
 
   onAssignDialogSubmit(): void {
-    if (!this.assignForm.valid) return;
+    console.log('====== ASSIGN ASSET DIALOG SUBMIT ======');
+    console.log('Form valid:', this.assignForm.valid);
 
-    const data = this.assignForm.value;
-    const assignmentData = {
-      assetId: this.selectedAsset.id,
-      employeeId: data.employeeId,
-      assignDate: data.assignDate instanceof Date ? data.assignDate.toISOString() : data.assignDate,
-      returnDate: data.returnDate instanceof Date ? data.returnDate.toISOString() : data.returnDate
-    };
+    if (!this.assignForm.valid) {
+      this.notification.error('Please fill in all required fields');
+      return;
+    }
 
-    console.log('Assignment data:', assignmentData);
-    this.notification.success('Asset assigned successfully');
-    this.assignDialogRef.close();
+    const formData = this.assignForm.value;
+
+    // Validate asset
+    if (!this.selectedAsset?.id) {
+      this.notification.error('Asset information is missing');
+      return;
+    }
+
+    // Validate employee
+    if (!formData.employeeId) {
+      this.notification.error('Please select an employee');
+      return;
+    }
+
+    // Format dates
+    const assignDate = formData.assignDate instanceof Date 
+      ? formData.assignDate.toISOString() 
+      : formData.assignDate;
+    
+    const returnDate = formData.returnDate 
+      ? (formData.returnDate instanceof Date 
+          ? formData.returnDate.toISOString() 
+          : formData.returnDate)
+      : null;
+
+    console.log('✅ Validation passed');
+    console.log('Asset ID:', this.selectedAsset.id);
+    console.log('Employee ID:', formData.employeeId);
+    console.log('Assign Date:', assignDate);
+    console.log('Return Date:', returnDate);
+    console.log('====== END VALIDATION ======');
+
+    this.loading.show();
+
+    this.assetsService.assignAsset(
+      this.selectedAsset.id,
+      formData.employeeId,
+      assignDate,
+      returnDate
+    ).subscribe({
+      next: (response) => {
+        console.log('✅ BACKEND RESPONSE SUCCESS:', response);
+        this.notification.success('Asset assigned successfully');
+        this.assignDialogRef.close();
+        this.assignForm.reset();
+        this.loading.hide();
+        // Optional: reload assets to show updated status
+        this.loadAssets();
+      },
+      error: (err) => {
+        console.error('❌ BACKEND RESPONSE ERROR:', err);
+        this.notification.error(err?.message || 'Failed to assign asset');
+        this.loading.hide();
+      }
+    });
   }
 
   onAssignDialogCancel(): void {
@@ -333,7 +416,8 @@ deleteAsset(asset: Asset): void {
           asset.status?.toLowerCase().includes(q)
         )) return false;
       }
-      if (this.typeFilter && asset.id !== this.typeFilter) return false;
+      // Fixed: Compare assetTypeId with typeFilter, not asset.id
+      if (this.typeFilter && asset.assetTypeId !== this.typeFilter) return false;
       if (this.statusFilter && asset.status !== this.statusFilter) return false;
       if (this.dateFromFilter && asset.purchaseDate && new Date(asset.purchaseDate) < this.dateFromFilter) return false;
       if (this.dateToFilter && asset.purchaseDate && new Date(asset.purchaseDate) > this.dateToFilter) return false;
