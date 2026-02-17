@@ -1,0 +1,238 @@
+// Apply Job Dialog - same style and color as create-job-dialog
+.apply-job-dialog-panel .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.apply-job-dialog {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white;
+    flex-shrink: 0;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    .close-button {
+      color: white;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .dialog-content {
+    padding: 28px !important;
+    min-width: 480px;
+    max-width: 100%;
+    max-height: 75vh;
+    overflow-y: auto;
+    flex: 1 1 auto;
+
+    .dialog-subtitle {
+      margin: 0 0 20px 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .apply-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 8px;
+
+        &.two-col .full-width {
+          flex: 1;
+        }
+
+        .full-width {
+          width: 100%;
+        }
+      }
+
+      .full-width {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+
+    .resume-upload {
+      margin-bottom: 16px;
+
+      .resume-label {
+        display: block;
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+
+      .resume-hint {
+        font-size: 12px;
+        color: #9ca3af;
+        margin: 0 0 12px 0;
+      }
+
+      .resume-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+
+        button[mat-stroked-button] {
+          border-radius: 12px;
+          border-color: #e5e7eb;
+          color: #374151;
+
+          mat-icon {
+            margin-right: 8px;
+            vertical-align: middle;
+          }
+        }
+
+        .resume-spinner {
+          margin-left: 4px;
+        }
+      }
+
+      .resume-current {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 10px 14px;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+
+        mat-icon {
+          color: #667eea;
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+
+        .resume-name {
+          flex: 1;
+          font-size: 14px;
+          color: #374151;
+        }
+
+        .resume-link {
+          font-size: 13px;
+          color: #667eea;
+          font-weight: 500;
+          text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .resume-file-input {
+        display: none;
+      }
+
+      mat-error {
+        display: block;
+        font-size: 12px;
+        color: #ef4444;
+        margin-top: 4px;
+      }
+    }
+
+    ::ng-deep mat-form-field.mat-form-field-appearance-outline {
+      .mat-mdc-text-field-wrapper { background: #f9fafb; border-radius: 12px; }
+      .mat-mdc-notch-piece { border-color: #e5e7eb !important; }
+      &:hover .mat-mdc-notch-piece { border-color: #667eea !important; }
+      &.mat-focused .mat-mdc-notch-piece { border-color: #667eea !important; border-width: 2px !important; }
+    }
+
+    ::ng-deep .mat-mdc-form-field .mdc-notched-outline .mdc-notched-outline__leading,
+    ::ng-deep .mat-mdc-form-field .mdc-notched-outline .mdc-notched-outline__notch,
+    ::ng-deep .mat-mdc-form-field .mdc-notched-outline .mdc-notched-outline__trailing {
+      border-color: #e5e7eb !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline .mdc-notched-outline__leading,
+    ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline .mdc-notched-outline__notch,
+    ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline .mdc-notched-outline__trailing {
+      border-color: #667eea !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline .mdc-notched-outline__leading,
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline .mdc-notched-outline__notch,
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline .mdc-notched-outline__trailing {
+      border-color: #667eea !important;
+      border-width: 2px !important;
+    }
+  }
+
+  .dialog-actions {
+    padding: 20px 28px !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+
+    button {
+      height: 44px;
+      padding: 0 28px !important;
+      border-radius: 12px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      text-transform: none !important;
+    }
+
+    .submit-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      &:not([disabled]) {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+      }
+    }
+
+    .mat-mdc-button .mat-icon {
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+  }
+}

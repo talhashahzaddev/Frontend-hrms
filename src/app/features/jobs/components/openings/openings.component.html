@@ -112,6 +112,10 @@
             <mat-icon>visibility</mat-icon>
             View details
           </button>
+          <button mat-flat-button (click)="openApplyJobDialog(job)" class="action-btn apply-btn" matTooltip="Apply for this job">
+            <mat-icon>how_to_reg</mat-icon>
+            Apply
+          </button>
           <button *ngIf="canManageJobs" mat-stroked-button (click)="editJob(job)" class="action-btn edit-btn" matTooltip="Edit">
             <mat-icon>edit</mat-icon>
             Edit
@@ -120,9 +124,9 @@
             <mat-icon>delete</mat-icon>
             Delete
           </button>
-          <a *ngIf="job.externalLink" [href]="job.externalLink" target="_blank" rel="noopener noreferrer" mat-flat-button class="apply-btn">
+          <a *ngIf="job.externalLink" [href]="job.externalLink" target="_blank" rel="noopener noreferrer" mat-stroked-button class="action-btn external-apply-btn" matTooltip="Apply via external link">
             <mat-icon>open_in_new</mat-icon>
-            Apply
+            Apply externally
           </a>
         </div>
       </div>
