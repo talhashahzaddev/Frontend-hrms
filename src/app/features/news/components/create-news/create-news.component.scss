@@ -400,98 +400,75 @@ mat-form-field mat-icon {
   }
 }
 
-/* Label for Quill editor */
-.quill-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.6);
-  margin-bottom: 4px;
-}
-
-/* Quill editor container styling */
-.ql-container {
-  border-radius: 4px;                     /* Rounded corners like mat-form-field */
-  border: 1px solid rgba(0, 0, 0, 0.38);  /* Border similar to mat-input */
-  min-height: 200px;                       /* Default height */
-  background-color: #fff;                  /* Match card/input background */
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-/* Quill toolbar styling */
-.ql-toolbar {
-  border-radius: 4px 4px 0 0;
-  border: 1px solid rgba(0, 0, 0, 0.38);
-  border-bottom: none;
-  background-color: #f5f5f5;               /* Light toolbar background */
-}
-
-
 .quill-wrapper-container {
   display: flex;
   flex-direction: column;
   width: 100%;
   margin-top: 7px;
-  margin-bottom: 7px;
-
+  margin-bottom: 16px; /* slightly smaller spacing */
+  /* Label styling - match mat-form-field labels */
   .quill-label {
+    font-size: 18px;       /* same as other labels */
+    font-weight: 500;      /* same as mat-form-field */
+    color: #1f2937;  
+    font-weight: 600;        
+    font-family: 'Roboto', sans-serif;
     margin-bottom: 8px;
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 14px;
     display: block;
   }
 
   ::ng-deep {
-    /* Main Toolbar Styling */
-    .ql-toolbar.ql-snow {
-      border: 1px solid #e5e7eb !important;
-      border-radius: 12px 12px 0 0 !important;
-      background: #f9fafb !important;
-      padding: 10px !important;
-      border-bottom: none !important;
-    }
-
     /* Editor Content Area */
     .ql-container.ql-snow {
+      min-height: 120px !important; /* smaller height */
+      max-height: 200px;            /* prevent it from growing too large */
+      border-radius: 8px !important;
       border: 1px solid #e5e7eb !important;
-      border-radius: 0 0 12px 12px !important;
-      min-height: 200px !important;
       background: white !important;
       font-family: 'Roboto', sans-serif !important;
     }
 
-    /* Professional Focus Effect */
-    .ql-container.ql-snow:focus-within {
-      border-color: #667eea !important;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    /* Toolbar */
+    .ql-toolbar.ql-snow {
+      border-radius: 8px 8px 0 0 !important;
+      border: 1px solid #e5e7eb !important;
+      border-bottom: none !important;
+      background: #f9fafb !important;
+      padding: 6px !important; /* smaller padding */
     }
 
     .ql-editor {
-      font-size: 15px;
-      line-height: 1.6;
-      color: #374151;
-      min-height: 200px;
-      
-      &.ql-blank::before {
-        font-style: normal;
-        color: #9ca3af;
-      }
+      font-size: 14px;
+      line-height: 1.4;
+      padding: 6px;
+      min-height: 100px; /* smaller content area */
+      max-height: 180px;
+      overflow-y: auto;   /* enable scroll if content grows */
     }
+    
+  }
+}
 
-    /* Fix for icons alignment */
-    .ql-snow .ql-picker.ql-expanded .ql-picker-options {
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+
+
+
+/* Responsive for mobile */
+@media (max-width: 600px) {
+  .quill-wrapper-container {
+    margin-bottom: 12px;
+
+    ::ng-deep {
+      .ql-container.ql-snow {
+        min-height: 100px;
+      }
+      .ql-editor {
+        min-height: 80px;
+      }
     }
   }
 }
 
-/* Ensure error message stays below the editor */
-mat-error {
-  margin-top: 4px;
-  display: block;
-}
 
 @media (max-width: 600px) {
   .apply-leave-container {
