@@ -1,3 +1,72 @@
+// Responsive Design for News Dashboard
+@media (max-width: 1200px) {
+	.news-dashboard-container {
+		.filters-card .filters-form {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+}
+
+@media (max-width: 768px) {
+	.news-dashboard-container {
+		padding: 12px;
+
+		.page-header {
+			flex-direction: column;
+			gap: 16px;
+			padding: 12px;
+
+			.page-title {
+				font-size: 18px;
+				gap: 8px;
+				mat-icon {
+					font-size: 20px;
+					width: 20px;
+					height: 20px;
+				}
+			}
+
+			.header-actions {
+				width: 100%;
+				display: flex;
+				justify-content: flex-end;
+				.mat-raised-button {
+					width: 100%;
+					min-width: 0;
+					font-size: 13px !important;
+					height: 34px;
+					padding: 0 0 !important;
+				}
+			}
+		}
+
+		.filters-card .filters-form {
+			display: flex !important;
+			flex-direction: column !important;
+			grid-template-columns: none !important;
+			padding: 12px;
+			gap: 12px;
+
+			mat-form-field {
+				width: 100% !important;
+				min-width: 0 !important;
+			}
+		}
+
+		.filter-actions {
+			flex-direction: column;
+			gap: 8px;
+			width: 100%;
+			button {
+				width: 100%;
+				min-width: 0;
+				font-size: 13px !important;
+				height: 34px;
+				padding: 0 0 !important;
+			}
+		}
+	}
+}
 /* Toggle Switch Styles for Table Status */
 .switch {
 	position: relative;
@@ -26,8 +95,8 @@
 }
 
 .switch input:checked+.slider {
-	background-color: #e53935;
-	/* Red for Published */
+	background-color: #059669;
+	/* Green for Published */
 }
 
 .slider:before {

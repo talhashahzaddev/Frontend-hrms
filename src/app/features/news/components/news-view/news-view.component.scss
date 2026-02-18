@@ -1,0 +1,186 @@
+/* ================= PAGE WRAPPER ================= */
+
+.news-view-container {
+  padding: 20px;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+.main-content-card {
+  width: 100%;
+  max-width: 100%;
+  // margin: 0 auto;
+}
+
+/* ================= HEADER SECTION ================= */
+
+.header-section {
+  margin-bottom: 50px;
+}
+
+.article-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #111;
+  margin-bottom: 20px;
+}
+
+/* Author + Date */
+.article-subtitle {
+  font-size: 15px;
+  color: #777;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  .author-name {
+    font-weight: 600;
+    color: #222;
+  }
+}
+
+/* Category + Status Row */
+.header-meta {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ================= BADGES ================= */
+
+.meta-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+.value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+}
+
+/* Make category look premium */
+.meta-group:first-child .value {
+  display: inline-block;
+  background: #f3f4f6;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+/* Status Badge */
+.status-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-tag.published {
+  background: #e6f4ea;
+  color: #1e7e34;
+}
+
+.status-tag.draft {
+  background: #fff4e5;
+  color: #d97706;
+}
+
+/* ================= IMAGE SECTION ================= */
+
+.article-top-layout {
+  margin-bottom: 50px;
+}
+
+.news-image img {
+  width: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+/* ================= DIVIDER ================= */
+
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e5e5e5, transparent);
+  margin: 60px 0;
+}
+
+/* ================= DESCRIPTION ================= */
+
+.description-heading {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #111;
+}
+
+.news-description {
+  font-size: 18px;
+  line-height: 1.9;
+  color: #333;
+
+  .ql-editor {
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  p {
+    margin-bottom: 18px;
+  }
+}
+
+/* ================= LOADING & ERROR ================= */
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.error-box {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 15px 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 900px) {
+
+  .news-view-container {
+    padding: 40px 20px;
+  }
+
+  .article-title {
+    font-size: 34px;
+  }
+
+  .news-description {
+    font-size: 16px;
+  }
+
+  .header-meta {
+    gap: 15px;
+  }
+}

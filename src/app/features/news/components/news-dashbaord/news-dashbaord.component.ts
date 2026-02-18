@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -87,7 +88,8 @@ export class NewsDashbaordComponent implements OnInit {
     private authService: AuthService,
     private dialog: MatDialog,
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -182,54 +184,15 @@ export class NewsDashbaordComponent implements OnInit {
       });
   }
 
-  //Edit news 
-
-  openEditDialog(news: NewsDto): void {
-    const dialogRef = this.dialog.open(CreateNewsComponent, {
-      width: '700px',
-      maxWidth: '90vw',
-      data: {
-        isEditMode: true,
-        news: news,
-        newsId: news.newsId
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadNews();
-      }
-    });
+  // Navigate to create-news page in edit mode (as route param)
+  navigateToEdit(news: NewsDto): void {
+    if (!news?.newsId) return;
+    this.router.navigate(['/news/create-news', news.newsId]);
   }
 
   openViewDialog(news: NewsDto): void {
     if (!news?.newsId) return;
-
-    // Call backend only if this news is not already read
-    if (!news.isRead) {
-      this.newsService.markNewsAsRead(news.newsId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (isFirstRead) => {
-            if (isFirstRead) {
-              // Increment UI view count
-              news.views = (news.views ?? 0) + 1;
-            }
-            // Mark as read in frontend so it won't call again
-            news.isRead = true;
-          },
-          error: (err) => {
-            console.error('Failed to mark news as read:', err);
-          }
-        });
-    }
-
-    // Open the dialog regardless of read state
-    this.dialog.open(NewsViewDialogueboxComponent, {
-      width: '700px',
-      maxWidth: '90vw',
-      data: { news }
-    });
+    this.router.navigate(['/news/view-news', news.newsId]);
   }
 
 
@@ -260,21 +223,7 @@ export class NewsDashbaordComponent implements OnInit {
   }
 
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(CreateNewsComponent, {
-      width: '700px',
-      maxWidth: '90vw',
-      data: {
-        isEditMode: false
-      },
-      disableClose: false
-    });
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result) {
-          this.loadNews();
-        }
-      });
+    this.router.navigate(['/news/create-news']);
   }
 
   onPageChange(event: PageEvent): void {

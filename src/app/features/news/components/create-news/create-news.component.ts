@@ -1,13 +1,14 @@
-import { Component, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { NewsDto, NewsRequest } from '@/app/core/models/news.models';
+import { Router, ActivatedRoute } from '@angular/router';
+import { NewsDto } from '@/app/core/models/news.models';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Employee } from '@/app/core/models/employee.models';
@@ -15,6 +16,7 @@ import { PerformanceService } from '@/app/features/performance/services/performa
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '@/app/core/services/notification.service';
 import { NewsService } from '../../services/news.services';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-create-news',
@@ -22,20 +24,23 @@ import { NewsService } from '../../services/news.services';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    QuillModule ,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCardModule
   ],
   templateUrl: './create-news.component.html',
   styleUrls: ['./create-news.component.scss']
 })
-export class CreateNewsComponent {
+export class CreateNewsComponent implements OnInit {
   newsForm: FormGroup;
   isSubmitting = false;
+  isLoading = false;
+  isEditMode = false;
   employees: Employee[] = [];
   isManager = false;
   private destroy$ = new Subject<void>();
@@ -43,32 +48,90 @@ export class CreateNewsComponent {
   isUploadingImage = false;
   imageFileName: string | null = null;
 
-
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private performanceService: PerformanceService,
     private notification: NotificationService,
     private newsService: NewsService,
-    private dialogRef: MatDialogRef<CreateNewsComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { isEditMode: boolean, news?: NewsDto }
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.newsForm = this.fb.group({
-      title: [data.news?.title || '', Validators.required],
-      description: [data.news?.description || '', Validators.required],
-      category: [data.news?.category || '', Validators.required],
-      imageUrl: [data.news?.imageUrl || ''], // will store URL string
-      status: [data.news?.status || 'Draft', Validators.required],
-      visibleTo: [data.news?.visibleTo || 'Everyone', Validators.required],
-      selectedEmployees: [data.news?.selectedEmployees || []]
+      title: ['', Validators.compose([
+        Validators.required,
+        Validators.maxLength(200), // fallback for very long titles
+        this.wordCountValidator(20)
+      ])],
+      description: ['', Validators.required],
+      category: ['', Validators.required],
+      imageUrl: [''],
+      status: ['Draft', Validators.required],
+      visibleTo: ['Everyone', Validators.required],
+      selectedEmployees: [[]]
     });
   }
-  ngOnInit() {
-    this.loadEmployees();
-    // Show existing image in edit mode
-    if (this.data.isEditMode && this.data.news?.imageUrl) {
-      this.imagePreview = this.data.news.imageUrl;
+
+  // Custom validator to restrict word count
+  wordCountValidator(maxWords: number) {
+    return (control: any) => {
+      if (!control.value) return null;
+      const wordCount = control.value.trim().split(/\s+/).length;
+      return wordCount > maxWords ? { maxWords: { value: maxWords } } : null;
+    };
+  }
+quillConfig = {
+  toolbar: [
+    ['bold', 'italic', 'underline', 'strike'],        // basic formatting
+    [{ header: [1, 2, 3, false] }],                  // headings
+    [{ align: [] }],                                 // text alignment
+    [{ list: 'ordered' }, { list: 'bullet' }],      // lists
+    ['link', 'image'],                               // links & images
+    ['clean']                                        // remove formatting
+  ]
+};
+
+
+
+
+  // Prevent entering more than 20 words in the input
+  onTitleInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    // Remove leading spaces and collapse multiple spaces
+    value = value.replace(/\s+/g, ' ').trim();
+    const words = value.split(' ');
+    if (words.length > 20) {
+      const trimmed = words.slice(0, 20).join(' ');
+      input.value = trimmed;
+      // Update form control without emitting event to avoid cursor jump
+      this.newsForm.get('title')?.setValue(trimmed, { emitEvent: false });
+    } else {
+      this.newsForm.get('title')?.setValue(value, { emitEvent: false });
     }
+  }
+
+  ngOnInit() {
+    // Check for edit mode via route param
+    const newsId = this.route.snapshot.paramMap.get('id');
+    this.isEditMode = !!newsId;
+    if (this.isEditMode) {
+      this.isLoading = true;
+      this.newsService.getNewsById(newsId!).subscribe({
+        next: (news: NewsDto) => {
+          this.newsForm.patchValue(news);
+          if (news.imageUrl) {
+            this.imagePreview = news.imageUrl;
+          }
+          this.isLoading = false;
+        },
+        error: () => {
+          this.notification.showError('Failed to load news');
+          this.isLoading = false;
+        }
+      });
+    }
+    this.loadEmployees();
   }
 
   private loadEmployees(): void {
@@ -119,38 +182,6 @@ export class CreateNewsComponent {
 
   onSubmit() {
     if (this.newsForm.invalid) return;
-    if (this.data.isEditMode) {
-      this.updateNews();
-    } else {
-      this.isSubmitting = true;
-      const formValue = this.newsForm.value;
-      // Send imageUrl as string (already uploaded)
-      const request: any = {
-        title: formValue.title,
-        description: formValue.description,
-        category: formValue.category,
-        status: formValue.status,
-        visibleTo: formValue.visibleTo,
-        selectedEmployees: formValue.selectedEmployees || [],
-        imageUrl: formValue.imageUrl || ''
-      };
-      this.newsService.createNews(request).subscribe({
-        next: (news) => {
-          this.notification.showSuccess('News created successfully');
-          this.isSubmitting = false;
-          this.dialogRef.close(news);
-        },
-        error: (err) => {
-          this.notification.showError(err?.message || 'Failed to create news');
-          this.isSubmitting = false;
-        }
-      });
-    }
-  }
-
-  //update news
-  private updateNews(): void {
-    if (!this.data.news) return;
     this.isSubmitting = true;
     const formValue = this.newsForm.value;
     const request: any = {
@@ -160,20 +191,37 @@ export class CreateNewsComponent {
       status: formValue.status,
       visibleTo: formValue.visibleTo,
       selectedEmployees: formValue.selectedEmployees || [],
-      imageUrl: formValue.imageUrl || this.data.news?.imageUrl || ''
+      imageUrl: formValue.imageUrl || ''
     };
-    this.newsService.editNews(this.data.news.newsId!, request).subscribe({
-      next: () => {
-        this.notification.showSuccess('News updated successfully');
-        this.isSubmitting = false;
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        this.notification.showError(err?.message || 'Failed to update news');
-        this.isSubmitting = false;
-      }
-    });
+    if (this.isEditMode) {
+      const newsId = this.route.snapshot.paramMap.get('id');
+      this.newsService.editNews(newsId!, request).subscribe({
+        next: () => {
+          this.notification.showSuccess('News updated successfully');
+          this.isSubmitting = false;
+          this.router.navigate(['/news']);
+        },
+        error: (err) => {
+          this.notification.showError(err?.message || 'Failed to update news');
+          this.isSubmitting = false;
+        }
+      });
+    } else {
+      this.newsService.createNews(request).subscribe({
+        next: (news) => {
+          this.notification.showSuccess('News created successfully');
+          this.isSubmitting = false;
+          this.router.navigate(['/news']);
+        },
+        error: (err) => {
+          this.notification.showError(err?.message || 'Failed to create news');
+          this.isSubmitting = false;
+        }
+      });
+    }
   }
+
+  // Removed updateNews method; handled in onSubmit
 
 
 
@@ -219,6 +267,6 @@ export class CreateNewsComponent {
   }
 
   onCancel() {
-    this.dialogRef.close();
+    this.router.navigate(['/news']);
   }
 }
