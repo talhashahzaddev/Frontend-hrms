@@ -68,7 +68,7 @@ export class AppliedJobsComponent implements OnInit {
   receivedIsLoading = false;
 
   stageOptions: { value: string; label: string }[] = [];
-  statusOptions: { value: string; label: string }[] = [];
+  // statusOptions: { value: string; label: string }[] = [];
 
   constructor(
     private dialog: MatDialog,
@@ -78,6 +78,7 @@ export class AppliedJobsComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.filterForm = this.fb.group({
+      search: [''],
       stageId: [''],
       status: ['']
     });
@@ -101,10 +102,10 @@ export class AppliedJobsComponent implements OnInit {
           { value: '', label: 'All stages' },
           ...this.stages.map((s) => ({ value: s.stageId, label: s.stageName }))
         ];
-        this.statusOptions = [
-          { value: '', label: 'All statuses' },
-          ...this.stages.map((s) => ({ value: s.stageName, label: s.stageName }))
-        ];
+        // this.statusOptions = [
+        //   { value: '', label: 'All statuses' },
+        //   ...this.stages.map((s) => ({ value: s.stageName, label: s.stageName }))
+        // ];
       }
     });
     this.loadApplications();
@@ -112,11 +113,13 @@ export class AppliedJobsComponent implements OnInit {
 
   loadApplications(): void {
     this.isLoading = true;
+    const search = this.filterForm.get('search')?.value;
     const stageId = this.filterForm.get('stageId')?.value;
     const status = this.filterForm.get('status')?.value;
     this.jobsService.getMyJobApplicationsPaged({
       page: this.page,
       pageSize: this.pageSize,
+      search: search?.trim() || undefined,
       stageId: stageId || undefined,
       status: status || undefined
     }).subscribe({
@@ -141,14 +144,14 @@ export class AppliedJobsComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterForm.patchValue({ stageId: '', status: '' });
+    this.filterForm.patchValue({ search: '', stageId: '', status: '' });
     this.page = 1;
     this.loadApplications();
   }
 
   hasFiltersApplied(): boolean {
     const v = this.filterForm.value;
-    return !!(v.stageId || v.status);
+    return !!(v.search?.trim() || v.stageId || v.status);
   }
 
   onPageChange(event: PageEvent): void {

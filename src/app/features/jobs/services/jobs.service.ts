@@ -14,6 +14,8 @@ import {
   UpdateJobApplicationRequest,
   JobApplicationDto,
   StageMasterDto,
+  CreateStageMasterRequest,
+  UpdateStageMasterRequest,
   MyJobApplicationsFilterParams,
   ReceivedJobApplicationsFilterParams
 } from '../../../core/models/jobs.models';
@@ -149,12 +151,55 @@ export class JobsService {
       );
   }
 
+  getStageById(id: string): Observable<StageMasterDto | null> {
+    return this.http
+      .get<ServiceResponse<StageMasterDto>>(`${this.apiUrl}/stages/${id}`)
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : null))
+      );
+  }
+
+  createStage(request: CreateStageMasterRequest): Observable<StageMasterDto> {
+    return this.http
+      .post<ServiceResponse<StageMasterDto>>(`${this.apiUrl}/stages`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to create stage');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  updateStage(id: string, request: UpdateStageMasterRequest): Observable<StageMasterDto> {
+    return this.http
+      .put<ServiceResponse<StageMasterDto>>(`${this.apiUrl}/stages/${id}`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to update stage');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  deleteStage(id: string): Observable<boolean> {
+    return this.http
+      .delete<ServiceResponse<boolean>>(`${this.apiUrl}/stages/${id}`)
+      .pipe(
+        map((res) => res.success === true && res.data === true)
+      );
+  }
+
   getMyJobApplicationsPaged(params: MyJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, stageId, status } = params;
+    const { page = 1, pageSize = 10, search, stageId, status } = params;
     const queryParams: Record<string, string | number> = {
       pageNumber: page,
       pageSize
     };
+    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
     if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
     if (status != null && status !== '') queryParams['status'] = status;
     return this.http

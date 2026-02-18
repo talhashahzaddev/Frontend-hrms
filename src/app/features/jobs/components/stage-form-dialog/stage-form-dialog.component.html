@@ -1,0 +1,39 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>label</mat-icon>
+    {{ data.mode === 'create' ? 'Create Stage' : 'Edit Stage' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="stageForm" class="stage-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Stage Name *</mat-label>
+      <input matInput formControlName="stageName" placeholder="e.g. Screening, Interview" maxlength="100">
+      <mat-hint>Required. Max 100 characters.</mat-hint>
+      <mat-error *ngIf="stageForm.get('stageName')?.hasError('required')">Stage name is required</mat-error>
+      <mat-error *ngIf="stageForm.get('stageName')?.hasError('maxlength')">Stage name cannot exceed 100 characters</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Order</mat-label>
+      <input matInput type="number" formControlName="stageOrder" placeholder="Optional display order" min="0">
+      <mat-hint>Optional. Lower numbers appear first.</mat-hint>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button mat-dialog-close type="button">Cancel</button>
+  <button mat-flat-button
+          [disabled]="stageForm.invalid || isSubmitting"
+          (click)="onSubmit()"
+          class="submit-button">
+    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <span *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'Create' : 'Update' }}</span>
+    <span *ngIf="isSubmitting">{{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}</span>
+  </button>
+</mat-dialog-actions>
