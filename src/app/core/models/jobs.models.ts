@@ -152,9 +152,20 @@ export interface StageMasterDto {
   createdAt?: string | null;
 }
 
+export interface CreateStageMasterRequest {
+  stageName: string;
+  stageOrder?: number | null;
+}
+
+export interface UpdateStageMasterRequest {
+  stageName: string;
+  stageOrder?: number | null;
+}
+
 export interface MyJobApplicationsFilterParams {
   page?: number;
   pageSize?: number;
+  search?: string | null;
   stageId?: string | null;
   status?: string | null;
 }

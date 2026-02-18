@@ -59,7 +59,15 @@ export class AppliedJobsComponent implements OnInit {
   totalCount = 0;
   totalPages = 0;
 
-  /** Received (org-wide) applications – only for HR Manager / Super Admin */
+  /** Received Application By My Job Post – HR Manager + Super Admin */
+  postedByMeApplications: JobApplicationDto[] = [];
+  postedByMeFilterForm: FormGroup;
+  postedByMePage = 1;
+  postedByMePageSize = 10;
+  postedByMeTotalCount = 0;
+  postedByMeIsLoading = false;
+
+  /** All Job Applications (org-wide) – Super Admin only */
   receivedApplications: JobApplicationDto[] = [];
   receivedFilterForm: FormGroup;
   receivedPage = 1;
@@ -68,7 +76,7 @@ export class AppliedJobsComponent implements OnInit {
   receivedIsLoading = false;
 
   stageOptions: { value: string; label: string }[] = [];
-  statusOptions: { value: string; label: string }[] = [];
+  // statusOptions: { value: string; label: string }[] = [];
 
   constructor(
     private dialog: MatDialog,
@@ -78,8 +86,15 @@ export class AppliedJobsComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.filterForm = this.fb.group({
+      search: [''],
       stageId: [''],
       status: ['']
+    });
+    this.postedByMeFilterForm = this.fb.group({
+      search: [''],
+      applyDateFrom: [null as Date | null],
+      applyDateTo: [null as Date | null],
+      stageId: ['']
     });
     this.receivedFilterForm = this.fb.group({
       search: [''],
@@ -89,8 +104,14 @@ export class AppliedJobsComponent implements OnInit {
     });
   }
 
+  /** Show tab group (MY, PostedByMe, and optionally All) for HR Manager + Super Admin */
   get canSeeReceivedTab(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
+  /** Show "All Job Applications" tab only for Super Admin */
+  get canSeeAllApplicationsTab(): boolean {
+    return this.authService.hasRole('Super Admin');
   }
 
   ngOnInit(): void {
@@ -101,10 +122,10 @@ export class AppliedJobsComponent implements OnInit {
           { value: '', label: 'All stages' },
           ...this.stages.map((s) => ({ value: s.stageId, label: s.stageName }))
         ];
-        this.statusOptions = [
-          { value: '', label: 'All statuses' },
-          ...this.stages.map((s) => ({ value: s.stageName, label: s.stageName }))
-        ];
+        // this.statusOptions = [
+        //   { value: '', label: 'All statuses' },
+        //   ...this.stages.map((s) => ({ value: s.stageName, label: s.stageName }))
+        // ];
       }
     });
     this.loadApplications();
@@ -112,11 +133,13 @@ export class AppliedJobsComponent implements OnInit {
 
   loadApplications(): void {
     this.isLoading = true;
+    const search = this.filterForm.get('search')?.value;
     const stageId = this.filterForm.get('stageId')?.value;
     const status = this.filterForm.get('status')?.value;
     this.jobsService.getMyJobApplicationsPaged({
       page: this.page,
       pageSize: this.pageSize,
+      search: search?.trim() || undefined,
       stageId: stageId || undefined,
       status: status || undefined
     }).subscribe({
@@ -141,14 +164,14 @@ export class AppliedJobsComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterForm.patchValue({ stageId: '', status: '' });
+    this.filterForm.patchValue({ search: '', stageId: '', status: '' });
     this.page = 1;
     this.loadApplications();
   }
 
   hasFiltersApplied(): boolean {
     const v = this.filterForm.value;
-    return !!(v.stageId || v.status);
+    return !!(v.search?.trim() || v.stageId || v.status);
   }
 
   onPageChange(event: PageEvent): void {
@@ -157,8 +180,64 @@ export class AppliedJobsComponent implements OnInit {
     this.loadApplications();
   }
 
-  loadReceivedApplications(): void {
+  loadPostedByMeApplications(): void {
     if (!this.canSeeReceivedTab) return;
+    this.postedByMeIsLoading = true;
+    const v = this.postedByMeFilterForm.value;
+    const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
+    const applyDateTo = v.applyDateTo instanceof Date ? v.applyDateTo.toISOString().slice(0, 10) : (v.applyDateTo || null);
+    this.jobsService.getJobApplicationsPostedByMePaged({
+      page: this.postedByMePage,
+      pageSize: this.postedByMePageSize,
+      search: v.search || undefined,
+      applyDateFrom: applyDateFrom || undefined,
+      applyDateTo: applyDateTo || undefined,
+      stageId: v.stageId || undefined
+    }).subscribe({
+      next: (result: PagedResult<JobApplicationDto>) => {
+        this.postedByMeApplications = result.data ?? [];
+        this.postedByMeTotalCount = result.totalCount ?? 0;
+        this.postedByMeIsLoading = false;
+      },
+      error: () => {
+        this.postedByMeApplications = [];
+        this.postedByMeTotalCount = 0;
+        this.postedByMeIsLoading = false;
+      }
+    });
+  }
+
+  applyPostedByMeFilters(): void {
+    this.postedByMePage = 1;
+    this.loadPostedByMeApplications();
+  }
+
+  clearPostedByMeFilters(): void {
+    this.postedByMeFilterForm.patchValue({
+      search: '',
+      applyDateFrom: null,
+      applyDateTo: null,
+      stageId: ''
+    });
+    this.postedByMePage = 1;
+    this.loadPostedByMeApplications();
+  }
+
+  hasPostedByMeFiltersApplied(): boolean {
+    const v = this.postedByMeFilterForm.value;
+    const fromDate = v.applyDateFrom;
+    const toDate = v.applyDateTo;
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId);
+  }
+
+  onPostedByMePageChange(event: PageEvent): void {
+    this.postedByMePage = event.pageIndex + 1;
+    this.postedByMePageSize = event.pageSize;
+    this.loadPostedByMeApplications();
+  }
+
+  loadReceivedApplications(): void {
+    if (!this.canSeeAllApplicationsTab) return;
     this.receivedIsLoading = true;
     const v = this.receivedFilterForm.value;
     const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
@@ -215,6 +294,8 @@ export class AppliedJobsComponent implements OnInit {
 
   onTabChange(index: number): void {
     if (index === 1) {
+      this.loadPostedByMeApplications();
+    } else if (index === 2 && this.canSeeAllApplicationsTab) {
       this.loadReceivedApplications();
     }
   }

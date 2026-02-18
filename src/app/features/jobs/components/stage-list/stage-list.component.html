@@ -1,0 +1,94 @@
+<div class="openings-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>label</mat-icon>
+        Stages
+      </h1>
+      <p class="page-subtitle">Manage application stages for job hiring</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button (click)="openCreateDialog()" class="add-button">
+        <mat-icon>add</mat-icon>
+        Add Stage
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="filters-card">
+    <div class="filters-header">
+      <h3>Search</h3>
+      <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()" class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear
+      </button>
+    </div>
+    <div class="filters-content">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search stages</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [formControl]="searchControl" placeholder="Search by name...">
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <div class="table-header">
+      <h3>Stages ({{ dataSource.data.length }})</h3>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading stages...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="dataSource" class="stage-table">
+        <ng-container matColumnDef="stageName">
+          <th mat-header-cell *matHeaderCellDef>Stage Name</th>
+          <td mat-cell *matCellDef="let row">{{ row.stageName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="stageOrder">
+          <th mat-header-cell *matHeaderCellDef>Order</th>
+          <td mat-cell *matCellDef="let row">{{ row.stageOrder ?? '—' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let row">{{ formatDate(row.createdAt) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="editStage(row)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteStage(row)" class="danger-action">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div *ngIf="dataSource.data.length === 0" class="empty-state">
+        <mat-icon>label</mat-icon>
+        <h3>No Stages Found</h3>
+        <p *ngIf="hasFiltersApplied()">No stages match your search.</p>
+        <p *ngIf="!hasFiltersApplied()">Create your first stage to organize job application flow.</p>
+        <button mat-flat-button *ngIf="!hasFiltersApplied()" (click)="openCreateDialog()" class="add-first-btn">
+          <mat-icon>add</mat-icon>
+          Add Stage
+        </button>
+      </div>
+    </div>
+  </mat-card>
+</div>

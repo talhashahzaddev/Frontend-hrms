@@ -13,6 +13,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateJobDialogComponent } from '../create-job-dialog/create-job-dialog.component';
 import { ApplyJobDialogComponent } from '../apply-job-dialog/apply-job-dialog.component';
@@ -73,6 +74,7 @@ export class OpeningsComponent implements OnInit {
     private jobsService: JobsService,
     private notification: NotificationService,
     private authService: AuthService,
+    private router: Router,
     private fb: FormBuilder
   ) {
     this.filterForm = this.fb.group({
@@ -160,11 +162,16 @@ export class OpeningsComponent implements OnInit {
   }
 
   openApplyJobDialog(job: JobOpeningDto): void {
-    this.dialog.open(ApplyJobDialogComponent, {
+    const dialogRef = this.dialog.open(ApplyJobDialogComponent, {
       width: '560px',
       maxHeight: '90vh',
       panelClass: 'apply-job-dialog-panel',
       data: { job }
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.router.navigate(['/jobs/applied']);
+      }
     });
   }
 

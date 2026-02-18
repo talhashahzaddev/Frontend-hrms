@@ -14,6 +14,8 @@ import {
   UpdateJobApplicationRequest,
   JobApplicationDto,
   StageMasterDto,
+  CreateStageMasterRequest,
+  UpdateStageMasterRequest,
   MyJobApplicationsFilterParams,
   ReceivedJobApplicationsFilterParams
 } from '../../../core/models/jobs.models';
@@ -149,16 +151,89 @@ export class JobsService {
       );
   }
 
+  getStageById(id: string): Observable<StageMasterDto | null> {
+    return this.http
+      .get<ServiceResponse<StageMasterDto>>(`${this.apiUrl}/stages/${id}`)
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : null))
+      );
+  }
+
+  createStage(request: CreateStageMasterRequest): Observable<StageMasterDto> {
+    return this.http
+      .post<ServiceResponse<StageMasterDto>>(`${this.apiUrl}/stages`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to create stage');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  updateStage(id: string, request: UpdateStageMasterRequest): Observable<StageMasterDto> {
+    return this.http
+      .put<ServiceResponse<StageMasterDto>>(`${this.apiUrl}/stages/${id}`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to update stage');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  deleteStage(id: string): Observable<boolean> {
+    return this.http
+      .delete<ServiceResponse<boolean>>(`${this.apiUrl}/stages/${id}`)
+      .pipe(
+        map((res) => res.success === true && res.data === true)
+      );
+  }
+
   getMyJobApplicationsPaged(params: MyJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, stageId, status } = params;
+    const { page = 1, pageSize = 10, search, stageId, status } = params;
     const queryParams: Record<string, string | number> = {
       pageNumber: page,
       pageSize
     };
+    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
     if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
     if (status != null && status !== '') queryParams['status'] = status;
     return this.http
       .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/me`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return {
+              data: [],
+              totalCount: 0,
+              page: 1,
+              pageSize: pageSize,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false
+            };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  getJobApplicationsPostedByMePaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId } = params;
+    const queryParams: Record<string, string | number> = {
+      pageNumber: page,
+      pageSize
+    };
+    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
+    if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
+    if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
+    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    return this.http
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/posted-by-me`, { params: queryParams })
       .pipe(
         map((res) => {
           if (!res.success || !res.data) {

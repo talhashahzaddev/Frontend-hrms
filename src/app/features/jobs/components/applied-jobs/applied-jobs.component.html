@@ -22,18 +22,23 @@
             <mat-card class="filters-card">
               <mat-card-content>
                 <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
+                  <mat-form-field appearance="outline" class="filter-field search-field">
+                    <mat-label>Search</mat-label>
+                    <input matInput formControlName="search" placeholder="Job role name...">
+                    <mat-icon matSuffix>search</mat-icon>
+                  </mat-form-field>
                   <mat-form-field appearance="outline" class="filter-field">
                     <mat-label>Stage</mat-label>
                     <mat-select formControlName="stageId">
                       <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
                     </mat-select>
                   </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Status</mat-label>
+                  <!-- <mat-form-field appearance="outline" class="filter-field"> -->
+                  <!-- <mat-label>Status</mat-label>
                     <mat-select formControlName="status">
                       <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
                     </mat-select>
-                  </mat-form-field>
+                  </mat-form-field> -->
                   <div class="filter-actions">
                     <button mat-flat-button type="submit" class="apply-filters-btn">
                       <mat-icon>filter_list</mat-icon>
@@ -59,22 +64,27 @@
                     <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                     <div class="job-post-heading">
                       <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app) }}</p>
+                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                        }}</p>
                     </div>
                     <div class="job-post-status">
-                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{ app.currentStageName || app.status || 'Applied' }}</span>
+                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
+                        app.currentStageName || app.status || 'Applied' }}</span>
                     </div>
                   </div>
                   <div class="job-post-footer">
                     <span class="job-last-date" *ngIf="app.status">{{ app.status }}</span>
                     <div class="job-post-actions">
-                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn" matTooltip="View application details">
+                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
+                        matTooltip="View application details">
                         <mat-icon>visibility</mat-icon> View details
                       </button>
-                      <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn" matTooltip="Edit application">
+                      <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn"
+                        matTooltip="Edit application">
                         <mat-icon>edit</mat-icon> Edit
                       </button>
-                      <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn" matTooltip="Withdraw application">
+                      <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn"
+                        matTooltip="Withdraw application">
                         <mat-icon>delete</mat-icon> Delete
                       </button>
                     </div>
@@ -82,7 +92,9 @@
                 </article>
               </div>
               <div class="jobs-pagination" *ngIf="applications.length > 0 && totalCount > 0">
-                <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons></mat-paginator>
+                <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+                  [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)"
+                  showFirstLastButtons></mat-paginator>
               </div>
             </div>
             <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && hasFiltersApplied()">
@@ -98,7 +110,8 @@
                 <mat-icon class="empty-icon">work_off</mat-icon>
                 <p class="empty-text">You haven't applied to any jobs yet.</p>
                 <p class="empty-subtext">Browse job openings and apply from there.</p>
-                <a mat-flat-button routerLink="/jobs/openings" class="add-button empty-action"><mat-icon>work_outline</mat-icon> Browse Openings</a>
+                <a mat-flat-button routerLink="/jobs/openings"
+                  class="add-button empty-action"><mat-icon>work_outline</mat-icon> Browse Openings</a>
               </mat-card-content>
             </mat-card>
           </div>
@@ -106,11 +119,113 @@
       </mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>
-          <span class="tab-label">Received Job Applications</span>
+          <span class="tab-label">Received Application By My Job Post</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <div class="tab-content posted-by-me-tab">
+            <!-- Posted By Me: Filters -->
+            <mat-card class="filters-card">
+              <mat-card-content>
+                <form [formGroup]="postedByMeFilterForm" class="filters-form" (ngSubmit)="applyPostedByMeFilters()">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Search</mat-label>
+                    <input matInput formControlName="search" placeholder="Candidate, email, job role...">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field date-field">
+                    <mat-label>Apply date (from)</mat-label>
+                    <input matInput [matDatepicker]="postedByMeApplyFromPicker" formControlName="applyDateFrom"
+                      placeholder="From">
+                    <mat-datepicker-toggle matIconSuffix [for]="postedByMeApplyFromPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #postedByMeApplyFromPicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field date-field">
+                    <mat-label>Apply date (to)</mat-label>
+                    <input matInput [matDatepicker]="postedByMeApplyToPicker" formControlName="applyDateTo"
+                      placeholder="To">
+                    <mat-datepicker-toggle matIconSuffix [for]="postedByMeApplyToPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #postedByMeApplyToPicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Stage</mat-label>
+                    <mat-select formControlName="stageId">
+                      <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <div class="filter-actions">
+                    <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon>
+                      Apply</button>
+                    <button mat-stroked-button type="button" (click)="clearPostedByMeFilters()"
+                      [disabled]="!hasPostedByMeFiltersApplied()"><mat-icon>clear</mat-icon> Clear</button>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+            <!-- Posted By Me: Loading / Feed / Empty -->
+            <div class="jobs-loading" *ngIf="postedByMeIsLoading">
+              <mat-spinner diameter="40"></mat-spinner>
+              <span>Loading applications for your job posts...</span>
+            </div>
+            <div class="jobs-feed-wrapper" *ngIf="!postedByMeIsLoading">
+              <div class="jobs-feed" *ngIf="postedByMeApplications.length > 0">
+                <article class="job-post-card" *ngFor="let app of postedByMeApplications">
+                  <div class="job-post-header">
+                    <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
+                    <div class="job-post-heading">
+                      <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                        }}</p>
+                      <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                        ' · ' + app.candidateEmail : '' }}</p>
+                    </div>
+                    <div class="job-post-status">
+                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
+                        app.currentStageName || app.status || 'Applied' }}</span>
+                    </div>
+                  </div>
+                  <div class="job-post-footer">
+                    <div class="job-post-actions">
+                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
+                        matTooltip="View application details">
+                        <mat-icon>visibility</mat-icon> View details
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              <div class="jobs-pagination" *ngIf="postedByMeApplications.length > 0 && postedByMeTotalCount > 0">
+                <mat-paginator [length]="postedByMeTotalCount" [pageSize]="postedByMePageSize"
+                  [pageIndex]="postedByMePage - 1" [pageSizeOptions]="[5, 10, 25, 50]"
+                  (page)="onPostedByMePageChange($event)" showFirstLastButtons></mat-paginator>
+              </div>
+            </div>
+            <mat-card class="empty-card"
+              *ngIf="!postedByMeIsLoading && postedByMeApplications.length === 0 && hasPostedByMeFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <p class="empty-text">No applications match your filters.</p>
+                <p class="empty-subtext">Try changing search, dates or stage.</p>
+                <button mat-stroked-button (click)="clearPostedByMeFilters()"><mat-icon>clear</mat-icon> Clear
+                  filters</button>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="empty-card"
+              *ngIf="!postedByMeIsLoading && postedByMeApplications.length === 0 && !hasPostedByMeFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">inbox</mat-icon>
+                <p class="empty-text">No applications for your job posts yet.</p>
+                <p class="empty-subtext">Applications for jobs you posted will appear here.</p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab *ngIf="canSeeAllApplicationsTab">
+        <ng-template mat-tab-label>
+          <span class="tab-label">All Job Applications</span>
         </ng-template>
         <ng-template matTabContent>
           <div class="tab-content received-tab">
-            <!-- Received: Filters -->
+            <!-- All: Filters -->
             <mat-card class="filters-card">
               <mat-card-content>
                 <form [formGroup]="receivedFilterForm" class="filters-form" (ngSubmit)="applyReceivedFilters()">
@@ -120,13 +235,15 @@
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="filter-field date-field">
                     <mat-label>Apply date (from)</mat-label>
-                    <input matInput [matDatepicker]="receivedApplyFromPicker" formControlName="applyDateFrom" placeholder="From">
+                    <input matInput [matDatepicker]="receivedApplyFromPicker" formControlName="applyDateFrom"
+                      placeholder="From">
                     <mat-datepicker-toggle matIconSuffix [for]="receivedApplyFromPicker"></mat-datepicker-toggle>
                     <mat-datepicker #receivedApplyFromPicker></mat-datepicker>
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="filter-field date-field">
                     <mat-label>Apply date (to)</mat-label>
-                    <input matInput [matDatepicker]="receivedApplyToPicker" formControlName="applyDateTo" placeholder="To">
+                    <input matInput [matDatepicker]="receivedApplyToPicker" formControlName="applyDateTo"
+                      placeholder="To">
                     <mat-datepicker-toggle matIconSuffix [for]="receivedApplyToPicker"></mat-datepicker-toggle>
                     <mat-datepicker #receivedApplyToPicker></mat-datepicker>
                   </mat-form-field>
@@ -137,8 +254,10 @@
                     </mat-select>
                   </mat-form-field>
                   <div class="filter-actions">
-                    <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon> Apply</button>
-                    <button mat-stroked-button type="button" (click)="clearReceivedFilters()" [disabled]="!hasReceivedFiltersApplied()"><mat-icon>clear</mat-icon> Clear</button>
+                    <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon>
+                      Apply</button>
+                    <button mat-stroked-button type="button" (click)="clearReceivedFilters()"
+                      [disabled]="!hasReceivedFiltersApplied()"><mat-icon>clear</mat-icon> Clear</button>
                   </div>
                 </form>
               </mat-card-content>
@@ -155,16 +274,20 @@
                     <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                     <div class="job-post-heading">
                       <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app) }}</p>
-                      <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ? ' · ' + app.candidateEmail : '' }}</p>
+                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                        }}</p>
+                      <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                        ' · ' + app.candidateEmail : '' }}</p>
                     </div>
                     <div class="job-post-status">
-                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{ app.currentStageName || app.status || 'Applied' }}</span>
+                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
+                        app.currentStageName || app.status || 'Applied' }}</span>
                     </div>
                   </div>
                   <div class="job-post-footer">
                     <div class="job-post-actions">
-                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn" matTooltip="View application details">
+                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
+                        matTooltip="View application details">
                         <mat-icon>visibility</mat-icon> View details
                       </button>
                     </div>
@@ -172,18 +295,23 @@
                 </article>
               </div>
               <div class="jobs-pagination" *ngIf="receivedApplications.length > 0 && receivedTotalCount > 0">
-                <mat-paginator [length]="receivedTotalCount" [pageSize]="receivedPageSize" [pageIndex]="receivedPage - 1" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onReceivedPageChange($event)" showFirstLastButtons></mat-paginator>
+                <mat-paginator [length]="receivedTotalCount" [pageSize]="receivedPageSize"
+                  [pageIndex]="receivedPage - 1" [pageSizeOptions]="[5, 10, 25, 50]"
+                  (page)="onReceivedPageChange($event)" showFirstLastButtons></mat-paginator>
               </div>
             </div>
-            <mat-card class="empty-card" *ngIf="!receivedIsLoading && receivedApplications.length === 0 && hasReceivedFiltersApplied()">
+            <mat-card class="empty-card"
+              *ngIf="!receivedIsLoading && receivedApplications.length === 0 && hasReceivedFiltersApplied()">
               <mat-card-content>
                 <mat-icon class="empty-icon">search_off</mat-icon>
                 <p class="empty-text">No applications match your filters.</p>
                 <p class="empty-subtext">Try changing search, dates or stage.</p>
-                <button mat-stroked-button (click)="clearReceivedFilters()"><mat-icon>clear</mat-icon> Clear filters</button>
+                <button mat-stroked-button (click)="clearReceivedFilters()"><mat-icon>clear</mat-icon> Clear
+                  filters</button>
               </mat-card-content>
             </mat-card>
-            <mat-card class="empty-card" *ngIf="!receivedIsLoading && receivedApplications.length === 0 && !hasReceivedFiltersApplied()">
+            <mat-card class="empty-card"
+              *ngIf="!receivedIsLoading && receivedApplications.length === 0 && !hasReceivedFiltersApplied()">
               <mat-card-content>
                 <mat-icon class="empty-icon">inbox</mat-icon>
                 <p class="empty-text">No received applications yet.</p>
@@ -201,18 +329,23 @@
     <mat-card class="filters-card">
       <mat-card-content>
         <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
+          <mat-form-field appearance="outline" class="filter-field search-field">
+            <mat-label>Search</mat-label>
+            <input matInput formControlName="search" placeholder="Job role name...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
           <mat-form-field appearance="outline" class="filter-field">
             <mat-label>Stage</mat-label>
             <mat-select formControlName="stageId">
               <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field appearance="outline" class="filter-field">
+          <!-- <mat-form-field appearance="outline" class="filter-field">
             <mat-label>Status</mat-label>
             <mat-select formControlName="status">
               <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
             </mat-select>
-          </mat-form-field>
+          </mat-form-field> -->
           <div class="filter-actions">
             <button mat-flat-button type="submit" class="apply-filters-btn">
               <mat-icon>filter_list</mat-icon>
@@ -254,15 +387,18 @@
           <div class="job-post-footer">
             <span class="job-last-date" *ngIf="app.status">{{ app.status }}</span>
             <div class="job-post-actions">
-              <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn" matTooltip="View application details">
+              <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
+                matTooltip="View application details">
                 <mat-icon>visibility</mat-icon>
                 View details
               </button>
-              <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn" matTooltip="Edit application">
+              <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn"
+                matTooltip="Edit application">
                 <mat-icon>edit</mat-icon>
                 Edit
               </button>
-              <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn" matTooltip="Withdraw application">
+              <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn"
+                matTooltip="Withdraw application">
                 <mat-icon>delete</mat-icon>
                 Delete
               </button>
@@ -272,13 +408,8 @@
       </div>
 
       <div class="jobs-pagination" *ngIf="applications.length > 0 && totalCount > 0">
-        <mat-paginator
-          [length]="totalCount"
-          [pageSize]="pageSize"
-          [pageIndex]="page - 1"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (page)="onPageChange($event)"
-          showFirstLastButtons>
+        <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+          [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
         </mat-paginator>
       </div>
     </div>
