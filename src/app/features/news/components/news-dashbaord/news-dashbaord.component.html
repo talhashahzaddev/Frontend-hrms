@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <!-- Filters (only for Admins / HR / Super Admin) -->
+ 
   <!-- Filters (only for Admins / HR / Super Admin) -->
   <mat-card class="filters-card" *ngIf="!isEmployee && !isManager">
     <mat-card-content>
@@ -129,7 +129,7 @@
                 </button>
 
                 <mat-menu #menu="matMenu">
-                  <button mat-menu-item (click)="$event.stopPropagation(); openEditDialog(news)">
+                  <button mat-menu-item (click)="$event.stopPropagation(); navigateToEdit(news)">
                     <mat-icon>edit</mat-icon>
                     <span>Edit</span>
                   </button>

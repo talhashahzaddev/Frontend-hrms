@@ -130,6 +130,24 @@ export class NewsService {
         })
       );
   }
+// GET NEWS BY ID
+getNewsById(id: string): Observable<NewsDto> {
+  return this.http
+    .get<ApiResponse<NewsDto>>(
+      `${this.apiUrl}/getNewsById/${id}`
+    )
+    .pipe(
+      map(res => {
+        if (!res.success || !res.data) {
+          throw new Error(res.message || 'Failed to fetch news details');
+        }
+        return res.data;
+      })
+    );
+}
+
+
+
 
   /** Upload file through uploads API; returns the hosted URL. */
   uploadReceipt(file: File): Observable<string> {
