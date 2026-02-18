@@ -119,11 +119,113 @@
       </mat-tab>
       <mat-tab>
         <ng-template mat-tab-label>
-          <span class="tab-label">Received Job Applications</span>
+          <span class="tab-label">Received Application By My Job Post</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <div class="tab-content posted-by-me-tab">
+            <!-- Posted By Me: Filters -->
+            <mat-card class="filters-card">
+              <mat-card-content>
+                <form [formGroup]="postedByMeFilterForm" class="filters-form" (ngSubmit)="applyPostedByMeFilters()">
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Search</mat-label>
+                    <input matInput formControlName="search" placeholder="Candidate, email, job role...">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field date-field">
+                    <mat-label>Apply date (from)</mat-label>
+                    <input matInput [matDatepicker]="postedByMeApplyFromPicker" formControlName="applyDateFrom"
+                      placeholder="From">
+                    <mat-datepicker-toggle matIconSuffix [for]="postedByMeApplyFromPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #postedByMeApplyFromPicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field date-field">
+                    <mat-label>Apply date (to)</mat-label>
+                    <input matInput [matDatepicker]="postedByMeApplyToPicker" formControlName="applyDateTo"
+                      placeholder="To">
+                    <mat-datepicker-toggle matIconSuffix [for]="postedByMeApplyToPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #postedByMeApplyToPicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Stage</mat-label>
+                    <mat-select formControlName="stageId">
+                      <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <div class="filter-actions">
+                    <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon>
+                      Apply</button>
+                    <button mat-stroked-button type="button" (click)="clearPostedByMeFilters()"
+                      [disabled]="!hasPostedByMeFiltersApplied()"><mat-icon>clear</mat-icon> Clear</button>
+                  </div>
+                </form>
+              </mat-card-content>
+            </mat-card>
+            <!-- Posted By Me: Loading / Feed / Empty -->
+            <div class="jobs-loading" *ngIf="postedByMeIsLoading">
+              <mat-spinner diameter="40"></mat-spinner>
+              <span>Loading applications for your job posts...</span>
+            </div>
+            <div class="jobs-feed-wrapper" *ngIf="!postedByMeIsLoading">
+              <div class="jobs-feed" *ngIf="postedByMeApplications.length > 0">
+                <article class="job-post-card" *ngFor="let app of postedByMeApplications">
+                  <div class="job-post-header">
+                    <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
+                    <div class="job-post-heading">
+                      <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                        }}</p>
+                      <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                        ' · ' + app.candidateEmail : '' }}</p>
+                    </div>
+                    <div class="job-post-status">
+                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
+                        app.currentStageName || app.status || 'Applied' }}</span>
+                    </div>
+                  </div>
+                  <div class="job-post-footer">
+                    <div class="job-post-actions">
+                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
+                        matTooltip="View application details">
+                        <mat-icon>visibility</mat-icon> View details
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              <div class="jobs-pagination" *ngIf="postedByMeApplications.length > 0 && postedByMeTotalCount > 0">
+                <mat-paginator [length]="postedByMeTotalCount" [pageSize]="postedByMePageSize"
+                  [pageIndex]="postedByMePage - 1" [pageSizeOptions]="[5, 10, 25, 50]"
+                  (page)="onPostedByMePageChange($event)" showFirstLastButtons></mat-paginator>
+              </div>
+            </div>
+            <mat-card class="empty-card"
+              *ngIf="!postedByMeIsLoading && postedByMeApplications.length === 0 && hasPostedByMeFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <p class="empty-text">No applications match your filters.</p>
+                <p class="empty-subtext">Try changing search, dates or stage.</p>
+                <button mat-stroked-button (click)="clearPostedByMeFilters()"><mat-icon>clear</mat-icon> Clear
+                  filters</button>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="empty-card"
+              *ngIf="!postedByMeIsLoading && postedByMeApplications.length === 0 && !hasPostedByMeFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">inbox</mat-icon>
+                <p class="empty-text">No applications for your job posts yet.</p>
+                <p class="empty-subtext">Applications for jobs you posted will appear here.</p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </ng-template>
+      </mat-tab>
+      <mat-tab *ngIf="canSeeAllApplicationsTab">
+        <ng-template mat-tab-label>
+          <span class="tab-label">All Job Applications</span>
         </ng-template>
         <ng-template matTabContent>
           <div class="tab-content received-tab">
-            <!-- Received: Filters -->
+            <!-- All: Filters -->
             <mat-card class="filters-card">
               <mat-card-content>
                 <form [formGroup]="receivedFilterForm" class="filters-form" (ngSubmit)="applyReceivedFilters()">

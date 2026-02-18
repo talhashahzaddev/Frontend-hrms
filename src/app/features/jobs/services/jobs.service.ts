@@ -222,6 +222,36 @@ export class JobsService {
       );
   }
 
+  getJobApplicationsPostedByMePaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId } = params;
+    const queryParams: Record<string, string | number> = {
+      pageNumber: page,
+      pageSize
+    };
+    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
+    if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
+    if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
+    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    return this.http
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/posted-by-me`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return {
+              data: [],
+              totalCount: 0,
+              page: 1,
+              pageSize: pageSize,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false
+            };
+          }
+          return res.data;
+        })
+      );
+  }
+
   getReceivedJobApplicationsPaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
     const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId } = params;
     const queryParams: Record<string, string | number> = {
