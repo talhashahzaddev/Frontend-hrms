@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { QuillModule } from 'ngx-quill';
 import { JobOpeningDto, JobApplicationDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -33,7 +34,8 @@ export interface ApplyJobDialogData {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    QuillModule
   ],
   templateUrl: './apply-job-dialog.component.html',
   styleUrls: ['./apply-job-dialog.component.scss']
@@ -46,6 +48,17 @@ export class ApplyJobDialogComponent {
 
   readonly acceptedResumeTypes = '.pdf,.jpg,.jpeg,.png,.gif';
   readonly maxResumeSizeMb = 5;
+
+  quillConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ header: [1, 2, 3, false] }],
+      [{ align: [] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['link', 'image'],
+      ['clean']
+    ]
+  };
 
   private static readonly MAX_RESUME_BYTES = 5 * 1024 * 1024;
   private static readonly ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
@@ -130,6 +143,8 @@ export class ApplyJobDialogComponent {
   }
 
   onResumeFileSelected(event: Event, input: HTMLInputElement): void {
+    event.preventDefault();
+    event.stopPropagation();
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 

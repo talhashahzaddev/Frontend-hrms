@@ -110,6 +110,19 @@
     color: #374151;
     line-height: 1.5;
     white-space: pre-wrap;
+
+    &.cover-letter-html {
+      white-space: normal;
+      p {
+        margin: 0 0 8px;
+        &:last-child { margin-bottom: 0; }
+      }
+      strong { font-weight: 700; }
+      em { font-style: italic; }
+      u { text-decoration: underline; }
+      ul, ol { margin: 0 0 8px; padding-left: 20px; }
+      a { color: #667eea; text-decoration: none; &:hover { text-decoration: underline; } }
+    }
   }
 }
 
