@@ -15,7 +15,7 @@ import { Output, EventEmitter } from '@angular/core';
 import { RejectLeaveDialogComponent } from '../leave/components/reject-leave-dialog/reject-leave-dialog.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { LeaveRequest } from '../../core/models/leave.models';
-
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
@@ -37,6 +37,7 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     private serverNotificationService: ServerNotificationService,
     private attendanceService: AttendanceService,
     public leaveService: LeaveService,
+    private sanitizer: DomSanitizer,
     private router: Router,
     private authService: AuthService,
     private dialog: MatDialog,
@@ -71,6 +72,9 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
 
 
+getSafeHtml(message: string): SafeHtml {
+  return this.sanitizer.bypassSecurityTrustHtml(message);
+}
 
   get unreadCount(): number {
     const count = this.notification.filter(n => !n.isRead).length;

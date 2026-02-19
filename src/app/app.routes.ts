@@ -64,7 +64,14 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('./features/attendance/attendance.routes').then(m => m.attendanceRoutes)
   },
-
+  // Assets Management Routes
+  {
+    path: 'assets',
+    canActivate: [AuthGuard],
+    loadChildren: () => 
+      import('./features/assets/assets.routes').then(m => m.assetsRoutes)
+  },
+  
   // Leave Management Routes
   {
     path: 'leave',
@@ -103,7 +110,17 @@ export const appRoutes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./features/news/news.routes').then(m => m.newsRoutes),
-    title: 'Company News - HRMS'},
+    title: 'Company News - HRMS'
+  },
+
+  // Jobs Module Routes (all roles)
+  {
+    path: 'jobs',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/jobs/jobs.routes').then(m => m.jobsRoutes),
+    title: 'Jobs - HRMS'
+  },
 
   // AI Assistant Route (accessible to all roles)
   {

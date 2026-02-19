@@ -14,7 +14,8 @@
       <mat-icon class="notification-icon">notifications</mat-icon>
       <div class="content">
         <div class="title">{{ n.title }}</div>
-        <div class="message">{{ n.message }}</div>
+        <!-- <div class="message">{{ n.message }}</div> -->
+         <div class="message" [innerHTML]="getSafeHtml(n.message)"></div>
         <div class="time">{{ n.createdAt | date:'dd-MM-yyyy HH:mm' }}</div>
         <div *ngIf="n.notificationType === 'Request' && n.moduletype && !n.isRead && !actionProcessed.has(n.notificationid)"
              class="action-buttons">

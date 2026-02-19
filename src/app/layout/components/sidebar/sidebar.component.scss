@@ -5,10 +5,12 @@
   flex-direction: column;
   background: white;
   color: var(--gray-700);
+  overflow-x: hidden;
 }
 
 // Sidebar Header
 .sidebar-header {
+  height : 73px;
   padding: var(--spacing-lg);
   border-bottom: 1px solid var(--gray-200);
   background: var(--gray-50);
@@ -61,6 +63,7 @@
 .sidebar-nav {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--spacing-md) 0;
 
   // Custom scrollbar
@@ -314,24 +317,6 @@
   }
 }
 
-// Sidebar Footer
-.sidebar-footer {
-  padding: var(--spacing-lg);
-  border-top: 1px solid var(--gray-200);
-  background: var(--gray-50);
-}
-
-.footer-content {
-  text-align: center;
-}
-
-.app-version {
-  .version-text {
-    font-size: 0.75rem;
-    color: var(--gray-500);
-    font-weight: 500;
-  }
-}
 
 // Responsive Design
 @media (max-width: 768px) {
