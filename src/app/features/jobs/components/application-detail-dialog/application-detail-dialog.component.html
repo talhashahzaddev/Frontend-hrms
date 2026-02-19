@@ -65,7 +65,7 @@
 
     <div class="detail-section" *ngIf="application.coverLetter">
       <h4 class="detail-heading">Cover letter</h4>
-      <p class="detail-text">{{ application.coverLetter }}</p>
+      <div class="detail-text cover-letter-html" [innerHTML]="application.coverLetter"></div>
     </div>
   </div>
 </mat-dialog-content>
