@@ -156,15 +156,46 @@
 .page-content {
   position: relative;
   transform-origin: top left;
-  overflow: auto; // Allow scrolling when zoomed
+  overflow: visible !important; // Critical: Allow content to expand when zoomed
   min-height: calc(100vh - 72px); // Subtract header height
-
+  
   // Smooth zoom transition
   transition: zoom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// Ensure content wrapper doesn't break layout when zoomed
+// Ensure content wrapper expands properly when zoomed
 .content-wrapper {
   position: relative;
   width: 100%;
+  overflow: visible !important; // Allow zoomed content to be visible
+  min-height: 100%;
+}
+
+// Fix for mat-sidenav-content to allow scrolling when zoomed
+.main-content {
+  overflow: auto !important; // Enable scrolling on the main content area
+  height: 100vh;
+  
+  // Ensure smooth scrolling
+  scroll-behavior: smooth;
+  
+  // Better scrollbar styling (optional)
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--primary-300);
+    border-radius: var(--radius-full);
+    
+    &:hover {
+      background: var(--primary-400);
+    }
+  }
 }
