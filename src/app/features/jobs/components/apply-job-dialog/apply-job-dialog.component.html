@@ -2,7 +2,7 @@
   <div class="dialog-header">
     <h2 mat-dialog-title>
       <mat-icon>how_to_reg</mat-icon>
-      {{ isEditMode ? 'Edit application' : 'Apply for' }} {{ job.jobRoleName }}
+      {{ isEditMode ? 'Edit application' : (applyForSelf ? 'Apply for' : 'Refer for') }} {{ job.jobRoleName }}
     </h2>
     <button mat-icon-button mat-dialog-close class="close-button">
       <mat-icon>close</mat-icon>
@@ -20,7 +20,7 @@
            aria-hidden="true">
     <p class="dialog-subtitle">Fields marked with * are required.</p>
     <form [formGroup]="applyForm" class="apply-form" (ngSubmit)="onSubmit(); $event.preventDefault()">
-      <div class="form-row two-col">
+      <div class="form-row two-col" *ngIf="!applyForSelf">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Candidate name *</mat-label>
           <input matInput formControlName="candidateName" placeholder="Full name" maxlength="200">
@@ -33,7 +33,7 @@
           <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('email')">Invalid email</mat-error>
         </mat-form-field>
       </div>
-      <div class="form-row">
+      <div class="form-row" *ngIf="!applyForSelf">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Phone *</mat-label>
           <input matInput formControlName="phone" placeholder="Phone number" maxlength="50">
@@ -95,7 +95,7 @@
             (click)="onSubmit()"
             class="submit-button">
       <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update application' : 'Submit application' }}</span>
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update application' : (applyForSelf ? 'Apply' : 'Submit application') }}</span>
       <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Submitting...' }}</span>
     </button>
   </mat-dialog-actions>

@@ -62,6 +62,11 @@ export class OpeningsComponent implements OnInit {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
   }
 
+  /** Apply button is shown to Manager and Employee only (not Super Admin, HR Manager). */
+  get canApplyForSelf(): boolean {
+    return !this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
   statusOptions = [
     { value: '', label: 'All statuses' },
     { value: 'Open', label: 'Open' },
@@ -167,6 +172,20 @@ export class OpeningsComponent implements OnInit {
       maxHeight: '90vh',
       panelClass: 'apply-job-dialog-panel',
       data: { job }
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.router.navigate(['/jobs/applied']);
+      }
+    });
+  }
+
+  openApplyForSelfDialog(job: JobOpeningDto): void {
+    const dialogRef = this.dialog.open(ApplyJobDialogComponent, {
+      width: '560px',
+      maxHeight: '90vh',
+      panelClass: 'apply-job-dialog-panel',
+      data: { job, applyForSelf: true }
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {

@@ -3,9 +3,9 @@
     <div class="header-content">
       <h1 class="page-title">
         <mat-icon>how_to_reg</mat-icon>
-        Applied Jobs
+        Job applications
       </h1>
-      <p class="page-subtitle">Jobs you have applied for</p>
+      <!-- <p class="page-subtitle">Your job applications</p> -->
     </div>
   </div>
 
@@ -14,7 +14,7 @@
     <mat-tab-group (selectedIndexChange)="onTabChange($event)" animationDuration="200ms" class="applied-jobs-tabs">
       <mat-tab>
         <ng-template mat-tab-label>
-          <span class="tab-label">MY Job Applications</span>
+          <span class="tab-label">MY Referenced Applications</span>
         </ng-template>
         <ng-template matTabContent>
           <div class="tab-content my-applications-tab">
