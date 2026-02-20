@@ -1,0 +1,117 @@
+<div class="openings-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>person_pin</mat-icon>
+        My Applications
+      </h1>
+      <p class="page-subtitle">Applications where you applied for yourself</p>
+    </div>
+  </div>
+
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
+        <mat-form-field appearance="outline" class="filter-field search-field">
+          <mat-label>Search</mat-label>
+          <input matInput formControlName="search" placeholder="Job role name...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Stage</mat-label>
+          <mat-select formControlName="stageId">
+            <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="filter-actions">
+          <button mat-flat-button type="submit" class="apply-filters-btn">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
+            <mat-icon>clear</mat-icon>
+            Clear
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="jobs-loading" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Loading applications...</span>
+  </div>
+
+  <div class="jobs-feed-wrapper" *ngIf="!isLoading">
+    <div class="jobs-feed" *ngIf="applications.length > 0">
+      <article class="job-post-card" *ngFor="let app of applications">
+        <div class="job-post-header">
+          <div class="job-post-avatar">
+            <mat-icon>work</mat-icon>
+          </div>
+          <div class="job-post-heading">
+            <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+            <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">
+              Applied {{ getAppliedDate(app) }}
+            </p>
+          </div>
+          <div class="job-post-status">
+            <span class="status-chip" [class.status-applied]="app.status === 'Applied'">
+              {{ app.currentStageName || app.status || 'Applied' }}
+            </span>
+          </div>
+        </div>
+        <div class="job-post-footer">
+          <span class="job-last-date" *ngIf="app.status">{{ app.status }}</span>
+          <div class="job-post-actions">
+            <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
+              matTooltip="View application details">
+              <mat-icon>visibility</mat-icon>
+              View details
+            </button>
+            <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn"
+              matTooltip="Edit application">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+            <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn"
+              matTooltip="Withdraw application">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="jobs-pagination" *ngIf="applications.length > 0 && totalCount > 0">
+      <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+        [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+
+  <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && hasFiltersApplied()">
+    <mat-card-content>
+      <mat-icon class="empty-icon">search_off</mat-icon>
+      <p class="empty-text">No applications match your filters.</p>
+      <p class="empty-subtext">Try changing stage or status.</p>
+      <button mat-stroked-button (click)="clearFilters()">
+        <mat-icon>clear</mat-icon>
+        Clear filters
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && !hasFiltersApplied()">
+    <mat-card-content>
+      <mat-icon class="empty-icon">work_off</mat-icon>
+      <p class="empty-text">You haven't applied to any jobs yet.</p>
+      <p class="empty-subtext">Browse job openings and apply from there.</p>
+      <a mat-flat-button routerLink="/jobs/openings" class="add-button empty-action">
+        <mat-icon>work_outline</mat-icon>
+        Browse Openings
+      </a>
+    </mat-card-content>
+  </mat-card>
+</div>

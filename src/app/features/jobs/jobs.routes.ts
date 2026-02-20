@@ -19,6 +19,12 @@ export const jobsRoutes: Routes = [
     title: 'Applied Jobs - HRMS'
   },
   {
+    path: 'my-applications',
+    loadComponent: () =>
+      import('./components/my-applications/my-applications.component').then(m => m.MyApplicationsComponent),
+    title: 'My Applications - HRMS'
+  },
+  {
     path: 'stage',
     loadComponent: () =>
       import('./components/stage-list/stage-list.component').then(m => m.StageListComponent),
