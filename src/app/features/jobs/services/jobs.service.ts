@@ -11,6 +11,7 @@ import {
   PagedResult,
   JobOpeningsFilterParams,
   CreateJobApplicationRequest,
+  ApplyForMySelfRequest,
   UpdateJobApplicationRequest,
   JobApplicationDto,
   StageMasterDto,
@@ -114,6 +115,19 @@ export class JobsService {
       );
   }
 
+  applyForMySelf(request: ApplyForMySelfRequest): Observable<JobApplicationDto> {
+    return this.http
+      .post<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications/apply-for-myself`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to submit application');
+          }
+          return res.data;
+        })
+      );
+  }
+
   getJobApplicationById(id: string): Observable<JobApplicationDto | null> {
     return this.http
       .get<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications/${id}`)
@@ -204,6 +218,35 @@ export class JobsService {
     if (status != null && status !== '') queryParams['status'] = status;
     return this.http
       .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/me`, { params: queryParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return {
+              data: [],
+              totalCount: 0,
+              page: 1,
+              pageSize: pageSize,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false
+            };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  getMySelfJobApplicationsPaged(params: MyJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
+    const { page = 1, pageSize = 10, search, stageId, status } = params;
+    const queryParams: Record<string, string | number> = {
+      pageNumber: page,
+      pageSize
+    };
+    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
+    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    if (status != null && status !== '') queryParams['status'] = status;
+    return this.http
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/me/self`, { params: queryParams })
       .pipe(
         map((res) => {
           if (!res.success || !res.data) {

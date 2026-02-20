@@ -19,6 +19,8 @@ export interface ApplyJobDialogData {
   job?: JobOpeningDto;
   mode?: 'create' | 'edit';
   application?: JobApplicationDto;
+  /** When true, dialog is for applying as current user (self). Only LinkedIn, resume, cover letter shown. */
+  applyForSelf?: boolean;
 }
 
 @Component({
@@ -72,14 +74,15 @@ export class ApplyJobDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: ApplyJobDialogData,
     private notification: NotificationService
   ) {
+    const isSelf = this.applyForSelf;
     this.applyForm = this.fb.group({
-      candidateName: ['', [Validators.required, Validators.maxLength(200)]],
-      candidateEmail: ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
-      phone: ['', [Validators.required, Validators.maxLength(50)]],
+      candidateName: [isSelf ? '' : '', isSelf ? [] : [Validators.required, Validators.maxLength(200)]],
+      candidateEmail: [isSelf ? '' : '', isSelf ? [] : [Validators.required, Validators.email, Validators.maxLength(200)]],
+      phone: [isSelf ? '' : '', isSelf ? [] : [Validators.required, Validators.maxLength(50)]],
       linkedInUrl: ['', [Validators.maxLength(500)]],
       resumeUrl: ['', [Validators.required]],
       coverLetter: [''],
-      applicationSource: ['Internal', [Validators.maxLength(100)]]
+      applicationSource: [isSelf ? 'Self' : 'Internal', [Validators.maxLength(100)]]
     });
     if (this.isEditMode && this.data.application) {
       this.patchFormWithApplication(this.data.application);
@@ -88,6 +91,10 @@ export class ApplyJobDialogComponent {
 
   get isEditMode(): boolean {
     return this.data?.mode === 'edit' && !!this.data?.application;
+  }
+
+  get applyForSelf(): boolean {
+    return !!this.data?.applyForSelf;
   }
 
   get job(): JobOpeningDto {
@@ -207,6 +214,24 @@ export class ApplyJobDialogComponent {
         error: (err) => {
           this.isSubmitting = false;
           this.notification.showError(err?.message || 'Failed to update application');
+        }
+      });
+    } else if (this.applyForSelf) {
+      const request = {
+        jobId: this.job.jobId,
+        linkedInUrl: value.linkedInUrl?.trim() || undefined,
+        resumeUrl: value.resumeUrl?.trim() ?? '',
+        coverLetter: value.coverLetter?.trim() || undefined,
+        applicationSource: value.applicationSource?.trim() || undefined
+      };
+      this.jobsService.applyForMySelf(request).subscribe({
+        next: () => {
+          this.notification.showSuccess('Application submitted successfully');
+          this.dialogRef.close(true);
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          this.notification.showError(err?.message || 'Failed to submit application');
         }
       });
     } else {
