@@ -66,82 +66,87 @@
   <div class="jobs-feed-wrapper" *ngIf="!isLoading">
     <div class="jobs-feed" *ngIf="openings.length > 0">
       <article class="job-post-card" *ngFor="let job of openings">
-      <div class="job-post-header">
-        <div class="job-post-avatar">
-          <mat-icon>work</mat-icon>
+        <div class="job-post-header">
+          <div class="job-post-avatar">
+            <mat-icon>work</mat-icon>
+          </div>
+          <div class="job-post-heading">
+            <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
+            <p class="job-post-meta" *ngIf="getMetaLine(job)">
+              {{ getMetaLine(job) }}
+            </p>
+            <p class="job-post-meta job-post-date" *ngIf="job.postedDate">
+              Posted {{ job.postedDate | date:'mediumDate' }}
+              <span class="job-posted-as" *ngIf="job.postedAs"> · {{ job.postedAs }}</span>
+            </p>
+          </div>
+          <div class="job-post-status">
+            <span class="status-chip" [class.status-open]="job.status === 'Open'"
+              [class.status-closed]="job.status === 'Closed'" [class.status-draft]="job.status === 'Draft'">
+              {{ job.status }}
+            </span>
+          </div>
         </div>
-        <div class="job-post-heading">
-          <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
-          <p class="job-post-meta" *ngIf="getMetaLine(job)">
-            {{ getMetaLine(job) }}
-          </p>
-          <p class="job-post-meta job-post-date" *ngIf="job.postedDate">
-            Posted {{ job.postedDate | date:'mediumDate' }}
-            <span class="job-posted-as" *ngIf="job.postedAs"> · {{ job.postedAs }}</span>
-          </p>
+        <div class="job-post-body" *ngIf="job.jobIntroduction">
+          <p class="job-intro">{{ job.jobIntroduction }}</p>
         </div>
-        <div class="job-post-status">
-          <span class="status-chip" [class.status-open]="job.status === 'Open'" [class.status-closed]="job.status === 'Closed'" [class.status-draft]="job.status === 'Draft'">
-            {{ job.status }}
+        <div class="job-post-tags" *ngIf="getExperienceText(job) || getCtcText(job) || job.vacancies">
+          <span class="job-tag" *ngIf="getExperienceText(job)">
+            <mat-icon>schedule</mat-icon>
+            {{ getExperienceText(job) }}
+          </span>
+          <span class="job-tag" *ngIf="getCtcText(job)">
+            <mat-icon>payments</mat-icon>
+            {{ getCtcText(job) }}
+          </span>
+          <span class="job-tag" *ngIf="job.vacancies">
+            <mat-icon>group</mat-icon>
+            {{ job.vacancies }} {{ job.vacancies === 1 ? 'vacancy' : 'vacancies' }}
           </span>
         </div>
-      </div>
-      <div class="job-post-body" *ngIf="job.jobIntroduction">
-        <p class="job-intro">{{ job.jobIntroduction }}</p>
-      </div>
-      <div class="job-post-tags" *ngIf="getExperienceText(job) || getCtcText(job) || job.vacancies">
-        <span class="job-tag" *ngIf="getExperienceText(job)">
-          <mat-icon>schedule</mat-icon>
-          {{ getExperienceText(job) }}
-        </span>
-        <span class="job-tag" *ngIf="getCtcText(job)">
-          <mat-icon>payments</mat-icon>
-          {{ getCtcText(job) }}
-        </span>
-        <span class="job-tag" *ngIf="job.vacancies">
-          <mat-icon>group</mat-icon>
-          {{ job.vacancies }} {{ job.vacancies === 1 ? 'vacancy' : 'vacancies' }}
-        </span>
-      </div>
-      <div class="job-post-footer">
-        <span class="job-last-date" *ngIf="job.lastDate">
-          Apply by {{ job.lastDate | date:'mediumDate' }}
-        </span>
-        <div class="job-post-actions">
-          <button mat-stroked-button (click)="viewDetails(job)" class="action-btn view-btn" matTooltip="View details">
-            <mat-icon>visibility</mat-icon>
-            View details
-          </button>
-          <button mat-flat-button (click)="openApplyJobDialog(job)" class="action-btn apply-btn" matTooltip="Apply for this job">
-            <mat-icon>how_to_reg</mat-icon>
-            Apply
-          </button>
-          <button *ngIf="canManageJobs" mat-stroked-button (click)="editJob(job)" class="action-btn edit-btn" matTooltip="Edit">
-            <mat-icon>edit</mat-icon>
-            Edit
-          </button>
-          <button *ngIf="canManageJobs" mat-stroked-button (click)="deleteJob(job)" class="action-btn delete-btn" matTooltip="Delete">
-            <mat-icon>delete</mat-icon>
-            Delete
-          </button>
-          <a *ngIf="job.externalLink" [href]="job.externalLink" target="_blank" rel="noopener noreferrer" mat-stroked-button class="action-btn external-apply-btn" matTooltip="Apply via external link">
-            <mat-icon>open_in_new</mat-icon>
-            Apply externally
-          </a>
+        <div class="job-post-footer">
+          <span class="job-last-date" *ngIf="job.lastDate">
+            Apply by {{ job.lastDate | date:'mediumDate' }}
+          </span>
+          <div class="job-post-actions">
+            <button mat-stroked-button (click)="viewDetails(job)" class="action-btn view-btn" matTooltip="View details">
+              <mat-icon>visibility</mat-icon>
+              View details
+            </button>
+            <button *ngIf="canApplyForSelf" mat-stroked-button (click)="openApplyForSelfDialog(job)"
+              class="action-btn apply-self-btn" matTooltip="Apply for this job yourself">
+              <mat-icon>person_add</mat-icon>
+              Apply
+            </button>
+            <button mat-flat-button (click)="openApplyJobDialog(job)" class="action-btn apply-btn"
+              matTooltip="Refer someone for this job">
+              <mat-icon>how_to_reg</mat-icon>
+              Refer
+            </button>
+            <button *ngIf="canManageJobs" mat-stroked-button (click)="editJob(job)" class="action-btn edit-btn"
+              matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+            <button *ngIf="canManageJobs" mat-stroked-button (click)="deleteJob(job)" class="action-btn delete-btn"
+              matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+            <a *ngIf="job.externalLink" [href]="job.externalLink" target="_blank" rel="noopener noreferrer"
+              mat-stroked-button class="action-btn external-apply-btn" matTooltip="Apply via external link">
+              <mat-icon>open_in_new</mat-icon>
+              Apply externally
+            </a>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
     </div>
 
     <!-- Pagination -->
     <div class="jobs-pagination" *ngIf="openings.length > 0 && totalCount > 0">
-      <mat-paginator
-        [length]="totalCount"
-        [pageSize]="pageSize"
-        [pageIndex]="page - 1"
-        [pageSizeOptions]="[5, 10, 25, 50]"
-        (page)="onPageChange($event)"
-        showFirstLastButtons>
+      <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+        [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
       </mat-paginator>
     </div>
   </div>

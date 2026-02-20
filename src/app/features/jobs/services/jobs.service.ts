@@ -11,6 +11,7 @@ import {
   PagedResult,
   JobOpeningsFilterParams,
   CreateJobApplicationRequest,
+  ApplyForMySelfRequest,
   UpdateJobApplicationRequest,
   JobApplicationDto,
   StageMasterDto,
@@ -104,6 +105,19 @@ export class JobsService {
   createJobApplication(request: CreateJobApplicationRequest): Observable<JobApplicationDto> {
     return this.http
       .post<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to submit application');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  applyForMySelf(request: ApplyForMySelfRequest): Observable<JobApplicationDto> {
+    return this.http
+      .post<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications/apply-for-myself`, request)
       .pipe(
         map((res) => {
           if (!res.success || !res.data) {

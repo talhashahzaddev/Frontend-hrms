@@ -132,6 +132,15 @@ export interface CreateJobApplicationRequest {
   status?: string | null;
 }
 
+/** Request for applying to a job as the current user (self). Name, email, phone come from employee record. */
+export interface ApplyForMySelfRequest {
+  jobId: string;
+  linkedInUrl?: string | null;
+  resumeUrl: string;
+  coverLetter?: string | null;
+  applicationSource?: string | null;
+}
+
 export interface UpdateJobApplicationRequest {
   candidateName?: string | null;
   candidateEmail?: string | null;
