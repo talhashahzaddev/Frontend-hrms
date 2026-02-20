@@ -16,7 +16,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { AttendanceUpdateRequestDto, ManualAttendanceRequest } from '../../../../core/models/attendance.models';
 
 export interface AttendanceRequestDialogData {
-  attendanceId?: string; // Optional - null for 'create' mode
+  attendanceId?: string | null; // Optional - null for 'create' mode or when no GUID exists
   timesheetId?: string; // Optional timesheetId for snapshot-based corrections
   employeeId?: string; // Required for 'create' mode
   employeeName: string;
@@ -84,16 +84,11 @@ export class AttendanceRequestDialogComponent implements OnInit {
     // Task 3: For create mode, initialize with default values for the selected date
     if (this.isCreateMode) {
       // Pre-fill with sensible defaults for a new record
-      const workDate = new Date(this.data.workDate);
-      const defaultCheckIn = new Date(workDate);
-      defaultCheckIn.setHours(9, 0, 0, 0); // Default 9:00 AM
-      const defaultCheckOut = new Date(workDate);
-      defaultCheckOut.setHours(18, 0, 0, 0); // Default 6:00 PM
-      
+      // type="time" inputs expect plain HH:mm
       this.requestForm.patchValue({
-        requestedCheckIn: this.formatDateTimeLocal(defaultCheckIn),
-        requestedCheckOut: this.formatDateTimeLocal(defaultCheckOut),
-        requestedStatus: 'present' // Default to present for new records
+        requestedCheckIn: '09:00',
+        requestedCheckOut: '18:00',
+        requestedStatus: 'present'
       });
       return;
     }
@@ -101,12 +96,12 @@ export class AttendanceRequestDialogComponent implements OnInit {
     // Edit mode: Pre-fill form with original values if available
     if (this.data.originalCheckIn) {
       this.requestForm.patchValue({
-        requestedCheckIn: this.parseDateTime(this.data.originalCheckIn)
+        requestedCheckIn: this.parseTimeOnly(this.data.originalCheckIn)
       });
     }
     if (this.data.originalCheckOut) {
       this.requestForm.patchValue({
-        requestedCheckOut: this.parseDateTime(this.data.originalCheckOut)
+        requestedCheckOut: this.parseTimeOnly(this.data.originalCheckOut)
       });
     }
     if (this.data.originalStatus) {
@@ -121,32 +116,45 @@ export class AttendanceRequestDialogComponent implements OnInit {
     }
   }
 
-  // Helper to format Date to datetime-local input format
+  /** @deprecated — use parseTimeOnly for type="time" inputs */
   formatDateTimeLocal(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    return `${hours}:${minutes}`;
   }
 
-  parseDateTime(dateTimeString: string): string {
-    // Convert ISO string to datetime-local format (YYYY-MM-DDTHH:mm)
+  /**
+   * Extracts HH:mm from an ISO / "HH:mm" / "HH:mm:ss" string.
+   * Safe against timezone shifts: reads the raw time segment from the string
+   * instead of constructing a JS Date object (which converts to local time).
+   */
+  parseTimeOnly(dateTimeString: string): string {
     if (!dateTimeString) return '';
-    const date = new Date(dateTimeString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    // ISO string: "2026-02-18T09:30:00" or "2026-02-18T09:30:00+05:00"
+    const tIndex = dateTimeString.indexOf('T');
+    if (tIndex !== -1) {
+      return dateTimeString.substring(tIndex + 1, tIndex + 6); // "HH:mm"
+    }
+    // Already "HH:mm" or "HH:mm:ss"
+    return dateTimeString.substring(0, 5);
   }
 
-  formatDateTime(dateTimeLocal: string): string {
-    // Convert datetime-local format to ISO string
-    if (!dateTimeLocal) return '';
-    return new Date(dateTimeLocal).toISOString();
+  /** @deprecated — kept for backwards compat, use parseTimeOnly instead */
+  parseDateTime(dateTimeString: string): string {
+    return this.parseTimeOnly(dateTimeString);
+  }
+
+  // Combines workDate (YYYY-MM-DD) with a HH:mm time string into a local ISO-like
+  // datetime string WITHOUT UTC conversion (no .toISOString()).
+  // Using .toISOString() shifts the time by the browser's UTC offset, causing the
+  // card to display wrong times after saving a draft.
+  formatDateTime(timeOnly: string): string {
+    if (!timeOnly) return '';
+    const workDatePart = this.data.workDate.split('T')[0];
+    // Return a plain local datetime string: "YYYY-MM-DDTHH:mm:00"
+    // The backend accepts ISO-like strings and formatTime() on the card parses
+    // the "T" substring directly — both work correctly with local time.
+    return `${workDatePart}T${timeOnly}:00`;
   }
 
   formatDateForDisplay(dateString: string): string {
@@ -163,17 +171,15 @@ export class AttendanceRequestDialogComponent implements OnInit {
   }
 
   validateTimeRange(): boolean {
-    const checkIn = this.requestForm.get('requestedCheckIn')?.value;
-    const checkOut = this.requestForm.get('requestedCheckOut')?.value;
+    const checkIn: string = this.requestForm.get('requestedCheckIn')?.value;
+    const checkOut: string = this.requestForm.get('requestedCheckOut')?.value;
 
     if (!checkIn || !checkOut) {
       return true; // Skip validation if either is empty
     }
 
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
-
-    if (checkOutDate <= checkInDate) {
+    // Inputs are type="time" so values are "HH:mm" — compare as strings (lexicographic is correct for same day)
+    if (checkOut <= checkIn) {
       this.notificationService.showError('Check-out time must be after check-in time');
       return false;
     }
@@ -182,35 +188,55 @@ export class AttendanceRequestDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    // Validate form
-    if (this.requestForm.invalid) {
-      this.notificationService.showError('Please fill in all required fields');
-      Object.keys(this.requestForm.controls).forEach(key => {
-        this.requestForm.get(key)?.markAsTouched();
-      });
-      return;
-    }
+    try {
+      // Validate form
+      if (this.requestForm.invalid) {
+        this.notificationService.showError('Please fill in all required fields');
+        Object.keys(this.requestForm.controls).forEach(key => {
+          this.requestForm.get(key)?.markAsTouched();
+        });
+        this.isSubmitting = false;
+        return;
+      }
 
-    // Validate time range
-    if (!this.validateTimeRange()) {
-      return;
-    }
+      // Validate time range
+      if (!this.validateTimeRange()) {
+        this.isSubmitting = false;
+        return;
+      }
 
-    this.isSubmitting = true;
-    const formValue = this.requestForm.value;
+      this.isSubmitting = true;
+      const formValue = this.requestForm.value;
 
-    // Task 2: Route to Create or Edit API based on mode
-    if (this.isCreateMode) {
-      this.submitCreateRequest(formValue);
-    } else {
-      this.submitEditRequest(formValue);
+      // Debug: Log submit mode and payload
+      console.log('[AttendanceRequestDialog] Submitting', this.isCreateMode ? 'CREATE' : 'EDIT', formValue);
+
+      // Add a timeout to reset isSubmitting if API call takes too long (e.g., 15s)
+      const timeout = setTimeout(() => {
+        if (this.isSubmitting) {
+          this.isSubmitting = false;
+          this.notificationService.showError('Request timed out. Please check your connection and try again.');
+        }
+      }, 15000);
+
+      // Task 2: Route to Create or Edit API based on mode
+      if (this.isCreateMode) {
+        this.submitCreateRequest(formValue, timeout);
+      } else {
+        this.submitEditRequest(formValue, timeout);
+      }
+    } catch (err) {
+      this.isSubmitting = false;
+      this.notificationService.showError('An unexpected error occurred. Please try again.');
+      console.error('[AttendanceRequestDialog] Unexpected error:', err);
     }
   }
 
   // Task 2: Create new attendance record (POST /api/Attendance/manual)
-  private submitCreateRequest(formValue: any): void {
+  // 2. Updated Create Request Logic
+  private submitCreateRequest(formValue: any, timeout?: any): void {
     if (!this.data.employeeId) {
-      this.notificationService.showError('Employee ID is required for creating new records');
+      this.notificationService.showError('Employee ID is required');
       this.isSubmitting = false;
       return;
     }
@@ -219,53 +245,53 @@ export class AttendanceRequestDialogComponent implements OnInit {
       employeeId: this.data.employeeId,
       workDate: this.data.workDate,
       date: this.data.workDate,
+      // Use the fixed formatting logic
       checkInTime: formValue.requestedCheckIn ? this.formatDateTime(formValue.requestedCheckIn) : '',
       checkOutTime: formValue.requestedCheckOut ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
       status: formValue.requestedStatus || 'present',
       notes: formValue.requestedNotes || undefined,
-      reason: formValue.reasonForEdit || 'Manager override - added missing attendance record'
+      reason: formValue.reasonForEdit // Ensure this matches your BE 'reason' property
     };
 
-    this.attendanceService.createManualAttendance(createDto)
-      .subscribe({
-        next: (result) => {
-          // Task 4: Return the new attendanceId for state refresh
-          this.notificationService.showSuccess('Attendance record created successfully');
-          this.isSubmitting = false;
-          this.dialogRef.close({ success: true, attendanceId: result.attendanceId, mode: 'create' });
-        },
-        error: (error) => {
-          console.error('Error creating attendance record:', error);
-          this.notificationService.showError(error?.message || 'Failed to create attendance record. Please try again.');
-          this.isSubmitting = false;
-        }
-      });
+    this.attendanceService.createManualAttendance(createDto).subscribe({
+      next: (result) => {
+        clearTimeout(timeout);
+        this.notificationService.showSuccess('Record created successfully');
+        this.dialogRef.close({ success: true, attendanceId: (result as any).attendanceId });
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.notificationService.showError(err?.error?.message || 'Submission failed');
+      }
+    });
   }
 
   // Edit existing attendance record
-  private submitEditRequest(formValue: any): void {
+  // 3. Updated Edit Request Logic
+  private submitEditRequest(formValue: any, timeout?: any): void {
+    const isAbsent = formValue.requestedStatus?.toLowerCase() === 'absent';
     const requestDto: AttendanceUpdateRequestDto = {
-      attendanceId: this.data.attendanceId!,
-      requestedCheckIn: formValue.requestedCheckIn ? this.formatDateTime(formValue.requestedCheckIn) : undefined,
-      requestedCheckOut: formValue.requestedCheckOut ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
+      attendanceId: this.data.attendanceId || null,
+      employeeId: this.data.employeeId!,
+      workDate: this.data.workDate,
+      requestedCheckIn: (!isAbsent && formValue.requestedCheckIn) ? this.formatDateTime(formValue.requestedCheckIn) : undefined,
+      requestedCheckOut: (!isAbsent && formValue.requestedCheckOut) ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
       requestedStatus: formValue.requestedStatus || undefined,
       reasonForEdit: formValue.reasonForEdit,
       requestedNotes: formValue.requestedNotes || undefined
     };
 
-    this.attendanceService.submitEditRequest(requestDto)
-      .subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Attendance correction request submitted successfully');
-          this.isSubmitting = false;
-          this.dialogRef.close({ success: true, mode: 'edit' });
-        },
-        error: (error) => {
-          console.error('Error submitting request:', error);
-          this.notificationService.showError('Failed to submit request. Please try again.');
-          this.isSubmitting = false;
-        }
-      });
+    this.attendanceService.submitEditRequest(requestDto).subscribe({
+      next: () => {
+        clearTimeout(timeout);
+        this.notificationService.showSuccess('Correction submitted');
+        this.dialogRef.close({ success: true, ...requestDto });
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        this.notificationService.showError('Error submitting correction');
+      }
+    });
   }
 
   cancel(): void {

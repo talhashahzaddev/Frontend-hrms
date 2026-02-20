@@ -13,6 +13,9 @@
     </button>
   </div>
 
+  <!-- Scrollable content wrapper -->
+  <div class="scrollable-content">
+
   <!-- Original Values Section - Task 3: Only show in edit mode -->
   @if (!isCreateMode) {
   <div class="original-values-section">
@@ -62,7 +65,7 @@
         <mat-label>Requested Check-In Time</mat-label>
         <input 
           matInput 
-          type="datetime-local"
+          type="time"
           formControlName="requestedCheckIn"
           placeholder="Select check-in time">
         <mat-icon matSuffix>schedule</mat-icon>
@@ -74,7 +77,7 @@
         <mat-label>Requested Check-Out Time</mat-label>
         <input 
           matInput 
-          type="datetime-local"
+          type="time"
           formControlName="requestedCheckOut"
           placeholder="Select check-out time">
         <mat-icon matSuffix>schedule</mat-icon>
@@ -101,7 +104,7 @@
       <textarea 
         matInput 
         formControlName="reasonForEdit"
-        rows="4"
+        rows="2"
         placeholder="Explain why this correction is needed (minimum 10 characters)"
         required></textarea>
       <mat-icon matSuffix>comment</mat-icon>
@@ -117,11 +120,13 @@
       <textarea 
         matInput 
         formControlName="requestedNotes"
-        rows="3"
+        rows="2"
         placeholder="Any additional information"></textarea>
       <mat-icon matSuffix>note</mat-icon>
     </mat-form-field>
   </form>
+
+  </div> <!-- end scrollable-content -->
 
   <!-- Dialog Actions -->
   <div class="dialog-actions">

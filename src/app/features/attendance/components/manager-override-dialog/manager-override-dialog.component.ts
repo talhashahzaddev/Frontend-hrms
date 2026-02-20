@@ -16,6 +16,7 @@ import { ManagerOverrideDto, DailyReviewRecord } from '../../../../core/models/a
 export interface ManagerOverrideDialogData {
   record: DailyReviewRecord;
   timesheetId: string;
+  employeeId: string;
   employeeName: string;
 }
 
@@ -123,23 +124,25 @@ export class ManagerOverrideDialogComponent implements OnInit {
     const record = this.data.record;
 
     // Build the checkIn/checkOut datetime strings using workDate
-    const workDateStr = record.workDate.split('T')[0];
+    const workDateStr = record.date.split('T')[0];
 
     const dto: ManagerOverrideDto = {
-      attendanceId: record.attendanceId,
+      attendanceId: record.attendanceId || null,
+      employeeId: this.data.employeeId,
       timesheetId: this.data.timesheetId,
+      workDate: workDateStr,
       reason: formValue.reason,
       notes: formValue.notes || undefined
     };
 
     // Add checkIn if provided
     if (formValue.checkIn) {
-      dto.checkIn = `${workDateStr}T${formValue.checkIn}:00`;
+      dto.checkInTime = `${workDateStr}T${formValue.checkIn}:00`;
     }
 
     // Add checkOut if provided
     if (formValue.checkOut) {
-      dto.checkOut = `${workDateStr}T${formValue.checkOut}:00`;
+      dto.checkOutTime = `${workDateStr}T${formValue.checkOut}:00`;
     }
 
     // Add status if provided
@@ -152,7 +155,16 @@ export class ManagerOverrideDialogComponent implements OnInit {
         this.isSubmitting = false;
         if (success) {
           this.notificationService.showSuccess('Override applied successfully');
-          this.dialogRef.close(true);
+          // Return the full override payload so the parent can do an optimistic
+          // update immediately — without waiting for the API reload to surface
+          // what the view may not yet return (e.g. absent-day overrides).
+          this.dialogRef.close({
+            success: true,
+            checkInTime:  dto.checkInTime  || null,
+            checkOutTime: dto.checkOutTime || null,
+            status:        dto.status       || null,
+            workDate:      dto.workDate
+          });
         } else {
           this.notificationService.showError('Failed to apply override');
         }

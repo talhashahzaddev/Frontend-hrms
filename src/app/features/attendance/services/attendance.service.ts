@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -40,9 +39,11 @@ import {
   EmployeeReviewPackage,
   DailyReviewRecord,
   ManagerOverrideDto,
-  OrgSubmissionProgress
+  OrgSubmissionProgress,
+  ManualAttendanceUpdateDto
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
+import { FinalizeBatchRequestDto } from '../models/finalize-batch-request.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -451,7 +452,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  /** ✅ Get Employees by Shift ID */
+  /** âœ… Get Employees by Shift ID */
   getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
     return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
       .pipe(
@@ -464,12 +465,12 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // ✅ Shift Swap API using model
+  // âœ… Shift Swap API using model
   createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap`, shiftSwap);
   }
 
-  /** ✅ Update an existing shift */
+  /** âœ… Update an existing shift */
   updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
     return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
   }
@@ -607,8 +608,8 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     const queryString = params.toString();
     const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
     
-    console.log('📊 Fetching timesheets from:', fullUrl);
-    console.log('📅 Date range:', { startDate: startDate || 'N/A', endDate: endDate || 'N/A' });
+    console.log('ðŸ“Š Fetching timesheets from:', fullUrl);
+    console.log('ðŸ“… Date range:', { startDate: startDate || 'N/A', endDate: endDate || 'N/A' });
 
     return this.http.get<ApiResponse<MonthlyTimesheetSummary[]>>(`${this.apiUrl}/timesheet`, { params })
       .pipe(
@@ -616,7 +617,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch timesheets');
           }
-          console.log('✅ Received', response.data?.length || 0, 'timesheet snapshots');
+          console.log('âœ… Received', response.data?.length || 0, 'timesheet snapshots');
           return response.data || [];
         })
       );
@@ -637,7 +638,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     const params = new HttpParams().set('timesheetId', timesheetId);
     const fullUrl = `${this.apiUrl}/timesheet/details?timesheetId=${timesheetId}`;
     
-    console.log('📋 Fetching timesheet details from:', fullUrl);
+    console.log('ðŸ“‹ Fetching timesheet details from:', fullUrl);
 
     return this.http.get<ApiResponse<EmployeeTimesheetDto[]>>(
       `${this.apiUrl}/timesheet/details`,
@@ -647,8 +648,40 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         if (!response.success) {
           throw new Error(response.message || 'Failed to fetch timesheet details');
         }
-        console.log('✅ Received details for', response.data?.length || 0, 'employees');
-        return response.data || [];
+        console.log('âœ… Received details for', response.data?.length || 0, 'employees');
+        // Normalize daily records to handle PascalCase flags from .NET backend
+        const employees = response.data || [];
+        employees.forEach((emp: any) => {
+          // ── Employee-level field normalization ──────────────────────────────
+          // .NET serializes snake_case columns as camelCase or PascalCase.
+          // Ensure is_finalized is always present at the employee level.
+          if (emp.is_finalized === undefined) {
+            emp.is_finalized = emp.isFinalized ?? emp.IsFinalized ?? false;
+          }
+          // ── Daily record normalization ──────────────────────────────────────
+          if (emp.dailyRecords?.length) {
+            emp.dailyRecords = emp.dailyRecords.map((r: any) => {
+              return {
+                ...r,
+                attendanceId: r.attendanceId || r.AttendanceId || undefined,
+                date: r.date || r.Date || r.workDate || r.WorkDate || '',
+                checkInTime: r.checkInTime || r.CheckInTime || undefined,
+                checkOutTime: r.checkOutTime || r.CheckOutTime || undefined,
+                status: r.status || r.Status || 'No Record',
+                totalHours: r.totalHours ?? r.TotalHours ?? 0,
+                notes: r.notes || r.Notes || undefined,
+                is_finalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
+                is_manager_override: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
+                hasApprovedRequest: r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest || false,
+                hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
+                // Draft wins â€” a record cannot be both draft AND pending
+                hasPendingRequest: (r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest || false)
+                  && !(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest),
+              };
+            });
+          }
+        });
+        return employees;
       })
     );
   }
@@ -656,7 +689,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   // Snapshot Management Methods
   // POST /api/attendance/timesheet/snapshot - Creates a new monthly timesheet snapshot
   createSnapshot(dto: MonthlyTimesheetCreateDto): Observable<FinalizedTimesheetDto> {
-    console.log('📸 Creating snapshot:', dto);
+    console.log('ðŸ“¸ Creating snapshot:', dto);
     
     return this.http.post<ApiResponse<FinalizedTimesheetDto>>(
       `${this.apiUrl}/timesheet/snapshot`,
@@ -666,7 +699,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         if (!response.success) {
           throw new Error(response.message || 'Failed to create timesheet snapshot');
         }
-        console.log('✅ Snapshot created successfully:', response.data);
+        console.log('âœ… Snapshot created successfully:', response.data);
         return response.data!;
       })
     );
@@ -687,10 +720,20 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   }
 
   // POST /api/attendance/timesheet/submit-approvals - Employee submits draft edits for approval
-  submitTimesheetApprovals(timesheetId: string): Observable<boolean> {
+  // Scoped to a single employee via { timesheetId, employeeId } DTO
+  /**
+   * @deprecated Use `submitTimesheetBatch(timesheetId)` instead.
+   *
+   * This method sends `employeeId` in the request body, but the backend
+   * resolves the employee from the JWT token and ignores the `employeeId`
+   * parameter entirely. It is therefore a functional duplicate of
+   * `submitTimesheetBatch`. Kept for backwards compatibility only — do not
+   * call from new code.
+   */
+  submitTimesheetApprovals(timesheetId: string, _employeeId: string): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(
       `${this.apiUrl}/timesheet/submit-approvals`,
-      { timesheetId }
+      { timesheetId }  // employeeId intentionally omitted — backend ignores it
     ).pipe(
       map(response => {
         if (!response.success) {
@@ -702,18 +745,24 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   }
 
   // POST /api/attendance/timesheet/finalize-batch - Finalizes a timesheet snapshot for payroll
-  finalizeBatch(timesheetId: string): Observable<boolean> {
-    console.log('🔒 Finalizing batch for timesheetId:', timesheetId);
+  // Accepts optional employeeId to scope finalization to a single employee
+  finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {
+    console.log('ðŸ”’ Finalizing batch for timesheetId:', timesheetId, employeeId ? `employeeId: ${employeeId}` : '(all employees)');
     
+    const body: { timesheetId: string; employeeId?: string } = { timesheetId };
+    if (employeeId) {
+      body.employeeId = employeeId;
+    }
+
     return this.http.post<ApiResponse<boolean>>(
       `${this.apiUrl}/timesheet/finalize-batch`,
-      { timesheetId: timesheetId } // Match backend FinalizeBatchRequestDto structure
+      body
     ).pipe(
       map(response => {
         if (!response.success) {
           throw new Error(response.message || 'Failed to finalize timesheet batch');
         }
-        console.log('✅ Batch finalized successfully');
+        console.log('âœ… Batch finalized successfully');
         return response.data || true;
       })
     );
@@ -769,49 +818,146 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
   // Task 1: Get organization submission progress for compliance tracking
   getOrgSubmissionProgress(month: number, year: number): Observable<OrgSubmissionProgress> {
-    const params = new HttpParams()
-      .set('month', month.toString())
-      .set('year', year.toString());
-    
-    return this.http.get<ApiResponse<OrgSubmissionProgress>>(
-      `${this.apiUrl}/timesheet/org-progress`,
-      { params }
-    ).pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to fetch organization progress');
-        }
-        // Calculate rates if not provided by backend
-        const data = response.data!;
-        if (data.submissionRate === undefined && data.totalEmployees > 0) {
-          data.submissionRate = ((data.finalizedCount + data.submittedCount) / data.totalEmployees) * 100;
-        }
-        if (data.complianceRate === undefined && data.totalEmployees > 0) {
-          data.complianceRate = (data.finalizedCount / data.totalEmployees) * 100;
-        }
-        return data;
-      })
-    );
-  }
+  const params = new HttpParams()
+    .set('month', month.toString())
+    .set('year', year.toString());
 
-  // Get manager review dashboard with all employee packages
+  return this.http.get<ApiResponse<OrgSubmissionProgress>>(
+    `${this.apiUrl}/timesheet/org-progress`,
+    { params }
+  ).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch organization progress');
+      }
+
+      const raw = response.data ?? {} as any;
+
+      const total          = Number(raw.totalEmployees     ?? 0);
+      const finalized      = Number(raw.finalizedCount     ?? 0);
+      const submitted      = Number(raw.submittedCount     ?? 0);
+      const pendingReview  = Number(raw.pendingReviewCount ?? 0);
+      const inProgress     = Number(raw.inProgressCount    ?? 0);
+      const untouched      = Number(raw.untouchedCount     ?? 0);
+
+      const submissionRate = raw.submissionRate != null
+        ? Number(raw.submissionRate)
+        : (total > 0 ? Math.round(((finalized + submitted) / total) * 100 * 10) / 10 : 0);
+
+      const complianceRate = raw.complianceRate != null
+        ? Number(raw.complianceRate)
+        : (total > 0 ? Math.round((finalized / total) * 100 * 10) / 10 : 0);
+
+      const result: OrgSubmissionProgress = {
+        month:             Number(raw.month  ?? month),
+        year:              Number(raw.year   ?? year),
+        totalEmployees:    total,
+        finalizedCount:    finalized,
+        submittedCount:    submitted,
+        pendingReviewCount: pendingReview,
+        inProgressCount:   inProgress,
+        untouchedCount:    untouched,
+        submissionRate,
+        complianceRate
+      };
+
+      return result;
+    })
+  );
+}
   getManagerReviewDashboard(timesheetId: string): Observable<EmployeeReviewPackage[]> {
     // Validate timesheetId before making network call
     if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
       throw new Error('Invalid Timesheet ID');
-    }
-    
+    }   
     return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
       `${this.apiUrl}/timesheet/review-dashboard`,
-      { params: { timesheetId } }
+      { params: { timesheetId, _t: Date.now().toString() } }
     ).pipe(
       map(response => {
         if (!response.success) {
           throw new Error(response.message || 'Failed to fetch manager review dashboard');
         }
-        return response.data || [];
+        const packages = response.data || [];
+        return packages.map((pkg: any) => {
+          // Handle PascalCase key from .NET: FullMonthRecords vs fullMonthRecords
+          const rawRecords = pkg.fullMonthRecords || pkg.FullMonthRecords || [];
+
+          // Normalize ALL package-level numeric/boolean fields that .NET sends in
+          // PascalCase. A plain { ...pkg } spread copies them as PascalCase keys but
+          // the TypeScript interface (and all template bindings) use camelCase, so
+          // without explicit mapping those values are always undefined.
+          const pkgIsFinalized: boolean =
+            (pkg as any).isFinalized ?? (pkg as any).IsFinalized ?? (pkg as any).is_finalized ?? false;
+          const pkgPending: number =
+            (pkg as any).pendingRequestCount ?? (pkg as any).PendingRequestCount ?? 0;
+          const pkgApproved: number =
+            (pkg as any).approvedCount ?? (pkg as any).ApprovedCount ?? 0;
+          const pkgRejected: number =
+            (pkg as any).rejectedCount ?? (pkg as any).RejectedCount ?? 0;
+          const pkgFinalizedCount: number =
+            (pkg as any).finalizedCount ?? (pkg as any).FinalizedCount ?? 0;
+          const pkgFinalizedDays: number =
+            (pkg as any).finalizedDays ?? (pkg as any).FinalizedDays ?? pkgFinalizedCount;
+          const pkgTotalRecords: number =
+            (pkg as any).totalRecords ?? (pkg as any).TotalRecords ?? 0;
+
+          return {
+            ...pkg,
+            // Explicit camelCase values override whatever PascalCase keys the spread copied.
+            isFinalized:          pkgIsFinalized,
+            pendingRequestCount:  pkgPending,
+            approvedCount:        pkgApproved,
+            rejectedCount:        pkgRejected,
+            finalizedCount:       pkgFinalizedCount,
+            finalizedDays:        pkgFinalizedDays,
+            totalRecords:         pkgTotalRecords,
+            fullMonthRecords: rawRecords.map((r: any) => this.normalizeDailyReviewRecord(r))
+          };
+        });
       })
     );
+  }
+
+  /**
+   * Normalize a raw API daily record to the DailyReviewRecord interface.
+   * Maps checkInTimeâ†’originalCheckIn, checkOutTimeâ†’originalCheckOut, statusâ†’originalStatus
+   * while preserving any fields that already use the correct names.
+   */
+  /**
+   * Extract attendanceId with case-insensitive fallback.
+   * .NET backends may serialize as AttendanceId (PascalCase) or attendanceId (camelCase).
+   */
+  private extractAttendanceId(r: any): string {
+    return r.attendanceId || r['AttendanceId'] || r['attendanceid'] || r['Attendanceid'] || '';
+  }
+
+  private normalizeDailyReviewRecord(r: any): DailyReviewRecord {
+    const resolvedAttendanceId = this.extractAttendanceId(r);
+    return {
+      recordId: r.recordId || r.RecordId || r.requestId || r.RequestId || '',
+      attendanceId: resolvedAttendanceId,
+      date: r.date || r.workDate || r.Date || r.WorkDate || '',
+      originalCheckIn: r.originalCheckIn || r.checkInTime || r.CheckInTime || undefined,
+      originalCheckOut: r.originalCheckOut || r.checkOutTime || r.CheckOutTime || undefined,
+      originalStatus: r.originalStatus || r.status || r.Status || 'No Record',
+      originalTotalHours: r.originalTotalHours || r.totalHours || r.TotalHours || 0,
+      requestedCheckIn: r.requestedCheckIn || r.RequestedCheckIn || undefined,
+      requestedCheckOut: r.requestedCheckOut || r.RequestedCheckOut || undefined,
+      requestedStatus: r.requestedStatus || r.RequestedStatus || undefined,
+      requestedNotes: r.requestedNotes || r.RequestedNotes || undefined,
+      reasonForEdit: r.reasonForEdit || r.ReasonForEdit || undefined,
+      // Map draft first so we can guard pending against it
+      hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
+      // A record cannot be both draft AND pending â€” draft wins
+      hasPendingRequest: (r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest || false)
+        && !(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest),
+      isFinalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
+      isManagerOverride: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
+      requestId: r.requestId || r.RequestId || undefined,
+      requestStatus: r.requestStatus || r.RequestStatus
+        || (((r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest) && !(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest)) ? 'pending' : undefined)
+    };
   }
 
   // Get single employee review package for the detail dialog
@@ -823,7 +969,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     
     return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
       `${this.apiUrl}/timesheet/review-dashboard`,
-      { params: { timesheetId, employeeId } }
+      { params: { timesheetId, employeeId, _t: Date.now().toString() } }
     ).pipe(
       map(response => {
         if (!response.success) {
@@ -834,37 +980,104 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         if (packages.length === 0) {
           throw new Error('No attendance data found for this employee');
         }
-        return packages[0];
+        const pkg = packages[0];
+        // Handle PascalCase key from .NET: FullMonthRecords vs fullMonthRecords
+        const rawRecords = (pkg as any).fullMonthRecords || (pkg as any).FullMonthRecords || [];
+        // Normalize package-level isFinalized (same PascalCase reason as getManagerReviewDashboard).
+        const pkgIsFinalized: boolean =
+          (pkg as any).isFinalized ?? (pkg as any).IsFinalized ?? (pkg as any).is_finalized ?? false;
+        const pkgPending: number =
+          (pkg as any).pendingRequestCount ?? (pkg as any).PendingRequestCount ?? 0;
+        return {
+          ...pkg,
+          isFinalized:         pkgIsFinalized,
+          pendingRequestCount: pkgPending,
+          approvedCount:       (pkg as any).approvedCount  ?? (pkg as any).ApprovedCount  ?? 0,
+          rejectedCount:       (pkg as any).rejectedCount  ?? (pkg as any).RejectedCount  ?? 0,
+          finalizedCount:      (pkg as any).finalizedCount ?? (pkg as any).FinalizedCount ?? 0,
+          totalRecords:        (pkg as any).totalRecords   ?? (pkg as any).TotalRecords   ?? 0,
+          fullMonthRecords: rawRecords.map((r: any) => this.normalizeDailyReviewRecord(r))
+        };
       })
     );
   }
 
   // Finalize all approved records for a specific employee
+  // Routes through finalize-batch with employeeId to scope to one employee
   finalizeEmployeeApprovals(timesheetId: string, employeeId: string): Observable<{ finalizedCount: number }> {
-    return this.http.post<ApiResponse<{ finalizedCount: number }>>(
-      `${this.apiUrl}/timesheet/finalize-employee`,
+    return this.http.post<ApiResponse<{ finalizedCount: number } | boolean>>(
+      `${this.apiUrl}/timesheet/finalize-batch`,
       { timesheetId, employeeId }
     ).pipe(
       map(response => {
         if (!response.success) {
           throw new Error(response.message || 'Failed to finalize employee approvals');
         }
-        return response.data || { finalizedCount: 0 };
+        // Backend may return boolean or { finalizedCount } â€” normalize
+        const data = response.data;
+        if (typeof data === 'object' && data !== null && 'finalizedCount' in data) {
+          return data as { finalizedCount: number };
+        }
+        return { finalizedCount: 0 };
       })
     );
   }
 
   // Apply manager override for a specific attendance record
+  // Redirected to admin-override endpoint for elevated-privilege finalization
   applyManagerOverride(dto: ManagerOverrideDto): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(
-      `${this.apiUrl}/timesheet/manager-override`,
+      `${this.apiUrl}/admin-override`,
       dto
     ).pipe(
       map(response => {
         if (!response.success) {
-          throw new Error(response.message || 'Failed to apply manager override');
+          throw new Error(response.message || 'Failed to apply admin override');
         }
         return response.data || true;
+      })
+    );
+  }
+
+  // Administrative override â€” high-privilege endpoint for finalization edits
+  adminOverride(dto: ManualAttendanceUpdateDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/admin-override`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to apply admin override');
+        }
+        return response.data || true;
+      })
+    );
+  }
+submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }> {
+    return this.http.post<ApiResponse<{ submittedCount: number }>>(
+      `${this.apiUrl}/timesheet/submit-approvals`,
+      { timesheetId } as FinalizeBatchRequestDto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to submit timesheet batch');
+        }
+        return response.data || { submittedCount: 0 };
+      })
+    );
+  }
+
+  // Finalize entire timesheet for payroll (manager/admin only)
+  finalizeTimesheetBatch(timesheetId: string): Observable<{ finalizedCount: number }> {
+    return this.http.post<ApiResponse<{ finalizedCount: number }>>(
+      `${this.apiUrl}/timesheet/finalize-batch`,
+      { timesheetId }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to finalize timesheet batch');
+        }
+        return response.data || { finalizedCount: 0 };
       })
     );
   }

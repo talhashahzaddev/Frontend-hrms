@@ -26,8 +26,7 @@ export const attendanceRoutes: Routes = [
     path: 'calendar',
     loadComponent: () => import('./components/attendancce-calendar/attendance-calendar').then(m => m.AttendanceCalendarComponent)
   }
-  ,
-  
+  , 
  { 
     path: 'shift',
     loadComponent: () => import('./components/shift/shift.component').then(m => m.ShiftComponent)

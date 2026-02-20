@@ -1,100 +1,174 @@
 .manager-override-dialog {
-  min-width: 480px;
+  min-width: 500px;
 
-  h2[mat-dialog-title] {
+  // ── Dialog Header ────────────────────────────────────────────────────
+  .override-dialog-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    color: #667eea;
-    margin: 0;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #eee;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f0f4ff 0%, #fff 100%);
 
-    mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
-    }
-  }
-
-  mat-dialog-content {
-    padding-top: 20px;
-    max-height: 70vh;
-  }
-
-  .record-info {
-    background: #f8f9fa;
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-
-    .info-row {
+    .header-icon-wrap {
       display: flex;
-      gap: 8px;
-      margin-bottom: 8px;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      flex-shrink: 0;
 
-      &:last-child {
-        margin-bottom: 0;
+      mat-icon {
+        color: #fff;
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    .header-text {
+      flex: 1;
+
+      .employee-name {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.3;
       }
 
-      .label {
-        font-weight: 500;
-        color: #666;
-        min-width: 80px;
+      .record-date {
+        font-size: 13px;
+        color: #6b7280;
+        font-weight: 400;
       }
+    }
 
-      .value {
-        color: #333;
-        font-weight: 600;
-      }
+    .close-btn {
+      color: #9ca3af;
     }
   }
 
-  .current-values {
-    margin-bottom: 24px;
+  // ── Content ──────────────────────────────────────────────────────────
+  .override-content {
+    padding: 0 !important;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
 
-    h4 {
-      margin: 0 0 12px 0;
-      color: #666;
-      font-size: 14px;
-      font-weight: 500;
+  // ── Before Panel ─────────────────────────────────────────────────────
+  .before-panel {
+    margin: 20px 24px 0;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 14px 16px;
+
+    .panel-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #92400e;
+      margin-bottom: 12px;
+
+      mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: #d97706;
+      }
     }
 
-    .current-grid {
+    .before-grid {
       display: flex;
       gap: 24px;
-      padding: 12px 16px;
-      background: #fff3cd;
-      border-radius: 8px;
-      border-left: 4px solid #ffc107;
+      flex-wrap: wrap;
 
-      .current-item {
+      .before-item {
         display: flex;
-        align-items: center;
-        gap: 8px;
-        
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-          color: #856404;
+        flex-direction: column;
+        gap: 2px;
+
+        .bi-label {
+          font-size: 11px;
+          color: #92400e;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
         }
 
-        span {
-          font-size: 14px;
-          color: #856404;
-          font-weight: 500;
+        .bi-value {
+          font-size: 15px;
+          font-weight: 700;
+          color: #78350f;
+
+          &.status-chip {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+          }
         }
       }
     }
   }
 
+  // ── Form Section ─────────────────────────────────────────────────────
   .override-form {
-    h4 {
-      margin: 0 0 16px 0;
-      color: #333;
-      font-size: 14px;
-      font-weight: 600;
+    padding: 20px 24px 0;
+
+    .form-section-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #4f46e5;
+      margin-bottom: 16px;
+
+      mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: #6366f1;
+      }
+    }
+
+    // Time conflict warning
+    .time-warning {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin: -8px 0 12px;
+      font-size: 13px;
+      color: #b91c1c;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #ef4444;
+      }
+    }
+
+    .reason-field {
+      textarea {
+        resize: vertical;
+      }
     }
 
     .time-row {
@@ -118,17 +192,28 @@
     }
   }
 
-  mat-dialog-actions {
-    padding: 16px 0 0 0;
-    margin-top: 16px;
-    border-top: 1px solid #eee;
+  // ── Dialog Actions ────────────────────────────────────────────────────
+  .override-actions {
+    padding: 16px 24px;
+    margin-top: 0;
+    border-top: 1px solid #e5e7eb;
     gap: 12px;
 
-    button {
-      min-width: 120px;
+    .submit-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: #fff;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
 
       .button-spinner {
-        margin-right: 8px;
+        margin-right: 6px;
         display: inline-block;
         vertical-align: middle;
 
@@ -145,7 +230,7 @@
     min-width: auto;
     width: 100%;
 
-    .current-values .current-grid {
+    .before-panel .before-grid {
       flex-direction: column;
       gap: 12px;
     }

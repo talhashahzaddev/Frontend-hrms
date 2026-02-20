@@ -384,8 +384,10 @@ export interface DailyAttendanceRecord {
   totalHours: number;
   notes?: string;
   is_finalized?: boolean;
+  is_manager_override?: boolean;
   hasPendingRequest?: boolean;
   hasDraftRequest?: boolean;
+  hasApprovedRequest?: boolean;
 }
 
 export interface TimesheetSearchRequest {
@@ -408,7 +410,9 @@ export interface MonthlyTimesheetCreateDto {
 }
 
 export interface AttendanceUpdateRequestDto {
-  attendanceId: string;
+  attendanceId: string | null;
+  employeeId: string;
+  workDate: string;
   requestedCheckIn?: string;
   requestedCheckOut?: string;
   requestedStatus?: string;
@@ -504,7 +508,7 @@ export interface FinalizedTimesheetDto {
 export interface DailyReviewRecord {
   recordId: string;
   attendanceId: string;
-  workDate: string;
+  date: string;
   originalCheckIn?: string;
   originalCheckOut?: string;
   originalStatus: string;
@@ -515,7 +519,9 @@ export interface DailyReviewRecord {
   requestedNotes?: string;
   reasonForEdit?: string;
   hasPendingRequest: boolean;
+  hasDraftRequest: boolean;
   isFinalized: boolean;
+  isManagerOverride?: boolean;
   requestId?: string;
   // Request status: 'pending', 'approved', 'rejected', 'none'
   requestStatus?: 'pending' | 'approved' | 'rejected' | 'none';
@@ -537,7 +543,7 @@ export interface EmployeeReviewPackage {
   rejectedCount: number;
   finalizedCount: number;
   finalizedDays: number;
-  dailyRecords: DailyReviewRecord[];
+  fullMonthRecords: DailyReviewRecord[];
   // Task 2: Status flags for roster card symbols
   hasDraftRequest?: boolean; // 🔵 In-Progress (Blue Edit Icon)
   hasPendingRequest?: boolean; // 🟡 Needs Review (Yellow Clock)
@@ -548,25 +554,26 @@ export interface EmployeeReviewPackage {
 
 // Manager override request DTO
 export interface ManagerOverrideDto {
-  attendanceId: string;
+  attendanceId: string | null;
+  employeeId: string;
   timesheetId: string;
-  checkIn?: string;
-  checkOut?: string;
+  workDate: string;
+  checkInTime?: string;
+  checkOutTime?: string;
   status?: string;
   notes?: string;
   reason: string;
 }
 
-// Task 1: Organization Submission Progress for compliance tracking
 export interface OrgSubmissionProgress {
   month: number;
   year: number;
   totalEmployees: number;
-  submittedCount: number;
   finalizedCount: number;
+  submittedCount: number;
   pendingReviewCount: number;
-  untouchedCount: number;
   inProgressCount: number;
-  submissionRate: number; // (FinalizedCount + SubmittedCount) / TotalEmployees
-  complianceRate: number; // FinalizedCount / TotalEmployees
+  untouchedCount: number;
+  submissionRate: number;
+  complianceRate: number;
 }

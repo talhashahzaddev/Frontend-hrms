@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -18,6 +19,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { MonthlyTimesheetSummary, MonthlyTimesheetCreateDto } from '../../../../core/models/attendance.models';
 import { TimesheetDetailDialogComponent } from '../timesheet-detail-dialog/timesheet-detail-dialog.component';
 import { CreateSnapshotDialogComponent } from '../create-snapshot-dialog/create-snapshot-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog_component';
 
 @Component({
   selector: 'app-timesheet-dashboard',
@@ -29,6 +31,7 @@ import { CreateSnapshotDialogComponent } from '../create-snapshot-dialog/create-
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatDividerModule,
     MatDialogModule,
     MatChipsModule,
     MatMenuModule
@@ -182,20 +185,11 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteSnapshot(timesheet: MonthlyTimesheetSummary): void {
-    // TODO: Implement delete functionality
-    this.notificationService.showInfo('Delete functionality will be implemented');
-  }
-
   getEmployeeCodeLabel(snapshot: MonthlyTimesheetSummary): string {
-    // For employees, show their employee code from the timesheet data
-    // Backend should filter to return only their data
     return this.isEmployee() ? 'Employee Code' : 'Total Employees';
   }
 
   getEmployeeCodeValue(snapshot: MonthlyTimesheetSummary): string | number {
-    // For employees, extract from their name or use a default
-    // The backend filters to only their data, so totalEmployees will be 1
     if (this.isEmployee()) {
       return this.currentUser?.email?.split('@')[0] || 'N/A';
     }
@@ -207,7 +201,22 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
   }
 
   finalizeSnapshot(timesheet: MonthlyTimesheetSummary): void {
-    if (confirm(`Are you sure you want to finalize "${timesheet.timesheetName}"? This action cannot be undone.`)) {
+    const dialogData: ConfirmationDialogData = {
+      title: 'Finalize Timesheet',
+      message: `Are you sure you want to finalize "${timesheet.timesheetName}"? This will lock all records for payroll and cannot be undone.`,
+      confirmLabel: 'Finalize',
+      confirmColor: 'warn',
+      icon: 'lock'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '480px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
       this.attendanceService.finalizeBatch(timesheet.timesheetId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -221,6 +230,6 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
             this.notificationService.showError(errorMessage);
           }
         });
-    }
+    });
   }
 }

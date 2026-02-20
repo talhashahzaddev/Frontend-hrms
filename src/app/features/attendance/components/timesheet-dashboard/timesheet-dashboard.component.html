@@ -15,9 +15,6 @@
           Create New Snapshot
         </button>
       }
-      <button mat-icon-button (click)="refreshData()" [disabled]="isLoading" matTooltip="Refresh">
-        <mat-icon>refresh</mat-icon>
-      </button>
     </div>
   </div>
 
@@ -51,114 +48,73 @@
   <!-- Snapshots Grid -->
   @if (!isLoading && timesheets.length > 0) {
     <div class="snapshots-grid">
-      <mat-card *ngFor="let snapshot of timesheets" class="snapshot-card">
-        <mat-card-header>
-          <div class="snapshot-header-content">
-            <div class="snapshot-title-section">
-              <h2 class="snapshot-name">{{ snapshot.timesheetName }}</h2>
-              <p class="snapshot-period">{{ getMonthYearDisplay(snapshot) }}</p>
-            </div>
-            <mat-chip [ngClass]="getStatusChipClass(snapshot.status)" class="status-chip">
-              <mat-icon class="chip-icon">{{ snapshot.status === 'Finalized' ? 'lock' : 'edit' }}</mat-icon>
-              {{ snapshot.status || 'Draft' }}
-            </mat-chip>
+      <mat-card *ngFor="let snapshot of timesheets" class="snapshot-card employee-summary-card">
+        <!-- Use approvals-like header structure -->
+        <div class="card-header">
+          <div class="employee-avatar">
+            <mat-icon>date_range</mat-icon>
           </div>
-        </mat-card-header>
-
-        <mat-card-content>
-          <div class="snapshot-stats">
-            <div class="stat-item">
-              <mat-icon class="stat-icon">{{ isEmployee() ? 'badge' : 'groups' }}</mat-icon>
-              <div class="stat-details">
-                <!-- Task 3: Use totalEmployees field from API response for full roster count -->
-                <span class="stat-value">{{ isEmployee() ? getEmployeeCodeValue(snapshot) : snapshot.totalEmployees }}</span>
-                <span class="stat-label">{{ getEmployeeCodeLabel(snapshot) }}</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <mat-icon class="stat-icon attendance">assessment</mat-icon>
-              <div class="stat-details">
-                <span class="stat-value">
-                  {{ snapshot.attendancePercentage > 0 ? (snapshot.attendancePercentage | number:'1.1-1') : ((snapshot.totalPresentDays / (snapshot.totalPresentDays + snapshot.totalAbsentDays)) * 100 | number:'1.1-1') }}%
-                </span>
-                <span class="stat-label">{{ getAttendanceRateLabel() }}</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <mat-icon class="stat-icon present">check_circle</mat-icon>
-              <div class="stat-details">
-                <span class="stat-value">{{ snapshot.totalPresentDays }}</span>
-                <span class="stat-label">Present Days</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <mat-icon class="stat-icon absent">cancel</mat-icon>
-              <div class="stat-details">
-                <span class="stat-value">{{ snapshot.totalAbsentDays }}</span>
-                <span class="stat-label">Absent Days</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <mat-icon class="stat-icon late">schedule</mat-icon>
-              <div class="stat-details">
-                <span class="stat-value">{{ snapshot.totalLateDays }}</span>
-                <span class="stat-label">Late Days</span>
-              </div>
-            </div>
-
-            <div class="stat-item">
-              <mat-icon class="stat-icon hours">access_time</mat-icon>
-              <div class="stat-details">
-                <span class="stat-value">{{ snapshot.totalHoursWorked | number:'1.1-1' }}</span>
-                <span class="stat-label">Total Hours</span>
-              </div>
-            </div>
+          <div class="employee-info">
+            <h3 class="employee-name">{{ snapshot.timesheetName }}</h3>
+            <span class="employee-meta">{{ getMonthYearDisplay(snapshot) }}</span>
           </div>
-        </mat-card-content>
+          <div class="month-badge">
+            <mat-icon>calendar_month</mat-icon>
+            <span>{{ getMonthYearDisplay(snapshot) }}</span>
+          </div>
+        </div>
 
-        <mat-card-actions align="end">
-          <button 
-            mat-button 
-            color="primary" 
-            (click)="openTimesheetDetailDialog(snapshot)"
-            matTooltip="View detailed employee records">
+        <mat-divider></mat-divider>
+
+        <div class="stats-row">
+          <div class="stat-pill">
+            <mat-icon>groups</mat-icon>
+            <span class="value">{{ snapshot.totalEmployees }}</span>
+            <span class="label">Total Employees</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="attendance">assessment</mat-icon>
+            <span class="value">{{ snapshot.attendancePercentage | number:'1.1-1' }}%</span>
+            <span class="label">Org Attendance Rate</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="present">check_circle</mat-icon>
+            <span class="value">{{ snapshot.totalPresentDays }}</span>
+            <span class="label">Present Days</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="absent">cancel</mat-icon>
+            <span class="value">{{ snapshot.totalAbsentDays }}</span>
+            <span class="label">Absent Days</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="hours">access_time</mat-icon>
+            <span class="value">{{ snapshot.totalHoursWorked | number:'1.1-1' }}</span>
+            <span class="label">Total Hours</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline-primary" (click)="openTimesheetDetailDialog(snapshot)">
             <mat-icon>visibility</mat-icon>
-            View Details
+            <span>View Details</span>
           </button>
-          
+
           @if (!isEmployee() && snapshot.status !== 'Finalized') {
-            <button 
-              mat-button 
-              (click)="finalizeSnapshot(snapshot)"
-              matTooltip="Finalize for payroll processing">
+            <button class="btn btn-primary" (click)="finalizeSnapshot(snapshot)">
               <mat-icon>lock</mat-icon>
-              Finalize
+              <span>Finalize</span>
             </button>
           }
 
           @if (!isEmployee()) {
-            <button 
-              mat-icon-button 
-              [matMenuTriggerFor]="menu"
-              matTooltip="More actions">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="openTimesheetDetailDialog(snapshot)">
-                <mat-icon>edit</mat-icon>
-                <span>Edit Records</span>
-              </button>
-              <button mat-menu-item (click)="deleteSnapshot(snapshot)">
-                <mat-icon>delete</mat-icon>
-                <span>Delete Snapshot</span>
-              </button>
-            </mat-menu>
+            <!-- Delete action removed per request -->
           }
-        </mat-card-actions>
+        </div>
       </mat-card>
     </div>
   }
