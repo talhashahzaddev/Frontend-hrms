@@ -1,7 +1,3 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// Global Button Base
-// Defined once here so header, cards, empty-state all share the same base.
-// ═══════════════════════════════════════════════════════════════════════════
 
 .btn {
   display: inline-flex;
@@ -124,20 +120,12 @@
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Page Layout
-// ═══════════════════════════════════════════════════════════════════════════
-
 .attendance-approvals-container {
   padding: 1.5rem;
   max-width: 1600px;
   margin: 0 auto;
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Page Header
-// ═══════════════════════════════════════════════════════════════════════════
 
 .page-header {
   display: flex;
@@ -178,6 +166,7 @@
         font-size: 1.75rem;
         font-weight: 700;
         letter-spacing: -0.02em;
+        color: white;
       }
       p {
         margin: 0.25rem 0 0;
@@ -194,10 +183,6 @@
   }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Org-Wide Compliance Section
-// ═══════════════════════════════════════════════════════════════════════════
 
 .compliance-section {
   background: white;
@@ -352,10 +337,6 @@
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Fallback Global Stats Bar
-// ═══════════════════════════════════════════════════════════════════════════
-
 .global-stats-bar {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -420,11 +401,6 @@
   }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Loading & Empty States
-// ═══════════════════════════════════════════════════════════════════════════
-
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -485,11 +461,6 @@
     font-size: 0.875rem;
   }
 }
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// History Drawer
-// ═══════════════════════════════════════════════════════════════════════════
 
 .history-drawer-overlay {
   position: fixed;
@@ -637,11 +608,6 @@
   }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Grid Toolbar (search + result count)
-// ═══════════════════════════════════════════════════════════════════════════
-
 .grid-toolbar {
   display: flex;
   align-items: center;
@@ -716,20 +682,11 @@
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Employee Grid
-// ═══════════════════════════════════════════════════════════════════════════
-
 .employee-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
   gap: 1.5rem;
 }
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Employee Summary Card
-// ═══════════════════════════════════════════════════════════════════════════
 
 .employee-summary-card {
   position: relative;
@@ -749,7 +706,6 @@
     border-color: var(--warning-300, #fcd34d);
   }
 
-  // ── Status Badge (absolute top-right) ────────────────────────────────────
   .status-badge {
     position: absolute;
     top: 12px;
@@ -769,7 +725,6 @@
       height: 18px;
     }
 
-    // FIX: these modifier classes are added via ngClass on top of .status-badge
     &.status-untouched {
       background: var(--gray-100, #f3f4f6);
       border: 2px solid var(--gray-300, #d1d5db);
@@ -795,7 +750,6 @@
     }
   }
 
-  // ── Card Header ───────────────────────────────────────────────────────────
   .card-header {
     display: flex;
     align-items: flex-start;
@@ -821,7 +775,6 @@
     .employee-info {
       flex: 1;
       min-width: 0;
-      // Leave room for status badge (32px + 12px right + 8px gap)
       padding-right: 52px;
 
       .employee-name {
@@ -926,7 +879,6 @@
     }
   }
 
-  // ── Review Progress Bar ───────────────────────────────────────────────────
   .progress-section {
     padding: 0 1.25rem 1rem;
 
@@ -964,7 +916,6 @@
     }
   }
 
-  // ── Pending Alert Banner ──────────────────────────────────────────────────
   .pending-alert {
     display: flex;
     align-items: center;
@@ -983,7 +934,6 @@
     }
   }
 
-  // ── Card Actions ──────────────────────────────────────────────────────────
   .card-actions {
     display: flex;
     gap: 0.625rem;
@@ -991,7 +941,6 @@
     border-top: 1px solid var(--border-light, #e2e8f0);
     background: var(--surface-light, #f8fafc);
 
-    // Each action button shares the global .btn styles; just cap the flex growth
     .btn {
       flex: 1;
       min-width: 0;
@@ -999,12 +948,6 @@
       padding: 0.5625rem 0.75rem;
     }
   }
-
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // Heat-Map Border Variants
-  // Applied via ngClass alongside the base .employee-summary-card class
-  // ═════════════════════════════════════════════════════════════════════════
 
   &.heat-border-finalized {
     border-color: var(--success-400, #4ade80);
@@ -1028,11 +971,6 @@
   }
 }
 
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Animations
-// ═══════════════════════════════════════════════════════════════════════════
-
 @keyframes pulseUrgent {
   0%, 100% {
     box-shadow: 0 0 0 2px var(--error-100, #fee2e2), 0 4px 12px rgba(239, 68, 68, 0.2);
@@ -1041,11 +979,6 @@
     box-shadow: 0 0 0 4px var(--error-100, #fee2e2), 0 6px 16px rgba(239, 68, 68, 0.35);
   }
 }
-
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Responsive
-// ═══════════════════════════════════════════════════════════════════════════
 
 @media (max-width: 768px) {
   .attendance-approvals-container { padding: 1rem; }

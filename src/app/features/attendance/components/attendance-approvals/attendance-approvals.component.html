@@ -1,8 +1,5 @@
 <div class="attendance-approvals-container">
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- Page Header                                                        -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div class="page-header">
     <div class="header-content">
       <div class="header-icon-wrapper">
@@ -32,9 +29,6 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- Org-Wide Compliance Progress Bar                                   -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
   @if (orgProgress) {
     <div class="compliance-section">
       <div class="compliance-header">
@@ -123,7 +117,6 @@
     </div>
   }
 
-  <!-- Fallback stats bar when orgProgress hasn't loaded yet -->
   @if (!orgProgress && !isLoading) {
     <div class="global-stats-bar">
       <div class="stat-card pending">
@@ -150,9 +143,6 @@
     </div>
   }
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- Historical Periods Drawer                                          -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
   @if (showHistoryDrawer) {
     <div class="history-drawer-overlay" (click)="toggleHistoryDrawer()"></div>
     <div class="history-drawer">
@@ -200,11 +190,6 @@
     </div>
   }
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- No-Snapshot Guidance Banner                                        -->
-  <!-- Shown only when bootstrap found zero snapshots and we are not      -->
-  <!-- currently loading. Directs managers to create one first.           -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
   @if (!isLoading && allSnapshots.length === 0 && employeePackages.length === 0) {
     <div class="no-snapshot-banner">
       <mat-icon class="banner-icon">info</mat-icon>
@@ -219,9 +204,6 @@
     </div>
   }
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- Loading State                                                      -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
   @if (isLoading) {
     <div class="loading-container">
       <mat-spinner diameter="50"></mat-spinner>
@@ -229,9 +211,6 @@
     </div>
   }
 
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- Employee Summary Cards                                             -->
-  <!-- ═══════════════════════════════════════════════════════════════════ -->
   @if (!isLoading && employeePackages.length > 0) {
 
     <!-- Search / Filter Toolbar -->
@@ -256,28 +235,18 @@
     <div class="employee-grid">
       @for (pkg of filteredPackages; track pkg.employeeId) {
 
-        <!--
-          FIX: Use ngClass instead of [class] so multiple classes can coexist.
-          [class]="..." replaces ALL classes; [ngClass] merges them.
-        -->
         <div class="employee-summary-card"
              [ngClass]="[
                hasPendingRequests(pkg) ? 'has-pending' : '',
                getHeatMapBorderClass(pkg)
              ]">
 
-          <!-- Status Symbol Badge -->
-          <!--
-            FIX: use ngClass to add the dynamic status class ON TOP of the base
-            'status-badge' class instead of replacing it.
-          -->
           <div class="status-badge"
                [ngClass]="getEmployeeStatusClass(pkg)"
                [matTooltip]="getEmployeeStatusTooltip(pkg)">
             <mat-icon>{{ getEmployeeStatusIcon(pkg) }}</mat-icon>
           </div>
 
-          <!-- Card Header -->
           <div class="card-header">
             <div class="employee-avatar">{{ pkg.employeeName | slice:0:1 }}</div>
             <div class="employee-info">
@@ -297,7 +266,6 @@
 
           <mat-divider></mat-divider>
 
-          <!-- Quick Stats Row -->
           <div class="stats-row">
             <div class="stat-pill pending" [class.has-items]="pkg.pendingRequestCount > 0">
               <mat-icon>hourglass_top</mat-icon>
@@ -387,12 +355,11 @@
             </button>
           </div>
 
-        </div><!-- /employee-summary-card -->
+        </div>
       }
-    </div><!-- /employee-grid -->
+    </div>
   }
 
-  <!-- Empty State -->
   @if (!isLoading && employeePackages.length === 0) {
     <div class="empty-state">
       <div class="empty-icon">
@@ -407,4 +374,4 @@
     </div>
   }
 
-</div><!-- /attendance-approvals-container -->
+</div>
