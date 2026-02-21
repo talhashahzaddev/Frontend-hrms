@@ -44,15 +44,17 @@
     </div>
 
     <!-- DAILY UPDATE / NOTES SECTION -->
-    <div class="detail-section" *ngIf="data.notes">
-      <div class="daily-update-card">
-        <div class="update-header">
-          <mat-icon>assignment</mat-icon>
-          <span>Daily Update</span>
+    @if (data.notes) {
+      <div class="detail-section">
+        <div class="daily-update-card">
+          <div class="update-header">
+            <mat-icon>assignment</mat-icon>
+            <span>Daily Update</span>
+          </div>
+          <p class="update-text">{{ data.notes }}</p>
         </div>
-        <p class="update-text">{{ data.notes }}</p>
       </div>
-    </div>
+    }
 
     <mat-divider></mat-divider>
 
@@ -64,13 +66,12 @@
           <span>Check In</span>
         </div>
         <div class="detail-value">
-          <ng-container *ngIf="data.checkInTime; else noCheckIn">
+          @if (data.checkInTime) {
             {{ data.checkInTime | date:'shortTime' }}<br>
             <span class="location">{{ data.checkInLocation }}</span>
-          </ng-container>
-          <ng-template #noCheckIn>
+          } @else {
             <span class="absent-text">Not Checked In</span>
-          </ng-template>
+          }
         </div>
       </div>
 
@@ -80,13 +81,12 @@
           <span>Check Out</span>
         </div>
         <div class="detail-value">
-          <ng-container *ngIf="data.checkOutTime; else noCheckOut">
+          @if (data.checkOutTime) {
             {{ data.checkOutTime | date:'shortTime' }}<br>
             <span class="location">{{ data.checkOutLocation }}</span>
-          </ng-container>
-          <ng-template #noCheckOut>
+          } @else {
             <span class="absent-text">Not Checked Out</span>
-          </ng-template>
+          }
         </div>
       </div>
     </div>
@@ -119,22 +119,22 @@
         Today's Sessions
       </h3>
 
-      <ng-container *ngIf="todaySessions.length > 0; else noSessions">
-        <div class="session-item row" *ngFor="let s of todaySessions">
-          <div>
-            <mat-icon>login</mat-icon>
-            {{ s.checkInTime | date:'shortTime' }}
+      @if (todaySessions.length > 0) {
+        @for (s of todaySessions; track s.checkInTime) {
+          <div class="session-item row">
+            <div>
+              <mat-icon>login</mat-icon>
+              {{ s.checkInTime | date:'shortTime' }}
+            </div>
+            <div>
+              <mat-icon>logout</mat-icon>
+              {{ s.checkOutTime ? (s.checkOutTime | date:'shortTime') : '—' }}
+            </div>
           </div>
-          <div>
-            <mat-icon>logout</mat-icon>
-            {{ s.checkOutTime ? (s.checkOutTime | date:'shortTime') : '—' }}
-          </div>
-        </div>
-      </ng-container>
-
-      <ng-template #noSessions>
+        }
+      } @else {
         <div class="absent-text">No sessions found</div>
-      </ng-template>
+      }
     </div>
 
   </div>

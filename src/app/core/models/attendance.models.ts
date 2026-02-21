@@ -118,6 +118,21 @@ export interface ClockInOutRequest {
   notes?: string;
 }
 
+export interface ManualAttendanceSearchDto {
+  startDate: string;
+  endDate: string;
+  employeeId?: string;
+}
+
+export interface ManualAttendanceUpdateDto {
+  attendanceId: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  status: string;
+  notes?: string;
+  employeeId: string;
+}
+
 export interface ManualAttendanceRequest {
   employeeId: string;
   workDate: string;
@@ -342,4 +357,239 @@ export interface AttendancePolicy {
   coreHoursStart?: string;
   coreHoursEnd?: string;
   isActive: boolean;
+}
+
+// Timesheet Models
+export interface MonthlyTimesheetSummary {
+  timesheetId: string;
+  timesheetName: string;
+  month: number;
+  year: number;
+  monthName: string;
+  totalEmployees: number;
+  attendancePercentage: number;
+  totalPresentDays: number;
+  totalAbsentDays: number;
+  totalLateDays: number;
+  totalHoursWorked: number;
+  status?: string;
+  createdAt?: string;
+}
+
+export interface EmployeeTimesheetDto {
+  employeeId: string;
+  employeeCode: string;
+  employeeName: string;
+  department: string;
+  presentDays: number;
+  absentDays: number;
+  lateDays: number;
+  totalHoursWorked: number;
+  attendancePercentage: number;
+  dailyRecords?: DailyAttendanceRecord[];
+  is_finalized?: boolean;
+  hasPendingRequest?: boolean;
+}
+
+export interface DailyAttendanceRecord {
+  attendanceId?: string;
+  date: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  status: string;
+  totalHours: number;
+  notes?: string;
+  is_finalized?: boolean;
+  is_manager_override?: boolean;
+  hasPendingRequest?: boolean;
+  hasDraftRequest?: boolean;
+  hasApprovedRequest?: boolean;
+}
+
+export interface TimesheetSearchRequest {
+  month: number;
+  year: number;
+  departmentId?: string;
+  employeeId?: string;
+}
+
+export interface TimesheetResponse {
+  summary: MonthlyTimesheetSummary;
+  employees: EmployeeTimesheetDto[];
+}
+
+// Finalized Timesheet Models
+export interface MonthlyTimesheetCreateDto {
+  timesheetName: string;
+  month: number;
+  year: number;
+}
+
+export interface AttendanceUpdateRequestDto {
+  attendanceId: string | null;
+  employeeId: string;
+  workDate: string;
+  requestedCheckIn?: string;
+  requestedCheckOut?: string;
+  requestedStatus?: string;
+  reasonForEdit: string;
+  requestedNotes?: string;
+}
+
+export interface ProcessAttendanceRequestDto {
+  requestId: string;
+  isApproved: boolean;
+  rejectionReason?: string;
+}
+
+export interface PendingAttendanceRequest {
+  requestId: string;
+  attendanceId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  workDate: string;
+  originalCheckIn?: string;
+  originalCheckOut?: string;
+  originalStatus: string;
+  requestedCheckIn?: string;
+  requestedCheckOut?: string;
+  requestedStatus: string;
+  reasonForEdit: string;
+  requestedNotes?: string;
+  requestedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+// Grouped correction record for a single day
+export interface CorrectionRecord {
+  requestId: string;
+  attendanceId: string;
+  workDate: string;
+  originalCheckIn?: string;
+  originalCheckOut?: string;
+  originalStatus: string;
+  requestedCheckIn?: string;
+  requestedCheckOut?: string;
+  requestedStatus: string;
+  reasonForEdit: string;
+  requestedNotes?: string;
+  requestedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+// Employee submission package containing all corrections for an employee
+export interface EmployeeSubmissionPackage {
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  timesheetId: string;
+  corrections: CorrectionRecord[];
+}
+export interface FinalizedTimesheetRecordDto {
+  recordId: string;
+  timesheetId: string;
+  attendanceId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode?: string;
+  department?: string;
+  workDate: string;
+  finalCheckIn?: string;
+  finalCheckOut?: string;
+  finalTotalHours: number;
+  finalStatus: string;
+  finalNotes?: string;
+  createdAt?: string;
+  presentDays?: number;
+  absentDays?: number;
+  lateDays?: number;
+  totalHoursWorked?: number;
+  attendancePercentage?: number;
+  is_finalized?: boolean;
+  hasPendingRequest?: boolean;
+}
+
+export interface FinalizedTimesheetDto {
+  timesheetId: string;
+  timesheetName: string;
+  month: number;
+  year: number;
+  records: FinalizedTimesheetRecordDto[];
+  createdAt?: string;
+  finalizedAt?: string;
+}
+
+// Daily review record for manager dashboard
+export interface DailyReviewRecord {
+  recordId: string;
+  attendanceId: string;
+  date: string;
+  originalCheckIn?: string;
+  originalCheckOut?: string;
+  originalStatus: string;
+  originalTotalHours: number;
+  requestedCheckIn?: string;
+  requestedCheckOut?: string;
+  requestedStatus?: string;
+  requestedNotes?: string;
+  reasonForEdit?: string;
+  hasPendingRequest: boolean;
+  hasDraftRequest: boolean;
+  isFinalized: boolean;
+  isManagerOverride?: boolean;
+  requestId?: string;
+  // Request status: 'pending', 'approved', 'rejected', 'none'
+  requestStatus?: 'pending' | 'approved' | 'rejected' | 'none';
+}
+
+// Employee review package for manager dashboard
+export interface EmployeeReviewPackage {
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  department?: string;
+  designation?: string;
+  timesheetId: string;
+  month: number;
+  year: number;
+  totalRecords: number;
+  pendingRequestCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  finalizedCount: number;
+  finalizedDays: number;
+  fullMonthRecords: DailyReviewRecord[];
+  // Task 2: Status flags for roster card symbols
+  hasDraftRequest?: boolean; // 🔵 In-Progress (Blue Edit Icon)
+  hasPendingRequest?: boolean; // 🟡 Needs Review (Yellow Clock)
+  isFinalized?: boolean; // 🔒 Finalized (Red Lock)
+  isUntouched?: boolean; // ⚪ Untouched (Grey Circle) - 0 logs and no requests
+  attendancePercentage?: number; // For heat map border calculation
+}
+
+// Manager override request DTO
+export interface ManagerOverrideDto {
+  attendanceId: string | null;
+  employeeId: string;
+  timesheetId: string;
+  workDate: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  status?: string;
+  notes?: string;
+  reason: string;
+}
+
+export interface OrgSubmissionProgress {
+  month: number;
+  year: number;
+  totalEmployees: number;
+  finalizedCount: number;
+  submittedCount: number;
+  pendingReviewCount: number;
+  inProgressCount: number;
+  untouchedCount: number;
+  submissionRate: number;
+  complianceRate: number;
 }

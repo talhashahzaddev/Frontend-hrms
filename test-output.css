@@ -1,0 +1,515 @@
+.filter-card {
+  margin-bottom: 24px;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  border: none !important;
+  overflow: hidden;
+  background: white;
+}
+.filter-card ::ng-deep mat-card-header {
+  padding: 20px 24px 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+.filter-card ::ng-deep mat-card-header mat-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px;
+}
+.filter-card ::ng-deep mat-card-header mat-card-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+.filter-card ::ng-deep mat-card-content {
+  padding: 24px !important;
+}
+.filter-card .filter-form .filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.filter-card .filter-form .filter-row .date-field {
+  flex: 1;
+  min-width: 250px;
+}
+.filter-card .filter-form .filter-row .date-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+.filter-card .filter-form .filter-row .filter-actions {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding-top: 8px;
+}
+.filter-card .filter-form .filter-row .filter-actions button {
+  height: 48px;
+  padding: 0 24px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.filter-card .filter-form .filter-row .filter-actions button mat-icon {
+  margin-right: 8px;
+}
+.filter-card .filter-form .filter-row .filter-actions button[color=primary] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+.filter-card .filter-form .filter-row .filter-actions button[color=primary]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+.filter-card .filter-form .filter-row .filter-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.empty-state .hint-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .filter-card .filter-form .filter-row {
+    flex-direction: column;
+  }
+  .filter-card .filter-form .filter-row .date-field {
+    width: 100%;
+  }
+  .filter-card .filter-form .filter-row .filter-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  .filter-card .filter-form .filter-row .filter-actions button {
+    width: 100%;
+  }
+}
+.timesheet-dashboard-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+.timesheet-dashboard-container .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.timesheet-dashboard-container .page-header .page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  letter-spacing: -0.5px;
+}
+.timesheet-dashboard-container .page-header .page-title mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #667eea;
+}
+.timesheet-dashboard-container .page-header .header-actions button {
+  height: 48px;
+  padding: 0 28px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.timesheet-dashboard-container .page-header .header-actions button mat-icon {
+  margin-right: 8px;
+}
+.timesheet-dashboard-container .page-header .header-actions button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+.timesheet-dashboard-container .page-header .header-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.timesheet-dashboard-container .loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.timesheet-dashboard-container .loading-container mat-spinner {
+  margin-bottom: 24px;
+}
+.timesheet-dashboard-container .loading-container p {
+  font-size: 16px;
+  color: #6b7280;
+  font-weight: 500;
+}
+.timesheet-dashboard-container .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+.timesheet-dashboard-container .empty-state mat-icon {
+  font-size: 120px;
+  width: 120px;
+  height: 120px;
+  color: #e5e7eb;
+  margin-bottom: 24px;
+}
+.timesheet-dashboard-container .empty-state h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 12px;
+}
+.timesheet-dashboard-container .empty-state p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 8px;
+  max-width: 500px;
+}
+.timesheet-dashboard-container .empty-state p strong {
+  color: #667eea;
+  font-weight: 600;
+}
+.timesheet-dashboard-container .empty-state .hint-text {
+  font-size: 14px;
+  color: #9ca3af;
+  font-style: italic;
+  margin-bottom: 24px;
+}
+.timesheet-dashboard-container .empty-state button {
+  margin-top: 16px;
+  height: 48px;
+  padding: 0 32px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+}
+.timesheet-dashboard-container .empty-state button mat-icon {
+  margin-right: 8px;
+}
+.timesheet-dashboard-container .snapshots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid #e5e7eb !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border-color: #667eea !important;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header {
+  padding: 20px 24px !important;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .snapshot-title-section {
+  flex: 1;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .snapshot-title-section .snapshot-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .snapshot-title-section .snapshot-period {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .status-chip {
+  height: 32px !important;
+  border-radius: 16px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 0 14px !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .status-chip .chip-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .status-chip.status-draft {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-header .snapshot-header-content .status-chip.status-finalized {
+  background: #d1fae5 !important;
+  color: #065f46 !important;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content {
+  padding: 24px !important;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item:hover {
+  background: #f3f4f6;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #6b7280;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-icon.attendance {
+  color: #667eea;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-icon.present {
+  color: #10b981;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-icon.absent {
+  color: #ef4444;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-icon.late {
+  color: #f59e0b;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-icon.hours {
+  color: #3b82f6;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-details .stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats .stat-item .stat-details .stat-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions {
+  padding: 16px 24px !important;
+  border-top: 1px solid #e5e7eb;
+  background: white;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions button {
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions button[color=primary]:hover {
+  background: rgba(102, 126, 234, 0.1) !important;
+}
+.timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions button mat-icon {
+  margin-right: 6px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+@media (max-width: 1200px) {
+  .timesheet-dashboard-container .snapshots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .timesheet-dashboard-container {
+    padding: 16px;
+  }
+  .timesheet-dashboard-container .page-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+  .timesheet-dashboard-container .page-header .page-title {
+    font-size: 24px;
+  }
+  .timesheet-dashboard-container .page-header .page-title mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+  .timesheet-dashboard-container .page-header .header-actions {
+    width: 100%;
+  }
+  .timesheet-dashboard-container .page-header .header-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .timesheet-dashboard-container .snapshots-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats {
+    grid-template-columns: 1fr;
+  }
+  .timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions {
+    flex-wrap: wrap;
+  }
+  .timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions button:not([mat-icon-button]) {
+    flex: 1;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+.empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+.empty-state p {
+  margin: 0;
+  font-size: 15px;
+  color: #6b7280;
+}
+
+@media (max-width: 1200px) {
+  .timesheet-dashboard-container .snapshots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .timesheet-dashboard-container {
+    padding: 16px;
+  }
+  .timesheet-dashboard-container .page-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+  .timesheet-dashboard-container .page-header .page-title {
+    font-size: 24px;
+  }
+  .timesheet-dashboard-container .page-header .page-title mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+  .timesheet-dashboard-container .page-header .header-actions {
+    width: 100%;
+  }
+  .timesheet-dashboard-container .page-header .header-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .timesheet-dashboard-container .snapshots-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-content .snapshot-stats {
+    grid-template-columns: 1fr;
+  }
+  .timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions {
+    flex-wrap: wrap;
+  }
+  .timesheet-dashboard-container .snapshots-grid .snapshot-card ::ng-deep mat-card-actions button:not([mat-icon-button]) {
+    flex: 1;
+  }
+}
+@media (max-width: 768px) {
+  .timesheet-dashboard-container {
+    padding: 16px;
+  }
+  .timesheet-dashboard-container .page-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+  .timesheet-dashboard-container .page-header .page-title {
+    font-size: 26px;
+  }
+  .timesheet-dashboard-container .page-header .page-title mat-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+  }
+  .timesheet-dashboard-container .page-header .header-actions {
+    width: 100%;
+  }
+  .timesheet-dashboard-container .page-header .header-actions button {
+    width: 100%;
+  }
+  .timesheet-dashboard-container .snapshots-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*# sourceMappingURL=test-output.css.map */

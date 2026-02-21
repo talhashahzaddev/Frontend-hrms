@@ -26,6 +26,7 @@ interface MenuItem {
 
 @Component({
   selector: 'app-sidebar',
+  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -79,6 +80,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'My Attendance', icon: 'access_time', route: '/attendance/dashboard' },
         { label: 'Time Tracker', icon: 'timer', route: '/attendance/time-tracker' },
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', roles: ['Super Admin', 'HR Manager', 'Manager'] },
+        { label: 'Timesheet', icon: 'date_range', route: '/attendance/timesheet' },
+        { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', roles: ['Super Admin', 'HR Manager', 'Manager'] },
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] },
         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift' },
       ]

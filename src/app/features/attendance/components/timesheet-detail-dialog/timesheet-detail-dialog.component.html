@@ -1,0 +1,299 @@
+<div class="timesheet-detail-dialog master-detail-container">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-left" style="display:flex;align-items:center;gap:12px;">
+      <mat-icon class="header-icon">event</mat-icon>
+      <div class="header-text">
+        <h2 class="header-title">{{ data.timesheetName || (data.monthName + ' ' + data.year + ' Timesheet') }}</h2>
+        <p class="subtitle">{{ employees.length || 0 }} employee records &bull; {{ data.monthName }} {{ data.year }}</p>
+      </div>
+    </div>
+    <div class="header-right" style="display:flex;align-items:center;gap:8px;">
+      <button mat-flat-button color="primary" (click)="exportToExcel()">Export</button>
+      <button mat-icon-button (click)="close()" aria-label="Close dialog"><mat-icon>close</mat-icon></button>
+    </div>
+  </div>
+
+  <!-- Status Bar Ribbon -->
+  <div class="header-ribbon" *ngIf="employees.length > 0">
+    <div class="stat-label">Total Records</div>
+    <div class="stat-value">{{ employees.length }}</div>
+    <div class="stat-label">Pending</div>
+    <div class="stat-value">{{ getPendingRequestCount() }}</div>
+    <div style="flex:1 1 auto;"></div>
+    <div class="stat-label">Period</div>
+    <div class="stat-value">{{ data.monthName }} {{ data.year }}</div>
+    @if (!isEmployee()) {
+      <div class="ribbon-search">
+        <div class="search-input-group">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input class="ribbon-search-input" type="text" placeholder="Search employees" [(ngModel)]="searchText" (keyup)="applyFilter()" />
+          <button *ngIf="searchText" class="clear-btn" (click)="clearFilter()" aria-label="Clear search"><mat-icon>close</mat-icon></button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Master-detail split -->
+  <div class="content-area">
+    <aside class="master-sidebar">
+      <mat-nav-list>
+        <mat-list-item
+          *ngFor="let emp of filteredEmployees"
+          (click)="selectEmployee(emp)"
+          [class.selected]="selectedEmployee?.employeeId === emp.employeeId">
+          <div class="sidebar-row">
+            <span class="avatar-circle">{{ emp.employeeName.charAt(0) }}</span>
+            <span class="sidebar-meta">
+              <span class="name">{{ emp.employeeName }}</span>
+              <span class="sub">{{ emp.employeeCode }} &bull; {{ emp.department }}</span>
+            </span>
+          </div>
+        </mat-list-item>
+      </mat-nav-list>
+    </aside>
+
+    <section class="detail-panel">
+      <ng-container *ngIf="!selectedEmployee; else detailView">
+        <div class="empty-detail">Select an employee to view daily records</div>
+      </ng-container>
+
+      <ng-template #detailView>
+        <ng-container *ngIf="selectedEmployee as se">
+          <div class="mini-stats-row">
+            <span class="mini-label">Present</span><span class="mini-value">{{ se.presentDays }}</span>
+            <span class="mini-label">Absent</span><span class="mini-value">{{ se.absentDays }}</span>
+            <span class="mini-label">Attendance</span><span class="mini-value">{{ se.attendancePercentage | number:'1.0-0' }}%</span>
+          </div>
+
+          <div class="daily-cards">
+            <ng-container *ngFor="let record of getDailyRecordsForMonth(se)">
+              <div
+                class="daily-card"
+                [class.weekend]="record.isWeekend"
+                [class.absent]="record.status?.toLowerCase() === 'absent'"
+                [class.is-finalized]="(record.is_finalized || record.isFinalized) && !record.is_manager_override"
+                [class.is-manager-override]="record.is_manager_override"
+                [class.is-approved]="record.hasApprovedRequest && !(record.is_finalized || record.isFinalized || record.is_manager_override)"
+                [class.is-pending]="record.hasPendingRequest && !record.hasDraftRequest && !(record.is_finalized || record.isFinalized)"
+                [class.is-requested]="record.hasDraftRequest && !(record.is_finalized || record.isFinalized)">
+
+                <div class="card-date">{{ formatDate(record.date) }}</div>
+
+                <!-- Finalized for Payroll badge — batch-locked, not manager-adjusted -->
+                <div *ngIf="(record.is_finalized || record.isFinalized) && !record.is_manager_override" class="finalized-badge">
+                  <mat-icon class="lock-icon">lock</mat-icon>
+                  <span>Finalized for Payroll</span>
+                </div>
+
+                <!-- Manager Adjusted badge — manager directly changed this record -->
+                <div *ngIf="record.is_manager_override" class="manager-override-badge">
+                  <mat-icon class="override-icon">manage_accounts</mat-icon>
+                  <span>Manager Adjusted</span>
+                </div>
+
+                <!-- Approved badge — correction request was approved by manager -->
+                <div *ngIf="record.hasApprovedRequest && !(record.is_finalized || record.isFinalized || record.is_manager_override)" class="approved-badge">
+                  <mat-icon class="approved-icon">check_circle</mat-icon>
+                  <span>Request Approved</span>
+                </div>
+
+                <!-- Draft / Pending badge — hidden for finalized/approved records -->
+                <div *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && !(record.is_finalized || record.isFinalized)" class="request-badge">
+                  <mat-icon class="requested-icon" *ngIf="record.hasDraftRequest">history_edu</mat-icon>
+                  <mat-icon class="requested-icon" *ngIf="record.hasPendingRequest">pending</mat-icon>
+                  <span *ngIf="record.hasDraftRequest">Draft Edit</span>
+                  <span *ngIf="record.hasPendingRequest">Awaiting Approval</span>
+                </div>
+
+                <!-- Check-in / Check-out times
+                     Logic per field:
+                       Draft/pending + requestedCheckIn exists  -> show requestedCheckIn styled purple (edited)
+                       Draft/pending + no requestedCheckIn      -> show original checkInTime or '-' (time unchanged)
+                       No draft/pending                         -> show original checkInTime or '-'
+                     showTimes() already returns true for any draft regardless of status,
+                     so absent days with newly-added times are handled automatically.
+                -->
+                <div *ngIf="showTimes(record)" class="card-times" style="font-size:13px;color:#334155;margin-bottom:4px;">
+
+                  <!-- Check-in -->
+                  <div class="in" style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+                    <span style="color:#64748b;font-weight:600;">In:</span>
+
+                    <!-- Has draft/pending AND a requested check-in time -> show it highlighted -->
+                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckIn"
+                          class="edited-info">
+                      {{ formatTime(record.requestedCheckIn) }}
+                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                    </span>
+
+                    <!-- Has draft/pending but no requested check-in -> show original or dash -->
+                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && !record.requestedCheckIn"
+                          style="color:#334155;">
+                      {{ record.checkInTime ? formatTime(record.checkInTime) : '-' }}
+                    </span>
+
+                    <!-- No draft at all -> show original or dash -->
+                    <span *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)"
+                          style="color:#334155;">
+                      {{ record.checkInTime ? formatTime(record.checkInTime) : '-' }}
+                    </span>
+                  </div>
+
+                  <!-- Check-out -->
+                  <div class="out" style="display:flex;align-items:center;gap:4px;">
+                    <span style="color:#64748b;font-weight:600;">Out:</span>
+
+                    <!-- Has draft/pending AND a requested check-out time -> show it highlighted -->
+                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckOut"
+                          class="edited-info">
+                      {{ formatTime(record.requestedCheckOut) }}
+                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                    </span>
+
+                    <!-- Has draft/pending but no requested check-out -> show original or dash -->
+                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && !record.requestedCheckOut"
+                          style="color:#334155;">
+                      {{ record.checkOutTime ? formatTime(record.checkOutTime) : '-' }}
+                    </span>
+
+                    <!-- No draft at all -> show original or dash -->
+                    <span *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)"
+                          style="color:#334155;">
+                      {{ record.checkOutTime ? formatTime(record.checkOutTime) : '-' }}
+                    </span>
+                  </div>
+
+                </div>
+
+                <!-- Status badge -->
+                <div class="card-status" style="margin-bottom:6px;">
+                  <span class="status-badge" [ngClass]="{
+                    'present':  record.status?.toLowerCase() === 'present',
+                    'absent':   record.status?.toLowerCase() === 'absent',
+                    'weekend':  record.status?.toLowerCase() === 'weekend',
+                    'leave':    record.status?.toLowerCase() === 'on leave',
+                    'late':     record.status?.toLowerCase() === 'late',
+                    'half-day': record.status?.toLowerCase() === 'half day' || record.status?.toLowerCase() === 'half_day',
+                    'norecord': record.status?.toLowerCase() === 'no record' || record.status?.toLowerCase() === 'no_record'
+                  }">
+                    <ng-container *ngIf="record.hasDraftRequest || record.hasPendingRequest">
+                      {{ record.requestedStatus || record.status }}
+                      <mat-icon class="requested-icon" *ngIf="record.hasDraftRequest">history_edu</mat-icon>
+                      <mat-icon class="requested-icon" *ngIf="record.hasPendingRequest">pending</mat-icon>
+                    </ng-container>
+                    <ng-container *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)">
+                      {{ record.status }}
+                    </ng-container>
+                  </span>
+                </div>
+
+                <!-- Edit / correction button
+                     -------------------------------------------------------------
+                     RULE:
+                       Employee role  -> always visible (backend only returns their
+                                        own record, so there is nothing else to show)
+                       Manager / Admin -> visible ONLY when the selected sidebar row
+                                        is the currently logged-in user's own record
+                                        (isOwnTimesheetSelected). They can still view
+                                        other employees' cards but cannot edit them.
+                     Shared guards (all roles):
+                        canRequestCorrection  - not finalized, not already pending
+                        not a weekend row
+                        status !== 'No Record'  (placeholder with no attendance data)
+                        not a future day
+                     -------------------------------------------------------------
+                -->
+                <div class="card-actions">
+                  <!-- Lock icon for finalized (non-override) records -->
+                  <span
+                    *ngIf="(record.is_finalized || record.isFinalized) && !record.is_manager_override"
+                    class="finalized-action-lock"
+                    title="Record locked for payroll">
+                    <mat-icon>lock</mat-icon>
+                  </span>
+
+                  <!-- Manager override button — managers on other employees' records -->
+                  <button
+                    *ngIf="isManagerOrAdmin() && !isOwnTimesheetSelected() && !isFutureDay(record) && canManagerOverride(record)"
+                    type="button"
+                    (click)="openManagerOverride(se, record)"
+                    [title]="record.is_manager_override ? 'Re-override record' : record.hasPendingRequest ? 'Override (supersedes pending request)' : 'Manager override'"
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 50%;
+                      border: none;
+                      background: transparent;
+                      cursor: pointer;
+                      color: #d97706;
+                      padding: 0;
+                      transition: background 0.18s;
+                    "
+                    onmouseenter="this.style.background='rgba(217,119,6,0.10)'"
+                    onmouseleave="this.style.background='transparent'"
+                  >
+                    <mat-icon style="font-size:20px;width:20px;height:20px;line-height:20px;">edit_note</mat-icon>
+                  </button>
+
+                  <!-- Employee correction button -->
+                  <button
+                    *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
+                    type="button"
+                    (click)="requestDailyCorrection(se, record)"
+                    [title]="record.hasDraftRequest ? 'Edit draft correction' : record.hasPendingRequest ? 'Re-edit pending request' : 'Request correction'"
+                    style="
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      width: 40px;
+                      height: 40px;
+                      border-radius: 50%;
+                      border: none;
+                      background: transparent;
+                      cursor: pointer;
+                      color: #2563eb;
+                      padding: 0;
+                      transition: background 0.18s;
+                    "
+                    onmouseenter="this.style.background='rgba(37,99,235,0.10)'"
+                    onmouseleave="this.style.background='transparent'"
+                  >
+                    <mat-icon style="font-size:20px;width:20px;height:20px;line-height:20px;" *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)">edit</mat-icon>
+                    <mat-icon style="font-size:20px;width:20px;height:20px;line-height:20px;" *ngIf="record.hasDraftRequest">published_with_changes</mat-icon>
+                    <mat-icon style="font-size:20px;width:20px;height:20px;line-height:20px;" *ngIf="record.hasPendingRequest">sync</mat-icon>
+                  </button>
+                </div>
+
+              </div>
+            </ng-container>
+          </div>
+
+        </ng-container>
+      </ng-template>
+    </section>
+  </div>
+
+  <!-- Sticky footer actions -->
+  <div class="dialog-footer">
+    <div class="footer-left">
+      <button mat-stroked-button (click)="refreshData()">Refresh</button>
+    </div>
+    <div class="footer-right">     
+      <button
+        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isEmployeePayrollLocked(selectedEmployee)"
+        mat-raised-button
+        color="primary"
+        (click)="submitAllEdits()"
+        [disabled]="!canSubmitBatch()">
+        Submit All Edits
+      </button>
+      <button mat-button (click)="close()">Close</button>
+    </div>
+  </div>
+
+</div>

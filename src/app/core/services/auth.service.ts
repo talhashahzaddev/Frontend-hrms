@@ -537,6 +537,27 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Decodes the current JWT and returns the employee GUID embedded in it.
+   * The backend embeds it as the "EmployeeId" custom claim.
+   * Returns null if the token is absent or the claim is not present.
+   */
+  getEmployeeIdFromToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Try all casing variants the backend may have used
+      return payload['EmployeeId']
+          || payload['employeeId']
+          || payload['employee_id']
+          || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/employeeid']
+          || null;
+    } catch {
+      return null;
+    }
+  }
+
   private isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));

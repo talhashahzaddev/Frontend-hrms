@@ -1,0 +1,121 @@
+<div class="timesheet-dashboard-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">date_range</mat-icon>
+      <div class="header-text">
+        <h1>Monthly Timesheet Snapshots</h1>
+        <p>Create, manage, and finalize monthly attendance snapshots for payroll processing</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (!isEmployee()) {
+        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" [disabled]="isLoading">
+          <mat-icon>add_circle</mat-icon>
+          Create New Snapshot
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading snapshots...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && timesheets.length === 0) {
+    <div class="empty-state">
+      <mat-icon>event_busy</mat-icon>
+      <h3>No Timesheet Snapshots</h3>
+      @if (isEmployee()) {
+        <p>No timesheet snapshots are available yet.</p>
+        <p class="hint-text">Please contact your manager for more information.</p>
+      } @else {
+        <p>You haven't created any monthly timesheet snapshots yet.</p>
+        <p class="hint-text">Click <strong>Create New Snapshot</strong> to get started.</p>
+        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()">
+          <mat-icon>add_circle</mat-icon>
+          Create First Snapshot
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Snapshots Grid -->
+  @if (!isLoading && timesheets.length > 0) {
+    <div class="snapshots-grid">
+      <mat-card *ngFor="let snapshot of timesheets" class="snapshot-card employee-summary-card">
+        <!-- Use approvals-like header structure -->
+        <div class="card-header">
+          <div class="employee-avatar">
+            <mat-icon>date_range</mat-icon>
+          </div>
+          <div class="employee-info">
+            <h3 class="employee-name">{{ snapshot.timesheetName }}</h3>
+            <span class="employee-meta">{{ getMonthYearDisplay(snapshot) }}</span>
+          </div>
+          <div class="month-badge">
+            <mat-icon>calendar_month</mat-icon>
+            <span>{{ getMonthYearDisplay(snapshot) }}</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="stats-row">
+          <div class="stat-pill">
+            <mat-icon>groups</mat-icon>
+            <span class="value">{{ snapshot.totalEmployees }}</span>
+            <span class="label">Total Employees</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="attendance">assessment</mat-icon>
+            <span class="value">{{ snapshot.attendancePercentage | number:'1.1-1' }}%</span>
+            <span class="label">Org Attendance Rate</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="present">check_circle</mat-icon>
+            <span class="value">{{ snapshot.totalPresentDays }}</span>
+            <span class="label">Present Days</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="absent">cancel</mat-icon>
+            <span class="value">{{ snapshot.totalAbsentDays }}</span>
+            <span class="label">Absent Days</span>
+          </div>
+
+          <div class="stat-pill">
+            <mat-icon class="hours">access_time</mat-icon>
+            <span class="value">{{ snapshot.totalHoursWorked | number:'1.1-1' }}</span>
+            <span class="label">Total Hours</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline-primary" (click)="openTimesheetDetailDialog(snapshot)">
+            <mat-icon>visibility</mat-icon>
+            <span>View Details</span>
+          </button>
+
+          @if (!isEmployee() && snapshot.status !== 'Finalized') {
+            <button class="btn btn-primary" (click)="finalizeSnapshot(snapshot)">
+              <mat-icon>lock</mat-icon>
+              <span>Finalize</span>
+            </button>
+          }
+
+          @if (!isEmployee()) {
+            <!-- Delete action removed per request -->
+          }
+        </div>
+      </mat-card>
+    </div>
+  }
+</div>

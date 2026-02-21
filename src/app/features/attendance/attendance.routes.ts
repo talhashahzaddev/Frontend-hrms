@@ -26,8 +26,7 @@ export const attendanceRoutes: Routes = [
     path: 'calendar',
     loadComponent: () => import('./components/attendancce-calendar/attendance-calendar').then(m => m.AttendanceCalendarComponent)
   }
-  ,
-  
+  , 
  { 
     path: 'shift',
     loadComponent: () => import('./components/shift/shift.component').then(m => m.ShiftComponent)
@@ -35,6 +34,18 @@ export const attendanceRoutes: Routes = [
     { 
     path: 'createshift',
     loadComponent: () => import('./components/create-shift/create-shift.component').then(m => m.CreateShiftComponent)
+  },
+  {
+    path: 'manual',
+    loadComponent: () => import('./components/manual-attendance/manual-attendance.component').then(m => m.ManualAttendanceComponent)
+  },
+  {
+    path: 'timesheet',
+    loadComponent: () => import('./components/timesheet-dashboard/timesheet-dashboard.component').then(m => m.TimesheetDashboardComponent)
+  },
+  {
+    path: 'approvals',
+    loadComponent: () => import('./components/attendance-approvals/attendance-approvals.component').then(m => m.AttendanceApprovalsComponent)
   }
 
 ];
