@@ -8,6 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ExpenseDto } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { Subject, takeUntil } from 'rxjs';
 
 export interface ClaimDetailsDialogData {
@@ -33,15 +34,23 @@ export class ClaimDetailsDialogComponent implements OnInit {
   claim: ExpenseDto | null = null;
   loading = true;
   error: string | null = null;
+  organizationCurrency = 'USD';
 
   constructor(
     private dialogRef: MatDialogRef<ClaimDetailsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ClaimDetailsDialogData,
     private expenseService: ExpenseService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (currency) => (this.organizationCurrency = currency || 'USD'),
+        error: () => (this.organizationCurrency = 'USD')
+      });
     this.expenseService
       .getExpenseById(this.data.expenseId)
       .pipe(takeUntil(this.destroy$))

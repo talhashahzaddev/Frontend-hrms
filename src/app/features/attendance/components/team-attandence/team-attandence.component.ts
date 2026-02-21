@@ -19,9 +19,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ViewDetailsDialogueComponent } from '../view-details-dialogue/view-details-dialogue.component';
+import { ManageOfficeIPsDialogComponent } from '../manage-office-ips-dialog/manage-office-ips-dialog.component';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
@@ -84,6 +86,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     'totalHours',
     'status',
     'notes',
+    'ipAddress',
     'actions'
   ];
 
@@ -127,6 +130,28 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+  get isSuperAdmin(): boolean {
+    return this.authService.hasRole('Super Admin');
+  }
+  get isManager(): boolean {
+    return this.authService.hasRole('Manager');
+  }
+
+  get isHRManager(): boolean {
+    return this.authService.hasRole('HR Manager');
+  }
+
+  get isAdminOrHR(): boolean {
+    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  }
+
+  get isEmployee(): boolean {
+    return this.authService.hasRole('Employee');
+  }
+
+  hasRole(role: string): boolean {
+    return this.authService.hasRole(role);
   }
 
   private getCurrentUser(): void {
@@ -298,5 +323,15 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     return `${hrs}h ${mins}m`;
   }
 
+  parseIP(ipString: string): string | null {
+    try {
+      const obj = JSON.parse(ipString);
+      return obj.ip || null;
+    } catch (e) {
+      return ipString || null; // fallback if it's already plain string
+    }
+  }
+  
 
+  
 }

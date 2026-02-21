@@ -1,0 +1,102 @@
+<div class="apply-job-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>how_to_reg</mat-icon>
+      {{ isEditMode ? 'Edit application' : (applyForSelf ? 'Apply for' : 'Refer for') }} {{ job.jobRoleName }}
+    </h2>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <!-- File input outside form to prevent any form submit / page reload on file select -->
+    <input #resumeInput
+           type="file"
+           [accept]="acceptedResumeTypes"
+           (change)="$event.preventDefault(); $event.stopPropagation(); onResumeFileSelected($event, resumeInput)"
+           class="resume-file-input-hidden"
+           tabindex="-1"
+           aria-hidden="true">
+    <p class="dialog-subtitle">Fields marked with * are required.</p>
+    <form [formGroup]="applyForm" class="apply-form" (ngSubmit)="onSubmit(); $event.preventDefault()">
+      <div class="form-row two-col" *ngIf="!applyForSelf">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Candidate name *</mat-label>
+          <input matInput formControlName="candidateName" placeholder="Full name" maxlength="200">
+          <mat-error *ngIf="applyForm.get('candidateName')?.hasError('required')">Candidate name is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email *</mat-label>
+          <input matInput type="email" formControlName="candidateEmail" placeholder="email@example.com" maxlength="200">
+          <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('email')">Invalid email</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="form-row" *ngIf="!applyForSelf">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone *</mat-label>
+          <input matInput formControlName="phone" placeholder="Phone number" maxlength="50">
+          <mat-error *ngIf="applyForm.get('phone')?.hasError('required')">Phone is required</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>LinkedIn profile URL</mat-label>
+          <input matInput formControlName="linkedInUrl" placeholder="https://linkedin.com/in/..." maxlength="500">
+        </mat-form-field>
+      </div>
+      <div class="resume-upload full-width" [class.resume-upload-loading]="isUploadingResume">
+        <label class="resume-label">Resume *</label>
+        <p class="resume-hint">PDF, JPG, JPEG, PNG or GIF. Max {{ maxResumeSizeMb }} MB.</p>
+        <div class="resume-actions">
+          <button mat-stroked-button type="button"
+                  (click)="triggerResumeInput(resumeInput); $event.preventDefault()"
+                  [disabled]="isUploadingResume">
+            <mat-icon>upload_file</mat-icon>
+            {{ isUploadingResume ? 'Uploading...' : (currentResumeUrl ? 'Replace resume' : 'Choose resume') }}
+          </button>
+          <button mat-icon-button type="button"
+                  *ngIf="currentResumeUrl && !isUploadingResume"
+                  (click)="clearResume(); $event.preventDefault()"
+                  matTooltip="Remove resume">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="resume-loading-overlay" *ngIf="isUploadingResume">
+          <mat-spinner diameter="32"></mat-spinner>
+          <span class="resume-loading-text">Uploading resume...</span>
+        </div>
+        <div class="resume-current" *ngIf="currentResumeUrl && !isUploadingResume">
+          <mat-icon>attach_file</mat-icon>
+          <span class="resume-name">{{ resumeFileName || 'Resume' }}</span>
+          <a [href]="currentResumeUrl" target="_blank" rel="noopener" class="resume-link">Open</a>
+        </div>
+        <mat-error *ngIf="applyForm.get('resumeUrl')?.invalid && applyForm.get('resumeUrl')?.touched">
+          Resume is required
+        </mat-error>
+      </div>
+      <div class="full-width quill-wrapper-container">
+        <label class="quill-label">Cover letter</label>
+        <quill-editor
+          formControlName="coverLetter"
+          [modules]="quillConfig"
+          placeholder="Why you're a good fit for this role..."
+          theme="snow">
+        </quill-editor>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+    <button mat-flat-button type="button"
+            [disabled]="applyForm.invalid || isSubmitting"
+            (click)="onSubmit()"
+            class="submit-button">
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update application' : (applyForSelf ? 'Apply' : 'Submit application') }}</span>
+      <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Submitting...' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -378,7 +378,18 @@ a {
     margin-top: 0.25rem;
   }
 }
-
+.custom-dialog {
+  padding: 20px;
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+}
 // Table Styles
 .table {
   width: 100%;
@@ -518,6 +529,15 @@ a {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
   }
+}
+.header-top {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;            
+}
+
+.settings-title {
+  margin: 0; 
 }
 
 // CDK Overlay Container - Critical for zoom functionality

@@ -1,0 +1,338 @@
+// Global Dialog Container Styles
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  max-width: 800px !important;
+  width: 90vw !important;
+}
+
+// Dialog Header
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.dialog-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+}
+
+.dialog-header h2 mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.dialog-header .close-button {
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.dialog-header .close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+// Dialog Content
+.dialog-content {
+  padding: 28px !important;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+// Form Section
+.form-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: -12px 0 16px 0;
+}
+
+.ip-form {
+  .form-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .form-field {
+      flex: 1;
+      min-width: 200px;
+
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      @media (max-width: 600px) {
+        width: 100%;
+        min-width: unset;
+        margin-bottom: 8px;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+
+    button {
+      height: 44px;
+      padding: 0 24px !important;
+      border-radius: 12px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      text-transform: none !important;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .cancel-btn {
+      background: white !important;
+      color: #6b7280 !important;
+      border: 2px solid #e5e7eb !important;
+    }
+
+    .cancel-btn:hover {
+      background: #f9fafb !important;
+      border-color: #cbd5e1 !important;
+      color: #374151 !important;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border: none !important;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Table Section
+.table-section {
+  margin-top: 24px;
+}
+
+.table-container {
+  .office-ips-table {
+    width: 100%;
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+
+    td {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .ip-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .ip-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #667eea;
+      }
+
+      .ip-text {
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+        color: #1f2937;
+      }
+    }
+
+    .no-description {
+      color: #9ca3af;
+      font-style: italic;
+    }
+
+    .danger-action {
+      color: #ef4444;
+
+      .mat-icon {
+        color: #ef4444;
+      }
+    }
+  }
+}
+
+// Loading & Empty States
+.loading-container,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 56px;
+    height: 56px;
+    width: 56px;
+    margin-bottom: 16px;
+    color: #d1d5db;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: #374151;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: #6b7280;
+    max-width: 400px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.empty-state {
+  mat-icon {
+    color: #e5e7eb;
+  }
+
+  button {
+    margin-top: 16px;
+  }
+}
+
+// Dialog Actions (Footer)
+.dialog-actions {
+  padding: 20px 28px !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+
+  button {
+    height: 44px;
+    padding: 0 28px !important;
+    border-radius: 12px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  button[mat-stroked-button] {
+    background: white !important;
+    color: #6b7280 !important;
+    border: 2px solid #e5e7eb !important;
+  }
+
+  button[mat-stroked-button]:hover {
+    background: #f9fafb !important;
+    border-color: #cbd5e1 !important;
+    color: #374151 !important;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dialog-header {
+    padding: 20px 24px;
+  }
+
+  .dialog-header h2 {
+    font-size: 18px;
+  }
+
+  .dialog-content {
+    padding: 20px !important;
+  }
+
+  .ip-form {
+    .form-row {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 20px !important;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

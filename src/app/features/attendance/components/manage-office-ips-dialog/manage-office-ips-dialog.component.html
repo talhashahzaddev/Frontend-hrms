@@ -1,0 +1,127 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>router</mat-icon>
+    Manage Office IPs
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <!-- Add/Edit Form -->
+  <div class="form-section">
+    <h3 class="section-title">{{ isEditing ? 'Edit Office IP' : 'Add New Office IP' }}</h3>
+    
+    <form [formGroup]="ipForm" (ngSubmit)="onSubmit()" class="ip-form">
+      <div class="form-row">
+        <div class="form-field">
+          <label>IP Address</label>
+          <mat-form-field appearance="outline" class="full-width">
+            <input matInput formControlName="ipAddressValue" placeholder="192.168.1.1" required>
+            <mat-error *ngIf="ipForm.get('ipAddressValue')?.invalid && ipForm.get('ipAddressValue')?.touched">
+              {{ getErrorMessage('ipAddressValue') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-field">
+          <label>Name</label>
+          <mat-form-field appearance="outline" class="full-width">
+            <input matInput formControlName="name" placeholder="Main Office" required>
+            <mat-error *ngIf="ipForm.get('name')?.invalid && ipForm.get('name')?.touched">
+              Name is required
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="cancelEdit()" *ngIf="isEditing" class="cancel-btn">
+          <mat-icon>cancel</mat-icon>
+          Cancel
+        </button>
+        <button mat-flat-button type="submit" [disabled]="isSubmitting" class="submit-btn">
+          <mat-icon *ngIf="!isSubmitting">{{ isEditing ? 'save' : 'add' }}</mat-icon>
+          <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+          {{ isEditing ? 'Update' : 'Add' }} IP
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Office IPs Table -->
+  <div class="table-section">
+    <h3 class="section-title">Office IPs</h3>
+    <p class="section-subtitle">Manage IP addresses that are considered office locations</p>
+
+    <div class="loading-container" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading office IPs...</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="officeIPs" class="office-ips-table" *ngIf="officeIPs.length > 0">
+
+        <!-- IP Address Column -->
+        <ng-container matColumnDef="ipAddressValue">
+          <th mat-header-cell *matHeaderCellDef>IP Address</th>
+          <td mat-cell *matCellDef="let ip">
+            <div class="ip-cell">
+              <mat-icon class="ip-icon">router</mat-icon>
+              <span class="ip-text">{{ ip.ipAddressValue }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let ip">
+            {{ ip.name }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let ip">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="editIP(ip)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="deleteIP(ip)" class="danger-action">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div *ngIf="officeIPs.length === 0" class="empty-state">
+        <mat-icon>router</mat-icon>
+        <h3>No Office IPs Configured</h3>
+        <p>Add IP addresses that should be considered office locations for attendance tracking.</p>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<div class="dialog-actions">
+  <button mat-stroked-button (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+    Close
+  </button>
+</div>

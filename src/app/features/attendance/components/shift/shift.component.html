@@ -31,6 +31,7 @@
         <strong>Start:</strong> {{ currentShift.startTime }} |
         <strong>End:</strong> {{ currentShift.endTime }} |
         <strong>Break:</strong> {{ currentShift.breakDuration }} min
+        <strong *ngIf="currentShift.marginHours">| Margin Hours: ±{{ currentShift.marginHours }} hrs</strong>
       </p>
     </div>
   </div>

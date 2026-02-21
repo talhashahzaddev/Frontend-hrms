@@ -50,8 +50,23 @@
       </mat-form-field>
     </div>
 
-    <!-- Margin Hours (Manager / HR only) -->
-      <mat-form-field appearance="outline" class="date-field">
+        <!-- Apply Margin Hours Toggle -->
+      <mat-slide-toggle
+        formControlName="applyMarginhours"
+        color="primary">
+        Apply Margin Hours
+      </mat-slide-toggle>
+
+      <mat-hint *ngIf="!shiftForm.get('applyMarginhours')?.value">
+        Margin hours will be ignored for this shift
+      </mat-hint>
+
+      <!-- Margin Hours (only when enabled) -->
+      <mat-form-field
+        *ngIf="shiftForm.get('applyMarginhours')?.value"
+        appearance="outline"
+        class="date-field">
+
         <mat-label>Margin Hours</mat-label>
         <input
           matInput
@@ -59,10 +74,12 @@
           formControlName="marginHours"
           min="0"
           max="5"
-          placeholder="e.g. 1.5"
-        />
+          placeholder="e.g. 1" />
+
         <mat-hint>Allowed clock-in window ± Margin Hours</mat-hint>
       </mat-form-field>
+
+
 
     <!-- Days of Week -->
     <mat-form-field appearance="outline" class="full-width">

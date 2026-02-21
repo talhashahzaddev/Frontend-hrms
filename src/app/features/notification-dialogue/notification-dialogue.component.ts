@@ -10,12 +10,12 @@ import { ServerNotificationService } from '@core/services/server-notification';
 import { AuthService } from '@core/services/auth.service';
 import { ServerNotification } from '../../core/models/common.models';
 import { LeaveService } from '../leave/services/leave.service';
-import  {AttendanceService} from '../attendance/services/attendance.service' 
+import { AttendanceService } from '../attendance/services/attendance.service'
 import { Output, EventEmitter } from '@angular/core';
 import { RejectLeaveDialogComponent } from '../leave/components/reject-leave-dialog/reject-leave-dialog.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { LeaveRequest } from '../../core/models/leave.models';
-
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
@@ -25,8 +25,8 @@ import { LeaveRequest } from '../../core/models/leave.models';
 })
 export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isOpen = false;
-@Output() unreadCountChange = new EventEmitter<number>();
-@Output() close = new EventEmitter<void>();
+  @Output() unreadCountChange = new EventEmitter<number>();
+  @Output() close = new EventEmitter<void>();
 
   notification: ServerNotification[] = [];
   currentUser: any = null;
@@ -35,13 +35,14 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   constructor(
     private serverNotificationService: ServerNotificationService,
-    private attendanceService:AttendanceService,
+    private attendanceService: AttendanceService,
     public leaveService: LeaveService,
-    private router: Router ,
+    private sanitizer: DomSanitizer,
+    private router: Router,
     private authService: AuthService,
     private dialog: MatDialog,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUserValue();
@@ -49,18 +50,18 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     //   this.loadNotifications();
     // }
 
-     // Subscribe to notifications observable
-  this.serverNotificationService.notifications$
-    .pipe(takeUntil(this.destroy$))
-    .subscribe((notifications: ServerNotification[]) => {
-      this.notification = notifications || [];
-      this.unreadCountChange.emit(this.unreadCount);
-    });
+    // Subscribe to notifications observable
+    this.serverNotificationService.notifications$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((notifications: ServerNotification[]) => {
+        this.notification = notifications || [];
+        this.unreadCountChange.emit(this.unreadCount);
+      });
 
-  // If dialogue opens initially
-  if (this.isOpen) {
-    this.loadNotifications(); // optional: to refresh
-  }
+    // If dialogue opens initially
+    if (this.isOpen) {
+      this.loadNotifications(); // optional: to refresh
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -69,8 +70,11 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     }
   }
 
-  
 
+
+getSafeHtml(message: string): SafeHtml {
+  return this.sanitizer.bypassSecurityTrustHtml(message);
+}
 
   get unreadCount(): number {
     const count = this.notification.filter(n => !n.isRead).length;
@@ -79,30 +83,37 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
   }
 
   loadNotifications(): void {
-  if (!this.currentUser?.userId) return;
-  this.serverNotificationService.loadNotifications(this.currentUser.userId);
-}
+    if (!this.currentUser?.userId) return;
+    this.serverNotificationService.loadNotifications(this.currentUser.userId);
+  }
 
- 
-onNotificationClick(notification: ServerNotification): void {
-  // Mark as read if unread
-  if (!notification.isRead) {
-    this.serverNotificationService.markAsRead(notification.notificationid)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
+
+  onNotificationClick(notification: ServerNotification): void {
+    // If unread, mark as read and then redirect if needed
+    if (!notification.isRead) {
+      this.serverNotificationService.markAsRead(notification.notificationid)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
             notification.isRead = true;
-            this.unreadCountChange.emit(this.unreadCount); // emit after single read
+            this.unreadCountChange.emit(this.unreadCount);
+            if (notification.redirectUrl) {
+              this.router.navigateByUrl(notification.redirectUrl);
+            }
           },
-        error: (err) => console.error('Failed to mark as read', err)
-      });
+          error: (err) => {
+            console.error('Failed to mark as read', err);
+            // Still redirect if marking as read fails
+            if (notification.redirectUrl) {
+              this.router.navigateByUrl(notification.redirectUrl);
+            }
+          }
+        });
+    } else if (notification.redirectUrl) {
+      // If already read, just redirect
+      this.router.navigateByUrl(notification.redirectUrl);
+    }
   }
-
-  // Navigate inside Angular app if redirectUrl exists
-  if (notification.redirectUrl) {
-    this.router.navigateByUrl(notification.redirectUrl);
-  }
-}
 
 
 
@@ -112,7 +123,7 @@ onNotificationClick(notification: ServerNotification): void {
         this.serverNotificationService.markAsRead(notification.notificationid)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
-             next: () => {
+            next: () => {
               notification.isRead = true;
               this.unreadCountChange.emit(this.unreadCount); // emit after marking read
             },
@@ -128,7 +139,7 @@ onNotificationClick(notification: ServerNotification): void {
   handleAction(n: ServerNotification, action: 'accept' | 'reject'): void {
     // Mark action as processed immediately to hide buttons
     this.actionProcessed.add(n.notificationid);
-    
+
     const moduleType = n.moduletype?.toLowerCase();
 
     switch (moduleType) {
@@ -157,7 +168,7 @@ onNotificationClick(notification: ServerNotification): void {
   private handleLeave(notification: ServerNotification, action: 'accept' | 'reject'): void {
     // Use requestid instead of notificationid for leave operations
     const requestId = notification.requestid;
-    
+
     if (!requestId) {
       this.notificationService.showError('Leave request ID not found in notification');
       return;
@@ -240,84 +251,84 @@ onNotificationClick(notification: ServerNotification): void {
 
 
   private handleAttendance(
-  notification: ServerNotification,
-  action: 'accept' | 'reject'
-): void {
+    notification: ServerNotification,
+    action: 'accept' | 'reject'
+  ): void {
 
-  // shift swap request id notification se
-  const requestId = notification.requestid;
+    // shift swap request id notification se
+    const requestId = notification.requestid;
 
-  if (!requestId) {
-    this.notificationService.showError('Shift swap request ID not found');
-    return;
-  }
+    if (!requestId) {
+      this.notificationService.showError('Shift swap request ID not found');
+      return;
+    }
 
-  if (!this.currentUser?.userId) {
-    this.notificationService.showError('User not authenticated');
-    return;
-  }
+    if (!this.currentUser?.userId) {
+      this.notificationService.showError('User not authenticated');
+      return;
+    }
 
-  if (action === 'accept') {
-    const payload = {
-      requestId,
-      approvedBy: this.currentUser.userId,
-      isApproved: true,
-      rejectionReason: ''
-    };
+    if (action === 'accept') {
+      const payload = {
+        requestId,
+        approvedBy: this.currentUser.userId,
+        isApproved: true,
+        rejectionReason: ''
+      };
 
-    this.attendanceService.approvedshiftRequest(payload)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res: any) => {
-          if (res.success) {
-            this.notificationService.showSuccess('Shift swap approved successfully');
-            notification.isRead = true;
-            this.unreadCountChange.emit(this.unreadCount);
-            this.loadNotifications();
-          } else {
-            this.notificationService.showError(res.message || 'Approval failed');
+      this.attendanceService.approvedshiftRequest(payload)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res: any) => {
+            if (res.success) {
+              this.notificationService.showSuccess('Shift swap approved successfully');
+              notification.isRead = true;
+              this.unreadCountChange.emit(this.unreadCount);
+              this.loadNotifications();
+            } else {
+              this.notificationService.showError(res.message || 'Approval failed');
+            }
+          },
+          error: (err) => {
+            console.error('Approve shift swap failed', err);
+            this.notificationService.showError('Failed to approve shift swap');
           }
-        },
-        error: (err) => {
-          console.error('Approve shift swap failed', err);
-          this.notificationService.showError('Failed to approve shift swap');
-        }
-      });
+        });
 
-  } else {
-    // 🔴 Reject flow
-    const rejectionReason =
-      prompt('Enter rejection reason:', 'Not suitable for schedule') || '';
+    } else {
+      // 🔴 Reject flow
+      const rejectionReason =
+        prompt('Enter rejection reason:', 'Not suitable for schedule') || '';
 
-    const payload = {
-      requestId,
-      approvedBy: this.currentUser.userId,
-      isApproved: false,
-      rejectionReason
-    };
+      const payload = {
+        requestId,
+        approvedBy: this.currentUser.userId,
+        isApproved: false,
+        rejectionReason
+      };
 
-    this.attendanceService.approvedshiftRequest(payload)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res: any) => {
-          if (res.success) {
-            this.notificationService.showSuccess('Shift swap rejected');
-            notification.isRead = true;
-            this.unreadCountChange.emit(this.unreadCount);
-            this.loadNotifications();
-          } else {
-            this.notificationService.showError(res.message || 'Rejection failed');
+      this.attendanceService.approvedshiftRequest(payload)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res: any) => {
+            if (res.success) {
+              this.notificationService.showSuccess('Shift swap rejected');
+              notification.isRead = true;
+              this.unreadCountChange.emit(this.unreadCount);
+              this.loadNotifications();
+            } else {
+              this.notificationService.showError(res.message || 'Rejection failed');
+            }
+          },
+          error: (err) => {
+            console.error('Reject shift swap failed', err);
+            this.notificationService.showError('Failed to reject shift swap');
           }
-        },
-        error: (err) => {
-          console.error('Reject shift swap failed', err);
-          this.notificationService.showError('Failed to reject shift swap');
-        }
-      });
+        });
+    }
   }
-}
 
- 
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

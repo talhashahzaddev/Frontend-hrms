@@ -31,6 +31,29 @@
     }
   }
 
+  .ip-line {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* space between icon and IP */
+}
+
+.checkin-icon {
+  width: 10px;
+  height: 10px;
+  background-color: green;
+  border-radius: 50%; /* makes it a circle */
+  display: inline-block;
+}
+
+.checkout-icon {
+  width: 10px;
+  height: 10px;
+  background-color: red; /* or blue if you prefer */
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
   // Filters Card
   .filters-card {
     margin-bottom: 24px;
@@ -500,6 +523,9 @@
 
       .attendance-table {
         width: 100%;
+        .location-line {
+          margin-bottom: 6px;
+          }
 
         ::ng-deep {
           // Table Headers
@@ -516,7 +542,7 @@
               padding: 16px 12px;
             }
           }
-
+          
           // Table Rows
           .mat-mdc-row {
             transition: all 0.2s ease;
@@ -589,43 +615,66 @@
         }
 
         // Status Chip
-        ::ng-deep mat-chip {
-          font-size: 12px !important;
-          font-weight: 600 !important;
-          height: 28px !important;
-          border-radius: 14px !important;
-          padding: 0 12px !important;
+       // Chips Styling (Status + Location)
+            ::ng-deep mat-chip {
+              font-size: 12px !important;
+              font-weight: 600 !important;
+              height: 28px !important;
+              border-radius: 14px !important;
+              padding: 0 12px !important;
+              /* ========== LOCATION CHIPS ========== */
+              &.location-checkin {
+                background: linear-gradient(
+                  135deg,
+                  rgba(16, 185, 129, 0.15) 0%,
+                  rgba(5, 150, 105, 0.1) 100%
+                ) !important;
+                color: #059669 !important;
+                border: 1px solid rgba(16, 185, 129, 0.3) !important;
+              }
 
-          &.status-present {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
-            color: #059669 !important;
-            border: 1px solid rgba(16, 185, 129, 0.3) !important;
-          }
+              &.location-checkout {
+                background: linear-gradient(
+                  135deg,
+                  rgba(239, 68, 68, 0.15) 0%,
+                  rgba(220, 38, 38, 0.1) 100%
+                ) !important;
+                color: #dc2626 !important;
+                border: 1px solid rgba(239, 68, 68, 0.3) !important;
+              }
 
-          &.status-absent {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
-            color: #dc2626 !important;
-            border: 1px solid rgba(239, 68, 68, 0.3) !important;
-          }
+              /* ========== STATUS CHIPS ========== */
 
-          &.status-late {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
-            color: #d97706 !important;
-            border: 1px solid rgba(245, 158, 11, 0.3) !important;
-          }
+              &.status-present {
+                background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+                color: #059669 !important;
+                border: 1px solid rgba(16, 185, 129, 0.3) !important;
+              }
 
-          &.status-on_leave {
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
-            color: #8b5cf6 !important;
-            border: 1px solid rgba(139, 92, 246, 0.3) !important;
-          }
+              &.status-absent {
+                background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+                color: #dc2626 !important;
+                border: 1px solid rgba(239, 68, 68, 0.3) !important;
+              }
 
-          &.status-pending_approval {
-            background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.1) 100%) !important;
-            color: #4b5563 !important;
-            border: 1px solid rgba(107, 114, 128, 0.3) !important;
-          }
-        }
+              &.status-late {
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
+                color: #d97706 !important;
+                border: 1px solid rgba(245, 158, 11, 0.3) !important;
+              }
+
+              &.status-on_leave {
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
+                color: #8b5cf6 !important;
+                border: 1px solid rgba(139, 92, 246, 0.3) !important;
+              }
+
+              &.status-pending_approval {
+                background: linear-gradient(135deg, rgba(107, 114, 128, 0.15) 0%, rgba(75, 85, 99, 0.1) 100%) !important;
+                color: #4b5563 !important;
+                border: 1px solid rgba(107, 114, 128, 0.3) !important;
+              }
+            }
       }
 
       // Empty State

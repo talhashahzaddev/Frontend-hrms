@@ -14,6 +14,19 @@ export interface Attendance {
   status: string;
   sessionsCount: number;
   notes?: string;
+  ipAddress?: string;
+  location?: string;
+  checkinip?: string;
+  checkoutip?: string;
+  checkinLocationType?: string;
+  checkoutLocationType?: string;
+}
+
+export interface OfficeIP {
+  id: string;
+  ipAddressValue: string;
+  name: string;
+  createdAt: string;
 }
 
 // export interface DepartmentEmployee {
@@ -75,6 +88,7 @@ export interface Shift {
   workingDays: string[]; // ['monday', 'tuesday', etc.]
   createdAt: string;
   marginHours?: number;
+  applyMarginhours?: boolean;
 }
 
 export interface AttendanceRecord {
@@ -260,7 +274,8 @@ export interface UpdateShiftDto {
   breakDuration?: number;  
   daysofWeek?: number[];  
   timezone?: string;
-  marginHours?: number;       
+  marginHours?: number;
+  applyMarginhours?: boolean;       
 }
 
 
@@ -273,7 +288,8 @@ export interface ShiftDto {
   daysOfWeek: number[];
   timezone: string;
   isActive: boolean;
-  marginHours?: number; 
+  marginHours?: number;
+  applyMarginhours?: boolean; 
 
 }
 

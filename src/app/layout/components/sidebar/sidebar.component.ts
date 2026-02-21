@@ -109,6 +109,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
+      label: 'Assets Management',
+      icon: 'inventory_2',
+      roles: ['Super Admin', 'HR Manager', 'Manager'],
+      children: [
+        { label: 'Types of Assets', icon: 'category', route: '/assets/types', roles: ['Super Admin', 'HR Manager'] },
+        { label: 'Create Assets', icon: 'add_box', route: '/assets/create', roles: ['Super Admin', 'HR Manager', 'Manager'] }
+      ]
+    },
+    {
       label: 'Performance',
       icon: 'trending_up',
       children: [
@@ -143,7 +152,28 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee'],
       children: [
         { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true }
+        { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true },
+        { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, roles: ['Super Admin', 'HR Manager'] },
+        { label: 'Reports', icon: 'summarize', route: '/expense/expense-report', exact: true, roles: ['Super Admin'] }
+      ]
+    },
+    {
+      label: 'News',
+      icon: 'event_available',
+      children: [
+        { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' },
+        { label: 'Create News', icon: 'event', route: '/news/create-news' }
+
+      ]
+    },
+    {
+      label: 'Jobs',
+      icon: 'work',
+      children: [
+        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings' },
+        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied' },
+        { label: 'My Applications', icon: 'person_pin', route: '/jobs/my-applications', roles: ['Manager', 'Employee'] },
+        { label: 'Stage', icon: 'label', route: '/jobs/stage', roles: ['Super Admin'] }
       ]
     }
   ];

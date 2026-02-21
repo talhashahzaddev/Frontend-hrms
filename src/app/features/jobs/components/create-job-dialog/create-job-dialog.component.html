@@ -1,0 +1,144 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>work</mat-icon>
+    {{ isEditMode ? 'Edit Job Opening' : 'Create Job Opening' }}
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="jobForm" class="job-form">
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Job role name *</mat-label>
+        <input matInput formControlName="jobRoleName" placeholder="e.g. Senior Software Engineer" maxlength="200">
+        <mat-error *ngIf="jobForm.get('jobRoleName')?.hasError('required')">Job role name is required</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Department</mat-label>
+        <mat-select formControlName="departmentId" placeholder="Select department">
+          <mat-option [value]="null">— None —</mat-option>
+          <mat-option *ngFor="let d of departments" [value]="d.departmentId">
+            {{ d.departmentName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Experience (min years)</mat-label>
+        <input matInput type="number" formControlName="experienceMin" placeholder="0" min="0" step="1">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Experience (max years)</mat-label>
+        <input matInput type="number" formControlName="experienceMax" placeholder="0" min="0" step="1">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>CTC min</mat-label>
+        <input matInput type="number" formControlName="ctcMin" placeholder="0" min="0" step="0.01">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>CTC max</mat-label>
+        <input matInput type="number" formControlName="ctcMax" placeholder="0" min="0" step="0.01">
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Currency</mat-label>
+        <input matInput formControlName="currency" placeholder="e.g. USD" maxlength="10">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Vacancies *</mat-label>
+        <input matInput type="number" formControlName="vacancies" placeholder="1" min="1" step="1">
+        <mat-error *ngIf="jobForm.get('vacancies')?.hasError('min')">At least 1</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Location</mat-label>
+        <input matInput formControlName="location" placeholder="e.g. New York, Remote" maxlength="200">
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Work mode</mat-label>
+        <mat-select formControlName="workMode" placeholder="Select">
+          <mat-option [value]="null">— None —</mat-option>
+          <mat-option *ngFor="let o of workModeOptions" [value]="o.value">{{ o.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Employment type</mat-label>
+        <mat-select formControlName="employmentType" placeholder="Select">
+          <mat-option [value]="null">— None —</mat-option>
+          <mat-option *ngFor="let o of employmentTypeOptions" [value]="o.value">{{ o.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Last date to apply</mat-label>
+        <input matInput [matDatepicker]="lastDatePicker" formControlName="lastDate" placeholder="Choose date">
+        <mat-datepicker-toggle matSuffix [for]="lastDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #lastDatePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row two-col">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Posted as *</mat-label>
+        <mat-select formControlName="postedAs" placeholder="Internal / External">
+          <mat-option value="Internal">Internal</mat-option>
+          <mat-option value="External">External</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status" placeholder="Open / Closed / Draft">
+          <mat-option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>External link</mat-label>
+        <input matInput formControlName="externalLink" placeholder="URL for external applications">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Job introduction</mat-label>
+      <textarea matInput formControlName="jobIntroduction" placeholder="Brief about the role" rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Responsibilities</mat-label>
+      <textarea matInput formControlName="responsibilities" placeholder="Key responsibilities" rows="4"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Skillset</mat-label>
+      <textarea matInput formControlName="skillset" placeholder="Required skills" rows="3"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+  <button mat-flat-button
+          [disabled]="jobForm.invalid || isSubmitting"
+          (click)="onSubmit()"
+          class="submit-button">
+    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Job' : 'Create Job' }}</span>
+    <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Creating...' }}</span>
+  </button>
+</mat-dialog-actions>

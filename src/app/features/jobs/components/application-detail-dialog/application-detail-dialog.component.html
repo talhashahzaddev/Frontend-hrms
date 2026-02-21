@@ -1,0 +1,75 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>how_to_reg</mat-icon>
+    Application details
+  </h2>
+  <button mat-icon-button mat-dialog-close class="close-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading...</p>
+  </div>
+
+  <div class="error-state" *ngIf="!isLoading && error">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="application-details" *ngIf="!isLoading && application">
+    <div class="detail-section">
+      <h3 class="detail-title">{{ application.jobRoleName || 'Job' }}</h3>
+      <span class="status-chip" [class.status-applied]="application.status === 'Applied'">
+        {{ application.currentStageName || application.status || 'Applied' }}
+      </span>
+      <p class="detail-meta">Applied {{ getAppliedDate(application) }}</p>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-row">
+        <span class="detail-label">Status</span>
+        <span class="detail-value">{{ application.status || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Current stage</span>
+        <span class="detail-value">{{ application.currentStageName || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Candidate name</span>
+        <span class="detail-value">{{ application.candidateName || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">{{ application.candidateEmail || '—' }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Phone</span>
+        <span class="detail-value">{{ application.phone || '—' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="application.linkedInUrl">
+        <span class="detail-label">LinkedIn</span>
+        <a [href]="application.linkedInUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open profile</a>
+      </div>
+      <div class="detail-row" *ngIf="application.resumeUrl">
+        <span class="detail-label">Resume</span>
+        <a [href]="application.resumeUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open resume</a>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Application source</span>
+        <span class="detail-value">{{ application.applicationSource || '—' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section" *ngIf="application.coverLetter">
+      <h4 class="detail-heading">Cover letter</h4>
+      <div class="detail-text cover-letter-html" [innerHTML]="application.coverLetter"></div>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-flat-button mat-dialog-close class="close-btn">Close</button>
+</mat-dialog-actions>

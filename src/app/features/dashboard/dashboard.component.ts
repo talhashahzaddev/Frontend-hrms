@@ -373,7 +373,9 @@ hasAnyRole(roles: string[]): boolean {
   scheduleLeave(): void {
   this.router.navigate(['/leave/apply']);
 }
-
+  leaveApprovals(): void {
+    this.router.navigate(['/leave/team']);
+  }
 
   private prepareChartConfigurations(): void {
     if (this.attendanceStats) {

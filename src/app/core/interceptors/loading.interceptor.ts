@@ -11,7 +11,8 @@ export class LoadingInterceptor implements HttpInterceptor {
     '/auth/refresh',
     '/attendance/today',
     '/Chat/message', // Exclude chat API to show typing indicator instead
-    '/chat/message' // Case-insensitive fallback
+    '/chat/message', // Case-insensitive fallback
+    '/uploads/files' // Exclude file upload – dialogs show their own loading (e.g. resume upload)
   ];
 
   constructor(

@@ -1,0 +1,317 @@
+<div class="container">
+  <!-- Header Section -->
+  <div class="header-card">
+    <div class="header-content">
+      <div class="header-left">
+        <h1><i class="fas fa-box"></i> Asset Management</h1>
+        <p>Add new asset to the system with proper categorization</p>
+      </div>
+      <div class="header-right">
+          <button class="create-btn" type="button" (click)="openCreateDialog()">
+            <i class="fas fa-plus"></i> Create Asset
+          </button>
+        </div>
+    </div>
+  
+
+  <!-- Assets List -->
+
+    <div class="filters-card">
+      <div class="filters-header">
+        <h3>Asset Filters</h3>
+      </div>
+
+      <div class="filters-content">
+      <!-- Search Assets -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search Assets</mat-label>
+        <input matInput (keyup)="onSearchChange($event)" placeholder="Search by name, code, type...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Asset Type Filter -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Asset Type</mat-label>
+        <mat-icon matPrefix>category</mat-icon>
+        <mat-select (selectionChange)="onTypeFilterChange($event.value)">
+          <mat-option value="">All Types</mat-option>
+          <mat-option *ngFor="let type of types" [value]="type.id">{{ type.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Status Filter -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-icon matPrefix>info</mat-icon>
+        <mat-select (selectionChange)="onStatusFilterChange($event.value)">
+          <mat-option value="">All Status</mat-option>
+          <mat-option value="Available">Available</mat-option>
+          <mat-option value="Assigned">Assigned</mat-option>
+          <mat-option value="Maintenance">Maintenance</mat-option>
+          <mat-option value="Retired">Retired</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Purchase Date Filter -->
+      <mat-form-field appearance="outline" class="filter-field date-field">
+        <mat-label>Purchase Date From</mat-label>
+        <mat-icon matPrefix>calendar_today</mat-icon>
+        <input matInput [matDatepicker]="dateFromPicker" (dateChange)="onDateFromChange($event.value)" formControlName="dateFrom" placeholder="Select date">
+        <mat-datepicker-toggle matIconSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #dateFromPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <!-- Filter Actions -->
+      
+    <div class="filter-actions">
+       <button mat-stroked-button 
+              (click)="clearFilters()" 
+              class="clear-filters-btn">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+      <button mat-flat-button 
+              (click)="applyFilters()" 
+              class="apply-filter-btn">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filters
+      </button>
+    </div>
+</div>
+
+  <!-- Table Card -->
+  <div class="table-section">
+    <div class="table-container">
+      <table class="asset-table">
+        <thead>
+          <tr>
+            <th>ASSET NAME</th>
+            <th>TYPE</th>
+            <th>CODE</th>
+            <th>PURCHASE DATE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let asset of filteredAssets; let i = index">
+            <td>{{ asset.name }}</td>
+            <td>{{ asset.typeName }}</td>
+            <td>{{ asset.code }}</td>
+            <td>{{ asset.purchaseDate | date:'mediumDate' }}</td>
+            <td>{{ asset.status }}</td>
+            <td>
+              <button class="action-btn edit-btn" (click)="editAsset(asset)" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn assign-btn" (click)="openAssignDialog(asset)" title="Assign Asset">
+                <i class="fas fa-user-plus"></i>
+              </button>
+              <button class="action-btn delete-btn" (click)="deleteAsset(asset)" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Empty State -->
+    <div *ngIf="filteredAssets.length === 0" class="empty-state">
+      <mat-icon>folder_open</mat-icon>
+      <h3>No Assets Found</h3>
+      <p>{{ searchQuery || typeFilter || statusFilter ? 'No assets found matching your filters.' : 'No assets created yet.' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Dialog Template (handled in component) -->
+<ng-template #assetDialog>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="header-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="header-text">
+            <h2>{{ isEditMode ? 'Edit Asset' : 'Create Asset' }}</h2>
+            <p>{{ isEditMode ? 'Modify existing asset details' : 'Add new asset to system' }}</p>
+          </div>
+        </div>
+      </div>
+      <button mat-icon-button class="close-button" (click)="onDialogCancel()" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="dialog-content">
+      <form [formGroup]="dialogForm" class="asset-form">
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-info-circle"></i>
+            <span>Basic Information</span>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Asset Name</mat-label>
+              <input matInput formControlName="name" placeholder="Enter asset name">
+              <mat-error *ngIf="dialogForm.get('name')?.invalid && dialogForm.get('name')?.touched">
+                Name is required and must be less than 200 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Asset Tag</mat-label>
+              <input matInput formControlName="assetTag" placeholder="Enter asset tag/serial number">
+              <mat-error *ngIf="dialogForm.get('assetTag')?.invalid && dialogForm.get('assetTag')?.touched">
+                Asset tag is required and must be less than 100 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Asset Type</mat-label>
+              <mat-select formControlName="typeId">
+                <mat-option *ngFor="let type of types" [value]="type.id">{{ type.name }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="dialogForm.get('typeId')?.invalid && dialogForm.get('typeId')?.touched">
+                Asset type is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Purchase Date</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="purchaseDate" placeholder="Select purchase date">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="">-- Select Status --</mat-option>
+                <mat-option *ngFor="let option of statusOptions" [value]="option.value">{{ option.label }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="dialogForm.get('status')?.invalid && dialogForm.get('status')?.touched">
+                Status must be less than 50 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row wide">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Notes</mat-label>
+              <textarea matInput formControlName="notes" rows="3" placeholder="Enter additional notes"></textarea>
+              <mat-error *ngIf="dialogForm.get('notes')?.invalid && dialogForm.get('notes')?.touched">
+                Notes must be less than 1000 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="dialog-actions">
+      <button mat-button class="cancel-btn" (click)="onDialogCancel()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      <button mat-flat-button class="submit-btn" (click)="onDialogSubmit()" [disabled]="dialogForm.invalid">
+        <i class="fas fa-save"></i> {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Assign Asset Dialog Template -->
+<ng-template #assignDialog>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="header-icon">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <div class="header-text">
+            <h2>Assign Asset</h2>
+            <p>Assign selected asset to an employee</p>
+          </div>
+        </div>
+      </div>
+      <button mat-icon-button class="close-button" (click)="onAssignDialogCancel()" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="dialog-content">
+      <form [formGroup]="assignForm" class="asset-form">
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-info-circle"></i>
+            <span>Assignment Details</span>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Asset</mat-label>
+              <input matInput [value]="selectedAsset?.name" readonly>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Employee*</mat-label>
+              <mat-select formControlName="employeeId">
+                <mat-option *ngFor="let employee of filteredEmployees" [value]="employee.employeeId">
+                  {{ employee.firstName }} {{ employee.lastName }} - {{ employee.email }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="assignForm.get('employeeId')?.invalid && assignForm.get('employeeId')?.touched">
+                Employee selection is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Assign Date*</mat-label>
+              <input matInput [matDatepicker]="assignDatePicker" formControlName="assignDate" placeholder="Select assign date">
+              <mat-datepicker-toggle matSuffix [for]="assignDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #assignDatePicker></mat-datepicker>
+              <mat-error *ngIf="assignForm.get('assignDate')?.invalid && assignForm.get('assignDate')?.touched">
+                Assign date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Return Date</mat-label>
+              <input matInput [matDatepicker]="returnDatePicker" formControlName="returnDate" placeholder="Select return date (optional)">
+              <mat-datepicker-toggle matSuffix [for]="returnDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #returnDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="dialog-actions">
+      <button mat-button class="cancel-btn" (click)="onAssignDialogCancel()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      <button mat-flat-button class="submit-btn" (click)="onAssignDialogSubmit()" >
+        <i class="fas fa-user-plus"></i> Assign
+      </button>
+    </div>
+  </div>
+</ng-template>

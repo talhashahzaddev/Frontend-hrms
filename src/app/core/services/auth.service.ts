@@ -21,6 +21,7 @@ import {
 })
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/Auth`;
+  private readonly uploadsUrl = `${environment.apiUrl}/uploads`;
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
@@ -412,6 +413,21 @@ export class AuthService {
         }),
         catchError(this.handleError)
       );
+  }
+
+  /** Upload file through uploads API; returns the hosted URL. */
+  uploadProfilePic(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<{ url: string }>(`${this.uploadsUrl}/files`, formData).pipe(
+      map((res) => {
+        if (!res?.url) {
+          throw new Error('Upload failed');
+        }
+        return res.url;
+      })
+    );
   }
 
   updateProfile(formData: FormData): Observable<User> {

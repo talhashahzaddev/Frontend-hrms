@@ -60,13 +60,6 @@
         <mat-icon>download</mat-icon>
         Export
       </button>
-      <!-- <button mat-stroked-button 
-              (click)="clearFilters()" 
-              [disabled]="isLoading"
-              class="clear-filters-btn">
-        <mat-icon>clear</mat-icon>
-        Clear
-      </button> -->
     </div>
   </mat-card>
 
@@ -261,8 +254,24 @@
             <span *ngIf="!attendance.notes" class="no-notes">--</span>
           </td>
         </ng-container>
-
-        <!-- Actions Column -->
+                  <ng-container matColumnDef="ipAddress">
+                      <th mat-header-cell *matHeaderCellDef>Location Type</th>
+                      <td mat-cell *matCellDef="let attendance">
+                        <!-- Check-In (Always Green) -->
+                        <div class="location-line">
+                          <mat-chip class="location-checkin">
+                            {{ attendance.checkinLocationType || 'Unknown' }}
+                          </mat-chip>
+                        </div>
+                        <!-- Check-Out (Always Red) -->
+                        <div class="location-line">
+                          <mat-chip class="location-checkout">
+                            {{ attendance.checkoutLocationType || 'Unknown' }}
+                          </mat-chip>
+                        </div>
+                      </td>
+                    </ng-container>
+                <!-- Actions Column -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let attendance">

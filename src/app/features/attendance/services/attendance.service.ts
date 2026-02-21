@@ -24,6 +24,7 @@ import {
   PendingShiftSwap,
   approvedshiftRequest,
   AttendanceStatus,
+  OfficeIP,
   MonthlyTimesheetSummary,
   EmployeeTimesheetDto,
   TimesheetSearchRequest,
@@ -50,6 +51,7 @@ import { FinalizeBatchRequestDto } from '../models/finalize-batch-request.dto';
 })
 export class AttendanceService {
   private readonly apiUrl = `${environment.apiUrl}/Attendance`;
+  private readonly ipUrl = `${environment.apiUrl}/IpAddress`;
 
   constructor(private http: HttpClient) { }
 
@@ -588,6 +590,53 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       case AttendanceStatus.PENDING_APPROVAL: return 'warning';
       default: return 'secondary';
     }
+  }
+  // Office IP Management
+  getOfficeIPs(): Observable<OfficeIP[]> {
+    return this.http.get<ApiResponse<OfficeIP[]>>(`${this.ipUrl}/office-ips`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch office IPs');
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  createOfficeIP(officeIP: Omit<OfficeIP, 'id' | 'createdAt' | 'updatedAt'>): Observable<OfficeIP> {
+    return this.http.post<ApiResponse<OfficeIP>>(`${this.ipUrl}/create-ip`, officeIP)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create office IP');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  updateOfficeIP(id: string, officeIP: Partial<OfficeIP>): Observable<OfficeIP> {
+    return this.http.put<ApiResponse<OfficeIP>>(`${this.ipUrl}/update/${id}`, officeIP)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to update office IP');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  deleteOfficeIP(id: string): Observable<void> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.ipUrl}/delete/${id}`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to delete office IP');
+          }
+        })
+      );
   }
 
   // Timesheet Methods - Snapshot-based

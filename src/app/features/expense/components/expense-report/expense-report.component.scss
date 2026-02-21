@@ -1,0 +1,328 @@
+// Expense Report - same style as claim-list / recurring-expense-list
+.expense-report-container {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  min-height: 100vh;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding: 24px;
+    background: white !important;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .header-content {
+      flex: 1;
+      .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.5px;
+        mat-icon {
+          font-size: 36px;
+          width: 36px;
+          height: 36px;
+          color: #667eea;
+        }
+      }
+      .page-subtitle {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .reports-tabs {
+    margin-top: 0;
+
+    ::ng-deep .mat-mdc-tab-group {
+      background: transparent;
+    }
+
+    ::ng-deep .mat-mdc-tab-header {
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    ::ng-deep .mat-mdc-tab-body-content {
+      overflow: visible;
+    }
+  }
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .filters-card {
+    margin-bottom: 24px;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    background: white !important;
+
+    ::ng-deep .mat-mdc-card-content {
+      padding: 24px;
+    }
+
+    .filters-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .filters-row-dates {
+      .date-field,
+      .preset-field {
+        min-width: 160px;
+      }
+      .preset-field {
+        min-width: 180px;
+      }
+    }
+
+    .filters-row-checks {
+      mat-checkbox {
+        margin-right: 8px;
+      }
+    }
+
+    .filter-actions {
+      .add-button {
+        height: 48px;
+        padding: 0 28px !important;
+        border-radius: 12px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.2s ease !important;
+        mat-icon {
+          margin-right: 8px;
+        }
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+        }
+        &:disabled {
+          background: #9ca3af !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          box-shadow: none !important;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    ::ng-deep {
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+      .mat-mdc-text-field-wrapper {
+        background: white;
+        border-radius: 12px;
+      }
+      .mat-mdc-notch-piece {
+        border-color: #e5e7eb !important;
+      }
+      .mat-mdc-form-field:hover .mat-mdc-notch-piece {
+        border-color: #667eea !important;
+      }
+      .mat-mdc-form-field.mat-focused .mat-mdc-notch-piece {
+        border-color: #667eea !important;
+        border-width: 2px !important;
+      }
+    }
+  }
+
+  .legend-card {
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+
+    .legend-title {
+      margin: 0 0 16px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .legend-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: #f9fafb;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    .legend-cost {
+      font-size: 14px;
+      font-weight: 600;
+      color: #667eea;
+    }
+  }
+
+  .chart-card {
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    background: white !important;
+    overflow: hidden;
+
+    ::ng-deep .mat-mdc-card-header {
+      padding: 20px 24px 0;
+    }
+    ::ng-deep .mat-mdc-card-content {
+      padding: 16px 24px 24px;
+    }
+
+    .card-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      .title-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #667eea;
+      }
+    }
+
+    .chart-container {
+      height: 360px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+
+      canvas {
+        max-height: 100%;
+        max-width: 100%;
+      }
+    }
+
+    .chart-container-line,
+    .chart-container-bar {
+      height: 360px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+
+      canvas {
+        max-height: 100%;
+        max-width: 100%;
+      }
+    }
+
+    .chart-total {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+
+      .chart-total-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .chart-total-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #667eea;
+      }
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #d1d5db;
+      margin-bottom: 16px;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #9ca3af;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    gap: 16px;
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+  }
+}
