@@ -21,7 +21,7 @@ import { MatListModule } from '@angular/material/list';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -62,7 +62,7 @@ const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
     MatDividerModule,
     MatSidenavModule,
     MatListModule,
-    RouterModule
+    RouterLink
   ],
   templateUrl: './attendance-approvals.component.html',
   styleUrls: ['./attendance-approvals.component.scss']
