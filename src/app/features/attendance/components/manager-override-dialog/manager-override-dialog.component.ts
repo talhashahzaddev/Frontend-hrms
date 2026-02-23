@@ -66,9 +66,8 @@ export class ManagerOverrideDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Pre-fill form with original values
     const record = this.data.record;
-    
+
     if (record.originalCheckIn) {
       this.overrideForm.patchValue({
         checkIn: this.parseTimeFromDateTime(record.originalCheckIn)
@@ -123,7 +122,6 @@ export class ManagerOverrideDialogComponent implements OnInit {
     const formValue = this.overrideForm.value;
     const record = this.data.record;
 
-    // Build the checkIn/checkOut datetime strings using workDate
     const workDateStr = record.date.split('T')[0];
 
     const dto: ManagerOverrideDto = {
@@ -135,17 +133,14 @@ export class ManagerOverrideDialogComponent implements OnInit {
       notes: formValue.notes || undefined
     };
 
-    // Add checkIn if provided
     if (formValue.checkIn) {
       dto.checkInTime = `${workDateStr}T${formValue.checkIn}:00`;
     }
 
-    // Add checkOut if provided
     if (formValue.checkOut) {
       dto.checkOutTime = `${workDateStr}T${formValue.checkOut}:00`;
     }
 
-    // Add status if provided
     if (formValue.status) {
       dto.status = formValue.status;
     }
@@ -155,9 +150,6 @@ export class ManagerOverrideDialogComponent implements OnInit {
         this.isSubmitting = false;
         if (success) {
           this.notificationService.showSuccess('Override applied successfully');
-          // Return the full override payload so the parent can do an optimistic
-          // update immediately — without waiting for the API reload to surface
-          // what the view may not yet return (e.g. absent-day overrides).
           this.dialogRef.close({
             success: true,
             checkInTime:  dto.checkInTime  || null,

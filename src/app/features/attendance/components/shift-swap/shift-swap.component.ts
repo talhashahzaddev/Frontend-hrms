@@ -13,7 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AttendanceService } from '../../services/attendance.service';
-import { AuthService } from '../../../../core/services/auth.service'; // ✅ added import
+import { AuthService } from '../../../../core/services/auth.service';
 import { ShiftSwap } from '../../../../core/models/attendance.models';
 
 export interface ShiftDto {
@@ -53,14 +53,14 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   private destroy$ = new Subject<void>();
 
-  currentUser: any = null; // ✅ store current user
+  currentUser: any = null;
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<ShiftSwapComponent>,
     private attendanceService: AttendanceService,
     private notification: NotificationService,
-    private authService: AuthService // ✅ inject AuthService
+    private authService: AuthService
   ) {
     this.swapForm = this.fb.group({
       currentShiftId: null,
@@ -75,7 +75,6 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
      this.loadCurrentShift();
   }
 
-  // ✅ Load current user from AuthService
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
     console.log('Current user:', this.currentUser);
@@ -99,9 +98,8 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
 
     this.isSubmitting = true;
 
-    // ✅ Add employeeId from currentUser before sending
     const shiftSwap: ShiftSwap = {
-      employeeId: this.currentUser.userId, // assuming userId is field name in user model
+      employeeId: this.currentUser.userId,
       ...this.swapForm.value
     };
 
@@ -131,7 +129,6 @@ private loadCurrentShift(): void {
 
         this.currentShift = res.data;
 
-        // Patch the form with current shift
         this.swapForm.patchValue({
           currentShiftId: this.currentShift?.shiftId
         });

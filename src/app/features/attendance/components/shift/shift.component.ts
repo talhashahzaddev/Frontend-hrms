@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
-// Material Imports
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
@@ -18,7 +17,6 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NotificationService } from '../../../../core/services/notification.service';
 
-// Components and Services
 import { AssignShiftComponent } from '../assign-shift/assign-shift.component';
 import { CreateShiftComponent } from '../create-shift/create-shift.component';
 import { AttendanceService } from '../../services/attendance.service';
@@ -63,8 +61,8 @@ export class ShiftComponent implements OnInit {
   isLoading = false;
   allEmployees: Employee[] = [];
 
-  employeeShiftSwaps: PendingShiftSwap[] = []; // ✅ store employee's shift swap requests
-  currentUser: any = null; // ✅ store current logged-in user
+  employeeShiftSwaps: PendingShiftSwap[] = [];
+  currentUser: any = null;
 
   constructor(
     private dialog: MatDialog,
@@ -92,20 +90,17 @@ export class ShiftComponent implements OnInit {
       this.loadEmployeeCurrentShift();
     }
 
-    // ✅ If Employee, load their shift swap requests
     if (this.isEmployee) {
       this.loadEmployeeShiftSwaps();
       this.loadEmployeeCurrentShift();
     }
 
 
-    this.selectedShiftId = '';            // select "All Shifts" by default
+    this.selectedShiftId = '';
     this.onShiftChange(this.selectedShiftId);
 
-    // Check for query params from calendar navigation
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       if (params['action'] === 'swap') {
-        // Small delay to ensure component is fully initialized
         setTimeout(() => {
           this.openSwapShift();
         }, 500);
@@ -113,12 +108,10 @@ export class ShiftComponent implements OnInit {
     });
   }
 
-  // ✅ Load current user
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
   }
 
-  // Role helpers
   get isSuperAdmin(): boolean {
     return this.authService.hasRole('Super Admin');
   }
@@ -155,12 +148,10 @@ export class ShiftComponent implements OnInit {
 
   onShiftChange(shiftId: string): void {
     if (!shiftId) {
-      // ✅ If "All Shifts" selected
       this.loadAllEmployees();
       return;
     }
 
-    // ✅ Otherwise load employees by specific shift
     this.attendanceService.getEmployeesByShift(shiftId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -175,7 +166,6 @@ export class ShiftComponent implements OnInit {
   private loadAllEmployees(): void {
     this.isLoading = true;
 
-    // 🔹 MANAGER → only team employees
     if (this.isManager && !this.isAdminOrHR) {
       this.performanceService.getMyTeamEmployees()
         .pipe(takeUntil(this.destroy$))
@@ -193,7 +183,6 @@ export class ShiftComponent implements OnInit {
       return;
     }
 
-    // 🔹 SUPER ADMIN / HR → all employees
     const searchRequest: EmployeeSearchRequest = {
       searchTerm: '',
       isActive: true,
@@ -223,7 +212,7 @@ export class ShiftComponent implements OnInit {
   private loadSuperAdminPendingSwaps(): void {
     this.attendanceService.getPendingShiftSwapsForAdmin().subscribe({
       next: (response: any) => {
-        this.superAdminPendingSwaps = response.data; // assign data
+        this.superAdminPendingSwaps = response.data;
         console.log('Super Admin pending swaps:', this.superAdminPendingSwaps);
       },
       error: (error: any) => {
@@ -233,7 +222,6 @@ export class ShiftComponent implements OnInit {
     });
   }
 
-  //Accepted Rejected Methods
 
   approveRequest(swap: PendingShiftSwap): void {
     if (!this.currentUser?.userId) return;
@@ -250,7 +238,7 @@ export class ShiftComponent implements OnInit {
         if (res.success) {
           console.log('Shift swap approved:', res.message);
           this.superAdminPendingSwaps = this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
-          this.loadSuperAdminPendingSwaps(); // ✅ reload updated list
+          this.loadSuperAdminPendingSwaps();
           this.notification.showSuccess('Shift swap approved');
         } else {
           this.notification.showError(res.message || 'Failed to approve shift swap');
@@ -266,7 +254,6 @@ export class ShiftComponent implements OnInit {
   rejectRequest(swap: PendingShiftSwap): void {
     if (!this.currentUser?.userId) return;
 
-    // Optionally open a dialog or prompt to ask reason
     const rejectionReason = prompt('Enter rejection reason:', 'Not suitable for schedule') || '';
 
     const payload = {
@@ -281,7 +268,7 @@ export class ShiftComponent implements OnInit {
         if (res.success) {
           console.log('Shift swap rejected:', res.message);
           this.superAdminPendingSwaps = this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
-          this.loadSuperAdminPendingSwaps(); // ✅ reload updated list
+          this.loadSuperAdminPendingSwaps();
           this.notification.showSuccess('Shift swap rejected');
         } else {
           this.notification.showError(res.message || 'Failed to reject shift swap');
@@ -300,7 +287,7 @@ export class ShiftComponent implements OnInit {
 
     this.attendanceService.getEmployeeShiftSwaps(this.currentUser.userId).subscribe({
       next: (response: any) => {
-        this.employeeShiftSwaps = response.data; // ✅ assign the data array
+        this.employeeShiftSwaps = response.data;
         console.log('Employee shift swaps:', this.employeeShiftSwaps);
       },
       error: (error: any) => {
@@ -315,7 +302,7 @@ export class ShiftComponent implements OnInit {
     this.attendanceService.getCurrentShift(this.currentUser.userId).subscribe({
       next: (res: any) => {
         if (!res?.data) return;
-        this.currentShift = res.data; // ✅ assign the nested object
+        this.currentShift = res.data;
       },
       error: (error) => {
         const errorMessage = error?.error?.message || error?.message || 'Failed to load current shift';
@@ -353,7 +340,7 @@ export class ShiftComponent implements OnInit {
         this.attendanceService.deleteShift(shift.shiftId).subscribe({
           next: (res: any) => {
             this.notification.showSuccess('Shift deleted successfully');
-            this.loadAllShifts(); // refresh table
+            this.loadAllShifts();
           },
           error: (err) => {
             const errorMessage = err?.error?.message || err?.message || 'Failed to delete shift';
@@ -371,10 +358,10 @@ export class ShiftComponent implements OnInit {
       disableClose: true,
       autoFocus: false,
       panelClass: 'custom-dialog-container',
-      data: {        // pass full shift data to the dialog
+      data: {
         shiftId: shift.shiftId,
         shiftName: shift.shiftName,
-        startTime: shift.startTime,  // must be "HH:mm:ss" or "HH:mm"
+        startTime: shift.startTime,
         endTime: shift.endTime,
         breakDuration: shift.breakDuration,
         daysofWeek: shift.daysOfWeek,
@@ -386,7 +373,7 @@ export class ShiftComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'updated') {
-        this.loadAllShifts();  // refresh table after update
+        this.loadAllShifts();
       }
     });
   }
@@ -416,7 +403,7 @@ export class ShiftComponent implements OnInit {
       autoFocus: false,
       panelClass: 'custom-dialog-container',
       data: {
-        isManager: this.isManager && !this.isAdminOrHR // Pass true if user is only Manager (not HR Manager)
+        isManager: this.isManager && !this.isAdminOrHR
       }
     });
 
@@ -437,7 +424,6 @@ export class ShiftComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'swapped' && this.isEmployee) {
-        // reload employee requests after swap
         this.loadEmployeeShiftSwaps();
       } else if (result === 'swapped' && this.isAdminOrHR) {
         this.loadAllShifts();

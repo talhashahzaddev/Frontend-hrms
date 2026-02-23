@@ -165,8 +165,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   isSubmittingBatch = false;
 
-  /** Set to true after a successful batch submission. Hides the Submit button
-   *  and all edit icons until the user explicitly refreshes the dialog. */
+
   timesheetSubmitted = false;
 
   isFinalizingBatch = false;
@@ -175,11 +174,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   currentTimesheetId: string = '';
 
-  // Draft state is persisted to localStorage so it survives full page refreshes.
-  // Storage key pattern: ts_draft__{timesheetId}__{employeeId}__{date}
-  // Value: JSON-serialized draft data object.
-  // Entries are evicted when the server confirms the record is already
-  // hasDraftRequest/hasPendingRequest (server becomes the source of truth).
   private get lsPrefix(): string {
     return `ts_draft__${this.currentTimesheetId}__`;
   }
@@ -187,13 +181,13 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   private saveDraftToStorage(empId: string, date: string, data: any): void {
     try {
       localStorage.setItem(`${this.lsPrefix}${empId}__${date}`, JSON.stringify(data));
-    } catch { /* storage full or unavailable - silent fail */ }
+    } catch { }
   }
 
   private removeDraftFromStorage(empId: string, date: string): void {
     try {
       localStorage.removeItem(`${this.lsPrefix}${empId}__${date}`);
-    } catch { /* silent */ }
+    } catch { }
   }
 
   private loadDraftMapForEmployee(empId: string): Map<string, any> {
@@ -208,12 +202,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           if (raw) result.set(date, JSON.parse(raw));
         }
       }
-    } catch { /* silent */ }
+    } catch { }
     return result;
   }
 
   private clearAllDraftsFromStorage(): void {
-    // Called on submitAllEdits success - wipe every draft for this timesheet.
     try {
       const toRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -221,24 +214,10 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
         if (key && key.startsWith(this.lsPrefix)) toRemove.push(key);
       }
       toRemove.forEach(k => localStorage.removeItem(k));
-    } catch { /* silent */ }
+    } catch { }
   }
 
-  /**
-   * Called after a successful batch submit instead of clearAllDraftsFromStorage.
-   *
-   * Rationale: absent-day correction records have no attendanceId, so the server
-   * view cannot return them as "pending" rows — they would silently disappear after
-   * a page reload, making the employee think the request was never sent (Bug 1 / Bug 3).
-   *
-   * Instead of wiping the localStorage entries, we flip each draft entry from
-   *   { hasDraftRequest: true }  →  { hasDraftRequest: false, hasPendingRequest: true }
-   *
-   * mergeDraftCache will then inject these as "Awaiting Approval" placeholder rows
-   * for any date not returned by the server, keeping the UI truthful. Once the
-   * server catches up and returns a real pending record for that date, mergeDraftCache
-   * detects server.hasPendingRequest === true and evicts the local copy automatically.
-   */
+
   private markAllDraftsAsSubmittedInStorage(): void {
     try {
       const keys: string[] = [];
@@ -254,19 +233,15 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           data.hasDraftRequest  = false;
           data.hasPendingRequest = true;
           localStorage.setItem(k, JSON.stringify(data));
-        } catch { /* corrupt entry — remove it */ localStorage.removeItem(k); }
+        } catch { localStorage.removeItem(k); }
       });
-    } catch { /* storage unavailable — silent fail */ }
+    } catch { }
   }
 
-  // Cache of getDailyRecordsForMonth output keyed by employeeId.
-  // Prevents Angular recreating placeholder objects on every CD cycle
-  // (which would wipe optimistic hasDraftRequest updates instantly).
   dailyRecordsCache: Map<string, any[]> = new Map();
 
 
 
-  // Pagination
 
   pageSize = 10;
 
@@ -276,7 +251,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  // Table columns
 
   displayedColumns: string[] = [
 
@@ -308,7 +282,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  // Daily records columns
 
   dailyRecordsColumns: string[] = [
 
@@ -352,13 +325,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    // Task 1: Store the timesheetId passed from the dashboard
 
     this.currentTimesheetId = this.data.timesheetId;
 
 
 
-    // Task 3: Validation - warn if timesheetId is null or empty GUID
 
     const emptyGuid = '00000000-0000-0000-0000-000000000000';
 
@@ -388,7 +359,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
           const u = user as any;
 
-          // Capture both potential identifiers from the session
 
           this.sessionUserId = String(u['userId'] || '').toLowerCase().trim();
 
@@ -406,21 +376,15 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  /**
 
-   * Returns true if the selected employee is the current user (for role-based button visibility)
-
-   */
 
   public isOwnTimesheetSelected(): boolean {
 
     const selectedId = String(this.selectedEmployee?.employeeId || '').toLowerCase().trim();
 
-    // Match if the selected ID matches the session's Employee ID OR User ID
 
     const isDirectMatch = selectedId === this.sessionEmployeeId || selectedId === this.sessionUserId;
 
-    // Fallback: If Super Admin is selected and the user IS a Super Admin
 
     const isSuperAdminBypass = !!(this.currentUserRole.includes('super admin') &&
 
@@ -446,7 +410,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    // Use currentTimesheetId (stored from dialog data) to fetch employee details
 
     this.attendanceService.getTimesheetDetails(this.currentTimesheetId)
 
@@ -456,7 +419,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
         next: (employees) => {
 
-          // Support both API shapes: either an array of employees or a { employees: EmployeeTimesheetDto[] } wrapper
 
           let resolvedEmployees: EmployeeTimesheetDto[] = [];
 
@@ -474,7 +436,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
           } else {
 
-            // Unexpected shape - try to coerce
 
             resolvedEmployees = (employees as unknown as EmployeeTimesheetDto[]) || [];
 
@@ -482,12 +443,9 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-          // Normalize each employee's dailyRecords and compute summary counts if missing
 
           resolvedEmployees = resolvedEmployees.map(emp => this.normalizeEmployeeTimesheet(emp));
 
-          // Merge any locally-cached draft state back into records the server
-          // didn't return with hasDraftRequest (e.g. absent placeholder rows).
           resolvedEmployees = resolvedEmployees.map(emp => this.mergeDraftCache(emp));
 
           this.employees = resolvedEmployees;
@@ -496,7 +454,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
           this.totalRecords = this.filteredEmployees.length;
 
-          // Clear the daily-records display cache so cards re-render with fresh data.
           this.dailyRecordsCache.clear();
 
           this.updateDisplayedEmployees();
@@ -505,9 +462,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
           console.log('[OK] Loaded timesheet details for', this.employees.length, 'employees');
 
-         
 
-          // Auto-expand for employee role
+
 
           if (this.isEmployeeRole() && this.filteredEmployees.length > 0) {
 
@@ -517,8 +473,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
           }
 
-          // Re-select the previously selected employee (by ID) so the detail panel
-          // stays on the same person after a reload. Fall back to first if not found.
           const prevId = this.selectedEmployee?.employeeId;
 
           const reSelected = prevId
@@ -577,7 +531,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     this.updateDisplayedEmployees();
 
-    // keep selectedEmployee valid after filtering
 
     if (this.filteredEmployees.length > 0) {
 
@@ -713,7 +666,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   requestDailyCorrection(employee: EmployeeTimesheetDto, record: any): void {
 
-    // Strict bracket-notation extraction - catches any casing from .NET
 
     const resolvedAttendanceId = record.attendanceId
 
@@ -723,39 +675,32 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
       || '';
 
-    // Always use 'edit' mode for ALL records including absent placeholders.
-    // The AttendanceRequestDialogComponent handles null attendanceId gracefully -
-    // it submits a correction request for that date regardless of whether a DB
-    // attendance row already exists. 'create' mode opens the wrong dialog (Add Record).
     const dialogMode = 'edit';
 
-    // Always open Request Correction dialog for all roles
 
-    const isDraft = record.hasDraftRequest === true;
+    const hasEditableRequest = record.hasDraftRequest === true || record.hasPendingRequest === true;
 
-    const prefillCheckIn = isDraft && record.requestedCheckIn
+    const prefillCheckIn = hasEditableRequest && record.requestedCheckIn
 
       ? record.requestedCheckIn
 
       : (record.checkInTime || record.CheckInTime || null);
 
-    const prefillCheckOut = isDraft && record.requestedCheckOut
+    const prefillCheckOut = hasEditableRequest && record.requestedCheckOut
 
       ? record.requestedCheckOut
 
       : (record.checkOutTime || record.CheckOutTime || null);
 
-    // For absent/placeholder rows the original status is 'Absent' - pass it through
 
-    // so the dialog can pre-select it and the user just fills in the reason/times.
 
-    const prefillStatus = isDraft && record.requestedStatus
+    const prefillStatus = hasEditableRequest && record.requestedStatus
 
       ? record.requestedStatus
 
       : (record.status || record.Status || 'Absent');
 
-    const prefillNotes = isDraft && record.requestedNotes
+    const prefillNotes = hasEditableRequest && record.requestedNotes
 
       ? record.requestedNotes
 
@@ -807,9 +752,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
         if (result?.success) {
 
-          // Build the draft state to persist across the upcoming reload.
-          // Try every field name variant the AttendanceRequestDialogComponent might return
-          // (camelCase, prefixed, plain) so we never miss updated time data.
           const resolvedCheckIn =
             result.requestedCheckIn  || result.checkIn  || result.checkInTime  ||
             result.CheckInTime       || result.CheckIn  ||
@@ -837,16 +779,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
             requestedNotes:    resolvedNotes,
           };
 
-          // Persist draft state to localStorage so it survives page refreshes.
           const empId = employee.employeeId;
           this.saveDraftToStorage(empId, record.date, draftData);
 
-          // Optimistic UI: update record in place so the card updates immediately
-          // without waiting for the server round-trip.
           Object.assign(record, draftData);
 
-          // Flush display cache for this employee so getDailyRecordsForMonth
-          // re-builds with the new draft state on next render.
           this.dailyRecordsCache.delete(empId);
 
           this.notificationService.showSuccess('Correction saved as draft');
@@ -882,6 +819,18 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.notificationService.showSuccess(`Records finalized successfully for ${employee.employeeName}`);
+            const empIdx = this.employees.findIndex(e => e.employeeId === employee.employeeId);
+            if (empIdx >= 0) {
+              (this.employees[empIdx] as any).is_finalized = true;
+              this.employees[empIdx].dailyRecords?.forEach((r: any) => {
+                r.is_finalized  = true;
+                r.isFinalized   = true;
+              });
+              if (this.selectedEmployee?.employeeId === employee.employeeId) {
+                this.selectedEmployee = this.employees[empIdx];
+              }
+              this.dailyRecordsCache.delete(employee.employeeId);
+            }
             this.loadTimesheetDetails();
           },
           error: (error) => {
@@ -915,8 +864,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   hasDraftDailyRecords(): boolean {
 
-    // Prioritise the actively selected/expanded employee so the footer button
-    // reflects the correct employee's draft state rather than always employees[0].
     const employee = this.selectedEmployee || this.expandedEmployee || this.employees[0];
 
     if (!employee?.dailyRecords?.length) return false;
@@ -927,7 +874,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  // Count draft requests across all employees
 
   getDraftRequestCount(): number {
 
@@ -949,7 +895,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  // Check if batch submission is allowed (has drafts)
 
   canSubmitBatch(): boolean {
 
@@ -993,8 +938,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
               `Successfully submitted ${submittedCount} edit${submittedCount > 1 ? 's' : ''} for approval`
             );
             this.timesheetSubmitted = true;
-            // Transform localStorage drafts → pending state so absent-day
-            // pending requests remain visible after the server reload (Bug 1/3).
             this.markAllDraftsAsSubmittedInStorage();
             this.loadTimesheetDetails();
             this.isSubmittingBatch = false;
@@ -1042,31 +985,17 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  /**
 
-   * Controls whether the edit/correction button is enabled for a given record.
+  isTimesheetUnderReview(employee?: any): boolean {
+    const emp = employee || this.selectedEmployee || this.expandedEmployee || (this.employees?.[0] ?? null);
+    if (!emp?.dailyRecords?.length) return false;
+    return emp.dailyRecords.some((r: any) => r.hasPendingRequest === true);
+  }
 
-   *
-   * RULES:
-   *   BLOCK  - record is finalized for payroll (is_finalized / isFinalized). Nothing
-   *             can change a payroll-locked record; the manager must un-finalize first.
-   *
-   *   ALLOW  - everything else, including:
-   *              hasDraftRequest  : employee can keep editing their own draft freely
-   *              hasPendingRequest: employee can update a request that is awaiting
-   *               manager review - the updated draft replaces the pending one on the
-   *               server when the batch is re-submitted.
-   *              absent / no check-in placeholder rows: employee should be able to
-   *               request a correction to explain or add their attendance.
-   *
-   * The template already hides the button for Weekend and No Record statuses via its
-   * own *ngIf guards, so those cases never reach this method.
 
-   */
 
   canRequestCorrection(record: any): boolean {
 
-    // Only hard-block on payroll finalization - nothing else should prevent editing.
 
     if (record.is_finalized || record.isFinalized) {
 
@@ -1074,40 +1003,27 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     }
 
-    // hasPendingRequest is intentionally NOT blocked here.
 
-    // Employees can re-edit a pending correction; the new draft overwrites the old
-    // pending request on the server when they next click "Submit All Edits".
+    if (record.hasPendingRequest) {
+
+      return false;
+
+    }
 
     return true;
 
   }
 
-  /**
-   * Returns true when the employee's timesheet is in a payroll-locked state,
-   * meaning no further employee edits should be accepted.
-   *
-   * Two cases trigger a lock:
-   *   1. employee.is_finalized === true  → every record is finalized (full lock).
-   *   2. ANY individual daily record has is_finalized === true → the manager has
-   *      started the finalization pass; absent-day and other unfinalized records
-   *      must also go read-only so employees cannot submit new requests while
-   *      payroll is being processed.
-   */
+
   isEmployeePayrollLocked(employee: EmployeeTimesheetDto | null): boolean {
     if (!employee) return false;
-    if ((employee as any).is_finalized) return true;
-    // Payroll started = at least one record locked by manager
-    return (employee.dailyRecords || []).some(
-      (r: any) => r.is_finalized || r.isFinalized
-    );
+    return (employee as any).is_finalized === true;
   }
 
 
 
   canFinalizeRecord(employee: EmployeeTimesheetDto): boolean {
 
-    // Managers can finalize records that aren't already finalized
 
     return !employee.is_finalized && this.isManagerOrAdmin();
 
@@ -1209,18 +1125,10 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  /**
 
-   * Generates a complete array of daily records for the entire month.
-
-   * Fills in missing days with 'No Record' or 'Absent' status.
-
-   */
 
   getDailyRecordsForMonth(employee: EmployeeTimesheetDto): any[] {
 
-    // Return cached result to prevent Angular recreating objects on every
-    // change-detection cycle (which would wipe optimistic draft updates).
     if (this.dailyRecordsCache.has(employee.employeeId)) {
       return this.dailyRecordsCache.get(employee.employeeId)!;
     }
@@ -1301,12 +1209,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     }
 
-    // When the employee is payroll-locked (at least one record finalized by the
-    // manager), propagate is_finalized = true to every non-weekend, non-future
-    // record in the display array. Absent-day placeholders have no DB row and are
-    // therefore never inserted into finalized_timesheet_records, but visually they
-    // must show "Finalized for Payroll" alongside the real records so the employee
-    // understands the entire period is locked for payroll processing.
     if (this.isEmployeePayrollLocked(employee)) {
       const todayMs = new Date().setHours(0, 0, 0, 0);
       allDays.forEach((r: any) => {
@@ -1316,7 +1218,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Store result in cache before returning.
     this.dailyRecordsCache.set(employee.employeeId, allDays);
 
     return allDays;
@@ -1325,29 +1226,19 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  /**
 
-   * Task 2: Check if manager can override a record for a day.
-
-   */
 
   canManagerOverride(record: any): boolean {
 
     if (!this.isManagerOrAdmin()) return false;
 
-    // Finalized records are permanently locked — cannot override.
     if (record.is_finalized) return false;
 
-    // Managers intentionally CAN override records that have a pending employee
-    // request — manager authority supersedes the pending request.
-    // The pending request will be auto-rejected by the BE when the override lands.
 
     const status = (record.status || '').toLowerCase().replace(/[_ ]/g, '');
 
-    // No-record placeholder with no data yet — nothing to override.
     if (status === 'norecord' || (record.isPlaceholder && !record.checkInTime && !record.checkOutTime && status !== 'absent')) return false;
 
-    // Weekends cannot be overridden.
     if (status === 'weekend' || record.isWeekend) return false;
 
     return true;
@@ -1356,7 +1247,6 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   openManagerOverride(employee: EmployeeTimesheetDto, record: any): void {
 
-    // Map DailyAttendanceRecord shape → DailyReviewRecord shape expected by dialog.
     const reviewRecord: any = {
       attendanceId:      record.attendanceId || record.AttendanceId || null,
       date:              record.date,
@@ -1385,20 +1275,17 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       .subscribe(result => {
         if (!result?.success) return;
 
-        // Optimistic UI: patch the card immediately before server reload.
         Object.assign(record, {
           checkInTime:        result.checkInTime  || record.checkInTime,
           checkOutTime:       result.checkOutTime || record.checkOutTime,
           status:             result.status ? this.titleCaseStatus(result.status) : record.status,
           is_manager_override: true,
           is_finalized:       false,
-          hasPendingRequest:  false   // pending request will be superseded by override
+          hasPendingRequest:  false
         });
 
-        // Flush display cache so getDailyRecordsForMonth re-renders the card.
         this.dailyRecordsCache.delete(employee.employeeId);
 
-        // Reload authoritative state from server.
         this.loadTimesheetDetails();
       });
 
@@ -1448,7 +1335,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     }
 
-   
+
 
     const daysInMonth = new Date(this.data.year, this.data.month, 0).getDate();
 
@@ -1460,7 +1347,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const missingPercentage = ((daysInMonth - recordCount) / daysInMonth) * 100;
 
-   
+
 
     return missingPercentage > 50;
 
@@ -1485,14 +1372,20 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     if (typeof timeStr === 'string' && timeStr.includes('T')) {
 
       const tIndex = timeStr.indexOf('T');
+      const afterT = timeStr.substring(tIndex + 1);
 
-      const timePart = timeStr.substring(tIndex + 1, tIndex + 6);
+      let hour: number;
+      let minute: string;
 
-      const [hourStr, minuteStr] = timePart.split(':');
-
-      let hour = parseInt(hourStr, 10);
-
-      const minute = minuteStr;
+      if (/[+-]\d{2}:\d{2}$/.test(afterT)) {
+        const hhmm = afterT.substring(0, 5);
+        hour   = parseInt(hhmm.split(':')[0], 10);
+        minute = hhmm.split(':')[1];
+      } else {
+        const d = new Date(timeStr);
+        hour   = d.getHours();
+        minute = String(d.getMinutes()).padStart(2, '0');
+      }
 
       const ampm = hour >= 12 ? 'PM' : 'AM';
 
@@ -1526,13 +1419,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
-  /**
-   * After a server reload, re-applies any locally-cached draft state to records
-   * that the server didn't return with hasDraftRequest (absent placeholder rows).
-   * Also normalizes requestedCheckIn/Out/Status from the server if present.
-   */
+
   private mergeDraftCache(emp: EmployeeTimesheetDto): EmployeeTimesheetDto {
-    // Load all drafts for this employee from localStorage (survives page refresh).
     const empCache = this.loadDraftMapForEmployee(emp.employeeId);
     if (empCache.size === 0) return emp;
 
@@ -1542,17 +1430,21 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       const existing = records.find(r => r.date === date);
       if (existing) {
         if (existing.hasDraftRequest || existing.hasPendingRequest) {
-          // Server already knows about this draft - it is the source of truth.
-          // Remove our local copy so we don't override server state on future loads.
-          this.removeDraftFromStorage(emp.employeeId, date);
+          const serverHasRequestedFields = !!(
+            existing.requestedCheckIn || existing.requestedCheckOut || existing.requestedStatus
+          );
+          if (!serverHasRequestedFields) {
+            existing.requestedCheckIn  = existing.requestedCheckIn  ?? draftData.requestedCheckIn;
+            existing.requestedCheckOut = existing.requestedCheckOut ?? draftData.requestedCheckOut;
+            existing.requestedStatus   = existing.requestedStatus   ?? draftData.requestedStatus;
+            existing.requestedNotes    = existing.requestedNotes    ?? draftData.requestedNotes;
+          } else {
+            this.removeDraftFromStorage(emp.employeeId, date);
+          }
         } else {
-          // Server returned the record but without draft state - re-apply local draft.
-          // This happens when the server hasn't processed the draft yet.
           Object.assign(existing, draftData);
         }
       } else {
-        // Server has no record for this date (absent placeholder with a local draft).
-        // Inject it so getDailyRecordsForMonth finds it and renders the card correctly.
         records.push({
           date,
           checkInTime: null,
@@ -1573,17 +1465,10 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   private normalizeEmployeeTimesheet(emp: EmployeeTimesheetDto): EmployeeTimesheetDto {
 
-    // Resolve the employee-level finalization flag with all possible casing variants.
-    // Used only for the "Finalize" button visibility / sidebar lock icon.
-    // Do NOT use this to cascade is_finalized onto individual records — each record
-    // carries its own is_finalized flag from vw_timesheet_consolidation, which now
-    // correctly reflects the finalized_timesheet_records table (including the
-    // UNION ALL branch for absent-day overrides).
-    const empIsFinalized: boolean =
+    const serverIsFinalized: boolean =
       (emp as any).is_finalized ?? (emp as any).isFinalized ?? (emp as any).IsFinalized ?? false;
 
     const normalized: EmployeeTimesheetDto = { ...emp } as any;
-    (normalized as any).is_finalized = empIsFinalized;
 
     normalized.dailyRecords = (emp.dailyRecords || []).map(r => {
 
@@ -1611,16 +1496,25 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
         notes: raw.notes || raw.Notes || null,
 
-        // Each record's own flag — comes directly from the view per-row.
         is_finalized: raw.is_finalized || raw.isFinalized || raw.IsFinalized || false,
 
         is_manager_override: raw.is_manager_override || raw.isManagerOverride || raw.IsManagerOverride || false,
 
         hasApprovedRequest: raw.hasApprovedRequest || raw.HasApprovedRequest || raw.has_approved_request || false,
 
-        hasPendingRequest: raw.hasPendingRequest || raw.HasPendingRequest || false,
+        hasPendingRequest: raw.hasPendingRequest || raw.HasPendingRequest || raw.has_pending_request || false,
 
-        hasDraftRequest: raw.hasDraftRequest || raw.HasDraftRequest || false,
+        hasDraftRequest: raw.hasDraftRequest || raw.HasDraftRequest || raw.has_draft_request || false,
+
+        hasRejectedRequest: raw.hasRejectedRequest || raw.HasRejectedRequest || raw.has_rejected_request || false,
+
+        requestedCheckIn:  raw.requestedCheckIn  || raw.RequestedCheckIn  || raw.requested_checkin  || null,
+
+        requestedCheckOut: raw.requestedCheckOut || raw.RequestedCheckOut || raw.requested_checkout || null,
+
+        requestedStatus:   raw.requestedStatus   || raw.RequestedStatus   || raw.requested_status   || null,
+
+        requestedNotes:    raw.requestedNotes    || raw.RequestedNotes    || raw.requested_notes    || null,
 
         isPlaceholder: raw.isPlaceholder || false,
 
@@ -1638,12 +1532,22 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const absentDays = days.filter(d => d.status && d.status.toLowerCase() === 'absent').length;
 
-    // Exclude weekends, future no-records, and holidays from the denominator so
-    // the percentage reflects actual working days only (matches Keka / Zoho behaviour).
     const totalDays = days.filter(d => {
       const s = ((d as any).status || '').toLowerCase().replace(/[_ ]/g, '');
       return s !== 'weekend' && s !== 'norecord' && s !== 'holiday';
     }).length || 1;
+
+    let derivedIsFinalized = serverIsFinalized;
+    if (!derivedIsFinalized) {
+      const realRecords = days.filter((d: any) => {
+        const s = ((d as any).status || '').toLowerCase().replace(/[_ ]/g, '');
+        return s !== 'weekend' && s !== 'norecord' && !!((d as any).attendanceId || (d as any).checkInTime);
+      });
+      if (realRecords.length > 0 && realRecords.every((d: any) => d.is_finalized)) {
+        derivedIsFinalized = true;
+      }
+    }
+    (normalized as any).is_finalized = derivedIsFinalized;
 
     normalized.presentDays = normalized.presentDays ?? presentDays;
 
@@ -1823,19 +1727,24 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
+
+  getEffectiveStatus(record: any): string {
+    if ((record.hasDraftRequest || record.hasPendingRequest) && record.requestedStatus) {
+      return record.requestedStatus.toLowerCase();
+    }
+    return (record.status || '').toLowerCase();
+  }
+
+
+
   showTimes(record: any): boolean {
 
     const status = (record.status || '').toLowerCase().replace(/[_ ]/g, '');
 
-    // Never show times for non-work days (even if someone somehow set a draft on them)
     if (['norecord', 'weekend', 'leave', 'onleave', 'holiday'].includes(status)) return false;
 
-    // If a correction draft or pending request exists, ALWAYS show the times section
-    // regardless of original status - the user may have added times to an absent day
-    // or changed times on a present/late record. The HTML handles null values as '-'.
     if (record.hasDraftRequest || record.hasPendingRequest) return true;
 
-    // No draft - show times only if the record actually has original check-in/out data
     if (record.checkInTime || record.checkOutTime) return true;
 
     return false;

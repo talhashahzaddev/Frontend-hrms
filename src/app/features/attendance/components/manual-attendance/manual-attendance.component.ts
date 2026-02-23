@@ -61,7 +61,7 @@ export class ManualAttendanceComponent implements OnInit {
     this.searchForm = this.fb.group({
       startDate: [new Date(), Validators.required],
       endDate: [new Date(), Validators.required],
-      employeeId: [''] // Optional, for managers
+      employeeId: ['']
     });
 
     this.editForm = this.fb.group({
@@ -76,7 +76,7 @@ export class ManualAttendanceComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
-    this.search(); // Initial load
+    this.search();
   }
 
   search(): void {
@@ -84,7 +84,7 @@ export class ManualAttendanceComponent implements OnInit {
 
     this.isLoading = true;
     const { startDate, endDate, employeeId } = this.searchForm.value;
-    
+
     const searchDto: ManualAttendanceSearchDto = {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
@@ -106,15 +106,11 @@ export class ManualAttendanceComponent implements OnInit {
   startEdit(record: Attendance): void {
     this.editingRecord = record;
     this.isEditing = true;
-    
-    // Format dates for datetime-local input
-    // Need to handle nulls and timezone correctly. 
-    // Assuming backend returns UTC ISO string. datetime-local expects local time YYYY-MM-DDTHH:mm
-    
+
+
     const formatForInput = (isoDate: string | undefined | null) => {
         if (!isoDate) return '';
         const d = new Date(isoDate);
-        // Adjust to local ISO string for input
         const pad = (n: number) => n < 10 ? '0' + n : n;
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
     };
@@ -157,7 +153,7 @@ export class ManualAttendanceComponent implements OnInit {
           this.notificationService.success('Attendance updated successfully');
           this.isEditing = false;
           this.editingRecord = null;
-          this.search(); // Refresh
+          this.search();
         } else {
             this.notificationService.error('Failed to update attendance');
         }
@@ -167,7 +163,7 @@ export class ManualAttendanceComponent implements OnInit {
       }
     });
   }
-  
+
   get isManagerOrAdmin(): boolean {
     return this.currentUser?.roleName ? ['Super Admin', 'HR Manager', 'Manager'].includes(this.currentUser.roleName) : false;
   }

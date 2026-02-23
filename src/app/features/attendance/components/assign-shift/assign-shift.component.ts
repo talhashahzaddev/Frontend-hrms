@@ -75,13 +75,11 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
 
   private loadEmployees(): void {
     if (this.isManager) {
-      // Load only team employees for managers
       this.performanceService.getMyTeamEmployees()
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (res) => {
             if (res.success && res.data) {
-              // Map the response to Employee format
               this.employees = res.data.map((emp: any) => ({
                 employeeId: emp.employeeId ? (typeof emp.employeeId === 'string' ? emp.employeeId : emp.employeeId.toString()) : '',
                 organizationId: '',
@@ -107,7 +105,6 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
           error: () => this.notification.showError('Failed to load team employees')
         });
     } else {
-      // Load all employees for Admin/HR
       this.employeeService.getEmployees()
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -145,9 +142,8 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
           this.notification.showSuccess('Shift assigned successfully');
           this.assignShiftForm.reset();
           this.isSubmitting = false;
-           // ✅ Close the dialog and pass optional result
         this.dialogRef.close('assigned');
-          
+
         },
         error: (error) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to assign shift';

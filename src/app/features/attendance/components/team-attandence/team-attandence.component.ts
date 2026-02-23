@@ -65,7 +65,6 @@ import { User } from '../../../../core/models/auth.models';
 export class TeamAttandenceComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  // Data
   attendanceRecords: Attendance[] = [];
   filteredAttendance: Attendance[] = [];
   departments: Department[] = [];
@@ -73,10 +72,8 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   totalRecords: number = 0;
   currentPage = 1;
   pageSize = 10;
-  // Current user
   currentUser: User | null = null;
 
-  // Table configuration
   displayedColumns: string[] = [
     'employee',
     'date',
@@ -90,16 +87,13 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     'actions'
   ];
 
-  // Loading states
   isLoading = false;
 
-  // Filters
   startDateControl = new FormControl(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
   endDateControl = new FormControl(new Date());
   departmentControl = new FormControl('');
   statusControl = new FormControl('');
 
-  // Filter options
   statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'present', label: 'Present' },
@@ -177,7 +171,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: any) {
-    this.currentPage = event.pageIndex + 1;   // because paginator starts from 0
+    this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadAttendanceData();
   }
@@ -197,7 +191,6 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   private setupFilters(): void {
-    // Removed auto-filtering - now filters are applied only when Apply Filters button is clicked
   }
 
   applyFilters(): void {
@@ -277,18 +270,15 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
 
 
   editAttendance(attendance: Attendance): void {
-    // TODO: Implement attendance edit dialog
     console.log('Edit attendance:', attendance);
   }
 
   approveAttendance(attendance: Attendance): void {
-    // TODO: Implement attendance approval
     console.log('Approve attendance:', attendance);
     this.notification.showSuccess('Attendance approved successfully');
   }
 
   rejectAttendance(attendance: Attendance): void {
-    // TODO: Implement attendance rejection
     console.log('Reject attendance:', attendance);
     this.notification.showSuccess('Attendance rejected');
   }
@@ -328,10 +318,10 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       const obj = JSON.parse(ipString);
       return obj.ip || null;
     } catch (e) {
-      return ipString || null; // fallback if it's already plain string
+      return ipString || null;
     }
   }
-  
 
-  
+
+
 }

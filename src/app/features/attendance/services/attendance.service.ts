@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -55,7 +55,6 @@ export class AttendanceService {
 
   constructor(private http: HttpClient) { }
 
-  // Clock In/Out Operations
   checkIn(request: ClockInOutRequest): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/clock-in`, request)
       .pipe(
@@ -92,7 +91,6 @@ export class AttendanceService {
       );
   }
 
-  // Attendance CRUD Operations
 
   getAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
     let params = new HttpParams();
@@ -179,7 +177,7 @@ export class AttendanceService {
     let params = new HttpParams()
         .set('startDate', searchDto.startDate)
         .set('endDate', searchDto.endDate);
-    
+
     if (searchDto.employeeId) {
         params = params.set('employeeId', searchDto.employeeId);
     }
@@ -193,7 +191,6 @@ export class AttendanceService {
         .pipe(map(res => res.success));
   }
 
-  // Employee-specific operations
   getMyAttendance(startDate: string, endDate: string): Observable<Attendance[]> {
     const params = new HttpParams()
       .set('startDate', startDate)
@@ -243,7 +240,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         })
       );
   }
-  //Today chhhn
 
   getTodaySessions(): Observable<AttendanceSessionDto[]> {
     return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
@@ -256,8 +252,8 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
     if (workDate) {
       const dateStr = (workDate instanceof Date)
-        ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
-        : workDate; // assume string is already formatted
+        ? workDate.toISOString().split('T')[0]
+        : workDate;
       url += `?date=${dateStr}`;
     }
 
@@ -271,8 +267,8 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
     if (workDate) {
       const dateStr = (workDate instanceof Date)
-        ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
-        : workDate; // assume string is already formatted
+        ? workDate.toISOString().split('T')[0]
+        : workDate;
       url += `?date=${dateStr}`;
     }
 
@@ -330,7 +326,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Calendar and Dashboard data
   getAttendanceCalendar(employeeId?: string, year?: number, month?: number): Observable<AttendanceCalendarData[]> {
     let params = new HttpParams();
     if (year) params = params.set('year', year.toString());
@@ -384,7 +379,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   }
 
 
-  // Reports
   getAttendanceReport(startDate: string, endDate: string, employeeId?: string, departmentId?: string, status?: string, pageNumber: number = 1, pageSize: number = 10): Observable<AttendanceReport> {
     let params = new HttpParams()
       .set('startDate', startDate)
@@ -421,7 +415,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   }
 
 
-  //\create Shift 
 
 
   createShift(request: any): Observable<any> {
@@ -449,12 +442,11 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
           if (!response.success) {
             throw new Error(response.message || 'Failed to assign shift');
           }
-          // No data needed, just return void
         })
       );
   }
 
-  /** âœ… Get Employees by Shift ID */
+
   getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
     return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
       .pipe(
@@ -467,12 +459,11 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // âœ… Shift Swap API using model
   createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap`, shiftSwap);
   }
 
-  /** âœ… Update an existing shift */
+
   updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
     return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
   }
@@ -490,30 +481,24 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Get all pending shift swap requests for Super Admin
   getPendingShiftSwapsForAdmin(): Observable<PendingShiftSwap[]> {
     return this.http.get<PendingShiftSwap[]>(`${this.apiUrl}/shiftswap/pending`);
   }
 
-  // Get current shift for an employee by ID
-  // Get current shift for an employee by ID
   getCurrentShift(employeeId: string): Observable<ShiftDto> {
     return this.http.get<ShiftDto>(`${this.apiUrl}/CurrentShift/${employeeId}`);
   }
 
-  // New method for Calendar/Dialog that needs unwrapped data
   getCurrentShiftDetails(employeeId: string): Observable<ShiftDto> {
     return this.http.get<ApiResponse<ShiftDto>>(`${this.apiUrl}/CurrentShift/${employeeId}`)
       .pipe(map(response => response.data!));
   }
 
-  //Approve or Reject Shift Swap Request
   approvedshiftRequest(request: approvedshiftRequest): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap/approve`, request);
   }
 
 
-  // Department Attendance (for managers)
   getDepartmentAttendance(departmentId: string, date?: string): Observable<Attendance[]> {
     const params = date ? new HttpParams().set('date', date) : new HttpParams();
 
@@ -528,7 +513,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Bulk Operations
   bulkApproveAttendance(attendanceIds: string[]): Observable<void> {
     return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/bulk/approve`, { attendanceIds })
       .pipe(
@@ -551,7 +535,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Utility methods
   calculateTotalHours(checkIn: string, checkOut: string, breakDuration: number = 0): number {
     const checkInTime = new Date(`2000-01-01T${checkIn}`);
     const checkOutTime = new Date(`2000-01-01T${checkOut}`);
@@ -591,7 +574,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       default: return 'secondary';
     }
   }
-  // Office IP Management
   getOfficeIPs(): Observable<OfficeIP[]> {
     return this.http.get<ApiResponse<OfficeIP[]>>(`${this.ipUrl}/office-ips`)
       .pipe(
@@ -639,12 +621,9 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Timesheet Methods - Snapshot-based
-  // GET /api/attendance/timesheet - Returns list of monthly timesheet snapshots
   getMonthlyTimesheets(startDate?: string, endDate?: string): Observable<MonthlyTimesheetSummary[]> {
     let params = new HttpParams();
-    
-    // Only add date parameters if they are valid non-empty strings
+
     if (startDate && startDate.trim() !== '') {
       params = params.set('startDate', startDate);
     }
@@ -652,11 +631,10 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       params = params.set('endDate', endDate);
     }
 
-    // Construct the full URL for logging
     const baseUrl = `${this.apiUrl}/timesheet`;
     const queryString = params.toString();
     const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
-    
+
     console.log('ðŸ“Š Fetching timesheets from:', fullUrl);
     console.log('ðŸ“… Date range:', { startDate: startDate || 'N/A', endDate: endDate || 'N/A' });
 
@@ -672,13 +650,10 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Alias method for fetching all monthly snapshots without date filtering
   getSnapshots(): Observable<MonthlyTimesheetSummary[]> {
-    return this.getMonthlyTimesheets(); // Call without parameters to get all snapshots
+    return this.getMonthlyTimesheets();
   }
 
-  // GET /api/attendance/timesheet/details?timesheetId={timesheetId}
-  // Returns detailed employee records for a specific timesheet snapshot
   getTimesheetDetails(timesheetId: string): Observable<EmployeeTimesheetDto[]> {
     if (!timesheetId || timesheetId.trim() === '') {
       throw new Error('Timesheet ID is required');
@@ -686,7 +661,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
     const params = new HttpParams().set('timesheetId', timesheetId);
     const fullUrl = `${this.apiUrl}/timesheet/details?timesheetId=${timesheetId}`;
-    
+
     console.log('ðŸ“‹ Fetching timesheet details from:', fullUrl);
 
     return this.http.get<ApiResponse<EmployeeTimesheetDto[]>>(
@@ -698,16 +673,11 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
           throw new Error(response.message || 'Failed to fetch timesheet details');
         }
         console.log('âœ… Received details for', response.data?.length || 0, 'employees');
-        // Normalize daily records to handle PascalCase flags from .NET backend
         const employees = response.data || [];
         employees.forEach((emp: any) => {
-          // ── Employee-level field normalization ──────────────────────────────
-          // .NET serializes snake_case columns as camelCase or PascalCase.
-          // Ensure is_finalized is always present at the employee level.
           if (emp.is_finalized === undefined) {
             emp.is_finalized = emp.isFinalized ?? emp.IsFinalized ?? false;
           }
-          // ── Daily record normalization ──────────────────────────────────────
           if (emp.dailyRecords?.length) {
             emp.dailyRecords = emp.dailyRecords.map((r: any) => {
               return {
@@ -722,10 +692,12 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
                 is_finalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
                 is_manager_override: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
                 hasApprovedRequest: r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest || false,
+                hasRejectedRequest: r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest || false,
                 hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
-                // Draft wins â€” a record cannot be both draft AND pending
                 hasPendingRequest: (r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest || false)
-                  && !(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest),
+                  && !(r.has_draft_request    || r.hasDraftRequest    || r.HasDraftRequest)
+                  && !(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest)
+                  && !(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest),
               };
             });
           }
@@ -735,11 +707,9 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Snapshot Management Methods
-  // POST /api/attendance/timesheet/snapshot - Creates a new monthly timesheet snapshot
   createSnapshot(dto: MonthlyTimesheetCreateDto): Observable<FinalizedTimesheetDto> {
     console.log('ðŸ“¸ Creating snapshot:', dto);
-    
+
     return this.http.post<ApiResponse<FinalizedTimesheetDto>>(
       `${this.apiUrl}/timesheet/snapshot`,
       dto
@@ -768,21 +738,11 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // POST /api/attendance/timesheet/submit-approvals - Employee submits draft edits for approval
-  // Scoped to a single employee via { timesheetId, employeeId } DTO
-  /**
-   * @deprecated Use `submitTimesheetBatch(timesheetId)` instead.
-   *
-   * This method sends `employeeId` in the request body, but the backend
-   * resolves the employee from the JWT token and ignores the `employeeId`
-   * parameter entirely. It is therefore a functional duplicate of
-   * `submitTimesheetBatch`. Kept for backwards compatibility only — do not
-   * call from new code.
-   */
+
   submitTimesheetApprovals(timesheetId: string, _employeeId: string): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(
       `${this.apiUrl}/timesheet/submit-approvals`,
-      { timesheetId }  // employeeId intentionally omitted — backend ignores it
+      { timesheetId }
     ).pipe(
       map(response => {
         if (!response.success) {
@@ -793,11 +753,9 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // POST /api/attendance/timesheet/finalize-batch - Finalizes a timesheet snapshot for payroll
-  // Accepts optional employeeId to scope finalization to a single employee
   finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {
     console.log('ðŸ”’ Finalizing batch for timesheetId:', timesheetId, employeeId ? `employeeId: ${employeeId}` : '(all employees)');
-    
+
     const body: { timesheetId: string; employeeId?: string } = { timesheetId };
     if (employeeId) {
       body.employeeId = employeeId;
@@ -817,7 +775,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Get pending attendance correction requests for manager (grouped by employee)
   getPendingAttendanceRequests(): Observable<EmployeeSubmissionPackage[]> {
     return this.http.get<ApiResponse<EmployeeSubmissionPackage[]>>(
       `${this.apiUrl}/pending-requests`
@@ -831,7 +788,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Process (approve/reject) attendance correction request
   processEditRequest(dto: ProcessAttendanceRequestDto): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(
       `${this.apiUrl}/process-request`,
@@ -846,7 +802,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Approve all pending correction requests for a timesheet
   approveAllPendingRequests(timesheetId: string, employeeId?: string): Observable<{ approvedCount: number }> {
     const body: { timesheetId: string; employeeId?: string } = { timesheetId };
     if (employeeId) {
@@ -865,7 +820,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Task 1: Get organization submission progress for compliance tracking
   getOrgSubmissionProgress(month: number, year: number): Observable<OrgSubmissionProgress> {
   const params = new HttpParams()
     .set('month', month.toString())
@@ -915,10 +869,9 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   );
 }
   getManagerReviewDashboard(timesheetId: string): Observable<EmployeeReviewPackage[]> {
-    // Validate timesheetId before making network call
     if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
       throw new Error('Invalid Timesheet ID');
-    }   
+    }
     return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
       `${this.apiUrl}/timesheet/review-dashboard`,
       { params: { timesheetId, _t: Date.now().toString() } }
@@ -929,13 +882,8 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         }
         const packages = response.data || [];
         return packages.map((pkg: any) => {
-          // Handle PascalCase key from .NET: FullMonthRecords vs fullMonthRecords
           const rawRecords = pkg.fullMonthRecords || pkg.FullMonthRecords || [];
 
-          // Normalize ALL package-level numeric/boolean fields that .NET sends in
-          // PascalCase. A plain { ...pkg } spread copies them as PascalCase keys but
-          // the TypeScript interface (and all template bindings) use camelCase, so
-          // without explicit mapping those values are always undefined.
           const pkgIsFinalized: boolean =
             (pkg as any).isFinalized ?? (pkg as any).IsFinalized ?? (pkg as any).is_finalized ?? false;
           const pkgPending: number =
@@ -953,7 +901,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
           return {
             ...pkg,
-            // Explicit camelCase values override whatever PascalCase keys the spread copied.
             isFinalized:          pkgIsFinalized,
             pendingRequestCount:  pkgPending,
             approvedCount:        pkgApproved,
@@ -968,21 +915,28 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  /**
-   * Normalize a raw API daily record to the DailyReviewRecord interface.
-   * Maps checkInTimeâ†’originalCheckIn, checkOutTimeâ†’originalCheckOut, statusâ†’originalStatus
-   * while preserving any fields that already use the correct names.
-   */
-  /**
-   * Extract attendanceId with case-insensitive fallback.
-   * .NET backends may serialize as AttendanceId (PascalCase) or attendanceId (camelCase).
-   */
+
+
   private extractAttendanceId(r: any): string {
     return r.attendanceId || r['AttendanceId'] || r['attendanceid'] || r['Attendanceid'] || '';
   }
 
   private normalizeDailyReviewRecord(r: any): DailyReviewRecord {
     const resolvedAttendanceId = this.extractAttendanceId(r);
+
+    const isDraft    = !!(r.has_draft_request    || r.hasDraftRequest    || r.HasDraftRequest);
+    const isPending  = !!(r.has_pending_request  || r.hasPendingRequest  || r.HasPendingRequest);
+    const isApproved = !!(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest);
+    const isRejected = !!(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest);
+
+    const derivedStatus: 'pending' | 'approved' | 'rejected' | undefined =
+      r.requestStatus  ? (r.requestStatus  as 'pending' | 'approved' | 'rejected') :
+      r.RequestStatus  ? (r.RequestStatus  as 'pending' | 'approved' | 'rejected') :
+      (isPending && !isDraft && !isApproved && !isRejected) ? 'pending'  :
+      isApproved                                            ? 'approved' :
+      isRejected                                            ? 'rejected' :
+      undefined;
+
     return {
       recordId: r.recordId || r.RecordId || r.requestId || r.RequestId || '',
       attendanceId: resolvedAttendanceId,
@@ -996,26 +950,21 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       requestedStatus: r.requestedStatus || r.RequestedStatus || undefined,
       requestedNotes: r.requestedNotes || r.RequestedNotes || undefined,
       reasonForEdit: r.reasonForEdit || r.ReasonForEdit || undefined,
-      // Map draft first so we can guard pending against it
-      hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
-      // A record cannot be both draft AND pending â€” draft wins
-      hasPendingRequest: (r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest || false)
-        && !(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest),
+      hasDraftRequest:    isDraft,
+      hasPendingRequest:  isPending && !isDraft && !isApproved && !isRejected,
+      hasApprovedRequest: isApproved,
       isFinalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
       isManagerOverride: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
       requestId: r.requestId || r.RequestId || undefined,
-      requestStatus: r.requestStatus || r.RequestStatus
-        || (((r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest) && !(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest)) ? 'pending' : undefined)
+      requestStatus: derivedStatus
     };
   }
 
-  // Get single employee review package for the detail dialog
-  // API returns array with one element when employeeId is provided
   getEmployeeReviewPackage(timesheetId: string, employeeId: string): Observable<EmployeeReviewPackage> {
     if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
       throw new Error('Invalid timesheetId provided');
     }
-    
+
     return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
       `${this.apiUrl}/timesheet/review-dashboard`,
       { params: { timesheetId, employeeId, _t: Date.now().toString() } }
@@ -1024,15 +973,12 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         if (!response.success) {
           throw new Error(response.message || 'Failed to fetch employee review data');
         }
-        // API returns array, get first element
         const packages = response.data || [];
         if (packages.length === 0) {
           throw new Error('No attendance data found for this employee');
         }
         const pkg = packages[0];
-        // Handle PascalCase key from .NET: FullMonthRecords vs fullMonthRecords
         const rawRecords = (pkg as any).fullMonthRecords || (pkg as any).FullMonthRecords || [];
-        // Normalize package-level isFinalized (same PascalCase reason as getManagerReviewDashboard).
         const pkgIsFinalized: boolean =
           (pkg as any).isFinalized ?? (pkg as any).IsFinalized ?? (pkg as any).is_finalized ?? false;
         const pkgPending: number =
@@ -1051,8 +997,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Finalize all approved records for a specific employee
-  // Routes through finalize-batch with employeeId to scope to one employee
   finalizeEmployeeApprovals(timesheetId: string, employeeId: string): Observable<{ finalizedCount: number }> {
     return this.http.post<ApiResponse<{ finalizedCount: number } | boolean>>(
       `${this.apiUrl}/timesheet/finalize-batch`,
@@ -1062,7 +1006,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         if (!response.success) {
           throw new Error(response.message || 'Failed to finalize employee approvals');
         }
-        // Backend may return boolean or { finalizedCount } â€” normalize
         const data = response.data;
         if (typeof data === 'object' && data !== null && 'finalizedCount' in data) {
           return data as { finalizedCount: number };
@@ -1072,8 +1015,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Apply manager override for a specific attendance record
-  // Redirected to admin-override endpoint for elevated-privilege finalization
   applyManagerOverride(dto: ManagerOverrideDto): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(
       `${this.apiUrl}/admin-override`,
@@ -1088,7 +1029,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Administrative override â€” high-privilege endpoint for finalization edits
   adminOverride(dto: ManualAttendanceUpdateDto): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(
       `${this.apiUrl}/admin-override`,
@@ -1103,7 +1043,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }> {
-    return this.http.post<ApiResponse<{ submittedCount: number }>>(
+    return this.http.post<ApiResponse<number>>(
       `${this.apiUrl}/timesheet/submit-approvals`,
       { timesheetId } as FinalizeBatchRequestDto
     ).pipe(
@@ -1111,12 +1051,11 @@ submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }
         if (!response.success) {
           throw new Error(response.message || 'Failed to submit timesheet batch');
         }
-        return response.data || { submittedCount: 0 };
+        return { submittedCount: (response.data as any) || 0 };
       })
     );
   }
 
-  // Finalize entire timesheet for payroll (manager/admin only)
   finalizeTimesheetBatch(timesheetId: string): Observable<{ finalizedCount: number }> {
     return this.http.post<ApiResponse<{ finalizedCount: number }>>(
       `${this.apiUrl}/timesheet/finalize-batch`,

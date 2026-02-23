@@ -16,16 +16,16 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { AttendanceUpdateRequestDto, ManualAttendanceRequest } from '../../../../core/models/attendance.models';
 
 export interface AttendanceRequestDialogData {
-  attendanceId?: string | null; // Optional - null for 'create' mode or when no GUID exists
-  timesheetId?: string; // Optional timesheetId for snapshot-based corrections
-  employeeId?: string; // Required for 'create' mode
+  attendanceId?: string | null;
+  timesheetId?: string;
+  employeeId?: string;
   employeeName: string;
   workDate: string;
   originalCheckIn?: string;
   originalCheckOut?: string;
   originalStatus?: string;
   originalNotes?: string;
-  mode: 'create' | 'edit'; // Task 3: Mode to determine dialog behavior
+  mode: 'create' | 'edit';
 }
 
 @Component({
@@ -59,7 +59,6 @@ export class AttendanceRequestDialogComponent implements OnInit {
     { value: 'absent', label: 'Absent' }
   ];
 
-  // Task 3: Check if dialog is in create mode
   get isCreateMode(): boolean {
     return this.data.mode === 'create';
   }
@@ -81,10 +80,7 @@ export class AttendanceRequestDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Task 3: For create mode, initialize with default values for the selected date
     if (this.isCreateMode) {
-      // Pre-fill with sensible defaults for a new record
-      // type="time" inputs expect plain HH:mm
       this.requestForm.patchValue({
         requestedCheckIn: '09:00',
         requestedCheckOut: '18:00',
@@ -92,8 +88,7 @@ export class AttendanceRequestDialogComponent implements OnInit {
       });
       return;
     }
-    
-    // Edit mode: Pre-fill form with original values if available
+
     if (this.data.originalCheckIn) {
       this.requestForm.patchValue({
         requestedCheckIn: this.parseTimeOnly(this.data.originalCheckIn)
@@ -116,44 +111,31 @@ export class AttendanceRequestDialogComponent implements OnInit {
     }
   }
 
-  /** @deprecated — use parseTimeOnly for type="time" inputs */
+
   formatDateTimeLocal(date: Date): string {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
   }
 
-  /**
-   * Extracts HH:mm from an ISO / "HH:mm" / "HH:mm:ss" string.
-   * Safe against timezone shifts: reads the raw time segment from the string
-   * instead of constructing a JS Date object (which converts to local time).
-   */
+
   parseTimeOnly(dateTimeString: string): string {
     if (!dateTimeString) return '';
-    // ISO string: "2026-02-18T09:30:00" or "2026-02-18T09:30:00+05:00"
     const tIndex = dateTimeString.indexOf('T');
     if (tIndex !== -1) {
-      return dateTimeString.substring(tIndex + 1, tIndex + 6); // "HH:mm"
+      return dateTimeString.substring(tIndex + 1, tIndex + 6);
     }
-    // Already "HH:mm" or "HH:mm:ss"
     return dateTimeString.substring(0, 5);
   }
 
-  /** @deprecated — kept for backwards compat, use parseTimeOnly instead */
+
   parseDateTime(dateTimeString: string): string {
     return this.parseTimeOnly(dateTimeString);
   }
 
-  // Combines workDate (YYYY-MM-DD) with a HH:mm time string into a local ISO-like
-  // datetime string WITHOUT UTC conversion (no .toISOString()).
-  // Using .toISOString() shifts the time by the browser's UTC offset, causing the
-  // card to display wrong times after saving a draft.
   formatDateTime(timeOnly: string): string {
     if (!timeOnly) return '';
     const workDatePart = this.data.workDate.split('T')[0];
-    // Return a plain local datetime string: "YYYY-MM-DDTHH:mm:00"
-    // The backend accepts ISO-like strings and formatTime() on the card parses
-    // the "T" substring directly — both work correctly with local time.
     return `${workDatePart}T${timeOnly}:00`;
   }
 
@@ -175,10 +157,9 @@ export class AttendanceRequestDialogComponent implements OnInit {
     const checkOut: string = this.requestForm.get('requestedCheckOut')?.value;
 
     if (!checkIn || !checkOut) {
-      return true; // Skip validation if either is empty
+      return true;
     }
 
-    // Inputs are type="time" so values are "HH:mm" — compare as strings (lexicographic is correct for same day)
     if (checkOut <= checkIn) {
       this.notificationService.showError('Check-out time must be after check-in time');
       return false;
@@ -189,7 +170,6 @@ export class AttendanceRequestDialogComponent implements OnInit {
 
   onSubmit(): void {
     try {
-      // Validate form
       if (this.requestForm.invalid) {
         this.notificationService.showError('Please fill in all required fields');
         Object.keys(this.requestForm.controls).forEach(key => {
@@ -199,7 +179,6 @@ export class AttendanceRequestDialogComponent implements OnInit {
         return;
       }
 
-      // Validate time range
       if (!this.validateTimeRange()) {
         this.isSubmitting = false;
         return;
@@ -208,10 +187,8 @@ export class AttendanceRequestDialogComponent implements OnInit {
       this.isSubmitting = true;
       const formValue = this.requestForm.value;
 
-      // Debug: Log submit mode and payload
       console.log('[AttendanceRequestDialog] Submitting', this.isCreateMode ? 'CREATE' : 'EDIT', formValue);
 
-      // Add a timeout to reset isSubmitting if API call takes too long (e.g., 15s)
       const timeout = setTimeout(() => {
         if (this.isSubmitting) {
           this.isSubmitting = false;
@@ -219,7 +196,6 @@ export class AttendanceRequestDialogComponent implements OnInit {
         }
       }, 15000);
 
-      // Task 2: Route to Create or Edit API based on mode
       if (this.isCreateMode) {
         this.submitCreateRequest(formValue, timeout);
       } else {
@@ -232,8 +208,6 @@ export class AttendanceRequestDialogComponent implements OnInit {
     }
   }
 
-  // Task 2: Create new attendance record (POST /api/Attendance/manual)
-  // 2. Updated Create Request Logic
   private submitCreateRequest(formValue: any, timeout?: any): void {
     if (!this.data.employeeId) {
       this.notificationService.showError('Employee ID is required');
@@ -245,12 +219,11 @@ export class AttendanceRequestDialogComponent implements OnInit {
       employeeId: this.data.employeeId,
       workDate: this.data.workDate,
       date: this.data.workDate,
-      // Use the fixed formatting logic
       checkInTime: formValue.requestedCheckIn ? this.formatDateTime(formValue.requestedCheckIn) : '',
       checkOutTime: formValue.requestedCheckOut ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
       status: formValue.requestedStatus || 'present',
       notes: formValue.requestedNotes || undefined,
-      reason: formValue.reasonForEdit // Ensure this matches your BE 'reason' property
+      reason: formValue.reasonForEdit
     };
 
     this.attendanceService.createManualAttendance(createDto).subscribe({
@@ -266,13 +239,12 @@ export class AttendanceRequestDialogComponent implements OnInit {
     });
   }
 
-  // Edit existing attendance record
-  // 3. Updated Edit Request Logic
   private submitEditRequest(formValue: any, timeout?: any): void {
     const isAbsent = formValue.requestedStatus?.toLowerCase() === 'absent';
     const requestDto: AttendanceUpdateRequestDto = {
       attendanceId: this.data.attendanceId || null,
       employeeId: this.data.employeeId!,
+      timesheetId: this.data.timesheetId || undefined,
       workDate: this.data.workDate,
       requestedCheckIn: (!isAbsent && formValue.requestedCheckIn) ? this.formatDateTime(formValue.requestedCheckIn) : undefined,
       requestedCheckOut: (!isAbsent && formValue.requestedCheckOut) ? this.formatDateTime(formValue.requestedCheckOut) : undefined,

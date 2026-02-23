@@ -69,7 +69,7 @@ export class CreateShiftComponent {
     private attendanceService: AttendanceService,
     private overlayContainer: OverlayContainer,
     private notification: NotificationService,
-    @Inject(MAT_DIALOG_DATA) public data?: any,// optional, contains shift for edit
+    @Inject(MAT_DIALOG_DATA) public data?: any,
   ) {
     this.shiftForm = this.fb.group({
       shiftName: ['', [Validators.required, Validators.minLength(3)]],
@@ -82,7 +82,6 @@ export class CreateShiftComponent {
       applyMarginhours: []
     });
 
-    // If data is passed, we are in edit mode
     if (data) {
       this.isEditMode = true;
       this.shiftId = data.shiftId;
@@ -90,11 +89,11 @@ export class CreateShiftComponent {
     }
   }
 
-  /** Populate form when editing */
+
   private patchForm(data: any): void {
     this.shiftForm.patchValue({
       shiftName: data.shiftName,
-      startTime: data.startTime?.substring(0, 5), // HH:mm
+      startTime: data.startTime?.substring(0, 5),
       endTime: data.endTime?.substring(0, 5),
       breakDuration: data.breakDuration,
       daysofWeek: data.daysofWeek,
@@ -106,7 +105,7 @@ export class CreateShiftComponent {
     });
   }
 
-  /** Handle both create & update */
+
   onSubmit(): void {
     if (!this.shiftForm.valid) {
       this.markFormGroupTouched(this.shiftForm);
@@ -118,7 +117,6 @@ export class CreateShiftComponent {
     const formValue = this.shiftForm.value;
 
     if (this.isEditMode) {
-      // Edit/Update logic
       const updateDto: UpdateShiftDto = {
         shiftId: this.shiftId,
         shiftName: formValue.shiftName,
@@ -128,7 +126,7 @@ export class CreateShiftComponent {
         daysofWeek: formValue.daysofWeek,
         timezone: formValue.timezone,
         marginHours: formValue.marginHours ?? 0,
-        applyMarginhours: formValue.applyMarginhours 
+        applyMarginhours: formValue.applyMarginhours
 
       };
 
@@ -146,7 +144,6 @@ export class CreateShiftComponent {
       });
 
     } else {
-      // Create logic (unchanged)
       const request = {
         shiftName: formValue.shiftName,
         startTime: formValue.startTime + ':00',
@@ -154,7 +151,7 @@ export class CreateShiftComponent {
         breakDuration: formValue.breakDuration,
         daysofWeek: formValue.daysofWeek,
         timezone: formValue.timezone,
-        marginHours: formValue.marginHours ?? 0,// <-- send marginHours
+        marginHours: formValue.marginHours ?? 0,
         applyMarginhours: formValue.applyMarginhours
 
       };
