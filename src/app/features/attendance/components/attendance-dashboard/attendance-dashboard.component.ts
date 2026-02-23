@@ -30,8 +30,8 @@ import {
 import { User } from '../../../../core/models/auth.models';
 
 import { MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort'; // Optional if you want sorting
-import { MatPaginatorModule } from '@angular/material/paginator'; // Optional if you want pagination
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 
 interface CalendarDay {
@@ -63,8 +63,8 @@ interface CalendarDay {
     MatInputModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-     MatTableModule,      // <-- ADD THIS
-    MatSortModule,       // <-- optional
+     MatTableModule,
+    MatSortModule,
     MatPaginatorModule   ,
     MatNativeDateModule
   ],
@@ -73,43 +73,36 @@ interface CalendarDay {
 })
 export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
-  // Current user and session
+
   currentUser: User | null = null;
   currentSession: TimeTrackingSession | null = null;
   currentTime = new Date();
-  // Add properties for pagination
 currentPage = 1;
 pageSize = 10;
 totalPages = 0;
 totalCount = 0;
-  // Loading states
   isLoading = false;
   isLoadingList = false;
-  
-  // Dashboard data
+
   attendanceSummary: AttendanceSummary | null = null;
   calendarData: AttendanceCalendarData[] = [];
   myAttendanceList: Attendance[] = [];
   Sessionslist:AttendanceSession[]=[];
 dataSource = new MatTableDataSource<AttendanceSession>([]);
 
-  // Date controls
   selectedMonth = new Date();
-listStartDateControl = new FormControl(new Date(new Date().getFullYear(), new Date().getMonth(), 1)); // 1st of current month
-listEndDateControl = new FormControl(new Date()); // Today
-  // Quick stats
+listStartDateControl = new FormControl(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+listEndDateControl = new FormControl(new Date());
   quickStats = [
     { label: 'Present Today', value: '0', icon: 'check_circle', color: 'success' },
     { label: 'Total Hours', value: '0h 0m', icon: 'schedule', color: 'primary' },
     { label: 'This Month', value: '0h 0m', icon: 'calendar_today', color: 'info' },
     { label: 'Attendance Rate', value: '0%', icon: 'trending_up', color: 'warning' }
   ];
-  
-  // Calendar view
+
   calendarWeeks: CalendarDay[][] = [];
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
+
   constructor(
     public attendanceService: AttendanceService,
     private authService: AuthService,
@@ -162,8 +155,8 @@ listEndDateControl = new FormControl(new Date()); // Today
 
   private loadAttendanceSummary(): void {
     const startDate = (new Date(new Date().getFullYear(), new Date().getMonth(), 1));
-    const endDate = new Date(new Date()); // Today
-    
+    const endDate = new Date(new Date());
+
     this.attendanceService.getMyAttendanceSummary(
       startDate.toISOString().split('T')[0],
       endDate.toISOString().split('T')[0]
@@ -183,29 +176,29 @@ listEndDateControl = new FormControl(new Date()); // Today
 
   private updateQuickStats(summary: AttendanceSummary): void {
     this.quickStats = [
-      { 
-        label: 'Present Days', 
-        value: (summary.presentDays || 0).toString(), 
-        icon: 'check_circle', 
-        color: 'success' 
+      {
+        label: 'Present Days',
+        value: (summary.presentDays || 0).toString(),
+        icon: 'check_circle',
+        color: 'success'
       },
-      { 
-        label: 'Total Hours', 
-        value: this.formatHours(summary.totalHours || 0), 
-        icon: 'schedule', 
-        color: 'primary' 
+      {
+        label: 'Total Hours',
+        value: this.formatHours(summary.totalHours || 0),
+        icon: 'schedule',
+        color: 'primary'
       },
-      { 
-        label: 'Overtime Hours', 
-        value: this.formatHours(summary.overtimeHours || 0), 
-        icon: 'access_time', 
-        color: 'info' 
+      {
+        label: 'Overtime Hours',
+        value: this.formatHours(summary.overtimeHours || 0),
+        icon: 'access_time',
+        color: 'info'
       },
-      { 
-        label: 'Average/Day', 
-        value: this.formatHours(summary.averageHoursPerDay || 0), 
-        icon: 'trending_up', 
-        color: 'warning' 
+      {
+        label: 'Average/Day',
+        value: this.formatHours(summary.averageHoursPerDay || 0),
+        icon: 'trending_up',
+        color: 'warning'
       }
     ];
   }
@@ -232,7 +225,6 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
   .pipe(takeUntil(this.destroy$))
   .subscribe({
     next: (res: any) => {
-      // Use the mapped attendances from your service
       const sessionsArray = res.attendances ?? [];
 
       this.Sessionslist = sessionsArray.map((s: any) => ({
@@ -242,13 +234,10 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
         workDate: s.workDate ? new Date(s.workDate) : null,
         checkInTime: s.checkInTime ? new Date(s.checkInTime) : null,
         checkOutTime: s.checkOutTime ? new Date(s.checkOutTime) : null,
-        // location: s.location ? (typeof s.location === 'string' ? s.location : s.location.source) : '--'
       }));
 
-      // Set dataSource for MatTable
       this.dataSource.data = this.Sessionslist;
 
-      // Pagination info
       this.currentPage = res.page ?? pageNumber;
       this.pageSize = res.pageSize ?? pageSize;
       this.totalPages = res.totalPages ?? 1;
@@ -269,8 +258,7 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
   generateCalendar(): void {
     const year = this.selectedMonth.getFullYear();
     const month = this.selectedMonth.getMonth();
-    
-    // Load calendar data
+
     this.attendanceService.getAttendanceCalendar(undefined, year, month + 1)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -281,7 +269,7 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
         error: (error) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to load calendar data';
           this.notification.showError(errorMessage);
-          this.buildCalendarWeeks(); // Build empty calendar
+          this.buildCalendarWeeks();
         }
       });
   }
@@ -289,17 +277,15 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
   private buildCalendarWeeks(): void {
     const year = this.selectedMonth.getFullYear();
     const month = this.selectedMonth.getMonth();
-    
-    // Get first day of the month and first day of the calendar grid
+
     const firstDayOfMonth = new Date(year, month, 1);
     const firstDayOfCalendar = new Date(firstDayOfMonth);
     firstDayOfCalendar.setDate(firstDayOfCalendar.getDate() - firstDayOfMonth.getDay());
-    
+
     const weeks: CalendarDay[][] = [];
     let currentWeek: CalendarDay[] = [];
     let currentDate = new Date(firstDayOfCalendar);
-    
-    // Generate 6 weeks (42 days)
+
     for (let day = 0; day < 42; day++) {
       const calendarDay: CalendarDay = {
         date: new Date(currentDate),
@@ -307,22 +293,22 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
         isCurrentMonth: currentDate.getMonth() === month,
         isToday: this.isToday(currentDate),
         isWeekend: currentDate.getDay() === 0 || currentDate.getDay() === 6,
-        isHoliday: false, // TODO: Implement holiday logic
+        isHoliday: false,
         isWorkingDay: this.isWorkingDay(currentDate),
         isPast: currentDate < new Date(),
         attendance: this.getAttendanceForDate(currentDate)
       };
-      
+
       currentWeek.push(calendarDay);
-      
+
       if (currentWeek.length === 7) {
         weeks.push(currentWeek);
         currentWeek = [];
       }
-      
+
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     this.calendarWeeks = weeks;
   }
 
@@ -333,7 +319,7 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
 
   private isWorkingDay(date: Date): boolean {
     const day = date.getDay();
-    return day >= 1 && day <= 5; // Monday to Friday
+    return day >= 1 && day <= 5;
   }
 
   private getAttendanceForDate(date: Date): AttendanceCalendarData | undefined {
@@ -361,7 +347,7 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
 
   loadListData(): void {
     this.isLoadingList = true;
-    
+
     const startDate = this.listStartDateControl.value?.toISOString().split('T')[0] || '';
     const endDate = this.listEndDateControl.value?.toISOString().split('T')[0] || '';
 

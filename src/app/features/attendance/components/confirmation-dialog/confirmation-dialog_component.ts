@@ -7,11 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 export interface ConfirmationDialogData {
   title: string;
   message: string;
-  /** Label for the confirm button. Defaults to 'Confirm'. */
+
   confirmLabel?: string;
-  /** Material color for the confirm button: 'primary' | 'warn'. Defaults to 'primary'. */
+
   confirmColor?: 'primary' | 'warn';
-  /** Optional icon shown next to the title. */
+
   icon?: string;
 }
 

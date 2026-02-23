@@ -19,7 +19,7 @@ import { NotificationService } from '@/app/core/services/notification.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule // ✅ Needed for <mat-dialog-content> and dialog features
+    MatDialogModule
   ],
   template: `
   <h2 mat-dialog-title>Edit Office IP</h2>
@@ -59,7 +59,7 @@ export class EditOfficeIPDialogComponent {
   constructor(
     private fb: FormBuilder,
     private notification: NotificationService,
-    private dialogRef: MatDialogRef<EditOfficeIPDialogComponent>, // ✅ Correct type
+    private dialogRef: MatDialogRef<EditOfficeIPDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: OfficeIP
   ) {
     this.ipForm = this.fb.group({

@@ -27,13 +27,13 @@ import { MatIconModule } from '@angular/material/icon';
         <mat-icon class="dialog-icon">add_circle</mat-icon>
         Create Monthly Timesheet Snapshot
       </h2>
-      
+
       <mat-dialog-content>
         <form [formGroup]="snapshotForm" class="snapshot-form">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Timesheet Name</mat-label>
-            <input 
-              matInput 
+            <input
+              matInput
               formControlName="timesheetName"
               placeholder="e.g., January 2026 Production"
               required>
@@ -77,7 +77,7 @@ import { MatIconModule } from '@angular/material/icon';
 
           <div class="info-box">
             <mat-icon>info</mat-icon>
-            <p>This will create a snapshot of attendance records for the selected month and year. 
+            <p>This will create a snapshot of attendance records for the selected month and year.
                The snapshot can be reviewed, edited, and finalized for payroll processing.</p>
           </div>
         </form>
@@ -87,9 +87,9 @@ import { MatIconModule } from '@angular/material/icon';
         <button mat-stroked-button (click)="onCancel()">
           Cancel
         </button>
-        <button 
-          mat-raised-button 
-          color="primary" 
+        <button
+          mat-raised-button
+          color="primary"
           (click)="onSubmit()"
           [disabled]="!snapshotForm.valid">
           <mat-icon>add</mat-icon>
@@ -187,7 +187,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class CreateSnapshotDialogComponent implements OnInit {
   snapshotForm: FormGroup;
-  
+
   months = [
     { value: 1, label: 'January' },
     { value: 2, label: 'February' },
@@ -209,11 +209,9 @@ export class CreateSnapshotDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CreateSnapshotDialogComponent>
   ) {
-    // Generate years (current year + 1 year back and 1 year forward)
     const currentYear = new Date().getFullYear();
     this.years = [currentYear - 1, currentYear, currentYear + 1];
 
-    // Initialize form with current month and year
     const currentMonth = new Date().getMonth() + 1;
     const suggestedName = `${this.months.find(m => m.value === currentMonth)?.label} ${currentYear} Timesheet`;
 
@@ -225,7 +223,6 @@ export class CreateSnapshotDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Update suggested name when month or year changes
     this.snapshotForm.get('month')?.valueChanges.subscribe(() => this.updateSuggestedName());
     this.snapshotForm.get('year')?.valueChanges.subscribe(() => this.updateSuggestedName());
   }
@@ -234,12 +231,11 @@ export class CreateSnapshotDialogComponent implements OnInit {
     const month = this.snapshotForm.get('month')?.value;
     const year = this.snapshotForm.get('year')?.value;
     const monthLabel = this.months.find(m => m.value === month)?.label;
-    
+
     if (monthLabel && year) {
       const currentName = this.snapshotForm.get('timesheetName')?.value;
-      // Only update if the user hasn't customized the name
       const isDefaultName = currentName.includes('Timesheet') || currentName.includes('Production');
-      
+
       if (isDefaultName) {
         this.snapshotForm.patchValue({
           timesheetName: `${monthLabel} ${year} Timesheet`

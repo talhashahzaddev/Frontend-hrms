@@ -46,16 +46,13 @@ import { EditOfficeIPDialogComponent } from './edit-ips-dialoguebox';
 export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  // Data
   officeIPs: OfficeIP[] = [];
   displayedColumns: string[] = ['ipAddressValue', 'name', 'actions'];
 
-  // Form
   ipForm: FormGroup;
   isEditing = false;
   editingIP: OfficeIP | null = null;
 
-  // Loading states
   isLoading = false;
   isSubmitting = false;
 
@@ -65,7 +62,7 @@ export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private dialogRef: MatDialogRef<ManageOfficeIPsDialogComponent>,
     private dialog: MatDialog,
-    
+
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.ipForm = this.fb.group({
@@ -106,7 +103,6 @@ export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
       const formValue = this.ipForm.value;
 
       if (this.isEditing && this.editingIP) {
-        // Update existing IP
         this.attendanceService.updateOfficeIP(this.editingIP.id, formValue)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
@@ -123,7 +119,6 @@ export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
             }
           });
       } else {
-        // Create new IP
         this.attendanceService.createOfficeIP(formValue)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
@@ -153,13 +148,12 @@ editIP(ip: OfficeIP): void {
 
   dialogRef.afterClosed().subscribe((updatedIP: OfficeIP | undefined) => {
     if (updatedIP) {
-      // Hit your backend API to update the IP
       this.attendanceService.updateOfficeIP(updatedIP.id, updatedIP)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
             this.notification.showSuccess('Office IP updated successfully');
-            this.loadOfficeIPs(); // reload table
+            this.loadOfficeIPs();
           },
           error: (error) => {
             const errorMessage = error?.error?.message || error?.message || 'Failed to update office IP';

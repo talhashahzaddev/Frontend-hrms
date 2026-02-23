@@ -76,22 +76,19 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   selectedTimesheetId: string = '';
   isLoading = false;
 
-  /** Track which individual correction requests are being processed */
+
   processingRequestIds = new Set<string>();
-  /** Track which employee packages are being finalized / bulk-approved */
+
   processingPackageIds = new Set<string>();
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Org-Wide Compliance Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   orgProgress: OrgSubmissionProgress | null = null;
   currentMonth: number = new Date().getMonth() + 1;
   currentYear: number = new Date().getFullYear();
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ History Drawer Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   showHistoryDrawer = false;
   allSnapshots: MonthlyTimesheetSummary[] = [];
   isLoadingSnapshots = false;
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Table columns (kept for any future table views) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
   displayedColumns: string[] = ['workDate', 'original', 'requested', 'status', 'actions'];
 
   constructor(
@@ -123,16 +120,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     );
   }
 
-  // =========================================================================
-  // BOOTSTRAP FLOW
-  // Always start by fetching snapshots Ã¢â€ â€™ pick latest Ã¢â€ â€™ load review dashboard
-  // =========================================================================
 
-  /**
-   * Primary bootstrap: fetches all snapshots, auto-selects the most-recent
-   * one, then loads the review dashboard with that timesheetId.
-   * Only falls back to pending-requests when no snapshots exist at all.
-   */
+
   private bootstrapDashboard(): void {
     this.isLoading = true;
 
@@ -140,7 +129,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (snapshots) => {
-          // Sort descending by year Ã¢â€ â€™ month so index 0 is always most recent
           this.allSnapshots = [...snapshots].sort((a, b) =>
             b.year !== a.year ? b.year - a.year : b.month - a.month
           );
@@ -171,11 +159,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       });
   }
 
-  // =========================================================================
-  // PUBLIC RELOAD / NAVIGATION METHODS
-  // =========================================================================
 
-  /** Called by the Refresh button and after dialog closes */
+
   loadManagerReviewDashboard(): void {
     if (this.selectedTimesheetId && this.selectedTimesheetId !== EMPTY_GUID) {
       this.isLoading = true;
@@ -185,7 +170,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Switch to a historical snapshot from the drawer */
+
   selectHistoricalPeriod(snapshot: MonthlyTimesheetSummary): void {
     if (!snapshot.timesheetId || snapshot.timesheetId === EMPTY_GUID) {
       this.notificationService.showError('Cannot load this period: Invalid timesheet ID.');
@@ -201,7 +186,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     this.loadReviewDashboard(snapshot.timesheetId);
   }
 
-  /** Return to the most-recent snapshot */
+
   resetToCurrentMonth(): void {
     this.selectedTimesheetId = '';
     this.currentMonth = new Date().getMonth() + 1;
@@ -209,7 +194,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     this.bootstrapDashboard();
   }
 
-  /** Toggle the history side-drawer; lazily load snapshots list */
+
   toggleHistoryDrawer(): void {
     this.showHistoryDrawer = !this.showHistoryDrawer;
     if (this.showHistoryDrawer && this.allSnapshots.length === 0) {
@@ -217,9 +202,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // =========================================================================
-  // PRIVATE LOAD HELPERS
-  // =========================================================================
 
   private loadReviewDashboard(timesheetId: string): void {
     this.attendanceService.getManagerReviewDashboard(timesheetId)
@@ -271,7 +253,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (packages) => {
-          // If any package carries a real timesheetId, pivot to the real dashboard
           const firstValidId = packages.find(
             p => p.timesheetId && p.timesheetId !== EMPTY_GUID
           )?.timesheetId;
@@ -313,7 +294,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       });
   }
 
-  /** Silent background refresh after any mutation */
+
   private refreshListQuietly(): void {
     const id = this.selectedTimesheetId;
     if (id && id !== EMPTY_GUID) {
@@ -342,9 +323,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // =========================================================================
-  // MANAGER ACTIONS
-  // =========================================================================
 
   approveRequest(pkg: EmployeeReviewPackage, record: DailyReviewRecord): void {
     if (!record.requestId) return;
@@ -389,30 +367,21 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (!result?.success) return;
 
-      // Optimistic local update — use the VALUES the manager just entered
-      // (result.checkInTime / checkOutTime / status), NOT the old employee
-      // request fields (record.requestedCheckIn etc.) which may differ.
       const updatedRecord = pkg.fullMonthRecords.find(
         r => r.date?.split('T')[0] === record.date?.split('T')[0]
       );
       if (updatedRecord) {
-        // Replace displayed times with the override values.
         if (result.checkInTime)  updatedRecord.originalCheckIn  = result.checkInTime;
         if (result.checkOutTime) updatedRecord.originalCheckOut = result.checkOutTime;
         if (result.status)       updatedRecord.originalStatus   = result.status;
 
-        // Clear pending request — the override supersedes it.
         updatedRecord.hasPendingRequest = false;
         updatedRecord.requestStatus     = 'approved';
 
-        // Mark as manager override (drives the amber badge).
         (updatedRecord as any).isManagerOverride = true;
 
-        // Override does NOT set isFinalized — that is a separate explicit action.
-        // Do NOT set updatedRecord.isFinalized = true here.
       }
 
-      // Update package-level counters optimistically.
       if ((pkg.pendingRequestCount || 0) > 0) {
         pkg.pendingRequestCount = Math.max(0, (pkg.pendingRequestCount || 0) - 1);
       }
@@ -436,7 +405,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
           this.notificationService.showSuccess(
             `Approved ${result.approvedCount} request(s) for ${pkg.employeeName}`
           );
-          // Optimistic update
           pkg.fullMonthRecords.forEach(r => {
             if (r.hasPendingRequest) {
               r.hasPendingRequest = false;
@@ -456,12 +424,10 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   }
 
   finalizeEmployeeApprovals(pkg: EmployeeReviewPackage): void {
-    // Guard: already fully finalized Ã¢â‚¬â€ nothing to do
     if (pkg.isFinalized) {
       this.notificationService.showError(`${pkg.employeeName}'s records are already finalized.`);
       return;
     }
-    // Guard: still has pending requests blocking finalization
     if ((pkg.pendingRequestCount || 0) > 0) {
       this.notificationService.showError('Resolve all pending requests before finalizing.');
       return;
@@ -476,9 +442,9 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
         next: () => {
           this.processingPackageIds.delete(pkg.employeeId);
           this.notificationService.showSuccess(`Successfully finalized records for ${pkg.employeeName}`);
-          // Optimistic update
           pkg.fullMonthRecords.forEach(r => {
-            if ((r.originalStatus || '').toLowerCase() !== 'no record') {
+            const s = (r.originalStatus || '').toLowerCase().replace(/[_ ]/g, '');
+            if (s !== 'norecord' && s !== 'weekend') {
               r.isFinalized = true;
               r.hasPendingRequest = false;
             }
@@ -512,8 +478,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe((result?: { refreshNeeded?: boolean; isFinalized?: boolean }) => {
-      // Immediately apply the finalized flag to the local package object so the
-      // card updates before the async refresh API call completes (no flicker).
       if (result?.isFinalized) {
         const localPkg = this.employeePackages.find(p => p.employeeId === pkg.employeeId);
         if (localPkg) {
@@ -525,9 +489,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // =========================================================================
-  // HELPER: resolve timesheetId with fallback chain
-  // =========================================================================
 
   private resolveTimesheetId(pkg: EmployeeReviewPackage): string {
     if (this.selectedTimesheetId && this.selectedTimesheetId !== EMPTY_GUID) {
@@ -539,9 +500,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  // =========================================================================
-  // PROCESS SINGLE REQUEST
-  // =========================================================================
 
   private processRequest(dto: ProcessAttendanceRequestDto, action: string, employeeId: string): void {
     this.processingRequestIds.add(dto.requestId);
@@ -555,10 +513,13 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
             this.notificationService.showSuccess(`Request ${action} successfully`);
             this.employeePackages = this.employeePackages.map(pkg => {
               if (pkg.employeeId !== employeeId) return pkg;
+              const newPendingCount = Math.max(0, pkg.pendingRequestCount - 1);
               return {
                 ...pkg,
-                pendingRequestCount: Math.max(0, pkg.pendingRequestCount - 1),
+                pendingRequestCount: newPendingCount,
+                hasPendingRequest: newPendingCount > 0,
                 approvedCount: action === 'approved' ? pkg.approvedCount + 1 : pkg.approvedCount,
+                rejectedCount: action === 'rejected' ? pkg.rejectedCount + 1 : pkg.rejectedCount,
                 fullMonthRecords: pkg.fullMonthRecords.map(r => {
                   if (r.requestId !== dto.requestId) return r;
                   if (action === 'approved') {
@@ -600,9 +561,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       });
   }
 
-  // =========================================================================
-  // CONVERT LEGACY SUBMISSION PACKAGES Ã¢â€ â€™ REVIEW PACKAGES
-  // =========================================================================
 
   private convertToReviewPackages(packages: any[]): EmployeeReviewPackage[] {
     return packages.map(pkg => {
@@ -645,16 +603,12 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // =========================================================================
-  // RECALCULATE PACKAGE SUMMARY FROM fullMonthRecords
-  // =========================================================================
 
   private recalculatePackageSummary(pkg: EmployeeReviewPackage): void {
     const records = pkg.fullMonthRecords || [];
     let pending = 0, approved = 0, rejected = 0, finalized = 0, hasRecords = 0;
     let hasDraft = false;
 
-    // Statuses that are not real working-day records (excluded from counts and %)
     const NON_WORKDAY = new Set([
       'no record', 'no_record', 'norecord',
       'weekend', 'off', 'offday', 'off_day',
@@ -669,8 +623,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       const reqStatus = (r.requestStatus || '').toLowerCase();
       const isDraft = r.hasDraftRequest === true;
 
-      if (!isDraft && (reqStatus === 'pending' || r.hasPendingRequest)) pending++;
-      else if (reqStatus === 'approved') approved++;
+      if (!isDraft && (reqStatus === 'pending' || (r.hasPendingRequest && reqStatus !== 'approved' && reqStatus !== 'rejected'))) pending++;
+      else if (reqStatus === 'approved' || (!isDraft && !!r.hasApprovedRequest)) approved++;
       else if (reqStatus === 'rejected') rejected++;
 
       if (r.isFinalized) finalized++;
@@ -680,25 +634,24 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     pkg.pendingRequestCount = pending;
     pkg.approvedCount       = approved;
     pkg.rejectedCount       = rejected;
-    pkg.finalizedCount      = finalized;
-    pkg.finalizedDays       = finalized;
     pkg.totalRecords        = hasRecords;
+
+    const apiFinalized = pkg.finalizedCount || 0;
+    pkg.finalizedCount = finalized > 0 ? finalized : apiFinalized;
+    pkg.finalizedDays  = pkg.finalizedCount;
 
     pkg.hasPendingRequest = pending > 0;
     pkg.hasDraftRequest   = hasDraft;
 
-    // Package is "fully finalized" only when every record that HAS actual
-    // attendance data (attendanceId) is locked. Absent-day placeholders never
-    // get an attendanceId and are never written to finalized_timesheet_records,
-    // so including them would permanently prevent isFinalized from being true.
-    const recordsWithAttendance = records.filter(r => !!(r as any).attendanceId);
-    pkg.isFinalized = recordsWithAttendance.length > 0
-      && recordsWithAttendance.every(r => r.isFinalized);
+    const finalizableRecords = records.filter(r =>
+      !!(r as any).attendanceId ||
+      (!!(r as any).requestId && ((r as any).requestStatus || '').toLowerCase() === 'approved')
+    );
+    const computedIsFinalized = finalizableRecords.length > 0
+      && finalizableRecords.every(r => r.isFinalized);
+    pkg.isFinalized = computedIsFinalized || pkg.isFinalized;
     pkg.isUntouched = hasRecords === 0 && pending === 0 && approved === 0 && rejected === 0;
 
-    // Always recompute attendance percentage so it stays accurate after
-    // overrides, approvals or any other record mutation.
-    // Denominator = workday records only (same NON_WORKDAY exclusion as above).
     const presentDays = records.filter(r => {
       const s = (r.originalStatus || '').toLowerCase().trim();
       return s === 'present' || s === 'late' || s === 'half_day' || s === 'half-day' || s === 'halfday';
@@ -706,11 +659,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     pkg.attendancePercentage = hasRecords > 0 ? Math.round((presentDays / hasRecords) * 100) : 0;
   }
 
-  // =========================================================================
-  // TEMPLATE HELPER METHODS
-  // =========================================================================
-
-  /** Returns true only when viewing a snapshot that is NOT the latest */
   isViewingHistoricalPeriod(): boolean {
     if (this.allSnapshots.length === 0) return false;
     const latest = this.allSnapshots[0];
@@ -749,19 +697,9 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     return (pkg.pendingRequestCount || 0) > 0;
   }
 
-  /**
-   * A package can be finalized when:
-   *  1. It is NOT already finalized
-   *  2. It has zero pending correction requests
-   *  3. At least one working-day record exists (something to lock)
-   *
-   * Note: we do NOT require approvedCount > 0 because a month with no
-   * correction requests but present/absent records is still valid to finalize.
-   */
   canFinalize(pkg: EmployeeReviewPackage): boolean {
     if (pkg.isFinalized) return false;
     if ((pkg.pendingRequestCount || 0) > 0) return false;
-    // Must have at least one record that represents a real working day
     return pkg.fullMonthRecords.some(r => {
       const s = (r.originalStatus || '').toLowerCase().replace(/[_ ]/g, '');
       return s !== 'norecord' && s !== 'weekend';
@@ -776,10 +714,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     return this.processingPackageIds.has(employeeId);
   }
 
-  /**
-   * Review progress = (approved + finalized) / total records with data.
-   * Falls back to 0 when no records exist.
-   */
   getProgressPercentage(pkg: EmployeeReviewPackage): number {
     const total = pkg.totalRecords || 0;
     if (total === 0) return 0;
@@ -793,7 +727,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       : 'Ã¢â‚¬â€';
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Status Icon / Class / Tooltip Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   getEmployeeStatusIcon(pkg: EmployeeReviewPackage): string {
     if (pkg.isFinalized)     return 'lock';
@@ -817,7 +750,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     return 'No activity';
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Heat Map Border Class Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   getHeatMapBorderClass(pkg: EmployeeReviewPackage): string {
     if (pkg.isFinalized)      return 'heat-border-finalized';
@@ -833,7 +765,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     return today.getDate() >= lastDay - 5;
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Status Chip Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   getStatusChipClass(status: string): string {
     switch (status?.toLowerCase()) {
@@ -846,7 +777,6 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Ã¢â€â‚¬Ã¢â€â‚¬ Formatters Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
   formatTime(dateTime?: string): string {
     if (!dateTime) return 'Ã¢â‚¬â€';

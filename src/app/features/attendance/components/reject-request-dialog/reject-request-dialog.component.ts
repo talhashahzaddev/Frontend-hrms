@@ -30,7 +30,7 @@ export interface RejectRequestDialogData {
         <mat-icon class="dialog-icon">cancel</mat-icon>
         Reject Attendance Correction Request
       </h2>
-      
+
       <mat-dialog-content>
         <div class="employee-info">
           <p><strong>Employee:</strong> {{ data.employeeName }}</p>
@@ -40,8 +40,8 @@ export interface RejectRequestDialogData {
         <form [formGroup]="rejectForm">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Rejection Reason</mat-label>
-            <textarea 
-              matInput 
+            <textarea
+              matInput
               formControlName="rejectionReason"
               rows="4"
               placeholder="Enter the reason for rejecting this request..."
@@ -61,9 +61,9 @@ export interface RejectRequestDialogData {
         <button mat-stroked-button (click)="onCancel()">
           Cancel
         </button>
-        <button 
-          mat-raised-button 
-          color="warn" 
+        <button
+          mat-raised-button
+          color="warn"
           (click)="onConfirm()"
           [disabled]="!rejectForm.valid">
           <mat-icon>cancel</mat-icon>

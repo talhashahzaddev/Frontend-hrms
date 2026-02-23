@@ -32,7 +32,7 @@ export class AttendanceCalendarComponent implements OnInit {
 
   attendanceData: AttendanceCalendarData[] = [];
   currentYear = new Date().getFullYear();
-  currentMonth = new Date().getMonth(); // 0 = Jan
+  currentMonth = new Date().getMonth();
   daysGrid: CalendarCell[] = [];
   weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -42,20 +42,18 @@ export class AttendanceCalendarComponent implements OnInit {
     this.buildAndLoad(this.currentYear, this.currentMonth);
   }
 
-  // Build & load attendance for month
   async buildAndLoad(year: number, monthIndex: number) {
     this.currentYear = year;
     this.currentMonth = monthIndex;
     this.buildEmptyGrid(year, monthIndex);
-    this.loadCalendar(year, monthIndex + 1); // API expects 1-based month
+    this.loadCalendar(year, monthIndex + 1);
   }
 
-  // Build 6-week calendar grid
   buildEmptyGrid(year: number, monthIndex: number) {
     const firstOfMonth = new Date(year, monthIndex, 1);
-    let startDayIndex = firstOfMonth.getDay(); // 0=Sun,6=Sat
+    let startDayIndex = firstOfMonth.getDay();
     const startDate = new Date(firstOfMonth);
-    startDate.setDate(firstOfMonth.getDate() - startDayIndex); // start from previous Sunday
+    startDate.setDate(firstOfMonth.getDate() - startDayIndex);
     startDate.setHours(0, 0, 0, 0);
 
     const cells: CalendarCell[] = [];
@@ -79,7 +77,6 @@ export class AttendanceCalendarComponent implements OnInit {
     this.daysGrid = cells;
   }
 
-  // Fetch attendance data and map it
   loadCalendar(year: number, monthOneBased: number) {
     this.attendanceService.getAttendanceCalendar(undefined, year, monthOneBased)
       .subscribe({
@@ -95,7 +92,6 @@ export class AttendanceCalendarComponent implements OnInit {
             const found = map.get(this.normalizeKey(cell.date));
             if (found) {
               cell.attendance = found;
-              // Only set isHoliday if status is actually a holiday, not a weekend
               cell.isHoliday = !!found.isHoliday && found.status?.toLowerCase() !== 'weekend';
             }
           });
@@ -110,19 +106,17 @@ export class AttendanceCalendarComponent implements OnInit {
   normalizeKey(dateInput: string | Date): string {
     let d: Date;
     if (typeof dateInput === 'string') {
-      // Handle ISO date strings or date-only strings
-      const dateStr = dateInput.split('T')[0]; // Remove time part if present
+      const dateStr = dateInput.split('T')[0];
       d = new Date(dateStr);
     } else {
       d = dateInput;
     }
-    
-    // Ensure we have a valid date
+
     if (isNaN(d.getTime())) {
       console.error('Invalid date:', dateInput);
       return '';
     }
-    
+
     const y = d.getFullYear();
     const m = (d.getMonth() + 1).toString().padStart(2, '0');
     const dd = d.getDate().toString().padStart(2, '0');
@@ -149,38 +143,32 @@ get currentMonthYear(): string {
     this.buildAndLoad(now.getFullYear(), now.getMonth());
   }
 
-  // Map to color classes
   getDateClass(cell: CalendarCell): string {
-    // Not in current month (dimmed)
     if (!cell.inCurrentMonth) return 'other-month-day';
 
-    // ✅ PRIORITY 1: Check weekend FIRST - weekends always show as weekends, even with leave requests
     if (cell.isWeekend) {
       return 'weekend-day';
     }
 
-    // Attendance status - check after weekends
     if (cell.attendance) {
       const status = (cell.attendance.status || '').toLowerCase().trim();
-      
-      // Check weekend status from API data (shouldn't happen if isWeekend is already checked, but for safety)
+
       if (status === 'weekend') {
         return 'weekend-day';
       }
-      
-      // Check leave status (only if not a weekend)
+
       if (status === 'leave' || status === 'on_leave') {
         return 'leave-day';
       }
-      
+
       switch (status) {
-        case 'present': 
+        case 'present':
           return 'present-day';
         case 'half_day':
         case 'half-day':
-        case 'half day': 
+        case 'half day':
           return 'half-day';
-        case 'late': 
+        case 'late':
           return 'late-day';
         case 'no record':
         case 'upcoming':
@@ -193,17 +181,14 @@ get currentMonthYear(): string {
           return 'working-day';
       }
     }
-    
-    // API Holiday (only if not a weekend)
+
     if (cell.isHoliday) return 'holiday-day';
 
-    // Default working day
     return 'working-day';
   }
 
 
 
-  // Tooltip info
   getTooltip(cell: CalendarCell): string {
     if (cell.attendance) {
       const a = cell.attendance;

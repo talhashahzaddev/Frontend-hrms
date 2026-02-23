@@ -25,9 +25,9 @@ import { AttendanceSessionDto, TimeTrackingSession } from '../../../../core/mode
     MatCardModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    MatDialogModule,     // <- Added
-    MatDividerModule,    // <- Added
-    MatButtonModule,     // <- Added
+    MatDialogModule,
+    MatDividerModule,
+    MatButtonModule,
     DatePipe
   ]
 })
@@ -43,7 +43,6 @@ export class ViewDetailsDialogueComponent implements OnInit, OnDestroy {
   isLoadingSession = false;
   isLoadingTodaySessions = false;
 
-  // Computed property for template
   get isLoading(): boolean {
     return this.isLoadingUser || this.isLoadingSession || this.isLoadingTodaySessions;
   }
@@ -103,7 +102,7 @@ export class ViewDetailsDialogueComponent implements OnInit, OnDestroy {
 
 
   private loadTodaySessions(): void {
-  if (!this.data.employeeId) return; // ensure employeeId is provided
+  if (!this.data.employeeId) return;
 const workDate = this.data.workDate;
   this.isLoadingTodaySessions = true;
   this.attendanceService.getTodaySessionsById(this.data.employeeId,workDate)
@@ -136,5 +135,5 @@ const workDate = this.data.workDate;
     this.dialogRef.close();
   }
 
- 
+
 }

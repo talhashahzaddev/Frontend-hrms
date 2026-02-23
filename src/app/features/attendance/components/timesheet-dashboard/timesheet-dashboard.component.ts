@@ -1,4 +1,3 @@
-// timesheet-dashboard.component.ts - UPDATED VERSION
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -81,8 +80,7 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
 
   loadAllSnapshots(): void {
     this.isLoading = true;
-    
-    // Load all monthly snapshots from the backend
+
     this.attendanceService.getSnapshots()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -116,13 +114,13 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
 
   createSnapshot(data: MonthlyTimesheetCreateDto): void {
     this.isLoading = true;
-    
+
     this.attendanceService.createSnapshot(data)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (snapshot) => {
           this.notificationService.showSuccess(`Snapshot "${data.timesheetName}" created successfully`);
-          this.loadAllSnapshots(); // Reload the list
+          this.loadAllSnapshots();
         },
         error: (error) => {
           console.error('Error creating snapshot:', error);
@@ -222,6 +220,9 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.notificationService.showSuccess('Timesheet finalized successfully');
+            this.timesheets = this.timesheets.map(t =>
+              t.timesheetId === timesheet.timesheetId ? { ...t, status: 'Finalized' } : t
+            );
             this.loadAllSnapshots();
           },
           error: (error) => {

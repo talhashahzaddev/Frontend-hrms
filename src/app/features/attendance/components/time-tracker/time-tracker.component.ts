@@ -57,23 +57,18 @@ import { map } from 'rxjs/operators';
 export class TimeTrackerComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  // Current state
   currentUser: User | null = null;
   currentSession: TimeTrackingSession | null = null;
   todayAttendance: Attendance | null = null;
   recentAttendance: Attendance[] = [];
   currentTime = new Date();
-  // Date filter for recent attendance
   filterStartDate: Date | null = null;
   filterEndDate: Date | null = null;
-  // New: Today's sessions
   todaySessions: AttendanceSessionDto[] = [];
   isLoadingSessions = false;
-  // Loading states
   isLoading = false;
   isClockActionLoading = false;
 
-  // Permissions
   canViewTeamAttendance = false;
 
   constructor(
@@ -98,7 +93,6 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // Role helpers
   get isSuperAdmin(): boolean {
     return this.authService.hasRole('Super Admin');
   }
@@ -221,7 +215,7 @@ currentShiftId: string | null = null;
         next: (attendances) => {
                       this.todayAttendance = attendances.length > 0 ? attendances[0] : null;
             if (this.todayAttendance?.shiftId) {
-              this.currentShiftId = this.todayAttendance.shiftId; // now it will be set
+              this.currentShiftId = this.todayAttendance.shiftId;
             }
         },
         error: (error) => {
@@ -275,7 +269,7 @@ currentShiftId: string | null = null;
   clockIn(): void {
      if (!this.currentShiftId) {
     this.notification.showError('No shift assigned for today.');
-    return; // stop if no shiftId
+    return;
   }
     this.isClockActionLoading = true;
 
@@ -310,9 +304,8 @@ currentShiftId: string | null = null;
   clockOut(): void {
     if (!this.currentShiftId) {
     this.notification.showError('No shift assigned for today.');
-    return; // stop if no shiftId
+    return;
   }
-    // Open comment dialog
     const dialogRef = this.dialog.open(CommentDialogComponent, {
       width: '400px',
       data: {
@@ -324,14 +317,13 @@ currentShiftId: string | null = null;
     });
 
     dialogRef.afterClosed().subscribe(comment => {
-      // If user cancelled, do nothing
       if (comment === undefined) return;
 
       this.isClockActionLoading = true;
 
       const request: ClockInOutRequest = {
         action: 'out',
-        shiftId: this.currentShiftId, 
+        shiftId: this.currentShiftId,
         location: {
           source: 'web_app',
           timestamp: new Date().toISOString()

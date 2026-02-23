@@ -22,16 +22,16 @@ export const attendanceRoutes: Routes = [
     path: 'reports',
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
-  { 
+  {
     path: 'calendar',
     loadComponent: () => import('./components/attendancce-calendar/attendance-calendar').then(m => m.AttendanceCalendarComponent)
   }
-  , 
- { 
+  ,
+ {
     path: 'shift',
     loadComponent: () => import('./components/shift/shift.component').then(m => m.ShiftComponent)
   },
-    { 
+    {
     path: 'createshift',
     loadComponent: () => import('./components/create-shift/create-shift.component').then(m => m.CreateShiftComponent)
   },

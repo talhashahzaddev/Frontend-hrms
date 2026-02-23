@@ -170,13 +170,13 @@
                 <!-- Status badge -->
                 <div class="card-status" style="margin-bottom:6px;">
                   <span class="status-badge" [ngClass]="{
-                    'present':  record.status?.toLowerCase() === 'present',
-                    'absent':   record.status?.toLowerCase() === 'absent',
-                    'weekend':  record.status?.toLowerCase() === 'weekend',
-                    'leave':    record.status?.toLowerCase() === 'on leave',
-                    'late':     record.status?.toLowerCase() === 'late',
-                    'half-day': record.status?.toLowerCase() === 'half day' || record.status?.toLowerCase() === 'half_day',
-                    'norecord': record.status?.toLowerCase() === 'no record' || record.status?.toLowerCase() === 'no_record'
+                    'present':  getEffectiveStatus(record) === 'present',
+                    'absent':   getEffectiveStatus(record) === 'absent',
+                    'weekend':  getEffectiveStatus(record) === 'weekend',
+                    'leave':    getEffectiveStatus(record) === 'on leave' || getEffectiveStatus(record) === 'leave',
+                    'late':     getEffectiveStatus(record) === 'late',
+                    'half-day': getEffectiveStatus(record) === 'half day' || getEffectiveStatus(record) === 'half_day',
+                    'norecord': getEffectiveStatus(record) === 'no record' || getEffectiveStatus(record) === 'no_record'
                   }">
                     <ng-container *ngIf="record.hasDraftRequest || record.hasPendingRequest">
                       {{ record.requestedStatus || record.status }}
@@ -189,22 +189,7 @@
                   </span>
                 </div>
 
-                <!-- Edit / correction button
-                     -------------------------------------------------------------
-                     RULE:
-                       Employee role  -> always visible (backend only returns their
-                                        own record, so there is nothing else to show)
-                       Manager / Admin -> visible ONLY when the selected sidebar row
-                                        is the currently logged-in user's own record
-                                        (isOwnTimesheetSelected). They can still view
-                                        other employees' cards but cannot edit them.
-                     Shared guards (all roles):
-                        canRequestCorrection  - not finalized, not already pending
-                        not a weekend row
-                        status !== 'No Record'  (placeholder with no attendance data)
-                        not a future day
-                     -------------------------------------------------------------
-                -->
+                
                 <div class="card-actions">
                   <!-- Lock icon for finalized (non-override) records -->
                   <span
@@ -242,7 +227,7 @@
 
                   <!-- Employee correction button -->
                   <button
-                    *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
+                    *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(se) && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
                     type="button"
                     (click)="requestDailyCorrection(se, record)"
                     [title]="record.hasDraftRequest ? 'Edit draft correction' : record.hasPendingRequest ? 'Re-edit pending request' : 'Request correction'"
@@ -284,13 +269,21 @@
       <button mat-stroked-button (click)="refreshData()">Refresh</button>
     </div>
     <div class="footer-right">     
+      <!-- Under-review banner: replaces the submit button once batch is pending manager review -->
+      <div
+        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
+        style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:#fef9c3;color:#92400e;font-size:13px;font-weight:500;border:1px solid #fbbf24;">
+        <mat-icon style="font-size:16px;width:16px;height:16px;line-height:16px;">hourglass_top</mat-icon>
+        Awaiting Manager Review
+      </div>
+
       <button
-        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isEmployeePayrollLocked(selectedEmployee)"
+        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
         mat-raised-button
         color="primary"
         (click)="submitAllEdits()"
         [disabled]="!canSubmitBatch()">
-        Submit All Edits
+        Submit Timesheet
       </button>
       <button mat-button (click)="close()">Close</button>
     </div>
