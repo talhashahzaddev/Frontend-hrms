@@ -346,7 +346,7 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
       };
 
       const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-        width: '450px',
+        width: '400px',
         data: dialogData,
         panelClass: 'confirm-delete-dialog-panel'
       });

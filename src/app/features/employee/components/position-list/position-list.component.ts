@@ -13,14 +13,17 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
+
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Position, Department, Role } from '../../../../core/models/employee.models';
 import { EmployeeService } from '../../services/employee.service';
 import { PositionFormDialogComponent } from '../position-form-dialog/position-form-dialog.component';
 import { PositionDetailsViewComponent } from '../position-form-dialog/position-details-view.component';
-import{PositionEmployeeViewComponent,PositionEmployeesViewData} from '../position-form-dialog/position-employee-viewDetails.component'
+import { PositionEmployeeViewComponent, PositionEmployeesViewData } from '../position-form-dialog/position-employee-viewDetails.component';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
@@ -40,7 +43,9 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatDividerModule
+    MatDividerModule,
+    MatCheckboxModule,
+    MatPaginatorModule
   ],
   templateUrl: './position-list.component.html',
   styleUrls: ['./position-list.component.scss']
@@ -50,11 +55,13 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
   // Data
   positions: Position[] = [];
+  private allPositions: Position[] = [];
   departments: Department[] = [];
   roles: Role[] = [];
 
   // Table configuration
   displayedColumns: string[] = [
+    'select',
     'title',
     'department',
     'role',
@@ -78,6 +85,12 @@ export class PositionListComponent implements OnInit, OnDestroy {
     { value: 'active', label: 'Active' },
     { value: 'inactive', label: 'Inactive' }
   ];
+
+  // Pagination — mat-paginator style (mirrors employee-list & department-list)
+  totalCount = 0;
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [10, 25, 50];
 
   constructor(
     private employeeService: EmployeeService,
@@ -107,8 +120,6 @@ export class PositionListComponent implements OnInit, OnDestroy {
       next: ([departments, roles]) => {
         this.departments = departments;
         this.roles = roles;
-
-        // Fetch positions immediately with default filters
         this.fetchPositions();
       },
       error: (error) => {
@@ -127,6 +138,7 @@ export class PositionListComponent implements OnInit, OnDestroy {
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe(() => {
+      this.pageIndex = 0;
       this.fetchPositions();
     });
   }
@@ -141,16 +153,29 @@ export class PositionListComponent implements OnInit, OnDestroy {
     this.employeeService.getPositions(departmentId, search, status)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-      next: (positions) => {
-        this.positions = positions;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Failed to fetch positions';
-        this.notificationService.showError(errorMessage);
-        this.isLoading = false;
-      }
-    });
+        next: (positions) => {
+          this.allPositions = positions;
+          this.totalCount = positions.length;
+          this.applyPagination();
+          this.isLoading = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to fetch positions';
+          this.notificationService.showError(errorMessage);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  private applyPagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.positions = this.allPositions.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.applyPagination();
   }
 
   clearFilters(): void {
@@ -159,10 +184,18 @@ export class PositionListComponent implements OnInit, OnDestroy {
     this.statusControl.setValue('');
   }
 
+  hasFiltersApplied(): boolean {
+    return !!(
+      this.searchControl.value?.trim() ||
+      this.departmentControl.value ||
+      this.statusControl.value
+    );
+  }
+
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(PositionFormDialogComponent, {
       width: '600px',
-      data: { 
+      data: {
         mode: 'create',
         departments: this.departments,
         roles: this.roles
@@ -178,24 +211,22 @@ export class PositionListComponent implements OnInit, OnDestroy {
   }
 
   viewPosition(position: Position): void {
-    const dialogRef = this.dialog.open(PositionDetailsViewComponent, {
+    this.dialog.open(PositionDetailsViewComponent, {
       width: '600px',
       data: {
-        position: position,
+        position,
         departments: this.departments,
         roles: this.roles
       }
     });
-
-    dialogRef.afterClosed().subscribe(() => {});
   }
 
   editPosition(position: Position): void {
     const dialogRef = this.dialog.open(PositionFormDialogComponent, {
       width: '600px',
-      data: { 
+      data: {
         mode: 'edit',
-        position: position,
+        position,
         departments: this.departments,
         roles: this.roles
       }
@@ -209,147 +240,104 @@ export class PositionListComponent implements OnInit, OnDestroy {
     });
   }
 
+  viewEmployees(position: Position): void {
+    const departmentName = this.departments.find(d => d.departmentId === position.departmentId)?.departmentName || 'N/A';
+    const roleName = this.roles.find(r => r.roleId === position.roleId)?.roleName || 'N/A';
 
-//Adding iew mploee method
-
-// Inside PositionListComponent
-
-viewEmployees(position: Position): void {
-  const departmentName = this.departments.find(d => d.departmentId === position.departmentId)?.departmentName || 'N/A';
-  const roleName = this.roles.find(r => r.roleId === position.roleId)?.roleName || 'N/A';
-
-  // Open dialog immediately with empty table and spinner
-  const dialogRef = this.dialog.open(PositionEmployeeViewComponent, {
-    width: '900px',
-    data: <PositionEmployeesViewData>{
-      positionId: position.positionId,
-      positionTitle: position.positionTitle,
-      departmentName: departmentName,
-      roleName: roleName,
-      description: position.description || 'N/A',
-      employees: [] // empty initially
-    }
-  });
-
-  // Show loading
-  dialogRef.componentInstance.isLoading = true;
-
-  // Fetch employees from API
-  this.employeeService.getEmployeesByPosition(position.positionId)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (res) => {
-        const employees = res?.employees || [];
-        console.log('Employees:', employees);
-
-        // Update table dynamically
-        dialogRef.componentInstance.employeesDataSource.data = employees;
-
-        // Hide spinner
-        dialogRef.componentInstance.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error fetching employees:', error);
-
-        // Hide spinner
-        dialogRef.componentInstance.isLoading = false;
-
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          'Failed to load employees for this position';
-        this.notificationService.showError(errorMessage);
+    const dialogRef = this.dialog.open(PositionEmployeeViewComponent, {
+      width: '900px',
+      data: <PositionEmployeesViewData>{
+        positionId: position.positionId,
+        positionTitle: position.positionTitle,
+        departmentName,
+        roleName,
+        description: position.description || 'N/A',
+        employees: []
       }
     });
-}
 
+    dialogRef.componentInstance.isLoading = true;
 
+    this.employeeService.getEmployeesByPosition(position.positionId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          const employees = res?.employees || [];
+          dialogRef.componentInstance.employeesDataSource.data = employees;
+          dialogRef.componentInstance.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching employees:', error);
+          dialogRef.componentInstance.isLoading = false;
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load employees for this position';
+          this.notificationService.showError(errorMessage);
+        }
+      });
+  }
 
-togglePositionStatus(position: Position, newStatus: boolean): void {
-  const isActivating = newStatus;
-  const action = isActivating ? 'Activate' : 'Deactivate';
+  togglePositionStatus(position: Position, newStatus: boolean): void {
+    const action = newStatus ? 'Activate' : 'Deactivate';
 
-  const dialogData: ConfirmDeleteData = {
-    title: `${action} Position`,
-    message: `Are you sure you want to ${action.toLowerCase()} "${position.positionTitle}"?`,
-    itemName: position.positionTitle,
-    confirmButtonText: `Yes, ${action}` // ✅ dynamic button text
-  };
+    const dialogData: ConfirmDeleteData = {
+      title: `${action} Position`,
+      message: `Are you sure you want to ${action.toLowerCase()} "${position.positionTitle}"?`,
+      itemName: position.positionTitle,
+      confirmButtonText: `Yes, ${action}`
+    };
 
-  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-    width: '450px',
-    data: dialogData,
-    panelClass: 'confirm-action-dialog-panel'
-  });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-action-dialog-panel'
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result === true) {
-      this.employeeService
-        .updatePositionStatus(position.positionId, newStatus)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            // Update UI
-            position.isActive = newStatus;
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.employeeService.updatePositionStatus(position.positionId, newStatus)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              position.isActive = newStatus;
+              this.notificationService.showSuccess(`Position ${action.toLowerCase()}d successfully`);
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || error?.message || `Failed to ${action.toLowerCase()} position`;
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      }
+    });
+  }
 
-            this.notificationService.showSuccess(`Position ${action.toLowerCase()}d successfully`);
-          },
-          error: (error) => {
-            const errorMessage =
-              error?.error?.message ||
-              error?.message ||
-              `Failed to ${action.toLowerCase()} position`;
-            this.notificationService.showError(errorMessage);
-          }
-        });
-    }
-  });
-}
+  deletePosition(position: Position): void {
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Position',
+      message: `Are you sure you want to delete "${position.positionTitle}"?`,
+      itemName: position.positionTitle,
+      confirmButtonText: 'Yes, Delete'
+    };
 
-deletePosition(position: Position): void {
-  const dialogData: ConfirmDeleteData = {
-    title: 'Delete Position',
-    message: `Are you sure you want to delete "${position.positionTitle}"?`,
-    itemName: position.positionTitle,
-    confirmButtonText: 'Yes, Delete' // ✅ dynamic button text
-  };
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-action-dialog-panel'
+    });
 
-  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-    width: '450px',
-    data: dialogData,
-    panelClass: 'confirm-action-dialog-panel'
-  });
-
-  dialogRef.afterClosed().subscribe(result => {
-    if (result === true) {
-      this.employeeService.deletePosition(position.positionId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.fetchPositions();
-            this.notificationService.showSuccess('Position deleted successfully');
-          },
-          error: (error) => {
-            const errorMessage =
-              error?.error?.message ||
-              error?.message ||
-              'Failed to delete position';
-            this.notificationService.showError(errorMessage);
-          }
-        });
-    }
-  });
-}
-
-
-
-  // Helper method to check if filters are applied
-  hasFiltersApplied(): boolean {
-    return !!(
-      this.searchControl.value?.trim() ||
-      this.departmentControl.value ||
-      this.statusControl.value
-    );
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.employeeService.deletePosition(position.positionId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.fetchPositions();
+              this.notificationService.showSuccess('Position deleted successfully');
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || error?.message || 'Failed to delete position';
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      }
+    });
   }
 }
-

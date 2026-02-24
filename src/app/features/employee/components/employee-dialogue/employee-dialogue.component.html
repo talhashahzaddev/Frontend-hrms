@@ -1,167 +1,225 @@
 <div class="dialog-container">
 
-  <!-- Header Gradient -->
+  <!-- ── Header ─────────────────────────────────────────────── -->
   <div class="dialog-header">
-    <h2>
-      <mat-icon>visibility</mat-icon>
-      Employee Details
-    </h2>
-    <button mat-icon-button mat-dialog-close>
+    <div class="header-left">
+      <div class="header-avatar">
+        <img *ngIf="data.employee.profilePictureUrl"
+             [src]="data.employee.profilePictureUrl"
+             [alt]="data.employee.fullName"
+             class="avatar-img">
+        <span *ngIf="!data.employee.profilePictureUrl" class="avatar-initials">
+          {{ data.employee.firstName.charAt(0) }}{{ data.employee.lastName.charAt(0) }}
+        </span>
+      </div>
+      <div class="header-info">
+        <h2 class="header-name">{{ data.employee.firstName }} {{ data.employee.lastName }}</h2>
+        <div class="header-meta">
+          <span class="emp-code">{{ data.employee.employeeCode }}</span>
+          <span class="dot">·</span>
+          <span class="emp-position">{{ data.employee.positionTitle || 'No Position' }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- <button mat-icon-button mat-dialog-close class="close-btn">
       <mat-icon>close</mat-icon>
-    </button>
+    </button> -->
   </div>
 
+  <!-- ── Quick Info Strip ───────────────────────────────────── -->
+  <div class="info-strip">
+    <div class="strip-item">
+      <mat-icon>apartment</mat-icon>
+      <span>{{ data.employee.departmentName || 'No Department' }}</span>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+      <mat-icon>event</mat-icon>
+      <span>Joined {{ formatDate(data.employee.hireDate) }}</span>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+      <span class="status-pill"
+        [class.pill-active]="data.employee.status === 'active'"
+        [class.pill-inactive]="data.employee.status === 'inactive'"
+        [class.pill-deleted]="data.employee.status === 'deleted'">
+        <span class="pill-dot"></span>
+        {{ data.employee.status | titlecase }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Scrollable Content ──────────────────────────────────── -->
   <mat-dialog-content>
 
-    <!-- Employee Info Block -->
-    <div class="section-card">
-      <h3 class="section-title">Employee Information</h3>
-
-      <div class="row">
-        <label>Full Name</label>
-        <p>{{ data.employee.fullName }}</p>
+    <!-- Personal Information -->
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>person</mat-icon></div>
+        <span>Personal Information</span>
       </div>
-
-      <div class="row">
-        <label>Employee Code</label>
-        <p>{{ data.employee.employeeCode }}</p>
-      </div>
-
-      <div class="row">
-        <label>Email</label>
-        <p>{{ data.employee.email }}</p>
-      </div>
-
-      <div class="row">
-        <label>Phone</label>
-        <p>{{ data.employee.phone || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Date of Birth</label>
-        <p>{{ formatDate(data.employee.dateOfBirth) }}</p>
-      </div>
-
-      <div class="row">
-        <label>Gender</label>
-        <p>{{ data.employee.gender || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Nationality</label>
-        <p>{{ data.employee.nationality || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Marital Status</label>
-        <p>{{ data.employee.maritalStatus || 'N/A' }}</p>
+      <div class="block-grid">
+        <div class="cell">
+          <span class="cell-label">Full Name</span>
+          <span class="cell-value">{{ data.employee.fullName }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Employee Code</span>
+          <span class="cell-value code">{{ data.employee.employeeCode }}</span>
+        </div>
+        <div class="cell cell-wide">
+          <span class="cell-label">Email</span>
+          <span class="cell-value">{{ data.employee.email }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Phone</span>
+          <span class="cell-value">{{ data.employee.phone || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Date of Birth</span>
+          <span class="cell-value">{{ formatDate(data.employee.dateOfBirth) }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Gender</span>
+          <span class="cell-value">{{ data.employee.gender || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Nationality</span>
+          <span class="cell-value">{{ data.employee.nationality || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Marital Status</span>
+          <span class="cell-value">{{ data.employee.maritalStatus || '—' }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Employment Details -->
-    <div class="section-card">
-      <h3 class="section-title">Employment Details</h3>
-
-      <div class="row">
-        <label>Department</label>
-        <p>{{ data.employee.departmentName || 'Not Assigned' }}</p>
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>work</mat-icon></div>
+        <span>Employment Details</span>
       </div>
-
-      <div class="row">
-        <label>Position</label>
-        <p>{{ data.employee.positionTitle || 'Not Assigned' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Reporting Manager</label>
-        <p>{{ data.employee.reportingManagerName || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Employment Type</label>
-        <p>{{ data.employee.employmentType | titlecase }}</p>
-      </div>
-
-      <div class="row">
-        <label>Hire Date</label>
-        <p>{{ formatDate(data.employee.hireDate) }}</p>
-      </div>
-
-      <div class="row">
-        <label>Status</label>
-        <mat-chip class="status-chip">{{ data.employee.status }}</mat-chip>
+      <div class="block-grid">
+        <div class="cell">
+          <span class="cell-label">Department</span>
+          <span class="cell-value">
+            <span class="badge badge-green">{{ data.employee.departmentName || 'Not Assigned' }}</span>
+          </span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Position</span>
+          <span class="cell-value">
+            <span class="badge badge-orange">{{ data.employee.positionTitle || 'Not Assigned' }}</span>
+          </span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Employment Type</span>
+          <span class="cell-value">{{ data.employee.employmentType | titlecase }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Reporting Manager</span>
+          <span class="cell-value">{{ data.employee.reportingManagerName || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Work Location</span>
+          <span class="cell-value">{{ data.employee.workLocation || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Status</span>
+          <span class="cell-value">
+            <span class="status-pill"
+              [class.pill-active]="data.employee.status === 'active'"
+              [class.pill-inactive]="data.employee.status === 'inactive'"
+              [class.pill-deleted]="data.employee.status === 'deleted'">
+              <span class="pill-dot"></span>
+              {{ data.employee.status | titlecase }}
+            </span>
+          </span>
+        </div>
       </div>
     </div>
 
     <!-- Compensation -->
-    <div class="section-card">
-      <h3 class="section-title">Compensation</h3>
-
-      <div class="row">
-        <label>Basic Salary</label>
-        <p>{{ data.employee.basicSalary ? ('$' + data.employee.basicSalary) : 'N/A' }}</p>
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>payments</mat-icon></div>
+        <span>Compensation</span>
       </div>
-
-      <div class="row">
-        <label>Pay Type</label>
-        <p>{{ data.employee.payType || 'N/A' }}</p>
+      <div class="block-grid">
+        <div class="cell">
+          <span class="cell-label">Basic Salary</span>
+          <span class="cell-value salary">
+            {{ data.employee.basicSalary ? ('$' + (data.employee.basicSalary | number:'1.0-0')) : '—' }}
+          </span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Pay Type</span>
+          <span class="cell-value">{{ data.employee.payType || '—' }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Address -->
-    <div class="section-card">
-      <h3 class="section-title">Address</h3>
-
-      <div class="row">
-        <label>Street</label>
-        <p>{{ data.employee.address?.street || 'N/A' }}</p>
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>location_on</mat-icon></div>
+        <span>Address</span>
       </div>
-
-      <div class="row">
-        <label>City</label>
-        <p>{{ data.employee.address?.city || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>State</label>
-        <p>{{ data.employee.address?.state || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Zip Code</label>
-        <p>{{ data.employee.address?.zip || 'N/A' }}</p>
+      <div class="block-grid">
+        <div class="cell cell-wide">
+          <span class="cell-label">Street</span>
+          <span class="cell-value">{{ data.employee.address?.street || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">City</span>
+          <span class="cell-value">{{ data.employee.address?.city || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">State</span>
+          <span class="cell-value">{{ data.employee.address?.state || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">ZIP Code</span>
+          <span class="cell-value">{{ data.employee.address?.zip || '—' }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Emergency Contact -->
-    <div class="section-card">
-      <h3 class="section-title">Emergency Contact</h3>
-
-      <div class="row">
-        <label>Name</label>
-        <p>{{ data.employee.emergencyContact?.name || 'N/A' }}</p>
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>contact_phone</mat-icon></div>
+        <span>Emergency Contact</span>
       </div>
-
-      <div class="row">
-        <label>Relationship</label>
-        <p>{{ data.employee.emergencyContact?.relationship || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Phone</label>
-        <p>{{ data.employee.emergencyContact?.phone || 'N/A' }}</p>
-      </div>
-
-      <div class="row">
-        <label>Email</label>
-        <p>{{ data.employee.emergencyContact?.email || 'N/A' }}</p>
+      <div class="block-grid">
+        <div class="cell">
+          <span class="cell-label">Contact Name</span>
+          <span class="cell-value">{{ data.employee.emergencyContact?.name || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Relationship</span>
+          <span class="cell-value">{{ data.employee.emergencyContact?.relationship || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Phone</span>
+          <span class="cell-value">{{ data.employee.emergencyContact?.phone || '—' }}</span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Email</span>
+          <span class="cell-value">{{ data.employee.emergencyContact?.email || '—' }}</span>
+        </div>
       </div>
     </div>
 
   </mat-dialog-content>
 
-  <div class="dialog-actions">
-    <button mat-stroked-button mat-dialog-close>Close</button>
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <div class="dialog-footer">
+    <button mat-stroked-button mat-dialog-close class="btn-close">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
   </div>
 
 </div>
