@@ -6,8 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { JobApplicationDto, StageMasterDto } from '@core/models/jobs.models';
+import { JobApplicationDto, StageMasterDto, ApplicationStageDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
 
@@ -26,7 +28,9 @@ export interface ApplicationProcessDialogData {
     MatIconModule,
     MatProgressSpinnerModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTableModule,
+    MatMenuModule
   ],
   templateUrl: './application-process-dialog.component.html',
   styleUrls: ['./application-process-dialog.component.scss']
@@ -39,13 +43,18 @@ export class ApplicationProcessDialogComponent implements OnInit {
   stagesLoading = true;
   selectedStageId = new FormControl<string>('', { nonNullable: false });
   addingStage = false;
+  applicationStages: ApplicationStageDto[] = [];
+  applicationStagesLoading = false;
+  stagesDataSource = new MatTableDataSource<ApplicationStageDto>([]);
+  displayedColumns: string[] = ['stageName', 'interviewers', 'type', 'notes', 'updatedOn', 'actions'];
+  selectedStage: ApplicationStageDto | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ApplicationProcessDialogData,
     private dialogRef: MatDialogRef<ApplicationProcessDialogComponent>,
     private jobsService: JobsService,
     private notification: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
@@ -67,6 +76,70 @@ export class ApplicationProcessDialogComponent implements OnInit {
         this.stagesLoading = false;
       }
     });
+    this.loadApplicationStages();
+  }
+
+  loadApplicationStages(): void {
+    this.applicationStagesLoading = true;
+    this.jobsService.getApplicationStagesByJobApplyId(this.data.jobApplyId).subscribe({
+      next: (list) => {
+        this.applicationStages = list ?? [];
+        this.stagesDataSource.data = this.applicationStages;
+        this.applicationStagesLoading = false;
+      },
+      error: () => {
+        this.applicationStages = [];
+        this.stagesDataSource.data = [];
+        this.applicationStagesLoading = false;
+      }
+    });
+  }
+
+  getInterviewersDisplay(stage: ApplicationStageDto): string {
+    const interviewers = stage.interviewers;
+    if (!interviewers?.length) return '—';
+    return interviewers.map((i) => i.employeeName || '—').join(', ');
+  }
+
+  formatUpdatedOn(updatedOn: string | null | undefined): string {
+    if (!updatedOn) return '—';
+    try {
+      return new Date(updatedOn).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return '—';
+    }
+  }
+
+  editStage(stage: ApplicationStageDto): void {
+    this.notification.showSuccess('Edit will be implemented later.');
+  }
+
+  deleteStage(stage: ApplicationStageDto): void {
+    if (!confirm(`Delete stage "${stage.stageName || 'this stage'}"?`)) return;
+    this.jobsService.deleteApplicationStage(stage.applicationStageId).subscribe({
+      next: () => {
+        this.notification.showSuccess('Stage removed.');
+        this.loadApplicationStages();
+        this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
+          next: (app) => {
+            this.application = app;
+          }
+        });
+      },
+      error: (err) => {
+        this.notification.showError(err?.message || 'Failed to delete stage');
+      }
+    });
+  }
+
+  openStageMenu(row: ApplicationStageDto): void {
+    this.selectedStage = row;
   }
 
   getAppliedDate(app: JobApplicationDto): string {
@@ -96,7 +169,7 @@ export class ApplicationProcessDialogComponent implements OnInit {
           this.notification.showSuccess('Stage added successfully. Application status updated.');
           this.addingStage = false;
           this.selectedStageId.setValue('');
-          // Reload application to show updated current stage
+          this.loadApplicationStages();
           this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
             next: (app) => {
               this.application = app;

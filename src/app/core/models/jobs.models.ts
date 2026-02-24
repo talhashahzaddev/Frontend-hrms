@@ -189,6 +189,12 @@ export interface ReceivedJobApplicationsFilterParams {
 }
 
 /** Application stage (movement of a job application to a stage) */
+export interface InterviewerInfoDto {
+  employeeId: string;
+  employeeName: string;
+  positionTitle?: string | null;
+}
+
 export interface ApplicationStageDto {
   applicationStageId: string;
   jobApplyId: string;
@@ -202,6 +208,7 @@ export interface ApplicationStageDto {
   updatedOn?: string | null;
   updatedBy?: string | null;
   updatedByName?: string | null;
+  interviewers?: InterviewerInfoDto[];
 }
 
 /** Request to add a stage to a job application (only jobApplyId + stageId required for now) */
@@ -210,4 +217,10 @@ export interface CreateApplicationStageRequest {
   stageId: string;
   notes?: string | null;
   type?: string | null;
+}
+
+export interface UpdateApplicationStageRequest {
+  notes?: string | null;
+  type?: string | null;
+  interviewerIds?: string[] | null;
 }
