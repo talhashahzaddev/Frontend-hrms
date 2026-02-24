@@ -3,7 +3,7 @@
     <mat-icon>how_to_reg</mat-icon>
     Process application
   </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
+  <button mat-icon-button (click)="close()" class="close-button">
     <mat-icon>close</mat-icon>
   </button>
 </div>
@@ -145,5 +145,5 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="dialog-actions">
-  <button mat-flat-button mat-dialog-close class="close-btn">Close</button>
+  <button mat-flat-button (click)="close()" class="close-btn">Close</button>
 </mat-dialog-actions>
