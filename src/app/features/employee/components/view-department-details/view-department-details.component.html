@@ -1,44 +1,90 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>apartment</mat-icon>
-    View Department
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
+<div class="dialog-container">
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-avatar">
+        <mat-icon>apartment</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-name">{{ data.department.departmentName }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Quick Info Strip ───────────────────────────────────── -->
+  <div class="info-strip">
+    <div class="strip-item">
+      <mat-icon>person</mat-icon>
+      <span>{{ data.department.managerId ? getManagerName(data.department.managerId) : 'No Manager' }}</span>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+      <span class="status-pill"
+        [class.pill-active]="data.department.isActive"
+        [class.pill-inactive]="!data.department.isActive">
+        <span class="pill-dot"></span>
+        {{ data.department.isActive ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Scrollable Content ──────────────────────────────────── -->
+  <mat-dialog-content>
+
+    <!-- Department Information -->
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>apartment</mat-icon></div>
+        <span>Department Information</span>
+      </div>
+      <div class="block-grid">
+        <div class="cell cell-wide">
+          <span class="cell-label">Department Name</span>
+          <span class="cell-value">{{ data.department.departmentName }}</span>
+        </div>
+        <div class="cell cell-wide">
+          <span class="cell-label">Description</span>
+          <span class="cell-value">{{ data.department.description || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Management -->
+    <div class="info-block">
+      <div class="block-header">
+        <div class="block-icon"><mat-icon>manage_accounts</mat-icon></div>
+        <span>Management</span>
+      </div>
+      <div class="block-grid">
+        <div class="cell">
+          <span class="cell-label">Reporting Manager</span>
+          <span class="cell-value">
+            {{ data.department.managerId ? getManagerName(data.department.managerId) : '—' }}
+          </span>
+        </div>
+        <div class="cell">
+          <span class="cell-label">Status</span>
+          <span class="cell-value">
+            <span class="status-pill"
+              [class.pill-active]="data.department.isActive"
+              [class.pill-inactive]="!data.department.isActive">
+              <span class="pill-dot"></span>
+              {{ data.department.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </mat-dialog-content>
+
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <div class="dialog-footer">
+    <button mat-stroked-button mat-dialog-close class="btn-close">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
+  </div>
+
 </div>
-
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="departmentForm" class="department-form">
-    
-    <!-- Department Name -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Department Name</mat-label>
-      <input matInput formControlName="departmentName" readonly>
-    </mat-form-field>
-
-    <!-- Description -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description" rows="3" readonly></textarea>
-    </mat-form-field>
-
-    <!-- Manager -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Department Manager</mat-label>
-      <mat-select formControlName="managerId">
-        <mat-option value="">No Manager</mat-option>
-        <mat-option *ngFor="let manager of data.managers" [value]="manager.employeeId">
-          {{ manager.fullName }} - {{ manager.email }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close type="button">
-    Close
-  </button>
-</mat-dialog-actions>

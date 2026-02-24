@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -14,6 +13,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
 
@@ -22,7 +23,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { DepartmentFormDialogComponent } from '../department-form-dialog/department-form-dialog.component';
 import { ViewDepartmentDetailsComponent } from '../view-department-details/view-department-details.component';
 import { AttendanceService } from '@/app/features/attendance/services/attendance.service';
-import { DepartmentEmployeeViewComponent,DepartmentEmployeesViewData } from './view-department-employees';
+import { DepartmentEmployeeViewComponent, DepartmentEmployeesViewData } from './view-department-employees';
 import { DepartmentEmployee } from '@/app/core/models/attendance.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -45,6 +46,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatDividerModule,
+    MatCheckboxModule,
+    MatPaginatorModule,
     MatDialogModule
   ],
   templateUrl: './department-list.component.html',
@@ -55,10 +58,12 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
   // Data
   departments: Department[] = [];
+  private allDepartments: Department[] = [];
   managers: Employee[] = [];
 
   // Table configuration
   displayedColumns: string[] = [
+    'select',
     'name',
     'manager',
     'employeeCount',
@@ -82,9 +87,15 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     { value: 'inactive', label: 'Inactive' }
   ];
 
+  // Pagination (mat-paginator style — mirrors employee-list)
+  totalCount = 0;
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [10, 25, 50];
+
   constructor(
     private employeeService: EmployeeService,
-    private attendanceService:AttendanceService,
+    private attendanceService: AttendanceService,
     private dialog: MatDialog,
     private notificationService: NotificationService
   ) {}
@@ -102,13 +113,11 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
   private loadInitialData(): void {
     this.isLoading = true;
 
-    // Load managers first
     this.employeeService.getManagers()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (managers) => {
           this.managers = managers;
-          // Fetch departments immediately with default filters
           this.fetchDepartments();
         },
         error: (error) => {
@@ -127,6 +136,7 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe(() => {
+      this.pageIndex = 0;
       this.fetchDepartments();
     });
   }
@@ -134,7 +144,6 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
   private fetchDepartments(): void {
     const searchQuery = this.searchControl.value || undefined;
     const status = this.statusControl.value || undefined;
-    const managerId = this.managerControl.value || undefined;
 
     this.isLoading = true;
 
@@ -142,7 +151,9 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (departments) => {
-          this.departments = departments;
+          this.allDepartments = departments;
+          this.totalCount = departments.length;
+          this.applyPagination();
           this.isLoading = false;
         },
         error: (error) => {
@@ -153,19 +164,35 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
       });
   }
 
+  private applyPagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.departments = this.allDepartments.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.applyPagination();
+  }
+
   clearFilters(): void {
     this.searchControl.setValue('');
     this.statusControl.setValue('');
     this.managerControl.setValue('');
   }
 
+  hasFiltersApplied(): boolean {
+    return !!(
+      this.searchControl.value?.trim() ||
+      this.statusControl.value ||
+      this.managerControl.value
+    );
+  }
+
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {
       width: '600px',
-      data: {
-        mode: 'create',
-        managers: this.managers
-      }
+      data: { mode: 'create', managers: this.managers }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -177,67 +204,42 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
   }
 
   viewDepartment(department: Department): void {
-    const dialogRef = this.dialog.open(ViewDepartmentDetailsComponent, {
+    this.dialog.open(ViewDepartmentDetailsComponent, {
       width: '600px',
-      data: {
-        department,
-        managers: this.managers
-      }
+      data: { department, managers: this.managers }
     });
-
-    dialogRef.afterClosed().subscribe(() => {});
   }
 
-
-
-//View Department Employees
-
-viewDepartmentEmployees(department: Department): void {
-
-  const dialogRef = this.dialog.open(DepartmentEmployeeViewComponent, {
-    width: '900px',
-    data: {
-      departmentId: department.departmentId,
-      departmentName: department.departmentName,
-      employees: []
-    }
-  });
-
-  dialogRef.componentInstance.isLoading = true;
-
-  this.attendanceService.getDepartmentEmployees(department.departmentId)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (employees: DepartmentEmployee[]) => {
-        // ✅ employees is already the array
-        dialogRef.componentInstance.employeesDataSource.data = employees;
-        dialogRef.componentInstance.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading department employees:', error);
-        dialogRef.componentInstance.isLoading = false;
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          'Failed to load department employees';
-        // this.showError(errorMessage);
+  viewDepartmentEmployees(department: Department): void {
+    const dialogRef = this.dialog.open(DepartmentEmployeeViewComponent, {
+      width: '900px',
+      data: {
+        departmentId: department.departmentId,
+        departmentName: department.departmentName,
+        employees: []
       }
     });
-}
 
+    dialogRef.componentInstance.isLoading = true;
 
-
-
-
+    this.attendanceService.getDepartmentEmployees(department.departmentId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (employees: DepartmentEmployee[]) => {
+          dialogRef.componentInstance.employeesDataSource.data = employees;
+          dialogRef.componentInstance.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading department employees:', error);
+          dialogRef.componentInstance.isLoading = false;
+        }
+      });
+  }
 
   editDepartment(department: Department): void {
     const dialogRef = this.dialog.open(DepartmentFormDialogComponent, {
       width: '600px',
-      data: {
-        mode: 'edit',
-        department,
-        managers: this.managers
-      }
+      data: { mode: 'edit', department, managers: this.managers }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -248,42 +250,39 @@ viewDepartmentEmployees(department: Department): void {
     });
   }
 
-toggleDepartmentStatus(department: Department, newStatus: boolean): void {
-  const isActivating = newStatus;
-  const action = isActivating ? 'Activate' : 'Deactivate';
+  toggleDepartmentStatus(department: Department, newStatus: boolean): void {
+    const action = newStatus ? 'Activate' : 'Deactivate';
 
-  const dialogData: ConfirmDeleteData = {  // ✅ changed interface
-    title: `${action} Department`,
-    message: `Are you sure you want to ${action.toLowerCase()} this department?`,
-    itemName: department.departmentName,
-    confirmButtonText: `Yes, ${action}`   // ✅ dynamic button text
-  };
+    const dialogData: ConfirmDeleteData = {
+      title: `${action} Department`,
+      message: `Are you sure you want to ${action.toLowerCase()} this department?`,
+      itemName: department.departmentName,
+      confirmButtonText: `Yes, ${action}`
+    };
 
-  const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, { // ✅ updated component
-    width: '450px',
-    data: dialogData,
-    panelClass: 'confirm-action-dialog-panel'
-  });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-action-dialog-panel'
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result === true) {
-      this.employeeService.updateDepartmentStatus(department.departmentId, newStatus)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.fetchDepartments();
-            this.notificationService.showSuccess(`Department ${action.toLowerCase()}d successfully`);
-          },
-          error: (error) => {
-            const errorMessage = error?.error?.message || error?.message || `Failed to ${action.toLowerCase()} department`;
-            this.notificationService.showError(errorMessage);
-          }
-        });
-    }
-  });
-}
-
-
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.employeeService.updateDepartmentStatus(department.departmentId, newStatus)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.fetchDepartments();
+              this.notificationService.showSuccess(`Department ${action.toLowerCase()}d successfully`);
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || error?.message || `Failed to ${action.toLowerCase()} department`;
+              this.notificationService.showError(errorMessage);
+            }
+          });
+      }
+    });
+  }
 
   deleteDepartment(department: Department): void {
     const dialogData: ConfirmDeleteData = {
@@ -293,7 +292,7 @@ toggleDepartmentStatus(department: Department, newStatus: boolean): void {
     };
 
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '450px',
+      width: '400px',
       data: dialogData,
       panelClass: 'confirm-delete-dialog-panel'
     });
@@ -315,16 +314,4 @@ toggleDepartmentStatus(department: Department, newStatus: boolean): void {
       }
     });
   }
-
-  // Helper method to check if filters are applied
-  hasFiltersApplied(): boolean {
-    return !!(
-      this.searchControl.value?.trim() ||
-      this.statusControl.value ||
-      this.managerControl.value
-    );
-  }
 }
-
-
-

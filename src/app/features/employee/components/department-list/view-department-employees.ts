@@ -8,9 +8,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-/* =======================
-   Backend-aligned Employee
-   ======================= */
 export interface DepartmentEmployee {
   employeeId: string;
   employeeCode: string;
@@ -23,9 +20,6 @@ export interface DepartmentEmployee {
   reportingManagerName: string;
 }
 
-/* =======================
-   Dialog Data (UI-only)
-   ======================= */
 export interface DepartmentEmployeesViewData {
   departmentId: string;
   departmentName: string;
@@ -46,304 +40,480 @@ export interface DepartmentEmployeesViewData {
     MatProgressSpinnerModule
   ],
   template: `
-  <!-- Dialog Header -->
+<div class="dialog-container">
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
   <div class="dialog-header">
-    <h2 mat-dialog-title>
-      <mat-icon>groups</mat-icon>
-      Employees in {{ data.departmentName }}
-    </h2>
-    <button mat-icon-button mat-dialog-close class="close-button">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="header-left">
+      <div class="header-avatar">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-name">{{ data.departmentName }}</h2>
+        <p class="header-sub">Department Employees</p>
+      </div>
+    </div>
   </div>
 
-  <!-- Dialog Content -->
-  <mat-dialog-content class="dialog-content">
+  <!-- ── Info Strip ─────────────────────────────────────────── -->
+  <div class="info-strip">
+    <div class="strip-item">
+      <mat-icon>apartment</mat-icon>
+      <span>{{ data.departmentName }}</span>
+    </div>
+    <div class="strip-divider"></div>
+    <div class="strip-item">
+      <mat-icon>group</mat-icon>
+      <span>{{ employeesDataSource.data.length }} {{ employeesDataSource.data.length === 1 ? 'Employee' : 'Employees' }}</span>
+    </div>
+  </div>
 
-    <!-- Department Info -->
-    <div class="detail-section mb-4">
-      <h3>Department Information</h3>
-      <div class="grid">
-        <div><strong>Name:</strong> {{ data.departmentName }}</div>
-        <div><strong>Total Employees:</strong> {{ employeesDataSource.data.length }}</div>
-      </div>
+  <!-- ── Content ────────────────────────────────────────────── -->
+  <mat-dialog-content>
+
+    <!-- Spinner -->
+    <div *ngIf="isLoading" class="spinner-wrap">
+      <mat-progress-spinner diameter="36" mode="indeterminate"></mat-progress-spinner>
     </div>
 
-    <!-- Employees -->
-    <div class="detail-section">
-      <h3>Employees</h3>
+    <!-- No Data -->
+    <div *ngIf="!isLoading && employeesDataSource.data.length === 0" class="empty-state">
+      <mat-icon>person_off</mat-icon>
+      <p>No employees found in this department.</p>
+    </div>
 
-      <!-- Spinner -->
-      <div *ngIf="isLoading" class="spinner-container">
-        <mat-progress-spinner diameter="50" mode="indeterminate"></mat-progress-spinner>
+    <!-- Employee List -->
+    <div *ngIf="!isLoading && employeesDataSource.data.length > 0" class="info-block">
+
+      <!-- Table Header -->
+      <div class="table-head">
+        <span class="col-name">Name</span>
+        <span class="col-email">Email</span>
+        <span class="col-position">Position</span>
+        <span class="col-manager">Manager</span>
+        <span class="col-status">Status</span>
+        <span class="col-date">Hire Date</span>
       </div>
 
-      <!-- Employee Table Container with Horizontal Scroll -->
-      <div class="table-wrapper">
-        <table
-          *ngIf="!isLoading"
-          mat-table
-          [dataSource]="employeesDataSource"
-          class="mat-elevation-z8 w-full">
+      <!-- Rows -->
+      <div class="table-row" *ngFor="let emp of employeesDataSource.data; let last = last" [class.last]="last">
 
-        <!-- Employee Code -->
-        <ng-container matColumnDef="employeeCode">
-          <th mat-header-cell *matHeaderCellDef>Code</th>
-          <td mat-cell *matCellDef="let emp">{{ emp.employeeCode }}</td>
-        </ng-container>
-
-        <!-- Name -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let emp">
-            {{ emp.firstName }} {{ emp.lastName }}
-          </td>
-        </ng-container>
+        <!-- Name + Code -->
+        <span class="col-name">
+          <span class="emp-name">{{ emp.firstName }} {{ emp.lastName }}</span>
+          <span class="emp-code">{{ emp.employeeCode }}</span>
+        </span>
 
         <!-- Email -->
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef>Email</th>
-          <td mat-cell *matCellDef="let emp">{{ emp.email }}</td>
-        </ng-container>
-
-        <!-- Status -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let emp">{{ emp.status }}</td>
-        </ng-container>
-
-        <!-- Hire Date -->
-        <ng-container matColumnDef="hireDate">
-          <th mat-header-cell *matHeaderCellDef>Hire Date</th>
-          <td mat-cell *matCellDef="let emp">
-            {{ emp.hireDate | date:'mediumDate' }}
-          </td>
-        </ng-container>
+        <span class="col-email">
+          <span class="cell-value">{{ emp.email }}</span>
+        </span>
 
         <!-- Position -->
-        <ng-container matColumnDef="position">
-          <th mat-header-cell *matHeaderCellDef>Position</th>
-          <td mat-cell *matCellDef="let emp">{{ emp.position }}</td>
-        </ng-container>
+        <span class="col-position">
+          <span class="cell-value">{{ emp.position || '—' }}</span>
+        </span>
 
-        <!-- Reporting Manager -->
-        <ng-container matColumnDef="reportingManager">
-          <th mat-header-cell *matHeaderCellDef>Reporting Manager</th>
-          <td mat-cell *matCellDef="let emp">{{ emp.reportingManagerName?.trim() || 'No Manager' }}</td>
-        </ng-container>
+        <!-- Manager -->
+        <span class="col-manager">
+          <span class="cell-value">{{ emp.reportingManagerName.trim() || 'No Manager' }}</span>
+        </span>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      </div>
+        <!-- Status -->
+        <span class="col-status">
+          <span class="status-pill"
+            [class.pill-active]="emp.status === 'active'"
+            [class.pill-inactive]="emp.status === 'inactive'"
+            [class.pill-deleted]="emp.status === 'deleted'">
+            <span class="pill-dot"></span>
+            {{ emp.status | titlecase }}
+          </span>
+        </span>
 
-      <!-- No Data -->
-      <div
-        *ngIf="!isLoading && employeesDataSource.data.length === 0"
-        class="no-data">
-        No employees found for this department.
+        <!-- Hire Date -->
+        <span class="col-date">
+          <span class="cell-value">{{ emp.hireDate ? (emp.hireDate | date:'MMM d, y') : '—' }}</span>
+        </span>
+
       </div>
     </div>
+
   </mat-dialog-content>
 
-  <!-- Dialog Actions -->
-  <div class="dialog-actions">
-    <button mat-stroked-button mat-dialog-close>
+  <!-- ── Footer ─────────────────────────────────────────────── -->
+  <div class="dialog-footer">
+    <button mat-stroked-button mat-dialog-close class="btn-close">
       <mat-icon>close</mat-icon>
       Close
     </button>
   </div>
+
+</div>
   `,
   styles: [`
-    ::ng-deep .mat-mdc-dialog-container {
-      border-radius: 16px !important;
-      padding: 0 !important;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
-      max-width: 1600px !important;
-      width: 95vw !important;
-      min-height: 500px;
-    }
+.dialog-container {
+  width: 100%;
+  background: #f7f8fa;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+}
 
-    .dialog-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 32px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
+/* ── Header ──────────────────────────────────────────────── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  padding: 22px 28px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+}
 
-    .dialog-header h2 {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
-    }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
 
-    .dialog-header .close-button {
-      color: white;
-    }
+.header-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f0eeff;
+  border: 2px solid #e0e2e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
-    .dialog-content {
-      padding: 32px !important;
-      max-height: 75vh;
-      overflow-y: auto;
-    }
+.header-avatar mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-    .detail-section {
-      margin-bottom: 24px;
-    }
+.header-name {
+  margin: 0 0 3px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
 
-    .detail-section h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #e5e7eb;
-      padding-bottom: 10px;
-      color: #1f2937;
-    }
+.header-sub {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 8px;
-    }
+/* ── Info Strip ──────────────────────────────────────────── */
+.info-strip {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 11px 28px;
+  background: #ffffff;
+  border-bottom: 1px solid #ebebeb;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
 
-    .grid div {
-      font-size: 15px;
-      padding: 8px 0;
-    }
+.strip-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #4b5563;
+  font-weight: 500;
+}
 
-    .grid div strong {
-      color: #374151;
-      font-weight: 600;
-      margin-right: 8px;
-    }
+.strip-item mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: #9ca3af;
+}
 
-    .table-wrapper {
-      overflow-x: auto;
-      margin-top: 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      background: white;
-      max-width: 100%;
-    }
+.strip-divider {
+  width: 1px;
+  height: 13px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
 
-    .table-wrapper::-webkit-scrollbar {
-      height: 10px;
-    }
+/* ── Scrollable Body ─────────────────────────────────────── */
+mat-dialog-content {
+  padding: 16px !important;
+  max-height: 62vh;
+  overflow-y: auto;
+  background: #f7f8fa;
+}
 
-    .table-wrapper::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 5px;
-      margin: 0 12px;
-    }
+mat-dialog-content::-webkit-scrollbar { width: 4px; }
+mat-dialog-content::-webkit-scrollbar-track { background: transparent; }
+mat-dialog-content::-webkit-scrollbar-thumb { background: #e0e2e8; border-radius: 4px; }
 
-    .table-wrapper::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 5px;
-    }
+/* ── Spinner / Empty ─────────────────────────────────────── */
+.spinner-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 120px;
+}
 
-    .table-wrapper::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: #9ca3af;
+}
 
-    table {
-      width: 100%;
-      min-width: 1200px;
-      border-collapse: separate;
-      border-spacing: 0;
-    }
+.empty-state mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
 
-    ::ng-deep .mat-mdc-table {
-      background: white !important;
-    }
+.empty-state p {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+}
 
-    ::ng-deep th.mat-mdc-header-cell {
-      font-weight: 700 !important;
-      color: #1f2937 !important;
-      font-size: 14px !important;
-      padding: 18px 24px !important;
-      background-color: #f9fafb !important;
-      white-space: nowrap !important;
-      border-bottom: 2px solid #e5e7eb !important;
-    }
+/* ── Employee List Block ─────────────────────────────────── */
+.info-block {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #ebebeb;
+  overflow: hidden;
+}
 
-    ::ng-deep td.mat-mdc-cell {
-      padding: 18px 24px !important;
-      font-size: 14px !important;
-      color: #374151 !important;
-      border-bottom: 1px solid #f3f4f6 !important;
-    }
+/* ── Table Head ──────────────────────────────────────────── */
+.table-head {
+  display: grid;
+  grid-template-columns: 1.8fr 2.2fr 1.2fr 1.4fr 0.9fr 1fr;
+  align-items: center;
+  padding: 0 16px;
+  height: 38px;
+  background: #fafafa;
+  border-bottom: 1px solid #ebebeb;
+  gap: 12px;
+}
 
-    ::ng-deep tr.mat-mdc-row {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      cursor: pointer !important;
-    }
+.table-head span {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-    ::ng-deep tr.mat-mdc-row:hover {
-      background-color: rgba(102, 126, 234, 0.08) !important;
-      transform: scale(1.01) !important;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15) !important;
-    }
+/* ── Table Row ───────────────────────────────────────────── */
+.table-row {
+  display: grid;
+  grid-template-columns: 1.8fr 2.2fr 1.2fr 1.4fr 0.9fr 1fr;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #f5f5f5;
+  gap: 12px;
+  transition: background 0.12s ease;
+}
 
-    ::ng-deep tr.mat-mdc-row:hover td.mat-mdc-cell {
-      color: #1f2937 !important;
-      font-weight: 500 !important;
-    }
+.table-row:hover { background: #fafafa; }
+.table-row.last { border-bottom: none; }
 
-    .dialog-actions {
-      padding: 20px 32px !important;
-      display: flex;
-      justify-content: flex-end;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-top: 1px solid #e5e7eb;
-    }
+/* ── Column Shared ───────────────────────────────────────── */
+.col-avatar, .col-name, .col-email,
+.col-position, .col-manager, .col-status, .col-date {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
 
-    .spinner-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 150px;
-    }
+.col-name { flex-direction: column; align-items: flex-start; gap: 2px; }
 
-    .no-data {
-      text-align: center;
-      padding: 20px;
-      color: #6b7280;
-      font-style: italic;
-    }
+/* ── Employee Avatar ─────────────────────────────────────── */
+.emp-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #f0eeff;
+  border: 1.5px solid #e0e2e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #6366f1;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
 
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr !important;
-      }
+.emp-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
 
-      ::ng-deep .mat-mdc-dialog-container {
-        width: 95vw !important;
-        max-width: 95vw !important;
-      }
+.emp-code {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
 
-      .dialog-content {
-        max-height: 80vh;
-      }
-    }
+.cell-value {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── Status Pills ────────────────────────────────────────── */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pill-active  { color: #166534; }
+.pill-active .pill-dot  { background: #22c55e; }
+.pill-inactive { color: #374151; }
+.pill-inactive .pill-dot { background: #9ca3af; }
+.pill-deleted  { color: #991b1b; }
+.pill-deleted .pill-dot  { background: #ef4444; }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 14px 20px;
+  border-top: 1px solid #ebebeb;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.btn-close {
+  height: 36px !important;
+  padding: 0 20px !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+  border-color: #d1d5db !important;
+  transition: all 0.15s ease !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-close mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+}
+
+.btn-close:hover {
+  background: #f3f4f6 !important;
+  border-color: #9ca3af !important;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+
+  .dialog-header { padding: 16px 16px 14px; }
+
+  .header-avatar { width: 44px; height: 44px; }
+  .header-avatar mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  .header-name { font-size: 16px; }
+
+  .info-strip { padding: 9px 16px; gap: 10px; }
+  .strip-divider { display: none; }
+
+  mat-dialog-content { padding: 12px !important; max-height: 65vh; }
+
+  /* Mobile: hide table head, stack each row as a mini-card */
+  .table-head { display: none; }
+
+  .table-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .table-row.last { border-bottom: none; }
+
+  .col-name {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .col-email, .col-position, .col-manager, .col-date {
+    width: 100%;
+    margin-bottom: 3px;
+  }
+
+  .col-email::before   { content: 'Email: '; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .col-position::before { content: 'Position: '; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .col-manager::before  { content: 'Manager: '; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .col-date::before     { content: 'Hired: '; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+
+  .col-status {
+    margin-top: 4px;
+  }
+
+  .dialog-footer { padding: 12px 14px; }
+  .btn-close { width: 100% !important; justify-content: center; height: 40px !important; }
+}
   `]
 })
 export class DepartmentEmployeeViewComponent {
 
   displayedColumns: string[] = [
-    'employeeCode',
-    'name',
-    'email',
-    'position',
-    'reportingManager',
-    'status',
-    'hireDate'
+    'employeeCode', 'name', 'email',
+    'position', 'reportingManager', 'status', 'hireDate'
   ];
 
   employeesDataSource: MatTableDataSource<DepartmentEmployee>;
@@ -354,6 +524,6 @@ export class DepartmentEmployeeViewComponent {
     @Inject(MAT_DIALOG_DATA) public data: DepartmentEmployeesViewData
   ) {
     this.employeesDataSource = new MatTableDataSource(data.employees || []);
-    this.isLoading = data.employees?.length ? false : true;
+    this.isLoading = false;
   }
 }

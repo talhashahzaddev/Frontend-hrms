@@ -8,198 +8,120 @@ export interface ConfirmDeleteData {
   title: string;
   message: string;
   itemName: string;
-   confirmButtonText?: string; 
+  confirmButtonText?: string;
 }
 
 @Component({
   selector: 'app-confirm-delete-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <div class="confirm-delete-dialog">
-      <div class="dialog-header">
-        <h2 mat-dialog-title>
-          <mat-icon class="warning-icon">warning</mat-icon>
-          {{ data.title }}
-        </h2>
-        <button mat-icon-button mat-dialog-close class="close-button">
-          <mat-icon>close</mat-icon>
+    <div class="cdd">
+      <h2 class="cdd-title">{{ data.title }}</h2>
+      <mat-dialog-content class="cdd-body">
+        <p class="cdd-message">
+          {{ data.message }}
+          <strong *ngIf="data.itemName"> {{ data.itemName }}</strong>?
+        </p>
+      </mat-dialog-content>
+      <div class="cdd-footer">
+        <button mat-stroked-button mat-dialog-close class="cdd-cancel">Cancel</button>
+        <button mat-flat-button (click)="onConfirm()" class="cdd-confirm">
+          {{ data.confirmButtonText || 'Delete' }}
         </button>
       </div>
-
-      <mat-dialog-content>
-        <div class="dialog-content">
-          <div class="warning-message">
-            <p>{{ data.message }}</p>
-            <p class="item-name" *ngIf="data.itemName">
-              <strong>{{ data.itemName }}</strong>
-            </p>
-          </div>
-          <div class="warning-note">
-            <mat-icon>info</mat-icon>
-            <span>This action cannot be undone.</span>
-          </div>
-        </div>
-      </mat-dialog-content>
-
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button mat-dialog-close class="cancel-button">
-          <mat-icon>close</mat-icon>
-          Cancel
-        </button>
-        <button mat-raised-button color="warn" (click)="onConfirm()" class="confirm-button">
-          <mat-icon>check</mat-icon>
-        {{ data.confirmButtonText || 'Yes, Delete' }}
-        </button>
-      </mat-dialog-actions>
     </div>
   `,
   styles: [`
-    .confirm-delete-dialog {
-      width: 450px;
+    /* Fix: Material gives the dialog container a large default min-width.
+       Override it so the dialog wraps tightly around .cdd */
+    :host ::ng-deep .mdc-dialog__surface {
+      min-width: unset !important;
+      width: auto !important;
+    }
+
+    .cdd {
+      width: 400px;
       max-width: 90vw;
+      background: white;
+      border-radius: 12px;
+      padding: 26px 26px 20px;
+      font-family: 'Inter', 'DM Sans', sans-serif;
+      box-sizing: border-box;
     }
 
-    .dialog-header {
+    .cdd-title {
+      margin: 0 0 12px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: -0.2px;
+    }
+
+    .cdd-body {
+      padding: 0 !important;
+      max-height: unset !important;
+      overflow: visible !important;
+    }
+
+    .cdd-message {
+      margin: 0;
+      font-size: 14px;
+      color: #4b5563;
+      line-height: 1.65;
+      font-weight: 400;
+    }
+
+    .cdd-message strong {
+      color: #111827;
+      font-weight: 600;
+    }
+
+    .cdd-footer {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-
-      h2 {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: white;
-
-        .warning-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-          color: #ffeb3b;
-        }
-      }
-
-      .close-button {
-        color: white;
-
-        &:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        mat-icon {
-          color: white;
-        }
-      }
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
     }
 
-    mat-dialog-content {
-      padding: 24px;
-      max-height: 300px;
-      overflow-y: auto;
-
-      .dialog-content {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-
-        .warning-message {
-          p {
-            margin: 0 0 12px 0;
-            font-size: 16px;
-            line-height: 1.6;
-            color: #333;
-
-            &:first-child {
-              margin-bottom: 8px;
-            }
-          }
-
-          .item-name {
-            margin: 0;
-            padding: 12px;
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            border-radius: 4px;
-            font-size: 15px;
-
-            strong {
-              color: #856404;
-              font-weight: 600;
-            }
-          }
-        }
-
-        .warning-note {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px;
-          background: #e3f2fd;
-          border-left: 4px solid #2196f3;
-          border-radius: 4px;
-          font-size: 14px;
-          color: #1565c0;
-
-          mat-icon {
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-            color: #2196f3;
-          }
-        }
-      }
+    .cdd-cancel {
+      height: 38px !important;
+      padding: 0 20px !important;
+      border-radius: 8px !important;
+      font-size: 13.5px !important;
+      font-weight: 500 !important;
+      color: #374151 !important;
+      border-color: #d1d5db !important;
+      transition: background 0.15s ease, border-color 0.15s ease !important;
     }
 
-    mat-dialog-actions {
-      padding: 16px 24px;
-      border-top: 1px solid #e0e0e0;
-      gap: 12px;
-      background: #f9fafb;
+    .cdd-cancel:hover {
+      background: #f9fafb !important;
+      border-color: #9ca3af !important;
+    }
 
-      button {
-        min-width: 120px;
-        height: 44px;
-        font-weight: 600;
-        font-size: 14px;
+    .cdd-confirm {
+      height: 38px !important;
+      padding: 0 22px !important;
+      border-radius: 8px !important;
+      font-size: 13.5px !important;
+      font-weight: 600 !important;
+      background: #dc2626 !important;
+      color: white !important;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.28) !important;
+      transition: all 0.15s ease !important;
+    }
 
-        mat-icon {
-          margin-right: 8px;
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-        }
-      }
+    .cdd-confirm:hover {
+      background: #b91c1c !important;
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.38) !important;
+    }
 
-      .cancel-button {
-        color: #666;
-        border-color: #e0e0e0;
-
-        &:hover {
-          background: #f5f5f5;
-        }
-      }
-
-      .confirm-button {
-        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-        color: white;
-        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
-
-        &:hover {
-          background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
-          box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-        }
-      }
+    @media (max-width: 480px) {
+      .cdd { padding: 20px 18px 16px; width: 100%; }
+      .cdd-title { font-size: 15.5px; }
+      .cdd-message { font-size: 13.5px; }
+      .cdd-cancel, .cdd-confirm { flex: 1; }
     }
   `]
 })
@@ -213,17 +135,3 @@ export class ConfirmDeleteDialogComponent {
     this.dialogRef.close(true);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -14,7 +14,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-
+import { SettingsService } from '../../../settings/services/settings.service';
 
 
 
@@ -43,6 +43,8 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   positions: Position[] = [];
   managers: Employee[] = [];
   isLoading = false;
+  currencySymbol: string = '$';
+  organizationCurrency: string = 'USD';
   private destroy$ = new Subject<void>();
 
   employmentTypes = [
@@ -83,6 +85,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private employeeService: EmployeeService,
     private notificationService:NotificationService,
+    private settingsService: SettingsService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EmployeeEditComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { employee: Employee }
@@ -91,6 +94,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeForm();
     this.loadDropdowns();
+    this.loadInitialData();
 
     // Filter positions by department selection and clear invalid position
     this.employeeForm.get('departmentId')?.valueChanges
@@ -282,6 +286,24 @@ private formatDate(date: Date): string {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+  private loadInitialData(): void {
+    // Load organization currency first
+    this.settingsService.getOrganizationSettings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (settings) => {
+          this.organizationCurrency = settings.currency || 'USD';
+          const currency = this.settingsService.getAvailableCurrencies().find(c => c.code === this.organizationCurrency);
+          this.currencySymbol = currency?.symbol || '$';
+        },
+        error: (error) => {
+          console.error('Error loading organization currency:', error);
+          // Default to USD if error
+          
+          this.currencySymbol = '$';
+        }
+      });
   }
 }
 

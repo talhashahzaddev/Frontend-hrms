@@ -2,7 +2,7 @@
 // Inspired by iFlag's precise, minimal table-centric layout
 
 .employee-list-container {
-  padding: 32px 36px;
+  padding: 12px 16px;
   max-width: 1600px;
   margin: 0 auto;
   background: #f5f6fa;
@@ -14,7 +14,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 28px;
+    margin-bottom: 10px;
 
     .header-content {
       .page-title {
@@ -40,7 +40,7 @@
         border-radius: 8px !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        background: #1a1f2e !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
         color: white !important;
         letter-spacing: 0.1px;
         transition: all 0.2s ease !important;
@@ -374,13 +374,13 @@
 
         // Employee Number
         .employee-number {
-          font-size: 12.5px;
+          font-size: 10px;
           font-weight: 600;
-          color: #6366f1;
-          font-family: 'Fira Code', 'Courier New', monospace;
-          background: #eef2ff;
-          padding: 3px 8px;
-          border-radius: 5px;
+          color: #000000;
+          //font-family: 'Fira Code', 'Courier New', monospace;
+          //background: #eef2ff;
+          padding: 3px 7px;
+          border-radius: 4px;
         }
 
         // Employee Info
@@ -459,6 +459,7 @@
         .date-cell {
           color: #6b7280 !important;
           font-size: 13px !important;
+          white-space: nowrap;
         }
 
         // Status Chip
@@ -493,15 +494,15 @@
         .action-menu-btn {
           width: 32px !important;
           height: 32px !important;
-          border-radius: 6px !important;
-          color: #9ca3af !important;
+          border-radius: 12px !important;
+          color: #000000 !important;
 
           mat-icon { font-size: 20px; }
 
-          &:hover {
-            background: #f3f4f6 !important;
-            color: #374151 !important;
-          }
+          //&:hover {
+            //background: #ffffff !important;
+            //color: #374151 !important;
+          //}
         }
       }
 
@@ -574,38 +575,36 @@
     // Pagination
     ::ng-deep mat-paginator {
       background: #fafafa;
-      border-top: 1px solid #f0f1f5;
+      border-top: 1px solid #e5e7eb;
 
       .mat-mdc-paginator-container {
+        display: flex;
+        align-items: center;       
+        justify-content: flex-start;
+        flex-wrap: nowrap;         
+        gap: 16px;                 
         padding: 8px 20px;
         min-height: 52px;
       }
 
-      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-paginator-page-size {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+      }
+
       .mat-mdc-paginator-range-label {
+        white-space: nowrap;       
         font-size: 13px;
-        color: #9ca3af;
-        font-weight: 500;
+        color: #6b7280;
       }
 
-      .mat-mdc-select-value {
-        font-size: 13px;
-        color: #374151;
-        font-weight: 600;
-      }
-
-      button {
-        width: 32px !important;
-        height: 32px !important;
-        border-radius: 6px !important;
-
-        &:not([disabled]) {
-          color: #6366f1;
-
-          &:hover {
-            background: #eef2ff;
-          }
-        }
+      .mat-mdc-paginator-navigation {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;         
       }
     }
   }
@@ -879,6 +878,7 @@
                 font-size: 10px;
                 padding: 0 10px;
                 letter-spacing: 0.5px;
+                white-space: nowrap;
               }
             }
 
@@ -943,32 +943,55 @@
 
       // Pagination: compact on mobile
       ::ng-deep mat-paginator {
+
         .mat-mdc-paginator-container {
-          padding: 6px 14px;
-          flex-wrap: wrap;
-          gap: 4px;
-          min-height: 48px;
-          justify-content: space-between;
+          flex-wrap: nowrap;              // keep single line
+          align-items: center;
+          justify-content: flex-start;
+          gap: 6px;
+          padding: 2px 6px;               // ⬅️ smaller padding
+          min-height: 36px;               // ⬅️ reduce height
         }
 
         .mat-mdc-paginator-page-size {
-          margin: 0;
+          display: flex;
           align-items: center;
+          gap: 4px;
+          margin: 0;
+          font-size: 11px;
+          white-space: nowrap;
         }
 
         .mat-mdc-paginator-page-size-label {
-          font-size: 11.5px;
-          display: none; // Hide "Items per page" label on mobile to save space
+          font-size: 11px;
+        }
+
+        .mat-mdc-select-trigger {
+          height: 22px;                   // ⬅️ smaller dropdown
+          font-size: 11px;
+          padding: 0 4px;
         }
 
         .mat-mdc-paginator-range-label {
-          font-size: 11.5px;
+          font-size: 11px;
+          white-space: nowrap;
           margin: 0;
         }
 
+        .mat-mdc-paginator-navigation {
+          display: flex;
+          align-items: center;
+          gap: 0;                         // ⬅️ tighter arrows
+        }
+
         button {
-          width: 28px !important;
-          height: 28px !important;
+          width: 22px !important;         // ⬅️ smaller buttons
+          height: 22px !important;
+          min-width: 22px !important;
+          padding: 0 !important;
+          mat-icon {
+            font-size: 14px;              // ⬅️ smaller icons
+          }
         }
       }
 
