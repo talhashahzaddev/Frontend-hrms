@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-//import { RoleGuard } from '../../core/guards/role.guard';
-
+import { AuthGuard } from '@/app/core/guards/auth.guard';
 export const newsRoutes: Routes = [
   {
     path: '',
@@ -14,6 +13,8 @@ export const newsRoutes: Routes = [
   },
   {
     path: 'create-news',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/create-news/create-news.component')
       .then(m => m.CreateNewsComponent),
   },
@@ -28,7 +29,5 @@ export const newsRoutes: Routes = [
     loadComponent: () => import('./components/news-view/news-view.component')
       .then(m => m.NewsViewComponent),
   },
-
-  
 
 ];
