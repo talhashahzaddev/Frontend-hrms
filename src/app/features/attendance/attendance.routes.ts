@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from '../../core/guards/auth.guard';
 
 export const attendanceRoutes: Routes = [
   {
@@ -16,10 +17,14 @@ export const attendanceRoutes: Routes = [
   },
   {
     path: 'team-attendance',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/team-attandence/team-attandence.component').then(m => m.TeamAttandenceComponent)
   },
   {
     path: 'reports',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
   {

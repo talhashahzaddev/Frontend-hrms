@@ -15,9 +15,6 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { SettingsService } from '../../../settings/services/settings.service';
-
-
-
 @Component({
   selector: 'app-employee-edit',
   standalone: true,
@@ -123,7 +120,7 @@ initializeForm(): void {
     firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
     lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
     email: [emp.email, [Validators.required, Validators.email]],
-    phone: [emp.phone, [Validators.pattern(/^[0-9]{10,15}$/)]],
+    phone: [emp.phone, [Validators.pattern(/^\+?[0-9]{10,15}$/)]],
     dateOfBirth: [emp.dateOfBirth ? new Date(emp.dateOfBirth) : null],
     gender: [emp.gender?.toLowerCase() || null],
     departmentId: [emp.departmentId || null],

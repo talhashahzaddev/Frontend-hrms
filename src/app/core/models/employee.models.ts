@@ -37,7 +37,7 @@ export interface Employee {
   // Related data
   employmentDetails?: EmploymentDetail;
   paytype?:string;
-
+  roleName?:string;
   department?: Department;
   position?: Position;
   manager?: Employee;
