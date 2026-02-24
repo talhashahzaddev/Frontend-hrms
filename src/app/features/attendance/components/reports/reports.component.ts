@@ -48,12 +48,10 @@ import { Department, Employee } from '../../../../core/models/employee.models';
 export class ReportsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  // Data
   reportData: AttendanceReport | null = null;
   departments: Department[] = [];
   employees: Employee[] = [];
 departmentEmployees: DepartmentEmployee[] = [];
-  // Table configuration
   displayedColumns: string[] = [
     'employee',
     'date',
@@ -63,22 +61,18 @@ departmentEmployees: DepartmentEmployee[] = [];
     'status'
   ];
 
-  // Loading states
   isLoading = false;
 
-  // Pagination
   pageSize = 10;
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25, 50, 100];
 
-  // Filters
   startDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   endDateControl = new FormControl(new Date());
   departmentControl = new FormControl('');
   employeeControl = new FormControl('');
   statusControl = new FormControl('');
 
-  // Filter options
   statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'present', label: 'Present' },
@@ -99,7 +93,6 @@ departmentEmployees: DepartmentEmployee[] = [];
   ngOnInit(): void {
     this.loadDepartmentsOnly();
 
-    // Listen for department changes to load employees dynamically
     this.departmentControl.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((departmentId) => {
@@ -112,27 +105,20 @@ departmentEmployees: DepartmentEmployee[] = [];
     this.destroy$.complete();
   }
 
-  // -----------------------------
-  // Load departments initially
-  // -----------------------------
   private loadDepartmentsOnly(): void {
     this.employeeService.getDepartments()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (departments) => {
           this.departments = departments;
-          this.employees = []; // Start with empty employees
+          this.employees = [];
         },
         error: (error) => console.error('Error loading departments:', error)
       });
   }
 
-  // -----------------------------
-  // Load employees dynamically by department
-  // -----------------------------
   private loadEmployeesByDepartment(departmentId: string | null): void {
     if (!departmentId) {
-      // No department selected → clear employee list
       this.employees = [];
       this.employeeControl.setValue('');
       return;
@@ -142,8 +128,8 @@ this.attendanceService.getDepartmentEmployees(departmentId)
   .pipe(takeUntil(this.destroy$))
   .subscribe({
     next: (deptEmployees) => {
-      this.departmentEmployees = deptEmployees; // store in new array
-      this.employeeControl.setValue(''); // reset selected employee if needed
+      this.departmentEmployees = deptEmployees;
+      this.employeeControl.setValue('');
     },
     error: (err) => {
       const errorMessage = err?.error?.message || err?.message || 'Failed to load employees for department';
@@ -156,9 +142,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
 
   }
 
-  // -----------------------------
-  // Generate attendance report
-  // -----------------------------
   generateReport(): void {
     this.isLoading = true;
 
@@ -168,7 +151,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     const departmentId = this.departmentControl.value || undefined;
     const status = this.statusControl.value || undefined;
 
-    // Reset to first page when generating new report
     this.pageIndex = 0;
 
     this.attendanceService.getAttendanceReport(startDate, endDate, employeeId, departmentId, status, this.pageIndex + 1, this.pageSize)
@@ -187,9 +169,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
       });
   }
 
-  // -----------------------------
-  // Pagination
-  // -----------------------------
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
     this.pageSize = event.pageSize;
@@ -227,9 +206,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
       });
   }
 
-  // -----------------------------
-  // Date range shortcuts
-  // -----------------------------
   setDateRange(range: string): void {
     const today = new Date();
     let startDate: Date;
@@ -259,9 +235,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     this.startDateControl.setValue(startDate);
   }
 
-  // -----------------------------
-  // Export functions
-  // -----------------------------
   exportToCSV(): void {
     this.exportReport('csv');
   }
@@ -294,9 +267,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
       });
   }
 
-  // -----------------------------
-  // Utility
-  // -----------------------------
   formatHours(hours: number): string {
     if (hours === 0) return '0h 0m';
     const hrs = Math.floor(hours);
@@ -304,5 +274,5 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     return `${hrs}h ${mins}m`;
   }
 
- 
+
 }

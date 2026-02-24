@@ -16,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ApplicationDetailDialogComponent } from '../application-detail-dialog/application-detail-dialog.component';
+import { ApplicationProcessDialogComponent } from '../application-process-dialog/application-process-dialog.component';
 import { ApplyJobDialogComponent } from '../apply-job-dialog/apply-job-dialog.component';
 import {
   ConfirmDeleteDialogComponent,
@@ -309,6 +310,22 @@ export class AppliedJobsComponent implements OnInit {
     });
   }
 
+  openProcessDialog(app: JobApplicationDto): void {
+    const ref = this.dialog.open(ApplicationProcessDialogComponent, {
+      width: '920px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'application-process-dialog-panel',
+      data: { jobApplyId: app.jobApplyId }
+    });
+    ref.afterClosed().subscribe((refreshed) => {
+      if (refreshed) {
+        this.loadPostedByMeApplications();
+        this.loadReceivedApplications();
+      }
+    });
+  }
+
   editApplication(app: JobApplicationDto): void {
     const dialogRef = this.dialog.open(ApplyJobDialogComponent, {
       width: '560px',
@@ -358,5 +375,53 @@ export class AppliedJobsComponent implements OnInit {
     } catch {
       return '';
     }
+  }
+
+  /** Stages sorted by stageOrder (1, 2, 3...) for board columns */
+  get postedByMeOrderedStages(): StageMasterDto[] {
+    if (!this.stages?.length) return [];
+    return [...this.stages].sort((a, b) => (a.stageOrder ?? 999) - (b.stageOrder ?? 999));
+  }
+
+  /** Board columns: first "Applied" (default), then API stages in order */
+  get postedByMeBoardColumns(): { stageId: string | null; stageName: string }[] {
+    const applied: { stageId: string | null; stageName: string } = { stageId: null, stageName: 'Applied' };
+    const stageCols = this.postedByMeOrderedStages.map((s) => ({
+      stageId: s.stageId,
+      stageName: s.stageName
+    }));
+    return [applied, ...stageCols];
+  }
+
+  /** Applications for a given column: null = default "Applied" (no match or null currentStageId) */
+  getPostedByMeAppsForColumn(columnStageId: string | null): JobApplicationDto[] {
+    const stageIds = new Set(this.postedByMeOrderedStages.map((s) => s.stageId));
+    if (columnStageId === null) {
+      return this.postedByMeApplications.filter(
+        (app) => !app.currentStageId || !stageIds.has(app.currentStageId)
+      );
+    }
+    return this.postedByMeApplications.filter((app) => app.currentStageId === columnStageId);
+  }
+
+  /** Board columns for All Job Applications: same structure as Posted By Me */
+  get receivedBoardColumns(): { stageId: string | null; stageName: string }[] {
+    const applied: { stageId: string | null; stageName: string } = { stageId: null, stageName: 'Applied' };
+    const stageCols = this.postedByMeOrderedStages.map((s) => ({
+      stageId: s.stageId,
+      stageName: s.stageName
+    }));
+    return [applied, ...stageCols];
+  }
+
+  /** Applications for a given column in All Job Applications tab */
+  getReceivedAppsForColumn(columnStageId: string | null): JobApplicationDto[] {
+    const stageIds = new Set(this.postedByMeOrderedStages.map((s) => s.stageId));
+    if (columnStageId === null) {
+      return this.receivedApplications.filter(
+        (app) => !app.currentStageId || !stageIds.has(app.currentStageId)
+      );
+    }
+    return this.receivedApplications.filter((app) => app.currentStageId === columnStageId);
   }
 }

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-
+import { AuthGuard } from '../../core/guards/auth.guard';
 export const performanceRoutes: Routes = [
   {
     path: '',
@@ -12,6 +12,8 @@ export const performanceRoutes: Routes = [
   },
   {
     path: 'appraisals',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/appraisals/appraisals.component').then(m => m.AppraisalsComponent)
   },
   {
@@ -20,6 +22,8 @@ export const performanceRoutes: Routes = [
   },
   {
     path: 'reports',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
   {

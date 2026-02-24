@@ -1,0 +1,136 @@
+<div class="manual-attendance-container">
+  <div class="header">
+    <h1>Manual Attendance Management</h1>
+    <p>View and edit attendance records.</p>
+  </div>
+
+  <!-- Search Filter -->
+  <mat-card class="search-card">
+    <mat-card-content>
+      <form [formGroup]="searchForm" (ngSubmit)="search()" class="search-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" *ngIf="isManagerOrAdmin">
+          <mat-label>Employee ID (Optional)</mat-label>
+          <input matInput formControlName="employeeId" placeholder="Search by Employee ID">
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">
+          <mat-icon>search</mat-icon> Search
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Edit Form (Modal-like or Inline) -->
+  <mat-card *ngIf="isEditing" class="edit-card">
+    <mat-card-header>
+      <mat-card-title>Edit Attendance for {{ editingRecord?.employeeName }} - {{ editingRecord?.workDate | date }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="editForm" (ngSubmit)="saveEdit()" class="edit-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Check-In Time</mat-label>
+            <input matInput type="datetime-local" formControlName="checkInTime">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Check-Out Time</mat-label>
+            <input matInput type="datetime-local" formControlName="checkOutTime">
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="present">Present</mat-option>
+              <mat-option value="absent">Absent</mat-option>
+              <mat-option value="leave">Leave</mat-option>
+              <mat-option value="half_day">Half Day</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Notes</mat-label>
+            <textarea matInput formControlName="notes"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="editForm.invalid">Save Changes</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Records Table -->
+  <div class="table-container" *ngIf="!isLoading && attendanceRecords.length > 0">
+    <table mat-table [dataSource]="attendanceRecords" class="mat-elevation-z8">
+      
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Date </th>
+        <td mat-cell *matCellDef="let element"> {{element.workDate | date}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="employeeName">
+        <th mat-header-cell *matHeaderCellDef> Employee </th>
+        <td mat-cell *matCellDef="let element"> {{element.employeeName}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="checkIn">
+        <th mat-header-cell *matHeaderCellDef> Check In </th>
+        <td mat-cell *matCellDef="let element"> {{element.checkInTime | date:'shortTime'}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="checkOut">
+        <th mat-header-cell *matHeaderCellDef> Check Out </th>
+        <td mat-cell *matCellDef="let element"> {{element.checkOutTime | date:'shortTime'}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let element"> 
+          <span class="status-badge" [ngClass]="element.status.toLowerCase()">
+            {{element.status}} 
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Actions </th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button color="primary" (click)="startEdit(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+  
+  <div *ngIf="!isLoading && attendanceRecords.length === 0" class="no-records">
+    <p>No attendance records found for the selected criteria.</p>
+  </div>
+</div>

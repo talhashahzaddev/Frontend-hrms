@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from '../../core/guards/auth.guard';
+
 //import { RoleGuard } from '../../core/guards/role.guard';
 
 export const leaveRoutes: Routes = [
@@ -27,7 +29,7 @@ export const leaveRoutes: Routes = [
   },
   {
     path: 'team',
-    //canActivate: [RoleGuard],
+    canActivate: [AuthGuard],
     data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
     loadComponent: () => import('./components/team-leaves/team-leaves.component')
       .then(m => m.TeamLeavesComponent),
@@ -41,7 +43,7 @@ export const leaveRoutes: Routes = [
   },
   {
     path: 'types',
-    //canActivate: [RoleGuard],
+    canActivate: [AuthGuard],
     data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/leave-types/leave-types.component')
       .then(m => m.LeaveTypesComponent),

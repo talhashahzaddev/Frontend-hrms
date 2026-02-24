@@ -1,5 +1,4 @@
-
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -25,9 +24,27 @@ import {
   PendingShiftSwap,
   approvedshiftRequest,
   AttendanceStatus,
-  OfficeIP
+  OfficeIP,
+  MonthlyTimesheetSummary,
+  EmployeeTimesheetDto,
+  TimesheetSearchRequest,
+  TimesheetResponse,
+  MonthlyTimesheetCreateDto,
+  AttendanceUpdateRequestDto,
+  FinalizedTimesheetRecordDto,
+  FinalizedTimesheetDto,
+  ProcessAttendanceRequestDto,
+  PendingAttendanceRequest,
+  EmployeeSubmissionPackage,
+  CorrectionRecord,
+  EmployeeReviewPackage,
+  DailyReviewRecord,
+  ManagerOverrideDto,
+  OrgSubmissionProgress,
+  ManualAttendanceUpdateDto
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
+import { FinalizeBatchRequestDto } from '../models/finalize-batch-request.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +55,6 @@ export class AttendanceService {
 
   constructor(private http: HttpClient) { }
 
-  // Clock In/Out Operations
   checkIn(request: ClockInOutRequest): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/clock-in`, request)
       .pipe(
@@ -75,7 +91,6 @@ export class AttendanceService {
       );
   }
 
-  // Attendance CRUD Operations
 
   getAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
     let params = new HttpParams();
@@ -158,7 +173,24 @@ export class AttendanceService {
       );
   }
 
-  // Employee-specific operations
+  getManualAttendanceRecords(searchDto: any): Observable<Attendance[]> {
+    let params = new HttpParams()
+        .set('startDate', searchDto.startDate)
+        .set('endDate', searchDto.endDate);
+
+    if (searchDto.employeeId) {
+        params = params.set('employeeId', searchDto.employeeId);
+    }
+
+    return this.http.get<ApiResponse<Attendance[]>>(`${this.apiUrl}/manual`, { params })
+      .pipe(map(res => res.data!));
+  }
+
+  updateManualAttendance(updateDto: any): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/manual`, updateDto)
+        .pipe(map(res => res.success));
+  }
+
   getMyAttendance(startDate: string, endDate: string): Observable<Attendance[]> {
     const params = new HttpParams()
       .set('startDate', startDate)
@@ -208,7 +240,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         })
       );
   }
-  //Today chhhn
 
   getTodaySessions(): Observable<AttendanceSessionDto[]> {
     return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
@@ -221,8 +252,8 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
     if (workDate) {
       const dateStr = (workDate instanceof Date)
-        ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
-        : workDate; // assume string is already formatted
+        ? workDate.toISOString().split('T')[0]
+        : workDate;
       url += `?date=${dateStr}`;
     }
 
@@ -236,8 +267,8 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
 
     if (workDate) {
       const dateStr = (workDate instanceof Date)
-        ? workDate.toISOString().split('T')[0] // format as 'YYYY-MM-DD'
-        : workDate; // assume string is already formatted
+        ? workDate.toISOString().split('T')[0]
+        : workDate;
       url += `?date=${dateStr}`;
     }
 
@@ -295,7 +326,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Calendar and Dashboard data
   getAttendanceCalendar(employeeId?: string, year?: number, month?: number): Observable<AttendanceCalendarData[]> {
     let params = new HttpParams();
     if (year) params = params.set('year', year.toString());
@@ -349,7 +379,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   }
 
 
-  // Reports
   getAttendanceReport(startDate: string, endDate: string, employeeId?: string, departmentId?: string, status?: string, pageNumber: number = 1, pageSize: number = 10): Observable<AttendanceReport> {
     let params = new HttpParams()
       .set('startDate', startDate)
@@ -386,7 +415,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   }
 
 
-  //\create Shift 
 
 
   createShift(request: any): Observable<any> {
@@ -414,12 +442,11 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
           if (!response.success) {
             throw new Error(response.message || 'Failed to assign shift');
           }
-          // No data needed, just return void
         })
       );
   }
 
-  /** ✅ Get Employees by Shift ID */
+
   getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
     return this.http.get<ApiResponse<EmployeeShift[]>>(`${this.apiUrl}/shift/${shiftId}`)
       .pipe(
@@ -432,12 +459,11 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // ✅ Shift Swap API using model
   createShiftSwap(shiftSwap: ShiftSwap): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap`, shiftSwap);
   }
 
-  /** ✅ Update an existing shift */
+
   updateShift(shiftId: string, updateDto: UpdateShiftDto): Observable<any> {
     return this.http.put(`${this.apiUrl}/shift/${shiftId}`, updateDto);
   }
@@ -455,30 +481,24 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
   }
 
-  // Get all pending shift swap requests for Super Admin
   getPendingShiftSwapsForAdmin(): Observable<PendingShiftSwap[]> {
     return this.http.get<PendingShiftSwap[]>(`${this.apiUrl}/shiftswap/pending`);
   }
 
-  // Get current shift for an employee by ID
-  // Get current shift for an employee by ID
   getCurrentShift(employeeId: string): Observable<ShiftDto> {
     return this.http.get<ShiftDto>(`${this.apiUrl}/CurrentShift/${employeeId}`);
   }
 
-  // New method for Calendar/Dialog that needs unwrapped data
   getCurrentShiftDetails(employeeId: string): Observable<ShiftDto> {
     return this.http.get<ApiResponse<ShiftDto>>(`${this.apiUrl}/CurrentShift/${employeeId}`)
       .pipe(map(response => response.data!));
   }
 
-  //Approve or Reject Shift Swap Request
   approvedshiftRequest(request: approvedshiftRequest): Observable<any> {
     return this.http.post(`${this.apiUrl}/shiftswap/approve`, request);
   }
 
 
-  // Department Attendance (for managers)
   getDepartmentAttendance(departmentId: string, date?: string): Observable<Attendance[]> {
     const params = date ? new HttpParams().set('date', date) : new HttpParams();
 
@@ -493,7 +513,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Bulk Operations
   bulkApproveAttendance(attendanceIds: string[]): Observable<void> {
     return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/bulk/approve`, { attendanceIds })
       .pipe(
@@ -516,7 +535,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       );
   }
 
-  // Utility methods
   calculateTotalHours(checkIn: string, checkOut: string, breakDuration: number = 0): number {
     const checkInTime = new Date(`2000-01-01T${checkIn}`);
     const checkOutTime = new Date(`2000-01-01T${checkOut}`);
@@ -556,7 +574,6 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       default: return 'secondary';
     }
   }
-  // Office IP Management
   getOfficeIPs(): Observable<OfficeIP[]> {
     return this.http.get<ApiResponse<OfficeIP[]>>(`${this.ipUrl}/office-ips`)
       .pipe(
@@ -602,5 +619,454 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
           }
         })
       );
+  }
+
+  getMonthlyTimesheets(startDate?: string, endDate?: string): Observable<MonthlyTimesheetSummary[]> {
+    let params = new HttpParams();
+
+    if (startDate && startDate.trim() !== '') {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate && endDate.trim() !== '') {
+      params = params.set('endDate', endDate);
+    }
+
+    const baseUrl = `${this.apiUrl}/timesheet`;
+    const queryString = params.toString();
+    const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+
+    console.log('ðŸ“Š Fetching timesheets from:', fullUrl);
+    console.log('ðŸ“… Date range:', { startDate: startDate || 'N/A', endDate: endDate || 'N/A' });
+
+    return this.http.get<ApiResponse<MonthlyTimesheetSummary[]>>(`${this.apiUrl}/timesheet`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch timesheets');
+          }
+          console.log('âœ… Received', response.data?.length || 0, 'timesheet snapshots');
+          return response.data || [];
+        })
+      );
+  }
+
+  getSnapshots(): Observable<MonthlyTimesheetSummary[]> {
+    return this.getMonthlyTimesheets();
+  }
+
+  getTimesheetDetails(timesheetId: string): Observable<EmployeeTimesheetDto[]> {
+    if (!timesheetId || timesheetId.trim() === '') {
+      throw new Error('Timesheet ID is required');
+    }
+
+    const params = new HttpParams().set('timesheetId', timesheetId);
+    const fullUrl = `${this.apiUrl}/timesheet/details?timesheetId=${timesheetId}`;
+
+    console.log('ðŸ“‹ Fetching timesheet details from:', fullUrl);
+
+    return this.http.get<ApiResponse<EmployeeTimesheetDto[]>>(
+      `${this.apiUrl}/timesheet/details`,
+      { params }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch timesheet details');
+        }
+        console.log('âœ… Received details for', response.data?.length || 0, 'employees');
+        const employees = response.data || [];
+        employees.forEach((emp: any) => {
+          if (emp.is_finalized === undefined) {
+            emp.is_finalized = emp.isFinalized ?? emp.IsFinalized ?? false;
+          }
+          if (emp.dailyRecords?.length) {
+            emp.dailyRecords = emp.dailyRecords.map((r: any) => {
+              return {
+                ...r,
+                attendanceId: r.attendanceId || r.AttendanceId || undefined,
+                date: r.date || r.Date || r.workDate || r.WorkDate || '',
+                checkInTime: r.checkInTime || r.CheckInTime || undefined,
+                checkOutTime: r.checkOutTime || r.CheckOutTime || undefined,
+                status: r.status || r.Status || 'No Record',
+                totalHours: r.totalHours ?? r.TotalHours ?? 0,
+                notes: r.notes || r.Notes || undefined,
+                is_finalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
+                is_manager_override: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
+                hasApprovedRequest: r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest || false,
+                hasRejectedRequest: r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest || false,
+                hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
+                hasPendingRequest: (r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest || false)
+                  && !(r.has_draft_request    || r.hasDraftRequest    || r.HasDraftRequest)
+                  && !(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest)
+                  && !(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest),
+              };
+            });
+          }
+        });
+        return employees;
+      })
+    );
+  }
+
+  createSnapshot(dto: MonthlyTimesheetCreateDto): Observable<FinalizedTimesheetDto> {
+    console.log('ðŸ“¸ Creating snapshot:', dto);
+
+    return this.http.post<ApiResponse<FinalizedTimesheetDto>>(
+      `${this.apiUrl}/timesheet/snapshot`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to create timesheet snapshot');
+        }
+        console.log('âœ… Snapshot created successfully:', response.data);
+        return response.data!;
+      })
+    );
+  }
+
+  submitEditRequest(dto: AttendanceUpdateRequestDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/request-update`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to submit edit request');
+        }
+        return response.data || true;
+      })
+    );
+  }
+
+
+  submitTimesheetApprovals(timesheetId: string, _employeeId: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/submit-approvals`,
+      { timesheetId }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to submit timesheet approvals');
+        }
+        return response.data || true;
+      })
+    );
+  }
+
+  finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {
+    console.log('ðŸ”’ Finalizing batch for timesheetId:', timesheetId, employeeId ? `employeeId: ${employeeId}` : '(all employees)');
+
+    const body: { timesheetId: string; employeeId?: string } = { timesheetId };
+    if (employeeId) {
+      body.employeeId = employeeId;
+    }
+
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/finalize-batch`,
+      body
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to finalize timesheet batch');
+        }
+        console.log('âœ… Batch finalized successfully');
+        return response.data || true;
+      })
+    );
+  }
+
+  getPendingAttendanceRequests(): Observable<EmployeeSubmissionPackage[]> {
+    return this.http.get<ApiResponse<EmployeeSubmissionPackage[]>>(
+      `${this.apiUrl}/pending-requests`
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch pending requests');
+        }
+        return response.data || [];
+      })
+    );
+  }
+
+  processEditRequest(dto: ProcessAttendanceRequestDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/process-request`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to process attendance request');
+        }
+        return response.data || false;
+      })
+    );
+  }
+
+  approveAllPendingRequests(timesheetId: string, employeeId?: string): Observable<{ approvedCount: number }> {
+    const body: { timesheetId: string; employeeId?: string } = { timesheetId };
+    if (employeeId) {
+      body.employeeId = employeeId;
+    }
+    return this.http.post<ApiResponse<{ approvedCount: number }>>(
+      `${this.apiUrl}/timesheet/approve-all`,
+      body
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to approve pending requests');
+        }
+        return response.data || { approvedCount: 0 };
+      })
+    );
+  }
+
+  getOrgSubmissionProgress(month: number, year: number): Observable<OrgSubmissionProgress> {
+  const params = new HttpParams()
+    .set('month', month.toString())
+    .set('year', year.toString());
+
+  return this.http.get<ApiResponse<OrgSubmissionProgress>>(
+    `${this.apiUrl}/timesheet/org-progress`,
+    { params }
+  ).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch organization progress');
+      }
+
+      const raw = response.data ?? {} as any;
+
+      const total          = Number(raw.totalEmployees     ?? 0);
+      const finalized      = Number(raw.finalizedCount     ?? 0);
+      const submitted      = Number(raw.submittedCount     ?? 0);
+      const pendingReview  = Number(raw.pendingReviewCount ?? 0);
+      const inProgress     = Number(raw.inProgressCount    ?? 0);
+      const untouched      = Number(raw.untouchedCount     ?? 0);
+
+      const submissionRate = raw.submissionRate != null
+        ? Number(raw.submissionRate)
+        : (total > 0 ? Math.round(((finalized + submitted) / total) * 100 * 10) / 10 : 0);
+
+      const complianceRate = raw.complianceRate != null
+        ? Number(raw.complianceRate)
+        : (total > 0 ? Math.round((finalized / total) * 100 * 10) / 10 : 0);
+
+      const result: OrgSubmissionProgress = {
+        month:             Number(raw.month  ?? month),
+        year:              Number(raw.year   ?? year),
+        totalEmployees:    total,
+        finalizedCount:    finalized,
+        submittedCount:    submitted,
+        pendingReviewCount: pendingReview,
+        inProgressCount:   inProgress,
+        untouchedCount:    untouched,
+        submissionRate,
+        complianceRate
+      };
+
+      return result;
+    })
+  );
+}
+  getManagerReviewDashboard(timesheetId: string): Observable<EmployeeReviewPackage[]> {
+    if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
+      throw new Error('Invalid Timesheet ID');
+    }
+    return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
+      `${this.apiUrl}/timesheet/review-dashboard`,
+      { params: { timesheetId, _t: Date.now().toString() } }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch manager review dashboard');
+        }
+        const packages = response.data || [];
+        return packages.map((pkg: any) => {
+          const rawRecords = pkg.fullMonthRecords || pkg.FullMonthRecords || [];
+
+          const pkgIsFinalized: boolean =
+            (pkg as any).isFinalized ?? (pkg as any).IsFinalized ?? (pkg as any).is_finalized ?? false;
+          const pkgPending: number =
+            (pkg as any).pendingRequestCount ?? (pkg as any).PendingRequestCount ?? 0;
+          const pkgApproved: number =
+            (pkg as any).approvedCount ?? (pkg as any).ApprovedCount ?? 0;
+          const pkgRejected: number =
+            (pkg as any).rejectedCount ?? (pkg as any).RejectedCount ?? 0;
+          const pkgFinalizedCount: number =
+            (pkg as any).finalizedCount ?? (pkg as any).FinalizedCount ?? 0;
+          const pkgFinalizedDays: number =
+            (pkg as any).finalizedDays ?? (pkg as any).FinalizedDays ?? pkgFinalizedCount;
+          const pkgTotalRecords: number =
+            (pkg as any).totalRecords ?? (pkg as any).TotalRecords ?? 0;
+
+          return {
+            ...pkg,
+            isFinalized:          pkgIsFinalized,
+            pendingRequestCount:  pkgPending,
+            approvedCount:        pkgApproved,
+            rejectedCount:        pkgRejected,
+            finalizedCount:       pkgFinalizedCount,
+            finalizedDays:        pkgFinalizedDays,
+            totalRecords:         pkgTotalRecords,
+            fullMonthRecords: rawRecords.map((r: any) => this.normalizeDailyReviewRecord(r))
+          };
+        });
+      })
+    );
+  }
+
+
+
+  private extractAttendanceId(r: any): string {
+    return r.attendanceId || r['AttendanceId'] || r['attendanceid'] || r['Attendanceid'] || '';
+  }
+
+  private normalizeDailyReviewRecord(r: any): DailyReviewRecord {
+    const resolvedAttendanceId = this.extractAttendanceId(r);
+
+    const isDraft    = !!(r.has_draft_request    || r.hasDraftRequest    || r.HasDraftRequest);
+    const isPending  = !!(r.has_pending_request  || r.hasPendingRequest  || r.HasPendingRequest);
+    const isApproved = !!(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest);
+    const isRejected = !!(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest);
+
+    const derivedStatus: 'pending' | 'approved' | 'rejected' | undefined =
+      r.requestStatus  ? (r.requestStatus  as 'pending' | 'approved' | 'rejected') :
+      r.RequestStatus  ? (r.RequestStatus  as 'pending' | 'approved' | 'rejected') :
+      (isPending && !isDraft && !isApproved && !isRejected) ? 'pending'  :
+      isApproved                                            ? 'approved' :
+      isRejected                                            ? 'rejected' :
+      undefined;
+
+    return {
+      recordId: r.recordId || r.RecordId || r.requestId || r.RequestId || '',
+      attendanceId: resolvedAttendanceId,
+      date: r.date || r.workDate || r.Date || r.WorkDate || '',
+      originalCheckIn: r.originalCheckIn || r.checkInTime || r.CheckInTime || undefined,
+      originalCheckOut: r.originalCheckOut || r.checkOutTime || r.CheckOutTime || undefined,
+      originalStatus: r.originalStatus || r.status || r.Status || 'No Record',
+      originalTotalHours: r.originalTotalHours || r.totalHours || r.TotalHours || 0,
+      requestedCheckIn: r.requestedCheckIn || r.RequestedCheckIn || undefined,
+      requestedCheckOut: r.requestedCheckOut || r.RequestedCheckOut || undefined,
+      requestedStatus: r.requestedStatus || r.RequestedStatus || undefined,
+      requestedNotes: r.requestedNotes || r.RequestedNotes || undefined,
+      reasonForEdit: r.reasonForEdit || r.ReasonForEdit || undefined,
+      hasDraftRequest:    isDraft,
+      hasPendingRequest:  isPending && !isDraft && !isApproved && !isRejected,
+      hasApprovedRequest: isApproved,
+      isFinalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
+      isManagerOverride: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
+      requestId: r.requestId || r.RequestId || undefined,
+      requestStatus: derivedStatus
+    };
+  }
+
+  getEmployeeReviewPackage(timesheetId: string, employeeId: string): Observable<EmployeeReviewPackage> {
+    if (!timesheetId || timesheetId === '00000000-0000-0000-0000-000000000000') {
+      throw new Error('Invalid timesheetId provided');
+    }
+
+    return this.http.get<ApiResponse<EmployeeReviewPackage[]>>(
+      `${this.apiUrl}/timesheet/review-dashboard`,
+      { params: { timesheetId, employeeId, _t: Date.now().toString() } }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch employee review data');
+        }
+        const packages = response.data || [];
+        if (packages.length === 0) {
+          throw new Error('No attendance data found for this employee');
+        }
+        const pkg = packages[0];
+        const rawRecords = (pkg as any).fullMonthRecords || (pkg as any).FullMonthRecords || [];
+        const pkgIsFinalized: boolean =
+          (pkg as any).isFinalized ?? (pkg as any).IsFinalized ?? (pkg as any).is_finalized ?? false;
+        const pkgPending: number =
+          (pkg as any).pendingRequestCount ?? (pkg as any).PendingRequestCount ?? 0;
+        return {
+          ...pkg,
+          isFinalized:         pkgIsFinalized,
+          pendingRequestCount: pkgPending,
+          approvedCount:       (pkg as any).approvedCount  ?? (pkg as any).ApprovedCount  ?? 0,
+          rejectedCount:       (pkg as any).rejectedCount  ?? (pkg as any).RejectedCount  ?? 0,
+          finalizedCount:      (pkg as any).finalizedCount ?? (pkg as any).FinalizedCount ?? 0,
+          totalRecords:        (pkg as any).totalRecords   ?? (pkg as any).TotalRecords   ?? 0,
+          fullMonthRecords: rawRecords.map((r: any) => this.normalizeDailyReviewRecord(r))
+        };
+      })
+    );
+  }
+
+  finalizeEmployeeApprovals(timesheetId: string, employeeId: string): Observable<{ finalizedCount: number }> {
+    return this.http.post<ApiResponse<{ finalizedCount: number } | boolean>>(
+      `${this.apiUrl}/timesheet/finalize-batch`,
+      { timesheetId, employeeId }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to finalize employee approvals');
+        }
+        const data = response.data;
+        if (typeof data === 'object' && data !== null && 'finalizedCount' in data) {
+          return data as { finalizedCount: number };
+        }
+        return { finalizedCount: 0 };
+      })
+    );
+  }
+
+  applyManagerOverride(dto: ManagerOverrideDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/admin-override`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to apply admin override');
+        }
+        return response.data || true;
+      })
+    );
+  }
+
+  adminOverride(dto: ManualAttendanceUpdateDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/admin-override`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to apply admin override');
+        }
+        return response.data || true;
+      })
+    );
+  }
+submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }> {
+    return this.http.post<ApiResponse<number>>(
+      `${this.apiUrl}/timesheet/submit-approvals`,
+      { timesheetId } as FinalizeBatchRequestDto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to submit timesheet batch');
+        }
+        return { submittedCount: (response.data as any) || 0 };
+      })
+    );
+  }
+
+  finalizeTimesheetBatch(timesheetId: string): Observable<{ finalizedCount: number }> {
+    return this.http.post<ApiResponse<{ finalizedCount: number }>>(
+      `${this.apiUrl}/timesheet/finalize-batch`,
+      { timesheetId }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to finalize timesheet batch');
+        }
+        return response.data || { finalizedCount: 0 };
+      })
+    );
   }
 }

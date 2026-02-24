@@ -1,214 +1,205 @@
-// Position Form Dialog - Professional & Beautiful Styling (Matches Department Dialog)
+// ── Dialog Container ──────────────────────────────────────────
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 16px !important;
+  border-radius: 12px !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10) !important;
 }
 
-// Dialog Header
+// ── Dialog Header ─────────────────────────────────────────────
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-  color: white;
+  padding: 22px 28px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #ebebeb;
 
   h2 {
     display: flex;
     align-items: center;
     gap: 12px;
     margin: 0;
-    font-size: 22px;
+    font-size: 25px;
     font-weight: 700;
-    color: white;
+    color: #111827;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    letter-spacing: -0.2px;
 
     mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+      font-size: 30px;
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
 
   .close-button {
-    color: white;
-    transition: all 0.2s ease;
+    color: #9ca3af;
+    width: 32px !important;
+    height: 32px !important;
+    transition: all 0.15s ease;
+
+    mat-icon { font-size: 18px; }
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(90deg);
+      color: #374151;
+      background: #f3f4f6;
     }
   }
 }
 
-// Dialog Content
+// ── Dialog Content ────────────────────────────────────────────
 .dialog-content {
-  padding: 28px !important;
-  min-width: 500px;
-  max-width: 600px;
+  padding: 20px 24px !important;
+  min-width: 480px;
+  max-width: 580px;
+  background: #f7f8fa;
 
   .position-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
     .full-width {
       width: 100%;
-      margin-bottom: 20px;
+      margin-bottom: 4px;
 
-      &:last-child {
-        margin-bottom: 0;
-      }
+      &:last-child { margin-bottom: 0; }
     }
 
     ::ng-deep mat-form-field {
       &.mat-form-field-appearance-outline {
+
         .mat-mdc-text-field-wrapper {
-          background: #f9fafb;
-          border-radius: 12px;
-          transition: all 0.3s ease;
+          background: #ffffff;
+          border-radius: 8px !important;
+          transition: background 0.15s ease;
         }
 
-        .mat-mdc-form-field-flex {
-          padding: 0 16px;
-        }
+        .mat-mdc-form-field-flex { padding: 0 14px; }
+        .mat-mdc-form-field-infix { padding: 11px 0 !important; min-height: unset; }
 
-        .mat-mdc-notch-piece {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
           border-color: #e5e7eb !important;
-          transition: border-color 0.3s ease;
+          transition: border-color 0.15s ease;
         }
 
-        &:hover .mat-mdc-text-field-wrapper {
-          background: white;
-        }
+        &:hover .mat-mdc-text-field-wrapper { background: #ffffff; }
 
-        &:hover .mat-mdc-notch-piece {
-          border-color: #8b5cf6 !important;
+        &:hover {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #c4b5fd !important;
+          }
         }
 
         &.mat-focused {
-          .mat-mdc-text-field-wrapper {
-            background: white;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-          }
+          .mat-mdc-text-field-wrapper { background: #ffffff; }
 
-          .mat-mdc-notch-piece {
-            border-color: #8b5cf6 !important;
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #6366f1 !important;
             border-width: 2px !important;
           }
+
+          label { color: #6366f1 !important; }
         }
 
-        .mat-mdc-form-field-label {
+        .mat-mdc-form-field-label,
+        label {
+          font-size: 13px;
           color: #6b7280;
           font-weight: 500;
         }
 
-        &.mat-focused .mat-mdc-form-field-label {
-          color: #8b5cf6;
-        }
-
-        // Input & Textarea styling
         input,
         textarea,
         .mat-mdc-select-value {
-          color: #1f2937;
+          font-size: 13.5px;
+          color: #111827;
           font-weight: 500;
         }
 
-        textarea {
-          resize: vertical;
-        }
+        textarea { resize: vertical; }
 
-        // Error state
         &.mat-form-field-invalid {
-          .mat-mdc-notch-piece {
-            border-color: #dc2626 !important;
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #ef4444 !important;
           }
 
-          .mat-mdc-form-field-label {
-            color: #dc2626;
-          }
+          label { color: #ef4444 !important; }
         }
 
-        // Hints
         .mat-mdc-form-field-hint {
+          font-size: 11.5px;
           color: #9ca3af;
-          font-size: 12px;
-          font-weight: 500;
+          font-weight: 400;
         }
       }
     }
   }
 }
 
-// Dialog Actions
+// ── Dialog Actions ────────────────────────────────────────────
 .dialog-actions {
-  padding: 20px 28px !important;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-top: 1px solid #e5e7eb;
+  padding: 14px 24px !important;
+  background: #ffffff;
+  border-top: 1px solid #ebebeb;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 
   button {
-    height: 44px;
-    padding: 0 28px !important;
-    border-radius: 12px !important;
-    font-size: 15px !important;
+    height: 38px;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+    font-size: 13.5px !important;
     font-weight: 600 !important;
     text-transform: none !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.15s ease !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 
     // Cancel Button
     &[mat-stroked-button] {
-      background: white !important;
-      color: #6b7280 !important;
-      border: 2px solid #e5e7eb !important;
+      background: #ffffff !important;
+      color: #374151 !important;
+      border-color: #d1d5db !important;
 
       &:hover {
         background: #f9fafb !important;
-        border-color: #cbd5e1 !important;
-        color: #374151 !important;
+        border-color: #9ca3af !important;
       }
     }
 
     // Submit Button
     &.submit-button:not([disabled]) {
-      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-      color: white !important;
+      background: #111827 !important;
+      color: #ffffff !important;
       border: none !important;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-      position: relative;
-      overflow: hidden;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-        transition: left 0.5s;
-      }
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
-
-        &::before {
-          left: 100%;
-        }
-      }
-
-      &:active {
-        transform: translateY(0);
+        background: #1f2937 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
       }
 
       mat-spinner {
         display: inline-block;
-        margin-right: 8px;
+        margin-right: 6px;
 
-        ::ng-deep circle {
-          stroke: white !important;
-        }
+        ::ng-deep circle { stroke: white !important; }
       }
     }
 
@@ -219,58 +210,63 @@
       border: 1px solid #e5e7eb !important;
       cursor: not-allowed;
       box-shadow: none !important;
-
-      &:hover {
-        transform: none !important;
-      }
     }
   }
 }
 
-// Select Panel Styling
-::ng-deep .mat-mdc-select-panel {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
-  margin-top: 8px;
-
-  .mat-mdc-option {
-    border-radius: 8px !important;
-    margin: 4px 8px !important;
-    padding: 12px 16px !important;
-
-    &:hover {
-      background: rgba(139, 92, 246, 0.1) !important;
-    }
-
-    &.mat-mdc-option-active,
-    &.mat-selected {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
-      color: #8b5cf6 !important;
-    }
-  }
-}
-
-// Error Messages
+// ── Error Messages ────────────────────────────────────────────
 ::ng-deep mat-error {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 500;
   color: #dc2626;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
-// Responsive Design
+// ── Select Panel ──────────────────────────────────────────────
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10) !important;
+  border: 1px solid #f0f1f5 !important;
+
+  .mat-mdc-option {
+    border-radius: 6px !important;
+    margin: 2px 6px !important;
+    font-size: 13.5px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+
+    &:hover { background: #f5f3ff !important; }
+
+    &.mat-mdc-option-active,
+    &.mdc-list-item--selected {
+      background: #eef2ff !important;
+      color: #6366f1 !important;
+    }
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────
 @media (max-width: 600px) {
+  .dialog-header {
+    padding: 16px 18px 14px;
+
+    h2 { font-size: 15px; }
+  }
+
   .dialog-content {
     min-width: unset;
-    padding: 20px !important;
+    padding: 14px 14px !important;
   }
 
   .dialog-actions {
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
+    padding: 12px 14px !important;
 
     button {
       width: 100%;
+      justify-content: center;
+      height: 40px !important;
     }
   }
 }

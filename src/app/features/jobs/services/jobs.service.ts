@@ -18,7 +18,10 @@ import {
   CreateStageMasterRequest,
   UpdateStageMasterRequest,
   MyJobApplicationsFilterParams,
-  ReceivedJobApplicationsFilterParams
+  ReceivedJobApplicationsFilterParams,
+  CreateApplicationStageRequest,
+  ApplicationStageDto,
+  UpdateApplicationStageRequest
 } from '../../../core/models/jobs.models';
 
 @Injectable({
@@ -322,6 +325,56 @@ export class JobsService {
           }
           return res.data;
         })
+      );
+  }
+
+  createApplicationStage(request: CreateApplicationStageRequest): Observable<ApplicationStageDto> {
+    return this.http
+      .post<ServiceResponse<ApplicationStageDto>>(
+        `${this.apiUrl}/application-stages`,
+        { jobApplyId: request.jobApplyId, stageId: request.stageId }
+      )
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to add stage');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  getApplicationStagesByJobApplyId(jobApplyId: string): Observable<ApplicationStageDto[]> {
+    return this.http
+      .get<ServiceResponse<ApplicationStageDto[]>>(
+        `${this.apiUrl}/application-stages/by-application/${jobApplyId}`
+      )
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : []))
+      );
+  }
+
+  updateApplicationStage(applicationStageId: string, request: UpdateApplicationStageRequest): Observable<ApplicationStageDto> {
+    return this.http
+      .put<ServiceResponse<ApplicationStageDto>>(
+        `${this.apiUrl}/application-stages/${applicationStageId}`,
+        request
+      )
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to update stage');
+          }
+          return res.data;
+        })
+      );
+  }
+
+  deleteApplicationStage(applicationStageId: string): Observable<boolean> {
+    return this.http
+      .delete<ServiceResponse<boolean>>(`${this.apiUrl}/application-stages/${applicationStageId}`)
+      .pipe(
+        map((res) => res.success === true)
       );
   }
 }

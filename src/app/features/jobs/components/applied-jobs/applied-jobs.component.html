@@ -165,32 +165,41 @@
               <mat-spinner diameter="40"></mat-spinner>
               <span>Loading applications for your job posts...</span>
             </div>
-            <div class="jobs-feed-wrapper" *ngIf="!postedByMeIsLoading">
-              <div class="jobs-feed" *ngIf="postedByMeApplications.length > 0">
-                <article class="job-post-card" *ngFor="let app of postedByMeApplications">
-                  <div class="job-post-header">
-                    <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
-                    <div class="job-post-heading">
-                      <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
-                        }}</p>
-                      <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
-                        ' · ' + app.candidateEmail : '' }}</p>
-                    </div>
-                    <div class="job-post-status">
-                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
-                        app.currentStageName || app.status || 'Applied' }}</span>
-                    </div>
+            <div class="jobs-board-wrapper" *ngIf="!postedByMeIsLoading">
+              <div class="jobs-board-row" *ngIf="postedByMeApplications.length > 0 || postedByMeBoardColumns.length > 0">
+                <div class="jobs-board-column" *ngFor="let col of postedByMeBoardColumns">
+                  <h3 class="board-column-title">{{ col.stageName }}</h3>
+                  <div class="board-column-cards">
+                    <article class="job-post-card" *ngFor="let app of getPostedByMeAppsForColumn(col.stageId)">
+                      <div class="job-post-header">
+                        <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
+                        <div class="job-post-heading">
+                          <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                            }}</p>
+                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                            ' · ' + app.candidateEmail : '' }}</p>
+                        </div>
+                        <div class="job-post-status">
+                          <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
+                            app.currentStageName || app.status || 'Applied' }}</span>
+                        </div>
+                      </div>
+                      <div class="job-post-footer">
+                        <div class="job-post-actions">
+                          <div class="action-btn process-btn board-process-btn"
+                            (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
+                            role="button"
+                            tabindex="0"
+                            (keydown.enter)="openProcessDialog(app)"
+                            (keydown.space)="openProcessDialog(app); $event.preventDefault()">
+                            <mat-icon>playlist_add_check</mat-icon> Processed
+                          </div>
+                        </div>
+                      </div>
+                    </article>
                   </div>
-                  <div class="job-post-footer">
-                    <div class="job-post-actions">
-                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
-                        matTooltip="View application details">
-                        <mat-icon>visibility</mat-icon> View details
-                      </button>
-                    </div>
-                  </div>
-                </article>
+                </div>
               </div>
               <div class="jobs-pagination" *ngIf="postedByMeApplications.length > 0 && postedByMeTotalCount > 0">
                 <mat-paginator [length]="postedByMeTotalCount" [pageSize]="postedByMePageSize"
@@ -262,37 +271,46 @@
                 </form>
               </mat-card-content>
             </mat-card>
-            <!-- Received: Loading / Feed / Empty -->
+            <!-- Received: Loading / Board / Empty -->
             <div class="jobs-loading" *ngIf="receivedIsLoading">
               <mat-spinner diameter="40"></mat-spinner>
               <span>Loading received applications...</span>
             </div>
-            <div class="jobs-feed-wrapper" *ngIf="!receivedIsLoading">
-              <div class="jobs-feed" *ngIf="receivedApplications.length > 0">
-                <article class="job-post-card" *ngFor="let app of receivedApplications">
-                  <div class="job-post-header">
-                    <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
-                    <div class="job-post-heading">
-                      <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
-                        }}</p>
-                      <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
-                        ' · ' + app.candidateEmail : '' }}</p>
-                    </div>
-                    <div class="job-post-status">
-                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
-                        app.currentStageName || app.status || 'Applied' }}</span>
-                    </div>
+            <div class="jobs-board-wrapper" *ngIf="!receivedIsLoading">
+              <div class="jobs-board-row" *ngIf="receivedApplications.length > 0 || receivedBoardColumns.length > 0">
+                <div class="jobs-board-column" *ngFor="let col of receivedBoardColumns">
+                  <h3 class="board-column-title">{{ col.stageName }}</h3>
+                  <div class="board-column-cards">
+                    <article class="job-post-card" *ngFor="let app of getReceivedAppsForColumn(col.stageId)">
+                      <div class="job-post-header">
+                        <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
+                        <div class="job-post-heading">
+                          <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                            }}</p>
+                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                            ' · ' + app.candidateEmail : '' }}</p>
+                        </div>
+                        <div class="job-post-status">
+                          <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
+                            app.currentStageName || app.status || 'Applied' }}</span>
+                        </div>
+                      </div>
+                      <div class="job-post-footer">
+                        <div class="job-post-actions">
+                          <div class="action-btn process-btn board-process-btn"
+                            (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
+                            role="button"
+                            tabindex="0"
+                            (keydown.enter)="openProcessDialog(app)"
+                            (keydown.space)="openProcessDialog(app); $event.preventDefault()">
+                            <mat-icon>playlist_add_check</mat-icon> Processed
+                          </div>
+                        </div>
+                      </div>
+                    </article>
                   </div>
-                  <div class="job-post-footer">
-                    <div class="job-post-actions">
-                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
-                        matTooltip="View application details">
-                        <mat-icon>visibility</mat-icon> View details
-                      </button>
-                    </div>
-                  </div>
-                </article>
+                </div>
               </div>
               <div class="jobs-pagination" *ngIf="receivedApplications.length > 0 && receivedTotalCount > 0">
                 <mat-paginator [length]="receivedTotalCount" [pageSize]="receivedPageSize"

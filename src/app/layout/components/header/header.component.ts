@@ -116,6 +116,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager']
     },
     {
+      name: 'Manual Attendance',
+      route: '/attendance/manual',
+      keywords: ['manual attendance', 'manual', 'attendance entry', 'add attendance', 'edit attendance'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
       name: 'Attendance Reports',
       route: '/attendance/reports',
       keywords: ['attendance reports', 'reports', 'attendance report'],

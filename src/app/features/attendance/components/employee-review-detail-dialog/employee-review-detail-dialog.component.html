@@ -1,0 +1,277 @@
+<div class="review-detail-dialog">
+
+  <!-- ── Gradient Header ───────────────────────────────────────────────── -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="avatar-circle">{{ pkg.employeeName | slice:0:1 }}</div>
+      <div class="header-info">
+        <h2 class="employee-name">{{ pkg.employeeName }}</h2>
+        <span class="employee-meta">{{ pkg.designation || 'Employee' }} &bull; {{ pkg.department }}</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="month-chip">
+        <mat-icon>calendar_today</mat-icon>
+        {{ getMonthYearDisplay() }}
+      </span>
+      <button type="button" class="close-btn" (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Stats Strip ───────────────────────────────────────────────────── -->
+  <div class="stats-strip">
+    <div class="stat-chip pending-chip">
+      <mat-icon>hourglass_top</mat-icon>
+      <span class="stat-val">{{ pkg.pendingRequestCount || 0 }}</span>
+      <span class="stat-lbl">Pending</span>
+    </div>
+    <div class="stat-chip approved-chip">
+      <mat-icon>check_circle</mat-icon>
+      <span class="stat-val">{{ pkg.approvedCount || 0 }}</span>
+      <span class="stat-lbl">Approved</span>
+    </div>
+    <div class="stat-chip rejected-chip">
+      <mat-icon>cancel</mat-icon>
+      <span class="stat-val">{{ pkg.rejectedCount || 0 }}</span>
+      <span class="stat-lbl">Rejected</span>
+    </div>
+    <div class="stat-chip finalized-chip">
+      <mat-icon>lock</mat-icon>
+      <span class="stat-val">{{ summaryFinalized }}</span>
+      <span class="stat-lbl">Finalized</span>
+    </div>
+  </div>
+
+  <!-- ── Loading State ─────────────────────────────────────────────────── -->
+  @if (isLoading) {
+    <div class="state-box">
+      <mat-spinner diameter="36"></mat-spinner>
+      <p>Loading attendance records...</p>
+    </div>
+  }
+
+  <!-- ── Error State ───────────────────────────────────────────────────── -->
+  @if (loadError && !isLoading) {
+    <div class="state-box error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ loadError }}</p>
+      <button class="btn btn-sm btn-primary" (click)="refreshData()">
+        <mat-icon>refresh</mat-icon> Retry
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty State ───────────────────────────────────────────────────── -->
+  @if (!isLoading && !loadError && !hasAnyRecords()) {
+    <div class="state-box">
+      <mat-icon>event_busy</mat-icon>
+      <p>No attendance records for {{ getMonthYearDisplay() }}</p>
+    </div>
+  }
+
+  <!-- ── Table ─────────────────────────────────────────────────────────── -->
+  @if (!isLoading && !loadError && (hasAnyRecords() || monthlyRecords.length > 0)) {
+    <div class="table-wrap">
+      <table mat-table [dataSource]="monthlyRecords" class="records-table">
+
+        <!-- Day -->
+        <ng-container matColumnDef="day">
+          <th mat-header-cell *matHeaderCellDef>Day</th>
+          <td mat-cell *matCellDef="let r" [class.weekend-cell]="r.isWeekend">
+            <div class="day-cell">
+              <span class="day-num" [class.red]="r.isWeekend">{{ r.dayOfMonth }}</span>
+              <span class="day-name">{{ r.dayName }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Original -->
+        <ng-container matColumnDef="original">
+          <th mat-header-cell *matHeaderCellDef>Original</th>
+          <td mat-cell *matCellDef="let r" [class.muted-cell]="!r.hasRecord">
+            @if (r.hasRecord) {
+              <div class="time-block">
+                @if (isNonWorkStatus(r.originalStatus)) {
+                  <span class="dash">-</span>
+                } @else {
+                  <span class="times" [class.struck]="hasRequestedChanges(r)">
+                    {{ formatTime(r.originalCheckIn) }} &ndash; {{ formatTime(r.originalCheckOut) }}
+                  </span>
+                }
+                <span class="status-pill" [ngClass]="getStatusClass(r.originalStatus)">
+                  {{ r.originalStatus | titlecase }}
+                </span>
+              </div>
+            } @else {
+              <span class="dash">No Record</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Hours -->
+        <ng-container matColumnDef="totalHours">
+          <th mat-header-cell *matHeaderCellDef>Hrs</th>
+          <td mat-cell *matCellDef="let r">
+            @if (r.hasRecord && !isNonWorkStatus(r.originalStatus)) {
+              <span class="hours-val">{{ (r.originalTotalHours || 0) | number:'1.1-1' }}h</span>
+            } @else {
+              <span class="dash">-</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Requested -->
+        <ng-container matColumnDef="requested">
+          <th mat-header-cell *matHeaderCellDef>Requested</th>
+          <td mat-cell *matCellDef="let r">
+            @if (hasRequestedChanges(r)) {
+              <div class="time-block requested">
+                @if (isNonWorkStatus(r.requestedStatus || r.originalStatus)) {
+                  <span class="dash">-</span>
+                } @else {
+                  <span class="times primary-bold">
+                    {{ formatTime(r.requestedCheckIn) || formatTime(r.originalCheckIn) }} &ndash;
+                    {{ formatTime(r.requestedCheckOut) || formatTime(r.originalCheckOut) }}
+                  </span>
+                }
+                @if (r.requestedStatus) {
+                  <span class="status-pill" [ngClass]="getStatusClass(r.requestedStatus)">
+                    {{ r.requestedStatus | titlecase }}
+                  </span>
+                }
+              </div>
+            } @else {
+              <span class="dash">-</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Justification -->
+        <ng-container matColumnDef="reason">
+          <th mat-header-cell *matHeaderCellDef>Justification</th>
+          <td mat-cell *matCellDef="let r">
+            @if (r.reasonForEdit) {
+              <span class="reason-text" [matTooltip]="r.reasonForEdit" matTooltipPosition="above">
+                {{ r.reasonForEdit.length > 38 ? (r.reasonForEdit | slice:0:38) + '…' : r.reasonForEdit }}
+              </span>
+            } @else {
+              <span class="dash">-</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Review Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Review Status</th>
+          <td mat-cell *matCellDef="let r">
+            @if (isPendingRequest(r)) {
+              <span class="status-badge warning"><mat-icon>hourglass_top</mat-icon>Pending</span>
+            } @else if (r.isFinalized || pkg.isFinalized) {
+              <span class="status-badge success"><mat-icon>check_circle</mat-icon>Finalized</span>
+            } @else if (r.isManagerOverride) {
+              <span class="status-badge override"><mat-icon>manage_accounts</mat-icon>Manager Adjusted</span>
+            } @else if (r.requestStatus === 'approved') {
+              <span class="status-badge info"><mat-icon>thumb_up</mat-icon>Approved</span>
+            } @else if (r.requestStatus === 'rejected') {
+              <span class="status-badge danger"><mat-icon>thumb_down</mat-icon>Rejected</span>
+            } @else if (r.hasRecord) {
+              <span class="status-badge clean"><mat-icon>check_circle_outline</mat-icon>Clean</span>
+            } @else {
+              <span class="dash">-</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let r">
+            @if (r.isFinalized || pkg.isFinalized) {
+              <span class="locked-tag"><mat-icon>lock</mat-icon>Locked</span>
+            } @else if (r.hasRecord && !isNoRecordStatus(r)) {
+              <div class="row-actions">
+                @if (r.requestId && r.requestStatus === 'pending') {
+                  <button class="act-btn approve"
+                          (click)="approveRequest(r)"
+                          [disabled]="isProcessing(r.requestId)"
+                          matTooltip="Approve">
+                    @if (isProcessing(r.requestId)) {
+                      <mat-spinner diameter="13"></mat-spinner>
+                    } @else {
+                      <mat-icon>check</mat-icon>
+                    }
+                    Approve
+                  </button>
+                  <button class="act-btn reject"
+                          (click)="rejectRequest(r)"
+                          [disabled]="isProcessing(r.requestId)"
+                          matTooltip="Reject">
+                    <mat-icon>close</mat-icon>Reject
+                  </button>
+                }
+                @if (!pkg.isFinalized) {
+                  <button class="act-btn override"
+                          (click)="editRecord(r)"
+                          matTooltip="Manager override">
+                    <mat-icon>edit</mat-icon>Override
+                  </button>
+                }
+              </div>
+            } @else {
+              <span class="dash"><mat-icon class="block-icon">block</mat-icon></span>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            [class.row-highlight]="shouldHighlightRow(row)"
+            [class.row-weekend]="row.isWeekend"
+            [class.row-finalized]="row.isFinalized"
+            [class.row-no-record]="!row.hasRecord"></tr>
+      </table>
+    </div>
+  }
+
+  <!-- ── Summary Bar ───────────────────────────────────────────────────── -->
+  @if (!isLoading && !loadError && monthlyRecords.length > 0) {
+    <div class="summary-bar">
+      <span class="sum-item present"><mat-icon>check_circle</mat-icon>{{ summaryPresent }} Present</span>
+      <span class="bar-sep"></span>
+      <span class="sum-item absent"><mat-icon>cancel</mat-icon>{{ summaryAbsent }} Absent</span>
+      <span class="bar-sep"></span>
+      <span class="sum-item late"><mat-icon>schedule</mat-icon>{{ summaryLate }} Late</span>
+      <span class="bar-sep"></span>
+      <span class="sum-item hours"><mat-icon>access_time</mat-icon>{{ summaryTotalHours | number:'1.1-1' }}h Total Hours</span>
+      <span class="bar-sep"></span>
+      <span class="sum-item rate"><mat-icon>trending_up</mat-icon>{{ summaryAttendanceRate }}% Attendance Rate</span>
+    </div>
+  }
+
+  <!-- ── Footer ────────────────────────────────────────────────────────── -->
+  <div class="dialog-footer">
+    <button class="foot-btn refresh" (click)="refreshData()" [disabled]="isLoading">
+      <mat-icon>refresh</mat-icon>Refresh
+    </button>
+    <div style="flex:1"></div>
+    @if (!isEmployeeRole()) {
+      <button class="foot-btn finalize"
+              [disabled]="isLoading || pkg.isFinalized || (pkg.pendingRequestCount || 0) > 0 || isFinalizing"
+              [matTooltip]="pkg.isFinalized ? 'Already finalized for payroll' : (pkg.pendingRequestCount || 0) > 0 ? 'Resolve all pending requests first' : 'Lock all records for payroll'"
+              (click)="finalizeEmployee()">
+        @if (isFinalizing) {
+          <mat-spinner diameter="15"></mat-spinner>
+        } @else {
+          <mat-icon>{{ pkg.isFinalized ? 'lock' : 'lock_open' }}</mat-icon>
+        }
+        {{ pkg.isFinalized ? 'Finalized' : 'Finalize for Payroll' }}
+      </button>
+    }
+    <button class="foot-btn close-btn-foot" (click)="closeDialog()">
+      <mat-icon>close</mat-icon>Close
+    </button>
+  </div>
+
+</div>

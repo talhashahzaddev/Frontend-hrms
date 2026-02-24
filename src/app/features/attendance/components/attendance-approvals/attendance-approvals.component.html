@@ -1,0 +1,377 @@
+<div class="attendance-approvals-container">
+
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon-wrapper">
+        <mat-icon class="header-icon">admin_panel_settings</mat-icon>
+      </div>
+      <div class="header-text">
+        <h1>Master Governance Dashboard</h1>
+        <p>{{ getCurrentPeriodDisplay() }} &bull; Compliance tracking, corrections, and payroll finalization</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      @if (isViewingHistoricalPeriod()) {
+        <button class="btn btn-warning" (click)="resetToCurrentMonth()" matTooltip="Return to latest snapshot">
+          <mat-icon>today</mat-icon>
+          <span>Latest Period</span>
+        </button>
+      }
+      <button class="btn btn-secondary" (click)="toggleHistoryDrawer()" matTooltip="View all periods">
+        <mat-icon>history</mat-icon>
+        <span>History</span>
+      </button>
+      <button class="btn btn-primary" (click)="loadManagerReviewDashboard()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  @if (orgProgress) {
+    <div class="compliance-section">
+      <div class="compliance-header">
+        <h2>
+          <mat-icon>verified</mat-icon>
+          Organization Compliance
+        </h2>
+        <span class="compliance-rate"
+              [class.high]="orgProgress.complianceRate >= 80"
+              [class.medium]="orgProgress.complianceRate >= 50 && orgProgress.complianceRate < 80"
+              [class.low]="orgProgress.complianceRate < 50">
+          {{ orgProgress.complianceRate | number:'1.0-0' }}% Compliant
+        </span>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-bar-track">
+          <div class="progress-segment finalized"
+               [style.width.%]="(orgProgress.finalizedCount / orgProgress.totalEmployees) * 100"
+               [matTooltip]="'Finalized: ' + orgProgress.finalizedCount + ' employees'">
+          </div>
+          <div class="progress-segment submitted"
+               [style.width.%]="(orgProgress.submittedCount / orgProgress.totalEmployees) * 100"
+               [matTooltip]="'Submitted: ' + orgProgress.submittedCount + ' employees'">
+          </div>
+          <div class="progress-segment pending"
+               [style.width.%]="((orgProgress.pendingReviewCount || 0) / orgProgress.totalEmployees) * 100"
+               [matTooltip]="'Pending Review: ' + (orgProgress.pendingReviewCount || 0) + ' employees'">
+          </div>
+          <div class="progress-segment in-progress"
+               [style.width.%]="((orgProgress.inProgressCount || 0) / orgProgress.totalEmployees) * 100"
+               [matTooltip]="'In Progress: ' + (orgProgress.inProgressCount || 0) + ' employees'">
+          </div>
+        </div>
+
+        <div class="progress-legend">
+          <span class="legend-item finalized">
+            <span class="dot"></span> Finalized ({{ orgProgress.finalizedCount }})
+          </span>
+          <span class="legend-item submitted">
+            <span class="dot"></span> Submitted ({{ orgProgress.submittedCount }})
+          </span>
+          <span class="legend-item pending">
+            <span class="dot"></span> Pending Review ({{ orgProgress.pendingReviewCount || 0 }})
+          </span>
+          <span class="legend-item in-progress">
+            <span class="dot"></span> In Progress ({{ orgProgress.inProgressCount || 0 }})
+          </span>
+          <span class="legend-item untouched">
+            <span class="dot"></span> Untouched ({{ orgProgress.untouchedCount || 0 }})
+          </span>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-cards">
+        <div class="kpi-card team-size">
+          <div class="kpi-icon"><mat-icon>groups</mat-icon></div>
+          <div class="kpi-info">
+            <span class="kpi-value">{{ orgProgress.totalEmployees }}</span>
+            <span class="kpi-label">Total Team Size</span>
+          </div>
+        </div>
+        <div class="kpi-card pending-review">
+          <div class="kpi-icon"><mat-icon>hourglass_top</mat-icon></div>
+          <div class="kpi-info">
+            <span class="kpi-value">{{ orgProgress.pendingReviewCount || 0 }}</span>
+            <span class="kpi-label">Pending Review</span>
+          </div>
+        </div>
+        <div class="kpi-card ready-payroll">
+          <div class="kpi-icon"><mat-icon>lock</mat-icon></div>
+          <div class="kpi-info">
+            <span class="kpi-value">{{ orgProgress.finalizedCount }}</span>
+            <span class="kpi-label">Ready for Payroll</span>
+          </div>
+        </div>
+        <div class="kpi-card submission-rate">
+          <div class="kpi-icon"><mat-icon>trending_up</mat-icon></div>
+          <div class="kpi-info">
+            <span class="kpi-value">{{ orgProgress.submissionRate | number:'1.0-0' }}%</span>
+            <span class="kpi-label">Submission Rate</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!orgProgress && !isLoading) {
+    <div class="global-stats-bar">
+      <div class="stat-card pending">
+        <div class="stat-icon"><mat-icon>hourglass_top</mat-icon></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ getTotalPendingCount() }}</span>
+          <span class="stat-label">Pending Requests</span>
+        </div>
+      </div>
+      <div class="stat-card records">
+        <div class="stat-icon"><mat-icon>assignment</mat-icon></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ getTotalRecordsCount() }}</span>
+          <span class="stat-label">Total Records</span>
+        </div>
+      </div>
+      <div class="stat-card employees">
+        <div class="stat-icon"><mat-icon>groups</mat-icon></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ employeePackages.length }}</span>
+          <span class="stat-label">Employees</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showHistoryDrawer) {
+    <div class="history-drawer-overlay" (click)="toggleHistoryDrawer()"></div>
+    <div class="history-drawer">
+      <div class="drawer-header">
+        <h3>
+          <mat-icon>history</mat-icon>
+          Historical Periods
+        </h3>
+        <button class="btn-icon" (click)="toggleHistoryDrawer()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="drawer-content">
+        @if (isLoadingSnapshots) {
+          <div class="drawer-loading">
+            <mat-spinner diameter="32"></mat-spinner>
+            <span>Loading periods...</span>
+          </div>
+        } @else if (allSnapshots.length === 0) {
+          <div class="drawer-empty">
+            <mat-icon>event_busy</mat-icon>
+            <span>No periods found</span>
+          </div>
+        } @else {
+          <div class="snapshot-list">
+            @for (snapshot of allSnapshots; track snapshot.timesheetId) {
+              <button class="snapshot-item"
+                      (click)="selectHistoricalPeriod(snapshot)"
+                      [class.active]="snapshot.timesheetId === selectedTimesheetId">
+                <div class="snapshot-period">
+                  <mat-icon>calendar_month</mat-icon>
+                  <span>{{ snapshot.monthName }} {{ snapshot.year }}</span>
+                </div>
+                <div class="snapshot-meta">
+                  <span class="status-chip" [ngClass]="snapshot.status?.toLowerCase()">
+                    {{ snapshot.status }}
+                  </span>
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!isLoading && allSnapshots.length === 0 && employeePackages.length === 0) {
+    <div class="no-snapshot-banner">
+      <mat-icon class="banner-icon">info</mat-icon>
+      <div class="banner-content">
+        <strong>No timesheet snapshots found</strong>
+        <p>
+          The approval workflow requires a monthly timesheet snapshot to be created first.
+          Go to the <a routerLink="/attendance/timesheet">Timesheet Dashboard</a> and click
+          <em>Create New Snapshot</em> to get started.
+        </p>
+      </div>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading governance dashboard...</p>
+    </div>
+  }
+
+  @if (!isLoading && employeePackages.length > 0) {
+
+    <!-- Search / Filter Toolbar -->
+    <div class="grid-toolbar">
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input [(ngModel)]="searchText"
+               (input)="applyPackageFilter()"
+               placeholder="Search by name, code or department…"
+               autocomplete="off" />
+        @if (searchText) {
+          <button class="clear-btn" (click)="searchText = ''; applyPackageFilter()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+      <span class="result-count">
+        {{ filteredPackages.length }} of {{ employeePackages.length }} employee{{ employeePackages.length === 1 ? '' : 's' }}
+      </span>
+    </div>
+
+    <div class="employee-grid">
+      @for (pkg of filteredPackages; track pkg.employeeId) {
+
+        <div class="employee-summary-card"
+             [ngClass]="[
+               hasPendingRequests(pkg) ? 'has-pending' : '',
+               getHeatMapBorderClass(pkg)
+             ]">
+
+          <div class="status-badge"
+               [ngClass]="getEmployeeStatusClass(pkg)"
+               [matTooltip]="getEmployeeStatusTooltip(pkg)">
+            <mat-icon>{{ getEmployeeStatusIcon(pkg) }}</mat-icon>
+          </div>
+
+          <div class="card-header">
+            <div class="employee-avatar">{{ pkg.employeeName | slice:0:1 }}</div>
+            <div class="employee-info">
+              <h3 class="employee-name">{{ pkg.employeeName }}</h3>
+              <span class="employee-meta">
+                {{ pkg.employeeCode }}
+                @if (pkg.department) {
+                  <span class="divider">&bull;</span>{{ pkg.department }}
+                }
+              </span>
+            </div>
+            <div class="month-badge">
+              <mat-icon>calendar_month</mat-icon>
+              <span>{{ getMonthYearDisplay(pkg) }}</span>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="stats-row">
+            <div class="stat-pill pending" [class.has-items]="pkg.pendingRequestCount > 0">
+              <mat-icon>hourglass_top</mat-icon>
+              <span class="value">{{ pkg.pendingRequestCount }}</span>
+              <span class="label">Pending</span>
+            </div>
+            <div class="stat-pill approved">
+              <mat-icon>check_circle</mat-icon>
+              <span class="value">{{ pkg.approvedCount }}</span>
+              <span class="label">Approved</span>
+            </div>
+            <div class="stat-pill rejected">
+              <mat-icon>cancel</mat-icon>
+              <span class="value">{{ pkg.rejectedCount }}</span>
+              <span class="label">Rejected</span>
+            </div>
+            <div class="stat-pill finalized">
+              <mat-icon>lock</mat-icon>
+              <span class="value">{{ pkg.finalizedDays }}</span>
+              <span class="label">Finalized</span>
+            </div>
+            @if (pkg.attendancePercentage !== undefined && pkg.attendancePercentage !== null) {
+              <div class="stat-pill attendance"
+                   [class.low]="(pkg.attendancePercentage || 0) < 80">
+                <mat-icon>percent</mat-icon>
+                <span class="value">{{ getAttendanceDisplay(pkg) }}</span>
+                <span class="label">Attendance</span>
+              </div>
+            }
+          </div>
+
+          <!-- Review Progress Bar -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <span class="progress-label">Review Progress</span>
+              <span class="progress-value">{{ getProgressPercentage(pkg) }}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgressPercentage(pkg)"></div>
+            </div>
+          </div>
+
+          <!-- Pending Alert Banner -->
+          @if (hasPendingRequests(pkg)) {
+            <div class="pending-alert">
+              <mat-icon>warning</mat-icon>
+              <span>{{ pkg.pendingRequestCount }} correction request(s) require your attention</span>
+            </div>
+          }
+
+          <!-- Card Actions -->
+          <div class="card-actions">
+            <button class="btn btn-outline-primary"
+                    (click)="viewEmployeeDetails(pkg)">
+              <mat-icon>visibility</mat-icon>
+              <span>View Details</span>
+            </button>
+
+            @if (hasPendingRequests(pkg)) {
+              <button class="btn btn-action-approve"
+                      (click)="approveAllForEmployee(pkg)"
+                      [disabled]="isPackageProcessing(pkg.employeeId)"
+                      matTooltip="Approve all pending correction requests">
+                @if (isPackageProcessing(pkg.employeeId)) {
+                  <mat-spinner diameter="16"></mat-spinner>
+                } @else {
+                  <mat-icon>done_all</mat-icon>
+                }
+                <span>Approve All</span>
+              </button>
+            }
+
+            <button class="btn btn-primary"
+                    (click)="finalizeEmployeeApprovals(pkg)"
+                    [disabled]="isPackageProcessing(pkg.employeeId) || !canFinalize(pkg)"
+                    [matTooltip]="pkg.isFinalized
+                      ? 'Already finalized'
+                      : !canFinalize(pkg)
+                        ? 'Resolve all pending requests before finalizing'
+                        : 'Finalize all approved records for payroll'">
+              @if (isPackageProcessing(pkg.employeeId)) {
+                <mat-spinner diameter="16"></mat-spinner>
+              } @else {
+                <mat-icon>{{ pkg.isFinalized ? 'lock' : 'check_circle' }}</mat-icon>
+              }
+              <span>{{ pkg.isFinalized ? 'Finalized' : 'Finalize' }}</span>
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoading && employeePackages.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <mat-icon>check_circle_outline</mat-icon>
+      </div>
+      <h3>All Caught Up!</h3>
+      <p>No attendance records require review for {{ getCurrentPeriodDisplay() }}.</p>
+      <button class="btn btn-outline-primary" (click)="loadManagerReviewDashboard()">
+        <mat-icon>refresh</mat-icon>
+        <span>Refresh Dashboard</span>
+      </button>
+    </div>
+  }
+
+</div>

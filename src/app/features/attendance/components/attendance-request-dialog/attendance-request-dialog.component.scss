@@ -1,0 +1,321 @@
+.daily-card.is-requested {
+  border: 1.5px dashed #4f46e5;
+  box-shadow: 0 0 6px 0 rgba(79, 70, 229, 0.08);
+  position: relative;
+
+  .requested-icon {
+    color: #4f46e5;
+    font-size: 14px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  .request-badge {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+// Attendance Request Dialog - Styled to match Manager Override Dialog
+.attendance-request-dialog {
+  min-width: 500px;
+
+  // ── Dialog Header ────────────────────────────────────────────────
+  .request-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--gradient-background);
+
+    .header-icon-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      flex-shrink: 0;
+
+      mat-icon {
+        color: #fff;
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    .header-text {
+      flex: 1;
+
+      .dialog-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.3;
+      }
+
+      .record-date {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.75);
+        font-weight: 400;
+      }
+    }
+
+    .close-btn {
+      color: rgba(255, 255, 255, 0.8);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        color: #fff;
+      }
+    }
+  }
+
+  // ── Content ──────────────────────────────────────────────────
+  .request-content {
+    padding: 0 !important;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  // ── Create Mode Banner ────────────────────────────────────────
+  .create-mode-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 20px 24px 0;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #22c55e;
+    border-radius: 8px;
+    color: #15803d;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: #22c55e;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    span {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+  }
+
+  // ── Before Panel ──────────────────────────────────────────────
+  .before-panel {
+    margin: 20px 24px 0;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 14px 16px;
+
+    .panel-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #92400e;
+      margin-bottom: 12px;
+
+      mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: #d97706;
+      }
+    }
+
+    .before-grid {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+
+      .before-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .bi-label {
+          font-size: 11px;
+          color: #92400e;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+        }
+
+        .bi-value {
+          font-size: 15px;
+          font-weight: 700;
+          color: #78350f;
+
+          &.status-chip {
+            display: inline-block;
+            background: rgba(245, 158, 11, 0.15);
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+          }
+        }
+      }
+    }
+  }
+
+  // ── Form Section ──────────────────────────────────────────────
+  .request-form {
+    padding: 20px 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    // Time conflict warning
+    .time-warning {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #b91c1c;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #ef4444;
+      }
+    }
+
+    .form-section-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #4f46e5;
+      margin-bottom: 16px;
+
+      mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: #6366f1;
+      }
+    }
+
+    .reason-field textarea {
+      resize: vertical;
+    }
+
+    .time-row {
+      display: flex;
+      gap: 16px;
+
+      .time-field {
+        flex: 1;
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-form-field {
+      mat-icon[matPrefix] {
+        margin-right: 8px;
+        color: #667eea;
+      }
+    }
+  }
+
+  // ── Dialog Actions ──────────────────────────────────────────────
+  .request-actions {
+    padding: 16px 24px;
+    margin-top: 0;
+    border-top: 1px solid #e5e7eb;
+    gap: 12px;
+
+    .submit-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .button-spinner {
+        margin-right: 6px;
+        display: inline-block;
+        vertical-align: middle;
+
+        ::ng-deep circle {
+          stroke: white !important;
+        }
+      }
+
+      &.mat-mdc-button-disabled {
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+}
+
+// Global Dialog Panel Class
+::ng-deep .attendance-request-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 600px) {
+  .attendance-request-dialog {
+    min-width: auto;
+    width: 100%;
+
+    .before-panel .before-grid {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .request-form .time-row {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
+}
