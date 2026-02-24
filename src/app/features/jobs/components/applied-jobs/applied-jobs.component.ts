@@ -16,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ApplicationDetailDialogComponent } from '../application-detail-dialog/application-detail-dialog.component';
+import { ApplicationProcessDialogComponent } from '../application-process-dialog/application-process-dialog.component';
 import { ApplyJobDialogComponent } from '../apply-job-dialog/apply-job-dialog.component';
 import {
   ConfirmDeleteDialogComponent,
@@ -306,6 +307,22 @@ export class AppliedJobsComponent implements OnInit {
       maxHeight: '90vh',
       panelClass: 'application-detail-dialog-panel',
       data: { jobApplyId: app.jobApplyId }
+    });
+  }
+
+  openProcessDialog(app: JobApplicationDto): void {
+    const ref = this.dialog.open(ApplicationProcessDialogComponent, {
+      width: '920px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      panelClass: 'application-process-dialog-panel',
+      data: { jobApplyId: app.jobApplyId }
+    });
+    ref.afterClosed().subscribe((refreshed) => {
+      if (refreshed) {
+        this.loadPostedByMeApplications();
+        this.loadReceivedApplications();
+      }
     });
   }
 

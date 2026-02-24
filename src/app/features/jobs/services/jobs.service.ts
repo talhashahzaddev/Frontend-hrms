@@ -18,7 +18,9 @@ import {
   CreateStageMasterRequest,
   UpdateStageMasterRequest,
   MyJobApplicationsFilterParams,
-  ReceivedJobApplicationsFilterParams
+  ReceivedJobApplicationsFilterParams,
+  CreateApplicationStageRequest,
+  ApplicationStageDto
 } from '../../../core/models/jobs.models';
 
 @Injectable({
@@ -319,6 +321,22 @@ export class JobsService {
               hasNextPage: false,
               hasPreviousPage: false
             };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  createApplicationStage(request: CreateApplicationStageRequest): Observable<ApplicationStageDto> {
+    return this.http
+      .post<ServiceResponse<ApplicationStageDto>>(
+        `${this.apiUrl}/application-stages`,
+        { jobApplyId: request.jobApplyId, stageId: request.stageId }
+      )
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            throw new Error(res.message || 'Failed to add stage');
           }
           return res.data;
         })

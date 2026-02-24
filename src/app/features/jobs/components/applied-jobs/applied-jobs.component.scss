@@ -286,6 +286,33 @@
       margin-right: 4px;
     }
   }
+
+  .action-btn.process-btn.board-process-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: auto;
+    padding: 0 10px !important;
+    height: 36px;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    pointer-events: auto;
+    border: 1px solid #059669;
+    color: #059669;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    box-sizing: border-box;
+    background: transparent;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: 4px;
+    }
+  }
 }
 
 .jobs-feed {

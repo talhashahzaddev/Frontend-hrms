@@ -195,6 +195,14 @@
                             (keydown.space)="viewJobDetails(app); $event.preventDefault()">
                             <mat-icon>visibility</mat-icon> View details
                           </div>
+                          <div class="action-btn process-btn board-process-btn"
+                            (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
+                            role="button"
+                            tabindex="0"
+                            (keydown.enter)="openProcessDialog(app)"
+                            (keydown.space)="openProcessDialog(app); $event.preventDefault()">
+                            <mat-icon>playlist_add_check</mat-icon> Processed
+                          </div>
                         </div>
                       </div>
                     </article>
@@ -305,6 +313,14 @@
                             (keydown.enter)="viewJobDetails(app)"
                             (keydown.space)="viewJobDetails(app); $event.preventDefault()">
                             <mat-icon>visibility</mat-icon> View details
+                          </div>
+                          <div class="action-btn process-btn board-process-btn"
+                            (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
+                            role="button"
+                            tabindex="0"
+                            (keydown.enter)="openProcessDialog(app)"
+                            (keydown.space)="openProcessDialog(app); $event.preventDefault()">
+                            <mat-icon>playlist_add_check</mat-icon> Processed
                           </div>
                         </div>
                       </div>

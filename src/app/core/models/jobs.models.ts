@@ -187,3 +187,27 @@ export interface ReceivedJobApplicationsFilterParams {
   applyDateTo?: string | null;   // ISO date string
   stageId?: string | null;
 }
+
+/** Application stage (movement of a job application to a stage) */
+export interface ApplicationStageDto {
+  applicationStageId: string;
+  jobApplyId: string;
+  jobId?: string | null;
+  jobRoleName?: string | null;
+  candidateName?: string | null;
+  stageId: string;
+  stageName?: string | null;
+  notes?: string | null;
+  type?: string | null;
+  updatedOn?: string | null;
+  updatedBy?: string | null;
+  updatedByName?: string | null;
+}
+
+/** Request to add a stage to a job application (only jobApplyId + stageId required for now) */
+export interface CreateApplicationStageRequest {
+  jobApplyId: string;
+  stageId: string;
+  notes?: string | null;
+  type?: string | null;
+}
