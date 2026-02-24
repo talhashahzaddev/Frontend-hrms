@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -12,6 +12,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { JobApplicationDto, StageMasterDto, ApplicationStageDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
+import { EditApplicationStageDialogComponent } from '../edit-application-stage-dialog/edit-application-stage-dialog.component';
+import {
+  ConfirmDeleteDialogComponent,
+  ConfirmDeleteData
+} from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 export interface ApplicationProcessDialogData {
   jobApplyId: string;
@@ -52,6 +57,7 @@ export class ApplicationProcessDialogComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: ApplicationProcessDialogData,
     private dialogRef: MatDialogRef<ApplicationProcessDialogComponent>,
+    private dialog: MatDialog,
     private jobsService: JobsService,
     private notification: NotificationService
   ) { }
@@ -117,23 +123,51 @@ export class ApplicationProcessDialogComponent implements OnInit {
   }
 
   editStage(stage: ApplicationStageDto): void {
-    this.notification.showSuccess('Edit will be implemented later.');
-  }
-
-  deleteStage(stage: ApplicationStageDto): void {
-    if (!confirm(`Delete stage "${stage.stageName || 'this stage'}"?`)) return;
-    this.jobsService.deleteApplicationStage(stage.applicationStageId).subscribe({
-      next: () => {
-        this.notification.showSuccess('Stage removed.');
+    const dialogRef = this.dialog.open(EditApplicationStageDialogComponent, {
+      width: '480px',
+      panelClass: 'edit-application-stage-dialog-panel',
+      data: { stage, stages: this.stages }
+    });
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) {
         this.loadApplicationStages();
         this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
           next: (app) => {
             this.application = app;
           }
         });
-      },
-      error: (err) => {
-        this.notification.showError(err?.message || 'Failed to delete stage');
+      }
+    });
+  }
+
+  deleteStage(stage: ApplicationStageDto): void {
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Application Stage',
+      message: 'Are you sure you want to delete this stage?',
+      itemName: stage.stageName || 'this stage',
+      confirmButtonText: 'Yes, Delete'
+    };
+    const confirmRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-action-dialog-panel'
+    });
+    confirmRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.jobsService.deleteApplicationStage(stage.applicationStageId).subscribe({
+          next: () => {
+            this.notification.showSuccess('Stage removed.');
+            this.loadApplicationStages();
+            this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
+              next: (app) => {
+                this.application = app;
+              }
+            });
+          },
+          error: (err) => {
+            this.notification.showError(err?.message || 'Failed to delete stage');
+          }
+        });
       }
     });
   }

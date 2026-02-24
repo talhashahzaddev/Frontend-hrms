@@ -1,0 +1,63 @@
+/* Same color and style as application-detail-dialog */
+::ng-deep .edit-application-stage-dialog-panel.mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white;
+
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    mat-icon { font-size: 22px; width: 22px; height: 22px; }
+  }
+  .close-button {
+    color: white;
+    &:hover { background: rgba(255, 255, 255, 0.2); }
+  }
+}
+
+.dialog-content {
+  padding: 24px !important;
+  min-width: 360px;
+  max-width: 480px;
+}
+
+.edit-stage-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+.dialog-actions {
+  padding: 16px 24px !important;
+  border-top: 1px solid #e5e7eb;
+  gap: 12px;
+
+  .cancel-btn {
+    border-radius: 10px !important;
+  }
+  .save-btn {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+  }
+}

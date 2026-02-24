@@ -209,6 +209,8 @@ export interface ApplicationStageDto {
   updatedBy?: string | null;
   updatedByName?: string | null;
   interviewers?: InterviewerInfoDto[];
+  interviewDate?: string | null;
+  interviewPlace?: string | null;
 }
 
 /** Request to add a stage to a job application (only jobApplyId + stageId required for now) */
@@ -223,4 +225,6 @@ export interface UpdateApplicationStageRequest {
   notes?: string | null;
   type?: string | null;
   interviewerIds?: string[] | null;
+  interviewDate?: string | null;
+  interviewPlace?: string | null;
 }
