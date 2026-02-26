@@ -158,17 +158,20 @@ export interface StageMasterDto {
   organizationId: string;
   stageName: string;
   stageOrder?: number | null;
+  isInterviewStage: boolean;
   createdAt?: string | null;
 }
 
 export interface CreateStageMasterRequest {
   stageName: string;
   stageOrder?: number | null;
+  isInterviewStage: boolean;
 }
 
 export interface UpdateStageMasterRequest {
   stageName: string;
   stageOrder?: number | null;
+  isInterviewStage: boolean;
 }
 
 export interface MyJobApplicationsFilterParams {
@@ -203,6 +206,7 @@ export interface ApplicationStageDto {
   candidateName?: string | null;
   stageId: string;
   stageName?: string | null;
+  isInterviewStage: boolean;
   notes?: string | null;
   type?: string | null;
   updatedOn?: string | null;
@@ -219,6 +223,9 @@ export interface CreateApplicationStageRequest {
   stageId: string;
   notes?: string | null;
   type?: string | null;
+  interviewerIds?: string[] | null;
+  interviewDate?: string | null;
+  interviewPlace?: string | null;
 }
 
 export interface UpdateApplicationStageRequest {

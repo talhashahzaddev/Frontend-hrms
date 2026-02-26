@@ -42,7 +42,7 @@ import {
 export class StageListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   dataSource = new MatTableDataSource<StageMasterDto>([]);
-  displayedColumns: string[] = ['stageName', 'stageOrder', 'createdAt', 'actions'];
+  displayedColumns: string[] = ['stageName', 'stageOrder', 'isInterviewStage', 'createdAt', 'actions'];
   isLoading = false;
   searchControl = new FormControl('');
 
@@ -50,7 +50,7 @@ export class StageListComponent implements OnInit, OnDestroy {
     private jobsService: JobsService,
     private notification: NotificationService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadStages();

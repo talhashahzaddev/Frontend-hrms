@@ -19,21 +19,26 @@
     ::ng-deep .mat-mdc-tab-header {
       padding: 0 16px;
     }
+
     ::ng-deep .mat-mdc-tab-labels {
       justify-content: flex-start;
       gap: 24px;
     }
+
     ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
       font-weight: 600;
       font-size: 14px;
     }
+
     .tab-label {
       padding: 0 4px;
     }
+
     .tab-content {
       padding: 12px 0 0;
       min-height: 200px;
     }
+
     .my-applications-tab .filters-card,
     .posted-by-me-tab .filters-card,
     .received-tab .filters-card {
@@ -102,6 +107,7 @@
   .filter-field {
     min-width: 140px;
   }
+
   .filter-field.date-field {
     min-width: 160px;
   }
@@ -218,8 +224,8 @@
 }
 
 .jobs-board-column {
-  flex: 0 0 280px;
-  min-width: 280px;
+  flex: 0 0 340px;
+  min-width: 340px;
   display: flex;
   flex-direction: column;
   background: #f8fafc;
@@ -249,8 +255,8 @@
   }
 
   .job-post-card {
-    min-height: 130px;
-    padding: 14px 16px;
+    min-height: 160px;
+    padding: 18px 20px;
     flex-shrink: 0;
   }
 
@@ -291,9 +297,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: auto;
-    padding: 0 10px !important;
-    height: 36px;
+    width: 32px;
+    min-width: 32px;
+    padding: 0 !important;
+    height: 32px;
     position: relative;
     z-index: 2;
     cursor: pointer;
@@ -307,10 +314,10 @@
     background: transparent;
 
     mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      margin-right: 4px;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 0;
     }
   }
 }
@@ -358,10 +365,28 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 12px 16px;
   border: 1px solid rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.25s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 
   &:hover {
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+  }
+
+  &.clickable-card {
+    cursor: pointer;
+    will-change: transform, box-shadow;
+
+    &:hover {
+      background-color: #f8fafc;
+      border-color: rgba(102, 126, 234, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(102, 126, 234, 0.15);
+    }
+
+    &:active {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+      transition: all 0.1s ease;
+    }
   }
 }
 
