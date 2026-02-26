@@ -274,8 +274,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
     {
-      name: 'Settings',
-      route: '/settings',
+      name: 'Change Password',
+      route: '/change-password',
       keywords: ['settings', 'preferences', 'configuration', 'config'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },

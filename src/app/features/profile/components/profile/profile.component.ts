@@ -430,4 +430,10 @@ this.passwordForm.setErrors(null);
   resetForm(): void {
     this.profileForm.reset();
   }
-} 
+
+  // Handler for header back button
+  onCancel(): void {
+    // Example: navigate back or emit event
+    // this.router.navigate(['/employee-list']);
+  }
+}

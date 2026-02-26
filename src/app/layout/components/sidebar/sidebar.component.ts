@@ -176,6 +176,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'My Applications', icon: 'person_pin', route: '/jobs/my-applications', roles: ['Manager', 'Employee'] },
         { label: 'Stage', icon: 'label', route: '/jobs/stage', roles: ['Super Admin'] }
       ]
+    },
+    {
+      label: 'Settings',
+      icon: 'work',
+      children: [
+        { label: 'Currency Settings', icon: 'work_outline', route: '/settings/general' },
+        { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address' },
+      
+      ]
     }
   ];
 
