@@ -158,6 +158,14 @@ export const appRoutes: Routes = [
       import('./features/profile/components/profile/profile.component').then(m => m.ProfileComponent),
     title: 'My Profile - HRMS'
   },
+  // Profile Management
+  {
+    path: 'change-password',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./features/profile/components/change-password/change-password.component').then(m => m.ChangePasswordComponent),
+    title: 'Change Password - HRMS'
+  },
 
   // Settings
   {

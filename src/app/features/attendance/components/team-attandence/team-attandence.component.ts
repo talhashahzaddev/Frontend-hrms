@@ -23,7 +23,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ViewDetailsDialogueComponent } from '../view-details-dialogue/view-details-dialogue.component';
-import { ManageOfficeIPsDialogComponent } from '../manage-office-ips-dialog/manage-office-ips-dialog.component';
+// import { ManageOfficeIPsDialogComponent } from '../manage-office-ips-dialog/manage-office-ips-dialog.component';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { EmployeeService } from '../../../employee/services/employee.service';

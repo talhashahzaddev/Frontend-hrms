@@ -12,7 +12,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { ManageOfficeIPsDialogComponent } from '../../../attendance/components/manage-office-ips-dialog/manage-office-ips-dialog.component';
 
 @Component({
   selector: 'app-settings-general',
@@ -149,12 +148,12 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     return currency ? currency.symbol : '';
   }
 
-  openManageOfficeIPsDialog(): void {
-    this.dialog.open(ManageOfficeIPsDialogComponent, {
-      width: '900px',
-      maxWidth: '95vw',
-      panelClass: 'manage-office-ips-dialog',
-      data: {}
-    });
-  }
+  // openManageOfficeIPsDialog(): void {
+  //   this.dialog.open(ManageOfficeIPsDialogComponent, {
+  //     width: '900px',
+  //     maxWidth: '95vw',
+  //     panelClass: 'manage-office-ips-dialog',
+  //     data: {}
+  //   });
+  // }
 }
