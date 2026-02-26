@@ -14,24 +14,20 @@ export const leaveRoutes: Routes = [
     title: 'Leave Dashboard - HRMS'
   },
   {
-    path: 'apply',
-    loadComponent: () => import('./components/apply-leave/apply-leave.component')
-      .then(m => m.ApplyLeaveComponent),
-    title: 'Apply for Leave - HRMS'
-  },
-  {
-    path: 'apply/:id',
-    loadComponent: () => import('./components/apply-leave/apply-leave.component')
-      .then(m => m.ApplyLeaveComponent),
-    title: 'Edit Leave Request - HRMS'
-  },
-  {
     path: 'team',
     //canActivate: [RoleGuard],
     data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
     loadComponent: () => import('./components/team-leaves/team-leaves.component')
       .then(m => m.TeamLeavesComponent),
     title: 'Team Leaves - HRMS'
+  },
+  {
+    path: 'team-requests',
+    //canActivate: [RoleGuard],
+    data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
+    loadComponent: () => import('./components/team-requests/team-requests.component')
+      .then(m => m.TeamRequestsComponent),
+    title: 'Team Requests - HRMS'
   },
   {
     path: 'calendar',
