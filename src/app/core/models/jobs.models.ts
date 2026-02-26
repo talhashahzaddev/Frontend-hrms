@@ -223,6 +223,9 @@ export interface CreateApplicationStageRequest {
   stageId: string;
   notes?: string | null;
   type?: string | null;
+  interviewerIds?: string[] | null;
+  interviewDate?: string | null;
+  interviewPlace?: string | null;
 }
 
 export interface UpdateApplicationStageRequest {
