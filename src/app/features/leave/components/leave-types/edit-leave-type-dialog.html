@@ -1,0 +1,109 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        <div class="header-left">
+            <div class="header-icon"><mat-icon>edit</mat-icon></div>
+            <div class="header-info">
+                <h2 class="header-title">Edit Leave Type</h2>
+                <p class="header-sub">{{ data.leaveType.typeName }}</p>
+            </div>
+        </div>
+    </div>
+
+    <mat-dialog-content class="dialog-body">
+        <form [formGroup]="form" (ngSubmit)="submit()" class="edit-form" autocomplete="off">
+
+            <!-- Basic Information -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon"><mat-icon>info</mat-icon></div>
+                    <div>
+                        <h3 class="section-title">Basic Information</h3>
+                        <p class="section-sub">Identity and description details</p>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <mat-form-field appearance="outline" class="field field-wide">
+                        <mat-label>Leave Type Name *</mat-label>
+                        <input matInput formControlName="typeName" required />
+                        <mat-error *ngIf="form.get('typeName')?.hasError('required')">Required</mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="field field-full">
+                        <mat-label>Description</mat-label>
+                        <textarea matInput formControlName="description" rows="2"></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Configuration -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon"><mat-icon>settings</mat-icon></div>
+                    <div>
+                        <h3 class="section-title">Leave Configuration</h3>
+                        <p class="section-sub">Limits and visual theme</p>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <mat-form-field appearance="outline" class="field">
+                        <mat-label>Maximum Days Per Year *</mat-label>
+                        <input matInput type="number" formControlName="maxDaysPerYear" min="1" required />
+                        <mat-error>Requires at least 1</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="field">
+                        <mat-label>Color Theme *</mat-label>
+                        <mat-select formControlName="color" required>
+                            <mat-option *ngFor="let c of colors" [value]="c.value">
+                                <div class="color-option">
+                                    <span class="color-preview" [style.background-color]="c.value"></span>
+                                    <span>{{ c.name }}</span>
+                                </div>
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Leave Policies -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon"><mat-icon>policy</mat-icon></div>
+                    <div>
+                        <h3 class="section-title">Leave Policies</h3>
+                        <p class="section-sub">Rules, active status, carry forward</p>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="checkbox-group field field-full">
+                        <mat-checkbox formControlName="isPaid">Paid Leave (Employees receive salary)</mat-checkbox>
+                        <mat-checkbox formControlName="carryForwardAllowed">Carry Forward Allowed</mat-checkbox>
+                        <mat-checkbox formControlName="isActive">Active (Available for use)</mat-checkbox>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="field field-full"
+                        *ngIf="form.get('carryForwardAllowed')?.value">
+                        <mat-label>Max Carry Forward Days</mat-label>
+                        <input matInput type="number" formControlName="maxCarryForwardDays" min="0"
+                            [max]="form.get('maxDaysPerYear')?.value || 365" required />
+                        <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('required')">Required when
+                            allowed</mat-error>
+                        <mat-error *ngIf="form.get('maxCarryForwardDays')?.hasError('max')">Cannot exceed max
+                            days</mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+        </form>
+    </mat-dialog-content>
+
+    <div class="dialog-footer">
+        <button mat-stroked-button type="button" mat-dialog-close [disabled]="isSubmitting" class="btn-cancel">
+            <mat-icon>close</mat-icon>
+            Cancel
+        </button>
+        <button mat-flat-button class="btn-save" (click)="submit()" [disabled]="form.invalid || isSubmitting">
+            <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+            Update Leave Type
+        </button>
+    </div>
+</div>

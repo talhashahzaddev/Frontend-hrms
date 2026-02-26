@@ -22,8 +22,8 @@ import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
-import { 
-  LeaveRequest, 
+import {
+  LeaveRequest,
   LeaveStatus,
   LeaveSearchRequest,
   LeaveListResponse,
@@ -52,279 +52,7 @@ import {
     MatDialogModule,
     MatExpansionModule
   ],
-  template: `
-    <div class="team-leaves-container">
-      
-      <!-- Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">
-            <mat-icon>groups</mat-icon>
-            Team Leave Management
-          </h1>
-          <p class="page-subtitle">Review and manage your team's leave requests</p>
-        </div>
-      </div>
-
-      <!-- Filters Section -->
-      <mat-card class="filters-card">
-        <mat-card-content>
-          <form [formGroup]="filterForm" class="filters-form">
-            
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Search</mat-label>
-              <mat-icon matPrefix>search</mat-icon>
-              <input matInput formControlName="search" placeholder="Search by employee name...">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Status</mat-label>
-              <mat-icon matPrefix>filter_list</mat-icon>
-              <mat-select formControlName="status">
-                <mat-option value="">All Status</mat-option>
-                <mat-option value="pending">Pending</mat-option>
-                <mat-option value="approved">Approved</mat-option>
-                <mat-option value="rejected">Rejected</mat-option>
-                <mat-option value="cancelled">Cancelled</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <button mat-stroked-button 
-                    type="button" 
-                    (click)="clearFilters()"
-                    [disabled]="!hasFiltersApplied()"
-                    class="clear-button">
-              <mat-icon>clear</mat-icon>
-              Clear Filters
-            </button>
-
-          </form>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Pending Approvals Section (Only for Managers, not HR Manager) -->
-      <mat-card class="pending-card" *ngIf="!isHRManager && pendingApprovals.length > 0">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="pending-icon">pending_actions</mat-icon>
-            Pending Approvals ({{ pendingApprovals.length }})
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="pending-list">
-            <div *ngFor="let request of pendingApprovals" class="pending-item">
-
-              <div class="item-header">
-                <div class="employee-info">
-                  
-
-<div class="employee-avatar">
-  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
-    <img
-      [src]="request.profilePreviewUrl"
-      alt="{{ request.employeeName }}"
-      class="avatar-image"
-    />
-  </ng-container>
-
-  <ng-template #initialsFallback>
-    <div class="avatar-initials">
-      {{ getInitials(request.employeeName) }}
-    </div>
-  </ng-template>
-</div>
-
-
-
-
-
-
-
-                  <div class="employee-details">
-                    <h4 class="employee-name">{{ request.employeeName }}</h4>
-                    <p class="leave-type">
-                      <span class="type-indicator" [style.background-color]="getLeaveTypeColor(request.leaveTypeId)"></span>
-                      {{ request.leaveTypeName }}
-                    </p>
-                  </div>
-                </div>
-
-
-
-
-                <div class="request-dates">
-                  <div class="date-badge">
-                    <mat-icon>event</mat-icon>
-                    <span>{{ request.startDate | date:'dd-MM-yyyy' }} - {{ request.endDate | date:'dd-MM-yyyy' }}</span>
-                  </div>
-                  <div class="days-badge">
-                    {{ request.daysRequested }} {{ request.daysRequested === 1 ? 'day' : 'days' }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="item-content" *ngIf="request.reason">
-                <p class="reason-label">Reason:</p>
-                <p class="reason-text">{{ request.reason }}</p>
-              </div>
-
-              <div class="item-footer">
-                <div class="submitted-info">
-                  <mat-icon>schedule</mat-icon>
-                  <span>Submitted {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}</span>
-                </div>
-                <div class="action-buttons">
-                  <button mat-stroked-button 
-                          color="warn" 
-                          (click)="openRejectDialog(request)"
-                          [disabled]="isProcessing">
-                    <mat-icon>close</mat-icon>
-                    Reject
-                  </button>
-                  <button mat-raised-button 
-                          color="primary" 
-                          (click)="approveRequest(request)"
-                          [disabled]="isProcessing">
-                    <mat-icon>check</mat-icon>
-                    Approve
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- All Requests Table -->
-      <mat-card class="requests-table-card">
-        <mat-card-header>
-          <mat-card-title>All Team Requests</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          
-          <div class="table-container" *ngIf="!isLoading">
-            <mat-table [dataSource]="teamRequests" class="team-requests-table">
-              
-              <ng-container matColumnDef="employee">
-                <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
-                <mat-cell *matCellDef="let request">
-                  <div class="employee-cell">
-                  
-<div class="employee-avatar-small">
-  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
-    <img [src]="request.profilePreviewUrl" [alt]="request.employeeName" />
-  </ng-container>
-
-  <ng-template #initialsFallback>
-    <div class="avatar-initials">
-      {{ getInitials(request.employeeName) }}
-    </div>
-  </ng-template>
-</div>
-
-
-
-                    <span>{{ request.employeeName }}</span>
-                  </div>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="leaveType">
-                <mat-header-cell *matHeaderCellDef>Leave Type</mat-header-cell>
-                <mat-cell *matCellDef="let request">
-                  <div class="leave-type-cell">
-                    <div class="type-indicator" [style.background-color]="getLeaveTypeColor(request.leaveTypeId)"></div>
-                    {{ request.leaveTypeName }}
-                  </div>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="dates">
-                <mat-header-cell *matHeaderCellDef>Duration</mat-header-cell>
-                <mat-cell *matCellDef="let request">
-                  <div class="dates-cell">
-                    <div>{{ request.startDate | date:'dd-MM-yyyy' }}</div>
-                    <div class="date-separator">to</div>
-                    <div>{{ request.endDate | date:'dd-MM-yyyy' }}</div>
-                    <div class="days-count">({{ request.daysRequested }} days)</div>
-                  </div>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="status">
-                <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-                <mat-cell *matCellDef="let request">
-                  <mat-chip [color]="leaveService.getStatusColor(request.status)">
-                    <mat-icon>{{ leaveService.getStatusIcon(request.status) }}</mat-icon>
-                    {{ leaveService.getStatusLabel(request.status) }}
-                  </mat-chip>
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="submitted">
-                <mat-header-cell *matHeaderCellDef>Submitted</mat-header-cell>
-                <mat-cell *matCellDef="let request">
-                  {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}
-                </mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
-                <mat-cell *matCellDef="let request">
-                  <button mat-icon-button [matMenuTriggerFor]="menu">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menu="matMenu">
-                    <button mat-menu-item 
-                            *ngIf="isPending(request.status)"
-                            (click)="approveRequest(request)">
-                      <mat-icon>check_circle</mat-icon>
-                      Approve
-                    </button>
-                    <button mat-menu-item 
-                            *ngIf="isPending(request.status)"
-                            (click)="openRejectDialog(request)">
-                      <mat-icon>cancel</mat-icon>
-                      Reject
-                    </button>
-                  </mat-menu>
-                </mat-cell>
-              </ng-container>
-
-              <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-            </mat-table>
-
-            <!-- Empty State -->
-            <div *ngIf="teamRequests.length === 0" class="empty-state">
-              <mat-icon>inbox</mat-icon>
-              <h3>No Team Requests</h3>
-              <p>There are no leave requests to display.</p>
-            </div>
-          </div>
-
-          <!-- Loading State -->
-          <div *ngIf="isLoading" class="loading-container">
-            <mat-spinner diameter="50"></mat-spinner>
-            <p>Loading team requests...</p>
-          </div>
-
-          <!-- Pagination -->
-          <mat-paginator 
-            *ngIf="totalCount > 0"
-            [length]="totalCount"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="[10, 25, 50, 100]"
-            [pageIndex]="currentPage - 1"
-            (page)="onPageChange($event)"
-            showFirstLastButtons>
-          </mat-paginator>
-
-        </mat-card-content>
-      </mat-card>
-
-    </div>
-  `,
+  templateUrl: './team-leaves.component.html',
   styleUrls: ['./team-leaves.component.scss']
 })
 export class TeamLeavesComponent implements OnInit, OnDestroy {
@@ -332,22 +60,22 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   filterForm!: FormGroup;
-  
+
   pendingApprovals: LeaveRequest[] = [];
   teamRequests: LeaveRequest[] = [];
   leaveTypes: LeaveType[] = [];
-  profilePreviewUrl:string|null=null;
-private backendBaseUrl = 'https://localhost:60485';
+  profilePreviewUrl: string | null = null;
+  private backendBaseUrl = 'https://localhost:60485';
 
 
   isLoading = false;
   isProcessing = false;
-  
+
   // Pagination
   currentPage = 1;
   pageSize = 10;
   totalCount = 0;
-  
+
   displayedColumns: string[] = ['employee', 'leaveType', 'dates', 'status', 'submitted', 'actions'];
   isHRManager = false;
 
@@ -366,7 +94,7 @@ private backendBaseUrl = 'https://localhost:60485';
     this.isHRManager = this.authService.hasAnyRole(['HR Manager', 'Super Admin']);
     // Update displayed columns based on role
     if (this.isHRManager) {
-      this.displayedColumns = ['employee', 'leaveType', 'dates', 'status', 'submitted','actions'];
+      this.displayedColumns = ['employee', 'leaveType', 'dates', 'status', 'submitted', 'actions'];
     }
   }
 
@@ -423,34 +151,34 @@ private backendBaseUrl = 'https://localhost:60485';
             // Handle both camelCase and PascalCase from API
             this.pendingApprovals = Array.isArray(pendingApprovals)
               ? pendingApprovals.map((employee: any) => {
-                  const mappedRequest: LeaveRequest = {
-                    requestId: employee.requestId || employee.RequestId || '',
-                    employeeId: employee.employeeId || employee.EmployeeId || '',
-                    employeeName: employee.employeeName || employee.EmployeeName || '',
-                    leaveTypeId: employee.leaveTypeId || employee.LeaveTypeId || '',
-                    leaveTypeName: employee.leaveTypeName || employee.LeaveTypeName || '',
-                    startDate: employee.startDate || employee.StartDate || '',
-                    endDate: employee.endDate || employee.EndDate || '',
-                    daysRequested: employee.daysRequested || employee.DaysRequested || 0,
-                    reason: employee.reason || employee.Reason,
-                    status: employee.status || employee.Status || 'pending',
-                    submittedAt: employee.submittedAt || employee.SubmittedAt || '',
-                    approverName: employee.approverName || employee.ApproverName,
-                    approvedAt: employee.approvedAt || employee.ApprovedAt,
-                    rejectionReason: employee.rejectionReason || employee.RejectionReason,
-                    profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
-                    profilePreviewUrl: null
-                  };
-                  
-                  // Set profile preview URL
-                  if (mappedRequest.profilePictureUrl) {
-                    mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
-                      ? mappedRequest.profilePictureUrl
-                      : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
-                  }
-                  
-                  return mappedRequest;
-                })
+                const mappedRequest: LeaveRequest = {
+                  requestId: employee.requestId || employee.RequestId || '',
+                  employeeId: employee.employeeId || employee.EmployeeId || '',
+                  employeeName: employee.employeeName || employee.EmployeeName || '',
+                  leaveTypeId: employee.leaveTypeId || employee.LeaveTypeId || '',
+                  leaveTypeName: employee.leaveTypeName || employee.LeaveTypeName || '',
+                  startDate: employee.startDate || employee.StartDate || '',
+                  endDate: employee.endDate || employee.EndDate || '',
+                  daysRequested: employee.daysRequested || employee.DaysRequested || 0,
+                  reason: employee.reason || employee.Reason,
+                  status: employee.status || employee.Status || 'pending',
+                  submittedAt: employee.submittedAt || employee.SubmittedAt || '',
+                  approverName: employee.approverName || employee.ApproverName,
+                  approvedAt: employee.approvedAt || employee.ApprovedAt,
+                  rejectionReason: employee.rejectionReason || employee.RejectionReason,
+                  profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
+                  profilePreviewUrl: null
+                };
+
+                // Set profile preview URL
+                if (mappedRequest.profilePictureUrl) {
+                  mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
+                    ? mappedRequest.profilePictureUrl
+                    : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
+                }
+
+                return mappedRequest;
+              })
               : [];
             this.cdr.markForCheck();
           },
@@ -475,7 +203,7 @@ private backendBaseUrl = 'https://localhost:60485';
     };
 
     // Use different API based on user role
-    const requestObservable = this.isHRManager 
+    const requestObservable = this.isHRManager
       ? this.leaveService.getLeaveRequestsForHR(searchRequest)
       : this.leaveService.getLeaveRequests(searchRequest);
 
@@ -505,14 +233,14 @@ private backendBaseUrl = 'https://localhost:60485';
               profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
               profilePreviewUrl: null
             };
-            
+
             // Set profile preview URL
             if (mappedRequest.profilePictureUrl) {
               mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
                 ? mappedRequest.profilePictureUrl
                 : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
             }
-            
+
             return mappedRequest;
           });
           this.totalCount = response.totalCount;
@@ -537,9 +265,9 @@ private backendBaseUrl = 'https://localhost:60485';
     }
 
     this.isProcessing = true;
-    
+
     console.log('Approving leave request with ID:', request.requestId);
-    
+
     this.leaveService.approveLeaveRequest(request.requestId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -581,9 +309,9 @@ private backendBaseUrl = 'https://localhost:60485';
       .subscribe(result => {
         if (result && result.rejected) {
           this.isProcessing = true;
-          
+
           console.log('Rejecting leave request with ID:', request.requestId, 'Reason:', result.reason);
-          
+
           this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
             .pipe(takeUntil(this.destroy$))
             .subscribe({

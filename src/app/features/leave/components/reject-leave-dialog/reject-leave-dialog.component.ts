@@ -30,94 +30,26 @@ export interface RejectLeaveDialogData {
     MatIconModule,
     MatProgressSpinnerModule
   ],
-  template: `
-    <div class="dialog-header">
-      <h2 mat-dialog-title>
-        <mat-icon>cancel</mat-icon>
-        Reject Leave Request
-      </h2>
-      <button mat-icon-button mat-dialog-close class="close-button">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-dialog-content class="dialog-content">
-      <!-- Leave Request Summary -->
-      <div class="request-summary">
-        <div class="summary-item">
-          <mat-icon>person</mat-icon>
-          <div class="summary-details">
-            <span class="label">Employee</span>
-            <span class="value">{{ data.employeeName }}</span>
-          </div>
-        </div>
-        <div class="summary-item">
-          <mat-icon>category</mat-icon>
-          <div class="summary-details">
-            <span class="label">Leave Type</span>
-            <span class="value">{{ data.leaveTypeName }}</span>
-          </div>
-        </div>
-        <div class="summary-item">
-          <mat-icon>date_range</mat-icon>
-          <div class="summary-details">
-            <span class="label">Duration</span>
-            <span class="value">{{ data.startDate | date:'mediumDate' }} - {{ data.endDate | date:'mediumDate' }}</span>
-          </div>
-        </div>
-        <div class="summary-item">
-          <mat-icon>event_note</mat-icon>
-          <div class="summary-details">
-            <span class="label">Days</span>
-            <span class="value">{{ data.daysRequested }} {{ data.daysRequested === 1 ? 'day' : 'days' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rejection Form -->
-      <form [formGroup]="rejectForm" class="reject-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Reason for Rejection *</mat-label>
-          <textarea matInput 
-                    formControlName="reason" 
-                    placeholder="Please provide a clear reason for rejecting this leave request..."
-                    rows="5"
-                    maxlength="500"></textarea>
-          <mat-hint align="start">Required - This will be sent to the employee</mat-hint>
-          <mat-hint align="end">{{ rejectForm.get('reason')?.value?.length || 0 }}/500</mat-hint>
-          <mat-error *ngIf="rejectForm.get('reason')?.hasError('required')">
-            Rejection reason is required
-          </mat-error>
-          <mat-error *ngIf="rejectForm.get('reason')?.hasError('minlength')">
-            Please provide at least 10 characters
-          </mat-error>
-        </mat-form-field>
-      </form>
-    </mat-dialog-content>
-
-    <mat-dialog-actions class="dialog-actions">
-      <button mat-stroked-button (click)="onCancel()" [disabled]="isSubmitting">
-        Cancel
-      </button>
-      <button mat-flat-button 
-              class="reject-button"
-              (click)="onReject()" 
-              [disabled]="!rejectForm.valid || isSubmitting">
-        <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
-        <mat-icon *ngIf="!isSubmitting">cancel</mat-icon>
-        {{ isSubmitting ? 'Rejecting...' : 'Reject Request' }}
-      </button>
-    </mat-dialog-actions>
-  `,
+  templateUrl: './reject-leave-dialog.component.html',
   styleUrls: ['./reject-leave-dialog.component.scss']
 })
 export class RejectLeaveDialogComponent {
+
   rejectForm: FormGroup;
   isSubmitting = false;
 
+  quickReasons: string[] = [
+    'Insufficient team coverage',
+    'Peak business period',
+    'Prior leave already approved',
+    'Insufficient notice period',
+    'Project deadline conflict',
+    'Leave balance insufficient',
+  ];
+
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<RejectLeaveDialogComponent>,
+    public dialogRef: MatDialogRef<RejectLeaveDialogComponent>,
     private notificationService: NotificationService,
     @Inject(MAT_DIALOG_DATA) public data: RejectLeaveDialogData
   ) {
@@ -126,26 +58,23 @@ export class RejectLeaveDialogComponent {
     });
   }
 
+  selectQuickReason(reason: string): void {
+    this.rejectForm.patchValue({ reason });
+    this.rejectForm.get('reason')?.markAsTouched();
+  }
+
   onCancel(): void {
-    this.dialogRef.close();
+    this.dialogRef.close({ rejected: false });
   }
 
   onReject(): void {
     if (!this.rejectForm.valid) {
-      this.notificationService.showError('Please fill in all required fields');
+      this.rejectForm.markAllAsTouched();
+      this.notificationService.showError('Please provide a rejection reason');
       return;
     }
     this.isSubmitting = true;
-    const reason = this.rejectForm.get('reason')?.value;
+    const reason = this.rejectForm.get('reason')?.value?.trim();
     this.dialogRef.close({ rejected: true, reason });
   }
 }
-
-
-
-
-
-
-
-
-

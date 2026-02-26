@@ -1,0 +1,176 @@
+<div class="reject-dialog-container">
+
+  <!-- ══ HEADER: icon left + title/subtitle + close btn right ══ -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>cancel</mat-icon>
+      </div>
+      <div class="header-titles">
+        <h2 class="dialog-title">Reject Leave Request</h2>
+        <p class="dialog-subtitle">Provide a reason that will be sent to the employee</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" type="button" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ══ SCROLLABLE BODY ══ -->
+  <mat-dialog-content class="dialog-body">
+
+    <!-- ── Section Card 1: Request Details ── -->
+    <div class="section-card">
+      <div class="section-card-title">
+        <div class="section-icon-box section-purple">
+          <mat-icon>info</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Request Details</p>
+          <p class="section-hint">Review the leave request before rejecting</p>
+        </div>
+      </div>
+
+      <!-- 2-column grid of fields -->
+      <div class="details-grid">
+
+        <!-- Employee -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>person</mat-icon>
+            Employee
+          </label>
+          <div class="field-display">{{ data.employeeName }}</div>
+        </div>
+
+        <!-- Leave Type -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>event_note</mat-icon>
+            Leave Type
+          </label>
+          <div class="field-display">
+            <span class="leave-type-badge">{{ data.leaveTypeName }}</span>
+          </div>
+        </div>
+
+        <!-- Start Date -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>today</mat-icon>
+            Start Date <span class="required-asterisk">*</span>
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">calendar_month</mat-icon>
+            {{ data.startDate | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>event</mat-icon>
+            End Date <span class="required-asterisk">*</span>
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">calendar_month</mat-icon>
+            {{ data.endDate | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+
+        <!-- Duration — full width -->
+        <div class="detail-field detail-field-full">
+          <label class="field-label">
+            <mat-icon>schedule</mat-icon>
+            Duration
+          </label>
+          <div class="field-display">
+            <span class="days-badge">
+              {{ data.daysRequested }} {{ data.daysRequested === 1 ? 'day' : 'days' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section Card 2: Rejection Reason ── -->
+    <div class="section-card">
+      <div class="section-card-title">
+        <div class="section-icon-box section-red">
+          <mat-icon>block</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">
+            Rejection Reason
+            <span class="required-asterisk">*</span>
+          </p>
+          <p class="section-hint">This message will be delivered to the employee</p>
+        </div>
+      </div>
+
+      <form [formGroup]="rejectForm">
+
+        <!-- Reason textarea -->
+        <div class="form-field-group">
+          <label class="field-label">
+            <mat-icon>notes</mat-icon>
+            Reason
+            <span class="required-asterisk">*</span>
+          </label>
+          <mat-form-field appearance="outline" class="textarea-field">
+            <textarea
+              matInput
+              formControlName="reason"
+              placeholder="Provide a clear reason for rejecting this leave request..."
+              rows="4"
+              maxlength="500">
+            </textarea>
+            <mat-hint align="end">{{ rejectForm.get('reason')?.value?.length || 0 }} / 500</mat-hint>
+            <mat-error *ngIf="rejectForm.get('reason')?.hasError('required')">
+              Rejection reason is required
+            </mat-error>
+            <mat-error *ngIf="rejectForm.get('reason')?.hasError('minlength')">
+              Please provide at least 10 characters
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Quick select reason chips -->
+        <div class="quick-reasons">
+          <p class="quick-label">Quick select:</p>
+          <div class="quick-chips">
+            <button
+              *ngFor="let r of quickReasons"
+              type="button"
+              class="quick-chip"
+              (click)="selectQuickReason(r)">
+              {{ r }}
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+  </mat-dialog-content>
+
+  <!-- ══ FOOTER: Cancel + Reject buttons ══ -->
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-stroked-button class="btn-cancel" type="button" (click)="onCancel()" [disabled]="isSubmitting">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+    <button
+      mat-raised-button
+      class="btn-reject"
+      type="button"
+      (click)="onReject()"
+      [disabled]="!rejectForm.valid || isSubmitting">
+      <mat-spinner diameter="15" *ngIf="isSubmitting"></mat-spinner>
+      <mat-icon *ngIf="!isSubmitting">cancel</mat-icon>
+      {{ isSubmitting ? 'Rejecting...' : 'Reject Request' }}
+    </button>
+  </mat-dialog-actions>
+
+</div>
