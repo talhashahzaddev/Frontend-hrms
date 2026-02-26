@@ -57,10 +57,7 @@ export class EditApplicationStageDialogComponent {
     private notification: NotificationService
   ) {
     const stage = data.stage;
-    const stageMaster = (data.stages || []).find((s) => s.stageId === stage.stageId);
-    const stageOrder = stageMaster?.stageOrder ?? undefined;
-    const stageName = (stage.stageName || stageMaster?.stageName || '').toLowerCase();
-    const showExtraFields = this.isInterviewTypeStage(stageOrder, stageName);
+    const showExtraFields = !!stage.isInterviewStage;
 
     const now = new Date();
     this.minInterviewDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -138,18 +135,10 @@ export class EditApplicationStageDialogComponent {
   }
 
   get showExtraFields(): boolean {
-    const stage = this.data.stage;
-    const stageMaster = (this.data.stages || []).find((s) => s.stageId === stage.stageId);
-    const stageOrder = stageMaster?.stageOrder ?? undefined;
-    const stageName = (stage.stageName || stageMaster?.stageName || '').toLowerCase();
-    return this.isInterviewTypeStage(stageOrder, stageName);
+    return !!this.data.stage.isInterviewStage;
   }
 
-  private isInterviewTypeStage(order: number | undefined, name: string): boolean {
-    if (order === 3) return true;
-    const interviewTypes = ['interview', 'assessment', 'screening', 'round', 'technical', 'hr'];
-    return interviewTypes.some((t) => name.includes(t));
-  }
+
 
   getEmployeeDisplay(emp: Employee): string {
     if (emp.fullName) return emp.fullName;
