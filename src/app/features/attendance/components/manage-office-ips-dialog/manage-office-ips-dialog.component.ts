@@ -1,12 +1,11 @@
-import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
@@ -19,15 +18,13 @@ import { Subject, takeUntil } from 'rxjs';
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { OfficeIP } from '../../../../core/models/attendance.models';
-import { EditOfficeIPDialogComponent } from './edit-ips-dialoguebox';
 
 @Component({
-  selector: 'app-manage-office-ips-dialog',
+  selector: 'app-manage-office-ips',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatDialogModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -43,7 +40,7 @@ import { EditOfficeIPDialogComponent } from './edit-ips-dialoguebox';
   templateUrl: './manage-office-ips-dialog.component.html',
   styleUrls: ['./manage-office-ips-dialog.component.scss']
 })
-export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
+export class ManageOfficeIPsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   officeIPs: OfficeIP[] = [];
@@ -59,11 +56,7 @@ export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private attendanceService: AttendanceService,
-    private notification: NotificationService,
-    private dialogRef: MatDialogRef<ManageOfficeIPsDialogComponent>,
-    private dialog: MatDialog,
-
-    @Inject(MAT_DIALOG_DATA) public data: any
+    private notification: NotificationService
   ) {
     this.ipForm = this.fb.group({
       ipAddressValue: ['', [Validators.required, Validators.pattern(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/)]],
@@ -140,29 +133,14 @@ export class ManageOfficeIPsDialogComponent implements OnInit, OnDestroy {
     }
   }
 
-editIP(ip: OfficeIP): void {
-  const dialogRef = this.dialog.open(EditOfficeIPDialogComponent, {
-    width: '400px',
-    data: ip
-  });
-
-  dialogRef.afterClosed().subscribe((updatedIP: OfficeIP | undefined) => {
-    if (updatedIP) {
-      this.attendanceService.updateOfficeIP(updatedIP.id, updatedIP)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Office IP updated successfully');
-            this.loadOfficeIPs();
-          },
-          error: (error) => {
-            const errorMessage = error?.error?.message || error?.message || 'Failed to update office IP';
-            this.notification.showError(errorMessage);
-          }
-        });
-    }
-  });
-}
+  editIP(ip: OfficeIP): void {
+    this.isEditing = true;
+    this.editingIP = { ...ip };
+    this.ipForm.patchValue({
+      ipAddressValue: ip.ipAddressValue,
+      name: ip.name
+    });
+  }
 
   cancelEdit(): void {
     this.isEditing = false;
@@ -170,24 +148,24 @@ editIP(ip: OfficeIP): void {
     this.ipForm.reset();
   }
 
-deleteIP(ip: OfficeIP): void {
-  this.attendanceService.deleteOfficeIP(ip.id)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: () => {
-        this.notification.showSuccess('Office IP deleted successfully');
-        this.loadOfficeIPs();
-      },
-      error: (error) => {
-        const errorMessage =
-          error?.error?.message ||
-          error?.message ||
-          'Failed to delete office IP';
+  deleteIP(ip: OfficeIP): void {
+    this.attendanceService.deleteOfficeIP(ip.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.notification.showSuccess('Office IP deleted successfully');
+          this.loadOfficeIPs();
+        },
+        error: (error) => {
+          const errorMessage =
+            error?.error?.message ||
+            error?.message ||
+            'Failed to delete office IP';
 
-        this.notification.showError(errorMessage);
-      }
-    });
-}
+          this.notification.showError(errorMessage);
+        }
+      });
+  }
 
   getErrorMessage(fieldName: string): string {
     const field = this.ipForm.get(fieldName);
@@ -205,9 +183,5 @@ deleteIP(ip: OfficeIP): void {
       const control = formGroup.get(key);
       control?.markAsTouched();
     });
-  }
-
-  closeDialog(): void {
-    this.dialogRef.close();
   }
 }

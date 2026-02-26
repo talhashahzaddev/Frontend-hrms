@@ -30,7 +30,7 @@ import {
 export class JobsService {
   private readonly apiUrl = `${environment.apiUrl}/Jobs`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getJobOpeningsPaged(params: JobOpeningsFilterParams = {}): Observable<PagedResult<JobOpeningDto>> {
     const { search, status, lastDateFrom, lastDateTo, page = 1, pageSize = 10 } = params;
@@ -332,7 +332,7 @@ export class JobsService {
     return this.http
       .post<ServiceResponse<ApplicationStageDto>>(
         `${this.apiUrl}/application-stages`,
-        { jobApplyId: request.jobApplyId, stageId: request.stageId }
+        request
       )
       .pipe(
         map((res) => {

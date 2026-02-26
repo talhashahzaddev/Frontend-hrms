@@ -10,19 +10,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ApplicationStageDto, StageMasterDto } from '@core/models/jobs.models';
+import { ApplicationStageDto, StageMasterDto, CreateApplicationStageRequest } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
 import { EmployeeService } from '@features/employee/services/employee.service';
 import { NotificationService } from '@core/services/notification.service';
 import { Employee } from '@core/models/employee.models';
 
-export interface EditApplicationStageDialogData {
-  stage: ApplicationStageDto;
-  stages: StageMasterDto[];
+export interface ApplicationStageDialogData {
+  mode: 'create' | 'edit';
+  jobApplyId: string;
+  stage?: ApplicationStageDto; // For edit mode
+  stageMaster?: StageMasterDto; // For create mode
 }
 
 @Component({
-  selector: 'app-edit-application-stage-dialog',
+  selector: 'app-application-stage-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -49,7 +51,7 @@ export class EditApplicationStageDialogComponent {
   minInterviewTime = '00:00';
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: EditApplicationStageDialogData,
+    @Inject(MAT_DIALOG_DATA) public data: ApplicationStageDialogData,
     private dialogRef: MatDialogRef<EditApplicationStageDialogComponent>,
     private fb: FormBuilder,
     private jobsService: JobsService,
@@ -57,18 +59,16 @@ export class EditApplicationStageDialogComponent {
     private notification: NotificationService
   ) {
     const stage = data.stage;
-    const stageMaster = (data.stages || []).find((s) => s.stageId === stage.stageId);
-    const stageOrder = stageMaster?.stageOrder ?? undefined;
-    const stageName = (stage.stageName || stageMaster?.stageName || '').toLowerCase();
-    const showExtraFields = this.isInterviewTypeStage(stageOrder, stageName);
+    const isInterviewStage = data.mode === 'create' ? !!data.stageMaster?.isInterviewStage : !!data.stage?.isInterviewStage;
+    const showExtraFields = isInterviewStage;
 
     const now = new Date();
     this.minInterviewDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     let interviewDateVal: Date | null = null;
     let interviewTimeVal = '';
-    let interviewPlaceVal = stage.interviewPlace ?? '';
-    if (stage.interviewDate) {
+    let interviewPlaceVal = stage?.interviewPlace ?? '';
+    if (stage?.interviewDate) {
       try {
         const d = new Date(stage.interviewDate);
         if (!isNaN(d.getTime())) {
@@ -81,9 +81,9 @@ export class EditApplicationStageDialogComponent {
     }
 
     this.form = this.fb.group({
-      notes: [stage.notes ?? ''],
-      type: [stage.type ?? ''],
-      interviewerIds: [stage.interviewers?.map((i) => i.employeeId) ?? []],
+      notes: [stage?.notes ?? ''],
+      type: [stage?.type ?? ''],
+      interviewerIds: [stage?.interviewers?.map((i) => i.employeeId) ?? []],
       interviewDate: [interviewDateVal],
       interviewTime: [interviewTimeVal],
       interviewPlace: [interviewPlaceVal]
@@ -138,18 +138,14 @@ export class EditApplicationStageDialogComponent {
   }
 
   get showExtraFields(): boolean {
-    const stage = this.data.stage;
-    const stageMaster = (this.data.stages || []).find((s) => s.stageId === stage.stageId);
-    const stageOrder = stageMaster?.stageOrder ?? undefined;
-    const stageName = (stage.stageName || stageMaster?.stageName || '').toLowerCase();
-    return this.isInterviewTypeStage(stageOrder, stageName);
+    return this.data.mode === 'create' ? !!this.data.stageMaster?.isInterviewStage : !!this.data.stage?.isInterviewStage;
   }
 
-  private isInterviewTypeStage(order: number | undefined, name: string): boolean {
-    if (order === 3) return true;
-    const interviewTypes = ['interview', 'assessment', 'screening', 'round', 'technical', 'hr'];
-    return interviewTypes.some((t) => name.includes(t));
+  get stageName(): string {
+    return this.data.mode === 'create' ? (this.data.stageMaster?.stageName || '') : (this.data.stage?.stageName || '');
   }
+
+
 
   getEmployeeDisplay(emp: Employee): string {
     if (emp.fullName) return emp.fullName;
@@ -171,24 +167,47 @@ export class EditApplicationStageDialogComponent {
       interviewDateIso = combined.toISOString();
     }
     this.saving = true;
-    const payload = {
-      notes: v.notes?.trim() || undefined,
-      type: this.showExtraFields ? (v.type?.trim() || undefined) : undefined,
-      interviewerIds: this.showExtraFields && Array.isArray(v.interviewerIds) ? v.interviewerIds : undefined,
-      interviewDate: interviewDateIso,
-      interviewPlace: this.showExtraFields && v.interviewPlace?.trim() ? v.interviewPlace.trim() : undefined
-    };
-    this.jobsService.updateApplicationStage(this.data.stage.applicationStageId, payload).subscribe({
-      next: () => {
-        this.notification.showSuccess('Stage updated successfully.');
-        this.dialogRef.close(true);
-        this.saving = false;
-      },
-      error: (err) => {
-        this.notification.showError(err?.message || 'Failed to update stage');
-        this.saving = false;
-      }
-    });
+    if (this.data.mode === 'create') {
+      const payload: CreateApplicationStageRequest = {
+        jobApplyId: this.data.jobApplyId,
+        stageId: this.data.stageMaster!.stageId,
+        notes: v.notes?.trim() || undefined,
+        type: this.showExtraFields ? (v.type?.trim() || undefined) : undefined,
+        interviewerIds: this.showExtraFields && Array.isArray(v.interviewerIds) ? v.interviewerIds : undefined,
+        interviewDate: interviewDateIso,
+        interviewPlace: this.showExtraFields && v.interviewPlace?.trim() ? v.interviewPlace.trim() : undefined
+      };
+      this.jobsService.createApplicationStage(payload).subscribe({
+        next: () => {
+          this.notification.showSuccess('Stage added successfully.');
+          this.dialogRef.close(true);
+          this.saving = false;
+        },
+        error: (err) => {
+          this.notification.showError(err?.message || 'Failed to add stage');
+          this.saving = false;
+        }
+      });
+    } else {
+      const payload = {
+        notes: v.notes?.trim() || undefined,
+        type: this.showExtraFields ? (v.type?.trim() || undefined) : undefined,
+        interviewerIds: this.showExtraFields && Array.isArray(v.interviewerIds) ? v.interviewerIds : undefined,
+        interviewDate: interviewDateIso,
+        interviewPlace: this.showExtraFields && v.interviewPlace?.trim() ? v.interviewPlace.trim() : undefined
+      };
+      this.jobsService.updateApplicationStage(this.data.stage!.applicationStageId, payload).subscribe({
+        next: () => {
+          this.notification.showSuccess('Stage updated successfully.');
+          this.dialogRef.close(true);
+          this.saving = false;
+        },
+        error: (err) => {
+          this.notification.showError(err?.message || 'Failed to update stage');
+          this.saving = false;
+        }
+      });
+    }
   }
 
   close(): void {

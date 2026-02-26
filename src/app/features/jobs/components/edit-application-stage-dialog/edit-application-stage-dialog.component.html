@@ -1,7 +1,7 @@
 <div class="dialog-header">
   <h2 mat-dialog-title>
-    <mat-icon>edit</mat-icon>
-    Edit stage — {{ data.stage.stageName || 'Stage' }}
+    <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
+    {{ data.mode === 'create' ? 'Add stage' : 'Edit stage' }} — {{ stageName || 'Stage' }}
   </h2>
   <button mat-icon-button mat-dialog-close class="close-button">
     <mat-icon>close</mat-icon>
@@ -23,7 +23,8 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Interview date</mat-label>
-        <input matInput [matDatepicker]="interviewDatePicker" formControlName="interviewDate" [min]="minInterviewDate" placeholder="Select date">
+        <input matInput [matDatepicker]="interviewDatePicker" formControlName="interviewDate" [min]="minInterviewDate"
+          placeholder="Select date">
         <mat-datepicker-toggle matIconSuffix [for]="interviewDatePicker"></mat-datepicker-toggle>
         <mat-datepicker #interviewDatePicker></mat-datepicker>
       </mat-form-field>

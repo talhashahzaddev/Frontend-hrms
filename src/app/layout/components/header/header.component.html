@@ -157,12 +157,13 @@
 
     <a mat-menu-item [routerLink]="['/profile']" (click)="onProfileClick()">
       <mat-icon>person</mat-icon>
-      <span>My Profile</span>
+      <span>Update Profile</span>
     </a>
 
-    <a mat-menu-item [routerLink]="['/settings']" (click)="onSettingsClick()">
+    <a mat-menu-item [routerLink]="['/change-password']" (click)="onSettingsClick()"
+      >
       <mat-icon>settings</mat-icon>
-      <span>Settings</span>
+      <span>Change Password</span>
     </a>
 
     <mat-divider></mat-divider>

@@ -9,5 +9,9 @@ export const settingsRoutes: Routes = [
   {
     path: 'general',
     loadComponent: () => import('./components/settings-general/settings-general.component').then(m => m.SettingsGeneralComponent)
+  },
+  {
+    path: 'ip-address',
+    loadComponent: () => import('../attendance/components/manage-office-ips-dialog/manage-office-ips-dialog.component').then(m => m.ManageOfficeIPsComponent)
   }
 ];

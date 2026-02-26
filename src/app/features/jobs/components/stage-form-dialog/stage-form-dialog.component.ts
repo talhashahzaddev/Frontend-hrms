@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { StageMasterDto, CreateStageMasterRequest, UpdateStageMasterRequest } from '@core/models/jobs.models';
 import { JobsService } from '../../services/jobs.service';
@@ -28,7 +29,8 @@ export interface StageFormDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCheckboxModule
   ],
   templateUrl: './stage-form-dialog.component.html',
   styleUrls: ['./stage-form-dialog.component.scss']
@@ -46,12 +48,14 @@ export class StageFormDialogComponent {
   ) {
     this.stageForm = this.fb.group({
       stageName: ['', [Validators.required, Validators.maxLength(100)]],
-      stageOrder: [null as number | null, []]
+      stageOrder: [null as number | null, []],
+      isInterviewStage: [false]
     });
     if (data.mode === 'edit' && data.stage) {
       this.stageForm.patchValue({
         stageName: data.stage.stageName,
-        stageOrder: data.stage.stageOrder ?? null
+        stageOrder: data.stage.stageOrder ?? null,
+        isInterviewStage: data.stage.isInterviewStage ?? false
       });
     }
   }
@@ -66,7 +70,8 @@ export class StageFormDialogComponent {
     if (this.data.mode === 'create') {
       const request: CreateStageMasterRequest = {
         stageName: v.stageName.trim(),
-        stageOrder: v.stageOrder != null && v.stageOrder !== '' ? Number(v.stageOrder) : undefined
+        stageOrder: v.stageOrder != null && v.stageOrder !== '' ? Number(v.stageOrder) : undefined,
+        isInterviewStage: !!v.isInterviewStage
       };
       this.jobsService.createStage(request).subscribe({
         next: () => {
@@ -81,7 +86,8 @@ export class StageFormDialogComponent {
     } else if (this.data.stage) {
       const request: UpdateStageMasterRequest = {
         stageName: v.stageName.trim(),
-        stageOrder: v.stageOrder != null && v.stageOrder !== '' ? Number(v.stageOrder) : undefined
+        stageOrder: v.stageOrder != null && v.stageOrder !== '' ? Number(v.stageOrder) : undefined,
+        isInterviewStage: !!v.isInterviewStage
       };
       this.jobsService.updateStage(this.data.stage.stageId, request).subscribe({
         next: () => {

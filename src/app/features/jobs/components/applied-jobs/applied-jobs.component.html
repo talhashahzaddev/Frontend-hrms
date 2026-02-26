@@ -166,18 +166,22 @@
               <span>Loading applications for your job posts...</span>
             </div>
             <div class="jobs-board-wrapper" *ngIf="!postedByMeIsLoading">
-              <div class="jobs-board-row" *ngIf="postedByMeApplications.length > 0 || postedByMeBoardColumns.length > 0">
+              <div class="jobs-board-row"
+                *ngIf="postedByMeApplications.length > 0 || postedByMeBoardColumns.length > 0">
                 <div class="jobs-board-column" *ngFor="let col of postedByMeBoardColumns">
                   <h3 class="board-column-title">{{ col.stageName }}</h3>
                   <div class="board-column-cards">
-                    <article class="job-post-card" *ngFor="let app of getPostedByMeAppsForColumn(col.stageId)">
+                    <article class="job-post-card clickable-card"
+                      *ngFor="let app of getPostedByMeAppsForColumn(col.stageId)" (click)="openProcessDialog(app)">
                       <div class="job-post-header">
                         <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                         <div class="job-post-heading">
                           <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{
+                            getAppliedDate(app)
                             }}</p>
-                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{
+                            app.candidateEmail ?
                             ' · ' + app.candidateEmail : '' }}</p>
                         </div>
                         <div class="job-post-status">
@@ -189,11 +193,9 @@
                         <div class="job-post-actions">
                           <div class="action-btn process-btn board-process-btn"
                             (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
-                            role="button"
-                            tabindex="0"
-                            (keydown.enter)="openProcessDialog(app)"
+                            role="button" tabindex="0" (keydown.enter)="openProcessDialog(app)"
                             (keydown.space)="openProcessDialog(app); $event.preventDefault()">
-                            <mat-icon>playlist_add_check</mat-icon> Processed
+                            <mat-icon>expand_more</mat-icon>
                           </div>
                         </div>
                       </div>
@@ -281,14 +283,17 @@
                 <div class="jobs-board-column" *ngFor="let col of receivedBoardColumns">
                   <h3 class="board-column-title">{{ col.stageName }}</h3>
                   <div class="board-column-cards">
-                    <article class="job-post-card" *ngFor="let app of getReceivedAppsForColumn(col.stageId)">
+                    <article class="job-post-card clickable-card"
+                      *ngFor="let app of getReceivedAppsForColumn(col.stageId)" (click)="openProcessDialog(app)">
                       <div class="job-post-header">
                         <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                         <div class="job-post-heading">
                           <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
+                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{
+                            getAppliedDate(app)
                             }}</p>
-                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{ app.candidateEmail ?
+                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{
+                            app.candidateEmail ?
                             ' · ' + app.candidateEmail : '' }}</p>
                         </div>
                         <div class="job-post-status">
@@ -300,11 +305,9 @@
                         <div class="job-post-actions">
                           <div class="action-btn process-btn board-process-btn"
                             (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
-                            role="button"
-                            tabindex="0"
-                            (keydown.enter)="openProcessDialog(app)"
+                            role="button" tabindex="0" (keydown.enter)="openProcessDialog(app)"
                             (keydown.space)="openProcessDialog(app); $event.preventDefault()">
-                            <mat-icon>playlist_add_check</mat-icon> Processed
+                            <mat-icon>expand_more</mat-icon>
                           </div>
                         </div>
                       </div>

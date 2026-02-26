@@ -126,7 +126,7 @@ export class ApplicationProcessDialogComponent implements OnInit {
     const dialogRef = this.dialog.open(EditApplicationStageDialogComponent, {
       width: '480px',
       panelClass: 'edit-application-stage-dialog-panel',
-      data: { stage, stages: this.stages }
+      data: { mode: 'edit', jobApplyId: this.data.jobApplyId, stage: stage }
     });
     dialogRef.afterClosed().subscribe((updated) => {
       if (updated) {
@@ -192,29 +192,31 @@ export class ApplicationProcessDialogComponent implements OnInit {
       this.notification.showError('Please select a stage');
       return;
     }
-    this.addingStage = true;
-    this.jobsService
-      .createApplicationStage({
+
+    const stageMaster = this.stages.find(s => s.stageId === stageId);
+    if (!stageMaster) return;
+
+    const dialogRef = this.dialog.open(EditApplicationStageDialogComponent, {
+      width: '480px',
+      panelClass: 'edit-application-stage-dialog-panel',
+      data: {
+        mode: 'create',
         jobApplyId: this.data.jobApplyId,
-        stageId: stageId.trim()
-      })
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Stage added successfully. Application status updated.');
-          this.addingStage = false;
-          this.selectedStageId.setValue('');
-          this.loadApplicationStages();
-          this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
-            next: (app) => {
-              this.application = app;
-            }
-          });
-        },
-        error: (err) => {
-          this.notification.showError(err?.message || 'Failed to add stage');
-          this.addingStage = false;
-        }
-      });
+        stageMaster: stageMaster
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.selectedStageId.setValue('');
+        this.loadApplicationStages();
+        this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
+          next: (app) => {
+            this.application = app;
+          }
+        });
+      }
+    });
   }
 
   close(): void {
