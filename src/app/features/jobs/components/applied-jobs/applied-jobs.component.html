@@ -172,13 +172,22 @@
               <span>Loading applications for your job posts...</span>
             </div>
             <div class="jobs-board-wrapper" *ngIf="!postedByMeIsLoading">
-              <div class="jobs-board-row"
-                *ngIf="postedByMeApplications.length > 0 || postedByMeBoardColumns.length > 0">
-                <div class="jobs-board-column" *ngFor="let col of postedByMeBoardColumns">
-                  <h3 class="board-column-title">{{ col.stageName }}</h3>
-                  <div class="board-column-cards">
-                    <article class="job-post-card clickable-card"
-                      *ngFor="let app of getPostedByMeAppsForColumn(col.stageId)" (click)="openProcessDialog(app)">
+              <div class="jobs-board-row" *ngIf="postedByMeColumnData.length > 0">
+                <div class="jobs-board-column" *ngFor="let colData of postedByMeColumnData; let i = index">
+                  <div class="board-column-header">
+                    <h3 class="board-column-title">{{ colData.col.stageName }}</h3>
+                    <span class="board-column-count">{{ colData.apps.length }}</span>
+                  </div>
+                  <div class="board-column-cards" cdkDropList [id]="'pbm-col-' + i" [cdkDropListData]="colData.apps"
+                    [cdkDropListConnectedTo]="postedByMeDropIds" (cdkDropListDropped)="onPostedByMeDrop($event, i)">
+                    <article class="job-post-card clickable-card dnd-card" cdkDrag [cdkDragData]="app"
+                      *ngFor="let app of colData.apps" (click)="openProcessDialog(app)">
+                      <!-- Drag handle indicator -->
+                      <div class="dnd-drag-handle" cdkDragHandle title="Drag to move stage">
+                        <mat-icon>drag_indicator</mat-icon>
+                      </div>
+                      <!-- Drag preview placeholder -->
+                      <div *cdkDragPlaceholder class="dnd-placeholder"></div>
                       <div class="job-post-header">
                         <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                         <div class="job-post-heading">
@@ -206,6 +215,11 @@
                         </div>
                       </div>
                     </article>
+                    <!-- Empty column drop zone -->
+                    <div class="board-column-empty" *ngIf="colData.apps.length === 0">
+                      <mat-icon>inbox</mat-icon>
+                      <span>Drop here</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -291,12 +305,20 @@
               <span>Loading received applications...</span>
             </div>
             <div class="jobs-board-wrapper" *ngIf="!receivedIsLoading">
-              <div class="jobs-board-row" *ngIf="receivedApplications.length > 0 || receivedBoardColumns.length > 0">
-                <div class="jobs-board-column" *ngFor="let col of receivedBoardColumns">
-                  <h3 class="board-column-title">{{ col.stageName }}</h3>
-                  <div class="board-column-cards">
-                    <article class="job-post-card clickable-card"
-                      *ngFor="let app of getReceivedAppsForColumn(col.stageId)" (click)="openProcessDialog(app)">
+              <div class="jobs-board-row" *ngIf="receivedColumnData.length > 0">
+                <div class="jobs-board-column" *ngFor="let colData of receivedColumnData; let i = index">
+                  <div class="board-column-header">
+                    <h3 class="board-column-title">{{ colData.col.stageName }}</h3>
+                    <span class="board-column-count">{{ colData.apps.length }}</span>
+                  </div>
+                  <div class="board-column-cards" cdkDropList [id]="'rec-col-' + i" [cdkDropListData]="colData.apps"
+                    [cdkDropListConnectedTo]="receivedDropIds" (cdkDropListDropped)="onReceivedDrop($event, i)">
+                    <article class="job-post-card clickable-card dnd-card" cdkDrag [cdkDragData]="app"
+                      *ngFor="let app of colData.apps" (click)="openProcessDialog(app)">
+                      <div class="dnd-drag-handle" cdkDragHandle title="Drag to move stage">
+                        <mat-icon>drag_indicator</mat-icon>
+                      </div>
+                      <div *cdkDragPlaceholder class="dnd-placeholder"></div>
                       <div class="job-post-header">
                         <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                         <div class="job-post-heading">
@@ -324,6 +346,10 @@
                         </div>
                       </div>
                     </article>
+                    <div class="board-column-empty" *ngIf="colData.apps.length === 0">
+                      <mat-icon>inbox</mat-icon>
+                      <span>Drop here</span>
+                    </div>
                   </div>
                 </div>
               </div>
