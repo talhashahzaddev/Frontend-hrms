@@ -224,8 +224,8 @@
 }
 
 .jobs-board-column {
-  flex: 0 0 340px;
-  min-width: 340px;
+  flex: 0 0 300px;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   background: #f8fafc;
@@ -233,16 +233,38 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
   max-height: 70vh;
   overflow: hidden;
+  transition: box-shadow 0.2s ease;
 
-  .board-column-title {
-    margin: 0;
+  // Column header with title + count badge
+  .board-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 12px 14px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #1f2937;
     background: white;
     border-bottom: 1px solid #e5e7eb;
     flex-shrink: 0;
+  }
+
+  .board-column-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  .board-column-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
   }
 
   .board-column-cards {
@@ -251,13 +273,48 @@
     padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
+    min-height: 80px; // always a droppable surface
+
+    // CDK DnD active state – column turns highlighted when a card hovers over it
+    &.cdk-drop-list-dragging {
+      background: rgba(102, 126, 234, 0.04);
+      border-radius: 0 0 12px 12px;
+    }
+
+    &.cdk-drop-list-receiving {
+      background: rgba(102, 126, 234, 0.08);
+      outline: 2px dashed rgba(102, 126, 234, 0.4);
+      outline-offset: -4px;
+      border-radius: 0 0 12px 12px;
+    }
+  }
+
+  // Empty column drop target
+  .board-column-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 24px 0;
+    color: #d1d5db;
+    font-size: 12px;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
   }
 
   .job-post-card {
-    min-height: 160px;
-    padding: 18px 20px;
+    min-height: unset;
+    padding: 12px 14px;
     flex-shrink: 0;
+    position: relative;
   }
 
   .job-post-footer {
@@ -321,6 +378,74 @@
     }
   }
 }
+
+// ===== Drag-and-Drop card styles =====
+
+// The draggable card itself
+.dnd-card {
+  cursor: default; // rely on handle for cursor
+}
+
+// Drag handle – the grab icon in the top-right corner
+.dnd-drag-handle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  cursor: grab;
+  color: #c4c9d4;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+  border-radius: 4px;
+  padding: 2px;
+
+  &:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+  }
+}
+
+// Placeholder (ghost) card shown in the gap where the card will be dropped
+.dnd-placeholder {
+  background: rgba(102, 126, 234, 0.1);
+  border: 2px dashed rgba(102, 126, 234, 0.5);
+  border-radius: 12px;
+  min-height: 80px;
+  transition: all 0.2s ease;
+}
+
+// The card that is being dragged (floating preview)
+.cdk-drag-preview {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(102, 126, 234, 0.25) !important;
+  border: 1.5px solid rgba(102, 126, 234, 0.4);
+  padding: 12px 14px;
+  opacity: 0.95;
+  transform: rotate(2deg) scale(1.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: grabbing;
+  z-index: 9999;
+}
+
+// Hide original while dragging (CDK replaces with placeholder)
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1) !important;
+}
+
+
 
 .jobs-feed {
   display: grid;
@@ -395,6 +520,8 @@
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
+  padding-right: 28px;
+  /* space for absolute drag handle */
 }
 
 .job-post-avatar {

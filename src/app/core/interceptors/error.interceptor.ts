@@ -11,7 +11,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   constructor(
     private router: Router,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -25,22 +25,22 @@ export class ErrorInterceptor implements HttpInterceptor {
 
   private handleHttpError(error: HttpErrorResponse): void {
     let errorMessage = 'An unexpected error occurred';
-    
+
     switch (error.status) {
       case 0:
         errorMessage = 'Unable to connect to server. Please check your internet connection.';
         this.notificationService.networkError();
         break;
-        
+
       case 400:
         errorMessage = this.extractErrorMessage(error) || 'Invalid request. Please check your input.';
         break;
-        
+
       case 401:
         errorMessage = 'Your session has expired. Please login again.';
         // Don't show notification for 401 as AuthInterceptor handles it
         break;
-        
+
       case 403:
         errorMessage = 'You do not have permission to perform this action.';
         this.notificationService.permissionDenied();
@@ -49,19 +49,19 @@ export class ErrorInterceptor implements HttpInterceptor {
           this.router.navigate(['/403']);
         }
         break;
-        
+
       case 404:
         errorMessage = 'The requested resource was not found.';
         if (!this.isApiCall(error.url)) {
           this.router.navigate(['/404']);
         }
         break;
-        
+
       case 422:
         errorMessage = this.extractErrorMessage(error) || 'Validation failed. Please check your input.';
         this.notificationService.validationError(errorMessage);
         break;
-        
+
       case 500:
         errorMessage = 'Internal server error. Please try again later.';
         this.notificationService.error({
@@ -72,7 +72,7 @@ export class ErrorInterceptor implements HttpInterceptor {
           this.router.navigate(['/500']);
         }
         break;
-        
+
       case 502:
       case 503:
       case 504:
@@ -82,9 +82,14 @@ export class ErrorInterceptor implements HttpInterceptor {
           message: errorMessage
         });
         break;
-        
+
+      case 409:
+        errorMessage = this.extractErrorMessage(error) || 'Conflict: This action has already been performed.';
+        this.notificationService.error(errorMessage);
+        break;
+
       default:
-        errorMessage = `Error ${error.status}: ${error.message}`;
+        errorMessage = this.extractErrorMessage(error) || `Error ${error.status}: ${error.statusText || 'Unexpected error'}`;
         this.notificationService.error(errorMessage);
         break;
     }
@@ -106,19 +111,19 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (error.error?.message) {
       return error.error.message;
     }
-    
+
     if (error.error?.errors && Array.isArray(error.error.errors)) {
       return error.error.errors.join(', ');
     }
-    
+
     if (error.error?.title) {
       return error.error.title;
     }
-    
+
     if (typeof error.error === 'string') {
       return error.error;
     }
-    
+
     return null;
   }
 

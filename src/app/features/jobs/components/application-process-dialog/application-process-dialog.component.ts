@@ -165,7 +165,7 @@ export class ApplicationProcessDialogComponent implements OnInit {
             });
           },
           error: (err) => {
-            this.notification.showError(err?.message || 'Failed to delete stage');
+            // ErrorInterceptor handles this
           }
         });
       }
