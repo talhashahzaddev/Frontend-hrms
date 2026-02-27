@@ -190,8 +190,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
           // Update onboarding steps based on API response
           this.onboardingSteps[0].completed = status.signUp; // Sign Up (always true)
           this.onboardingSteps[1].completed = status.createTeam;
-          this.onboardingSteps[2].completed = status.defineLeaveTypes;
-          this.onboardingSteps[3].completed = status.markAttendance;
+          this.onboardingSteps[2].completed = status.markAttendance;
+          this.onboardingSteps[3].completed = status.defineLeaveTypes;
           this.onboardingSteps[4].completed = status.processPayroll;
           this.cdr.markForCheck();
         },
