@@ -11,6 +11,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatChipsModule } from '@angular/material/chips';
 import { RouterModule } from '@angular/router';
 
 import { Asset, AssetType } from '../../../../core/models/assets.models';
@@ -37,7 +40,10 @@ import { LoadingService } from '@core/services/loading.service';
     MatDatepickerModule,
     MatNativeDateModule,
     MatTableModule,
-    MatDialogModule
+    MatDialogModule,
+    MatMenuModule,
+    MatDividerModule,
+    MatChipsModule
   ],
   templateUrl: './create-asset.component.html',
   styleUrls: ['./create-asset.component.scss']
@@ -45,6 +51,9 @@ import { LoadingService } from '@core/services/loading.service';
 export class CreateAssetComponent implements OnInit {
   @ViewChild('assetDialog') assetDialogTemplate!: TemplateRef<any>;
   @ViewChild('assignDialog') assignDialogTemplate!: TemplateRef<any>;
+  @ViewChild('historyDialog') historyDialogTemplate!: TemplateRef<any>;
+  @ViewChild('viewDialog') viewDialogTemplate!: TemplateRef<any>;
+  @ViewChild('returnDialog') returnDialogTemplate!: TemplateRef<any>;
 
   form!: FormGroup;
   dialogForm!: FormGroup;
@@ -55,11 +64,15 @@ export class CreateAssetComponent implements OnInit {
   employees: any[] = [];
   filteredEmployees: any[] = [];
   selectedAsset: any;
+  selectedAssignment: any;
   editingAssetId: string | null = null;
   isEditMode = false;
 
   dialogRef!: MatDialogRef<any>;
   assignDialogRef!: MatDialogRef<any>;
+  historyDialogRef!: MatDialogRef<any>;
+  viewDialogRef!: MatDialogRef<any>;
+  returnDialogRef!: MatDialogRef<any>;
 
   // Filter properties
   searchQuery = '';
@@ -76,7 +89,7 @@ export class CreateAssetComponent implements OnInit {
     { value: 'Retired', label: 'Retired' }
   ];
 
-  displayedColumns: string[] = ['name', 'type', 'code', 'purchaseDate', 'status', 'actions'];
+  displayedColumns: string[] = ['name', 'type', 'code', 'purchaseDate', 'status', 'assignedTo', 'actions'];
 
   constructor(
     private fb: FormBuilder,
@@ -112,6 +125,43 @@ export class CreateAssetComponent implements OnInit {
     });
     // dialogForm references the same controls as `form` for template compatibility
     this.dialogForm = this.form;
+
+    this.returnForm = this.fb.group({
+      condition: ['Good']
+    });
+  }
+
+  returnForm!: FormGroup;
+
+  getAssignedToDisplay(asset: any): string {
+    if (!asset) return 'Not Assigned';
+    
+    // Try different property name variations from backend
+    const employeeName = asset.employeeName || asset.EmployeeName || asset.assignedEmployeeName || asset.currentAssigneeName;
+    const employeeEmail = asset.employeeEmail || asset.EmployeeEmail || asset.assignedEmployeeEmail || asset.assigneeEmail;
+    
+    // If we have both name and email, display as "Name (Email)"
+    if (employeeName && employeeEmail) {
+      return `${employeeName} (${employeeEmail})`;
+    }
+    
+    // If only name, display name
+    if (employeeName) {
+      return employeeName;
+    }
+    
+    // If only email, display email
+    if (employeeEmail) {
+      return employeeEmail;
+    }
+    
+    // Fallback: check for employeeId
+    const employeeId = asset.assignedEmployeeId || asset.assignedToId || asset.employeeId || asset.EmployeeId;
+    if (employeeId) {
+      return employeeId;
+    }
+    
+    return 'Not Assigned';
   }
 
   private loadAssetTypes(): void {
@@ -125,10 +175,32 @@ export class CreateAssetComponent implements OnInit {
     this.assetsService.getAll$().subscribe({
       next: items => {
         console.log('Loaded assets:', items);
-        console.log('First asset structure:', items[0]);
-        console.log('First asset id value:', items[0]?.id);
         this.assets = items;
         this.filteredAssets = [...items];
+        
+        // Fetch current assignment for each asset to populate "Assigned To" column
+        items.forEach((asset: any) => {
+          this.assetsService.getCurrentAssignment(asset.id).subscribe(
+            assignment => {
+              if (assignment) {
+                // Merge assignment data into asset for display
+                asset.employeeName = assignment.employeeName || assignment.EmployeeName;
+                asset.employeeEmail = assignment.employeeEmail || assignment.EmployeeEmail;
+                asset.assignedEmployeeId = assignment.employeeId || assignment.EmployeeId;
+              } else {
+                asset.employeeName = null;
+                asset.employeeEmail = null;
+                asset.assignedEmployeeId = null;
+              }
+            },
+            error => {
+              console.warn('Could not load assignment for asset', asset.id, error);
+              asset.employeeName = null;
+              asset.employeeEmail = null;
+              asset.assignedEmployeeId = null;
+            }
+          );
+        });
       },
       error: err => console.error('Failed to load assets', err)
     });
@@ -293,6 +365,88 @@ deleteAsset(asset: Asset): void {
     this.selectedAsset = asset;
     this.assignForm.reset({ employeeId: '', assignDate: new Date(), returnDate: null });
     this.assignDialogRef = this.dialog.open(this.assignDialogTemplate, { width: '500px' });
+  }
+
+  openHistoryDialog(asset: any): void {
+    if (!asset) return;
+    this.selectedAsset = asset;
+    // load assignment history from server
+    if (asset.id) {
+      this.assetsService.getAssignmentHistory(asset.id).subscribe(history => {
+        this.selectedAsset.assignmentHistory = history || [];
+        this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px' });
+      }, err => {
+        console.error('Failed to load history', err);
+        this.selectedAsset.assignmentHistory = [];
+        this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px' });
+      });
+    } else {
+      this.selectedAsset.assignmentHistory = [];
+      this.historyDialogRef = this.dialog.open(this.historyDialogTemplate, { width: '600px' });
+    }
+  }
+
+  openViewDialog(asset: any): void {
+    if (!asset) return;
+    this.selectedAsset = asset;
+    this.viewDialogRef = this.dialog.open(this.viewDialogTemplate, { width: '600px' });
+  }
+
+  openReturnDialog(asset: any): void {
+    if (!asset) return;
+    this.selectedAsset = asset;
+    this.returnForm.reset({ condition: 'Good' });
+    this.selectedAssignment = null;
+    if (asset.id) {
+      this.assetsService.getAssignmentHistory(asset.id).subscribe(history => {
+        this.selectedAsset.assignmentHistory = history || [];
+        // find active assignment (not returned)
+        const active = (history || []).find((h: any) => !h.returnedAt && (h.status === 'Active' || h.status === 'Assigned' || h.status === 'Overdue'))
+                    || (history || [])[0];
+        this.selectedAssignment = active || null;
+        this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px' });
+      }, err => {
+        console.error('Failed to load assignment history for return', err);
+        this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px' });
+      });
+    } else {
+      this.returnDialogRef = this.dialog.open(this.returnDialogTemplate, { width: '480px' });
+    }
+  }
+
+  onReturnDialogSubmit(): void {
+    if (!this.selectedAsset?.id) {
+      this.notification.error('Asset information is missing');
+      return;
+    }
+    if (!this.returnForm.valid) {
+      this.notification.error('Please select an asset condition');
+      return;
+    }
+    const condition = this.returnForm.value.condition;
+    // Determine assignment id
+    const assignmentId = this.selectedAssignment?.assignmentId || this.selectedAssignment?.AssignmentId || this.selectedAssignment?.AssignmentId || this.selectedAssignment?.assignmentId || this.selectedAssignment?.AssignmentId;
+    if (!assignmentId) {
+      this.notification.error('No active assignment found for this asset');
+      return;
+    }
+
+    this.loading.show();
+    const notesSuffix = `\n[Returned ${new Date().toISOString()}] Condition: ${condition}`;
+    const notes = (this.selectedAsset.notes || '') + notesSuffix;
+
+    this.assetsService.returnAsset(assignmentId, new Date().toISOString(), notes).subscribe({
+      next: (resp) => {
+        this.notification.success('Asset returned successfully');
+        this.returnDialogRef.close();
+        this.loading.hide();
+        this.loadAssets();
+      },
+      error: (err) => {
+        this.notification.error(err?.message || 'Failed to return asset');
+        this.loading.hide();
+      }
+    });
   }
 
   onAssignDialogSubmit(): void {

@@ -1,0 +1,191 @@
+<div class="team-requests-container">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>group_work</mat-icon>
+        Team Requests
+      </h1>
+      <p class="page-subtitle">Review pending approvals and team leave balances</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Loading team data...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ─── Pending Approvals ──────────────────────────────────────────────── -->
+    <mat-card class="section-card">
+      <mat-card-content>
+
+        <div class="section-header">
+          <h2 class="section-title">
+            <mat-icon>pending_actions</mat-icon>
+            Pending Approvals
+            <span class="count-badge" *ngIf="pendingApprovals.length > 0">
+              {{ pendingApprovals.length }}
+            </span>
+          </h2>
+        </div>
+
+        <ng-container *ngIf="pendingApprovals.length > 0; else noPending">
+          <div *ngFor="let request of pendingApprovals" class="approval-card">
+            <div class="approval-header">
+              <div class="employee-info">
+                <div class="employee-avatar">
+                  <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
+                    <img [src]="request.profilePreviewUrl" [alt]="request.employeeName" />
+                  </ng-container>
+                  <ng-template #initialsFallback>
+                    {{ getInitials(request.employeeName) }}
+                  </ng-template>
+                </div>
+                <div class="employee-details">
+                  <h4>{{ request.employeeName }}</h4>
+                  <p>
+                    <span class="leave-type-badge small"
+                          [style.color]="getLeaveTypeColor(request.leaveTypeId)"
+                          [style.background-color]="getLeaveTypeColor(request.leaveTypeId) + '1A'"
+                          [style.border-color]="getLeaveTypeColor(request.leaveTypeId) + '4D'">
+                      <span class="leave-type-dot" [style.background]="getLeaveTypeColor(request.leaveTypeId)"></span>
+                      {{ request.leaveTypeName }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div class="leave-dates">
+                <span>{{ request.startDate | date:'mediumDate' }}</span>
+                <span class="separator">to</span>
+                <span>{{ request.endDate | date:'mediumDate' }}</span>
+                <span class="days-badge">({{ request.daysRequested }} days)</span>
+              </div>
+            </div>
+
+            <div class="leave-reason" *ngIf="request.reason">
+              <strong>Reason:</strong> {{ request.reason }}
+            </div>
+
+            <div class="approval-actions">
+              <button mat-stroked-button color="warn" (click)="rejectRequest(request)">
+                <mat-icon>close</mat-icon>
+                Reject
+              </button>
+              <button mat-raised-button color="primary" (click)="approveRequest(request)">
+                <mat-icon>check</mat-icon>
+                Approve
+              </button>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #noPending>
+          <div class="empty-state">
+            <mat-icon>check_circle</mat-icon>
+            <h3>No Pending Approvals</h3>
+            <p>All leave requests have been processed.</p>
+          </div>
+        </ng-template>
+
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ─── Team Remaining Leaves ─────────────────────────────────────────── -->
+    <mat-card class="section-card">
+      <mat-card-content>
+
+        <div class="section-header">
+          <h2 class="section-title">
+            <mat-icon>people</mat-icon>
+            Team Remaining Leaves
+          </h2>
+          <span class="year-badge">{{ currentYear }}</span>
+        </div>
+
+        <!-- Filters -->
+        <mat-card class="filters-card">
+          <div class="filters-header">
+            <h3>Search &amp; Filters</h3>
+            <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+              <mat-icon>clear</mat-icon>
+              Clear Filters
+            </button>
+          </div>
+          <div class="filters-content">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search employees...</mat-label>
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput [formControl]="employeeNameFilter"
+                     placeholder="Name, email, or employee number">
+            </mat-form-field>
+          </div>
+        </mat-card>
+
+        <!-- Table -->
+        <div *ngIf="isLoadingTeamLeaves" class="loading-overlay">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+
+        <div class="table-container"
+             *ngIf="!isLoadingTeamLeaves && teamRemainingLeaves.length > 0 && teamRemainingLeavesColumns.length > 1">
+          <table mat-table [dataSource]="teamRemainingLeaves" class="team-leaves-table">
+
+            <!-- Employee Name Column -->
+            <ng-container matColumnDef="employeeName">
+              <th mat-header-cell *matHeaderCellDef>Employee Name</th>
+              <td mat-cell *matCellDef="let employee">
+                <div class="employee-name-cell">
+                  <mat-icon class="employee-icon">person</mat-icon>
+                  <span>{{ employee.employeeName }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Dynamic Leave Type Columns -->
+            <ng-container *ngFor="let leaveTypeName of getLeaveTypeColumns()"
+                          [matColumnDef]="leaveTypeName">
+              <th mat-header-cell *matHeaderCellDef>
+                <div class="leave-type-header">
+                  <span class="leave-type-name">{{ leaveTypeName }}</span>
+                  <span class="leave-type-total">({{ getLeaveTypeTotal(leaveTypeName) }})</span>
+                </div>
+              </th>
+              <td mat-cell *matCellDef="let employee">
+                <span class="remaining-badge">
+                  Remaining {{ getEmployeeLeaveBalance(employee.employeeId, leaveTypeName) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="teamRemainingLeavesColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: teamRemainingLeavesColumns;"></tr>
+          </table>
+
+          <div class="pagination-container">
+            <mat-paginator
+              [length]="teamRemainingLeavesTotalCount"
+              [pageSize]="teamRemainingLeavesPageSize"
+              [pageSizeOptions]="teamRemainingLeavesPageSizeOptions"
+              [pageIndex]="teamRemainingLeavesPage - 1"
+              (page)="onPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoadingTeamLeaves && teamRemainingLeaves.length === 0" class="empty-state">
+          <mat-icon>people</mat-icon>
+          <h3>No Team Members</h3>
+          <p>You don't have any team members reporting to you.</p>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+
+</div>

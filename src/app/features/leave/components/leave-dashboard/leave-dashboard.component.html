@@ -1,0 +1,190 @@
+<div class="leave-dashboard-container">
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon>event_busy</mat-icon>
+        Leave Management
+      </h1>
+      <p class="page-subtitle">Manage your time off requests and balances</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button (click)="openLeaveRequestDialog()">
+        <mat-icon>add</mat-icon>
+        Request Leave
+      </button>
+    </div>
+  </div>
+
+  <!-- Leave Balance Section -->
+  <div class="balance-section" *ngIf="leaveBalances.length > 0">
+    <div class="section-header">
+      <h2 class="section-title">Your Leave Balance</h2>
+      <span class="year-badge">{{ currentYear }}</span>
+    </div>
+
+    <div class="statistics-cards">
+      <mat-card
+        *ngFor="let balance of leaveBalances"
+        class="stat-card stat-card-dynamic-color"
+        [style.background]="getBalanceCardColor(balance) + '1A'">
+        <mat-card-content>
+          <div class="stat-item">
+
+            <div class="stat-icon-wrapper" [style.background]="getBalanceCardColor(balance)">
+              <mat-icon class="stat-icon">event_available</mat-icon>
+            </div>
+
+            <div class="stat-details">
+              <div class="stat-label">{{ balance.leaveTypeName }}</div>
+              <div class="stat-value" [style.color]="getBalanceCardColor(balance)">
+                {{ balance.remainingDays }} Days Remaining
+              </div>
+              <div class="stat-footer">
+                <mat-icon class="stat-indicator">{{ getBalanceIcon(balance) }}</mat-icon>
+                <span>{{ balance.usedDays }} used of {{ balance.totalDays }} total</span>
+              </div>
+
+              <div class="leave-breakdown">
+                <div class="breakdown-item">
+                  <span class="breakdown-label">
+                    <mat-icon class="breakdown-icon">today</mat-icon>
+                    Current Year:
+                  </span>
+                  <span class="breakdown-value">{{ balance.currentYearDays }}</span>
+                </div>
+                <div class="breakdown-item" *ngIf="balance.carryForwardDays > 0">
+                  <span class="breakdown-label">
+                    <mat-icon class="breakdown-icon">history</mat-icon>
+                    Carry Forward:
+                  </span>
+                  <span class="breakdown-value">{{ balance.carryForwardDays }}</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- ─── My Requests Section ─────────────────────────────────────────────── -->
+  <div class="requests-section" *ngIf="!isLoading">
+
+    <!-- Section Header (filters row style) -->
+    <div class="requests-section-header">
+      <h2 class="section-title">
+        <mat-icon>list_alt</mat-icon>
+        My Requests
+      </h2>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+      <div class="table-meta">
+        <span class="total-count">{{ myLeaveRequests.length }} leave requests</span>
+      </div>
+
+      <!-- Table Container -->
+      <div class="table-container">
+        <table mat-table [dataSource]="myLeaveRequests" class="requests-table">
+
+          <!-- Leave Type Column -->
+          <ng-container matColumnDef="leaveType">
+            <th mat-header-cell *matHeaderCellDef>Leave Type</th>
+            <td mat-cell *matCellDef="let request">
+              <span class="badge badge-leave"
+                    [style.color]="getLeaveTypeColor(request.leaveTypeId)"
+                    [style.background-color]="getLeaveTypeColor(request.leaveTypeId) + '1A'"
+                    [style.border]="'1px solid ' + getLeaveTypeColor(request.leaveTypeId) + '4D'">
+                <span class="leave-dot" [style.background]="getLeaveTypeColor(request.leaveTypeId)"></span>
+                {{ request.leaveTypeName }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Duration Column -->
+          <ng-container matColumnDef="dates">
+            <th mat-header-cell *matHeaderCellDef>Duration</th>
+            <td mat-cell *matCellDef="let request" class="date-cell">
+              {{ request.startDate | date:'dd-MM-yyyy' }} &ndash; {{ request.endDate | date:'dd-MM-yyyy' }}
+              <span class="days-count">({{ request.daysRequested }} days)</span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let request">
+              <mat-chip [class]="'status-' + request.status.toLowerCase()">
+                <mat-icon>{{ leaveService.getStatusIcon(request.status) }}</mat-icon>
+                {{ leaveService.getStatusLabel(request.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Submitted Column -->
+          <ng-container matColumnDef="submitted">
+            <th mat-header-cell *matHeaderCellDef>Submitted</th>
+            <td mat-cell *matCellDef="let request" class="date-cell">
+              {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let request">
+              <button mat-icon-button
+                      [matMenuTriggerFor]="requestMenu"
+                      class="action-menu-btn"
+                      [disabled]="!isPending(request.status)">
+                <mat-icon>more_horiz</mat-icon>
+              </button>
+              <mat-menu #requestMenu="matMenu">
+                <button mat-menu-item (click)="editRequest(request)" [disabled]="!isPending(request.status)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit Request</span>
+                </button>
+                <button mat-menu-item (click)="cancelRequest(request)" [disabled]="!isPending(request.status)" class="danger-action">
+                  <mat-icon>cancel</mat-icon>
+                  <span>Cancel Request</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Empty State -->
+        <div *ngIf="myLeaveRequests.length === 0" class="empty-state">
+          <div class="empty-icon">
+            <mat-icon>event_busy</mat-icon>
+          </div>
+          <h3>No Leave Requests</h3>
+          <p>You haven't submitted any leave requests yet.</p>
+          <button mat-raised-button (click)="openLeaveRequestDialog()" class="add-first-btn">
+            <mat-icon>add</mat-icon>
+            Request Leave
+          </button>
+        </div>
+      </div>
+      <!-- /table-container -->
+
+    </div>
+    <!-- /table-card -->
+
+  </div>
+  <!-- /requests-section -->
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Loading leave data...</p>
+  </div>
+
+</div>

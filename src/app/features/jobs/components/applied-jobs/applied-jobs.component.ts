@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { DragDropModule, CdkDragDrop, transferArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ApplicationDetailDialogComponent } from '../application-detail-dialog/application-detail-dialog.component';
 import { ApplicationProcessDialogComponent } from '../application-process-dialog/application-process-dialog.component';
 import { ApplyJobDialogComponent } from '../apply-job-dialog/apply-job-dialog.component';
@@ -25,7 +26,8 @@ import {
 import { JobsService } from '../../services/jobs.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
-import { JobApplicationDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
+import { JobApplicationDto, JobOpeningDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
+import { EditApplicationStageDialogComponent } from '../edit-application-stage-dialog/edit-application-stage-dialog.component';
 
 @Component({
   selector: 'app-applied-jobs',
@@ -45,7 +47,8 @@ import { JobApplicationDto, PagedResult, StageMasterDto } from '@core/models/job
     MatNativeDateModule,
     MatPaginatorModule,
     MatTooltipModule,
-    MatTabsModule
+    MatTabsModule,
+    DragDropModule
   ],
   templateUrl: './applied-jobs.component.html',
   styleUrls: ['./applied-jobs.component.scss']
@@ -77,7 +80,23 @@ export class AppliedJobsComponent implements OnInit {
   receivedIsLoading = false;
 
   stageOptions: { value: string; label: string }[] = [];
-  // statusOptions: { value: string; label: string }[] = [];
+  jobOptions: { value: string; label: string }[] = [];
+  allJobs: JobOpeningDto[] = [];
+
+  /** Mutable per-column arrays for CDK DnD – Posted By Me board */
+  postedByMeColumnData: { col: { stageId: string | null; stageName: string }; apps: JobApplicationDto[] }[] = [];
+  /** Mutable per-column arrays for CDK DnD – Received board */
+  receivedColumnData: { col: { stageId: string | null; stageName: string }; apps: JobApplicationDto[] }[] = [];
+
+  /** Connected drop list IDs for Posted By Me board */
+  get postedByMeDropIds(): string[] {
+    return this.postedByMeColumnData.map((_, i) => `pbm-col-${i}`);
+  }
+
+  /** Connected drop list IDs for Received board */
+  get receivedDropIds(): string[] {
+    return this.receivedColumnData.map((_, i) => `rec-col-${i}`);
+  }
 
   constructor(
     private dialog: MatDialog,
@@ -95,13 +114,15 @@ export class AppliedJobsComponent implements OnInit {
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: ['']
+      stageId: [''],
+      jobId: ['']
     });
     this.receivedFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: ['']
+      stageId: [''],
+      jobId: ['']
     });
   }
 
@@ -123,10 +144,16 @@ export class AppliedJobsComponent implements OnInit {
           { value: '', label: 'All stages' },
           ...this.stages.map((s) => ({ value: s.stageId, label: s.stageName }))
         ];
-        // this.statusOptions = [
-        //   { value: '', label: 'All statuses' },
-        //   ...this.stages.map((s) => ({ value: s.stageName, label: s.stageName }))
-        // ];
+      }
+    });
+
+    this.jobsService.getJobOpeningsPaged({ pageSize: 100 }).subscribe({
+      next: (result) => {
+        this.allJobs = result.data ?? [];
+        this.jobOptions = [
+          { value: '', label: 'All jobs' },
+          ...this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName }))
+        ];
       }
     });
     this.loadApplications();
@@ -193,17 +220,20 @@ export class AppliedJobsComponent implements OnInit {
       search: v.search || undefined,
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
-      stageId: v.stageId || undefined
+      stageId: v.stageId || undefined,
+      jobId: v.jobId || undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.postedByMeApplications = result.data ?? [];
         this.postedByMeTotalCount = result.totalCount ?? 0;
         this.postedByMeIsLoading = false;
+        this.buildPostedByMeColumnData();
       },
       error: () => {
         this.postedByMeApplications = [];
         this.postedByMeTotalCount = 0;
         this.postedByMeIsLoading = false;
+        this.buildPostedByMeColumnData();
       }
     });
   }
@@ -218,7 +248,8 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: ''
+      stageId: '',
+      jobId: ''
     });
     this.postedByMePage = 1;
     this.loadPostedByMeApplications();
@@ -228,7 +259,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.postedByMeFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
   }
 
   onPostedByMePageChange(event: PageEvent): void {
@@ -249,17 +280,20 @@ export class AppliedJobsComponent implements OnInit {
       search: v.search || undefined,
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
-      stageId: v.stageId || undefined
+      stageId: v.stageId || undefined,
+      jobId: v.jobId || undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.receivedApplications = result.data ?? [];
         this.receivedTotalCount = result.totalCount ?? 0;
         this.receivedIsLoading = false;
+        this.buildReceivedColumnData();
       },
       error: () => {
         this.receivedApplications = [];
         this.receivedTotalCount = 0;
         this.receivedIsLoading = false;
+        this.buildReceivedColumnData();
       }
     });
   }
@@ -274,7 +308,8 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: ''
+      stageId: '',
+      jobId: ''
     });
     this.receivedPage = 1;
     this.loadReceivedApplications();
@@ -284,7 +319,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.receivedFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
   }
 
   onReceivedPageChange(event: PageEvent): void {
@@ -300,6 +335,132 @@ export class AppliedJobsComponent implements OnInit {
       this.loadReceivedApplications();
     }
   }
+
+  // ==================== Kanban / DnD helpers ====================
+
+  /** Stages sorted by stageOrder for board columns */
+  get orderedStages(): StageMasterDto[] {
+    if (!this.stages?.length) return [];
+    return [...this.stages].sort((a, b) => (a.stageOrder ?? 999) - (b.stageOrder ?? 999));
+  }
+
+  /** All board column definitions (Applied + each stage) */
+  get boardColumns(): { stageId: string | null; stageName: string }[] {
+    return [
+      { stageId: null, stageName: 'Applied' },
+      ...this.orderedStages.map((s) => ({ stageId: s.stageId, stageName: s.stageName }))
+    ];
+  }
+
+  /** Build the mutable column-data array used by Posted By Me DnD board */
+  private buildPostedByMeColumnData(): void {
+    const stageIds = new Set(this.orderedStages.map((s) => s.stageId));
+    this.postedByMeColumnData = this.boardColumns.map((col) => ({
+      col,
+      apps: col.stageId === null
+        ? this.postedByMeApplications.filter((a) => !a.currentStageId || !stageIds.has(a.currentStageId))
+        : this.postedByMeApplications.filter((a) => a.currentStageId === col.stageId)
+    }));
+  }
+
+  /** Build the mutable column-data array used by Received DnD board */
+  private buildReceivedColumnData(): void {
+    const stageIds = new Set(this.orderedStages.map((s) => s.stageId));
+    this.receivedColumnData = this.boardColumns.map((col) => ({
+      col,
+      apps: col.stageId === null
+        ? this.receivedApplications.filter((a) => !a.currentStageId || !stageIds.has(a.currentStageId))
+        : this.receivedApplications.filter((a) => a.currentStageId === col.stageId)
+    }));
+  }
+
+  /** Called when a card is dropped in the Posted By Me board */
+  onPostedByMeDrop(event: CdkDragDrop<JobApplicationDto[]>, targetColIndex: number): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+    const app: JobApplicationDto = event.previousContainer.data[event.previousIndex];
+    const targetCol = this.postedByMeColumnData[targetColIndex].col;
+    const prevStageId = app.currentStageId ?? null;
+
+    // Optimistic move
+    transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+
+    this.openStageDnDDialog(app, targetCol, prevStageId,
+      () => this.loadPostedByMeApplications());
+  }
+
+  /** Called when a card is dropped in the Received board */
+  onReceivedDrop(event: CdkDragDrop<JobApplicationDto[]>, targetColIndex: number): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+    const app: JobApplicationDto = event.previousContainer.data[event.previousIndex];
+    const targetCol = this.receivedColumnData[targetColIndex].col;
+    const prevStageId = app.currentStageId ?? null;
+
+    // Optimistic move
+    transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+
+    this.openStageDnDDialog(app, targetCol, prevStageId,
+      () => this.loadReceivedApplications());
+  }
+
+  /**
+   * Open the EditApplicationStageDialogComponent after a DnD drop.
+   * Passes the resolved StageMasterDto so the dialog knows whether it's an interview stage.
+   * On cancel/close → revert the optimistic move; on save → reload.
+   */
+  private openStageDnDDialog(
+    app: JobApplicationDto,
+    targetCol: { stageId: string | null; stageName: string },
+    prevStageId: string | null,
+    reloadFn: () => void
+  ): void {
+    if (!targetCol.stageId) {
+      // Dropped to "Applied" column — no stage to create, just notify
+      app.currentStageId = undefined;
+      app.currentStageName = undefined;
+      this.notification.showSuccess(`Moved back to Applied`);
+      return;
+    }
+
+    // Resolve the full StageMasterDto for the target column
+    const stageMaster = this.orderedStages.find((s) => s.stageId === targetCol.stageId);
+    if (!stageMaster) {
+      this.notification.showError('Stage not found — please try again.');
+      reloadFn();
+      return;
+    }
+
+    const dialogRef = this.dialog.open(EditApplicationStageDialogComponent, {
+      width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'edit-stage-dialog-panel',
+      disableClose: true,
+      data: {
+        mode: 'create',
+        jobApplyId: app.jobApplyId,
+        stageMaster
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved) {
+        // Dialog already persisted the stage; just update the local card optimistically
+        app.currentStageId = stageMaster.stageId;
+        app.currentStageName = stageMaster.stageName;
+        reloadFn();
+      } else {
+        // User cancelled — revert optimistic move
+        reloadFn();
+      }
+    });
+  }
+
+  // ==================== Dialogs ====================
 
   viewJobDetails(app: JobApplicationDto): void {
     this.dialog.open(ApplicationDetailDialogComponent, {
@@ -360,7 +521,7 @@ export class AppliedJobsComponent implements OnInit {
             this.loadApplications();
           },
           error: (err) => {
-            this.notification.showError(err?.message || 'Failed to withdraw application');
+            // Already handled by ErrorInterceptor
           }
         });
       }
@@ -377,50 +538,32 @@ export class AppliedJobsComponent implements OnInit {
     }
   }
 
-  /** Stages sorted by stageOrder (1, 2, 3...) for board columns */
+  // ==================== Legacy getters (keep for safety) ====================
+
   get postedByMeOrderedStages(): StageMasterDto[] {
-    if (!this.stages?.length) return [];
-    return [...this.stages].sort((a, b) => (a.stageOrder ?? 999) - (b.stageOrder ?? 999));
+    return this.orderedStages;
   }
 
-  /** Board columns: first "Applied" (default), then API stages in order */
   get postedByMeBoardColumns(): { stageId: string | null; stageName: string }[] {
-    const applied: { stageId: string | null; stageName: string } = { stageId: null, stageName: 'Applied' };
-    const stageCols = this.postedByMeOrderedStages.map((s) => ({
-      stageId: s.stageId,
-      stageName: s.stageName
-    }));
-    return [applied, ...stageCols];
+    return this.boardColumns;
   }
 
-  /** Applications for a given column: null = default "Applied" (no match or null currentStageId) */
   getPostedByMeAppsForColumn(columnStageId: string | null): JobApplicationDto[] {
-    const stageIds = new Set(this.postedByMeOrderedStages.map((s) => s.stageId));
+    const stageIds = new Set(this.orderedStages.map((s) => s.stageId));
     if (columnStageId === null) {
-      return this.postedByMeApplications.filter(
-        (app) => !app.currentStageId || !stageIds.has(app.currentStageId)
-      );
+      return this.postedByMeApplications.filter((app) => !app.currentStageId || !stageIds.has(app.currentStageId));
     }
     return this.postedByMeApplications.filter((app) => app.currentStageId === columnStageId);
   }
 
-  /** Board columns for All Job Applications: same structure as Posted By Me */
   get receivedBoardColumns(): { stageId: string | null; stageName: string }[] {
-    const applied: { stageId: string | null; stageName: string } = { stageId: null, stageName: 'Applied' };
-    const stageCols = this.postedByMeOrderedStages.map((s) => ({
-      stageId: s.stageId,
-      stageName: s.stageName
-    }));
-    return [applied, ...stageCols];
+    return this.boardColumns;
   }
 
-  /** Applications for a given column in All Job Applications tab */
   getReceivedAppsForColumn(columnStageId: string | null): JobApplicationDto[] {
-    const stageIds = new Set(this.postedByMeOrderedStages.map((s) => s.stageId));
+    const stageIds = new Set(this.orderedStages.map((s) => s.stageId));
     if (columnStageId === null) {
-      return this.receivedApplications.filter(
-        (app) => !app.currentStageId || !stageIds.has(app.currentStageId)
-      );
+      return this.receivedApplications.filter((app) => !app.currentStageId || !stageIds.has(app.currentStageId));
     }
     return this.receivedApplications.filter((app) => app.currentStageId === columnStageId);
   }

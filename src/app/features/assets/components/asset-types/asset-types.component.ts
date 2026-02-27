@@ -9,12 +9,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
 import { AssetType } from '../../../../core/models/assets.models';
 import { AssetTypeService } from '../../services/asset-type.service';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
 import { CreateAssetTypeDialogComponent } from './create-asset-type-dialog.component';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-asset-types',
@@ -30,7 +32,8 @@ import { CreateAssetTypeDialogComponent } from './create-asset-type-dialog.compo
     MatTableModule,
     MatMenuModule,
     MatChipsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatDividerModule
   ],
   templateUrl: './asset-types.component.html',
   styleUrls: ['./asset-types.component.scss']
@@ -41,7 +44,6 @@ export class AssetTypesComponent implements OnInit {
   searchQuery = '';
   displayedColumns = ['name', 'description', 'createdAt', 'actions'];
 
-  // Card styling
   private gradients = [
     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     'linear-gradient(135deg, #10b981 0%, #059669 100%)',
@@ -78,9 +80,7 @@ export class AssetTypesComponent implements OnInit {
     });
   }
 
-  // =====================
-  // CREATE / EDIT DIALOG
-  // =====================
+  // ── CREATE / EDIT ──────────────────────────────────────────────
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(CreateAssetTypeDialogComponent, { width: '500px', data: null });
     dialogRef.afterClosed().subscribe(result => { if (result) this.createType(result); });
@@ -115,14 +115,12 @@ export class AssetTypesComponent implements OnInit {
 
   private updateType(data: any): void {
     const { id, name, description } = data;
-    
-    // Validate required fields
+
     if (!id) {
       this.notification.error('Asset type ID is missing');
-      console.error('Missing ID in updateType:', data);
       return;
     }
-    
+
     if (!name) {
       this.notification.error('Asset type name is required');
       return;
@@ -136,98 +134,62 @@ export class AssetTypesComponent implements OnInit {
     this.loading.show();
     this.assetTypeService.update({ id, name, description }).subscribe({
       next: (type) => {
-        console.log('Update successful:', type);
-        // Update local arrays with the updated item
         this.types = this.types.map(t => t.id === id ? type : t);
         this.filteredTypes = this.filteredTypes.map(t => t.id === id ? type : t);
-        
         this.notification.success(`Updated asset type "${type.name}"`);
         this.loading.hide();
       },
       error: (err) => {
-        console.error('Update error:', err);
         this.notification.error(err?.message || 'Failed to update asset type');
         this.loading.hide();
       }
     });
   }
 
-  // deleteType(type: string): void {
- 
-  //   this.loading.show();
-  //   this.assetTypeService.delete(type.id).subscribe({
-  //     next: () => {
-  //       this.notification.info(`Deleted asset type "${type.name}"`);
-  //       this.loading.hide();
-  //     },
-  //     error: () => {
-  //       this.notification.error('Failed to delete asset type');
-  //       this.loading.hide();
-  //     }
-  //   });
-  // }
-
-  // template compatibility: provide `delete` alias used in templates
-  // delete(type: AssetType): void {
-  //   this.deleteType(type);
-  // }
-// ✅ This method is now called 'delete' to match template
+  // ── DELETE — same pattern as employee-list ─────────────────────
   delete(item: AssetType): void {
-    // Debug: log the item to see what properties it has
-    console.log('Delete item:', item);
-    console.log('Item ID:', item?.id);
-    console.log('Item Name:', item?.name);
-    
-    // Validate item has required properties
-    if (!item) {
-      this.notification.error('No asset type selected');
-      return;
-    }
-    
-    if (!item.id) {
+    if (!item?.id) {
       this.notification.error('Asset type ID is missing');
-      console.error('Missing ID in item:', item);
-      return;
-    }
-    
-    if (!item.name) {
-      this.notification.error('Asset type name is missing');
-      console.error('Missing name in item:', item);
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete "${item.name}"?`)) return;
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Asset Type',
+      message: 'Are you sure you want to delete this asset type?',
+      itemName: item.name,
+      confirmButtonText: 'Yes, Delete'
+    };
 
-    this.loading.show();
-    this.assetTypeService.delete(item.id).subscribe({
-      next: () => {
-        // Remove from local arrays immediately
-        this.types = this.types.filter(t => t.id !== item.id);
-        this.filteredTypes = this.filteredTypes.filter(t => t.id !== item.id);
-        
-        this.notification.info(`Deleted asset type "${item.name}"`);
-        this.loading.hide();
-      },
-      error: (err) => {
-        console.error('Delete error:', err);
-        this.notification.error(err?.message || 'Failed to delete asset type');
-        this.loading.hide();
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading.show();
+        this.assetTypeService.delete(item.id).subscribe({
+          next: () => {
+            this.types = this.types.filter(t => t.id !== item.id);
+            this.filteredTypes = this.filteredTypes.filter(t => t.id !== item.id);
+            this.notification.info(`Deleted asset type "${item.name}"`);
+            this.loading.hide();
+          },
+          error: (err) => {
+            this.notification.error(err?.message || 'Failed to delete asset type');
+            this.loading.hide();
+          }
+        });
       }
     });
   }
 
-
-
-
-
-  
-  // =====================
-  // FILTERS
-  // =====================
+  // ── FILTERS ────────────────────────────────────────────────────
   onSearchChange(eventOrQuery: any): void {
     let value = '';
     if (typeof eventOrQuery === 'string') value = eventOrQuery;
-    else if (eventOrQuery && eventOrQuery.target) value = eventOrQuery.target.value;
+    else if (eventOrQuery?.target) value = eventOrQuery.target.value;
     this.searchQuery = String(value || '').toLowerCase();
     this.applyFilters();
   }
@@ -244,9 +206,7 @@ export class AssetTypesComponent implements OnInit {
     );
   }
 
-  // =====================
-  // CARD STYLING
-  // =====================
+  // ── CARD STYLING ───────────────────────────────────────────────
   getCardGradient(index: number): string {
     return this.gradients[index % this.gradients.length];
   }

@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Optional, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -31,181 +31,14 @@ import { LeaveType, LeaveBalance, CreateLeaveRequest, LeaveRequest } from '../..
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
+    MatDialogModule
   ],
-  template: `
-    <div class="apply-leave-container">
-      <mat-card class="apply-leave-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>{{ isEditMode ? 'edit' : 'event_available' }}</mat-icon>
-            {{ isEditMode ? 'Edit Leave Request' : 'Apply for Leave' }}
-          </mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content>
-        <form [formGroup]="leaveForm" class="leave-form">
-          
-          <!-- Leave Selection Section -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <mat-icon>category</mat-icon>
-              Leave Type Selection
-            </h3>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Leave Type *</mat-label>
-                <mat-select formControlName="leaveTypeId" (selectionChange)="onLeaveTypeChange()">
-                  <mat-option *ngFor="let type of leaveTypes" [value]="type.leaveTypeId">
-                    <div class="leave-type-option">
-                      <div class="type-indicator" [style.background-color]="type.color"></div>
-                      <span>{{ type.typeName }}</span>
-                      <span class="available-days" *ngIf="getAvailableDays(type.leaveTypeId) !== null">
-                        {{ getAvailableDays(type.leaveTypeId) }} days left
-                      </span>
-                    </div>
-                  </mat-option>
-                </mat-select>
-                <mat-hint>Select the type of leave you want to apply for</mat-hint>
-                <mat-error *ngIf="leaveForm.get('leaveTypeId')?.hasError('required')">
-                  Please select a leave type
-                </mat-error>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <!-- Leave Duration Section -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <mat-icon>date_range</mat-icon>
-              Leave Duration
-            </h3>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline">
-                <mat-label>Start Date *</mat-label>
-                <input matInput 
-                       [matDatepicker]="startPicker" 
-                       formControlName="startDate"
-                       [min]="minDate"
-                       (dateChange)="onDateChange()"
-                       placeholder="Select start date">
-                <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-                <mat-error *ngIf="leaveForm.get('startDate')?.hasError('required')">
-                  Start date is required
-                </mat-error>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>End Date *</mat-label>
-                <input matInput 
-                       [matDatepicker]="endPicker" 
-                       formControlName="endDate"
-                       [min]="leaveForm.get('startDate')?.value || minDate"
-                       (dateChange)="onDateChange()"
-                       placeholder="Select end date">
-                <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-                <mat-error *ngIf="leaveForm.get('endDate')?.hasError('required')">
-                  End date is required
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <!-- Days Count Display -->
-            <div class="days-info" *ngIf="calculatedDays > 0">
-              <mat-icon>info</mat-icon>
-              <div class="info-content">
-                <span class="info-label">Total Duration</span>
-                <span class="info-value">{{ calculatedDays }} {{ calculatedDays === 1 ? 'day' : 'days' }}</span>
-              </div>
-            </div>
-
-            <!-- Balance Warning -->
-            <div class="balance-warning" *ngIf="showBalanceWarning">
-              <mat-icon>warning</mat-icon>
-              <div class="warning-content">
-                <span class="warning-label">Insufficient Balance!</span>
-                <span class="warning-text">You only have {{ selectedLeaveBalance }} days available for this leave type.</span>
-              </div>
-            </div>
-
-            <!-- Overlap Warning -->
-            <div class="balance-warning" *ngIf="showOverlapWarning">
-              <mat-icon>warning</mat-icon>
-              <div class="warning-content">
-                <span class="warning-label">Leave Overlap Detected!</span>
-                <span class="warning-text">You have already applied for leave during this period. Please select different dates.</span>
-              </div>
-            </div>
-
-            <!-- Checking Overlap Indicator -->
-            <div class="days-info" *ngIf="isCheckingOverlap">
-              <mat-icon>sync</mat-icon>
-              <div class="info-content">
-                <span class="info-label">Checking for overlaps...</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Additional Information Section -->
-          <div class="form-section">
-            <h3 class="section-title">
-              <mat-icon>description</mat-icon>
-              Additional Information
-            </h3>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Reason (Optional)</mat-label>
-                <textarea matInput 
-                          formControlName="reason" 
-                          rows="4"
-                          placeholder="Provide a reason for your leave request"
-                          maxlength="500"></textarea>
-                <mat-hint align="end">{{ leaveForm.get('reason')?.value?.length || 0 }}/500</mat-hint>
-                <mat-error *ngIf="leaveForm.get('reason')?.hasError('maxlength')">
-                  Reason cannot exceed 500 characters
-                </mat-error>
-              </mat-form-field>
-            </div>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <button mat-button type="button" (click)="onCancel()" [disabled]="isSubmitting">
-              <mat-icon>cancel</mat-icon>
-              Cancel
-            </button>
-            
-            <button mat-raised-button 
-                    color="primary" 
-                    type="submit"
-                    (click)="onSubmit()"
-                    [disabled]="!leaveForm.valid || isSubmitting || showBalanceWarning || showOverlapWarning || isCheckingOverlap">
-              <mat-icon *ngIf="!isSubmitting">{{ isEditMode ? 'save' : 'send' }}</mat-icon>
-              <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update' : 'Submit' }} Request</span>
-              <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Submitting...' }}</span>
-            </button>
-          </div>
-
-        </form>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Loading State -->
-      <div *ngIf="isLoading" class="loading-container">
-        <mat-spinner diameter="60"></mat-spinner>
-        <p>Loading leave application form...</p>
-      </div>
-    </div>
-  `,
+  templateUrl: './apply-leave.component.html',
   styleUrls: ['./apply-leave.component.scss']
 })
 export class ApplyLeaveComponent implements OnInit, OnDestroy {
-  @Input() requestId?: string;
+  requestId?: string;
 
   private destroy$ = new Subject<void>();
 
@@ -227,18 +60,16 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private leaveService: LeaveService,
     private notificationService: NotificationService,
-    private router: Router,
-    private route: ActivatedRoute
+    public dialogRef: MatDialogRef<ApplyLeaveComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.initializeForm();
+    if (this.data?.requestId) {
+      this.requestId = this.data.requestId;
+    }
   }
 
   ngOnInit(): void {
-    // Get request ID from route params if not provided as input
-    if (!this.requestId) {
-      this.requestId = this.route.snapshot.paramMap.get('id') || undefined;
-    }
-
     this.isEditMode = !!this.requestId;
     this.loadLeaveData();
   }
@@ -277,25 +108,16 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           this.leaveTypes = data.leaveTypes || [];
           this.leaveBalances = Array.isArray(data.leaveBalances) ? data.leaveBalances : [];
 
-          // If editing, populate form with request data
           if (this.isEditMode && data.leaveRequest) {
             this.populateFormForEdit(data.leaveRequest);
-          } else {
-            // Check for query params from calendar navigation
-            this.route.queryParams
-              .pipe(takeUntil(this.destroy$))
-              .subscribe(params => {
-                if (params['startDate'] && params['endDate']) {
-                  this.leaveForm.patchValue({
-                    startDate: new Date(params['startDate']),
-                    endDate: new Date(params['endDate'])
-                  });
-                  // Trigger date change to calculate days
-                  setTimeout(() => {
-                    this.onDateChange();
-                  }, 100);
-                }
-              });
+          } else if (this.data?.startDate && this.data?.endDate) {
+            this.leaveForm.patchValue({
+              startDate: new Date(this.data.startDate),
+              endDate: new Date(this.data.endDate)
+            });
+            setTimeout(() => {
+              this.onDateChange();
+            }, 100);
           }
 
           this.isLoading = false;
@@ -437,7 +259,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    this.router.navigate(['/leave/dashboard']);
+    this.dialogRef.close();
   }
 
   onSubmit(): void {
@@ -461,7 +283,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
         // startDate: startDate.toISOString(),
         // endDate: endDate.toISOString(),
         startDate: formatDateOnly(startDate), // ✅ use formatDateOnly
-      endDate: formatDateOnly(endDate),  
+        endDate: formatDateOnly(endDate),
         reason: formValue.reason || ''
       };
 
@@ -519,7 +341,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           next: (response) => {
             this.isSubmitting = false;
             this.notificationService.showSuccess('Leave request updated successfully');
-            this.router.navigate(['/leave/dashboard']);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Error updating leave request:', error);
@@ -540,7 +362,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           next: (response) => {
             this.isSubmitting = false;
             this.notificationService.showSuccess('Leave request submitted successfully');
-            this.router.navigate(['/leave/dashboard']);
+            this.dialogRef.close(true);
           },
           error: (error) => {
             console.error('Error submitting leave request:', error);
@@ -554,5 +376,9 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  formInvalidOrChecking(): boolean {
+    return !this.leaveForm.valid || this.isSubmitting || this.showBalanceWarning || this.showOverlapWarning || this.isCheckingOverlap;
   }
 }

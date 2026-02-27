@@ -1,0 +1,177 @@
+<div class="dialog-container">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>{{ isEditMode ? 'edit_calendar' : 'event_available' }}</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-title">{{ isEditMode ? 'Edit Leave Request' : 'Apply for Leave' }}</h2>
+        <p class="header-sub">{{ isEditMode ? 'Update your leave request details' : 'Submit a new time off request for approval' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-body">
+    <form [formGroup]="leaveForm" (ngSubmit)="onSubmit()" class="edit-form" autocomplete="off">
+
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon"><mat-icon>info</mat-icon></div>
+          <div>
+            <h3 class="section-title">{{ isEditMode ? 'Request Details' : 'Leave Details' }}</h3>
+            <p class="section-sub">Fill out the required information below</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+
+          <!-- ── Leave Type ──────────────────────────────────── -->
+          <div class="field field-full custom-field">
+            <label class="field-label">
+              <mat-icon class="label-icon">category</mat-icon>
+              Leave Type <span class="required">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <mat-select formControlName="leaveTypeId"
+                          (selectionChange)="onLeaveTypeChange()"
+                          placeholder="Select leave type">
+                <mat-option *ngFor="let type of leaveTypes" [value]="type.leaveTypeId">
+                  <div class="leave-type-option">
+                    <div class="type-indicator" [style.background-color]="type.color"></div>
+                    <span>{{ type.typeName }}</span>
+                    <span class="available-days" *ngIf="getAvailableDays(type.leaveTypeId) !== null">
+                      {{ getAvailableDays(type.leaveTypeId) }} days left
+                    </span>
+                  </div>
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="leaveForm.get('leaveTypeId')?.hasError('required')">
+                Please select a leave type
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- ── Start Date ──────────────────────────────────── -->
+          <div class="field custom-field">
+            <label class="field-label">
+              <mat-icon class="label-icon">calendar_today</mat-icon>
+              Start Date <span class="required">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <input matInput [matDatepicker]="startPicker"
+                     formControlName="startDate"
+                     [min]="minDate"
+                     (dateChange)="onDateChange()"
+                     placeholder="DD / MM / YYYY">
+              <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+              <mat-error *ngIf="leaveForm.get('startDate')?.hasError('required')">
+                Start date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- ── End Date ────────────────────────────────────── -->
+          <div class="field custom-field">
+            <label class="field-label">
+              <mat-icon class="label-icon">event</mat-icon>
+              End Date <span class="required">*</span>
+            </label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <input matInput [matDatepicker]="endPicker"
+                     formControlName="endDate"
+                     [min]="leaveForm.get('startDate')?.value || minDate"
+                     (dateChange)="onDateChange()"
+                     placeholder="DD / MM / YYYY">
+              <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+              <mat-error *ngIf="leaveForm.get('endDate')?.hasError('required')">
+                End date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- ── Reason ──────────────────────────────────────── -->
+          <div class="field field-full custom-field">
+            <label class="field-label">
+              <mat-icon class="label-icon">description</mat-icon>
+              Reason <span class="optional">(Optional)</span>
+            </label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <textarea matInput formControlName="reason"
+                        rows="3"
+                        placeholder="Provide a brief reason for your leave request"
+                        maxlength="500"></textarea>
+              <mat-hint align="end">{{ leaveForm.get('reason')?.value?.length || 0 }}/500</mat-hint>
+              <mat-error *ngIf="leaveForm.get('reason')?.hasError('maxlength')">
+                Reason cannot exceed 500 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- ── Alerts ──────────────────────────────────────── -->
+          <div class="alerts-container field-full"
+               *ngIf="calculatedDays > 0 || showBalanceWarning || showOverlapWarning || isCheckingOverlap">
+
+            <div class="info-alert" *ngIf="calculatedDays > 0">
+              <mat-icon>info</mat-icon>
+              <div class="alert-content">
+                <span class="alert-label">Total Duration</span>
+                <span class="alert-value">{{ calculatedDays }} {{ calculatedDays === 1 ? 'Day' : 'Days' }}</span>
+              </div>
+            </div>
+
+            <div class="warning-alert" *ngIf="showBalanceWarning">
+              <mat-icon>warning</mat-icon>
+              <div class="alert-content">
+                <span class="alert-label">Insufficient Balance</span>
+                <span class="alert-text">You only have {{ selectedLeaveBalance }} days available for this leave type.</span>
+              </div>
+            </div>
+
+            <div class="warning-alert" *ngIf="showOverlapWarning">
+              <mat-icon>event_busy</mat-icon>
+              <div class="alert-content">
+                <span class="alert-label">Leave Overlap Detected</span>
+                <span class="alert-text">You have already applied for leave during this period. Please select different dates.</span>
+              </div>
+            </div>
+
+            <div class="info-alert" *ngIf="isCheckingOverlap">
+              <mat-icon class="spin-icon">sync</mat-icon>
+              <div class="alert-content">
+                <span class="alert-label">Checking dates...</span>
+                <span class="alert-text">Verifying availability</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSubmitting" class="btn-cancel">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+    <button mat-flat-button class="btn-save" (click)="onSubmit()" [disabled]="formInvalidOrChecking()">
+      <mat-icon *ngIf="!isSubmitting">{{ isEditMode ? 'save' : 'send' }}</mat-icon>
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update' : 'Submit Request' }}</span>
+      <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Submitting...' }}</span>
+    </button>
+  </div>
+
+  <!-- Loading overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading application form...</p>
+    </div>
+  </div>
+
+</div>

@@ -90,11 +90,31 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Leave Management',
       icon: 'event_available',
       children: [
-        { label: 'My Leaves', icon: 'event', route: '/leave/dashboard' },
-        { label: 'Apply for Leave', icon: 'add_circle', route: '/leave/apply' },
-        { label: 'Team Leaves', icon: 'group_work', route: '/leave/team', roles: ['Super Admin', 'HR Manager', 'Manager'] },
-        { label: 'Leave Calendar', icon: 'calendar_month', route: '/leave/calendar' },
-        { label: 'Leave Types', icon: 'category', route: '/leave/types', roles: ['Super Admin', 'HR Manager'] }
+        {
+          label: 'My Leaves',
+          icon: 'event',
+          route: '/leave/dashboard'
+        },
+        {
+          // Existing page — unchanged
+          label: 'Team Leaves',
+          icon: 'groups',
+          route: '/leave/team',
+          roles: ['Super Admin', 'HR Manager', 'Manager']
+        },
+        {
+          // NEW page — pending approvals + team remaining leave balances
+          label: 'Team Requests',
+          icon: 'group_work',
+          route: '/leave/team-requests',
+          roles: ['Super Admin', 'HR Manager', 'Manager']
+        },
+        {
+          label: 'Leave Types',
+          icon: 'category',
+          route: '/leave/types',
+          roles: ['Super Admin', 'HR Manager']
+        }
       ]
     },
     {
@@ -235,15 +255,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   isGroupContainsActive(item: MenuItem): boolean {
     if (!item.children) return false;
-    const children = this.getFilteredChildren(item.children);
-    return children.some(child => this.isActiveItem(child));
+    return this.getFilteredChildren(item.children).some(child => this.isActiveItem(child));
   }
 
   hasPermission(item: MenuItem): boolean {
-    if (!item.roles || item.roles.length === 0) {
-      return true;
-    }
-
+    if (!item.roles || item.roles.length === 0) return true;
     return this.authService.hasAnyRole(item.roles);
   }
 
@@ -260,9 +276,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private setActiveItemByRoute(url: string): void {
-    // Build a visible menu list and pick the first match by route
     const visibleItems = this.getFilteredMenuItems();
-    // Check top-level single items
     for (const item of visibleItems) {
       if (!item.children || item.children.length === 0) {
         if (item.route && this.isActiveRoute(item.route, true)) {
@@ -271,7 +285,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
         }
       }
     }
-    // Check children items within groups
     for (const parent of visibleItems) {
       const children = parent.children ? this.getFilteredChildren(parent.children) : [];
       for (const child of children) {
@@ -281,24 +294,18 @@ export class SidebarComponent implements OnInit, OnDestroy {
         }
       }
     }
-    // If no match found, clear active
     this.activeItemKey = null;
   }
 
   private subscribeToUser(): void {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        this.currentUser = user;
-      });
+      .subscribe(user => { this.currentUser = user; });
   }
 
   private subscribeToRouterEvents(): void {
     this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
+      .pipe(filter(event => event instanceof NavigationEnd), takeUntil(this.destroy$))
       .subscribe((event) => {
         this.activeRoute = (event as NavigationEnd).url;
         this.setActiveItemByRoute(this.activeRoute);
@@ -306,8 +313,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   private collapseAllGroups(): void {
-    if (this.panels) {
-      this.panels.forEach(p => p.close());
-    }
+    if (this.panels) { this.panels.forEach(p => p.close()); }
   }
 }
