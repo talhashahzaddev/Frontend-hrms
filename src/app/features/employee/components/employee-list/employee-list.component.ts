@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -121,8 +122,30 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private notificationService: NotificationService,
     private paymentService: PaymentService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) { }
+  async onAddEmployeeClick(): Promise<void> {
+    // Always fetch latest departments and positions before checking
+    try {
+      const [departments, positions] = await Promise.all([
+        this.employeeService.getDepartments().toPromise(),
+        this.employeeService.getPositions().toPromise()
+      ]);
+      const safeDepartments = departments ?? [];
+      const safePositions = positions ?? [];
+      this.departments = safeDepartments;
+      this.positions = safePositions;
+      if (!safeDepartments.length || !safePositions.length) {
+        this.notificationService.showError('First make department and position before adding an employee.');
+        return;
+      }
+      // Only navigate if BOTH exist
+      this.router.navigate(['/employees/add']);
+    } catch (e) {
+      this.notificationService.showError('Failed to check departments and positions.');
+    }
+  }
 
   ngOnInit(): void {
     this.checkSubscription();

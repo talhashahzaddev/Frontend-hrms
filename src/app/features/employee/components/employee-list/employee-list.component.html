@@ -10,7 +10,7 @@
 
     <div class="header-actions">
       <button mat-flat-button *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeAction"
-        routerLink="/employees/add" class="add-button">
+        (click)="onAddEmployeeClick()" class="add-button">
         <mat-icon>person_add</mat-icon>
         Add Employee
       </button>
