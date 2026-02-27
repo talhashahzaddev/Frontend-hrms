@@ -95,7 +95,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.leaveBalances    = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
           this.leaveTypes       = data.leaveTypes || [];
-          this.myLeaveRequests  = Array.isArray(data.myRequests)  ? data.myRequests  : [];
+          this.myLeaveRequests  = Array.isArray(data.myRequests)  ? data.myRequests . map((r : any) => ({...r, leaveTypeName: r.leaveTypeName || r.typename || ''})) : [];
           this.isLoading        = false;
           this.cdr.markForCheck();
         },

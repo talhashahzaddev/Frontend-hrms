@@ -53,9 +53,9 @@ export class RejectLeaveDialogComponent {
     private notificationService: NotificationService,
     @Inject(MAT_DIALOG_DATA) public data: RejectLeaveDialogData
   ) {
-    this.rejectForm = this.fb.group({
-      reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]]
-    });
+   this.rejectForm = this.fb.group({
+     reason: ['', [Validators.maxLength(500)]]
+  });
   }
 
   selectQuickReason(reason: string): void {
@@ -67,14 +67,9 @@ export class RejectLeaveDialogComponent {
     this.dialogRef.close({ rejected: false });
   }
 
-  onReject(): void {
-    if (!this.rejectForm.valid) {
-      this.rejectForm.markAllAsTouched();
-      this.notificationService.showError('Please provide a rejection reason');
-      return;
-    }
-    this.isSubmitting = true;
-    const reason = this.rejectForm.get('reason')?.value?.trim();
-    this.dialogRef.close({ rejected: true, reason });
-  }
+ onReject(): void {
+  this.isSubmitting = true;
+  const reason = this.rejectForm.get('reason')?.value?.trim();
+  this.dialogRef.close({ rejected: true, reason });
+}
 }
