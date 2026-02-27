@@ -25,7 +25,7 @@ import {
 import { JobsService } from '../../services/jobs.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
-import { JobApplicationDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
+import { JobApplicationDto, JobOpeningDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
 
 @Component({
   selector: 'app-applied-jobs',
@@ -77,7 +77,8 @@ export class AppliedJobsComponent implements OnInit {
   receivedIsLoading = false;
 
   stageOptions: { value: string; label: string }[] = [];
-  // statusOptions: { value: string; label: string }[] = [];
+  jobOptions: { value: string; label: string }[] = [];
+  allJobs: JobOpeningDto[] = [];
 
   constructor(
     private dialog: MatDialog,
@@ -95,13 +96,15 @@ export class AppliedJobsComponent implements OnInit {
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: ['']
+      stageId: [''],
+      jobId: ['']
     });
     this.receivedFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: ['']
+      stageId: [''],
+      jobId: ['']
     });
   }
 
@@ -123,10 +126,16 @@ export class AppliedJobsComponent implements OnInit {
           { value: '', label: 'All stages' },
           ...this.stages.map((s) => ({ value: s.stageId, label: s.stageName }))
         ];
-        // this.statusOptions = [
-        //   { value: '', label: 'All statuses' },
-        //   ...this.stages.map((s) => ({ value: s.stageName, label: s.stageName }))
-        // ];
+      }
+    });
+
+    this.jobsService.getJobOpeningsPaged({ pageSize: 100 }).subscribe({
+      next: (result) => {
+        this.allJobs = result.data ?? [];
+        this.jobOptions = [
+          { value: '', label: 'All jobs' },
+          ...this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName }))
+        ];
       }
     });
     this.loadApplications();
@@ -193,7 +202,8 @@ export class AppliedJobsComponent implements OnInit {
       search: v.search || undefined,
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
-      stageId: v.stageId || undefined
+      stageId: v.stageId || undefined,
+      jobId: v.jobId || undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.postedByMeApplications = result.data ?? [];
@@ -218,7 +228,8 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: ''
+      stageId: '',
+      jobId: ''
     });
     this.postedByMePage = 1;
     this.loadPostedByMeApplications();
@@ -228,7 +239,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.postedByMeFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
   }
 
   onPostedByMePageChange(event: PageEvent): void {
@@ -249,7 +260,8 @@ export class AppliedJobsComponent implements OnInit {
       search: v.search || undefined,
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
-      stageId: v.stageId || undefined
+      stageId: v.stageId || undefined,
+      jobId: v.jobId || undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.receivedApplications = result.data ?? [];
@@ -274,7 +286,8 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: ''
+      stageId: '',
+      jobId: ''
     });
     this.receivedPage = 1;
     this.loadReceivedApplications();
@@ -284,7 +297,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.receivedFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
   }
 
   onReceivedPageChange(event: PageEvent): void {

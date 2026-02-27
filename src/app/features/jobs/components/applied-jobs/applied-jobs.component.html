@@ -151,6 +151,12 @@
                       <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
                     </mat-select>
                   </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Job</mat-label>
+                    <mat-select formControlName="jobId">
+                      <mat-option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
                   <div class="filter-actions">
                     <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon>
                       Apply</button>
@@ -262,6 +268,12 @@
                     <mat-label>Stage</mat-label>
                     <mat-select formControlName="stageId">
                       <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Job</mat-label>
+                    <mat-select formControlName="jobId">
+                      <mat-option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</mat-option>
                     </mat-select>
                   </mat-form-field>
                   <div class="filter-actions">

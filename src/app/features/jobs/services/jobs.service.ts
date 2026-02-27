@@ -269,7 +269,7 @@ export class JobsService {
   }
 
   getJobApplicationsPostedByMePaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId } = params;
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId, jobId } = params;
     const queryParams: Record<string, string | number> = {
       pageNumber: page,
       pageSize
@@ -278,6 +278,7 @@ export class JobsService {
     if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
     if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
     if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    if (jobId != null && jobId !== '') queryParams['jobId'] = jobId;
     return this.http
       .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/posted-by-me`, { params: queryParams })
       .pipe(
@@ -299,7 +300,7 @@ export class JobsService {
   }
 
   getReceivedJobApplicationsPaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId } = params;
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId, jobId } = params;
     const queryParams: Record<string, string | number> = {
       pageNumber: page,
       pageSize
@@ -308,6 +309,7 @@ export class JobsService {
     if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
     if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
     if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
+    if (jobId != null && jobId !== '') queryParams['jobId'] = jobId;
     return this.http
       .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/received`, { params: queryParams })
       .pipe(
