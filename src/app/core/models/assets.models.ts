@@ -51,6 +51,27 @@ export interface UpdateAssetRequest {
   notes?: string;
 }
 
+export interface AssetAssignment {
+  assignmentId?: string;
+  AssignmentId?: string;
+  assetId?: string;
+  AssetId?: string;
+  employeeId?: string;
+  EmployeeId?: string;
+  employeeName?: string;
+  EmployeeName?: string;
+  employeeEmail?: string;
+  EmployeeEmail?: string;
+  assignedAt?: string;
+  AssignedAt?: string;
+  returnedAt?: string;
+  ReturnedAt?: string;
+  status?: string;
+  Status?: string;
+  notes?: string;
+  Notes?: string;
+}
+
 export interface ServiceResponse<T> {
   success: boolean;
   message?: string;
