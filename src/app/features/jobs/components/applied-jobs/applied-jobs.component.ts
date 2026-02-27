@@ -521,7 +521,7 @@ export class AppliedJobsComponent implements OnInit {
             this.loadApplications();
           },
           error: (err) => {
-            this.notification.showError(err?.message || 'Failed to withdraw application');
+            this.notification.showError(err?.error?.message || err?.message || 'Failed to withdraw application');
           }
         });
       }

@@ -184,7 +184,7 @@ export class EditApplicationStageDialogComponent {
           this.saving = false;
         },
         error: (err) => {
-          this.notification.showError(err?.message || 'Failed to add stage');
+          this.notification.showError(err?.error?.message || err?.message || 'Failed to add stage');
           this.saving = false;
         }
       });
@@ -203,7 +203,7 @@ export class EditApplicationStageDialogComponent {
           this.saving = false;
         },
         error: (err) => {
-          this.notification.showError(err?.message || 'Failed to update stage');
+          this.notification.showError(err?.error?.message || err?.message || 'Failed to update stage');
           this.saving = false;
         }
       });
