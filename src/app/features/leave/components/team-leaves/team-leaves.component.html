@@ -35,73 +35,7 @@
     </div>
   </form>
 
-  <!-- Pending Approvals Section (Only for Managers, not HR Manager) -->
-  <div class="pending-section" *ngIf="!isHRManager && pendingApprovals.length > 0">
-    <div class="section-title">
-      <mat-icon class="pending-icon">pending_actions</mat-icon>
-      Pending Approvals ({{ pendingApprovals.length }})
-    </div>
-
-    <div class="pending-list">
-      <div *ngFor="let request of pendingApprovals" class="pending-item">
-        <div class="item-header">
-          <div class="employee-info">
-            <div class="employee-avatar">
-              <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
-                <img [src]="request.profilePreviewUrl" alt="{{ request.employeeName }}" class="avatar-img" />
-              </ng-container>
-              <ng-template #initialsFallback>
-                <div class="avatar-initials">
-                  {{ getInitials(request.employeeName) }}
-                </div>
-              </ng-template>
-            </div>
-            <div class="employee-details">
-              <h4 class="employee-name">{{ request.employeeName }}</h4>
-              <p class="leave-type">
-                <span class="type-indicator" [style.background-color]="getLeaveTypeColor(request.leaveTypeId)"></span>
-                {{ request.leaveTypeName }}
-              </p>
-            </div>
-          </div>
-
-          <div class="request-dates">
-            <div class="date-badge">
-              <mat-icon>event</mat-icon>
-              <span>{{ request.startDate | date:'dd-MM-yyyy' }} &minus; {{ request.endDate | date:'dd-MM-yyyy' }}</span>
-            </div>
-            <div class="days-badge">
-              {{ request.daysRequested }} {{ request.daysRequested === 1 ? 'day' : 'days' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="item-content" *ngIf="request.reason">
-          <p class="reason-label">Reason:</p>
-          <p class="reason-text">{{ request.reason }}</p>
-        </div>
-
-        <div class="item-footer">
-          <div class="submitted-info">
-            <mat-icon>schedule</mat-icon>
-            <span>Submitted {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}</span>
-          </div>
-          <div class="action-buttons">
-            <button mat-stroked-button color="warn" class="reject-btn" (click)="openRejectDialog(request)"
-              [disabled]="isProcessing">
-              <mat-icon>close</mat-icon>
-              Reject
-            </button>
-            <button mat-raised-button color="primary" class="approve-btn" (click)="approveRequest(request)"
-              [disabled]="isProcessing">
-              <mat-icon>check</mat-icon>
-              Approve
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- Table Card -->
   <div class="table-card" style="margin-top: 24px;">

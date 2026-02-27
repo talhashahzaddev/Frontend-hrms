@@ -53,6 +53,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private backendBaseUrl = 'https://localhost:60485';
 
+  // ── Active Tab ────────────────────────────────────────────────────────────
+  activeTab: 'pending' | 'balance' = 'pending';
+
   // ── Data ──────────────────────────────────────────────────────────────────
   leaveTypes: LeaveType[] = [];
   pendingApprovals: LeaveRequest[] = [];
@@ -106,6 +109,7 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
           // Map profile picture URLs
           this.pendingApprovals = Array.isArray(data.pendingApprovals)
             ? data.pendingApprovals.map((req: any) => {
+                req.leaveTypeName = req.leaveTypeName || req.typename || req.TypeName || '';
                 if (req.profilePictureUrl) {
                   req.profilePreviewUrl = req.profilePictureUrl.startsWith('http')
                     ? req.profilePictureUrl
@@ -228,11 +232,11 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
       width: '650px',
       data: {
-        employeeName:   request.employeeName,
-        leaveTypeName:  request.leaveTypeName,
-        startDate:      request.startDate,
-        endDate:        request.endDate,
-        daysRequested:  request.daysRequested
+        employeeName:  request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate:     request.startDate,
+        endDate:       request.endDate,
+        daysRequested: request.daysRequested
       }
     });
 
