@@ -27,6 +27,7 @@ import { JobsService } from '../../services/jobs.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { JobApplicationDto, JobOpeningDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
+import { EditApplicationStageDialogComponent } from '../edit-application-stage-dialog/edit-application-stage-dialog.component';
 
 @Component({
   selector: 'app-applied-jobs',
@@ -380,13 +381,14 @@ export class AppliedJobsComponent implements OnInit {
       return;
     }
     const app: JobApplicationDto = event.previousContainer.data[event.previousIndex];
-    const targetStageId = this.postedByMeColumnData[targetColIndex].col.stageId;
+    const targetCol = this.postedByMeColumnData[targetColIndex].col;
+    const prevStageId = app.currentStageId ?? null;
 
-    // Optimistic UI update
+    // Optimistic move
     transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
-    app.currentStageId = targetStageId ?? undefined;
 
-    this.persistStageChange(app, targetStageId, () => this.loadPostedByMeApplications());
+    this.openStageDnDDialog(app, targetCol, prevStageId,
+      () => this.loadPostedByMeApplications());
   }
 
   /** Called when a card is dropped in the Received board */
@@ -396,34 +398,64 @@ export class AppliedJobsComponent implements OnInit {
       return;
     }
     const app: JobApplicationDto = event.previousContainer.data[event.previousIndex];
-    const targetStageId = this.receivedColumnData[targetColIndex].col.stageId;
+    const targetCol = this.receivedColumnData[targetColIndex].col;
+    const prevStageId = app.currentStageId ?? null;
 
-    // Optimistic UI update
+    // Optimistic move
     transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
-    app.currentStageId = targetStageId ?? undefined;
 
-    this.persistStageChange(app, targetStageId, () => this.loadReceivedApplications());
+    this.openStageDnDDialog(app, targetCol, prevStageId,
+      () => this.loadReceivedApplications());
   }
 
-  /** Create a new ApplicationStage record to persist the stage move */
-  private persistStageChange(app: JobApplicationDto, stageId: string | null, onError: () => void): void {
-    if (!stageId) {
-      // Moving back to "Applied" column — no stage to create; just notify
-      this.notification.showSuccess(`${app.candidateName || 'Application'} moved to Applied`);
+  /**
+   * Open the EditApplicationStageDialogComponent after a DnD drop.
+   * Passes the resolved StageMasterDto so the dialog knows whether it's an interview stage.
+   * On cancel/close → revert the optimistic move; on save → reload.
+   */
+  private openStageDnDDialog(
+    app: JobApplicationDto,
+    targetCol: { stageId: string | null; stageName: string },
+    prevStageId: string | null,
+    reloadFn: () => void
+  ): void {
+    if (!targetCol.stageId) {
+      // Dropped to "Applied" column — no stage to create, just notify
+      app.currentStageId = undefined;
+      app.currentStageName = undefined;
+      this.notification.showSuccess(`Moved back to Applied`);
       return;
     }
-    this.jobsService.createApplicationStage({
-      jobApplyId: app.jobApplyId,
-      stageId: stageId
-    }).subscribe({
-      next: (stage) => {
-        app.currentStageId = stage.stageId;
-        app.currentStageName = stage.stageName ?? undefined;
-        this.notification.showSuccess(`Moved to "${stage.stageName}"`);
-      },
-      error: (err) => {
-        this.notification.showError(err?.message || 'Failed to update stage – reverting');
-        onError();
+
+    // Resolve the full StageMasterDto for the target column
+    const stageMaster = this.orderedStages.find((s) => s.stageId === targetCol.stageId);
+    if (!stageMaster) {
+      this.notification.showError('Stage not found — please try again.');
+      reloadFn();
+      return;
+    }
+
+    const dialogRef = this.dialog.open(EditApplicationStageDialogComponent, {
+      width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'edit-stage-dialog-panel',
+      disableClose: true,
+      data: {
+        mode: 'create',
+        jobApplyId: app.jobApplyId,
+        stageMaster
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((saved: boolean) => {
+      if (saved) {
+        // Dialog already persisted the stage; just update the local card optimistically
+        app.currentStageId = stageMaster.stageId;
+        app.currentStageName = stageMaster.stageName;
+        reloadFn();
+      } else {
+        // User cancelled — revert optimistic move
+        reloadFn();
       }
     });
   }
