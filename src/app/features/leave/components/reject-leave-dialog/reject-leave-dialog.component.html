@@ -103,7 +103,6 @@
         <div>
           <p class="section-label">
             Rejection Reason
-            <span class="required-asterisk">*</span>
           </p>
           <p class="section-hint">This message will be delivered to the employee</p>
         </div>
@@ -116,7 +115,6 @@
           <label class="field-label">
             <mat-icon>notes</mat-icon>
             Reason
-            <span class="required-asterisk">*</span>
           </label>
           <mat-form-field appearance="outline" class="textarea-field">
             <textarea
@@ -166,7 +164,7 @@
       class="btn-reject"
       type="button"
       (click)="onReject()"
-      [disabled]="!rejectForm.valid || isSubmitting">
+      [disabled]="isSubmitting">
       <mat-spinner diameter="15" *ngIf="isSubmitting"></mat-spinner>
       <mat-icon *ngIf="!isSubmitting">cancel</mat-icon>
       {{ isSubmitting ? 'Rejecting...' : 'Reject Request' }}
