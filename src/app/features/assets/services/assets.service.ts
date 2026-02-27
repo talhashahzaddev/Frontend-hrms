@@ -321,7 +321,8 @@ export class AssetsService {
       tap((resp: any) => {
         console.log('✅ SUCCESS!');
         console.log('Response:', JSON.stringify(resp, null, 2));
-        console.log('================================');
+        // Refresh assets from server to reflect assignment status
+        this.getFromServer().subscribe();
       }),
       catchError((error: HttpErrorResponse) => {
         console.error('❌ FAILED');
@@ -347,6 +348,66 @@ export class AssetsService {
         }
 
         return throwError(() => new Error(errorMsg));
+      })
+    );
+  }
+
+  // =========================
+  // ASSIGNMENT HISTORY & RETURN
+  // =========================
+  getAssignmentHistory(assetId?: string, employeeId?: string): Observable<any[]> {
+    const params: any = {};
+    if (assetId) params.assetId = assetId;
+    if (employeeId) params.employeeId = employeeId;
+    return this.http.get<any>(`${this.apiUrl}/asset-assignments/history`, { params }).pipe(
+      map((resp: any) => {
+        return resp?.data || resp || [];
+      }),
+      catchError((err: HttpErrorResponse) => {
+        console.error('Failed to fetch assignment history', err);
+        return of([]);
+      })
+    );
+  }
+
+  returnAsset(assignmentId: string, returnedAt?: string, notes?: string): Observable<any> {
+    if (!assignmentId) return throwError(() => new Error('AssignmentId is required'));
+    const payload: any = {
+      AssignmentId: assignmentId,
+      ReturnedAt: returnedAt || new Date().toISOString(),
+      Notes: notes || null
+    };
+    const endpoint = `${this.apiUrl}/asset-assignments/return`;
+    return this.http.post<any>(endpoint, payload).pipe(
+      tap((resp: any) => {
+        console.log('✅ Return success', resp);
+        // Refresh assets list to reflect returned status
+        this.getFromServer().subscribe();
+      }),
+      catchError((err: HttpErrorResponse) => {
+        console.error('Failed to return asset', err);
+        let msg = 'Failed to return asset';
+        if (err.error?.message) msg = err.error.message;
+        return throwError(() => new Error(msg));
+      })
+    );
+  }
+
+  // Get current active assignment for an asset (not returned)
+  getCurrentAssignment(assetId: string): Observable<any> {
+    if (!assetId) return of(null);
+    return this.getAssignmentHistory(assetId).pipe(
+      map((history: any[]) => {
+        if (!history || history.length === 0) return null;
+        // Find active assignment (not returned)
+        const active = history.find((h: any) => !h.returnedAt && !h.ReturnedAt && 
+          (h.status === 'Active' || h.status === 'Assigned' || h.status === 'Overdue' ||
+           h.Status === 'Active' || h.Status === 'Assigned' || h.Status === 'Overdue'));
+        return active || null;
+      }),
+      catchError(err => {
+        console.error('Failed to get current assignment', err);
+        return of(null);
       })
     );
   }
