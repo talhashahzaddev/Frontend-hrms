@@ -302,6 +302,7 @@
     color: #d1d5db;
     font-size: 12px;
     font-weight: 500;
+
     mat-icon {
       font-size: 28px;
       width: 28px;
@@ -409,9 +410,9 @@
   }
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
     pointer-events: none;
   }
 }
@@ -519,6 +520,8 @@
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
+  padding-right: 28px;
+  /* space for absolute drag handle */
 }
 
 .job-post-avatar {
