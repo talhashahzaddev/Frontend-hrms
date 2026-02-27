@@ -20,7 +20,7 @@ export class UiScaleService {
 
   initializeScale(): void {
     const saved = this.getCookie(this.SCALE_COOKIE);
-    const value = saved ? this.toNumber(saved, 100) : 100;
+    const value = saved ? this.toNumber(saved, 90) : 90;
     const clamped = this.clamp(value);
     this.applyScale(clamped);
   }
@@ -40,7 +40,7 @@ export class UiScaleService {
   }
 
   reset(): void {
-    this.setScale(100);
+    this.setScale(90);
   }
 
   private applyScale(percent: number): void {

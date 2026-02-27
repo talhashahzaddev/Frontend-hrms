@@ -14,34 +14,35 @@
   <mat-card class="profile-card">
     <div class="form-section">
       <h3 class="section-title">{{ isEditing ? 'Edit Office IP' : 'Add New Office IP' }}</h3>
-      <form [formGroup]="ipForm" (ngSubmit)="onSubmit()" class="ip-form">
-        <div class="form-grid">
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>IP Address</mat-label>
-            <mat-icon matPrefix>router</mat-icon>
-            <input matInput formControlName="ipAddressValue" placeholder="192.168.1.1" required>
-            <mat-error *ngIf="ipForm.get('ipAddressValue')?.invalid && ipForm.get('ipAddressValue')?.touched">
-              {{ getErrorMessage('ipAddressValue') }}
-            </mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Name</mat-label>
-            <mat-icon matPrefix>location_on</mat-icon>
-            <input matInput formControlName="name" placeholder="Main Office" required>
-            <mat-error *ngIf="ipForm.get('name')?.invalid && ipForm.get('name')?.touched">
-              Name is required
-            </mat-error>
-          </mat-form-field>
-        </div>
-        <div class="form-actions">
-          <button mat-stroked-button type="button" (click)="cancelEdit()" *ngIf="isEditing" class="cancel-btn">
-            <mat-icon>cancel</mat-icon>
-            Cancel
-          </button>
+      <form [formGroup]="ipForm" (ngSubmit)="onSubmit()" class="ip-form-row">
+        
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>IP Address</mat-label>
+          <mat-icon matPrefix>router</mat-icon>
+          <input matInput formControlName="ipAddressValue" placeholder="192.168.1.1" required>
+          <mat-error *ngIf="ipForm.get('ipAddressValue')?.invalid && ipForm.get('ipAddressValue')?.touched">
+            {{ getErrorMessage('ipAddressValue') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Name</mat-label>
+          <mat-icon matPrefix>location_on</mat-icon>
+          <input matInput formControlName="name" placeholder="Main Office" required>
+          <mat-error *ngIf="ipForm.get('name')?.invalid && ipForm.get('name')?.touched">
+            Name is required
+          </mat-error>
+        </mat-form-field>
+
+        <div class="action-buttons">
           <button mat-flat-button type="submit" [disabled]="isSubmitting" class="save-button">
             <mat-icon *ngIf="!isSubmitting">{{ isEditing ? 'save' : 'add' }}</mat-icon>
             <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
             {{ isEditing ? 'Update' : 'Add' }} IP
+          </button>
+          
+          <button mat-stroked-button type="button" (click)="cancelEdit()" *ngIf="isEditing" class="cancel-btn">
+            Cancel
           </button>
         </div>
       </form>
@@ -69,12 +70,12 @@
               </div>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
-            <td mat-cell *matCellDef="let ip">
-              {{ ip.name }}
-            </td>
+            <td mat-cell *matCellDef="let ip"> {{ ip.name }} </td>
           </ng-container>
+
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>Actions</th>
             <td mat-cell *matCellDef="let ip">
@@ -94,9 +95,11 @@
               </mat-menu>
             </td>
           </ng-container>
+
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
+
         <div *ngIf="officeIPs.length === 0" class="empty-state">
           <mat-icon>router</mat-icon>
           <h3>No Office IPs Configured</h3>
