@@ -85,9 +85,8 @@ export class PublicCareerComponent implements OnInit {
     ngOnInit(): void {
         this.loadStatistics();
         this.loadFilterOptions();
-        this.setupSearch();
+        this.searchJobs();
     }
-
     private getDomainFromUrl(): string {
         const hostname = window.location.hostname;
 
