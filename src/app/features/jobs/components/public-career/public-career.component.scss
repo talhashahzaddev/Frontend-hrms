@@ -1,5 +1,5 @@
 .public-career-container {
-    max-width: 1400px;
+    max-width: auto;
     margin: 0 auto;
     padding: var(--spacing-xl) var(--spacing-lg);
     background-color: var(--gray-50);
@@ -71,8 +71,7 @@
     gap: 12px;
 
     .search-field {
-        min-width: 240px;
-        flex: 1;
+        width: 300px;
     }
 
     .filter-field {
@@ -104,6 +103,10 @@
             color: white !important;
             box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
         }
+    }
+
+    mat-icon[matSuffix] {
+        color: var(--primary-600) !important;
     }
 }
 
@@ -335,10 +338,25 @@
     }
 
     .empty-icon {
-        font-size: 40px;
-        width: 40px;
-        height: 40px;
-        color: #d1d5db;
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: var(--gray-400);
+        margin-bottom: 8px;
+    }
+
+    .empty-text {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--gray-800);
+    }
+
+    .empty-subtext {
+        margin: 0;
+        font-size: 14px;
+        color: var(--gray-500);
+        font-weight: 500;
     }
 }
 
