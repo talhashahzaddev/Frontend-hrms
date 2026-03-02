@@ -278,7 +278,7 @@ export class EditLeaveTypeDialogTemplate {
     maxDaysPerYear: [this.data.leaveType.maxDaysPerYear, [Validators.required, Validators.min(1)]],
     isPaid: [this.data.leaveType.isPaid],
     carryForwardAllowed: [this.data.leaveType.carryForwardAllowed],
-    maxCarryForwardDays: [this.data.leaveType.maxCarryForwardDays || 0, [Validators.min(0)]],
+    maxCarryForwardDays: [this.data.leaveType.maxCarryForwardDays || 1, [Validators.min(1)]],
     requiresApproval: [this.data.leaveType.requiresApproval ?? true],
     color: [this.data.leaveType.color, Validators.required],
     isActive: [this.data.leaveType.isActive]
@@ -295,7 +295,7 @@ export class EditLeaveTypeDialogTemplate {
         maxCarryForwardControl?.updateValueAndValidity();
       } else {
         maxCarryForwardControl?.clearValidators();
-        maxCarryForwardControl?.setValue(0);
+        maxCarryForwardControl?.setValue(null);
         maxCarryForwardControl?.updateValueAndValidity();
       }
     });

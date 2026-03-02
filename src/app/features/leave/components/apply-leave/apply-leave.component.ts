@@ -55,6 +55,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   showOverlapWarning = false;
   isCheckingOverlap = false;
   minDate = new Date();
+  workingDaysOfWeek: number[] = [1, 2, 3, 4, 5];
 
   constructor(
     private fb: FormBuilder,
@@ -90,11 +91,17 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
 
   private loadLeaveData(): void {
     this.isLoading = true;
+    const userId = this.data?.userId;
 
     const requests: any = {
       leaveTypes: this.leaveService.getLeaveTypes(),
       leaveBalances: this.leaveService.getMyLeaveBalance()
     };
+
+    // Fetch the employee's current shift to determine working days
+    if (userId) {
+      requests.shift = this.leaveService.getCurrentShift(userId);
+    }
 
     // If edit mode, load the request data
     if (this.isEditMode && this.requestId) {
@@ -107,6 +114,12 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
         next: (data: any) => {
           this.leaveTypes = data.leaveTypes || [];
           this.leaveBalances = Array.isArray(data.leaveBalances) ? data.leaveBalances : [];
+
+          // Extract working days from shift response
+          // API daysOfWeek uses ISO weekday format: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun
+          if (data.shift?.data?.daysOfWeek?.length) {
+            this.workingDaysOfWeek = data.shift.data.daysOfWeek;
+          }
 
           if (this.isEditMode && data.leaveRequest) {
             this.populateFormForEdit(data.leaveRequest);
@@ -144,6 +157,28 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
+
+  private calculateWorkingDays(startIso: string, endIso: string): number {
+    const start = new Date(startIso);
+    const end = new Date(endIso);
+    let count = 0;
+    const current = new Date(start);
+
+    while (current <= end) {
+      const jsDay = current.getDay();
+      // Convert JS day to ISO weekday: Sunday(0) → 7, rest stay the same
+      const isoDay = jsDay === 0 ? 7 : jsDay;
+
+      if (this.workingDaysOfWeek.includes(isoDay)) {
+        count++;
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+  }
+
   onLeaveTypeChange(): void {
     const leaveTypeId = this.leaveForm.get('leaveTypeId')?.value;
 
@@ -169,7 +204,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
       const end = new Date(endDate);
 
       if (end >= start) {
-        this.calculatedDays = this.leaveService.calculateLeaveDays(
+        this.calculatedDays = this.calculateWorkingDays(
           start.toISOString(),
           end.toISOString()
         );

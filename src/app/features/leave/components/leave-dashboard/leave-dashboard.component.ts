@@ -114,7 +114,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       width: '600px',
       maxWidth: '90vw',
       disableClose: true,
-      panelClass: 'custom-dialog-container'
+      panelClass: 'custom-dialog-container',
+      data: { userId: this.currentUser?.userId } 
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -128,7 +129,9 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       maxWidth: '90vw',
       disableClose: true,
       panelClass: 'custom-dialog-container',
-      data: { requestId: request.requestId }
+      data: { requestId: request.requestId,
+        userId: this.currentUser?.userId
+       }
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
