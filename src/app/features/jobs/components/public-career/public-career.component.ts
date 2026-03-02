@@ -8,11 +8,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map, startWith, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { map, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto, PagedResult } from '@core/models/jobs.models';
@@ -30,7 +33,10 @@ import { JobOpeningDto, PagedResult } from '@core/models/jobs.models';
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        MatPaginatorModule
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatPaginatorModule,
+        MatTooltipModule
     ],
     templateUrl: './public-career.component.html',
     styleUrls: ['./public-career.component.scss']
@@ -52,6 +58,11 @@ export class PublicCareerComponent implements OnInit {
     totalDepartments = 0;
 
     // Filter options
+    statusOptions = [
+        { value: '', label: 'All statuses' },
+        { value: 'Open', label: 'Open' },
+        { value: 'Closed', label: 'Closed' }
+    ];
     departments: string[] = [];
     locations: string[] = [];
 
@@ -65,9 +76,9 @@ export class PublicCareerComponent implements OnInit {
     ) {
         this.searchForm = this.fb.group({
             search: [''],
-            department: [''],
-            location: [''],
-            workMode: ['']
+            status: ['Open'],
+            lastDateFrom: [null as Date | null],
+            lastDateTo: [null as Date | null]
         });
     }
 
@@ -107,17 +118,16 @@ export class PublicCareerComponent implements OnInit {
 
     private loadStatistics(): void {
         const domain = this.getDomainFromUrl();
-        this.publicCareerService.getExternalJobOpeningsPaged(domain, { page: 1, pageSize: 1 }).subscribe({
+        this.publicCareerService.getExternalJobOpeningsPaged(domain, { page: 1, pageSize: 1, status: 'Open' }).subscribe({
             next: (result) => {
                 this.totalOpenings = result.totalCount || 0;
-                this.calculateStats();
             }
         });
     }
 
     private loadFilterOptions(): void {
         const domain = this.getDomainFromUrl();
-        this.publicCareerService.getExternalJobOpeningsPaged(domain, { page: 1, pageSize: 1000 }).subscribe({
+        this.publicCareerService.getExternalJobOpeningsPaged(domain, { page: 1, pageSize: 1000, status: 'Open' }).subscribe({
             next: (result) => {
                 const jobs = result.data || [];
                 this.departments = [...new Set(jobs.map(j => j.departmentName).filter(Boolean) as string[])];
@@ -134,23 +144,17 @@ export class PublicCareerComponent implements OnInit {
 
     private loadJobs(): Observable<PagedResult<JobOpeningDto>> {
         this.isLoading = true;
-        const { search, department, location, workMode } = this.searchForm.value;
+        const { search, status, lastDateFrom, lastDateTo } = this.searchForm.value;
         const domain = this.getDomainFromUrl();
 
-        // Create filter params object
-        const filterParams: any = {
+        return this.publicCareerService.getExternalJobOpeningsPaged(domain, {
             search: search || undefined,
-            status: 'Open',
+            status: status || undefined,
+            lastDateFrom: lastDateFrom ? lastDateFrom.toISOString().split('T')[0] : undefined,
+            lastDateTo: lastDateTo ? lastDateTo.toISOString().split('T')[0] : undefined,
             page: this.page,
             pageSize: this.pageSize
-        };
-
-        // Add optional filters
-        if (department) filterParams.departmentName = department;
-        if (location) filterParams.location = location;
-        if (workMode) filterParams.workMode = workMode;
-
-        return this.publicCareerService.getExternalJobOpeningsPaged(domain, filterParams).pipe(
+        }).pipe(
             map((result) => {
                 this.jobs = result.data ?? [];
                 this.totalCount = result.totalCount ?? 0;
@@ -167,14 +171,14 @@ export class PublicCareerComponent implements OnInit {
     }
 
     clearFilters(): void {
-        this.searchForm.reset();
+        this.searchForm.patchValue({ search: '', status: 'Open', lastDateFrom: null, lastDateTo: null });
         this.page = 1;
         this.loadJobs().subscribe();
     }
 
     hasFilters(): boolean {
-        const values = this.searchForm.value;
-        return !!(values.search?.trim() || values.department || values.location || values.workMode);
+        const v = this.searchForm.value;
+        return !!(v.search?.trim() || v.status !== 'Open' || v.lastDateFrom || v.lastDateTo);
     }
 
     onPageChange(event: PageEvent): void {
@@ -198,6 +202,14 @@ export class PublicCareerComponent implements OnInit {
     applyForJob(job: JobOpeningDto): void {
         // Navigate to apply page or open application form
         this.router.navigate(['/jobs/apply', job.jobId]);
+    }
+
+    getMetaLine(job: JobOpeningDto): string {
+        const parts = [];
+        if (job.departmentName) parts.push(job.departmentName);
+        if (job.location) parts.push(job.location);
+        if (job.workMode) parts.push(job.workMode);
+        return parts.join(' · ');
     }
 
     getExperienceText(job: JobOpeningDto): string {
