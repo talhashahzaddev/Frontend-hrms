@@ -576,6 +576,9 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
         })
       );
   }
+getCurrentShift(userId: string): Observable<any> {
+  return this.http.get<any>(`${environment.apiUrl}/Attendance/CurrentShift/${userId}`);
+}
 
   // Helper to parse API date strings
   parseApiDate(dateString: string): Date {
