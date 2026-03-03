@@ -69,10 +69,10 @@ export const appRoutes: Routes = [
   {
     path: 'assets',
     canActivate: [AuthGuard],
-    loadChildren: () => 
+    loadChildren: () =>
       import('./features/assets/assets.routes').then(m => m.assetsRoutes)
   },
-  
+
   // Leave Management Routes
   {
     path: 'leave',
@@ -106,7 +106,7 @@ export const appRoutes: Routes = [
       import('./features/calendar/calendar.routes').then(m => m.calendarRoutes),
     title: 'Calendar - HRMS'
   },
-   {
+  {
     path: 'news',
     canActivate: [AuthGuard],
     loadChildren: () =>
@@ -121,6 +121,14 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('./features/jobs/jobs.routes').then(m => m.jobsRoutes),
     title: 'Jobs - HRMS'
+  },
+
+  // Public Career Routes (no authentication required)
+  {
+    path: 'career',
+    loadChildren: () =>
+      import('./features/jobs/public-career.routes').then(m => m.publicCareerRoutes),
+    title: 'Careers - Codified Labs'
   },
 
   // AI Assistant Route (accessible to all roles)
