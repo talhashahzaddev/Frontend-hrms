@@ -1,42 +1,91 @@
 <div class="attendance-approvals-container">
 
-  <div class="page-header">
-    <div class="header-content">
-      <div class="header-icon-wrapper">
-        <mat-icon class="header-icon">admin_panel_settings</mat-icon>
+  <!-- Consolidated Dashboard -->
+  <div class="dashboard-card">
+    <div class="dashboard-top-row">
+      <div class="dashboard-title-group">
+        <div class="dashboard-icon-wrapper">
+          <mat-icon class="dashboard-icon">admin_panel_settings</mat-icon>
+        </div>
+        <div>
+          <h1 class="dashboard-title">Master Governance Dashboard</h1>
+          <p class="dashboard-subtitle">{{ getCurrentPeriodDisplay() }} &bull; Compliance tracking, corrections &amp; payroll finalization</p>
+        </div>
       </div>
-      <div class="header-text">
-        <h1>Master Governance Dashboard</h1>
-        <p>{{ getCurrentPeriodDisplay() }} &bull; Compliance tracking, corrections, and payroll finalization</p>
-      </div>
-    </div>
 
-    <div class="header-actions">
-      @if (isViewingHistoricalPeriod()) {
-        <button class="btn btn-warning" (click)="resetToCurrentMonth()" matTooltip="Return to latest snapshot">
-          <mat-icon>today</mat-icon>
-          <span>Latest Period</span>
+      <div class="dashboard-actions">
+        <!-- Period selector dropdown -->
+        <button class="period-selector-btn" [matMenuTriggerFor]="periodMenu"
+                matTooltip="Switch timesheet period">
+          <mat-icon>calendar_month</mat-icon>
+          <span>{{ getCurrentPeriodDisplay() }}</span>
+          <mat-icon class="period-arrow">expand_more</mat-icon>
         </button>
-      }
-      <button class="btn btn-secondary" (click)="toggleHistoryDrawer()" matTooltip="View all periods">
-        <mat-icon>history</mat-icon>
-        <span>History</span>
-      </button>
-      <button class="btn btn-primary" (click)="loadManagerReviewDashboard()" [disabled]="isLoading">
-        <mat-icon>refresh</mat-icon>
-        <span>Refresh</span>
-      </button>
-    </div>
-  </div>
+        <mat-menu #periodMenu="matMenu" class="period-dropdown-menu">
+          @if (isLoadingSnapshots) {
+            <div class="period-loading">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Loading…</span>
+            </div>
+          } @else if (allSnapshots.length === 0) {
+            <div class="period-empty">No periods found</div>
+          } @else {
+            @for (snapshot of allSnapshots; track snapshot.timesheetId) {
+              <button mat-menu-item
+                      (click)="selectHistoricalPeriod(snapshot)"
+                      [class.period-active]="snapshot.timesheetId === selectedTimesheetId">
+                <mat-icon>calendar_month</mat-icon>
+                <span>{{ snapshot.monthName }} {{ snapshot.year }}</span>
+                <span class="period-status-chip" [ngClass]="snapshot.status?.toLowerCase()">
+                  {{ snapshot.status }}
+                </span>
+              </button>
+            }
+          }
+        </mat-menu>
 
-  @if (orgProgress) {
-    <div class="compliance-section">
-      <div class="compliance-header">
-        <h2>
-          <mat-icon>verified</mat-icon>
-          Organization Compliance
-        </h2>
-        <span class="compliance-rate"
+        @if (isViewingHistoricalPeriod()) {
+          <button class="icon-action-btn latest-btn" (click)="resetToCurrentMonth()" matTooltip="Return to current period">
+            <mat-icon>today</mat-icon>
+          </button>
+        }
+
+        <button class="icon-action-btn" (click)="loadManagerReviewDashboard()" [disabled]="isLoading" matTooltip="Refresh data">
+          <mat-icon [class.spin]="isLoading">refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (orgProgress) {
+      <!-- KPI Chips -->
+      <div class="kpi-row">
+        <div class="kpi-chip team-size">
+          <div class="kpi-icon-wrap"><mat-icon>groups</mat-icon></div>
+          <span class="kpi-val">{{ orgProgress.totalEmployees }}</span>
+          <span class="kpi-lbl">Team</span>
+        </div>
+        <div class="kpi-chip pending-review">
+          <div class="kpi-icon-wrap"><mat-icon>hourglass_top</mat-icon></div>
+          <span class="kpi-val">{{ orgProgress.pendingReviewCount || 0 }}</span>
+          <span class="kpi-lbl">Pending</span>
+        </div>
+        <div class="kpi-chip ready-payroll">
+          <div class="kpi-icon-wrap"><mat-icon>lock</mat-icon></div>
+          <span class="kpi-val">{{ orgProgress.finalizedCount }}</span>
+          <span class="kpi-lbl">Finalized</span>
+        </div>
+        <div class="kpi-chip in-progress-kpi">
+          <div class="kpi-icon-wrap"><mat-icon>sync</mat-icon></div>
+          <span class="kpi-val">{{ orgProgress.inProgressCount || 0 }}</span>
+          <span class="kpi-lbl">In Progress</span>
+        </div>
+        <div class="kpi-chip submission-rate">
+          <div class="kpi-icon-wrap"><mat-icon>trending_up</mat-icon></div>
+          <span class="kpi-val">{{ orgProgress.submissionRate | number:'1.0-0' }}%</span>
+          <span class="kpi-lbl">Submission</span>
+        </div>
+
+        <span class="compliance-badge"
               [class.high]="orgProgress.complianceRate >= 80"
               [class.medium]="orgProgress.complianceRate >= 50 && orgProgress.complianceRate < 80"
               [class.low]="orgProgress.complianceRate < 50">
@@ -44,78 +93,92 @@
         </span>
       </div>
 
-      <div class="progress-bar-container">
+      <!-- Progress bar -->
+      <div class="progress-track-wrapper">
         <div class="progress-bar-track">
           <div class="progress-segment finalized"
                [style.width.%]="(orgProgress.finalizedCount / orgProgress.totalEmployees) * 100"
-               [matTooltip]="'Finalized: ' + orgProgress.finalizedCount + ' employees'">
-          </div>
+               [matTooltip]="'Finalized: ' + orgProgress.finalizedCount"></div>
           <div class="progress-segment submitted"
                [style.width.%]="(orgProgress.submittedCount / orgProgress.totalEmployees) * 100"
-               [matTooltip]="'Submitted: ' + orgProgress.submittedCount + ' employees'">
-          </div>
+               [matTooltip]="'Submitted: ' + orgProgress.submittedCount"></div>
           <div class="progress-segment pending"
                [style.width.%]="((orgProgress.pendingReviewCount || 0) / orgProgress.totalEmployees) * 100"
-               [matTooltip]="'Pending Review: ' + (orgProgress.pendingReviewCount || 0) + ' employees'">
-          </div>
+               [matTooltip]="'Pending: ' + (orgProgress.pendingReviewCount || 0)"></div>
           <div class="progress-segment in-progress"
                [style.width.%]="((orgProgress.inProgressCount || 0) / orgProgress.totalEmployees) * 100"
-               [matTooltip]="'In Progress: ' + (orgProgress.inProgressCount || 0) + ' employees'">
-          </div>
+               [matTooltip]="'In Progress: ' + (orgProgress.inProgressCount || 0)"></div>
         </div>
-
         <div class="progress-legend">
-          <span class="legend-item finalized">
-            <span class="dot"></span> Finalized ({{ orgProgress.finalizedCount }})
-          </span>
-          <span class="legend-item submitted">
-            <span class="dot"></span> Submitted ({{ orgProgress.submittedCount }})
-          </span>
-          <span class="legend-item pending">
-            <span class="dot"></span> Pending Review ({{ orgProgress.pendingReviewCount || 0 }})
-          </span>
-          <span class="legend-item in-progress">
-            <span class="dot"></span> In Progress ({{ orgProgress.inProgressCount || 0 }})
-          </span>
-          <span class="legend-item untouched">
-            <span class="dot"></span> Untouched ({{ orgProgress.untouchedCount || 0 }})
-          </span>
+          <span class="legend-item finalized"><span class="dot"></span> Finalized ({{ orgProgress.finalizedCount }})</span>
+          <span class="legend-item submitted"><span class="dot"></span> Submitted ({{ orgProgress.submittedCount }})</span>
+          <span class="legend-item pending"><span class="dot"></span> Pending ({{ orgProgress.pendingReviewCount || 0 }})</span>
+          <span class="legend-item in-progress"><span class="dot"></span> In Progress ({{ orgProgress.inProgressCount || 0 }})</span>
+          <span class="legend-item untouched"><span class="dot"></span> Untouched ({{ orgProgress.untouchedCount || 0 }})</span>
         </div>
       </div>
+    }
 
-      <!-- KPI Cards -->
-      <div class="kpi-cards">
-        <div class="kpi-card team-size">
-          <div class="kpi-icon"><mat-icon>groups</mat-icon></div>
-          <div class="kpi-info">
-            <span class="kpi-value">{{ orgProgress.totalEmployees }}</span>
-            <span class="kpi-label">Total Team Size</span>
-          </div>
-        </div>
-        <div class="kpi-card pending-review">
-          <div class="kpi-icon"><mat-icon>hourglass_top</mat-icon></div>
-          <div class="kpi-info">
-            <span class="kpi-value">{{ orgProgress.pendingReviewCount || 0 }}</span>
-            <span class="kpi-label">Pending Review</span>
-          </div>
-        </div>
-        <div class="kpi-card ready-payroll">
-          <div class="kpi-icon"><mat-icon>lock</mat-icon></div>
-          <div class="kpi-info">
-            <span class="kpi-value">{{ orgProgress.finalizedCount }}</span>
-            <span class="kpi-label">Ready for Payroll</span>
-          </div>
-        </div>
-        <div class="kpi-card submission-rate">
-          <div class="kpi-icon"><mat-icon>trending_up</mat-icon></div>
-          <div class="kpi-info">
-            <span class="kpi-value">{{ orgProgress.submissionRate | number:'1.0-0' }}%</span>
-            <span class="kpi-label">Submission Rate</span>
-          </div>
-        </div>
+    <!-- Search / Filter Bar (inside dashboard) -->
+    @if (!isLoading && employeePackages.length > 0) {
+      <div class="dashboard-filter-bar">
+        <mat-icon class="ss-search-icon">search</mat-icon>
+        <input class="ss-input" type="text"
+               placeholder="Search by name, code or department…"
+               [(ngModel)]="searchText"
+               (input)="applyPackageFilter()"
+               autocomplete="off" />
+
+        <span class="ss-sep"></span>
+
+        <button class="ss-dropdown-btn" [matMenuTriggerFor]="statusMenu">
+          <span class="ss-dropdown-label">{{ statusFilter === 'all' ? 'Status' : (statusFilter === 'in_progress' ? 'Draft' : (statusFilter | titlecase)) }}</span>
+          <mat-icon class="ss-dropdown-arrow">expand_more</mat-icon>
+        </button>
+        <mat-menu #statusMenu="matMenu" class="ss-dropdown-menu">
+          <button mat-menu-item (click)="statusFilter='all'; applyPackageFilter()" [class.ss-menu-active]="statusFilter==='all'">
+            <span>All</span><span class="ss-menu-count">{{ employeePackages.length }}</span>
+          </button>
+          <button mat-menu-item (click)="statusFilter='finalized'; applyPackageFilter()" [class.ss-menu-active]="statusFilter==='finalized'">
+            <span>Finalized</span><span class="ss-menu-count">{{ getStatusFilterCount('finalized') }}</span>
+          </button>
+          <button mat-menu-item (click)="statusFilter='pending'; applyPackageFilter()" [class.ss-menu-active]="statusFilter==='pending'">
+            <span>Pending</span><span class="ss-menu-count">{{ getStatusFilterCount('pending') }}</span>
+          </button>
+          <button mat-menu-item (click)="statusFilter='in_progress'; applyPackageFilter()" [class.ss-menu-active]="statusFilter==='in_progress'">
+            <span>Draft</span><span class="ss-menu-count">{{ getStatusFilterCount('in_progress') }}</span>
+          </button>
+          <button mat-menu-item (click)="statusFilter='untouched'; applyPackageFilter()" [class.ss-menu-active]="statusFilter==='untouched'">
+            <span>Untouched</span><span class="ss-menu-count">{{ getStatusFilterCount('untouched') }}</span>
+          </button>
+        </mat-menu>
+
+        <span class="ss-sep"></span>
+
+        <button class="ss-dropdown-btn" [matMenuTriggerFor]="deptMenu">
+          <span class="ss-dropdown-label">{{ departmentFilter === 'all' ? 'Dept' : departmentFilter }}</span>
+          <mat-icon class="ss-dropdown-arrow">expand_more</mat-icon>
+        </button>
+        <mat-menu #deptMenu="matMenu" class="ss-dropdown-menu">
+          @for (dept of uniqueDepartments; track dept) {
+            <button mat-menu-item (click)="departmentFilter=dept; applyPackageFilter()" [class.ss-menu-active]="departmentFilter===dept">
+              <span>{{ dept === 'all' ? 'All Depts' : dept }}</span><span class="ss-menu-count">{{ getDeptFilterCount(dept) }}</span>
+            </button>
+          }
+        </mat-menu>
+
+        @if (searchText || statusFilter !== 'all' || departmentFilter !== 'all') {
+          <button class="ss-clear-btn" (click)="clearPackageFilter()" aria-label="Clear">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+
+        <span class="result-count">
+          {{ filteredPackages.length }} of {{ employeePackages.length }}
+        </span>
       </div>
-    </div>
-  }
+    }
+  </div>
 
   @if (!orgProgress && !isLoading) {
     <div class="global-stats-bar">
@@ -143,53 +206,6 @@
     </div>
   }
 
-  @if (showHistoryDrawer) {
-    <div class="history-drawer-overlay" (click)="toggleHistoryDrawer()"></div>
-    <div class="history-drawer">
-      <div class="drawer-header">
-        <h3>
-          <mat-icon>history</mat-icon>
-          Historical Periods
-        </h3>
-        <button class="btn-icon" (click)="toggleHistoryDrawer()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-
-      <div class="drawer-content">
-        @if (isLoadingSnapshots) {
-          <div class="drawer-loading">
-            <mat-spinner diameter="32"></mat-spinner>
-            <span>Loading periods...</span>
-          </div>
-        } @else if (allSnapshots.length === 0) {
-          <div class="drawer-empty">
-            <mat-icon>event_busy</mat-icon>
-            <span>No periods found</span>
-          </div>
-        } @else {
-          <div class="snapshot-list">
-            @for (snapshot of allSnapshots; track snapshot.timesheetId) {
-              <button class="snapshot-item"
-                      (click)="selectHistoricalPeriod(snapshot)"
-                      [class.active]="snapshot.timesheetId === selectedTimesheetId">
-                <div class="snapshot-period">
-                  <mat-icon>calendar_month</mat-icon>
-                  <span>{{ snapshot.monthName }} {{ snapshot.year }}</span>
-                </div>
-                <div class="snapshot-meta">
-                  <span class="status-chip" [ngClass]="snapshot.status?.toLowerCase()">
-                    {{ snapshot.status }}
-                  </span>
-                </div>
-              </button>
-            }
-          </div>
-        }
-      </div>
-    </div>
-  }
-
   @if (!isLoading && allSnapshots.length === 0 && employeePackages.length === 0) {
     <div class="no-snapshot-banner">
       <mat-icon class="banner-icon">info</mat-icon>
@@ -212,26 +228,6 @@
   }
 
   @if (!isLoading && employeePackages.length > 0) {
-
-    <!-- Search / Filter Toolbar -->
-    <div class="grid-toolbar">
-      <div class="search-box">
-        <mat-icon>search</mat-icon>
-        <input [(ngModel)]="searchText"
-               (input)="applyPackageFilter()"
-               placeholder="Search by name, code or department…"
-               autocomplete="off" />
-        @if (searchText) {
-          <button class="clear-btn" (click)="searchText = ''; applyPackageFilter()">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </div>
-      <span class="result-count">
-        {{ filteredPackages.length }} of {{ employeePackages.length }} employee{{ employeePackages.length === 1 ? '' : 's' }}
-      </span>
-    </div>
-
     <div class="employee-grid">
       @for (pkg of filteredPackages; track pkg.employeeId) {
 
