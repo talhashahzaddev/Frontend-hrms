@@ -137,8 +137,8 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
 
   openTimesheetDetailDialog(timesheet: MonthlyTimesheetSummary): void {
     const dialogRef = this.dialog.open(TimesheetDetailDialogComponent, {
-      width: '95%',
-      maxWidth: '1400px',
+      width: '92%',
+      maxWidth: '1260px',
       height: '90vh',
       data: {
         timesheetId: timesheet.timesheetId,

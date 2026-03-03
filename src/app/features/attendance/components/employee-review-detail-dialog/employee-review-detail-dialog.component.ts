@@ -358,7 +358,7 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
 
   shouldHighlightRow(record: MonthlyDayRecord): boolean {
     if (record.isFinalized) return false;
-    return this.isPendingRequest(record) || this.hasRequestedChanges(record);
+    return this.isPendingRequest(record) || this.hasRequestedChanges(record) || !!record.isManagerOverride;
   }
 
   hasRequestedChanges(record: MonthlyDayRecord): boolean {
@@ -529,6 +529,9 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
           }
           liveRecord.isFinalized = false;
           liveRecord.hasRecord   = true;
+          liveRecord.isManagerOverride = true;
+          liveRecord.hasPendingRequest = false;
+          liveRecord.requestStatus = 'none';
           this.pkg.finalizedCount = this.monthlyRecords.filter(r => r.isFinalized).length;
           this.pkg.finalizedDays  = this.pkg.finalizedCount;
         }

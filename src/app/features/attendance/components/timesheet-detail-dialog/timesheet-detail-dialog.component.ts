@@ -156,6 +156,15 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   isLoading = false;
 
   searchText = '';
+  statusFilter = 'all';
+  departmentFilter = 'all';
+
+  get uniqueDepartments(): string[] {
+    const depts = this.employees
+      .map(e => e.department || '')
+      .filter(d => d.trim() !== '');
+    return ['all', ...Array.from(new Set(depts)).sort()];
+  }
 
   expandedEmployee: EmployeeTimesheetDto | null = null;
 
@@ -503,43 +512,28 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (!this.employees.length) return;
 
-
-
     this.filteredEmployees = this.employees.filter(emp => {
-
       const searchLower = this.searchText.toLowerCase();
-
-      return (
-
+      const textMatch =
         emp.employeeName.toLowerCase().includes(searchLower) ||
-
         emp.employeeCode.toLowerCase().includes(searchLower) ||
-
         emp.employeeId.toLowerCase().includes(searchLower) ||
+        (emp.department || '').toLowerCase().includes(searchLower);
 
-        (emp.department || '').toLowerCase().includes(searchLower)
+      const statusMatch = this.statusFilter === 'all' ||
+        this.getEmployeeTimesheetStatus(emp) === this.statusFilter;
 
-      );
-
+      return textMatch && statusMatch;
     });
 
-
-
     this.totalRecords = this.filteredEmployees.length;
-
     this.pageIndex = 0;
-
     this.updateDisplayedEmployees();
 
-
     if (this.filteredEmployees.length > 0) {
-
       this.selectedEmployee = this.filteredEmployees[0];
-
     } else {
-
       this.selectedEmployee = null;
-
     }
 
   }
@@ -549,9 +543,35 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   clearFilter(): void {
 
     this.searchText = '';
+    this.statusFilter = 'all';
+    this.departmentFilter = 'all';
 
     this.applyFilter();
 
+  }
+
+  setStatusFilter(filter: string): void {
+    this.statusFilter = filter;
+    this.applyFilter();
+  }
+
+  getEmployeeTimesheetStatus(emp: EmployeeTimesheetDto): string {
+    if (emp.is_finalized) return 'finalized';
+    const records = (emp as any).dailyRecords || [];
+    const hasPending = records.some((r: any) => r.hasPendingRequest);
+    const hasDraft   = records.some((r: any) => r.hasDraftRequest);
+    if (hasPending) return 'pending';
+    if (hasDraft)   return 'in_progress';
+    return 'untouched';
+  }
+
+  getStatusCount(filter: string): number {
+    return this.employees.filter(emp => this.getEmployeeTimesheetStatus(emp) === filter).length;
+  }
+
+  getDeptCount(dept: string): number {
+    if (dept === 'all') return this.employees.length;
+    return this.employees.filter(emp => (emp.department || '') === dept).length;
   }
 
 
@@ -996,18 +1016,18 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   canRequestCorrection(record: any): boolean {
 
-
     if (record.is_finalized || record.isFinalized) {
-
       return false;
-
     }
 
+    // Manager override is an administrative decision — employee cannot
+    // raise a correction request on it. Only the manager can re-override.
+    if (record.is_manager_override || record.isManagerOverride) {
+      return false;
+    }
 
     if (record.hasPendingRequest) {
-
       return false;
-
     }
 
     return true;
@@ -1042,13 +1062,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   onDisabledButtonClick(record: any): void {
 
     if (record.is_finalized || record.isFinalized) {
-
       this.notificationService.showInfo('This record has been finalized for payroll and cannot be modified');
-
+    } else if (record.is_manager_override || record.isManagerOverride) {
+      this.notificationService.showInfo('This record has been adjusted by your manager. If you believe this is incorrect, please speak with your manager directly.');
     } else if (record.hasPendingRequest) {
-
       this.notificationService.showInfo('A correction request is already pending - please wait for manager review');
-
     }
 
   }
@@ -1232,7 +1250,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (!this.isManagerOrAdmin()) return false;
 
-    if (record.is_finalized) return false;
+    // Block only truly finalized (payroll-locked) records; allow re-override of overridden records
+    if ((record.is_finalized || record.isFinalized) && !record.is_manager_override) return false;
 
 
     const status = (record.status || '').toLowerCase().replace(/[_ ]/g, '');
@@ -1539,11 +1558,20 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     let derivedIsFinalized = serverIsFinalized;
     if (!derivedIsFinalized) {
+      // Include ALL elapsed non-weekend records — absent finalized days have no attendanceId
+      // but vw_employee_timesheet_details still marks them is_finalized=true
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const realRecords = days.filter((d: any) => {
         const s = ((d as any).status || '').toLowerCase().replace(/[_ ]/g, '');
-        return s !== 'weekend' && s !== 'norecord' && !!((d as any).attendanceId || (d as any).checkInTime);
+        if (s === 'weekend' || s === 'norecord') return false;
+        const workDate = new Date((d as any).date || (d as any).workDate || '');
+        return !isNaN(workDate.getTime()) && workDate < today;
       });
-      if (realRecords.length > 0 && realRecords.every((d: any) => d.is_finalized)) {
+
+      if (realRecords.length > 0 && realRecords.every((d: any) =>
+          (d as any).is_finalized === true || (d as any).isFinalized === true)) {
         derivedIsFinalized = true;
       }
     }

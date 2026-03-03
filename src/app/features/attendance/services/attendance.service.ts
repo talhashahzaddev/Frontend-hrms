@@ -694,10 +694,7 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
                 hasApprovedRequest: r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest || false,
                 hasRejectedRequest: r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest || false,
                 hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
-                hasPendingRequest: (r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest || false)
-                  && !(r.has_draft_request    || r.hasDraftRequest    || r.HasDraftRequest)
-                  && !(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest)
-                  && !(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest),
+                hasPendingRequest: !!(r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest),
               };
             });
           }

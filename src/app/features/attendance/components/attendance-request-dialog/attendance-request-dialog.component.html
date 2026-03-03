@@ -122,7 +122,7 @@
     <button mat-stroked-button (click)="cancel()" [disabled]="isSubmitting">
       Cancel
     </button>
-    <button mat-raised-button color="primary" (click)="onSubmit()"
+    <button mat-flat-button (click)="onSubmit()"
             [disabled]="isSubmitting || requestForm.invalid" class="submit-btn">
       @if (isSubmitting) {
         <mat-spinner diameter="18" class="button-spinner"></mat-spinner>

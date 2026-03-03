@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -61,7 +61,7 @@ export class ManagerOverrideDialogComponent implements OnInit {
       checkOut: [''],
       status: [''],
       notes: [''],
-      reason: ['', [Validators.required, Validators.minLength(10)]]
+      reason: ['']
     });
   }
 

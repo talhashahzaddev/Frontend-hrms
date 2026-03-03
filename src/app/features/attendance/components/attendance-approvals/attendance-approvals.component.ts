@@ -81,6 +81,9 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   processingPackageIds = new Set<string>();
 
+  statusFilter: string = 'all';
+  departmentFilter: string = 'all';
+
   orgProgress: OrgSubmissionProgress | null = null;
   currentMonth: number = new Date().getMonth() + 1;
   currentYear: number = new Date().getFullYear();
@@ -99,6 +102,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.bootstrapDashboard();
+    this.loadAllSnapshots();
   }
 
   ngOnDestroy(): void {
@@ -108,16 +112,55 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   applyPackageFilter(): void {
     const q = this.searchText.trim().toLowerCase();
-    if (!q) {
-      this.filteredPackages = [...this.employeePackages];
-      return;
-    }
-    this.filteredPackages = this.employeePackages.filter(pkg =>
-      pkg.employeeName.toLowerCase().includes(q) ||
-      (pkg.employeeCode || '').toLowerCase().includes(q) ||
-      (pkg.department || '').toLowerCase().includes(q) ||
-      pkg.employeeId.toLowerCase().includes(q)
-    );
+    this.filteredPackages = this.employeePackages.filter(pkg => {
+      // Text search
+      const textMatch = !q ||
+        pkg.employeeName.toLowerCase().includes(q) ||
+        (pkg.employeeCode || '').toLowerCase().includes(q) ||
+        (pkg.department || '').toLowerCase().includes(q) ||
+        pkg.employeeId.toLowerCase().includes(q);
+
+      // Status filter
+      const statusMatch = this.statusFilter === 'all' ||
+        this.getPackageStatus(pkg) === this.statusFilter;
+
+      // Department filter
+      const deptMatch = this.departmentFilter === 'all' ||
+        (pkg.department || '') === this.departmentFilter;
+
+      return textMatch && statusMatch && deptMatch;
+    });
+  }
+
+  getPackageStatus(pkg: EmployeeReviewPackage): string {
+    if (pkg.isFinalized) return 'finalized';
+    if (pkg.hasPendingRequest || (pkg.pendingRequestCount || 0) > 0) return 'pending';
+    if (pkg.hasDraftRequest) return 'in_progress';
+    if ((pkg.finalizedDays || 0) > 0 || (pkg.approvedCount || 0) > 0) return 'partial';
+    return 'untouched';
+  }
+
+  getStatusFilterCount(filter: string): number {
+    return this.employeePackages.filter(pkg => this.getPackageStatus(pkg) === filter).length;
+  }
+
+  get uniqueDepartments(): string[] {
+    const depts = this.employeePackages
+      .map(p => p.department || '')
+      .filter(d => d.trim() !== '');
+    return ['all', ...Array.from(new Set(depts)).sort()];
+  }
+
+  getDeptFilterCount(dept: string): number {
+    if (dept === 'all') return this.employeePackages.length;
+    return this.employeePackages.filter(p => (p.department || '') === dept).length;
+  }
+
+  clearPackageFilter(): void {
+    this.searchText = '';
+    this.statusFilter = 'all';
+    this.departmentFilter = 'all';
+    this.applyPackageFilter();
   }
 
 
@@ -643,13 +686,22 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     pkg.hasPendingRequest = pending > 0;
     pkg.hasDraftRequest   = hasDraft;
 
-    const finalizableRecords = records.filter(r =>
-      !!(r as any).attendanceId ||
-      (!!(r as any).requestId && ((r as any).requestStatus || '').toLowerCase() === 'approved')
-    );
-    const computedIsFinalized = finalizableRecords.length > 0
-      && finalizableRecords.every(r => r.isFinalized);
-    pkg.isFinalized = computedIsFinalized || pkg.isFinalized;
+    // Use all elapsed non-weekend records — absent finalized days have no attendanceId
+    // but the backend still marks them is_finalized=true after BatchFinalizeForEmployee
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const elapsedWorkRecords = records.filter(r => {
+      const s = (r.originalStatus || '').toLowerCase().replace(/[_ ]/g, '');
+      if (s === 'weekend' || s === 'norecord') return false;
+      const d = new Date(r.date || '');
+      return !isNaN(d.getTime()) && d < today;
+    });
+
+    const computedIsFinalized = elapsedWorkRecords.length > 0
+      && elapsedWorkRecords.every(r => r.isFinalized === true);
+    // Preserve API-level isFinalized (from backend) as authoritative fallback
+    pkg.isFinalized = computedIsFinalized || (pkg.isFinalized === true);
     pkg.isUntouched = hasRecords === 0 && pending === 0 && approved === 0 && rejected === 0;
 
     const presentDays = records.filter(r => {
@@ -732,6 +784,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     if (pkg.isFinalized)     return 'lock';
     if (pkg.hasPendingRequest || (pkg.pendingRequestCount || 0) > 0) return 'hourglass_top';
     if (pkg.hasDraftRequest) return 'edit_note';
+    if ((pkg.finalizedDays || 0) > 0 || (pkg.approvedCount || 0) > 0) return 'sync';
     return 'radio_button_unchecked';
   }
 
@@ -739,14 +792,17 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     if (pkg.isFinalized)     return 'status-finalized';
     if (pkg.hasPendingRequest || (pkg.pendingRequestCount || 0) > 0) return 'status-pending-review';
     if (pkg.hasDraftRequest) return 'status-in-progress';
+    if ((pkg.finalizedDays || 0) > 0 || (pkg.approvedCount || 0) > 0) return 'status-in-progress';
     return 'status-untouched';
   }
 
   getEmployeeStatusTooltip(pkg: EmployeeReviewPackage): string {
-    if (pkg.isFinalized)     return 'Finalized Ã¢â‚¬â€ locked for payroll';
+    if (pkg.isFinalized)     return 'Finalized \u2014 locked for payroll';
     if (pkg.hasPendingRequest || (pkg.pendingRequestCount || 0) > 0)
-      return `Pending Review Ã¢â‚¬â€ ${pkg.pendingRequestCount || 0} request(s) awaiting action`;
-    if (pkg.hasDraftRequest) return 'In Progress Ã¢â‚¬â€ has draft corrections (not yet submitted)';
+      return `Pending Review \u2014 ${pkg.pendingRequestCount || 0} request(s) awaiting action`;
+    if (pkg.hasDraftRequest) return 'In Progress \u2014 has draft corrections (not yet submitted)';
+    if ((pkg.finalizedDays || 0) > 0 || (pkg.approvedCount || 0) > 0)
+      return `Partially Reviewed \u2014 ${pkg.finalizedDays || 0} day(s) finalized, ${pkg.approvedCount || 0} approved`;
     return 'No activity';
   }
 
@@ -756,6 +812,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     if (pkg.hasPendingRequest) return 'heat-border-pending';
     if (pkg.isUntouched && this.isNearMonthEnd()) return 'heat-border-urgent';
     if (pkg.hasDraftRequest)  return 'heat-border-draft';
+    if ((pkg.finalizedDays || 0) > 0 || (pkg.approvedCount || 0) > 0) return 'heat-border-draft';
     return '';
   }
 
