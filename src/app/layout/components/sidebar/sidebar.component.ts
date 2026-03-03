@@ -183,7 +183,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'event_available',
       children: [
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' },
-        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, roles: ['Super Admin', 'HR Manager']  }
+        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, roles: ['Super Admin', 'HR Manager'] }
 
       ]
     },
@@ -203,7 +203,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Currency Settings', icon: 'work_outline', route: '/settings/general' },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address' },
-      
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', roles: ['Super Admin'] }
       ]
     }
   ];

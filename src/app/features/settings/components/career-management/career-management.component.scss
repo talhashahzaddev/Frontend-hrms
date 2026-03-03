@@ -1,0 +1,385 @@
+// Career Management page — matches openings/settings-general design system
+.career-container {
+    padding: 12px;
+    max-width: auto;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    // ── Page Header ────────────────────────────────────────────────
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 12px 16px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+        .header-content {
+            flex: 1;
+
+            .page-title {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 0 0 2px;
+                font-size: 20px;
+                font-weight: 700;
+                color: #1f2937;
+                letter-spacing: -0.5px;
+
+                mat-icon {
+                    font-size: 24px;
+                    width: 24px;
+                    height: 24px;
+                    color: #667eea;
+                }
+            }
+
+            .page-subtitle {
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+                font-weight: 500;
+            }
+        }
+    }
+
+    // ── Loading ────────────────────────────────────────────────────
+    .career-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 32px 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+    }
+}
+
+// ── Form Cards ───────────────────────────────────────────────────
+.form-card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+}
+
+.card-section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+
+    .section-icon-wrap {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+            color: white;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .section-title {
+        margin: 0 0 2px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+        letter-spacing: -0.3px;
+    }
+
+    .section-sub {
+        margin: 0;
+        font-size: 12px;
+        color: #6b7280;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+}
+
+.card-body {
+    padding: 20px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+// ── Upload Rows ──────────────────────────────────────────────────
+.upload-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .upload-label-col {
+        min-width: 200px;
+        padding-top: 6px;
+
+        .upload-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .upload-hint {
+            display: block;
+            font-size: 11px;
+            color: #9ca3af;
+            line-height: 1.4;
+        }
+    }
+
+    .upload-control-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.upload-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.upload-btn {
+    height: 36px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border-color: #667eea !important;
+    color: #667eea !important;
+    padding: 0 16px !important;
+    transition: all 0.2s ease !important;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+    }
+
+    &:hover:not(:disabled) {
+        background: rgba(102, 126, 234, 0.08) !important;
+    }
+}
+
+.clear-btn {
+    color: #dc2626 !important;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+}
+
+.inline-spinner {
+    flex-shrink: 0;
+}
+
+// ── Previews ─────────────────────────────────────────────────────
+.image-preview-wrap,
+.bg-preview-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.logo-preview {
+    display: block;
+    max-height: 90px;
+    max-width: 220px;
+    object-fit: contain;
+    padding: 10px;
+}
+
+.bg-preview {
+    display: block;
+    width: 100%;
+    max-height: 160px;
+    object-fit: cover;
+}
+
+.preview-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-top: 1px solid #f3f4f6;
+    font-size: 11px;
+    color: #6b7280;
+
+    mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        color: #9ca3af;
+    }
+
+    .preview-name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    .preview-link {
+        color: #667eea;
+        font-weight: 600;
+        text-decoration: none;
+        flex-shrink: 0;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.row-divider {
+    margin: 4px 0 !important;
+}
+
+// ── Text Fields ──────────────────────────────────────────────────
+.full-width {
+    width: 100%;
+}
+
+::ng-deep .form-card {
+    .mat-mdc-text-field-wrapper {
+        border-radius: 10px !important;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+        padding: 0 4px;
+    }
+
+    .mdc-floating-label {
+        font-size: 13px !important;
+    }
+
+    input.mat-mdc-input-element,
+    textarea.mat-mdc-input-element {
+        font-size: 13px !important;
+    }
+}
+
+// ── Footer ───────────────────────────────────────────────────────
+.form-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 0 8px;
+
+    .save-button {
+        height: 38px;
+        padding: 0 24px !important;
+        border-radius: 10px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-spinner {
+            flex-shrink: 0;
+        }
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45) !important;
+        }
+
+        &:disabled {
+            opacity: 0.65;
+        }
+    }
+
+    .footer-hint {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 500;
+
+        mat-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+        }
+    }
+}
+
+// ── Empty / access denied card ───────────────────────────────────
+.empty-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 32px 20px;
+    text-align: center;
+
+    mat-card-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .empty-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        color: #d1d5db;
+    }
+
+    .empty-text {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .empty-subtext {
+        margin: 0;
+        font-size: 12px;
+        color: #6b7280;
+    }
+}
