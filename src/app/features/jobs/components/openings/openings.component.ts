@@ -160,7 +160,8 @@ export class OpeningsComponent implements OnInit {
 
   viewDetails(job: JobOpeningDto): void {
     this.dialog.open(JobViewDialogComponent, {
-      width: '560px',
+      width: '860px',
+      maxWidth: '95vw',
       maxHeight: '90vh',
       data: { jobId: job.jobId }
     });

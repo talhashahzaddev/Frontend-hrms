@@ -21,14 +21,22 @@
 
   <div class="job-details" *ngIf="!isLoading && job">
     <div class="detail-section">
-      <h3 class="detail-title">{{ job.jobRoleName }}</h3>
+      <div class="detail-title-row">
+        <h3 class="detail-title">{{ job.jobRoleName }}</h3>
+        <span class="job-code-badge" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
+      </div>
       <p class="detail-meta" *ngIf="getMetaLine(job)">{{ getMetaLine(job) }}</p>
-      <span class="status-chip" [class.status-open]="job.status === 'Open'" [class.status-closed]="job.status === 'Closed'" [class.status-draft]="job.status === 'Draft'">
+      <span class="status-chip" [class.status-open]="job.status === 'Open'"
+        [class.status-closed]="job.status === 'Closed'" [class.status-draft]="job.status === 'Draft'">
         {{ job.status }}
       </span>
     </div>
 
     <div class="detail-grid">
+      <div class="detail-row" *ngIf="job.jobCode">
+        <span class="detail-label">Job code</span>
+        <span class="detail-value job-code-value">{{ job.jobCode }}</span>
+      </div>
       <div class="detail-row">
         <span class="detail-label">Department</span>
         <span class="detail-value">{{ job.departmentName || '—' }}</span>
@@ -79,20 +87,37 @@
 
     <div class="detail-section" *ngIf="job.externalLink">
       <span class="detail-label">External link</span>
-      <a [href]="job.externalLink" target="_blank" rel="noopener noreferrer" class="detail-link">{{ job.externalLink }}</a>
+      <a [href]="job.externalLink" target="_blank" rel="noopener noreferrer" class="detail-link">{{ job.externalLink
+        }}</a>
     </div>
 
-    <div class="detail-section" *ngIf="job.jobIntroduction">
-      <h4 class="detail-heading">Introduction</h4>
-      <p class="detail-text">{{ job.jobIntroduction }}</p>
-    </div>
-    <div class="detail-section" *ngIf="job.responsibilities">
-      <h4 class="detail-heading">Responsibilities</h4>
-      <p class="detail-text">{{ job.responsibilities }}</p>
-    </div>
-    <div class="detail-section" *ngIf="job.skillset">
-      <h4 class="detail-heading">Skillset</h4>
-      <p class="detail-text">{{ job.skillset }}</p>
+    <!-- ── Rich content sections ─────────────────────────────────── -->
+    <div class="content-sections" *ngIf="job.jobIntroduction || job.responsibilities || job.skillset">
+
+      <div class="content-panel" *ngIf="job.jobIntroduction">
+        <div class="content-panel-header">
+          <mat-icon>info_outline</mat-icon>
+          <span>Introduction</span>
+        </div>
+        <div class="content-panel-body ql-content" [innerHTML]="job.jobIntroduction"></div>
+      </div>
+
+      <div class="content-panel" *ngIf="job.responsibilities">
+        <div class="content-panel-header">
+          <mat-icon>checklist</mat-icon>
+          <span>Responsibilities</span>
+        </div>
+        <div class="content-panel-body ql-content" [innerHTML]="job.responsibilities"></div>
+      </div>
+
+      <div class="content-panel" *ngIf="job.skillset">
+        <div class="content-panel-header">
+          <mat-icon>psychology</mat-icon>
+          <span>Skillset</span>
+        </div>
+        <div class="content-panel-body ql-content" [innerHTML]="job.skillset"></div>
+      </div>
+
     </div>
 
     <div class="detail-section" *ngIf="job.createdByName">

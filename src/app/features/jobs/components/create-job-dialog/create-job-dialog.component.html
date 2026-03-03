@@ -10,133 +10,208 @@
 
 <mat-dialog-content class="dialog-content">
   <form [formGroup]="jobForm" class="job-form">
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Job role name *</mat-label>
-        <input matInput formControlName="jobRoleName" placeholder="e.g. Senior Software Engineer" maxlength="200">
-        <mat-error *ngIf="jobForm.get('jobRoleName')?.hasError('required')">Job role name is required</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Department</mat-label>
-        <mat-select formControlName="departmentId" placeholder="Select department">
-          <mat-option [value]="null">— None —</mat-option>
-          <mat-option *ngFor="let d of departments" [value]="d.departmentId">
-            {{ d.departmentName }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+
+    <!-- ── Section: Identity ─────────────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon class="section-icon">badge</mat-icon>
+        <span class="section-title">Job Identity</span>
+      </div>
+
+      <!-- Row 1: Role Name (wide) + Job Code (narrow) -->
+      <div class="form-row role-row">
+        <mat-form-field appearance="outline" class="field-role">
+          <mat-label>Job role name *</mat-label>
+          <input matInput formControlName="jobRoleName" placeholder="e.g. Senior Software Engineer" maxlength="200">
+          <mat-error *ngIf="jobForm.get('jobRoleName')?.hasError('required')">Job role name is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="field-code">
+          <mat-label>Job code *</mat-label>
+          <input matInput formControlName="jobCode" placeholder="e.g. SWE001" maxlength="8">
+          <mat-error *ngIf="jobForm.get('jobCode')?.hasError('required')">Required</mat-error>
+          <mat-error *ngIf="jobForm.get('jobCode')?.hasError('minlength')">Min 4 chars</mat-error>
+          <mat-error *ngIf="jobForm.get('jobCode')?.hasError('maxlength')">Max 8 chars</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Row 2: Department (half-width) -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="field-department">
+          <mat-label>Department</mat-label>
+          <mat-select formControlName="departmentId" placeholder="Select department">
+            <mat-option [value]="null">— None —</mat-option>
+            <mat-option *ngFor="let d of departments" [value]="d.departmentId">
+              {{ d.departmentName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
 
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Experience (min years)</mat-label>
-        <input matInput type="number" formControlName="experienceMin" placeholder="0" min="0" step="1">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Experience (max years)</mat-label>
-        <input matInput type="number" formControlName="experienceMax" placeholder="0" min="0" step="1">
-      </mat-form-field>
+    <!-- ── Section: Experience & Compensation ────────────────────── -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon class="section-icon">payments</mat-icon>
+        <span class="section-title">Experience & Compensation</span>
+      </div>
+
+      <!-- Row: Exp Min + Exp Max -->
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Experience (min yrs)</mat-label>
+          <input matInput type="number" formControlName="experienceMin" placeholder="0" min="0" step="1">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Experience (max yrs)</mat-label>
+          <input matInput type="number" formControlName="experienceMax" placeholder="0" min="0" step="1">
+        </mat-form-field>
+      </div>
+
+      <!-- Row: CTC Min + CTC Max -->
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>CTC min</mat-label>
+          <input matInput type="number" formControlName="ctcMin" placeholder="0" min="0" step="0.01">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>CTC max</mat-label>
+          <input matInput type="number" formControlName="ctcMax" placeholder="0" min="0" step="0.01">
+        </mat-form-field>
+      </div>
+
+      <!-- Row: Currency (narrow) + Vacancies (narrow) + Posted as + Status — all 4 in one line -->
+      <div class="form-row four-col">
+        <mat-form-field appearance="outline" class="field-currency">
+          <mat-label>Currency</mat-label>
+          <input matInput formControlName="currency" placeholder="USD" maxlength="10">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="field-vacancies">
+          <mat-label>Vacancies *</mat-label>
+          <input matInput type="number" formControlName="vacancies" placeholder="1" min="1" step="1">
+          <mat-error *ngIf="jobForm.get('vacancies')?.hasError('min')">Min 1</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Posted as *</mat-label>
+          <mat-select formControlName="postedAs" placeholder="Internal / External">
+            <mat-option value="Internal">Internal</mat-option>
+            <mat-option value="External">External</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status" placeholder="Status">
+            <mat-option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
 
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>CTC min</mat-label>
-        <input matInput type="number" formControlName="ctcMin" placeholder="0" min="0" step="0.01">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>CTC max</mat-label>
-        <input matInput type="number" formControlName="ctcMax" placeholder="0" min="0" step="0.01">
-      </mat-form-field>
+    <!-- ── Section: Location & Work ──────────────────────────────── -->
+    <div class="form-section">
+      <div class="section-header">
+        <mat-icon class="section-icon">location_on</mat-icon>
+        <span class="section-title">Location & Work Details</span>
+      </div>
+
+      <!-- Row: Location + Work mode -->
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" placeholder="e.g. New York, Remote" maxlength="200">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Work mode</mat-label>
+          <mat-select formControlName="workMode" placeholder="Select">
+            <mat-option [value]="null">— None —</mat-option>
+            <mat-option *ngFor="let o of workModeOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Row: Employment type + Last date -->
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Employment type</mat-label>
+          <mat-select formControlName="employmentType" placeholder="Select">
+            <mat-option [value]="null">— None —</mat-option>
+            <mat-option *ngFor="let o of employmentTypeOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Last date to apply</mat-label>
+          <input matInput [matDatepicker]="lastDatePicker" formControlName="lastDate" placeholder="Choose date">
+          <mat-datepicker-toggle matSuffix [for]="lastDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #lastDatePicker></mat-datepicker>
+        </mat-form-field>
+      </div>
     </div>
 
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Currency</mat-label>
-        <input matInput formControlName="currency" placeholder="e.g. USD" maxlength="10">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Vacancies *</mat-label>
-        <input matInput type="number" formControlName="vacancies" placeholder="1" min="1" step="1">
-        <mat-error *ngIf="jobForm.get('vacancies')?.hasError('min')">At least 1</mat-error>
-      </mat-form-field>
+    <!-- ── Section: Job Content (Quill editors) ───────────────────── -->
+    <div class="form-section last-section">
+      <div class="section-header">
+        <mat-icon class="section-icon">description</mat-icon>
+        <span class="section-title">Job Content</span>
+      </div>
+
+      <!-- External link (commented out for now) -->
+      <!--
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>External link</mat-label>
+          <input matInput formControlName="externalLink" placeholder="URL for external applications">
+        </mat-form-field>
+      </div>
+      -->
+
+      <!-- Job Introduction (rich text) -->
+      <div class="quill-field">
+        <label class="quill-field-label">
+          <mat-icon>info_outline</mat-icon>
+          Job Introduction
+          <span class="quill-field-hint">Brief overview of the role</span>
+        </label>
+        <div class="quill-editor-wrap">
+          <quill-editor formControlName="jobIntroduction" [modules]="quillBasicConfig"
+            placeholder="Brief about the role..." theme="snow" id="job-introduction">
+          </quill-editor>
+        </div>
+      </div>
+
+      <!-- Responsibilities (rich text) -->
+      <div class="quill-field">
+        <label class="quill-field-label">
+          <mat-icon>checklist</mat-icon>
+          Responsibilities
+          <span class="quill-field-hint">Key responsibilities for this position</span>
+        </label>
+        <div class="quill-editor-wrap">
+          <quill-editor formControlName="responsibilities" [modules]="quillRichConfig"
+            placeholder="List key responsibilities..." theme="snow" id="job-responsibilities">
+          </quill-editor>
+        </div>
+      </div>
+
+      <!-- Skillset (rich text) -->
+      <div class="quill-field">
+        <label class="quill-field-label">
+          <mat-icon>psychology</mat-icon>
+          Skillset
+          <span class="quill-field-hint">Required skills and qualifications</span>
+        </label>
+        <div class="quill-editor-wrap">
+          <quill-editor formControlName="skillset" [modules]="quillRichConfig" placeholder="List required skills..."
+            theme="snow" id="job-skillset">
+          </quill-editor>
+        </div>
+      </div>
     </div>
 
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Location</mat-label>
-        <input matInput formControlName="location" placeholder="e.g. New York, Remote" maxlength="200">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Work mode</mat-label>
-        <mat-select formControlName="workMode" placeholder="Select">
-          <mat-option [value]="null">— None —</mat-option>
-          <mat-option *ngFor="let o of workModeOptions" [value]="o.value">{{ o.label }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Employment type</mat-label>
-        <mat-select formControlName="employmentType" placeholder="Select">
-          <mat-option [value]="null">— None —</mat-option>
-          <mat-option *ngFor="let o of employmentTypeOptions" [value]="o.value">{{ o.label }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Last date to apply</mat-label>
-        <input matInput [matDatepicker]="lastDatePicker" formControlName="lastDate" placeholder="Choose date">
-        <mat-datepicker-toggle matSuffix [for]="lastDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #lastDatePicker></mat-datepicker>
-      </mat-form-field>
-    </div>
-
-    <div class="form-row two-col">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Posted as *</mat-label>
-        <mat-select formControlName="postedAs" placeholder="Internal / External">
-          <mat-option value="Internal">Internal</mat-option>
-          <mat-option value="External">External</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="status" placeholder="Open / Closed / Draft">
-          <mat-option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>External link</mat-label>
-        <input matInput formControlName="externalLink" placeholder="URL for external applications">
-      </mat-form-field>
-    </div>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Job introduction</mat-label>
-      <textarea matInput formControlName="jobIntroduction" placeholder="Brief about the role" rows="3"></textarea>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Responsibilities</mat-label>
-      <textarea matInput formControlName="responsibilities" placeholder="Key responsibilities" rows="4"></textarea>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Skillset</mat-label>
-      <textarea matInput formControlName="skillset" placeholder="Required skills" rows="3"></textarea>
-    </mat-form-field>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions class="dialog-actions">
   <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
-  <button mat-flat-button
-          [disabled]="jobForm.invalid || isSubmitting"
-          (click)="onSubmit()"
-          class="submit-button">
+  <button mat-flat-button [disabled]="jobForm.invalid || isSubmitting" (click)="onSubmit()" class="submit-button">
     <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
     <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Job' : 'Create Job' }}</span>
     <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Creating...' }}</span>

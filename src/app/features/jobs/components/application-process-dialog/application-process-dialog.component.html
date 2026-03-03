@@ -22,7 +22,10 @@
     </div>
     <div class="application-details" *ngIf="!isLoading && application">
       <div class="detail-section">
-        <h4 class="detail-title">{{ application.jobRoleName || 'Job' }}</h4>
+        <div class="detail-title-row">
+          <h4 class="detail-title">{{ application.jobRoleName || 'Job' }}</h4>
+          <span class="job-code-badge" *ngIf="application.jobCode"># {{ application.jobCode }}</span>
+        </div>
         <span class="status-chip" [class.status-applied]="application.status === 'Applied'">
           {{ application.currentStageName || application.status || 'Applied' }}
         </span>
@@ -51,20 +54,25 @@
         </div>
         <div class="detail-row" *ngIf="application.linkedInUrl">
           <span class="detail-label">LinkedIn</span>
-          <a [href]="application.linkedInUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open profile</a>
+          <a [href]="application.linkedInUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open
+            profile</a>
         </div>
         <div class="detail-row" *ngIf="application.resumeUrl">
           <span class="detail-label">Resume</span>
-          <a [href]="application.resumeUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open resume</a>
+          <a [href]="application.resumeUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open
+            resume</a>
         </div>
         <div class="detail-row">
           <span class="detail-label">Application source</span>
           <span class="detail-value">{{ application.applicationSource || '—' }}</span>
         </div>
       </div>
-      <div class="detail-section" *ngIf="application.coverLetter">
-        <h4 class="detail-heading">Cover letter</h4>
-        <div class="detail-text cover-letter-html" [innerHTML]="application.coverLetter"></div>
+      <div class="content-panel" *ngIf="application.coverLetter">
+        <div class="content-panel-header">
+          <mat-icon>description</mat-icon>
+          <span>Cover Letter</span>
+        </div>
+        <div class="content-panel-body ql-content" [innerHTML]="application.coverLetter"></div>
       </div>
     </div>
   </div>
@@ -79,7 +87,8 @@
           <mat-option *ngFor="let s of stages" [value]="s.stageId">{{ s.stageName }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-flat-button class="add-stage-btn" (click)="addStage()" [disabled]="addingStage || !selectedStageId.value">
+      <button mat-flat-button class="add-stage-btn" (click)="addStage()"
+        [disabled]="addingStage || !selectedStageId.value">
         <mat-spinner *ngIf="addingStage" diameter="20"></mat-spinner>
         <mat-icon *ngIf="!addingStage">add</mat-icon>
         {{ addingStage ? 'Adding...' : 'Add stage' }}

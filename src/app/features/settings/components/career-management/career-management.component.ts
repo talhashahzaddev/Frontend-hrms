@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -94,10 +94,10 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         private notificationService: NotificationService
     ) {
         this.form = this.fb.group({
-            logoUrl: [''],
-            careerBgImageUrl: [''],
-            careerHeaderText: [''],
-            careerDescription: ['']
+            logoUrl: ['', Validators.required],
+            careerBgImageUrl: ['', Validators.required],
+            careerHeaderText: ['', Validators.required],
+            careerDescription: ['', Validators.required]
         });
     }
 

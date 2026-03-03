@@ -63,7 +63,7 @@
   // Gradients (like Hubstaff)
   --gradient-primary: linear-gradient(135deg, var(--primary-600) 0%, var(--purple-600) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--purple-500) 0%, var(--primary-500) 100%);
-  --gradient-background: white;//linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
   // Shadows
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -95,7 +95,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 html {
@@ -114,19 +113,41 @@ body {
 }
 
 // Typography
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.4;
   color: var(--gray-900);
   margin: 0;
 }
 
-h1 { font-size: 2.25rem; }
-h2 { font-size: 1.875rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
-h5 { font-size: 1.125rem; }
-h6 { font-size: 1rem; }
+h1 {
+  font-size: 2.25rem;
+}
+
+h2 {
+  font-size: 1.875rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5 {
+  font-size: 1.125rem;
+}
+
+h6 {
+  font-size: 1rem;
+}
 
 p {
   margin: 0;
@@ -144,32 +165,97 @@ a {
 }
 
 // Utility Classes
-.text-primary { color: var(--primary-600) !important; }
-.text-secondary { color: var(--gray-600) !important; }
-.text-success { color: var(--success) !important; }
-.text-warning { color: var(--warning) !important; }
-.text-error { color: var(--error) !important; }
-.text-white { color: white !important; }
+.text-primary {
+  color: var(--primary-600) !important;
+}
 
-.bg-primary { background-color: var(--primary-600) !important; }
-.bg-secondary { background-color: var(--gray-100) !important; }
-.bg-success { background-color: var(--success) !important; }
-.bg-warning { background-color: var(--warning) !important; }
-.bg-error { background-color: var(--error) !important; }
-.bg-white { background-color: white !important; }
-.bg-gradient { background: var(--gradient-primary) !important; }
+.text-secondary {
+  color: var(--gray-600) !important;
+}
 
-.shadow-sm { box-shadow: var(--shadow-sm) !important; }
-.shadow-md { box-shadow: var(--shadow-md) !important; }
-.shadow-lg { box-shadow: var(--shadow-lg) !important; }
-.shadow-xl { box-shadow: var(--shadow-xl) !important; }
+.text-success {
+  color: var(--success) !important;
+}
 
-.rounded-sm { border-radius: var(--radius-sm) !important; }
-.rounded-md { border-radius: var(--radius-md) !important; }
-.rounded-lg { border-radius: var(--radius-lg) !important; }
-.rounded-xl { border-radius: var(--radius-xl) !important; }
-.rounded-2xl { border-radius: var(--radius-2xl) !important; }
-.rounded-full { border-radius: var(--radius-full) !important; }
+.text-warning {
+  color: var(--warning) !important;
+}
+
+.text-error {
+  color: var(--error) !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-600) !important;
+}
+
+.bg-secondary {
+  background-color: var(--gray-100) !important;
+}
+
+.bg-success {
+  background-color: var(--success) !important;
+}
+
+.bg-warning {
+  background-color: var(--warning) !important;
+}
+
+.bg-error {
+  background-color: var(--error) !important;
+}
+
+.bg-white {
+  background-color: white !important;
+}
+
+.bg-gradient {
+  background: var(--gradient-primary) !important;
+}
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.shadow-xl {
+  box-shadow: var(--shadow-xl) !important;
+}
+
+.rounded-sm {
+  border-radius: var(--radius-sm) !important;
+}
+
+.rounded-md {
+  border-radius: var(--radius-md) !important;
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg) !important;
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl) !important;
+}
+
+.rounded-2xl {
+  border-radius: var(--radius-2xl) !important;
+}
+
+.rounded-full {
+  border-radius: var(--radius-full) !important;
+}
 
 // Layout Classes
 .container {
@@ -199,27 +285,73 @@ a {
   justify-content: space-between;
 }
 
-.gap-2 { gap: var(--spacing-sm); }
-.gap-4 { gap: var(--spacing-md); }
-.gap-6 { gap: var(--spacing-lg); }
-.gap-8 { gap: var(--spacing-xl); }
+.gap-2 {
+  gap: var(--spacing-sm);
+}
 
-.p-2 { padding: var(--spacing-sm); }
-.p-4 { padding: var(--spacing-md); }
-.p-6 { padding: var(--spacing-lg); }
-.p-8 { padding: var(--spacing-xl); }
+.gap-4 {
+  gap: var(--spacing-md);
+}
 
-.m-2 { margin: var(--spacing-sm); }
-.m-4 { margin: var(--spacing-md); }
-.m-6 { margin: var(--spacing-lg); }
-.m-8 { margin: var(--spacing-xl); }
+.gap-6 {
+  gap: var(--spacing-lg);
+}
 
-.w-full { width: 100%; }
-.h-full { height: 100%; }
+.gap-8 {
+  gap: var(--spacing-xl);
+}
 
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.p-2 {
+  padding: var(--spacing-sm);
+}
+
+.p-4 {
+  padding: var(--spacing-md);
+}
+
+.p-6 {
+  padding: var(--spacing-lg);
+}
+
+.p-8 {
+  padding: var(--spacing-xl);
+}
+
+.m-2 {
+  margin: var(--spacing-sm);
+}
+
+.m-4 {
+  margin: var(--spacing-md);
+}
+
+.m-6 {
+  margin: var(--spacing-lg);
+}
+
+.m-8 {
+  margin: var(--spacing-xl);
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
 
 // Button Styles (Hubstaff-inspired)
 .btn {
@@ -379,18 +511,22 @@ a {
     margin-top: 0.25rem;
   }
 }
+
 .custom-dialog {
   padding: 20px;
 }
+
 .form-row {
   display: flex;
   gap: 16px;
 }
+
 .form-actions {
   margin-top: 16px;
   display: flex;
   gap: 10px;
 }
+
 // Table Styles
 .table {
   width: 100%;
@@ -400,7 +536,8 @@ a {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 
-  th, td {
+  th,
+  td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--gray-200);
@@ -470,7 +607,9 @@ a {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 // Responsive Design
@@ -485,6 +624,7 @@ a {
   }
 
   .card {
+
     .card-header,
     .card-body,
     .card-footer {
@@ -495,7 +635,8 @@ a {
   .table {
     font-size: 0.75rem;
 
-    th, td {
+    th,
+    td {
       padding: 0.75rem;
     }
   }
@@ -525,20 +666,21 @@ a {
   background: var(--gradient-primary);
   border: none;
   border-radius: var(--radius-lg);
-  
+
   &:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
   }
 }
+
 .header-top {
   display: flex;
-  justify-content: space-between; 
-  align-items: center;            
+  justify-content: space-between;
+  align-items: center;
 }
 
 .settings-title {
-  margin: 0; 
+  margin: 0;
 }
 
 // CDK Overlay Container - Critical for zoom functionality
@@ -548,7 +690,7 @@ a {
   // Ensure overlay container doesn't interfere with zoom calculations
   // The service will dynamically apply inverse zoom to counteract body zoom
   pointer-events: none;
-  
+
   // Allow child overlays to receive pointer events
   .cdk-overlay-pane {
     pointer-events: auto;
@@ -562,6 +704,7 @@ a {
    - Preserves the existing color scheme
 ======================================================= */
 .empty-state {
+
   // Ensure buttons within empty states are compact and centered
   button {
     // Force compact button width (not full-width)
@@ -570,29 +713,29 @@ a {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    
+
     // Standard button padding
     padding: 0 24px !important;
     height: 44px !important;
-    
+
     // Typography
     font-weight: 600 !important;
     font-size: 14px !important;
     line-height: 1 !important;
-    
+
     // Preserve purple/gradient background (do NOT change color)
     // Individual components may override with their own gradient
     // This ensures consistency across all empty states
     background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
     color: white !important;
-    
+
     // Spacing & Styling
     border-radius: 12px !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
     gap: 8px !important;
     margin: 0 auto !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    
+
     // Icon styling
     mat-icon {
       font-size: 20px !important;
@@ -601,7 +744,7 @@ a {
       margin: 0 !important;
       color: white !important;
     }
-    
+
     // Hover effect
     &:hover {
       transform: translateY(-2px);
@@ -631,73 +774,5 @@ a {
       flex-direction: column !important;
       flex: 1 !important;
     }
-  }
-}
-
-/* ── Timesheet sidebar filter dropdown menus ── */
-.ss-dropdown-menu {
-  .mat-mdc-menu-panel {
-    min-width: 110px !important;
-    max-width: 160px !important;
-    border-radius: 7px !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.09) !important;
-    border: 1px solid #e8eaed !important;
-    padding: 3px 0 !important;
-    overflow: hidden !important;
-  }
-
-  .mat-mdc-menu-content {
-    padding: 0 !important;
-  }
-
-  .mat-mdc-menu-item {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    min-height: 28px !important;
-    padding: 0 11px !important;
-    font-size: 11.5px !important;
-    font-weight: 400 !important;
-    color: #374151 !important;
-    transition: background 0.1s !important;
-
-    .mdc-list-item__primary-text {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      width: 100% !important;
-      font-size: 11.5px !important;
-      color: #374151 !important;
-    }
-
-    &:hover { background: #f8f9fb !important; }
-
-    &.ss-menu-active {
-      background: #f0f6ff !important;
-      font-weight: 600 !important;
-      color: #2563eb !important;
-
-      .mdc-list-item__primary-text { color: #2563eb !important; }
-
-      .ss-menu-count {
-        background: #dbeafe !important;
-        color: #1d4ed8 !important;
-      }
-    }
-  }
-
-  .ss-menu-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 15px;
-    height: 15px;
-    padding: 0 4px;
-    border-radius: 4px;
-    background: #ebedf0;
-    color: #6b7280;
-    font-size: 9.5px;
-    font-weight: 600;
-    margin-left: 8px;
   }
 }

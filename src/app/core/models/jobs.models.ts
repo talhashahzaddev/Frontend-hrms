@@ -3,6 +3,7 @@ export interface JobOpeningDto {
   jobId: string;
   organizationId: string;
   jobRoleName: string;
+  jobCode?: string | null;
   departmentId?: string | null;
   departmentName?: string | null;
   experienceMin?: number | null;
@@ -30,6 +31,7 @@ export interface JobOpeningDto {
 
 export interface CreateJobOpeningRequest {
   jobRoleName: string;
+  jobCode: string;
   departmentId?: string | null;
   experienceMin?: number | null;
   experienceMax?: number | null;
@@ -51,6 +53,7 @@ export interface CreateJobOpeningRequest {
 
 export interface UpdateJobOpeningRequest {
   jobRoleName?: string | null;
+  jobCode?: string | null;
   departmentId?: string | null;
   experienceMin?: number | null;
   experienceMax?: number | null;
@@ -101,6 +104,7 @@ export interface JobApplicationDto {
   jobApplyId: string;
   jobId: string;
   jobRoleName?: string | null;
+  jobCode?: string | null;
   organizationId: string;
   employeeId?: string | null;
   employeeName?: string | null;
