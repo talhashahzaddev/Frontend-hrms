@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatChipsModule } from '@angular/material/chips';
+import { QuillModule } from 'ngx-quill';
 import { Subject, takeUntil } from 'rxjs';
 
 import {
@@ -21,6 +23,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 @Component({
     selector: 'app-career-management',
     standalone: true,
+    encapsulation: ViewEncapsulation.None,
     imports: [
         CommonModule,
         ReactiveFormsModule,
@@ -31,7 +34,9 @@ import { NotificationService } from '../../../../core/services/notification.serv
         MatIconModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
-        MatDividerModule
+        MatDividerModule,
+        MatChipsModule,
+        QuillModule
     ],
     templateUrl: './career-management.component.html',
     styleUrls: ['./career-management.component.scss']
@@ -44,18 +49,43 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
     isSaving = false;
     isSuperAdmin = false;
 
-    // Logo upload state
+    /** View mode vs edit mode toggle */
+    isEditMode = false;
+
+    /** The last snapshot saved (or loaded) — drives the view panel */
+    savedData: CareerPageSettings | null = null;
+
+    // ─── Upload state ─────────────────────────────────────────────
     isUploadingLogo = false;
     logoFileName: string | null = null;
-
-    // Background image upload state
     isUploadingBg = false;
     bgFileName: string | null = null;
 
     readonly acceptedImageTypes = 'image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml';
     readonly maxFileMb = 5;
     private static readonly MAX_BYTES = 5 * 1024 * 1024;
-    private static readonly ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    private static readonly ALLOWED_TYPES = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'
+    ];
+
+    readonly quillHeaderConfig = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{ align: [] }],
+            ['clean']
+        ]
+    };
+
+    readonly quillDescConfig = {
+        toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ header: [1, 2, 3, false] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ align: [] }],
+            ['link'],
+            ['clean']
+        ]
+    };
 
     constructor(
         private fb: FormBuilder,
@@ -83,20 +113,15 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
+    // ─── Load ─────────────────────────────────────────────────────
     loadSettings(): void {
         this.isLoading = true;
         this.settingsService.getCareerPage()
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (data: CareerPageSettings) => {
-                    this.form.patchValue({
-                        logoUrl: data.logoUrl ?? '',
-                        careerBgImageUrl: data.careerBgImageUrl ?? '',
-                        careerHeaderText: data.careerHeaderText ?? '',
-                        careerDescription: data.careerDescription ?? ''
-                    });
-                    this.logoFileName = this.extractFileName(data.logoUrl);
-                    this.bgFileName = this.extractFileName(data.careerBgImageUrl);
+                    this.savedData = data;
+                    this.patchForm(data);
                     this.isLoading = false;
                 },
                 error: () => {
@@ -106,7 +131,29 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
             });
     }
 
-    // ─── Logo upload ───────────────────────────────────────────────
+    private patchForm(data: CareerPageSettings): void {
+        this.form.patchValue({
+            logoUrl: data.logoUrl ?? '',
+            careerBgImageUrl: data.careerBgImageUrl ?? '',
+            careerHeaderText: data.careerHeaderText ?? '',
+            careerDescription: data.careerDescription ?? ''
+        });
+        this.logoFileName = this.extractFileName(data.logoUrl);
+        this.bgFileName = this.extractFileName(data.careerBgImageUrl);
+    }
+
+    // ─── View / Edit toggle ───────────────────────────────────────
+    enterEditMode(): void {
+        if (this.savedData) this.patchForm(this.savedData);
+        this.isEditMode = true;
+    }
+
+    cancelEdit(): void {
+        if (this.savedData) this.patchForm(this.savedData);
+        this.isEditMode = false;
+    }
+
+    // ─── Logo upload ──────────────────────────────────────────────
     triggerLogoInput(input: HTMLInputElement): void {
         if (this.isUploadingLogo) return;
         input.value = '';
@@ -150,7 +197,7 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         return v?.trim() ? v.trim() : null;
     }
 
-    // ─── Background image upload ─────────────────────────────────
+    // ─── Background upload ────────────────────────────────────────
     triggerBgInput(input: HTMLInputElement): void {
         if (this.isUploadingBg) return;
         input.value = '';
@@ -194,23 +241,31 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         return v?.trim() ? v.trim() : null;
     }
 
-    // ─── Save ──────────────────────────────────────────────────────
+    // ─── Save ─────────────────────────────────────────────────────
     onSave(): void {
         if (!this.isSuperAdmin || this.isSaving) return;
 
         this.isSaving = true;
         const v = this.form.value;
-
-        this.settingsService.updateCareerPage({
+        const request = {
             logoUrl: v.logoUrl?.trim() || null,
             careerBgImageUrl: v.careerBgImageUrl?.trim() || null,
             careerHeaderText: v.careerHeaderText?.trim() || null,
             careerDescription: v.careerDescription?.trim() || null
-        }).pipe(takeUntil(this.destroy$))
+        };
+
+        this.settingsService.updateCareerPage(request)
+            .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: () => {
+                    // Update the displayed snapshot and exit edit mode
+                    this.savedData = {
+                        ...(this.savedData as CareerPageSettings),
+                        ...request
+                    };
                     this.notificationService.showSuccess('Career page settings saved successfully');
                     this.isSaving = false;
+                    this.isEditMode = false;
                 },
                 error: (err) => {
                     this.notificationService.showError(err?.message || 'Failed to save career page settings');
@@ -219,7 +274,13 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
             });
     }
 
-    // ─── Helpers ───────────────────────────────────────────────────
+    // ─── Helpers ──────────────────────────────────────────────────
+    hasAnyData(): boolean {
+        if (!this.savedData) return false;
+        const d = this.savedData;
+        return !!(d.logoUrl || d.careerBgImageUrl || d.careerHeaderText || d.careerDescription);
+    }
+
     private validateImage(file: File): string | null {
         if (!CareerManagementComponent.ALLOWED_TYPES.includes(file.type)) {
             return 'Allowed formats: JPG, PNG, GIF, WEBP, SVG';

@@ -1,167 +1,328 @@
 <div class="career-container">
 
-    <!-- Page Header -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- PAGE HEADER                                                  -->
+    <!-- ════════════════════════════════════════════════════════════ -->
     <div class="page-header">
-        <div class="header-content">
-            <h1 class="page-title">
+        <div class="header-left">
+            <div class="header-icon-wrap">
                 <mat-icon>business_center</mat-icon>
-                Career Management
-            </h1>
-            <p class="page-subtitle">Customize your public career page — logo, header, background &amp; description</p>
+            </div>
+            <div>
+                <h1 class="page-title">Career Management</h1>
+                <p class="page-subtitle">Manage your public career page — logo, background &amp; content</p>
+            </div>
         </div>
+        <button mat-flat-button class="action-btn primary-btn"
+            *ngIf="!isLoading && isSuperAdmin && !isEditMode && hasAnyData()" (click)="enterEditMode()"
+            id="career-edit-btn">
+            <mat-icon>edit</mat-icon>
+            Edit
+        </button>
+        <button mat-flat-button class="action-btn primary-btn"
+            *ngIf="!isLoading && isSuperAdmin && !isEditMode && !hasAnyData() && savedData !== null"
+            (click)="enterEditMode()" id="career-setup-btn">
+            <mat-icon>add</mat-icon>
+            Set Up Career Page
+        </button>
     </div>
 
-    <!-- Access Denied -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- ACCESS DENIED                                                -->
+    <!-- ════════════════════════════════════════════════════════════ -->
     <mat-card class="empty-card" *ngIf="!isSuperAdmin">
         <mat-card-content>
-            <mat-icon class="empty-icon">lock</mat-icon>
+            <div class="empty-icon-wrap lock"><mat-icon>lock</mat-icon></div>
             <p class="empty-text">Access Restricted</p>
             <p class="empty-subtext">Only Super Admins can manage career page settings.</p>
         </mat-card-content>
     </mat-card>
 
-    <!-- Loading -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- LOADING                                                      -->
+    <!-- ════════════════════════════════════════════════════════════ -->
     <div class="career-loading" *ngIf="isSuperAdmin && isLoading">
-        <mat-spinner diameter="40"></mat-spinner>
-        <span>Loading career page settings...</span>
+        <mat-spinner diameter="36"></mat-spinner>
+        <span>Loading career page settings…</span>
     </div>
 
-    <!-- Form -->
-    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="isSuperAdmin && !isLoading">
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- VIEW MODE                                                    -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="isSuperAdmin && !isLoading && !isEditMode">
 
-        <!-- Section 1: Branding Images -->
-        <mat-card class="form-card">
-            <div class="card-section-header">
-                <div class="section-icon-wrap">
-                    <mat-icon>image</mat-icon>
-                </div>
-                <div>
-                    <h2 class="section-title">Branding Images</h2>
-                    <p class="section-sub">Upload your organization logo and career page background image.</p>
+        <!-- Empty state -->
+        <mat-card class="empty-card setup-card" *ngIf="!hasAnyData()">
+            <mat-card-content>
+                <div class="empty-icon-wrap"><mat-icon>rocket_launch</mat-icon></div>
+                <p class="empty-text">Your career page isn't configured yet</p>
+                <p class="empty-subtext">Add a logo, background image, header and description to make it shine for
+                    applicants.</p>
+                <button mat-flat-button class="action-btn primary-btn" (click)="enterEditMode()">
+                    <mat-icon>add</mat-icon>Set Up Career Page
+                </button>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Data view -->
+        <ng-container *ngIf="hasAnyData()">
+
+            <!-- Hero: bg image + logo + header -->
+            <div class="hero-preview" *ngIf="savedData?.careerBgImageUrl || savedData?.logoUrl">
+                <div class="hero-bg"
+                    [style.backgroundImage]="savedData?.careerBgImageUrl ? 'url(' + savedData!.careerBgImageUrl + ')' : 'none'"
+                    [class.no-bg]="!savedData?.careerBgImageUrl">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo" class="hero-logo">
+                        <h2 class="hero-header" *ngIf="savedData?.careerHeaderText"
+                            [innerHTML]="savedData!.careerHeaderText"></h2>
+                        <span class="hero-badge" *ngIf="!savedData?.careerBgImageUrl">No background image set</span>
+                    </div>
                 </div>
             </div>
-            <mat-divider></mat-divider>
-            <mat-card-content class="card-body">
 
-                <!-- Logo Upload -->
-                <div class="upload-row">
-                    <div class="upload-label-col">
-                        <span class="upload-label">Organization Logo</span>
-                        <span class="upload-hint">JPG, PNG, SVG, WEBP or GIF · Max {{ maxFileMb }} MB</span>
+            <!-- Image info grid -->
+            <div class="info-grid">
+                <mat-card class="info-card">
+                    <mat-card-content>
+                        <div class="info-card-header">
+                            <div class="info-icon logo-icon"><mat-icon>image</mat-icon></div>
+                            <span class="info-label">Organization Logo</span>
+                        </div>
+                        <div class="info-value-wrap">
+                            <ng-container *ngIf="savedData?.logoUrl; else noLogo">
+                                <div class="logo-thumb-wrap"><img [src]="savedData!.logoUrl" alt="Logo"
+                                        class="logo-thumb"></div>
+                                <a [href]="savedData!.logoUrl" target="_blank" rel="noopener" class="view-link">
+                                    <mat-icon>open_in_new</mat-icon> View full image
+                                </a>
+                            </ng-container>
+                            <ng-template #noLogo><span class="no-value">Not set</span></ng-template>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="info-card">
+                    <mat-card-content>
+                        <div class="info-card-header">
+                            <div class="info-icon bg-icon"><mat-icon>wallpaper</mat-icon></div>
+                            <span class="info-label">Career Background Image</span>
+                        </div>
+                        <div class="info-value-wrap">
+                            <ng-container *ngIf="savedData?.careerBgImageUrl; else noBg">
+                                <div class="bg-thumb-wrap"><img [src]="savedData!.careerBgImageUrl" alt="Background"
+                                        class="bg-thumb"></div>
+                                <a [href]="savedData!.careerBgImageUrl" target="_blank" rel="noopener"
+                                    class="view-link">
+                                    <mat-icon>open_in_new</mat-icon> View full image
+                                </a>
+                            </ng-container>
+                            <ng-template #noBg><span class="no-value">Not set</span></ng-template>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Text content card -->
+            <mat-card class="info-card text-card">
+                <mat-card-content>
+                    <div class="text-card-body">
+                        <div class="text-field-block">
+                            <div class="text-field-meta">
+                                <div class="info-icon header-icon"><mat-icon>title</mat-icon></div>
+                                <span class="info-label">Page Header</span>
+                            </div>
+                            <p class="text-value header-value" *ngIf="savedData?.careerHeaderText; else noHeader"
+                                [innerHTML]="savedData!.careerHeaderText"></p>
+                            <ng-template #noHeader><span class="no-value">Not set</span></ng-template>
+                        </div>
+                        <mat-divider class="text-divider"></mat-divider>
+                        <div class="text-field-block">
+                            <div class="text-field-meta">
+                                <div class="info-icon desc-icon"><mat-icon>subject</mat-icon></div>
+                                <span class="info-label">Career Description</span>
+                            </div>
+                            <div class="text-value desc-value" *ngIf="savedData?.careerDescription; else noDesc"
+                                [innerHTML]="savedData!.careerDescription"></div>
+                            <ng-template #noDesc><span class="no-value">Not set</span></ng-template>
+                        </div>
                     </div>
-                    <div class="upload-control-col">
+                </mat-card-content>
+            </mat-card>
+
+        </ng-container>
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- EDIT MODE                                                    -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="isSuperAdmin && !isLoading && isEditMode" class="edit-form">
+
+        <!-- ── Section 1: Branding Images ─────────────────────────── -->
+        <div class="edit-section">
+            <div class="edit-section-label">
+                <div class="section-step">1</div>
+                <div>
+                    <h2 class="section-title">Branding Images</h2>
+                    <p class="section-sub">Upload your organization logo and the career page background.</p>
+                </div>
+            </div>
+
+            <div class="edit-fields-panel">
+
+                <!-- Logo upload field -->
+                <div class="two-col-grid">
+
+                    <!-- Logo upload field -->
+                    <div class="upload-field">
+                        <div class="upload-field-header">
+                            <div class="upload-field-icon logo-icon"><mat-icon>image</mat-icon></div>
+                            <div>
+                                <span class="upload-field-title">Organization Logo</span>
+                                <span class="upload-field-hint">JPG, PNG, SVG, WEBP · Max {{ maxFileMb }} MB</span>
+                            </div>
+                        </div>
                         <input #logoInput type="file" [accept]="acceptedImageTypes"
                             (change)="onLogoSelected($event, logoInput)" hidden>
                         <div class="upload-actions">
                             <button mat-stroked-button type="button" (click)="triggerLogoInput(logoInput)"
                                 [disabled]="isUploadingLogo" class="upload-btn">
-                                <mat-icon>upload</mat-icon>
-                                {{ isUploadingLogo ? 'Uploading...' : (currentLogoUrl ? 'Replace Logo' : 'Upload Logo')
-                                }}
+                                <mat-icon>cloud_upload</mat-icon>
+                                {{ isUploadingLogo ? 'Uploading…' : (currentLogoUrl ? 'Replace Logo' : 'Upload Logo') }}
                             </button>
                             <mat-spinner *ngIf="isUploadingLogo" diameter="22" class="inline-spinner"></mat-spinner>
                             <button mat-icon-button type="button" *ngIf="currentLogoUrl && !isUploadingLogo"
-                                (click)="clearLogo()" matTooltip="Remove logo" class="clear-btn">
-                                <mat-icon>close</mat-icon>
+                                (click)="clearLogo()" matTooltip="Remove logo" class="remove-btn">
+                                <mat-icon>delete_outline</mat-icon>
                             </button>
                         </div>
-                        <!-- Preview -->
                         <div class="image-preview-wrap" *ngIf="currentLogoUrl && !isUploadingLogo">
-                            <img [src]="currentLogoUrl" alt="Organization Logo" class="logo-preview">
-                            <div class="preview-meta">
-                                <mat-icon>insert_drive_file</mat-icon>
-                                <span class="preview-name">{{ logoFileName || 'logo' }}</span>
-                                <a [href]="currentLogoUrl" target="_blank" rel="noopener" class="preview-link">Open</a>
+                            <div class="preview-img-row">
+                                <img [src]="currentLogoUrl" alt="Logo preview" class="logo-preview">
+                                <a [href]="currentLogoUrl" target="_blank" rel="noopener" class="preview-open-btn"
+                                    matTooltip="Open in new tab">
+                                    <mat-icon>open_in_new</mat-icon>
+                                </a>
                             </div>
+                            <p class="preview-filename"><mat-icon>attach_file</mat-icon>{{ logoFileName || 'logo' }}</p>
                         </div>
                     </div>
-                </div>
 
-                <mat-divider class="row-divider"></mat-divider>
-
-                <!-- Background Image Upload -->
-                <div class="upload-row">
-                    <div class="upload-label-col">
-                        <span class="upload-label">Career Page Background</span>
-                        <span class="upload-hint">JPG, PNG, WEBP or GIF · Max {{ maxFileMb }} MB · Recommended:
-                            1920×480px</span>
-                    </div>
-                    <div class="upload-control-col">
+                    <!-- Background image upload field -->
+                    <div class="upload-field">
+                        <div class="upload-field-header">
+                            <div class="upload-field-icon bg-icon"><mat-icon>wallpaper</mat-icon></div>
+                            <div>
+                                <span class="upload-field-title">Career Page Background</span>
+                                <span class="upload-field-hint">JPG, PNG, WEBP · Max {{ maxFileMb }} MB · Recommended:
+                                    1920×480px</span>
+                            </div>
+                        </div>
                         <input #bgInput type="file" [accept]="acceptedImageTypes"
                             (change)="onBgSelected($event, bgInput)" hidden>
                         <div class="upload-actions">
                             <button mat-stroked-button type="button" (click)="triggerBgInput(bgInput)"
                                 [disabled]="isUploadingBg" class="upload-btn">
-                                <mat-icon>wallpaper</mat-icon>
-                                {{ isUploadingBg ? 'Uploading...' : (currentBgUrl ? 'Replace Background' : 'Upload
+                                <mat-icon>cloud_upload</mat-icon>
+                                {{ isUploadingBg ? 'Uploading…' : (currentBgUrl ? 'Replace Background' : 'Upload
                                 Background') }}
                             </button>
                             <mat-spinner *ngIf="isUploadingBg" diameter="22" class="inline-spinner"></mat-spinner>
                             <button mat-icon-button type="button" *ngIf="currentBgUrl && !isUploadingBg"
-                                (click)="clearBg()" matTooltip="Remove background" class="clear-btn">
-                                <mat-icon>close</mat-icon>
+                                (click)="clearBg()" matTooltip="Remove background" class="remove-btn">
+                                <mat-icon>delete_outline</mat-icon>
                             </button>
                         </div>
-                        <!-- Preview -->
                         <div class="bg-preview-wrap" *ngIf="currentBgUrl && !isUploadingBg">
-                            <img [src]="currentBgUrl" alt="Career Page Background" class="bg-preview">
-                            <div class="preview-meta">
-                                <mat-icon>insert_drive_file</mat-icon>
-                                <span class="preview-name">{{ bgFileName || 'background' }}</span>
-                                <a [href]="currentBgUrl" target="_blank" rel="noopener" class="preview-link">Open</a>
+                            <img [src]="currentBgUrl" alt="Background preview" class="bg-preview">
+                            <div class="bg-preview-footer">
+                                <p class="preview-filename"><mat-icon>attach_file</mat-icon>{{ bgFileName ||
+                                    'background' }}</p>
+                                <a [href]="currentBgUrl" target="_blank" rel="noopener" class="preview-open-btn"
+                                    matTooltip="Open in new tab">
+                                    <mat-icon>open_in_new</mat-icon>
+                                </a>
                             </div>
                         </div>
                     </div>
-                </div>
 
-            </mat-card-content>
-        </mat-card>
+                </div><!-- /two-col-grid -->
 
-        <!-- Section 2: Text Content -->
-        <mat-card class="form-card">
-            <div class="card-section-header">
-                <div class="section-icon-wrap">
-                    <mat-icon>text_fields</mat-icon>
-                </div>
+            </div>
+        </div>
+
+        <!-- ── Section 2: Page Content ────────────────────────────── -->
+        <div class="edit-section">
+            <div class="edit-section-label">
+                <div class="section-step">2</div>
                 <div>
                     <h2 class="section-title">Page Content</h2>
-                    <p class="section-sub">Set the headline and description visitors see on your public career page.</p>
+                    <p class="section-sub">Set the headline and description shown on your public career page.</p>
                 </div>
             </div>
-            <mat-divider></mat-divider>
-            <mat-card-content class="card-body">
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Header Text</mat-label>
-                    <input matInput formControlName="careerHeaderText" placeholder="e.g. Join Our Team" maxlength="255"
-                        id="career-header-text">
-                    <mat-icon matSuffix>title</mat-icon>
-                    <mat-hint>Up to 255 characters · Shown as the main headline on the career page</mat-hint>
-                </mat-form-field>
+            <div class="edit-fields-panel">
 
-                <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Career Page Description</mat-label>
-                    <textarea matInput formControlName="careerDescription"
-                        placeholder="Write a compelling description about your company culture, values, and why people should join your team..."
-                        rows="5" id="career-description"></textarea>
-                    <mat-hint>Displayed below the header — describe your culture and benefits</mat-hint>
-                </mat-form-field>
+                <div class="two-col-grid">
 
-            </mat-card-content>
-        </mat-card>
+                    <!-- Header Text (quill, minimal toolbar) -->
+                    <div class="quill-field">
+                        <label class="quill-field-label">
+                            <mat-icon>title</mat-icon>
+                            Header Text
+                            <span class="quill-field-hint">Main headline — keep it short and inspiring</span>
+                        </label>
+                        <div class="quill-editor-wrap">
+                            <quill-editor formControlName="careerHeaderText" [modules]="quillHeaderConfig"
+                                placeholder="e.g. Join Our Team and Build Something Amazing" theme="snow"
+                                id="career-header-text">
+                            </quill-editor>
+                        </div>
+                    </div>
 
-        <!-- Save Button -->
-        <div class="form-footer">
-            <button mat-flat-button type="submit" class="save-button"
-                [disabled]="isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
-                <mat-spinner *ngIf="isSaving" diameter="20" class="btn-spinner"></mat-spinner>
-                <mat-icon *ngIf="!isSaving">save</mat-icon>
-                {{ isSaving ? 'Saving...' : 'Save Changes' }}
-            </button>
-            <p class="footer-hint" *ngIf="isUploadingLogo || isUploadingBg">
-                <mat-icon>info_outline</mat-icon>
-                Please wait for uploads to finish before saving.
-            </p>
+                    <!-- Description (quill, full toolbar) -->
+                    <div class="quill-field">
+                        <label class="quill-field-label">
+                            <mat-icon>subject</mat-icon>
+                            Career Description
+                            <span class="quill-field-hint">Describe your culture, values and benefits. Supports rich
+                                text.</span>
+                        </label>
+                        <div class="quill-editor-wrap">
+                            <quill-editor formControlName="careerDescription" [modules]="quillDescConfig"
+                                placeholder="Describe your company culture, values, and why people should join…"
+                                theme="snow" id="career-description">
+                            </quill-editor>
+                        </div>
+                    </div>
+
+                </div><!-- /two-col-grid -->
+
+            </div>
+        </div>
+
+        <!-- ── Footer ─────────────────────────────────────────────── -->
+        <div class="edit-footer">
+            <div class="edit-footer-left">
+                <p class="upload-wait-hint" *ngIf="isUploadingLogo || isUploadingBg">
+                    <mat-icon>hourglass_top</mat-icon>
+                    Please wait for all uploads to complete before saving.
+                </p>
+            </div>
+            <div class="edit-footer-actions">
+                <button mat-stroked-button type="button" class="action-btn cancel-btn" [disabled]="isSaving"
+                    (click)="cancelEdit()" id="career-cancel-btn">
+                    <mat-icon>close</mat-icon>
+                    Cancel
+                </button>
+                <button mat-flat-button type="submit" class="action-btn primary-btn"
+                    [disabled]="isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
+                    <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
+                    <mat-icon *ngIf="!isSaving">save</mat-icon>
+                    {{ isSaving ? 'Saving…' : 'Save Changes' }}
+                </button>
+            </div>
         </div>
 
     </form>
