@@ -70,7 +70,7 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
 
   private loadLeaveTypes(): void {
     this.isLoading = true;
-    this.leaveService.getLeaveTypes()
+    this.leaveService.getLeaveTypesforadmin()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (types) => {
