@@ -150,7 +150,7 @@
         <div class="cell">
           <span class="cell-label">Basic Salary</span>
           <span class="cell-value salary">
-            {{ data.employee.basicSalary ? ('$' + (data.employee.basicSalary | number:'1.0-0')) : '—' }}
+            {{ data.employee.basicSalary ? currencySymbol + ': '  + (data.employee.basicSalary | number:'1.0-0') : '—' }}
           </span>
         </div>
         <div class="cell">

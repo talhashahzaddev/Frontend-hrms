@@ -63,7 +63,7 @@
   // Gradients (like Hubstaff)
   --gradient-primary: linear-gradient(135deg, var(--primary-600) 0%, var(--purple-600) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--purple-500) 0%, var(--primary-500) 100%);
-  --gradient-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-background: white;//linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
   // Shadows
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -95,6 +95,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 html {

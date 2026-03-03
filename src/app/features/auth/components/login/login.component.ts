@@ -40,6 +40,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = false;
   isReady = false; // Add ready state to prevent white card flash
   private isSubmitting = false;
+  activeSlide = 0;
+  prevSlide = -1;
+  private slideInterval: any;
 
   private destroy$ = new Subject<void>();
 
@@ -56,6 +59,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.subscribeToLoading();
     this.setFavicon();
+    this.startSlideshow();
   }
 
   ngAfterViewInit(): void {
@@ -104,6 +108,9 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.slideInterval) {
+      clearInterval(this.slideInterval);
+    }
   }
 
   // onSubmit(): void {
@@ -482,4 +489,49 @@ onSubmit(): void {
     control?.markAsTouched();
     this.notificationService.showError(message || 'Incorrect password');
   }
+  slides = [
+  {
+    image: 'https://res.cloudinary.com/dn7o89asj/image/upload/v1769097850/employees_dhrvea.png',
+    title: 'Employee Management',
+    description: 'Manage employees, managers, and HR roles with department positions in one centralized system.'
+  },
+  {
+    image: 'https://res.cloudinary.com/dn7o89asj/image/upload/v1769097850/general_dqgw1q.png',
+    title: 'Attendance',
+    description: 'Accurately track employee work hours, leaves, and overtime with our integrated system.'
+  },
+  {
+    image: 'https://res.cloudinary.com/dn7o89asj/image/upload/v1769099992/Leave-Cover_vupfet.png',
+    title: 'Leave Management',
+    description: 'Streamline employee leave requests, approvals, and balance tracking with a transparent, easy-to-use system.'
+  },
+  {
+    image: 'https://res.cloudinary.com/dn7o89asj/image/upload/v1769097851/managers-decision-making_rdbwdt.png',
+    title: 'Timesheets',
+    description: 'Log time against projects and tasks for better resource management and billing.'
+  },
+  {
+    image: 'https://res.cloudinary.com/dn7o89asj/image/upload/v1769097850/many-other-features_e9ow5i.png',
+    title: 'Performance',
+    description: 'Manage employee reviews, set goals, and foster a culture of continuous improvement.'
+  }
+];
+startSlideshow() {
+  this.slideInterval = setInterval(() => {
+    this.nextSlide();
+  }, 3000); // 3 seconds per slide
+}
+
+nextSlide() {
+  this.prevSlide = this.activeSlide;
+  this.activeSlide = (this.activeSlide + 1) % this.slides.length;
+}
+
+goToSlide(index: number) {
+  this.prevSlide = this.activeSlide;
+  this.activeSlide = index;
+  // Reset timer on manual navigation
+  clearInterval(this.slideInterval);
+  this.startSlideshow();
+}
 }
