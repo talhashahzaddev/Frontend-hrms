@@ -53,6 +53,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   selectedLeaveBalance = 0;
   showBalanceWarning = false;
   showOverlapWarning = false;
+  showWeekendOnlyWarning = false;  
   isCheckingOverlap = false;
   minDate = new Date();
   workingDaysOfWeek: number[] = [1, 2, 3, 4, 5];
@@ -165,7 +166,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     const current = new Date(start);
 
     while (current <= end) {
-      const jsDay = current.getDay();
+      const jsDay = current.getDay(); 
       // Convert JS day to ISO weekday: Sunday(0) → 7, rest stay the same
       const isoDay = jsDay === 0 ? 7 : jsDay;
 
@@ -177,6 +178,25 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     }
 
     return count;
+  }
+
+  private isEntireRangeNonWorking(start: Date, end: Date): boolean {
+    const current = new Date(start);
+
+    while (current <= end) {
+      const jsDay = current.getDay();
+      const isoDay = jsDay === 0 ? 7 : jsDay;
+
+      if (this.workingDaysOfWeek.includes(isoDay)) {
+        // Found at least one working day → range is NOT entirely non-working
+        return false;
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    // Every day in range was a non-working day
+    return true;
   }
 
   onLeaveTypeChange(): void {
@@ -196,26 +216,40 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   }
 
   onDateChange(): void {
-    const startDate = this.leaveForm.get('startDate')?.value;
-    const endDate = this.leaveForm.get('endDate')?.value;
+    const startVal = this.leaveForm.get('startDate')?.value;
+    const endVal = this.leaveForm.get('endDate')?.value;
 
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+    // Reset all warnings whenever dates change
+    this.showWeekendOnlyWarning = false;
+    this.showOverlapWarning = false;
+    this.showBalanceWarning = false;
+    this.isCheckingOverlap = false;
+    this.calculatedDays = 0;
 
-      if (end >= start) {
-        this.calculatedDays = this.calculateWorkingDays(
-          start.toISOString(),
-          end.toISOString()
-        );
-        this.validateBalance();
-        this.checkForOverlap();
-      } else {
-        this.showOverlapWarning = false;
-      }
-    } else {
-      this.showOverlapWarning = false;
+    // Both dates must be present and valid
+    if (!startVal || !endVal) return;
+
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+
+    // End must not be before start
+    if (end < start) return;
+    const allOffDays = this.isEntireRangeNonWorking(start, end);
+
+    if (allOffDays) {
+      // Every day in range is a shift day-off → show error, block submission
+      this.showWeekendOnlyWarning = true;
+      this.calculatedDays = 0;
+      return; // skip balance check and overlap API call
     }
+
+    // At least one working day exists — count only working days
+    this.calculatedDays = this.calculateWorkingDays(
+      start.toISOString(),
+      end.toISOString()
+    );
+    this.validateBalance();
+    this.checkForOverlap();
   }
 
   private checkForOverlap(): void {
@@ -298,7 +332,8 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.leaveForm.valid && !this.showBalanceWarning && !this.showOverlapWarning && !this.isCheckingOverlap) {
+    if (this.leaveForm.valid && !this.showBalanceWarning && !this.showOverlapWarning
+        && !this.isCheckingOverlap && !this.showWeekendOnlyWarning) {  // ✅ guard added
       this.isSubmitting = true;
       const formValue = this.leaveForm.value;
 
@@ -315,9 +350,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
 
       const request: CreateLeaveRequest = {
         leaveTypeId: formValue.leaveTypeId,
-        // startDate: startDate.toISOString(),
-        // endDate: endDate.toISOString(),
-        startDate: formatDateOnly(startDate), // ✅ use formatDateOnly
+        startDate: formatDateOnly(startDate),
         endDate: formatDateOnly(endDate),
         reason: formValue.reason || ''
       };
@@ -338,9 +371,7 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
               return;
             }
 
-            // Validate before submission
             const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
-
             if (validationErrors.length > 0) {
               this.notificationService.showError(validationErrors[0]);
               this.isSubmitting = false;
@@ -351,15 +382,12 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           },
           error: (error) => {
             console.error('Error in final overlap check:', error);
-            // Continue with submission, backend will catch it
             const validationErrors = this.leaveService.validateLeaveRequest(request, this.leaveBalances, this.leaveTypes);
-
             if (validationErrors.length > 0) {
               this.notificationService.showError(validationErrors[0]);
               this.isSubmitting = false;
               return;
             }
-
             this.submitLeaveRequest(request);
           }
         });
@@ -367,13 +395,11 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
   }
 
   private submitLeaveRequest(request: CreateLeaveRequest): void {
-
     if (this.isEditMode && this.requestId) {
-      // Update existing request
       this.leaveService.updateLeaveRequest(this.requestId, request)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (response) => {
+          next: () => {
             this.isSubmitting = false;
             this.notificationService.showSuccess('Leave request updated successfully');
             this.dialogRef.close(true);
@@ -382,7 +408,6 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
             console.error('Error updating leave request:', error);
             this.isSubmitting = false;
             const errorMessage = error?.error?.message || error?.message || 'Failed to update leave request';
-            // Check if it's an overlap error
             if (errorMessage.toLowerCase().includes('overlap')) {
               this.showOverlapWarning = true;
             }
@@ -390,11 +415,10 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
           }
         });
     } else {
-      // Create new request
       this.leaveService.createLeaveRequest(request)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (response) => {
+          next: () => {
             this.isSubmitting = false;
             this.notificationService.showSuccess('Leave request submitted successfully');
             this.dialogRef.close(true);
@@ -403,7 +427,6 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
             console.error('Error submitting leave request:', error);
             this.isSubmitting = false;
             const errorMessage = error?.error?.message || error?.message || 'Failed to submit leave request';
-            // Check if it's an overlap error
             if (errorMessage.toLowerCase().includes('overlap')) {
               this.showOverlapWarning = true;
             }
@@ -413,7 +436,13 @@ export class ApplyLeaveComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ✅ showWeekendOnlyWarning added to the guard
   formInvalidOrChecking(): boolean {
-    return !this.leaveForm.valid || this.isSubmitting || this.showBalanceWarning || this.showOverlapWarning || this.isCheckingOverlap;
+    return !this.leaveForm.valid
+      || this.isSubmitting
+      || this.showBalanceWarning
+      || this.showOverlapWarning
+      || this.isCheckingOverlap
+      || this.showWeekendOnlyWarning;
   }
 }

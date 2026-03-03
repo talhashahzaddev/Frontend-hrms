@@ -111,15 +111,28 @@
             </mat-form-field>
           </div>
 
-          <!-- ── Alerts ──────────────────────────────────────── -->
+          <!-- ── Alerts ──────────────────────────────────────── -->       
           <div class="alerts-container field-full"
-               *ngIf="calculatedDays > 0 || showBalanceWarning || showOverlapWarning || isCheckingOverlap">
+               *ngIf="calculatedDays > 0 || showWeekendOnlyWarning || showBalanceWarning || showOverlapWarning || isCheckingOverlap">
 
+            <!-- Duration info — only shown when there are actual working days -->
             <div class="info-alert" *ngIf="calculatedDays > 0">
               <mat-icon>info</mat-icon>
               <div class="alert-content">
                 <span class="alert-label">Total Duration</span>
                 <span class="alert-value">{{ calculatedDays }} {{ calculatedDays === 1 ? 'Day' : 'Days' }}</span>
+              </div>
+            </div>
+
+       
+            <div class="warning-alert" *ngIf="showWeekendOnlyWarning">
+              <mat-icon>event_busy</mat-icon>
+              <div class="alert-content">
+                <span class="alert-label">Non-Working Days Selected</span>
+                <span class="alert-text">
+                  The selected dates fall entirely on your scheduled days off.
+                  Please include at least one working day in your selection.
+                </span>
               </div>
             </div>
 
