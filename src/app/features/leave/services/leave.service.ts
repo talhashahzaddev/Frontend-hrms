@@ -213,6 +213,17 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
 
   // Leave Types
   getLeaveTypes(): Observable<LeaveType[]> {
+    return this.http.get<ApiResponse<LeaveType[]>>(`${this.apiUrl}/typesforrequest`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch leave types');
+          }
+          return response.data!;
+        })
+      );
+  }
+    getLeaveTypesforadmin(): Observable<LeaveType[]> {
     return this.http.get<ApiResponse<LeaveType[]>>(`${this.apiUrl}/types`)
       .pipe(
         map(response => {
