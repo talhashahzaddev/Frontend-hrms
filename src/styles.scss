@@ -63,7 +63,7 @@
   // Gradients (like Hubstaff)
   --gradient-primary: linear-gradient(135deg, var(--primary-600) 0%, var(--purple-600) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--purple-500) 0%, var(--primary-500) 100%);
-  --gradient-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-background: white; //linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
   // Shadows
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -774,5 +774,77 @@ a {
       flex-direction: column !important;
       flex: 1 !important;
     }
+  }
+}
+
+/* ── Timesheet sidebar filter dropdown menus ── */
+.ss-dropdown-menu {
+  .mat-mdc-menu-panel {
+    min-width: 110px !important;
+    max-width: 160px !important;
+    border-radius: 7px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09) !important;
+    border: 1px solid #e8eaed !important;
+    padding: 3px 0 !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+
+  .mat-mdc-menu-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 28px !important;
+    padding: 0 11px !important;
+    font-size: 11.5px !important;
+    font-weight: 400 !important;
+    color: #374151 !important;
+    transition: background 0.1s !important;
+
+    .mdc-list-item__primary-text {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      font-size: 11.5px !important;
+      color: #374151 !important;
+    }
+
+    &:hover {
+      background: #f8f9fb !important;
+    }
+
+    &.ss-menu-active {
+      background: #f0f6ff !important;
+      font-weight: 600 !important;
+      color: #2563eb !important;
+
+      .mdc-list-item__primary-text {
+        color: #2563eb !important;
+      }
+
+      .ss-menu-count {
+        background: #dbeafe !important;
+        color: #1d4ed8 !important;
+      }
+    }
+  }
+
+  .ss-menu-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: #ebedf0;
+    color: #6b7280;
+    font-size: 9.5px;
+    font-weight: 600;
+    margin-left: 8px;
   }
 }
