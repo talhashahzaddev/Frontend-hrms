@@ -29,6 +29,7 @@ import { ApiResponse } from '../../../core/models/auth.models';
 })
 export class LeaveService {
   private readonly apiUrl = `${environment.apiUrl}/Leave`;
+  private readonly employeeapiUrl = `${environment.apiUrl}/employee`;
 
   constructor(private http: HttpClient) { }
 
@@ -223,6 +224,9 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
         })
       );
   }
+  getEmployeesByOrganization(): Observable<any> {
+  return this.http.get<any>(`${this.employeeapiUrl}/GetEmployeebyOrganization`);
+}
     getLeaveTypesforadmin(): Observable<LeaveType[]> {
     return this.http.get<ApiResponse<LeaveType[]>>(`${this.apiUrl}/types`)
       .pipe(

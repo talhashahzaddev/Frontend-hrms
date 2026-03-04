@@ -465,9 +465,8 @@
 
         // Action menu button
         .action-menu-btn {
-          width: 32px !important;
-          height: 32px !important;
-          border-radius: 12px !important;
+          padding: 4px 4px;
+          border-radius: 8px !important;
           color: #374151 !important;
 
           mat-icon {
