@@ -1,23 +1,35 @@
 // ──────────────────────────────────────────────────
 // Career Page – Modern Glassmorphic Theme
-// Palette:  BG #F8FAFC · Primary #2563EB · Text #1E293B
+// Palette:  BG #F1F5F9 · Primary #2563EB · Text #1E293B
+// Zone colors:
+//   Company Info  → soft blue gradient  #EFF6FF → #F0F4FF
+//   Filter bar    → light slate glass   #F1F5F9
+//   Job cards     → clean white + blue accent border
 // ──────────────────────────────────────────────────
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 // ── Variables ──
-$bg: #F8FAFC;
+$bg: #F1F5F9; // page bg – cool light slate
 $primary: #2563EB;
 $primary-dark: #1D4ED8;
 $text: #1E293B;
 $text-muted: #64748B;
 $border: #E2E8F0;
-$glass-bg: rgba(255, 255, 255, 0.60);
-$glass-border: rgba(255, 255, 255, 0.45);
+$border-blue: rgba(37, 99, 235, 0.15); // blue-tinted border for cards
+$glass-bg: rgba(255, 255, 255, 0.72);
+$glass-border: rgba(255, 255, 255, 0.50);
+
+// Zone backgrounds
+$zone-info: linear-gradient(160deg, #EFF6FF 0%, #EEF2FF 100%); // company info – soft blue-indigo
+$zone-filter: rgba(241, 245, 249, 0.90); // filter bar  – light slate glass
+$zone-card: #FFFFFF; // job cards   – crisp white
+$zone-card-hover: #F5F9FF; // job card hover – barely-blue
+
 $radius: 16px;
 $radius-sm: 10px;
 $shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-$shadow-hover: 0 8px 32px rgba(37, 99, 235, 0.12);
+$shadow-hover: 0 8px 32px rgba(37, 99, 235, 0.13);
 $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
 // ── Resets ──
@@ -58,9 +70,9 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 //  COMPANY INFO SECTION  (below banner)
 // ══════════════════════════════════════════════════
 .company-info-section {
-  background: #fff;
-  border-bottom: 1px solid $border;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+  background: $zone-info;
+  border-bottom: 1px solid rgba(37, 99, 235, 0.10);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.06);
 }
 
 .company-info-inner {
@@ -216,13 +228,14 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 16px;
-  background: $glass-bg;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  background: $zone-filter;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid $border;
+  border-top: 2px solid rgba(37, 99, 235, 0.18); // subtle brand accent on top
   border-radius: $radius;
   padding: 14px 20px;
-  box-shadow: $shadow;
+  box-shadow: 0 6px 28px rgba(37, 99, 235, 0.08);
   animation: fadeUp 0.9s ease-out both;
 }
 
@@ -302,9 +315,10 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 .filter-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 44px;
-  padding: 0 22px;
+  min-height: 44px;
+  padding: 10px 22px;
   background: $primary;
   color: #fff;
   border: none;
@@ -315,11 +329,13 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   transition: $transition;
   white-space: nowrap;
+  box-sizing: border-box;
 
   mat-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;
+    flex-shrink: 0;
   }
 
   &:hover {
@@ -398,18 +414,19 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   align-items: center;
   gap: 20px;
   padding: 20px 24px;
-  background: $glass-bg;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: $zone-card;
   border: 1px solid $border;
+  border-left: 3px solid $border-blue;
   border-radius: $radius;
   transition: $transition;
   animation: fadeUp 0.6s ease-out both;
 
   &:hover {
+    background: $zone-card-hover;
     box-shadow: $shadow-hover;
     transform: translateY(-2px);
-    border-color: rgba(37, 99, 235, 0.18);
+    border-left-color: $primary;
+    border-color: rgba(37, 99, 235, 0.20);
   }
 }
 
@@ -770,27 +787,46 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 // ══════════════════════════════════════════════════
 //  RESPONSIVE
 // ══════════════════════════════════════════════════
+
+// ── Tablet  (≤ 900px) ──
 @media (max-width: 900px) {
   .filter-glass-bar {
     flex-wrap: wrap;
+    gap: 12px;
   }
 
   .filter-input-group {
     flex: 1 1 100%;
+    order: 1;
   }
 
   .filter-select-group {
     flex: 1 1 100%;
+    order: 2;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .filter-select {
-    flex: 1;
+    flex: 1 1 calc(50% - 5px);
+    min-width: 140px;
     width: auto;
   }
 
-  .filter-btn {
-    width: 100%;
-    justify-content: center;
+  .filter-date {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 140px;
+    width: auto;
+  }
+
+  .filter-actions {
+    order: 3;
+    flex: 1 1 100%;
+
+    .filter-btn {
+      flex: 1;
+      justify-content: center;
+    }
   }
 
   .job-row-card {
@@ -809,6 +845,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+// ── Mobile  (≤ 600px) ──
 @media (max-width: 600px) {
   .hero-banner {
     height: 180px;
@@ -817,7 +854,11 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   .company-logo-wrap {
     width: 56px;
     height: 56px;
-    margin-top: -36px;
+  }
+
+  .company-info-inner {
+    padding: 24px 16px 28px;
+    gap: 14px;
   }
 
   .company-name {
@@ -832,26 +873,96 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 13.5px;
   }
 
+  .company-hiring-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
   .filter-section {
-    padding: 0 16px;
+    padding: 0 12px;
+    margin-top: 20px;
+  }
+
+  .filter-glass-bar {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .filter-select {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: unset;
+  }
+
+  .filter-date {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: unset;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    gap: 8px;
+
+    .filter-btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 
   .content-section {
-    padding: 24px 16px;
+    padding: 20px 12px;
   }
 
   .job-row-card {
-    padding: 16px;
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .job-row-title {
+    font-size: 14px;
+  }
+
+  .job-row-badges {
+    gap: 6px;
   }
 
   .job-row-right {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
 
-    .btn-view,
     .btn-apply {
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+// ── Small mobile  (≤ 420px) ──
+@media (max-width: 420px) {
+  .company-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .company-meta {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .company-headline {
+    font-size: 19px;
+  }
+
+  .filter-glass-bar {
+    padding: 10px 12px;
+  }
+
+  .badge {
+    font-size: 10.5px;
+    padding: 4px 9px;
   }
 }
