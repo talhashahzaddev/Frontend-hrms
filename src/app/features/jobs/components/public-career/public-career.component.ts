@@ -216,4 +216,27 @@ export class PublicCareerComponent implements OnInit {
         if (job.ctcMax != null) return `Up to ${cur} ${job.ctcMax}`;
         return '';
     }
+
+    getTimeAgo(dateStr?: string | null): string {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
+
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHrs = Math.floor(diffMin / 60);
+        const diffDays = Math.floor(diffHrs / 24);
+        const diffWeeks = Math.floor(diffDays / 7);
+        const diffMonths = Math.floor(diffDays / 30);
+
+        if (diffSec < 60) return 'Just now';
+        if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? 'minute' : 'minutes'} ago`;
+        if (diffHrs < 24) return `${diffHrs} ${diffHrs === 1 ? 'hour' : 'hours'} ago`;
+        if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+        if (diffWeeks < 5) return `${diffWeeks} ${diffWeeks === 1 ? 'week' : 'weeks'} ago`;
+        return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+    }
 }
+

@@ -1,21 +1,32 @@
 <div class="career-page">
 
-    <!-- ═══════════════════ HERO SECTION ═══════════════════ -->
-    <section class="hero-section"
+    <!-- ═══════════════════ HERO BANNER (background only) ═══════════════════ -->
+    <section class="hero-banner"
         [style.backgroundImage]="companyDetails?.careerBgImageUrl ? 'url(' + companyDetails!.careerBgImageUrl + ')' : ''">
-        <div class="hero-overlay"></div>
-        <div class="hero-content-wrapper">
-            <div class="hero-glass-card">
-                <!-- Company Branding -->
-                <div class="company-brand" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
-                    <img *ngIf="companyDetails?.logoUrl" [src]="companyDetails!.logoUrl"
-                        [alt]="companyDetails?.name || 'Company Logo'" class="company-logo" />
-                    <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
+        <div class="hero-banner-overlay"></div>
+    </section>
+
+    <!-- ═══════════════════ COMPANY INFO SECTION ═══════════════════ -->
+    <section class="company-info-section">
+        <div class="company-info-inner">
+            <!-- Logo + Name -->
+            <div class="company-header" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
+                <div class="company-logo-wrap" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" class="company-logo" />
                 </div>
-                <!-- Hero Text -->
-                <h1 class="hero-title" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'">
+                <div class="company-meta">
+                    <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
+                    <span class="company-hiring-badge">
+                        <span class="hiring-dot"></span>
+                        We're Hiring
+                    </span>
+                </div>
+            </div>
+            <!-- Header text & Description -->
+            <div class="company-text">
+                <h1 class="company-headline" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'">
                 </h1>
-                <div class="hero-description" *ngIf="companyDetails?.careerDescription"
+                <div class="company-description" *ngIf="companyDetails?.careerDescription"
                     [innerHTML]="companyDetails!.careerDescription">
                 </div>
             </div>
@@ -64,6 +75,7 @@
         </form>
     </section>
 
+
     <!-- ═══════════════════ LOADING ═══════════════════ -->
     <section class="content-section" *ngIf="isLoading">
         <div class="loading-glass-card">
@@ -84,7 +96,10 @@
 
                 <!-- Left: Title + Location -->
                 <div class="job-row-left">
-                    <h3 class="job-row-title">{{ job.jobRoleName }}</h3>
+                    <div class="job-row-title-group">
+                        <h3 class="job-row-title">{{ job.jobRoleName }}</h3>
+                        <span class="job-code-badge" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
+                    </div>
                     <div class="job-row-subtitle">
                         <span *ngIf="job.location">
                             <mat-icon class="inline-icon">location_on</mat-icon>
@@ -103,11 +118,15 @@
                     <span class="badge badge-dept" *ngIf="job.departmentName">{{ job.departmentName }}</span>
                     <span class="badge badge-type" *ngIf="job.employmentType">{{ job.employmentType }}</span>
                     <span class="badge badge-exp" *ngIf="getExperienceText(job)">{{ getExperienceText(job) }}</span>
+                    <span class="badge badge-posted" *ngIf="getTimeAgo(job.createdAt)">
+                        <mat-icon class="badge-icon">schedule</mat-icon>
+                        {{ getTimeAgo(job.createdAt) }}
+                    </span>
                 </div>
 
                 <!-- Right: Apply Button -->
                 <div class="job-row-right">
-                    <button class="btn-view" (click)="viewJobDetails(job)">View</button>
+                    <!-- <button class="btn-view" (click)="viewJobDetails(job)">View</button> -->
                     <button class="btn-apply" (click)="applyForJob(job)">Apply Now
                         <mat-icon class="btn-arrow">arrow_forward</mat-icon>
                     </button>
