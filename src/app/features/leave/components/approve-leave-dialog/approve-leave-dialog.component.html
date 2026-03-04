@@ -1,14 +1,14 @@
-<div class="reject-dialog-container">
+<div class="approve-dialog-container">
 
-  <!-- ══ HEADER: icon left + title/subtitle + close btn right ══ -->
+  <!-- ══ HEADER ══ -->
   <div class="dialog-header">
     <div class="header-left">
       <div class="header-icon-box">
-        <mat-icon>cancel</mat-icon>
+        <mat-icon>check_circle</mat-icon>
       </div>
       <div class="header-titles">
-        <h2 class="dialog-title">Reject Leave Request</h2>
-        <p class="dialog-subtitle">Provide a reason that will be sent to the employee</p>
+        <h2 class="dialog-title">Approve Leave Request</h2>
+        <p class="dialog-subtitle">Review the details before approving this request</p>
       </div>
     </div>
   </div>
@@ -24,11 +24,10 @@
         </div>
         <div>
           <p class="section-label">Request Details</p>
-          <p class="section-hint">Review the leave request before rejecting</p>
+          <p class="section-hint">Review the leave request before approving</p>
         </div>
       </div>
 
-      <!-- 2-column grid of fields -->
       <div class="details-grid">
 
         <!-- Employee -->
@@ -55,7 +54,7 @@
         <div class="detail-field">
           <label class="field-label">
             <mat-icon>today</mat-icon>
-            Start Date <span class="required-asterisk">*</span>
+            Start Date
           </label>
           <div class="field-display date-box">
             <mat-icon class="date-icon">calendar_month</mat-icon>
@@ -67,7 +66,7 @@
         <div class="detail-field">
           <label class="field-label">
             <mat-icon>event</mat-icon>
-            End Date <span class="required-asterisk">*</span>
+            End Date
           </label>
           <div class="field-display date-box">
             <mat-icon class="date-icon">calendar_month</mat-icon>
@@ -91,80 +90,58 @@
       </div>
     </div>
 
-    <!-- ── Section Card 2: Rejection Reason ── -->
-    <div class="section-card">
+    <!-- ── Section Card 2: Reason (if provided) ── -->
+    <div class="section-card" *ngIf="data.reason">
       <div class="section-card-title">
-        <div class="section-icon-box section-red">
-          <mat-icon>block</mat-icon>
+        <div class="section-icon-box section-green">
+          <mat-icon>notes</mat-icon>
         </div>
         <div>
-          <p class="section-label">
-            Rejection Reason
-          </p>
-          <p class="section-hint">This message will be delivered to the employee</p>
+          <p class="section-label">Employee's Reason</p>
+          <p class="section-hint">Reason provided by the employee for this leave</p>
         </div>
       </div>
 
-      <form [formGroup]="rejectForm">
+      <div class="reason-box">
+        <mat-icon>format_quote</mat-icon>
+        <p>{{ data.reason }}</p>
+      </div>
+    </div>
 
-        <!-- Reason textarea -->
-        <div class="form-field-group">
-          <label class="field-label">
-            <mat-icon>notes</mat-icon>
-            Reason
-          </label>
-          <mat-form-field appearance="outline" class="textarea-field">
-            <textarea
-              matInput
-              formControlName="reason"
-              placeholder="Provide a clear reason for rejecting this leave request..."
-              rows="4"
-              maxlength="500">
-            </textarea>
-            <mat-hint align="end">{{ rejectForm.get('reason')?.value?.length || 0 }} / 500</mat-hint>
-            <mat-error *ngIf="rejectForm.get('reason')?.hasError('required')">
-              Rejection reason is required
-            </mat-error>
-            <mat-error *ngIf="rejectForm.get('reason')?.hasError('minlength')">
-              Please provide at least 10 characters
-            </mat-error>
-          </mat-form-field>
+    <!-- ── Section Card 3: Confirmation ── -->
+    <div class="section-card confirmation-card">
+      <div class="section-card-title">
+        <div class="section-icon-box section-green">
+          <mat-icon>task_alt</mat-icon>
         </div>
-
-        <!-- Quick select reason chips -->
-        <div class="quick-reasons">
-          <p class="quick-label">Quick select:</p>
-          <div class="quick-chips">
-            <button
-              *ngFor="let r of quickReasons"
-              type="button"
-              class="quick-chip"
-              (click)="selectQuickReason(r)">
-              {{ r }}
-            </button>
-          </div>
+        <div>
+          <p class="section-label">Confirm Approval</p>
+          <p class="section-hint">This action will notify the employee immediately</p>
         </div>
+      </div>
 
-      </form>
+      <div class="confirmation-body">
+        <mat-icon class="confirm-check-icon">check_circle</mat-icon>
+        <p>
+          You are about to approve <strong>{{ data.daysRequested }} {{ data.daysRequested === 1 ? 'day' : 'days' }}</strong>
+          of <strong>{{ data.leaveTypeName }}</strong> for <strong>{{ data.employeeName }}</strong>.
+          The employee will be notified of this decision.
+        </p>
+      </div>
     </div>
 
   </mat-dialog-content>
 
-  <!-- ══ FOOTER: Cancel + Reject buttons ══ -->
+  <!-- ══ FOOTER ══ -->
   <mat-dialog-actions class="dialog-footer">
     <button mat-stroked-button class="btn-cancel" type="button" (click)="onCancel()" [disabled]="isSubmitting">
       <mat-icon>close</mat-icon>
       Cancel
     </button>
-    <button
-      mat-raised-button
-      class="btn-reject"
-      type="button"
-      (click)="onReject()"
-      [disabled]="isSubmitting">
+    <button mat-raised-button class="btn-approve" type="button" (click)="onApprove()" [disabled]="isSubmitting">
       <mat-spinner diameter="15" *ngIf="isSubmitting"></mat-spinner>
-      <mat-icon *ngIf="!isSubmitting">cancel</mat-icon>
-      {{ isSubmitting ? 'Rejecting...' : 'Reject Request' }}
+      <mat-icon *ngIf="!isSubmitting">check_circle</mat-icon>
+      {{ isSubmitting ? 'Approving...' : 'Approve Request' }}
     </button>
   </mat-dialog-actions>
 
