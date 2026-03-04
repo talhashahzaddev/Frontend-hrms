@@ -18,6 +18,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { LeaveRequestDetailsDialogComponent } from '../leave-request-details-dialog/leave-request-details-dialog.component';
 import {
   LeaveRequest,
   LeaveType,
@@ -93,10 +94,12 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.leaveBalances    = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
-          this.leaveTypes       = data.leaveTypes || [];
-          this.myLeaveRequests  = Array.isArray(data.myRequests)  ? data.myRequests . map((r : any) => ({...r, leaveTypeName: r.leaveTypeName || r.typename || ''})) : [];
-          this.isLoading        = false;
+          this.leaveBalances   = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
+          this.leaveTypes      = data.leaveTypes || [];
+          this.myLeaveRequests = Array.isArray(data.myRequests)
+            ? data.myRequests.map((r: any) => ({ ...r, leaveTypeName: r.leaveTypeName || r.typename || '' }))
+            : [];
+          this.isLoading = false;
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -115,7 +118,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       maxWidth: '90vw',
       disableClose: true,
       panelClass: 'custom-dialog-container',
-      data: { userId: this.currentUser?.userId } 
+      data: { userId: this.currentUser?.userId }
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -129,9 +132,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       maxWidth: '90vw',
       disableClose: true,
       panelClass: 'custom-dialog-container',
-      data: { requestId: request.requestId,
-        userId: this.currentUser?.userId
-       }
+      data: { requestId: request.requestId, userId: this.currentUser?.userId }
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -166,6 +167,48 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
               this.notificationService.showError(errorMessage);
             }
           });
+      }
+    });
+  }
+
+  // ✅ Opens RequestDetailsDialogComponent — available for ALL statuses
+  viewRequestDetails(request: LeaveRequest): void {
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        // No employeeName — self-view dashboard hides it
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        reason:          request.reason,
+        status:          request.status,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason
+      }
+    });
+  }
+
+  // ✅ View Details — always available for any status
+  openDetailsDialog(request: LeaveRequest): void {
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        status:          request.status,
+        reason:          request.reason,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason,
+        isSelfView:      true   // hides the Employee section since it's the user's own request
       }
     });
   }

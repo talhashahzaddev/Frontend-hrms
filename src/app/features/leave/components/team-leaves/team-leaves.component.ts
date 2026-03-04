@@ -16,12 +16,14 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
+import { ApproveLeaveDialogComponent } from '../approve-leave-dialog/approve-leave-dialog.component';
+import { LeaveRequestDetailsDialogComponent } from '../leave-request-details-dialog/leave-request-details-dialog.component';
 import {
   LeaveRequest,
   LeaveStatus,
@@ -64,14 +66,11 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   pendingApprovals: LeaveRequest[] = [];
   teamRequests: LeaveRequest[] = [];
   leaveTypes: LeaveType[] = [];
-  profilePreviewUrl: string | null = null;
   private backendBaseUrl = 'https://localhost:60485';
-
 
   isLoading = false;
   isProcessing = false;
 
-  // Pagination
   currentPage = 1;
   pageSize = 10;
   totalCount = 0;
@@ -92,7 +91,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
 
   private checkUserRole(): void {
     this.isHRManager = this.authService.hasAnyRole(['HR Manager', 'Super Admin']);
-    // Update displayed columns based on role
     if (this.isHRManager) {
       this.displayedColumns = ['employee', 'leaveType', 'dates', 'status', 'submitted', 'actions'];
     }
@@ -117,11 +115,7 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
 
   private setupFilterListeners(): void {
     this.filterForm.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
         this.currentPage = 1;
         this.loadTeamRequests();
@@ -129,7 +123,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   }
 
   private loadInitialData(): void {
-    // Load leave types
     this.leaveService.getLeaveTypes()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -137,54 +130,45 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
           this.leaveTypes = leaveTypes || [];
           this.cdr.markForCheck();
         },
-        error: (error) => {
-          console.error('Error loading leave types:', error);
-        }
+        error: (error) => console.error('Error loading leave types:', error)
       });
 
-    // Load pending approvals only for Managers (not HR Manager)
     if (!this.isHRManager) {
       this.leaveService.getPendingApprovals()
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (pendingApprovals) => {
-            // Handle both camelCase and PascalCase from API
             this.pendingApprovals = Array.isArray(pendingApprovals)
               ? pendingApprovals.map((employee: any) => {
-                const mappedRequest: LeaveRequest = {
-                  requestId: employee.requestId || employee.RequestId || '',
-                  employeeId: employee.employeeId || employee.EmployeeId || '',
-                  employeeName: employee.employeeName || employee.EmployeeName || '',
-                  leaveTypeId: employee.leaveTypeId || employee.LeaveTypeId || '',
-                  leaveTypeName: employee.leaveTypeName || employee.LeaveTypeName || '',
-                  startDate: employee.startDate || employee.StartDate || '',
-                  endDate: employee.endDate || employee.EndDate || '',
-                  daysRequested: employee.daysRequested || employee.DaysRequested || 0,
-                  reason: employee.reason || employee.Reason,
-                  status: employee.status || employee.Status || 'pending',
-                  submittedAt: employee.submittedAt || employee.SubmittedAt || '',
-                  approverName: employee.approverName || employee.ApproverName,
-                  approvedAt: employee.approvedAt || employee.ApprovedAt,
-                  rejectionReason: employee.rejectionReason || employee.RejectionReason,
-                  profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
-                  profilePreviewUrl: null
-                };
-
-                // Set profile preview URL
-                if (mappedRequest.profilePictureUrl) {
-                  mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
-                    ? mappedRequest.profilePictureUrl
-                    : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
-                }
-
-                return mappedRequest;
-              })
+                  const mappedRequest: LeaveRequest = {
+                    requestId:       employee.requestId       || employee.RequestId       || '',
+                    employeeId:      employee.employeeId      || employee.EmployeeId      || '',
+                    employeeName:    employee.employeeName    || employee.EmployeeName    || '',
+                    leaveTypeId:     employee.leaveTypeId     || employee.LeaveTypeId     || '',
+                    leaveTypeName:   employee.leaveTypeName   || employee.LeaveTypeName   || '',
+                    startDate:       employee.startDate       || employee.StartDate       || '',
+                    endDate:         employee.endDate         || employee.EndDate         || '',
+                    daysRequested:   employee.daysRequested   || employee.DaysRequested   || 0,
+                    reason:          employee.reason          || employee.Reason,
+                    status:          employee.status          || employee.Status          || 'pending',
+                    submittedAt:     employee.submittedAt     || employee.SubmittedAt     || '',
+                    approverName:    employee.approverName    || employee.ApproverName,
+                    approvedAt:      employee.approvedAt      || employee.ApprovedAt,
+                    rejectionReason: employee.rejectionReason || employee.RejectionReason,
+                    profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
+                    profilePreviewUrl: null
+                  };
+                  if (mappedRequest.profilePictureUrl) {
+                    mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
+                      ? mappedRequest.profilePictureUrl
+                      : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
+                  }
+                  return mappedRequest;
+                })
               : [];
             this.cdr.markForCheck();
           },
-          error: (error) => {
-            console.error('Error loading pending approvals:', error);
-          }
+          error: (error) => console.error('Error loading pending approvals:', error)
         });
     }
 
@@ -195,14 +179,13 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     this.isLoading = true;
 
     const searchRequest: LeaveSearchRequest = {
-      status: this.filterForm.get('status')?.value || undefined,
-      page: this.currentPage,
-      pageSize: this.pageSize,
-      sortBy: 'submittedAt',
+      status:        this.filterForm.get('status')?.value || undefined,
+      page:          this.currentPage,
+      pageSize:      this.pageSize,
+      sortBy:        'submittedAt',
       sortDirection: 'desc'
     };
 
-    // Use different API based on user role
     const requestObservable = this.isHRManager
       ? this.leaveService.getLeaveRequestsForHR(searchRequest)
       : this.leaveService.getLeaveRequests(searchRequest);
@@ -211,36 +194,30 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: LeaveListResponse) => {
-          // API returns data in response.data, not response.leaveRequests
-          // Map the response and ensure requestId is properly set
           this.teamRequests = (response.data || []).map((employee: any) => {
-            // Handle both camelCase and PascalCase from API
             const mappedRequest: LeaveRequest = {
-              requestId: employee.requestId || employee.RequestId || '',
-              employeeId: employee.employeeId || employee.EmployeeId || '',
-              employeeName: employee.employeeName || employee.EmployeeName || '',
-              leaveTypeId: employee.leaveTypeId || employee.LeaveTypeId || '',
-              leaveTypeName: employee.leaveTypeName || employee.LeaveTypeName || '',
-              startDate: employee.startDate || employee.StartDate || '',
-              endDate: employee.endDate || employee.EndDate || '',
-              daysRequested: employee.daysRequested || employee.DaysRequested || 0,
-              reason: employee.reason || employee.Reason,
-              status: employee.status || employee.Status || 'pending',
-              submittedAt: employee.submittedAt || employee.SubmittedAt || '',
-              approverName: employee.approverName || employee.ApproverName,
-              approvedAt: employee.approvedAt || employee.ApprovedAt,
+              requestId:       employee.requestId       || employee.RequestId       || '',
+              employeeId:      employee.employeeId      || employee.EmployeeId      || '',
+              employeeName:    employee.employeeName    || employee.EmployeeName    || '',
+              leaveTypeId:     employee.leaveTypeId     || employee.LeaveTypeId     || '',
+              leaveTypeName:   employee.leaveTypeName   || employee.LeaveTypeName   || '',
+              startDate:       employee.startDate       || employee.StartDate       || '',
+              endDate:         employee.endDate         || employee.EndDate         || '',
+              daysRequested:   employee.daysRequested   || employee.DaysRequested   || 0,
+              reason:          employee.reason          || employee.Reason,
+              status:          employee.status          || employee.Status          || 'pending',
+              submittedAt:     employee.submittedAt     || employee.SubmittedAt     || '',
+              approverName:    employee.approverName    || employee.ApproverName,
+              approvedAt:      employee.approvedAt      || employee.ApprovedAt,
               rejectionReason: employee.rejectionReason || employee.RejectionReason,
               profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
               profilePreviewUrl: null
             };
-
-            // Set profile preview URL
             if (mappedRequest.profilePictureUrl) {
               mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
                 ? mappedRequest.profilePictureUrl
                 : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
             }
-
             return mappedRequest;
           });
           this.totalCount = response.totalCount;
@@ -256,39 +233,51 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ✅ Opens ApproveLeaveDialogComponent — API is called only after confirmation
   approveRequest(request: LeaveRequest): void {
-    // Validate request ID
     if (!request.requestId) {
-      console.error('Request ID is missing:', request);
       this.notificationService.showError('Leave request ID is missing. Cannot approve.');
       return;
     }
 
-    this.isProcessing = true;
+    const dialogRef = this.dialog.open(ApproveLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName:  request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate:     request.startDate,
+        endDate:       request.endDate,
+        daysRequested: request.daysRequested,
+        reason:        request.reason
+      }
+    });
 
-    console.log('Approving leave request with ID:', request.requestId);
-
-    this.leaveService.approveLeaveRequest(request.requestId)
+    dialogRef.afterClosed()
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Leave request approved successfully');
-          this.isProcessing = false;
-          this.loadInitialData();
-        },
-        error: (error) => {
-          console.error('Error approving request:', error);
-          const errorMessage = error?.error?.message || error?.message || 'Failed to approve leave request';
-          this.notificationService.showError(errorMessage);
-          this.isProcessing = false;
+      .subscribe(result => {
+        if (result?.approved) {
+          this.isProcessing = true;
+          this.leaveService.approveLeaveRequest(request.requestId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request approved successfully');
+                this.isProcessing = false;
+                this.loadInitialData();
+              },
+              error: (error) => {
+                console.error('Error approving request:', error);
+                const errorMessage = error?.error?.message || error?.message || 'Failed to approve leave request';
+                this.notificationService.showError(errorMessage);
+                this.isProcessing = false;
+              }
+            });
         }
       });
   }
 
   openRejectDialog(request: LeaveRequest): void {
-    // Validate request ID
     if (!request.requestId) {
-      console.error('Request ID is missing:', request);
       this.notificationService.showError('Leave request ID is missing. Cannot reject.');
       return;
     }
@@ -296,10 +285,10 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
       width: '650px',
       data: {
-        employeeName: request.employeeName,
+        employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
-        startDate: request.startDate,
-        endDate: request.endDate,
+        startDate:     request.startDate,
+        endDate:       request.endDate,
         daysRequested: request.daysRequested
       }
     });
@@ -307,11 +296,8 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed()
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
-        if (result && result.rejected) {
+        if (result?.rejected) {
           this.isProcessing = true;
-
-          console.log('Rejecting leave request with ID:', request.requestId, 'Reason:', result.reason);
-
           this.leaveService.rejectLeaveRequest(request.requestId, result.reason)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
@@ -332,14 +318,49 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   }
 
   viewRequestDetails(request: LeaveRequest): void {
-    this.notificationService.showInfo('Request details dialog will be implemented');
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName:    request.employeeName,
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        reason:          request.reason,
+        status:          request.status,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason
+      }
+    });
+  }
+
+  // ✅ View Details — always available regardless of status
+  openDetailsDialog(request: LeaveRequest): void {
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName:    request.employeeName,
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        status:          request.status,
+        reason:          request.reason,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason,
+        isSelfView:      false
+      }
+    });
   }
 
   clearFilters(): void {
-    this.filterForm.reset({
-      search: '',
-      status: ''
-    });
+    this.filterForm.reset({ search: '', status: '' });
   }
 
   onPageChange(event: PageEvent): void {
@@ -354,12 +375,7 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
 
   getInitials(name: string): string {
     if (!name) return '??';
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
   }
 
   getLeaveTypeColor(leaveTypeId: string): string {
@@ -367,7 +383,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     return leaveType?.color || '#2196F3';
   }
 
-  // Helper method to check if filters are applied
   hasFiltersApplied(): boolean {
     if (!this.filterForm) return false;
     const values = this.filterForm.value;

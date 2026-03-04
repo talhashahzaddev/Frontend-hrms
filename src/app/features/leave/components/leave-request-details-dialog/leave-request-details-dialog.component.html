@@ -1,0 +1,274 @@
+<div class="details-dialog-container">
+
+  <!-- ══ HEADER ══ -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>event_note</mat-icon>
+      </div>
+      <div class="header-titles">
+        <h2 class="dialog-title">Request Details</h2>
+        <p class="dialog-subtitle">Full details of this leave request</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BODY ══ -->
+  <mat-dialog-content class="dialog-body">
+
+    <!-- ── Status Banner ── -->
+    <div class="status-banner" [class]="'status-banner-' + data.status?.toLowerCase()">
+      <div class="status-banner-left">
+        <mat-icon>{{ getStatusIcon(data.status) }}</mat-icon>
+        <div>
+          <span class="status-banner-label">Request Status</span>
+          <span class="status-banner-value">{{ getStatusLabel(data.status) }}</span>
+        </div>
+      </div>
+      <div class="status-dot-ring">
+        <div class="status-dot"></div>
+      </div>
+    </div>
+
+    <!-- ── Section 1: Employee (hidden for self-view) ── -->
+    <div class="section-card" *ngIf="!data.isSelfView">
+      <div class="section-card-title">
+        <div class="section-icon-box section-purple">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Employee</p>
+          <p class="section-hint">Who submitted this request</p>
+        </div>
+      </div>
+
+      <div class="employee-row">
+        <div class="emp-avatar">{{ getInitials(data.employeeName) }}</div>
+        <div class="emp-info">
+          <span class="emp-name">{{ data.employeeName }}</span>
+          <span class="emp-email" *ngIf="data.employeeEmail">{{ data.employeeEmail }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Section 2: Leave Details ── -->
+    <div class="section-card">
+      <div class="section-card-title">
+        <div class="section-icon-box section-purple">
+          <mat-icon>info</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Leave Details</p>
+          <p class="section-hint">Dates and type of leave requested</p>
+        </div>
+      </div>
+
+      <div class="details-grid">
+
+        <!-- Leave Type -->
+        <div class="detail-field detail-field-full">
+          <label class="field-label">
+            <mat-icon>event_note</mat-icon>
+            Leave Type
+          </label>
+          <div class="field-display">
+            <span class="leave-type-badge"
+                  [style.color]="data.leaveTypeColor || '#4f46e5'"
+                  [style.background-color]="(data.leaveTypeColor || '#4f46e5') + '15'"
+                  [style.border-color]="(data.leaveTypeColor || '#4f46e5') + '40'">
+              <span class="leave-dot" [style.background]="data.leaveTypeColor || '#4f46e5'"></span>
+              {{ data.leaveTypeName }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Start Date -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>today</mat-icon>
+            Start Date
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">calendar_month</mat-icon>
+            {{ data.startDate | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>event</mat-icon>
+            End Date
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">calendar_month</mat-icon>
+            {{ data.endDate | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div class="detail-field detail-field-full">
+          <label class="field-label">
+            <mat-icon>schedule</mat-icon>
+            Duration
+          </label>
+          <div class="field-display">
+            <span class="days-badge">
+              {{ data.daysRequested }} {{ data.daysRequested === 1 ? 'working day' : 'working days' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Submitted At -->
+        <div class="detail-field detail-field-full" *ngIf="data.submittedAt">
+          <label class="field-label">
+            <mat-icon>send</mat-icon>
+            Submitted On
+          </label>
+          <div class="field-display submitted-value">
+            {{ data.submittedAt | date:'dd MMM yyyy, hh:mm a' }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section 3: Employee's Reason (if any) ── -->
+    <div class="section-card" *ngIf="data.reason">
+      <div class="section-card-title">
+        <div class="section-icon-box section-blue">
+          <mat-icon>notes</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Reason for Leave</p>
+          <p class="section-hint">Provided by the employee</p>
+        </div>
+      </div>
+
+      <div class="reason-box reason-blue">
+        <mat-icon>format_quote</mat-icon>
+        <p>{{ data.reason }}</p>
+      </div>
+    </div>
+
+    <!-- ── Section 4: Approval Info (approved) ── -->
+    <div class="section-card" *ngIf="data.status?.toLowerCase() === 'approved'">
+      <div class="section-card-title">
+        <div class="section-icon-box section-green">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Approval Information</p>
+          <p class="section-hint">This request was approved</p>
+        </div>
+      </div>
+
+      <div class="details-grid">
+        <div class="detail-field" *ngIf="data.approverName">
+          <label class="field-label">
+            <mat-icon>person_check</mat-icon>
+            Approved By
+          </label>
+          <div class="field-display approver-value">
+            <div class="mini-avatar">{{ getInitials(data.approverName) }}</div>
+            {{ data.approverName }}
+          </div>
+        </div>
+
+        <div class="detail-field" *ngIf="data.approvedAt">
+          <label class="field-label">
+            <mat-icon>calendar_month</mat-icon>
+            Approved On
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">event_available</mat-icon>
+            {{ data.approvedAt | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="outcome-box outcome-green" *ngIf="!data.approverName && !data.approvedAt">
+        <mat-icon>check_circle</mat-icon>
+        <p>This leave request has been <strong>approved</strong>. The employee has been notified.</p>
+      </div>
+    </div>
+
+    <!-- ── Section 5: Rejection Info (rejected) ── -->
+    <div class="section-card" *ngIf="data.status?.toLowerCase() === 'rejected'">
+      <div class="section-card-title">
+        <div class="section-icon-box section-red">
+          <mat-icon>block</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Rejection Information</p>
+          <p class="section-hint">This request was not approved</p>
+        </div>
+      </div>
+
+      <div class="details-grid" *ngIf="data.approverName || data.approvedAt">
+        <div class="detail-field" *ngIf="data.approverName">
+          <label class="field-label">
+            <mat-icon>person</mat-icon>
+            Rejected By
+          </label>
+          <div class="field-display approver-value">
+            <div class="mini-avatar mini-avatar-red">{{ getInitials(data.approverName) }}</div>
+            {{ data.approverName }}
+          </div>
+        </div>
+
+        <div class="detail-field" *ngIf="data.approvedAt">
+          <label class="field-label">
+            <mat-icon>calendar_month</mat-icon>
+            Rejected On
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">event_busy</mat-icon>
+            {{ data.approvedAt | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="reason-box reason-red" *ngIf="data.rejectionReason">
+        <mat-icon>comment</mat-icon>
+        <div>
+          <span class="reason-box-label">Rejection Reason</span>
+          <p>{{ data.rejectionReason }}</p>
+        </div>
+      </div>
+
+      <div class="outcome-box outcome-red" *ngIf="!data.rejectionReason && !data.approverName">
+        <mat-icon>cancel</mat-icon>
+        <p>This leave request has been <strong>rejected</strong>. The employee has been notified.</p>
+      </div>
+    </div>
+
+    <!-- ── Section 6: Cancelled ── -->
+    <div class="section-card" *ngIf="data.status?.toLowerCase() === 'cancelled'">
+      <div class="section-card-title">
+        <div class="section-icon-box section-grey">
+          <mat-icon>do_not_disturb</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Cancellation</p>
+          <p class="section-hint">This request was withdrawn</p>
+        </div>
+      </div>
+
+      <div class="outcome-box outcome-grey">
+        <mat-icon>block</mat-icon>
+        <p>This leave request was <strong>cancelled</strong> by the employee.</p>
+      </div>
+    </div>
+
+  </mat-dialog-content>
+
+  <!-- ══ FOOTER ══ -->
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-raised-button class="btn-close" type="button" (click)="onClose()">
+      <mat-icon>close</mat-icon>
+      Close
+    </button>
+  </mat-dialog-actions>
+
+</div>
