@@ -13,7 +13,7 @@ import {
     providedIn: 'root'
 })
 export class PublicCareerService {
-    private readonly apiUrl = `${environment.apiUrl}/ExternallJobs`;
+    private readonly apiUrl = `${environment.apiUrl}/Career`;
 
     constructor(private http: HttpClient) { }
 
@@ -64,6 +64,14 @@ export class PublicCareerService {
     getExternalJobOpeningById(id: string): Observable<JobOpeningDto | null> {
         return this.http
             .get<ServiceResponse<JobOpeningDto>>(`${this.apiUrl}/openings/${id}`)
+            .pipe(
+                map((res) => (res.success && res.data ? res.data : null))
+            );
+    }
+
+    getCompanyCareerDetails(domain: string): Observable<any> {
+        return this.http
+            .get<ServiceResponse<any>>(`${this.apiUrl}/companycareerdetails`, { params: { domain } })
             .pipe(
                 map((res) => (res.success && res.data ? res.data : null))
             );
