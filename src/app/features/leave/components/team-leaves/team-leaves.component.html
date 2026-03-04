@@ -11,10 +11,88 @@
   <form [formGroup]="filterForm">
     <!-- Filters Row -->
     <div class="filters-row single-line-filters">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput formControlName="search" placeholder="Search by employee name...">
-      </mat-form-field>
+
+      <!-- ── Employee Select2 Dropdown ── -->
+      <div class="employee-select-wrapper" [class.open]="employeeDropdownOpen" [class.has-value]="selectedEmployee">
+
+        <!-- Trigger: shows plain text when closed, becomes live search input when open -->
+        <div class="employee-select-trigger" (click)="openEmployeeDropdown()">
+          <mat-icon class="select-prefix-icon">person_search</mat-icon>
+
+          <!-- When closed + no selection: placeholder -->
+          <span class="select-display-value"
+                *ngIf="!employeeDropdownOpen && !selectedEmployee">
+            Search employee...
+          </span>
+
+          <!-- When closed + has selection: show name -->
+          <span class="select-display-value selected-name"
+                *ngIf="!employeeDropdownOpen && selectedEmployee">
+            {{ selectedEmployee.fullName }}
+          </span>
+
+          <!-- When open: inline search input replaces text -->
+          <input
+            *ngIf="employeeDropdownOpen"
+            #employeeSearchInput
+            class="trigger-search-input"
+            type="text"
+            [placeholder]="selectedEmployee ? selectedEmployee.fullName : 'Type to search...'"
+            [(ngModel)]="employeeSearchQuery"
+            [ngModelOptions]="{standalone: true}"
+            (input)="onEmployeeSearch()"
+            (click)="$event.stopPropagation()"
+            autocomplete="off"
+          />
+
+          <mat-spinner *ngIf="isLoadingEmployees" diameter="14" class="trigger-spinner"></mat-spinner>
+          <mat-icon class="select-clear-icon"
+                    *ngIf="selectedEmployee && !employeeDropdownOpen"
+                    (click)="clearEmployeeSelection($event)">close</mat-icon>
+          <mat-icon class="select-arrow-icon">
+            {{ employeeDropdownOpen ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </div>
+
+        <!-- Dropdown panel: list only, no search box header -->
+        <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+          <div class="dropdown-list">
+            <div
+              *ngFor="let emp of filteredEmployees"
+              class="dropdown-option"
+              [class.active]="selectedEmployee?.fullName === emp.fullName"
+              (click)="selectEmployee(emp)"
+            >
+
+              <!-- Name + Email -->
+              <div class="option-info">
+                <span class="option-name">{{ emp.fullName }}</span>
+                <span class="option-email" *ngIf="emp.email">{{ emp.email }}</span>
+              </div>
+
+              <!-- Employee Code badge -->
+              <span class="option-emp-code" *ngIf="emp.employeeCode">{{ emp.employeeCode }}</span>
+
+              <!-- Active check -->
+              <mat-icon class="option-check" *ngIf="selectedEmployee?.fullName === emp.fullName">check</mat-icon>
+            </div>
+
+            <div *ngIf="filteredEmployees.length === 0 && !isLoadingEmployees" class="dropdown-empty">
+              <mat-icon>search_off</mat-icon>
+              <span>No employees found</span>
+            </div>
+
+            <div *ngIf="isLoadingEmployees && filteredEmployees.length === 0" class="dropdown-loading">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Loading employees...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop -->
+        <div class="dropdown-backdrop" *ngIf="employeeDropdownOpen" (click)="closeEmployeeDropdown()"></div>
+      </div>
+      <!-- ── End Employee Dropdown ── -->
 
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Status</mat-label>

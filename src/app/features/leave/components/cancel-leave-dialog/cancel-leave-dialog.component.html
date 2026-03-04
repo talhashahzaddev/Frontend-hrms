@@ -1,0 +1,79 @@
+<div class="cancel-leave-dialog">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-icon-wrapper">
+      <mat-icon class="header-icon">event_busy</mat-icon>
+    </div>
+    <div class="header-text">
+      <h2 class="dialog-title">Cancel Leave Request</h2>
+      <p class="dialog-subtitle">This action cannot be undone</p>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <mat-dialog-content class="dialog-body">
+
+    <!-- Warning Banner -->
+    <div class="warning-banner">
+      <mat-icon>warning_amber</mat-icon>
+      <span>Are you sure you want to cancel this leave request?</span>
+    </div>
+
+    <!-- Request Summary Card -->
+    <div class="request-summary-card">
+      <div class="summary-row">
+        <div class="summary-icon-col">
+          <div class="summary-icon-wrap" [style.background]="data.leaveTypeColor + '1A'">
+            <mat-icon [style.color]="data.leaveTypeColor">event_note</mat-icon>
+          </div>
+        </div>
+        <div class="summary-details">
+          <div class="summary-leave-type"
+               [style.color]="data.leaveTypeColor"
+               [style.background]="data.leaveTypeColor + '12'"
+               [style.border]="'1px solid ' + data.leaveTypeColor + '40'">
+            <span class="leave-dot" [style.background]="data.leaveTypeColor"></span>
+            {{ data.leaveTypeName }}
+          </div>
+          <div class="summary-meta-row">
+            <div class="summary-meta-item">
+              <mat-icon>calendar_today</mat-icon>
+              <span>{{ data.startDate | date:'dd MMM yyyy' }} — {{ data.endDate | date:'dd MMM yyyy' }}</span>
+            </div>
+            <div class="summary-meta-item days-badge">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ data.daysRequested }} day{{ data.daysRequested !== 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+          <div class="summary-meta-row" *ngIf="data.reason">
+            <div class="summary-meta-item reason-item">
+              <mat-icon>notes</mat-icon>
+              <span class="reason-text">{{ data.reason }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info note -->
+    <div class="info-note">
+      <mat-icon>info</mat-icon>
+      <span>Once cancelled, your leave balance will be restored and the request will no longer be pending approval.</span>
+    </div>
+
+  </mat-dialog-content>
+
+  <!-- Footer Actions -->
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button class="btn-keep" (click)="onClose()">
+      <mat-icon>arrow_back</mat-icon>
+      Keep Request
+    </button>
+    <button mat-raised-button class="btn-cancel-confirm" (click)="onConfirm()">
+      <mat-icon>cancel</mat-icon>
+      Yes, Cancel Request
+    </button>
+  </mat-dialog-actions>
+
+</div>

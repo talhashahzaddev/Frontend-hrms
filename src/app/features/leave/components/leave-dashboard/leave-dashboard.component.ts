@@ -16,9 +16,8 @@ import { of, catchError } from 'rxjs';
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
-import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { LeaveRequestDetailsDialogComponent } from '../leave-request-details-dialog/leave-request-details-dialog.component';
+import { CancelLeaveDialogComponent } from '../cancel-leave-dialog/cancel-leave-dialog.component';  // ← new
 import {
   LeaveRequest,
   LeaveType,
@@ -140,59 +139,42 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ── Cancel — uses new CancelLeaveDialogComponent ──────────────────────────
   cancelRequest(request: LeaveRequest): void {
-    const dialogData: ConfirmDeleteData = {
-      title: 'Cancel Leave Request',
-      message: 'Are you sure you want to cancel this leave request?',
-      itemName: `${request.leaveTypeName} - ${new Date(request.startDate).toLocaleDateString()} to ${new Date(request.endDate).toLocaleDateString()}`
-    };
-
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '450px',
-      data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
-    });
-
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-      if (result === true) {
-        this.leaveService.cancelLeaveRequest(request.requestId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.notificationService.showSuccess('Leave request cancelled successfully');
-              this.loadInitialData();
-            },
-            error: (error) => {
-              const errorMessage = error?.error?.message || error?.message || 'Failed to cancel leave request';
-              this.notificationService.showError(errorMessage);
-            }
-          });
-      }
-    });
-  }
-
-  // ✅ Opens RequestDetailsDialogComponent — available for ALL statuses
-  viewRequestDetails(request: LeaveRequest): void {
-    this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+    const dialogRef = this.dialog.open(CancelLeaveDialogComponent, {
+      width: '520px',
+      maxWidth: '90vw',
+      panelClass: 'custom-dialog-container',
       data: {
-        // No employeeName — self-view dashboard hides it
-        leaveTypeName:   request.leaveTypeName,
-        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
-        startDate:       request.startDate,
-        endDate:         request.endDate,
-        daysRequested:   request.daysRequested,
-        reason:          request.reason,
-        status:          request.status,
-        submittedAt:     request.submittedAt,
-        approverName:    request.approverName,
-        approvedAt:      request.approvedAt,
-        rejectionReason: request.rejectionReason
+        leaveTypeName:  request.leaveTypeName,
+        leaveTypeColor: this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:      request.startDate,
+        endDate:        request.endDate,
+        daysRequested:  request.daysRequested,
+        reason:         request.reason
       }
     });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result === true) {
+          this.leaveService.cancelLeaveRequest(request.requestId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request cancelled successfully');
+                this.loadInitialData();
+              },
+              error: (error) => {
+                const errorMessage = error?.error?.message || error?.message || 'Failed to cancel leave request';
+                this.notificationService.showError(errorMessage);
+              }
+            });
+        }
+      });
   }
 
-  // ✅ View Details — always available for any status
   openDetailsDialog(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
       width: '650px',
@@ -208,7 +190,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
         approverName:    request.approverName,
         approvedAt:      request.approvedAt,
         rejectionReason: request.rejectionReason,
-        isSelfView:      true   // hides the Employee section since it's the user's own request
+        isSelfView:      true
       }
     });
   }
@@ -216,8 +198,6 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   isPending(status: string): boolean {
     return status?.toLowerCase() === 'pending';
   }
-
-  // ── Balance card helpers ─────────────────────────────────────────────────────
 
   getBalanceCardColor(balance: LeaveBalance): string {
     const leaveType = this.leaveTypes.find(lt => lt.typeName === balance.leaveTypeName);

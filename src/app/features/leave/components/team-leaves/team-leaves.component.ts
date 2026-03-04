@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -32,12 +32,23 @@ import {
   LeaveType
 } from '../../../../core/models/leave.models';
 
+// ── Employee model (from GetEmployeebyOrganization) ──────────────
+export interface EmployeeOption {
+  employeeId: string;
+  fullName: string;
+  email: string;
+  employeeCode: string;
+  profilePictureUrl?: string;
+  profilePreviewUrl?: string | null;
+}
+
 @Component({
   selector: 'app-team-leaves',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,              // ← needed for [(ngModel)] on search input
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -78,6 +89,16 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ['employee', 'leaveType', 'dates', 'status', 'submitted', 'actions'];
   isHRManager = false;
 
+  // ── Employee Select2 state ──────────────────────────────────────
+  allEmployees: EmployeeOption[] = [];           // full list from API
+  filteredEmployees: EmployeeOption[] = [];      // list shown in dropdown
+  selectedEmployee: EmployeeOption | null = null;
+  employeeSearchQuery = '';
+  employeeDropdownOpen = false;
+  isLoadingEmployees = false;
+
+  @ViewChild('employeeSearchInput') employeeSearchInputRef!: ElementRef<HTMLInputElement>;
+
   constructor(
     private fb: FormBuilder,
     public leaveService: LeaveService,
@@ -98,6 +119,7 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.loadEmployeeList();
     this.setupFilterListeners();
   }
 
@@ -108,7 +130,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
 
   private initializeFilterForm(): void {
     this.filterForm = this.fb.group({
-      search: [''],
       status: ['']
     });
   }
@@ -120,6 +141,121 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
         this.currentPage = 1;
         this.loadTeamRequests();
       });
+  }
+
+  // ── Load all employees from API once ─────────────────────────────
+  private loadEmployeeList(): void {
+    this.isLoadingEmployees = true;
+    this.leaveService.getEmployeesByOrganization()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          // API returns ServiceResponse<List<EmployeeNameList>>
+          // Each item only has: { EmployeeName: string }
+          const list: any[] = response?.data || response?.Data || response || [];
+          this.allEmployees = list.map((emp: any) => ({
+            employeeId:        '',
+            fullName:          emp.employeeName   || emp.EmployeeName   || '',
+            email:             emp.email          || emp.Email          || '',
+            employeeCode:      emp.employeeCode   || emp.EmployeeCode   || '',
+            profilePictureUrl: undefined,
+            profilePreviewUrl: null
+          } as EmployeeOption));
+          this.filteredEmployees = [...this.allEmployees];
+          this.isLoadingEmployees = false;
+          this.cdr.markForCheck();
+        },
+        error: (err: any) => {
+          console.error('Error loading employees:', err);
+          this.isLoadingEmployees = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  // ── Dropdown open / close ────────────────────────────────────────
+  toggleEmployeeDropdown(): void {
+    if (this.employeeDropdownOpen) {
+      this.closeEmployeeDropdown();
+    } else {
+      this.openEmployeeDropdown();
+    }
+  }
+
+  openEmployeeDropdown(): void {
+    if (this.employeeDropdownOpen) return;
+    this.employeeDropdownOpen = true;
+    this.employeeSearchQuery = '';
+    this.filteredEmployees = [...this.allEmployees];
+    this.cdr.markForCheck();
+    // Auto-focus the inline input rendered inside the trigger
+    setTimeout(() => {
+      this.employeeSearchInputRef?.nativeElement?.focus();
+    }, 30);
+  }
+
+  closeEmployeeDropdown(): void {
+    this.employeeDropdownOpen = false;
+    this.employeeSearchQuery = '';
+    this.cdr.markForCheck();
+  }
+
+  // ── Typing in the search box filters the list client-side ────────
+  onEmployeeSearch(): void {
+    const q = (this.employeeSearchQuery || '').trim().toLowerCase();
+    if (!q) {
+      this.filteredEmployees = [...this.allEmployees];
+    } else {
+      this.filteredEmployees = this.allEmployees.filter(emp =>
+        emp.fullName.toLowerCase().includes(q) ||
+        emp.email.toLowerCase().includes(q)
+      );
+    }
+    this.cdr.markForCheck();
+  }
+
+  // ── Select an employee — filter table client-side ────────────────
+  selectEmployee(emp: EmployeeOption): void {
+    this.selectedEmployee = emp;
+    this.closeEmployeeDropdown();
+    this.currentPage = 1;
+    this.applyEmployeeFilter();
+  }
+
+  clearEmployeeSelection(event: Event): void {
+    event.stopPropagation();
+    this.selectedEmployee = null;
+    this.currentPage = 1;
+    this.loadTeamRequests();   // reload without employee filter
+  }
+
+  /**
+   * After selecting an employee, filter teamRequests client-side by name.
+   * No additional API call — uses the already-loaded data.
+   */
+  private applyEmployeeFilter(): void {
+    if (!this.selectedEmployee) {
+      this.loadTeamRequests();
+      return;
+    }
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    // We reload with employee name as a filter passed to the backend
+    // OR we filter client-side if the full dataset is already loaded.
+    // Per the requirement: filter client-side from the loaded list.
+    const selectedName = this.selectedEmployee.fullName.toLowerCase();
+    this.teamRequests = this.teamRequests.filter(r =>
+      r.employeeName?.toLowerCase().includes(selectedName)
+    );
+    this.totalCount = this.teamRequests.length;
+    this.isLoading = false;
+    this.cdr.markForCheck();
+
+    // NOTE: If you want to re-fetch with employee filter from backend,
+    // add employeeId to LeaveSearchRequest and pass it here instead.
+    // For a full reload with employee filter:
+    this.loadTeamRequestsWithEmployeeFilter();
   }
 
   private loadInitialData(): void {
@@ -139,32 +275,7 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (pendingApprovals) => {
             this.pendingApprovals = Array.isArray(pendingApprovals)
-              ? pendingApprovals.map((employee: any) => {
-                  const mappedRequest: LeaveRequest = {
-                    requestId:       employee.requestId       || employee.RequestId       || '',
-                    employeeId:      employee.employeeId      || employee.EmployeeId      || '',
-                    employeeName:    employee.employeeName    || employee.EmployeeName    || '',
-                    leaveTypeId:     employee.leaveTypeId     || employee.LeaveTypeId     || '',
-                    leaveTypeName:   employee.leaveTypeName   || employee.LeaveTypeName   || '',
-                    startDate:       employee.startDate       || employee.StartDate       || '',
-                    endDate:         employee.endDate         || employee.EndDate         || '',
-                    daysRequested:   employee.daysRequested   || employee.DaysRequested   || 0,
-                    reason:          employee.reason          || employee.Reason,
-                    status:          employee.status          || employee.Status          || 'pending',
-                    submittedAt:     employee.submittedAt     || employee.SubmittedAt     || '',
-                    approverName:    employee.approverName    || employee.ApproverName,
-                    approvedAt:      employee.approvedAt      || employee.ApprovedAt,
-                    rejectionReason: employee.rejectionReason || employee.RejectionReason,
-                    profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
-                    profilePreviewUrl: null
-                  };
-                  if (mappedRequest.profilePictureUrl) {
-                    mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
-                      ? mappedRequest.profilePictureUrl
-                      : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
-                  }
-                  return mappedRequest;
-                })
+              ? pendingApprovals.map((employee: any) => this.mapLeaveRequest(employee))
               : [];
             this.cdr.markForCheck();
           },
@@ -194,33 +305,16 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: LeaveListResponse) => {
-          this.teamRequests = (response.data || []).map((employee: any) => {
-            const mappedRequest: LeaveRequest = {
-              requestId:       employee.requestId       || employee.RequestId       || '',
-              employeeId:      employee.employeeId      || employee.EmployeeId      || '',
-              employeeName:    employee.employeeName    || employee.EmployeeName    || '',
-              leaveTypeId:     employee.leaveTypeId     || employee.LeaveTypeId     || '',
-              leaveTypeName:   employee.leaveTypeName   || employee.LeaveTypeName   || '',
-              startDate:       employee.startDate       || employee.StartDate       || '',
-              endDate:         employee.endDate         || employee.EndDate         || '',
-              daysRequested:   employee.daysRequested   || employee.DaysRequested   || 0,
-              reason:          employee.reason          || employee.Reason,
-              status:          employee.status          || employee.Status          || 'pending',
-              submittedAt:     employee.submittedAt     || employee.SubmittedAt     || '',
-              approverName:    employee.approverName    || employee.ApproverName,
-              approvedAt:      employee.approvedAt      || employee.ApprovedAt,
-              rejectionReason: employee.rejectionReason || employee.RejectionReason,
-              profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
-              profilePreviewUrl: null
-            };
-            if (mappedRequest.profilePictureUrl) {
-              mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
-                ? mappedRequest.profilePictureUrl
-                : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
-            }
-            return mappedRequest;
-          });
-          this.totalCount = response.totalCount;
+          let requests = (response.data || []).map((emp: any) => this.mapLeaveRequest(emp));
+
+          // Apply client-side employee name filter if an employee is selected
+          if (this.selectedEmployee) {
+            const name = this.selectedEmployee.fullName.toLowerCase();
+            requests = requests.filter(r => r.employeeName?.toLowerCase().includes(name));
+          }
+
+          this.teamRequests = requests;
+          this.totalCount = this.selectedEmployee ? requests.length : response.totalCount;
           this.isLoading = false;
           this.cdr.markForCheck();
         },
@@ -233,7 +327,43 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ✅ Opens ApproveLeaveDialogComponent — API is called only after confirmation
+  /**
+   * Reload team requests and apply employee filter after API response.
+   * This ensures we always filter from the latest full page of data.
+   */
+  private loadTeamRequestsWithEmployeeFilter(): void {
+    this.loadTeamRequests();
+  }
+
+  // ── Shared mapper ────────────────────────────────────────────────
+  private mapLeaveRequest(employee: any): LeaveRequest {
+    const mappedRequest: LeaveRequest = {
+      requestId:       employee.requestId       || employee.RequestId       || '',
+      employeeId:      employee.employeeId      || employee.EmployeeId      || '',
+      employeeName:    employee.employeeName    || employee.EmployeeName    || '',
+      leaveTypeId:     employee.leaveTypeId     || employee.LeaveTypeId     || '',
+      leaveTypeName:   employee.leaveTypeName   || employee.LeaveTypeName   || '',
+      startDate:       employee.startDate       || employee.StartDate       || '',
+      endDate:         employee.endDate         || employee.EndDate         || '',
+      daysRequested:   employee.daysRequested   || employee.DaysRequested   || 0,
+      reason:          employee.reason          || employee.Reason,
+      status:          employee.status          || employee.Status          || 'pending',
+      submittedAt:     employee.submittedAt     || employee.SubmittedAt     || '',
+      approverName:    employee.approverName    || employee.ApproverName,
+      approvedAt:      employee.approvedAt      || employee.ApprovedAt,
+      rejectionReason: employee.rejectionReason || employee.RejectionReason,
+      profilePictureUrl: employee.profilePictureUrl || employee.ProfilePictureUrl,
+      profilePreviewUrl: null
+    };
+    if (mappedRequest.profilePictureUrl) {
+      mappedRequest.profilePreviewUrl = mappedRequest.profilePictureUrl.startsWith('http')
+        ? mappedRequest.profilePictureUrl
+        : `${this.backendBaseUrl}${mappedRequest.profilePictureUrl}`;
+    }
+    return mappedRequest;
+  }
+
+  // ── Actions ──────────────────────────────────────────────────────
   approveRequest(request: LeaveRequest): void {
     if (!request.requestId) {
       this.notificationService.showError('Leave request ID is missing. Cannot approve.');
@@ -317,27 +447,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
       });
   }
 
-  viewRequestDetails(request: LeaveRequest): void {
-    this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
-      data: {
-        employeeName:    request.employeeName,
-        leaveTypeName:   request.leaveTypeName,
-        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
-        startDate:       request.startDate,
-        endDate:         request.endDate,
-        daysRequested:   request.daysRequested,
-        reason:          request.reason,
-        status:          request.status,
-        submittedAt:     request.submittedAt,
-        approverName:    request.approverName,
-        approvedAt:      request.approvedAt,
-        rejectionReason: request.rejectionReason
-      }
-    });
-  }
-
-  // ✅ View Details — always available regardless of status
   openDetailsDialog(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
       width: '650px',
@@ -360,7 +469,9 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.filterForm.reset({ search: '', status: '' });
+    this.selectedEmployee = null;
+    this.filterForm.reset({ status: '' });
+    // filterForm change triggers loadTeamRequests automatically
   }
 
   onPageChange(event: PageEvent): void {
@@ -386,6 +497,6 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
   hasFiltersApplied(): boolean {
     if (!this.filterForm) return false;
     const values = this.filterForm.value;
-    return !!(values.search?.trim() || values.status);
+    return !!(this.selectedEmployee || values.status);
   }
 }
