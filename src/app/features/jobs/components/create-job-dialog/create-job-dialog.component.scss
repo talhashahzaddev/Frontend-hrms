@@ -1,92 +1,433 @@
-// Create Job Dialog - same style as claim-form-dialog, larger size
+// ─── Dialog shell ─────────────────────────────────────────────────────────
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 16px !important;
+  border-radius: 18px !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important;
 }
 
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 
   h2 {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     margin: 0;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
-    color: white;
-    mat-icon { font-size: 28px; width: 28px; height: 28px; }
+    color: white !important;
+    letter-spacing: -0.3px;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      color: white !important;
+    }
   }
+
+  // Force mat-dialog-title directive colour override
+  ::ng-deep .mat-mdc-dialog-title,
+  ::ng-deep [mat-dialog-title] {
+    color: white !important;
+  }
+
   .close-button {
     color: white;
-    transition: all 0.2s ease;
-    &:hover { background: rgba(255, 255, 255, 0.2); transform: rotate(90deg); }
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.25s;
+
+    &:hover {
+      opacity: 1;
+      transform: rotate(90deg);
+      background: rgba(255, 255, 255, 0.15);
+    }
   }
 }
 
+// ─── Content scroll area ───────────────────────────────────────────────────
 .dialog-content {
-  padding: 28px !important;
-  min-width: 480px;
-  max-width: 100%;
+  padding: 0 !important;
   max-height: 75vh;
   overflow-y: auto;
+  background: #f7f8fc;
 
-  .job-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-
-    .form-row {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 8px;
-
-      &.two-col {
-        .full-width { flex: 1; }
-      }
-      .full-width { width: 100%; }
-    }
-    .full-width {
-      width: 100%;
-      margin-bottom: 8px;
-    }
+  &::-webkit-scrollbar {
+    width: 4px;
   }
 
-  ::ng-deep mat-form-field.mat-form-field-appearance-outline {
-    .mat-mdc-text-field-wrapper { background: #f9fafb; border-radius: 12px; }
-    .mat-mdc-notch-piece { border-color: #e5e7eb !important; }
-    &:hover .mat-mdc-notch-piece { border-color: #667eea !important; }
-    &.mat-focused .mat-mdc-notch-piece { border-color: #667eea !important; border-width: 2px !important; }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.35);
+    border-radius: 4px;
   }
 }
 
+// ─── Form wrapper ─────────────────────────────────────────────────────────
+.job-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// ─── Sections ─────────────────────────────────────────────────────────────
+.form-section {
+  padding: 20px 28px 12px;
+  border-bottom: 1px solid #ecedf5;
+  background: #fff;
+  margin-bottom: 6px;
+
+  &:last-child,
+  &.last-section {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  .section-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: white;
+  }
+}
+
+// Section header pill — wraps icon + title
+.section-header::before {
+  content: '';
+  display: none;
+}
+
+// Re-style section-header as a pill chip
+.section-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 8px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  margin-bottom: 16px;
+}
+
+// ─── Row layouts ──────────────────────────────────────────────────────────
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 4px;
+
+  &.two-col .full-width {
+    flex: 1;
+  }
+
+  &.role-row {
+    .field-role {
+      flex: 1;
+    }
+
+    .field-code {
+      flex: 1;
+    }
+  }
+
+  &.four-col {
+    flex-wrap: nowrap;
+    gap: 10px;
+
+    .field-currency {
+      flex: 0 0 88px;
+    }
+
+    .field-vacancies {
+      flex: 0 0 96px;
+    }
+
+    .full-width {
+      flex: 1;
+    }
+  }
+}
+
+.field-department {
+  width: 50%;
+  max-width: 50%;
+  flex: 0 0 50%;
+  min-width: 160px;
+}
+
+// ─── Material form field — deep premium override ───────────────────────────
+// Since ViewEncapsulation.None is set, these apply globally from this component.
+// We scope under .job-form to reduce blast radius.
+.job-form {
+
+  mat-form-field.mat-form-field-appearance-outline {
+    width: 100%;
+
+    // The outer text-field wrapper
+    .mdc-text-field--outlined {
+      border-radius: 10px !important;
+      background: #f5f6fd !important;
+      transition: background 0.2s ease;
+    }
+
+    // Remove Material's default border drawing — we control it via outline
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #dde1f0 !important;
+      border-width: 1.5px !important;
+      transition: border-color 0.2s ease;
+    }
+
+    .mdc-notched-outline__leading {
+      border-radius: 10px 0 0 10px !important;
+    }
+
+    .mdc-notched-outline__trailing {
+      border-radius: 0 10px 10px 0 !important;
+    }
+
+    // Hover
+    &:not(.mdc-text-field--focused):hover {
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #a8b4e8 !important;
+      }
+
+      .mdc-text-field--outlined {
+        background: #f0f2fb !important;
+      }
+    }
+
+    // Focus
+    &.mdc-text-field--focused {
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #667eea !important;
+        border-width: 2px !important;
+      }
+
+      .mdc-text-field--outlined {
+        background: #fff !important;
+      }
+    }
+
+    // Infix — controls the input height
+    .mat-mdc-form-field-infix {
+      padding-top: 11px !important;
+      padding-bottom: 11px !important;
+      min-height: 44px !important;
+    }
+
+    // Input text
+    input.mat-mdc-input-element,
+    .mat-mdc-select-value-text {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #1f2937 !important;
+    }
+
+    // Placeholder
+    input.mat-mdc-input-element::placeholder {
+      color: #b0b8d4 !important;
+    }
+
+    // Label
+    .mdc-floating-label {
+      font-size: 13px !important;
+      color: #6b7a9e !important;
+      font-weight: 500 !important;
+    }
+
+    .mdc-floating-label--float-above {
+      color: #667eea !important;
+      font-weight: 600 !important;
+    }
+
+    // Error text
+    mat-error {
+      font-size: 10.5px !important;
+      color: #ef4444 !important;
+    }
+
+    // Select arrow
+    .mat-mdc-select-arrow svg {
+      fill: #667eea !important;
+    }
+
+    // Datepicker toggle icon
+    .mat-datepicker-toggle .mat-mdc-icon-button mat-icon {
+      color: #667eea !important;
+      font-size: 20px;
+    }
+
+    // Subscript (error area) spacing
+    .mat-mdc-form-field-subscript-wrapper {
+      padding: 0 2px !important;
+    }
+  }
+}
+
+// ─── Dialog actions ───────────────────────────────────────────────────────
 .dialog-actions {
-  padding: 20px 28px !important;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-top: 1px solid #e5e7eb;
+  padding: 16px 28px !important;
+  background: #fff;
+  border-top: 1px solid #ecedf5;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 
   button {
-    height: 44px;
-    padding: 0 28px !important;
-    border-radius: 12px !important;
-    font-size: 15px !important;
+    height: 42px;
+    padding: 0 24px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
-    text-transform: none !important;
+    letter-spacing: 0.01em !important;
   }
+
   .submit-button:not([disabled]) {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     color: white !important;
     border: none !important;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(102, 126, 234, 0.5) !important;
+    }
+  }
+}
+
+// ─── Quill rich-text fields ───────────────────────────────────────────────
+.quill-field {
+  margin-bottom: 14px;
+
+  .quill-field-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+
+    mat-icon {
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+      color: #667eea;
+    }
+
+    .quill-field-hint {
+      font-size: 11px;
+      font-weight: 400;
+      color: #9ca3af;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+
+  .quill-editor-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid #dde1f0;
+    background: #f5f6fd;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+    &:focus-within {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+      background: #fff;
+    }
+  }
+}
+
+// ─── Quill global overrides ───────────────────────────────────────────────
+.ql-toolbar.ql-snow {
+  border: none !important;
+  border-bottom: 1px solid #e5e7f0 !important;
+  background: #eef0f9;
+  padding: 5px 10px !important;
+
+  .ql-formats {
+    margin-right: 6px;
+  }
+
+  button,
+  .ql-picker-label {
+    color: #4b5563 !important;
+  }
+
+  .ql-stroke {
+    stroke: #4b5563 !important;
+  }
+
+  .ql-fill {
+    fill: #4b5563 !important;
+  }
+
+  button:hover .ql-stroke,
+  button.ql-active .ql-stroke {
+    stroke: #667eea !important;
+  }
+
+  button:hover,
+  button.ql-active {
+    color: #667eea !important;
+  }
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.ql-editor {
+  min-height: 90px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 10px 13px;
+  color: #1f2937;
+  font-weight: 500;
+  line-height: 1.65;
+
+  &.ql-blank::before {
+    color: #b0b8d4;
+    font-style: normal;
+    font-size: 13px;
   }
 }

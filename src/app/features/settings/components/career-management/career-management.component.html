@@ -317,7 +317,7 @@
                     Cancel
                 </button>
                 <button mat-flat-button type="submit" class="action-btn primary-btn"
-                    [disabled]="isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
+                    [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
                     <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
                     <mat-icon *ngIf="!isSaving">save</mat-icon>
                     {{ isSaving ? 'Saving…' : 'Save Changes' }}

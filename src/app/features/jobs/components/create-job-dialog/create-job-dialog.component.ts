@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { QuillModule } from 'ngx-quill';
 
 import { CreateJobOpeningRequest, UpdateJobOpeningRequest, JobOpeningDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
@@ -25,6 +26,7 @@ export interface CreateJobDialogData {
 @Component({
   selector: 'app-create-job-dialog',
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -36,7 +38,8 @@ export interface CreateJobDialogData {
     MatIconModule,
     MatProgressSpinnerModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    QuillModule
   ],
   templateUrl: './create-job-dialog.component.html',
   styleUrls: ['./create-job-dialog.component.scss']
@@ -48,6 +51,27 @@ export class CreateJobDialogComponent implements OnInit {
   get isEditMode(): boolean {
     return this.data?.mode === 'edit' && !!this.data?.job;
   }
+
+  /** Quill toolbar for plain-ish text (intro) */
+  readonly quillBasicConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      [{ align: [] }],
+      ['clean']
+    ]
+  };
+
+  /** Quill toolbar for rich content (responsibilities / skillset) */
+  readonly quillRichConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ header: [1, 2, 3, false] }],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ align: [] }],
+      ['link'],
+      ['clean']
+    ]
+  };
 
   workModeOptions = [
     { value: 'Onsite', label: 'Onsite' },
@@ -78,6 +102,7 @@ export class CreateJobDialogComponent implements OnInit {
   ) {
     this.jobForm = this.fb.group({
       jobRoleName: ['', [Validators.required, Validators.maxLength(200)]],
+      jobCode: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(8)]],
       departmentId: [null as string | null],
       experienceMin: [null as number | null],
       experienceMax: [null as number | null],
@@ -110,6 +135,7 @@ export class CreateJobDialogComponent implements OnInit {
   private patchFormWithJob(job: JobOpeningDto): void {
     this.jobForm.patchValue({
       jobRoleName: job.jobRoleName || '',
+      jobCode: job.jobCode || '',
       departmentId: job.departmentId || null,
       experienceMin: job.experienceMin ?? null,
       experienceMax: job.experienceMax ?? null,
@@ -139,6 +165,7 @@ export class CreateJobDialogComponent implements OnInit {
     if (this.isEditMode && this.data.job?.jobId) {
       const request: UpdateJobOpeningRequest = {
         jobRoleName: v.jobRoleName,
+        jobCode: v.jobCode || null,
         departmentId: v.departmentId || null,
         experienceMin: v.experienceMin ?? null,
         experienceMax: v.experienceMax ?? null,
@@ -171,6 +198,7 @@ export class CreateJobDialogComponent implements OnInit {
     } else {
       const request: CreateJobOpeningRequest = {
         jobRoleName: v.jobRoleName,
+        jobCode: v.jobCode,
         departmentId: v.departmentId || null,
         experienceMin: v.experienceMin ?? null,
         experienceMax: v.experienceMax ?? null,

@@ -63,7 +63,10 @@
                   <div class="job-post-header">
                     <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                     <div class="job-post-heading">
-                      <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                      <div class="job-post-title-row">
+                        <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                        <span class="job-code-badge" *ngIf="app.jobCode"># {{ app.jobCode }}</span>
+                      </div>
                       <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
                         }}</p>
                     </div>
@@ -191,7 +194,10 @@
                       <div class="job-post-header">
                         <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                         <div class="job-post-heading">
-                          <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                          <div class="job-post-title-row">
+                            <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                            <span class="job-code-badge" *ngIf="app.jobCode"># {{ app.jobCode }}</span>
+                          </div>
                           <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{
                             getAppliedDate(app)
                             }}</p>
@@ -322,7 +328,10 @@
                       <div class="job-post-header">
                         <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
                         <div class="job-post-heading">
-                          <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                          <div class="job-post-title-row">
+                            <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
+                            <span class="job-code-badge" *ngIf="app.jobCode"># {{ app.jobCode }}</span>
+                          </div>
                           <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{
                             getAppliedDate(app)
                             }}</p>

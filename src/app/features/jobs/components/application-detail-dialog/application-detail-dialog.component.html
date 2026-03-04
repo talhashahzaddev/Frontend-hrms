@@ -1,7 +1,7 @@
 <div class="dialog-header">
   <h2 mat-dialog-title>
     <mat-icon>how_to_reg</mat-icon>
-    Application details
+    Application Details
   </h2>
   <button mat-icon-button mat-dialog-close class="close-button">
     <mat-icon>close</mat-icon>
@@ -20,14 +20,24 @@
   </div>
 
   <div class="application-details" *ngIf="!isLoading && application">
-    <div class="detail-section">
-      <h3 class="detail-title">{{ application.jobRoleName || 'Job' }}</h3>
-      <span class="status-chip" [class.status-applied]="application.status === 'Applied'">
-        {{ application.currentStageName || application.status || 'Applied' }}
-      </span>
-      <p class="detail-meta">Applied {{ getAppliedDate(application) }}</p>
+
+    <!-- ── Hero header ───────────────────────────────────────────── -->
+    <div class="detail-section hero-section">
+      <div class="detail-title-row">
+        <h3 class="detail-title">{{ application.jobRoleName || 'Job' }}</h3>
+        <span class="job-code-badge" *ngIf="application.jobCode"># {{ application.jobCode }}</span>
+      </div>
+      <div class="hero-meta-row">
+        <span class="status-chip" [class.status-applied]="application.status === 'Applied'">
+          {{ application.currentStageName || application.status || 'Applied' }}
+        </span>
+        <p class="detail-meta" *ngIf="getAppliedDate(application)">
+          Applied {{ getAppliedDate(application) }}
+        </p>
+      </div>
     </div>
 
+    <!-- ── Details grid ──────────────────────────────────────────── -->
     <div class="detail-grid">
       <div class="detail-row">
         <span class="detail-label">Status</span>
@@ -49,24 +59,30 @@
         <span class="detail-label">Phone</span>
         <span class="detail-value">{{ application.phone || '—' }}</span>
       </div>
+      <div class="detail-row">
+        <span class="detail-label">Application source</span>
+        <span class="detail-value">{{ application.applicationSource || '—' }}</span>
+      </div>
       <div class="detail-row" *ngIf="application.linkedInUrl">
         <span class="detail-label">LinkedIn</span>
-        <a [href]="application.linkedInUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open profile</a>
+        <a [href]="application.linkedInUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open
+          profile</a>
       </div>
       <div class="detail-row" *ngIf="application.resumeUrl">
         <span class="detail-label">Resume</span>
         <a [href]="application.resumeUrl" target="_blank" rel="noopener noreferrer" class="detail-link">Open resume</a>
       </div>
-      <div class="detail-row">
-        <span class="detail-label">Application source</span>
-        <span class="detail-value">{{ application.applicationSource || '—' }}</span>
-      </div>
     </div>
 
-    <div class="detail-section" *ngIf="application.coverLetter">
-      <h4 class="detail-heading">Cover letter</h4>
-      <div class="detail-text cover-letter-html" [innerHTML]="application.coverLetter"></div>
+    <!-- ── Cover letter ──────────────────────────────────────────── -->
+    <div class="content-panel" *ngIf="application.coverLetter">
+      <div class="content-panel-header">
+        <mat-icon>description</mat-icon>
+        <span>Cover Letter</span>
+      </div>
+      <div class="content-panel-body ql-content" [innerHTML]="application.coverLetter"></div>
     </div>
+
   </div>
 </mat-dialog-content>
 

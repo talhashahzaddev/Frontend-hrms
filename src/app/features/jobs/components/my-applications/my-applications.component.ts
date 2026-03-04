@@ -128,7 +128,8 @@ export class MyApplicationsComponent implements OnInit {
 
   viewJobDetails(app: JobApplicationDto): void {
     this.dialog.open(ApplicationDetailDialogComponent, {
-      width: '560px',
+      width: '680px',
+      maxWidth: '95vw',
       maxHeight: '90vh',
       panelClass: 'application-detail-dialog-panel',
       data: { jobApplyId: app.jobApplyId }

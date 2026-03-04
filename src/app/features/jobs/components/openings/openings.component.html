@@ -71,7 +71,10 @@
             <mat-icon>work</mat-icon>
           </div>
           <div class="job-post-heading">
-            <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
+            <div class="job-post-title-row">
+              <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
+              <span class="job-code-badge" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
+            </div>
             <p class="job-post-meta" *ngIf="getMetaLine(job)">
               {{ getMetaLine(job) }}
             </p>
@@ -88,7 +91,7 @@
           </div>
         </div>
         <div class="job-post-body" *ngIf="job.jobIntroduction">
-          <p class="job-intro">{{ job.jobIntroduction }}</p>
+          <div class="job-intro clamp-one-line" [innerHTML]="job.jobIntroduction"></div>
         </div>
         <div class="job-post-tags" *ngIf="getExperienceText(job) || getCtcText(job) || job.vacancies">
           <span class="job-tag" *ngIf="getExperienceText(job)">
