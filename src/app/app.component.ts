@@ -102,29 +102,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setupRouterProgress();
     this.setFavicon();
 
-    // 🔥 Subscribe to authentication/user changes
-    // this.authService.isAuthenticated$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(isAuth => {
-    //     if (isAuth) {
-    //       const user = this.authService.getCurrentUserValue();
-    //       if (user?.userId) {
-    //         this.serverNotificationService.loadNotifications(user.userId);
-    //       }
-    //     } else {
-    //       // Optional: clear notifications on logout
-    //       // this.serverNotificationService.clearNotifications();
-    //     }
-    //   });
-
-    // // Optional: refresh notifications every 60 seconds
-    // interval(60000)
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(() => {
-    //     const user = this.authService.getCurrentUserValue();
-    //     if (user?.userId) this.serverNotificationService.loadNotifications(user.userId);
-    //   });
-
   }
 
 
@@ -221,12 +198,12 @@ export class AppComponent implements OnInit, OnDestroy {
         const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
         const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
 
-        // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
-        if (!isAdmin && currentPath === '/dashboard' || currentPath === '/') {
-          this.router.navigate(['/performance/dashboard']);
-        }
-      });
-  }
+      // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
+      if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
+        this.router.navigate(['/employee/dashboard']);
+      }
+    });
+}
 
 
 
