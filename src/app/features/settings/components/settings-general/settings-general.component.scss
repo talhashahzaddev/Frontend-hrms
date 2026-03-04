@@ -1,6 +1,6 @@
 // Settings General Component Styles (Hubstaff-inspired)
 .settings-general-container {
-  padding: var(--spacing-xl);
+  padding: var(--spacing-sm);
   min-height: calc(100vh - 64px);
   background: var(--gray-50);
   max-width: 1200px;
@@ -9,7 +9,7 @@
 
 // Header Section
 .settings-header {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-sm);
   
   .settings-title {
     font-size: 2rem;

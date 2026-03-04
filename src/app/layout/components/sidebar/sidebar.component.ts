@@ -58,7 +58,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     {
       label: 'Dashboard',
       icon: 'dashboard',
-      route: '/performance/dashboard',
+      route: '/employee/dashboard',
       roles: ['Manager', 'Employee']
     }
     ,
@@ -199,7 +199,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       label: 'Settings',
-      icon: 'work',
+      icon: 'settings',
       children: [
         { label: 'Currency Settings', icon: 'work_outline', route: '/settings/general' },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address' },

@@ -201,16 +201,17 @@ onSubmit(): void {
             let redirectUrl = sessionStorage.getItem('redirectUrl');
             sessionStorage.removeItem('redirectUrl');
 
+
             if (!redirectUrl) {
               redirectUrl =
                 response.roleName === 'Employee' || response.roleName === 'Manager'
-                  ? '/performance/dashboard'
+                  ? '/employee/dashboard'
                   : '/dashboard';
             }
 
             // ✅ normalize employee dashboard
             if (redirectUrl === '/dashboard' && (response.roleName === 'Employee' || response.roleName === 'Manager')) {
-              redirectUrl = '/performance/dashboard';
+              redirectUrl = '/employee/dashboard';
             }
 
             const separator = redirectUrl.includes('?') ? '&' : '?';
@@ -233,7 +234,7 @@ onSubmit(): void {
         if (!redirectUrl) {
           redirectUrl =
             response.roleName === 'Employee' || response.roleName === 'Manager'
-              ? '/performance/dashboard'
+              ? '/employee/dashboard'
               : '/dashboard';
         }
 
@@ -242,7 +243,7 @@ onSubmit(): void {
           redirectUrl === '/dashboard' &&
           (response.roleName === 'Employee' || response.roleName === 'Manager')
         ) {
-          redirectUrl = '/performance/dashboard';
+          redirectUrl = '/employee/dashboard';
         }
 
         this.isSubmitting = false;
