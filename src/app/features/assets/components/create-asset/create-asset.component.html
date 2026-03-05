@@ -70,7 +70,7 @@
   <!-- ── Table Card ──────────────────────────────────────────── -->
   <div class="toolbar-row">
     <h2 class="table-title">All Assets</h2>
-    <span class="total-count">{{ filteredAssets.length }} asset{{ filteredAssets.length !== 1 ? 's' : '' }}</span>
+    <span class="total-count">{{ totalCount }} asset{{ totalCount !== 1 ? 's' : '' }}</span>
   </div>
 
   <div class="table-card">
@@ -147,7 +147,7 @@
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="filteredAssets.length === 0" class="empty-state">
+    <div *ngIf="totalCount === 0" class="empty-state">
       <div class="empty-icon">
         <mat-icon>inventory_2</mat-icon>
       </div>
@@ -158,6 +158,18 @@
         Create Asset
       </button>
     </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      *ngIf="totalCount > 0"
+      [length]="totalCount"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+    </mat-paginator>
+
   </div>
 </div>
 
@@ -193,13 +205,6 @@
           </div>
           <div class="cad-grid cad-grid-3">
             <mat-form-field appearance="outline" class="cad-field">
-              <mat-label>Asset Name *</mat-label>
-              <input matInput formControlName="name" placeholder="e.g. Dell Laptop">
-              <mat-error *ngIf="dialogForm.get('name')?.hasError('required')">Name is required</mat-error>
-              <mat-error *ngIf="dialogForm.get('name')?.hasError('maxlength')">Max 200 characters</mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="cad-field">
               <mat-label>Asset Code / Serial</mat-label>
               <input matInput formControlName="code" placeholder="e.g. SN-2024-001">
             </mat-form-field>
@@ -208,6 +213,13 @@
               <mat-label>Asset Tag *</mat-label>
               <input matInput formControlName="assetTag" placeholder="e.g. TAG-001">
               <mat-error *ngIf="dialogForm.get('assetTag')?.hasError('required')">Tag is required</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="cad-field">
+              <mat-label>Asset Name *</mat-label>
+              <input matInput formControlName="name" placeholder="e.g. Dell Laptop">
+              <mat-error *ngIf="dialogForm.get('name')?.hasError('required')">Name is required</mat-error>
+              <mat-error *ngIf="dialogForm.get('name')?.hasError('maxlength')">Max 200 characters</mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -233,7 +245,7 @@
         <div class="cad-section">
           <div class="cad-section-label">
             <mat-icon>event</mat-icon>
-            Purchase & Status
+            Purchase
           </div>
           <div class="cad-grid cad-grid-2">
             <mat-form-field appearance="outline" class="cad-field">
@@ -241,14 +253,6 @@
               <input matInput [matDatepicker]="cadPicker" formControlName="purchaseDate">
               <mat-datepicker-toggle matIconSuffix [for]="cadPicker"></mat-datepicker-toggle>
               <mat-datepicker #cadPicker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="cad-field">
-              <mat-label>Status</mat-label>
-              <mat-select formControlName="status">
-                <mat-option value="">— Select Status —</mat-option>
-                <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-              </mat-select>
             </mat-form-field>
           </div>
         </div>
@@ -339,14 +343,18 @@
 
           <div class="cad-grid cad-grid-1">
 
-            <!-- Employee select — NO matPrefix icon -->
+            <!-- Employee autocomplete field -->
             <mat-form-field appearance="outline" class="cad-field">
               <mat-label>Employee *</mat-label>
-              <mat-select formControlName="employeeId" required>
-                <mat-option *ngFor="let emp of filteredEmployees" [value]="emp.employeeId">
+              <input matInput 
+                     [formControl]="employeeSearchControl"
+                     [matAutocomplete]="autoEmployee"
+                     placeholder="Search by name or email">
+              <mat-autocomplete #autoEmployee="matAutocomplete" (optionSelected)="onEmployeeSelected($event.option.value)">
+                <mat-option *ngFor="let emp of filteredEmployees$ | async" [value]="emp">
                   {{ emp.firstName }} {{ emp.lastName }} — {{ emp.email }}
                 </mat-option>
-              </mat-select>
+              </mat-autocomplete>
               <mat-error *ngIf="assignForm.get('employeeId')?.hasError('required')">
                 Employee is required
               </mat-error>
@@ -537,6 +545,10 @@
               <div class="history-detail">
                 <span class="history-detail-label">Assigned</span>
                 <span class="history-detail-value">{{ (a.assignedAt || a.AssignedAt || a.assignDate || a.AssignDate) | date:'d MMM y' }}</span>
+              </div>
+              <div class="history-detail">
+                <span class="history-detail-label">Condition</span>
+                <span class="history-detail-value">{{ a.condition || a.Condition || '—' }}</span>
               </div>
               <div class="history-detail">
                 <span class="history-detail-label">Returned</span>

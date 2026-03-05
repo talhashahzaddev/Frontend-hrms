@@ -135,7 +135,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager'],
       children: [
         { label: 'Types of Assets', icon: 'category', route: '/assets/types', roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Create Assets', icon: 'add_box', route: '/assets/create', roles: ['Super Admin', 'HR Manager', 'Manager'] }
+        { label: 'Assets', icon: 'add_box', route: '/assets/create', roles: ['Super Admin', 'HR Manager', 'Manager'] }
       ]
     },
     {
