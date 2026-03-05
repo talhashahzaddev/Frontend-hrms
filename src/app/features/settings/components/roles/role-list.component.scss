@@ -1,0 +1,383 @@
+// Roles List – Matching Employee Module Design System
+.role-list-container {
+  padding: 12px 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: #f5f6fa;
+  min-height: 100vh;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+
+  // ─── Page Header ──────────────────────────────────────────────
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+
+    .header-content {
+      .page-title {
+        margin: 0 0 4px;
+        font-size: 26px;
+        font-weight: 700;
+        color: #111827;
+        letter-spacing: -0.4px;
+      }
+      .page-subtitle {
+        margin: 0;
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 400;
+      }
+    }
+
+    .header-actions {
+      .add-button {
+        height: 42px;
+        padding: 0 20px !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+        color: white !important;
+        letter-spacing: 0.1px;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3) !important;
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 6px;
+        }
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+
+  // ─── Toolbar Card ─────────────────────────────────────────────
+  .toolbar-card {
+    background: white;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e9eaf0;
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .search-field {
+        width: 320px;
+        margin-bottom: -22px;
+
+        ::ng-deep {
+          .mat-mdc-text-field-wrapper {
+            background: #f8f9fc;
+            border-radius: 8px !important;
+          }
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #e5e7eb !important;
+          }
+          .mat-mdc-form-field-flex { padding: 0 12px; }
+          .mat-mdc-form-field-infix { padding: 10px 0 !important; min-height: unset; }
+          input { font-size: 13px; color: #374151; }
+          mat-icon { color: #9ca3af; font-size: 18px; width: 18px; height: 18px; margin-right: 6px; }
+
+          &.mat-focused .mdc-notched-outline__leading,
+          &.mat-focused .mdc-notched-outline__notch,
+          &.mat-focused .mdc-notched-outline__trailing {
+            border-color: #6366f1 !important;
+            border-width: 1.5px !important;
+          }
+        }
+      }
+
+      .clear-btn {
+        height: 38px;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #6b7280 !important;
+        border-color: #e5e7eb !important;
+        white-space: nowrap;
+
+        mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+        &:not([disabled]):hover {
+          color: #374151 !important;
+          border-color: #d1d5db !important;
+          background: #f9fafb !important;
+        }
+
+        &[disabled] { opacity: 0.4; }
+      }
+    }
+  }
+
+  // ─── Table Card ───────────────────────────────────────────────
+  .table-card {
+    background: white;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: hidden;
+
+    .table-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f1f5;
+
+      .total-count {
+        font-size: 13px;
+        font-weight: 600;
+        color: #6b7280;
+      }
+    }
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 16px;
+
+      p { margin: 0; font-size: 14px; color: #9ca3af; }
+
+      ::ng-deep .mat-mdc-progress-spinner circle { stroke: #6366f1; }
+    }
+
+    .table-container {
+      overflow-x: auto;
+
+      .role-table {
+        width: 100%;
+
+        ::ng-deep {
+          .mat-mdc-header-row {
+            background: #fafafa;
+            height: 44px;
+
+            .mat-mdc-header-cell {
+              font-size: 11px;
+              font-weight: 700;
+              color: #9ca3af;
+              text-transform: uppercase;
+              letter-spacing: 0.7px;
+              border-bottom: 1px solid #f0f1f5;
+              padding: 0 16px;
+            }
+          }
+
+          .mat-mdc-row {
+            height: 64px;
+            transition: background 0.12s ease;
+
+            &:hover { background: #fafbff; }
+
+            .mat-mdc-cell {
+              padding: 0 16px;
+              border-bottom: 1px solid #f5f6fa;
+              font-size: 13.5px;
+              color: #374151;
+            }
+          }
+        }
+
+        // Role info cell
+        .role-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          .role-icon-wrap {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+
+            mat-icon {
+              color: white;
+              font-size: 20px;
+              width: 20px;
+              height: 20px;
+            }
+          }
+
+          .role-details {
+            .role-name {
+              font-size: 14px;
+              font-weight: 600;
+              color: #111827;
+              margin-bottom: 2px;
+            }
+
+            .role-system {
+              display: flex;
+              align-items: center;
+              gap: 3px;
+              font-size: 11px;
+              color: #9ca3af;
+              font-weight: 500;
+            }
+          }
+        }
+
+        .description-text {
+          font-size: 13px;
+          color: #6b7280;
+          max-width: 320px;
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .badge {
+          display: inline-block;
+          padding: 3px 10px;
+          border-radius: 5px;
+          font-size: 12px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        .badge-menu {
+          background: #eef2ff;
+          color: #4f46e5;
+          border: 1px solid #c7d2fe;
+        }
+
+        .date-cell {
+          color: #6b7280 !important;
+          font-size: 13px !important;
+          white-space: nowrap;
+        }
+
+        .action-menu-btn {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 8px !important;
+          color: #374151 !important;
+
+          mat-icon { font-size: 20px; }
+        }
+      }
+
+      // Empty State
+      .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+
+        .empty-icon {
+          width: 72px;
+          height: 72px;
+          border-radius: 16px;
+          background: #f3f4f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 20px;
+
+          mat-icon {
+            font-size: 36px;
+            width: 36px;
+            height: 36px;
+            color: #d1d5db;
+          }
+        }
+
+        h3 { margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #111827; }
+        p { margin: 0 0 24px; font-size: 14px; color: #9ca3af; }
+
+        .add-first-btn {
+          height: 40px;
+          padding: 0 20px !important;
+          border-radius: 8px !important;
+          font-weight: 600 !important;
+          font-size: 14px !important;
+          background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+          color: white !important;
+
+          mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; }
+        }
+      }
+    }
+
+    // Pagination
+    ::ng-deep mat-paginator {
+      background: #fafafa;
+      border-top: 1px solid #e5e7eb;
+
+      .mat-mdc-paginator-container {
+        padding: 8px 20px;
+        min-height: 52px;
+      }
+
+      .mat-mdc-paginator-range-label {
+        font-size: 13px;
+        color: #6b7280;
+      }
+    }
+  }
+
+  // ─── Action Menu ──────────────────────────────────────────────
+  ::ng-deep .mat-mdc-menu-panel {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+    border: 1px solid #f0f1f5 !important;
+    min-width: 180px !important;
+
+    .mat-mdc-menu-content {
+      padding: 6px !important;
+
+      .mat-mdc-menu-item {
+        border-radius: 6px !important;
+        margin: 1px 0 !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        font-size: 13.5px !important;
+        color: #374151;
+
+        &:hover { background: #f5f6fa !important; }
+
+        mat-icon { margin-right: 10px; font-size: 18px; width: 18px; height: 18px; color: #6b7280; }
+
+        &.danger-action {
+          color: #dc2626 !important;
+          mat-icon { color: #dc2626 !important; }
+          &:hover { background: #fff5f5 !important; }
+        }
+      }
+
+      mat-divider { margin: 4px 0 !important; border-color: #f0f1f5 !important; }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .role-list-container {
+    padding: 16px 14px;
+
+    .page-header {
+      .header-content .page-title { font-size: 20px; }
+      .header-actions .add-button { height: 36px !important; padding: 0 14px !important; font-size: 13px !important; }
+    }
+
+    .toolbar-card .toolbar-row {
+      .search-field { width: 100%; flex: 1; }
+    }
+  }
+}

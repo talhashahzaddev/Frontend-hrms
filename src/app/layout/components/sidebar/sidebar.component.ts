@@ -203,7 +203,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Currency Settings', icon: 'work_outline', route: '/settings/general' },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address' },
-        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', roles: ['Super Admin'] }
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', roles: ['Super Admin'] },
+        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', roles: ['Super Admin'] }
       ]
     }
   ];

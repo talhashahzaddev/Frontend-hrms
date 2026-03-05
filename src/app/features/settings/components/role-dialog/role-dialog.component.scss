@@ -1,0 +1,301 @@
+// Role Dialog Styles
+.role-dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 90vh;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+  overflow: hidden;
+
+  // ─── Dialog Header ─────────────────────────────────────────────
+  .dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e9eaf0;
+    flex-shrink: 0;
+
+    .header-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+
+      .header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+
+        mat-icon {
+          color: white;
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+
+      .dialog-title {
+        margin: 0 0 3px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        letter-spacing: -0.3px;
+      }
+
+      .dialog-subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: #6b7280;
+      }
+    }
+
+    .close-btn {
+      color: #9ca3af;
+      flex-shrink: 0;
+      margin-top: -4px;
+      margin-right: -8px;
+
+      &:hover { color: #374151; }
+    }
+  }
+
+  // ─── Dialog Body ───────────────────────────────────────────────
+  .dialog-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &::-webkit-scrollbar { width: 5px; }
+    &::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+    .form-row {
+      .full-width { width: 100%; }
+
+      ::ng-deep {
+        .mat-mdc-text-field-wrapper {
+          background: #f8f9fc;
+          border-radius: 8px !important;
+        }
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: #e5e7eb !important;
+        }
+        .mat-mdc-form-field-infix { padding: 12px 0 !important; }
+        input, textarea { font-size: 14px !important; color: #374151 !important; }
+
+        &.mat-focused .mdc-notched-outline__leading,
+        &.mat-focused .mdc-notched-outline__notch,
+        &.mat-focused .mdc-notched-outline__trailing {
+          border-color: #6366f1 !important;
+          border-width: 1.5px !important;
+        }
+      }
+    }
+
+    // ─── Permissions Section ──────────────────────────────────────
+    .permissions-section {
+      margin-top: 8px;
+
+      .permissions-header {
+        margin-bottom: 12px;
+
+        .permissions-title {
+          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 2px;
+        }
+
+        .permissions-subtitle {
+          font-size: 12.5px;
+          color: #9ca3af;
+        }
+      }
+
+      .menus-loading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 0;
+        color: #9ca3af;
+        font-size: 13px;
+      }
+
+      // ─── Permissions Table ────────────────────────────────────────
+      .permissions-table-wrap {
+        border: 1px solid #e9eaf0;
+        border-radius: 10px;
+        overflow: hidden;
+
+        .permissions-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13px;
+
+          thead {
+            background: #fafafa;
+
+            tr th {
+              padding: 10px 14px;
+              font-size: 11px;
+              font-weight: 700;
+              color: #9ca3af;
+              text-transform: uppercase;
+              letter-spacing: 0.6px;
+              border-bottom: 1px solid #e9eaf0;
+              white-space: nowrap;
+
+              &.col-menu { width: 160px; min-width: 140px; text-align: left; }
+              &.col-section { text-align: left; }
+              &.col-perm { width: 60px; text-align: center; }
+            }
+          }
+
+          tbody {
+            tr {
+              border-bottom: 1px solid #f5f6fa;
+              transition: background 0.1s ease;
+
+              &:hover { background: #fafbff; }
+
+              &:last-child { border-bottom: none; }
+
+              &.first-row {
+                border-top: 1px solid #eff0f5;
+              }
+
+              td {
+                padding: 10px 14px;
+                vertical-align: middle;
+
+                &.col-menu {
+                  vertical-align: top;
+                  padding-top: 14px;
+                  background: #fafafa;
+                  border-right: 1px solid #f0f1f5;
+
+                  .menu-cell {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+
+                    .menu-icon {
+                      font-size: 16px;
+                      width: 16px;
+                      height: 16px;
+                      color: #6366f1;
+                    }
+
+                    .menu-name {
+                      font-size: 13px;
+                      font-weight: 600;
+                      color: #374151;
+                      white-space: nowrap;
+                    }
+                  }
+                }
+
+                &.col-section {
+                  .sub-name {
+                    font-size: 13px;
+                    color: #4b5563;
+                  }
+
+                  .no-sub {
+                    font-size: 12px;
+                    color: #9ca3af;
+                    font-style: italic;
+                  }
+                }
+
+                &.col-perm {
+                  text-align: center;
+
+                  ::ng-deep {
+                    .mat-mdc-checkbox {
+                      .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+                        background-color: #6366f1 !important;
+                        border-color: #6366f1 !important;
+                      }
+                      .mdc-checkbox__ripple { display: none; }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ─── Dialog Footer ─────────────────────────────────────────────
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid #e9eaf0;
+    flex-shrink: 0;
+    background: white;
+
+    .cancel-btn {
+      height: 40px;
+      padding: 0 20px !important;
+      border-radius: 8px !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      color: #6b7280 !important;
+      border-color: #e5e7eb !important;
+
+      &:hover {
+        background: #f9fafb !important;
+        border-color: #d1d5db !important;
+      }
+    }
+
+    .submit-btn {
+      height: 40px;
+      padding: 0 24px !important;
+      border-radius: 8px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+      color: white !important;
+      box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3) !important;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease !important;
+
+      &:hover:not([disabled]) {
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+        transform: translateY(-1px);
+      }
+
+      &[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+      ::ng-deep .mat-mdc-progress-spinner circle { stroke: white !important; }
+    }
+  }
+}
+
+// Dialog panel override
+::ng-deep .mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    border-radius: 14px !important;
+    overflow: hidden;
+  }
+}
