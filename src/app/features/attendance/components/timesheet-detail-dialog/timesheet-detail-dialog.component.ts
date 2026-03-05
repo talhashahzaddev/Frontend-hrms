@@ -1515,9 +1515,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
         notes: raw.notes || raw.Notes || null,
 
-        is_finalized: raw.is_finalized || raw.isFinalized || raw.IsFinalized || false,
-
         is_manager_override: raw.is_manager_override || raw.isManagerOverride || raw.IsManagerOverride || false,
+
+        // Overridden records are NOT payroll-locked — only truly finalized records are
+        is_finalized: (raw.is_finalized || raw.isFinalized || raw.IsFinalized || false)
+                       && !(raw.is_manager_override || raw.isManagerOverride || raw.IsManagerOverride),
 
         hasApprovedRequest: raw.hasApprovedRequest || raw.HasApprovedRequest || raw.has_approved_request || false,
 
@@ -1571,7 +1573,9 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       });
 
       if (realRecords.length > 0 && realRecords.every((d: any) =>
-          (d as any).is_finalized === true || (d as any).isFinalized === true)) {
+          // Only truly finalized records count — overridden records are NOT payroll-locked
+          ((d as any).is_finalized === true || (d as any).isFinalized === true)
+          && !(d as any).is_manager_override)) {
         derivedIsFinalized = true;
       }
     }

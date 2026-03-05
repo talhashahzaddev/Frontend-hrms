@@ -53,6 +53,20 @@
         <button class="icon-action-btn" (click)="loadManagerReviewDashboard()" [disabled]="isLoading" matTooltip="Refresh data">
           <mat-icon [class.spin]="isLoading">refresh</mat-icon>
         </button>
+
+        @if (canFinalizeAll()) {
+          <button class="finalize-all-btn"
+                  (click)="finalizeAll()"
+                  [disabled]="isFinalizeAllProcessing"
+                  matTooltip="Finalize all employees for payroll">
+            @if (isFinalizeAllProcessing) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <mat-icon>lock</mat-icon>
+            }
+            <span>Finalize All</span>
+          </button>
+        }
       </div>
     </div>
 

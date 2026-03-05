@@ -312,7 +312,7 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
         this.pkg.rejectedCount++;
       }
 
-      if (r.isFinalized) {
+      if (r.isFinalized && !r.isManagerOverride) {
         this.pkg.finalizedCount++;
         this.pkg.finalizedDays++;
       }
@@ -324,7 +324,8 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
       r.hasRecord && !!r.attendanceId
     );
     if (recordsWithAttendance.length > 0) {
-      const derivedFinalized = recordsWithAttendance.every(r => r.isFinalized);
+      // Only truly finalized (not overridden) records count toward deriving employee as fully finalized
+      const derivedFinalized = recordsWithAttendance.every(r => r.isFinalized && !r.isManagerOverride);
       this.pkg.isFinalized = (this.pkg.isFinalized === true) || derivedFinalized;
     }
 

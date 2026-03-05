@@ -35,6 +35,7 @@ import {
 import { RejectRequestDialogComponent } from '../reject-request-dialog/reject-request-dialog.component';
 import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../manager-override-dialog/manager-override-dialog.component';
 import { EmployeeReviewDetailDialogComponent, EmployeeReviewDetailDialogData } from '../employee-review-detail-dialog/employee-review-detail-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog_component';
 
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
@@ -80,6 +81,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   processingRequestIds = new Set<string>();
 
   processingPackageIds = new Set<string>();
+  isFinalizeAllProcessing = false;
 
   statusFilter: string = 'all';
   departmentFilter: string = 'all';
@@ -466,6 +468,69 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       });
   }
 
+  /* ─── Finalize ALL employees for the current timesheet ── */
+  canFinalizeAll(): boolean {
+    if (!this.selectedTimesheetId || this.selectedTimesheetId === EMPTY_GUID) return false;
+    if (this.employeePackages.length === 0) return false;
+    // Block if every employee is already finalized
+    if (this.employeePackages.every(p => p.isFinalized)) return false;
+    // Block if ANY employee still has pending requests
+    if (this.employeePackages.some(p => (p.pendingRequestCount || 0) > 0)) return false;
+    return true;
+  }
+
+  finalizeAll(): void {
+    if (!this.canFinalizeAll()) return;
+
+    const unfinalizedCount = this.employeePackages.filter(p => !p.isFinalized).length;
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '520px',
+      data: {
+        title: 'Finalize All Employees',
+        message: `This will finalize records for ${unfinalizedCount} employee(s) and lock them for payroll. This action cannot be undone.`,
+        confirmLabel: 'Finalize All',
+        confirmColor: 'warn',
+        icon: 'lock'
+      } as ConfirmationDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+
+      this.isFinalizeAllProcessing = true;
+      this.attendanceService.finalizeTimesheetBatch(this.selectedTimesheetId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (result) => {
+            this.isFinalizeAllProcessing = false;
+            const count = result.finalizedCount || 0;
+            this.notificationService.showSuccess(
+              `Successfully finalized ${count} record${count !== 1 ? 's' : ''} for payroll`
+            );
+            // Optimistically mark all packages as finalized
+            this.employeePackages.forEach(pkg => {
+              pkg.isFinalized = true;
+              pkg.fullMonthRecords.forEach(r => {
+                const s = (r.originalStatus || '').toLowerCase().replace(/[_ ]/g, '');
+                if (s !== 'norecord' && s !== 'weekend') {
+                  r.isFinalized = true;
+                }
+              });
+            });
+            this.applyPackageFilter();
+            this.refreshListQuietly();
+          },
+          error: (err) => {
+            this.isFinalizeAllProcessing = false;
+            this.notificationService.showError(
+              err?.error?.message || err?.message || 'Failed to finalize all employees'
+            );
+          }
+        });
+    });
+  }
+
   finalizeEmployeeApprovals(pkg: EmployeeReviewPackage): void {
     if (pkg.isFinalized) {
       this.notificationService.showError(`${pkg.employeeName}'s records are already finalized.`);
@@ -670,7 +735,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       else if (reqStatus === 'approved' || (!isDraft && !!r.hasApprovedRequest)) approved++;
       else if (reqStatus === 'rejected') rejected++;
 
-      if (r.isFinalized) finalized++;
+      if (r.isFinalized && !r.isManagerOverride) finalized++;
       if (r.hasDraftRequest) hasDraft = true;
     });
 
@@ -699,7 +764,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     });
 
     const computedIsFinalized = elapsedWorkRecords.length > 0
-      && elapsedWorkRecords.every(r => r.isFinalized === true);
+      && elapsedWorkRecords.every(r => r.isFinalized === true && !r.isManagerOverride);
     // Preserve API-level isFinalized (from backend) as authoritative fallback
     pkg.isFinalized = computedIsFinalized || (pkg.isFinalized === true);
     pkg.isUntouched = hasRecords === 0 && pending === 0 && approved === 0 && rejected === 0;

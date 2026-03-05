@@ -689,8 +689,10 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
                 status: r.status || r.Status || 'No Record',
                 totalHours: r.totalHours ?? r.TotalHours ?? 0,
                 notes: r.notes || r.Notes || undefined,
-                is_finalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
                 is_manager_override: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
+                // Overridden records are NOT payroll-locked — only truly finalized records are
+                is_finalized: (r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false)
+                               && !(r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride),
                 hasApprovedRequest: r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest || false,
                 hasRejectedRequest: r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest || false,
                 hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
@@ -950,8 +952,10 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
       hasDraftRequest:    isDraft,
       hasPendingRequest:  isPending && !isDraft && !isApproved && !isRejected,
       hasApprovedRequest: isApproved,
-      isFinalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
       isManagerOverride: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
+      // Overridden records are NOT payroll-locked — only truly finalized records are
+      isFinalized: (r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false)
+                    && !(r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride),
       requestId: r.requestId || r.RequestId || undefined,
       requestStatus: derivedStatus
     };
