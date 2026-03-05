@@ -286,7 +286,7 @@ export class AssetsService {
   // =========================
   // ASSET ASSIGNMENT
   // =========================
-  assignAsset(assetId: string, employeeId: string, assignDate: string, returnDate?: string): Observable<any> {
+  assignAsset(assetId: string, employeeId: string, assignDate: string, returnDate?: string, condition?: string): Observable<any> {
     console.log('================================');
     console.log('🔍 ASSET ASSIGNMENT REQUEST');
     console.log('================================');
@@ -294,6 +294,7 @@ export class AssetsService {
     console.log('Employee ID:', employeeId);
     console.log('Assign Date:', assignDate);
     console.log('Return Date:', returnDate || 'null');
+    console.log('Condition:', condition || 'Good');
 
     if (!assetId || String(assetId).trim() === '') {
       return throwError(() => new Error('Asset ID is required'));
@@ -307,7 +308,8 @@ export class AssetsService {
       assetId: String(assetId).trim(),
       employeeId: String(employeeId).trim(),
       assignDate,
-      returnDate: returnDate ? String(returnDate).trim() : null
+      returnDate: returnDate ? String(returnDate).trim() : null,
+      condition: condition || 'Good'
     };
 
     console.log('📦 Sending payload:', JSON.stringify(assignmentPayload, null, 2));
