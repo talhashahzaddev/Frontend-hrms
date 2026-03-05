@@ -1,154 +1,171 @@
-<div class="public-career-container">
-    <div class="page-header">
-        <div class="header-content">
-            <h1 class="page-title">
-                <mat-icon>work</mat-icon>
-                Job Openings
-            </h1>
-            <p class="page-subtitle">Discover opportunities to grow and innovate with us.</p>
-        </div>
-    </div>
+<div class="career-page">
 
-    <!-- Filters -->
-    <mat-card class="filters-card">
-        <mat-card-content>
-            <form [formGroup]="searchForm" class="filters-form" (ngSubmit)="searchJobs()">
-                <mat-form-field appearance="outline" class="search-field">
-                    <mat-label>Search</mat-label>
-                    <input matInput formControlName="search" placeholder="Role, location, department, skills...">
-                    <mat-icon matSuffix>search</mat-icon>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="filter-field">
+    <!-- ═══════════════════ HERO BANNER (background only) ═══════════════════ -->
+    <section class="hero-banner"
+        [style.backgroundImage]="companyDetails?.careerBgImageUrl ? 'url(' + companyDetails!.careerBgImageUrl + ')' : ''">
+        <div class="hero-banner-overlay"></div>
+    </section>
+
+    <!-- ═══════════════════ COMPANY INFO SECTION ═══════════════════ -->
+    <section class="company-info-section">
+        <div class="company-info-inner">
+            <!-- Logo + Name -->
+            <div class="company-header" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
+                <div class="company-logo-wrap" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" class="company-logo" />
+                </div>
+                <div class="company-meta">
+                    <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
+                    <span class="company-hiring-badge">
+                        <span class="hiring-dot"></span>
+                        We're Hiring
+                    </span>
+                </div>
+            </div>
+            <!-- Header text & Description -->
+            <div class="company-text">
+                <h1 class="company-headline" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'">
+                </h1>
+                <div class="company-description" *ngIf="companyDetails?.careerDescription"
+                    [innerHTML]="companyDetails!.careerDescription">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FILTER BAR ═══════════════════ -->
+    <section class="filter-section">
+        <form [formGroup]="searchForm" class="filter-glass-bar" (ngSubmit)="searchJobs()">
+            <div class="filter-input-group">
+                <mat-icon class="filter-input-icon">search</mat-icon>
+                <input matInput formControlName="search" placeholder="Search jobs by title, skill, keyword..."
+                    class="filter-text-input" />
+            </div>
+            <div class="filter-select-group">
+                <mat-form-field appearance="outline" class="filter-select">
                     <mat-label>Status</mat-label>
                     <mat-select formControlName="status">
                         <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
                     </mat-select>
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="filter-field date-field">
-                    <mat-label>Last date to apply (from)</mat-label>
+                <mat-form-field appearance="outline" class="filter-select filter-date">
+                    <mat-label>Last date from</mat-label>
                     <input matInput [matDatepicker]="lastDateFromPicker" formControlName="lastDateFrom"
                         placeholder="From">
                     <mat-datepicker-toggle matIconSuffix [for]="lastDateFromPicker"></mat-datepicker-toggle>
                     <mat-datepicker #lastDateFromPicker></mat-datepicker>
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="filter-field date-field">
-                    <mat-label>Last date to apply (to)</mat-label>
+                <mat-form-field appearance="outline" class="filter-select filter-date">
+                    <mat-label>Last date to</mat-label>
                     <input matInput [matDatepicker]="lastDateToPicker" formControlName="lastDateTo" placeholder="To">
                     <mat-datepicker-toggle matIconSuffix [for]="lastDateToPicker"></mat-datepicker-toggle>
                     <mat-datepicker #lastDateToPicker></mat-datepicker>
                 </mat-form-field>
-                <div class="filter-actions">
-                    <button mat-flat-button type="submit" class="apply-filters-btn">
-                        <mat-icon>filter_list</mat-icon>
-                        Apply
-                    </button>
-                    <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFilters()">
-                        <mat-icon>clear</mat-icon>
-                        Clear
-                    </button>
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="filter-btn">
+                    <mat-icon>tune</mat-icon>
+                    Filter
+                </button>
+                <button type="button" class="filter-btn filter-btn-clear" (click)="clearFilters()" *ngIf="hasFilters()">
+                    <mat-icon>clear</mat-icon>
+                    Clear
+                </button>
+            </div>
+        </form>
+    </section>
 
-    <!-- Loading -->
-    <div class="jobs-loading" *ngIf="isLoading">
-        <mat-spinner diameter="40"></mat-spinner>
-        <span>Fetching the best roles for you...</span>
-    </div>
 
-    <!-- Feed: social post style -->
-    <div class="jobs-feed-wrapper" *ngIf="!isLoading">
-        <div class="jobs-feed" *ngIf="jobs.length > 0">
-            <article class="job-post-card" *ngFor="let job of jobs">
-                <div class="job-post-header">
-                    <div class="job-post-avatar">
-                        <mat-icon>work</mat-icon>
+    <!-- ═══════════════════ LOADING ═══════════════════ -->
+    <section class="content-section" *ngIf="isLoading">
+        <div class="loading-glass-card">
+            <mat-spinner diameter="36"></mat-spinner>
+            <span>Fetching opportunities...</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ JOB LISTINGS ═══════════════════ -->
+    <section class="content-section" *ngIf="!isLoading">
+
+        <div class="jobs-count-bar" *ngIf="jobs.length > 0">
+            <span class="jobs-count-text">{{ totalCount }} open position{{ totalCount !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="job-list" *ngIf="jobs.length > 0">
+            <article class="job-row-card" *ngFor="let job of jobs">
+
+                <!-- Left: Title + Location -->
+                <div class="job-row-left">
+                    <div class="job-row-title-group">
+                        <h3 class="job-row-title">{{ job.jobRoleName }}</h3>
+                        <span class="job-code-badge" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
                     </div>
-                    <div class="job-post-heading">
-                        <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
-                        <p class="job-post-meta" *ngIf="getMetaLine(job)">
-                            {{ getMetaLine(job) }}
-                        </p>
-                        <p class="job-post-meta job-post-date" *ngIf="job.postedDate">
-                            Posted {{ job.postedDate | date:'mediumDate' }}
-                        </p>
-                    </div>
-                    <div class="job-post-status">
-                        <span class="status-chip" [class.status-open]="job.status === 'Open'"
-                            [class.status-closed]="job.status === 'Closed'"
-                            [class.status-draft]="job.status === 'Draft'">
-                            {{ job.status }}
+                    <div class="job-row-subtitle">
+                        <span *ngIf="job.location">
+                            <mat-icon class="inline-icon">location_on</mat-icon>
+                            {{ job.location }}
+                        </span>
+                        <span *ngIf="job.workMode" class="work-mode-label">
+                            <mat-icon class="inline-icon">{{ job.workMode === 'Remote' ? 'wifi' : (job.workMode ===
+                                'Hybrid' ? 'sync_alt' : 'business') }}</mat-icon>
+                            {{ job.workMode }}
                         </span>
                     </div>
                 </div>
-                <div class="job-post-body" *ngIf="job.jobIntroduction">
-                    <p class="job-intro">{{ job.jobIntroduction }}</p>
-                </div>
-                <div class="job-post-tags" *ngIf="getExperienceText(job) || getCtcText(job) || job.vacancies">
-                    <span class="job-tag" *ngIf="getExperienceText(job)">
-                        <mat-icon>schedule</mat-icon>
-                        {{ getExperienceText(job) }}
-                    </span>
-                    <span class="job-tag" *ngIf="getCtcText(job)">
-                        <mat-icon>payments</mat-icon>
-                        {{ getCtcText(job) }}
-                    </span>
-                    <span class="job-tag" *ngIf="job.vacancies">
-                        <mat-icon>group</mat-icon>
-                        {{ job.vacancies }} {{ job.vacancies === 1 ? 'vacancy' : 'vacancies' }}
+
+                <!-- Middle: Badges -->
+                <div class="job-row-badges">
+                    <span class="badge badge-dept" *ngIf="job.departmentName">{{ job.departmentName }}</span>
+                    <span class="badge badge-type" *ngIf="job.employmentType">{{ job.employmentType }}</span>
+                    <span class="badge badge-exp" *ngIf="getExperienceText(job)">{{ getExperienceText(job) }}</span>
+                    <span class="badge badge-posted" *ngIf="getTimeAgo(job.createdAt)">
+                        <mat-icon class="badge-icon">schedule</mat-icon>
+                        {{ getTimeAgo(job.createdAt) }}
                     </span>
                 </div>
-                <div class="job-post-footer">
-                    <span class="job-last-date" *ngIf="job.lastDate">
-                        Apply by {{ job.lastDate | date:'mediumDate' }}
-                    </span>
-                    <div class="job-post-actions">
-                        <button mat-stroked-button (click)="viewJobDetails(job)" class="action-btn view-btn"
-                            matTooltip="View details">
-                            <mat-icon>visibility</mat-icon>
-                            View details
-                        </button>
-                        <button mat-flat-button (click)="applyForJob(job)" class="action-btn apply-btn">
-                            <mat-icon>how_to_reg</mat-icon>
-                            Apply Now
-                        </button>
-                    </div>
+
+                <!-- Right: Apply Button -->
+                <div class="job-row-right">
+                    <!-- <button class="btn-view" (click)="viewJobDetails(job)">View</button> -->
+                    <button class="btn-apply" (click)="applyForJob(job)">Apply Now
+                        <mat-icon class="btn-arrow">arrow_forward</mat-icon>
+                    </button>
                 </div>
             </article>
         </div>
 
         <!-- Pagination -->
-        <div class="jobs-pagination" *ngIf="jobs.length > 0 && totalCount > 0">
+        <div class="pagination-glass-card" *ngIf="jobs.length > 0 && totalCount > 0">
             <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
                 [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
             </mat-paginator>
         </div>
-    </div>
 
-    <!-- Empty state: no results (filters applied) -->
-    <mat-card class="empty-card" *ngIf="!isLoading && jobs.length === 0 && hasFilters()">
-        <mat-card-content>
+        <!-- Empty State: with filters -->
+        <div class="empty-glass-card" *ngIf="jobs.length === 0 && hasFilters()">
             <mat-icon class="empty-icon">search_off</mat-icon>
-            <p class="empty-text">No openings match your filters.</p>
-            <p class="empty-subtext">Try changing search or status.</p>
-            <button mat-stroked-button (click)="clearFilters()">
-                <mat-icon>clear</mat-icon>
-                Clear filters
+            <p class="empty-title">No positions match your filters</p>
+            <p class="empty-sub">Try adjusting your search criteria or clearing filters.</p>
+            <button class="btn-apply" (click)="clearFilters()">
+                <mat-icon>refresh</mat-icon>
+                Clear Filters
             </button>
-        </mat-card-content>
-    </mat-card>
+        </div>
 
-    <!-- Empty state: no jobs at all -->
-    <mat-card class="empty-card" *ngIf="!isLoading && jobs.length === 0 && !hasFilters()">
-        <mat-card-content>
+        <!-- Empty State: no jobs -->
+        <div class="empty-glass-card" *ngIf="jobs.length === 0 && !hasFilters()">
             <mat-icon class="empty-icon">work_off</mat-icon>
-            <p class="empty-text">No job openings yet.</p>
-            <p class="empty-subtext">Check back soon for new opportunities!</p>
-        </mat-card-content>
-    </mat-card>
+            <p class="empty-title">No openings at the moment</p>
+            <p class="empty-sub">Check back soon — exciting opportunities are on the way!</p>
+        </div>
+    </section>
 
-    <!-- Job Details Dialog -->
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="career-footer">
+        <span>© {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.</span>
+    </footer>
+
+    <!-- ═══════════════════ JOB DETAILS DIALOG ═══════════════════ -->
     <ng-template #jobDetailsDialog let-job>
         <div class="job-details-dialog">
             <div class="dialog-header">
@@ -201,7 +218,7 @@
 
             <div class="dialog-footer">
                 <button mat-button (click)="closeJobDetailsDialog()">Close</button>
-                <button mat-flat-button color="primary" (click)="applyForJob(job)" class="apply-btn">
+                <button mat-flat-button color="primary" (click)="applyForJob(job)" class="btn-apply">
                     Apply Now
                 </button>
             </div>

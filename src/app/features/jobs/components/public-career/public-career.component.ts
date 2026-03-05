@@ -14,11 +14,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, switchMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto, PagedResult } from '@core/models/jobs.models';
+
+export interface CompanyCareerDetails {
+    organizationId: string;
+    name?: string | null;
+    logoUrl?: string | null;
+    careerBgImageUrl?: string | null;
+    careerHeaderText?: string | null;
+    careerDescription?: string | null;
+}
 
 @Component({
     selector: 'app-public-career',
@@ -52,19 +61,17 @@ export class PublicCareerComponent implements OnInit {
     totalCount = 0;
     totalPages = 0;
 
-    // Statistics
-    totalOpenings = 0;
-    totalLocations = 0;
-    totalDepartments = 0;
+    // Company career details from API
+    companyDetails: CompanyCareerDetails | null = null;
 
     // Filter options
     statusOptions = [
-        { value: '', label: 'All statuses' },
+        { value: '', label: 'All Statuses' },
         { value: 'Open', label: 'Open' },
         { value: 'Closed', label: 'Closed' }
     ];
-    departments: string[] = [];
-    locations: string[] = [];
+
+    currentYear = new Date().getFullYear();
 
     private currentJob: JobOpeningDto | null = null;
 
@@ -83,10 +90,11 @@ export class PublicCareerComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.loadStatistics();
-        this.loadFilterOptions();
+        this.loadCompanyDetails();
         this.searchJobs();
     }
+
+    // ── Domain helper ──
     private getDomainFromUrl(): string {
         const hostname = window.location.hostname;
 
@@ -98,7 +106,6 @@ export class PublicCareerComponent implements OnInit {
             return hostname.split('.localhost')[0];
         }
 
-        // Simple fallback: if there's a dot, take the first part
         const parts = hostname.split('.');
         if (parts.length > 1) {
             return parts[0];
@@ -107,47 +114,27 @@ export class PublicCareerComponent implements OnInit {
         return hostname;
     }
 
-    private setupSearch(): void {
-        this.searchForm.valueChanges.pipe(
-            debounceTime(300),
-            distinctUntilChanged(),
-            switchMap(() => this.loadJobs())
-        ).subscribe();
-    }
-
-    private loadStatistics(): void {
+    // ── Load Company Career Details ──
+    private loadCompanyDetails(): void {
         const domain = this.getDomainFromUrl();
-        this.publicCareerService.getExternalJobOpeningsPaged(domain, { page: 1, pageSize: 1, status: 'Open' }).subscribe({
-            next: (result) => {
-                this.totalOpenings = result.totalCount || 0;
+        this.publicCareerService.getCompanyCareerDetails(domain).subscribe({
+            next: (details) => {
+                this.companyDetails = details;
+            },
+            error: (err) => {
+                console.error('Failed to load company career details', err);
             }
         });
     }
 
-    private loadFilterOptions(): void {
-        const domain = this.getDomainFromUrl();
-        this.publicCareerService.getExternalJobOpeningsPaged(domain, { page: 1, pageSize: 1000, status: 'Open' }).subscribe({
-            next: (result) => {
-                const jobs = result.data || [];
-                this.departments = [...new Set(jobs.map(j => j.departmentName).filter(Boolean) as string[])];
-                this.locations = [...new Set(jobs.map(j => j.location).filter(Boolean) as string[])];
-                this.calculateStats();
-            }
-        });
-    }
-
-    private calculateStats(): void {
-        this.totalLocations = this.locations.length;
-        this.totalDepartments = this.departments.length;
-    }
-
+    // ── Load Jobs ──
     private loadJobs(): Observable<PagedResult<JobOpeningDto>> {
         this.isLoading = true;
         const { search, status, lastDateFrom, lastDateTo } = this.searchForm.value;
         const domain = this.getDomainFromUrl();
 
         return this.publicCareerService.getExternalJobOpeningsPaged(domain, {
-            search: search || undefined,
+            search: search?.trim() || undefined,
             status: status || undefined,
             lastDateFrom: lastDateFrom ? lastDateFrom.toISOString().split('T')[0] : undefined,
             lastDateTo: lastDateTo ? lastDateTo.toISOString().split('T')[0] : undefined,
@@ -199,7 +186,6 @@ export class PublicCareerComponent implements OnInit {
     }
 
     applyForJob(job: JobOpeningDto): void {
-        // Navigate to apply page or open application form
         this.router.navigate(['/jobs/apply', job.jobId]);
     }
 
@@ -230,4 +216,27 @@ export class PublicCareerComponent implements OnInit {
         if (job.ctcMax != null) return `Up to ${cur} ${job.ctcMax}`;
         return '';
     }
+
+    getTimeAgo(dateStr?: string | null): string {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
+
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHrs = Math.floor(diffMin / 60);
+        const diffDays = Math.floor(diffHrs / 24);
+        const diffWeeks = Math.floor(diffDays / 7);
+        const diffMonths = Math.floor(diffDays / 30);
+
+        if (diffSec < 60) return 'Just now';
+        if (diffMin < 60) return `${diffMin} ${diffMin === 1 ? 'minute' : 'minutes'} ago`;
+        if (diffHrs < 24) return `${diffHrs} ${diffHrs === 1 ? 'hour' : 'hours'} ago`;
+        if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+        if (diffWeeks < 5) return `${diffWeeks} ${diffWeeks === 1 ? 'week' : 'weeks'} ago`;
+        return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+    }
 }
+
