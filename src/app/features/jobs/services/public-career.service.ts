@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
     JobOpeningDto,
+    JobApplicationDto,
+    CreateJobApplicationRequest,
     ServiceResponse,
     PagedResult
 } from '../../../core/models/jobs.models';
@@ -14,6 +16,7 @@ import {
 })
 export class PublicCareerService {
     private readonly apiUrl = `${environment.apiUrl}/Career`;
+    private readonly uploadsUrl = `${environment.apiUrl}/uploads`;
 
     constructor(private http: HttpClient) { }
 
@@ -61,12 +64,34 @@ export class PublicCareerService {
             );
     }
 
-    getExternalJobOpeningById(id: string): Observable<JobOpeningDto | null> {
+    getExternalJobByJobCode(jobCode: string, domain: string): Observable<JobOpeningDto | null> {
         return this.http
-            .get<ServiceResponse<JobOpeningDto>>(`${this.apiUrl}/openings/${id}`)
+            .get<ServiceResponse<JobOpeningDto>>(`${this.apiUrl}/openings/${jobCode}`, { params: { domain } })
             .pipe(
                 map((res) => (res.success && res.data ? res.data : null))
             );
+    }
+
+    applyJobByExternalCandidate(domain: string, request: CreateJobApplicationRequest): Observable<ServiceResponse<JobApplicationDto>> {
+        return this.http
+            .post<ServiceResponse<JobApplicationDto>>(`${this.apiUrl}/applications`, request, { params: { domain } });
+    }
+
+    uploadFile(file: File): Observable<string> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url: string }>(`${this.uploadsUrl}/files`, formData).pipe(
+            map((res) => {
+                if (!res?.url) throw new Error('Upload failed');
+                return res.url;
+            })
+        );
+    }
+
+    deleteFile(fileUrl: string): Observable<boolean> {
+        return this.http.delete<{ message: string }>(`${this.uploadsUrl}/files`, { body: { fileUrl } }).pipe(
+            map(() => true)
+        );
     }
 
     getCompanyCareerDetails(domain: string): Observable<any> {
