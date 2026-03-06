@@ -3,24 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-
-export interface ApiMenu {
-  menuId: string;
-  menuName: string;
-  icon: string;
-  subMenus: {
-    subMenuId: string;
-    subMenuName: string;
-    icon: string | null;
-  }[];
-}
-
-export interface MenusResponse {
-  data: ApiMenu[];
-  success: boolean;
-  message: string;
-  errors: null | any;
-}
+import { MenusResponse } from '../../../core/models/role.models';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +13,7 @@ export class MenuService {
 
   constructor(private http: HttpClient) {}
 
-  /** GET /api/menus - Retrieve all menus and submenus */
+  /** GET /Auth/menus - Retrieve all menus, submenus and their actions */
   getMenus(): Observable<MenusResponse> {
     return this.http.get<MenusResponse>(`${this.apiUrl}/menus`);
   }

@@ -6,12 +6,20 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { RoleService } from '../../services/role.service';
 import { MenuService } from '../../services/menu.service';
-import { Role, MenuPermissionGroup, SubMenuPermission } from '../../../../core/models/role.models';
+import { NotificationService } from '../../../../core/services/notification.service';
+import {
+  Role,
+  MenuPermissionGroup,
+  SubMenuPermissionGroup,
+  ActionPermission,
+  CreateRoleRequest,
+  ApiMenu
+} from '../../../../core/models/role.models';
 
 export interface RoleDialogData {
   mode: 'add' | 'edit' | 'view';
@@ -30,8 +38,8 @@ export interface RoleDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './role-dialog.component.html',
   styleUrls: ['./role-dialog.component.scss']
@@ -41,6 +49,7 @@ export class RoleDialogComponent implements OnInit {
   permissionGroups: MenuPermissionGroup[] = [];
   isLoadingMenus = false;
   isSaving = false;
+  grantFullAccess = false;
 
   get isViewMode(): boolean { return this.data.mode === 'view'; }
   get isEditMode(): boolean { return this.data.mode === 'edit'; }
@@ -50,7 +59,8 @@ export class RoleDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<RoleDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: RoleDialogData,
     private roleService: RoleService,
-    private menuService: MenuService
+    private menuService: MenuService,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +71,10 @@ export class RoleDialogComponent implements OnInit {
   private buildForm(): void {
     const role = this.data.role;
     this.roleForm = this.fb.group({
-      roleName: [{ value: role?.roleName || '', disabled: this.isViewMode }, [Validators.required, Validators.minLength(2)]],
+      roleName: [
+        { value: role?.roleName || '', disabled: this.isViewMode },
+        [Validators.required, Validators.minLength(2)]
+      ],
       description: [{ value: role?.description || '', disabled: this.isViewMode }]
     });
   }
@@ -71,62 +84,94 @@ export class RoleDialogComponent implements OnInit {
     this.menuService.getMenus().subscribe({
       next: (response) => {
         this.buildPermissionGroups(response.data);
-        // If editing or viewing, populate existing permissions
         if ((this.isEditMode || this.isViewMode) && this.data.role?.menus) {
-          this.populatePermissions(this.data.role.menus);
+          this.populateExistingPermissions(this.data.role.menus);
         }
         this.isLoadingMenus = false;
       },
       error: () => {
+        this.notificationService.showError('Failed to load menu permissions');
         this.isLoadingMenus = false;
       }
     });
   }
 
-  private buildPermissionGroups(menus: any[]): void {
-    this.permissionGroups = menus.map(menu => {
-      const subMenus: SubMenuPermission[] = menu.subMenus?.length
-        ? menu.subMenus.map((sub: any) => ({
-            subMenuId: sub.subMenuId,
-            subMenuName: sub.subMenuName,
-            canView: false,
-            canAdd: false,
-            canEdit: false,
-            canDelete: false
-          }))
-        : [{
-            subMenuId: menu.menuId + '_none',
-            subMenuName: '__none__',
-            canView: false,
-            canAdd: false,
-            canEdit: false,
-            canDelete: false
-          }];
-
-      return {
-        menuId: menu.menuId,
-        menuName: menu.menuName,
-        icon: menu.icon,
-        subMenus
-      };
-    });
+  private buildPermissionGroups(menus: ApiMenu[]): void {
+    this.permissionGroups = menus.map(menu => ({
+      menuId: menu.menuId,
+      menuName: menu.menuName,
+      icon: menu.icon,
+      subMenus: (menu.subMenus || []).map(sub => ({
+        subMenuId: sub.subMenuId,
+        subMenuName: sub.subMenuName,
+        actions: (sub.actions || []).map(action => ({
+          actionId: action.actionId,
+          actionName: action.actionName,
+          actionKey: action.actionKey,
+          hasPermission: false
+        }))
+      }))
+    }));
   }
 
-  private populatePermissions(existingMenus: any[]): void {
-    existingMenus.forEach(existingMenu => {
-      const group = this.permissionGroups.find(g => g.menuId === existingMenu.menuId);
-      if (!group) return;
-      existingMenu.subMenus?.forEach((existingSub: any) => {
-        const sub = group.subMenus.find(s => s.subMenuId === existingSub.subMenuId);
-        if (sub) {
-          sub.canView = existingSub.canView;
-          sub.canAdd = existingSub.canAdd;
-          sub.canEdit = existingSub.canEdit;
-          sub.canDelete = existingSub.canDelete;
-        }
+  private populateExistingPermissions(existingMenus: any[]): void {
+  existingMenus.forEach(existingMenu => {
+    const group = this.permissionGroups.find(g => g.menuId === existingMenu.menuId);
+    if (!group) return;
+
+    existingMenu.subMenus?.forEach((existingSub: any) => {
+      const sub = group.subMenus.find(s => s.subMenuId === existingSub.subMenuId);
+      if (!sub) return;
+
+      existingSub.actions?.forEach((existingAction: any) => {
+        // FIX: match by actionKey instead of actionId
+        const action = sub.actions.find(a => a.actionKey === existingAction.actionKey);
+        if (action) action.hasPermission = existingAction.hasPermission;
       });
     });
+  });
+}
+
+  // ─── Toggle helpers ────────────────────────────────────────────
+
+  private getAllActionsForMenu(group: MenuPermissionGroup): ActionPermission[] {
+    return group.subMenus.flatMap(sub => sub.actions);
   }
+
+  isMenuFullyEnabled(group: MenuPermissionGroup): boolean {
+    const all = this.getAllActionsForMenu(group);
+    return all.length > 0 && all.every(a => a.hasPermission);
+  }
+
+  isMenuPartiallyEnabled(group: MenuPermissionGroup): boolean {
+    const all = this.getAllActionsForMenu(group);
+    const enabled = all.filter(a => a.hasPermission).length;
+    return enabled > 0 && enabled < all.length;
+  }
+
+  toggleAllMenuActions(group: MenuPermissionGroup, event: Event): void {
+    if (this.isViewMode) return;
+    const checked = (event.target as HTMLInputElement).checked;
+    this.getAllActionsForMenu(group).forEach(a => a.hasPermission = checked);
+  }
+
+  onGrantFullAccessChange(): void {
+    this.permissionGroups.forEach(group =>
+      this.getAllActionsForMenu(group).forEach(a => a.hasPermission = this.grantFullAccess)
+    );
+  }
+
+  // ─── Count helpers (for card footer) ──────────────────────────
+
+  getEnabledCount(group: MenuPermissionGroup): number {
+    return this.getAllActionsForMenu(group).filter(a => a.hasPermission).length;
+  }
+
+  getTotalCount(group: MenuPermissionGroup): number {
+    return this.getAllActionsForMenu(group).length;
+  }
+
+  // ─── Icon map ──────────────────────────────────────────────────
 
   getMenuIcon(menuName: string): string {
     const iconMap: Record<string, string> = {
@@ -148,36 +193,31 @@ export class RoleDialogComponent implements OnInit {
     return iconMap[menuName] || 'widgets';
   }
 
+  // ─── Submit ────────────────────────────────────────────────────
+
   onSubmit(): void {
     if (this.roleForm.invalid || this.isSaving) return;
-
     this.isSaving = true;
 
-    // Build menus payload – only include menus that have at least one sub with a permission
     const menus = this.permissionGroups
-      .map(group => {
-        const validSubs = group.subMenus
-          .filter(s => s.subMenuName !== '__none__')
+      .map(group => ({
+        menuId: group.menuId,
+        subMenus: group.subMenus
+          .filter(sub => sub.actions.length > 0)
           .map(sub => ({
             subMenuId: sub.subMenuId,
-            canView: sub.canView,
-            canAdd: sub.canAdd,
-            canEdit: sub.canEdit,
-            canDelete: sub.canDelete
-          }));
-
-        return {
-          menuId: group.menuId,
-          subMenus: validSubs
-        };
-      })
+            actions: sub.actions.map(action => ({
+              actionId: action.actionId,
+              hasPermission: action.hasPermission
+            }))
+          }))
+      }))
       .filter(m => m.subMenus.length > 0);
 
-    const payload = {
+    const payload: CreateRoleRequest = {
       roleName: this.roleForm.get('roleName')!.value,
       description: this.roleForm.get('description')!.value || '',
       isSystemRole: false,
-      organizationId: '00000000-0000-0000-0000-000000000000', // Backend overwrites with token org
       menus
     };
 
@@ -192,6 +232,9 @@ export class RoleDialogComponent implements OnInit {
       },
       error: () => {
         this.isSaving = false;
+        this.notificationService.showError(
+          this.isEditMode ? 'Failed to update role' : 'Failed to create role'
+        );
       }
     });
   }
