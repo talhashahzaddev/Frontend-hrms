@@ -1,0 +1,130 @@
+<h2 mat-dialog-title>
+  <mat-icon>contact_mail</mat-icon>
+  Inquiry Details
+</h2>
+
+<mat-dialog-content>
+  <!-- Contact Info -->
+  <div class="detail-section">
+    <h3 class="section-title">Contact Information</h3>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">Full Name</span>
+        <span class="detail-value">{{ inquiry.fullName }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Email</span>
+        <span class="detail-value">
+          <a [href]="'mailto:' + inquiry.email">{{ inquiry.email }}</a>
+        </span>
+      </div>
+      @if (inquiry.phone) {
+        <div class="detail-item">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value">{{ inquiry.phone }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Company Info -->
+  <div class="detail-section">
+    <h3 class="section-title">Company Details</h3>
+    <div class="detail-grid">
+      @if (inquiry.companyName) {
+        <div class="detail-item">
+          <span class="detail-label">Company</span>
+          <span class="detail-value">{{ inquiry.companyName }}</span>
+        </div>
+      }
+      @if (inquiry.companySize) {
+        <div class="detail-item">
+          <span class="detail-label">Size</span>
+          <span class="detail-value">{{ inquiry.companySize }}</span>
+        </div>
+      }
+      @if (inquiry.industry) {
+        <div class="detail-item">
+          <span class="detail-label">Industry</span>
+          <span class="detail-value">{{ inquiry.industry }}</span>
+        </div>
+      }
+      @if (inquiry.country) {
+        <div class="detail-item">
+          <span class="detail-label">Country</span>
+          <span class="detail-value">{{ inquiry.country }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (inquiry.message) {
+    <mat-divider></mat-divider>
+
+    <!-- Message -->
+    <div class="detail-section">
+      <h3 class="section-title">Message</h3>
+      <p class="message-text">{{ inquiry.message }}</p>
+    </div>
+  }
+
+  <mat-divider></mat-divider>
+
+  <!-- Status & Meta -->
+  <div class="detail-section">
+    <div class="meta-row">
+      <span class="status-chip"
+            [style.background]="getStatusColor(inquiry.status) + '18'"
+            [style.color]="getStatusColor(inquiry.status)">
+        {{ formatStatus(inquiry.status) }}
+      </span>
+      <span class="meta-date">Submitted {{ inquiry.createdAt | date:'medium' }}</span>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Update Status -->
+  <div class="detail-section">
+    <h3 class="section-title">Update Status</h3>
+
+    @if (errorMessage) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>New Status</mat-label>
+      <mat-select [(ngModel)]="newStatus">
+        @for (status of statusOptions; track status) {
+          <mat-option [value]="status">
+            {{ formatStatus(status) | titlecase }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput [(ngModel)]="notes" rows="2"
+                placeholder="Add notes about this status change..."></textarea>
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Close</button>
+  <button mat-flat-button color="primary" (click)="updateStatus()"
+          [disabled]="newStatus === inquiry.status || isUpdating">
+    @if (isUpdating) {
+      <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+      <span>Updating...</span>
+    } @else {
+      <span>Update Status</span>
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,225 @@
+<div class="org-detail-page">
+  <!-- Header -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to list">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    @if (org) {
+      <div class="header-text">
+        <h1>{{ org.name }}</h1>
+        <span class="status-chip"
+              [style.background]="getStatusColor(org.subscription?.status || '') + '18'"
+              [style.color]="getStatusColor(org.subscription?.status || '')">
+          {{ org.subscription?.status || 'No Subscription' }}
+        </span>
+      </div>
+    }
+    <div class="header-spacer"></div>
+    @if (org) {
+      <button mat-flat-button color="primary"
+              (click)="openManageSubscription()">
+        <mat-icon>settings</mat-icon>
+        Manage Subscription
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage && !isLoading) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage }}</p>
+      <button mat-flat-button color="primary" (click)="loadOrganization()">Retry</button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!isLoading && !errorMessage && org) {
+    <div class="detail-content">
+      <mat-tab-group animationDuration="200ms">
+        <!-- Overview Tab -->
+        <mat-tab label="Overview">
+          <div class="tab-body">
+            <div class="info-grid">
+              <mat-card class="info-card">
+                <mat-card-header>
+                  <mat-card-title>Organization Info</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ org.name }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Subdomain</span>
+                    <span class="info-value">{{ org.subdomain || '—' }}.briskpeople.com</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Admin Email</span>
+                    <span class="info-value">{{ org.adminEmail || '—' }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Industry</span>
+                    <span class="info-value">{{ org.industry || '—' }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Country</span>
+                    <span class="info-value">{{ org.country || '—' }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Company Size</span>
+                    <span class="info-value">{{ org.companySize || '—' }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Created</span>
+                    <span class="info-value">{{ org.createdAt | date:'medium' }}</span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="info-card">
+                <mat-card-header>
+                  <mat-card-title>Employee Metrics</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="metric-grid">
+                    <div class="metric-item">
+                      <span class="metric-value">{{ org.totalEmployees | number }}</span>
+                      <span class="metric-label">Total Employees</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-value success">{{ org.activeEmployees | number }}</span>
+                      <span class="metric-label">Active</span>
+                    </div>
+                    <div class="metric-item">
+                      <span class="metric-value warn">{{ org.totalEmployees - org.activeEmployees | number }}</span>
+                      <span class="metric-label">Inactive</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Subscription Tab -->
+        <mat-tab label="Subscription">
+          <div class="tab-body">
+            @if (org.subscription) {
+              <mat-card class="info-card">
+                <mat-card-header>
+                  <mat-card-title>Current Subscription</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="info-row">
+                    <span class="info-label">Plan</span>
+                    <span class="info-value plan-badge">{{ org.subscription.planName }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="status-chip"
+                          [style.background]="getStatusColor(org.subscription.status) + '18'"
+                          [style.color]="getStatusColor(org.subscription.status)">
+                      {{ org.subscription.status }}
+                    </span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Billing Cycle</span>
+                    <span class="info-value">{{ org.subscription.billingCycle | titlecase }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Amount</span>
+                    <span class="info-value">${{ org.subscription.amount | number:'1.2-2' }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">Start Date</span>
+                    <span class="info-value">{{ org.subscription.startDate | date:'mediumDate' }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="info-row">
+                    <span class="info-label">End Date</span>
+                    <span class="info-value">{{ org.subscription.endDate | date:'mediumDate' }}</span>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            } @else {
+              <div class="empty-state">
+                <mat-icon>credit_card_off</mat-icon>
+                <p>No active subscription</p>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- History Tab -->
+        <mat-tab label="History">
+          <div class="tab-body">
+            @if (subscriptionHistory.length > 0) {
+              <mat-card class="table-card">
+                <mat-card-content>
+                  <table mat-table [dataSource]="subscriptionHistory">
+                    <ng-container matColumnDef="action">
+                      <th mat-header-cell *matHeaderCellDef>Action</th>
+                      <td mat-cell *matCellDef="let row">
+                        <span class="action-chip"
+                              [style.background]="getActionColor(row.action) + '18'"
+                              [style.color]="getActionColor(row.action)">
+                          {{ row.action | titlecase }}
+                        </span>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="oldPlan">
+                      <th mat-header-cell *matHeaderCellDef>From Plan</th>
+                      <td mat-cell *matCellDef="let row">{{ row.oldPlanName || '—' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="newPlan">
+                      <th mat-header-cell *matHeaderCellDef>To Plan</th>
+                      <td mat-cell *matCellDef="let row">{{ row.newPlanName || '—' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="performedBy">
+                      <th mat-header-cell *matHeaderCellDef>Performed By</th>
+                      <td mat-cell *matCellDef="let row">{{ row.performedByName || 'System' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="createdAt">
+                      <th mat-header-cell *matHeaderCellDef>Date</th>
+                      <td mat-cell *matCellDef="let row">{{ row.createdAt | date:'medium' }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: historyColumns;"></tr>
+                  </table>
+                </mat-card-content>
+              </mat-card>
+            } @else {
+              <div class="empty-state">
+                <mat-icon>history</mat-icon>
+                <p>No subscription history</p>
+              </div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  }
+</div>

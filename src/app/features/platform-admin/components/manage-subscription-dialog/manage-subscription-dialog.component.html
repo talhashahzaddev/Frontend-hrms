@@ -1,0 +1,110 @@
+<h2 mat-dialog-title>
+  <mat-icon>settings</mat-icon>
+  Manage Subscription
+</h2>
+<p class="dialog-subtitle">{{ data.organizationName }}</p>
+
+<mat-dialog-content>
+  <!-- Current Subscription Info -->
+  @if (data.currentSubscription) {
+    <div class="current-sub">
+      <div class="current-sub-row">
+        <span class="sub-label">Current Plan:</span>
+        <span class="sub-value">{{ data.currentSubscription.planName }}</span>
+      </div>
+      <div class="current-sub-row">
+        <span class="sub-label">Status:</span>
+        <span class="sub-value">{{ data.currentSubscription.status | titlecase }}</span>
+      </div>
+      <div class="current-sub-row">
+        <span class="sub-label">Expires:</span>
+        <span class="sub-value">{{ data.currentSubscription.endDate | date:'mediumDate' }}</span>
+      </div>
+    </div>
+  } @else {
+    <div class="no-sub">
+      <mat-icon>info_outline</mat-icon>
+      <span>No active subscription</span>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage) {
+    <div class="error-banner">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form">
+    <!-- Action Select -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Action</mat-label>
+      <mat-select formControlName="action">
+        @for (action of actions; track action.value) {
+          <mat-option [value]="action.value">
+            <div class="action-option">
+              <mat-icon [style.color]="action.color">{{ action.icon }}</mat-icon>
+              {{ action.label }}
+            </div>
+          </mat-option>
+        }
+      </mat-select>
+      <mat-error>Select an action</mat-error>
+    </mat-form-field>
+
+    <!-- Plan Select (upgrade/downgrade) -->
+    @if (selectedAction === 'upgrade' || selectedAction === 'downgrade') {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>New Plan</mat-label>
+        <mat-select formControlName="newPlanId">
+          @for (plan of plans; track plan.planId) {
+            <mat-option [value]="plan.planId">
+              {{ plan.name }} — ${{ plan.monthlyPrice }}/mo
+            </mat-option>
+          }
+        </mat-select>
+        <mat-error>Select a plan</mat-error>
+      </mat-form-field>
+    }
+
+    <!-- Date Picker (extend) -->
+    @if (selectedAction === 'extend') {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>New End Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="newEndDate" [min]="minDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error>Select a date</mat-error>
+      </mat-form-field>
+    }
+
+    <!-- Cancel Warning -->
+    @if (selectedAction === 'cancel') {
+      <div class="cancel-warning">
+        <mat-icon>warning</mat-icon>
+        <span>This will immediately cancel the subscription. The organization will lose access at the end of the billing period.</span>
+      </div>
+    }
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes (optional)</mat-label>
+      <textarea matInput formControlName="notes" rows="2"
+                placeholder="Reason for change..."></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="onSubmit()"
+          [disabled]="form.invalid || isSubmitting">
+    @if (isSubmitting) {
+      <mat-progress-spinner diameter="18" mode="indeterminate"></mat-progress-spinner>
+      <span>Processing...</span>
+    } @else {
+      <span>Confirm</span>
+    }
+  </button>
+</mat-dialog-actions>

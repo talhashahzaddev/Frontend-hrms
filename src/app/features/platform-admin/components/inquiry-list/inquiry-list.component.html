@@ -1,0 +1,131 @@
+<div class="inquiry-list-page">
+  <div class="page-header">
+    <div>
+      <h1>Demo Inquiries</h1>
+      <p class="page-subtitle">Manage incoming demo requests</p>
+    </div>
+    @if (!isLoading) {
+      <span class="inquiry-count">{{ totalCount }} total</span>
+    }
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search inquiries</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)"
+                 placeholder="Name, email, company...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Statuses</mat-option>
+            @for (status of statusOptions; track status) {
+              <mat-option [value]="status">
+                {{ formatStatus(status) | titlecase }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @if (searchTerm || statusFilter) {
+          <button mat-icon-button matTooltip="Clear filters" (click)="clearFilters()">
+            <mat-icon>filter_alt_off</mat-icon>
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+        </div>
+      }
+
+      <div class="table-container">
+        <table mat-table [dataSource]="inquiries" matSort (matSortChange)="onSortChange($event)"
+               matSortActive="createdAt" matSortDirection="desc">
+
+          <!-- Full Name -->
+          <ng-container matColumnDef="fullName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+            <td mat-cell *matCellDef="let inq">{{ inq.fullName }}</td>
+          </ng-container>
+
+          <!-- Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+            <td mat-cell *matCellDef="let inq">{{ inq.email }}</td>
+          </ng-container>
+
+          <!-- Company -->
+          <ng-container matColumnDef="companyName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Company</th>
+            <td mat-cell *matCellDef="let inq">{{ inq.companyName || '—' }}</td>
+          </ng-container>
+
+          <!-- Size -->
+          <ng-container matColumnDef="companySize">
+            <th mat-header-cell *matHeaderCellDef>Size</th>
+            <td mat-cell *matCellDef="let inq">{{ inq.companySize || '—' }}</td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let inq">
+              <span class="status-chip"
+                    [style.background]="getStatusColor(inq.status) + '18'"
+                    [style.color]="getStatusColor(inq.status)">
+                {{ formatStatus(inq.status) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Date -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Submitted</th>
+            <td mat-cell *matCellDef="let inq">{{ inq.createdAt | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let inq">
+              <button mat-icon-button matTooltip="View details" (click)="viewInquiry(inq); $event.stopPropagation()">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              class="inquiry-row" (click)="viewInquiry(row)"></tr>
+        </table>
+
+        @if (!isLoading && inquiries.length === 0) {
+          <div class="empty-state">
+            <mat-icon>contact_mail</mat-icon>
+            <p>No inquiries found</p>
+          </div>
+        }
+      </div>
+
+      <mat-paginator [length]="totalCount"
+                     [pageIndex]="pageIndex"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="[10, 15, 25, 50]"
+                     (page)="onPageChange($event)"
+                     showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>
