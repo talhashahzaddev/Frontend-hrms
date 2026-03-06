@@ -15,26 +15,29 @@ export class RoleService {
 
   constructor(private http: HttpClient) {}
 
-  /** GET /api/roles - Get all roles for the organization */
+  /** GET /Auth/get-roles-by-organization */
   getRoles(): Observable<Role[]> {
-    return this.http.get<{ data: Role[]; success: boolean }>(`${this.apiUrl}/get-roles-by-organizatio`)
+    return this.http.get<{ data: Role[]; success: boolean; message: string; errors: null }>
+      (`${this.apiUrl}/get-roles-by-organization`)
       .pipe(map(res => res.data));
   }
 
-  /** POST /api/roles/create-role - Create a new role */
-  createRole(payload: CreateRoleRequest): Observable<Role> {
-    return this.http.post<{ data: Role; success: boolean }>(`${this.apiUrl}/create-role`, payload)
+  /** POST /Auth/create-role */
+  createRole(payload: CreateRoleRequest): Observable<any> {
+    return this.http.post<{ data: any; success: boolean }>
+      (`${this.apiUrl}/create-role`, payload)
       .pipe(map(res => res.data));
   }
 
-  /** PUT /api/roles/{roleId} - Update an existing role */
-  updateRole(roleId: string, payload: UpdateRoleRequest): Observable<Role> {
-    return this.http.put<{ data: Role; success: boolean }>(`${this.apiUrl}/${roleId}`, payload)
+  /** PUT /Auth/update-role/{roleId} — update endpoint, confirm path with backend */
+  updateRole(roleId: string, payload: UpdateRoleRequest): Observable<any> {
+    return this.http.put<{ data: any; success: boolean }>
+      (`${this.apiUrl}/update-role/${roleId}`, payload)
       .pipe(map(res => res.data));
   }
 
-  /** DELETE /api/roles/{roleId} - Delete a role */
+  /** DELETE /Auth/delete-role/{roleId} — confirm path with backend */
   deleteRole(roleId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${roleId}`);
+    return this.http.delete<void>(`${this.apiUrl}/delete-role/${roleId}`);
   }
 }

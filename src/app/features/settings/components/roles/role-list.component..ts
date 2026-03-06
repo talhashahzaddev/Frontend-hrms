@@ -108,9 +108,9 @@ export class RoleListComponent implements OnInit, OnDestroy {
 
   openAddRoleDialog(): void {
     const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '700px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
+       width: '92%',
+    maxWidth: '1260px',
+    height: '90vh',
       disableClose: false,
       data: { mode: 'add' }
     });
@@ -125,18 +125,18 @@ export class RoleListComponent implements OnInit, OnDestroy {
 
   viewRole(role: Role): void {
     this.dialog.open(RoleDialogComponent, {
-      width: '700px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
+      width: '92%',
+    maxWidth: '1260px',
+    height: '90vh',
       data: { mode: 'view', role }
     });
   }
 
   editRole(role: Role): void {
     const dialogRef = this.dialog.open(RoleDialogComponent, {
-      width: '700px',
-      maxWidth: '95vw',
-      maxHeight: '90vh',
+       width: '92%',
+    maxWidth: '1260px',
+    height: '90vh',
       disableClose: false,
       data: { mode: 'edit', role }
     });
