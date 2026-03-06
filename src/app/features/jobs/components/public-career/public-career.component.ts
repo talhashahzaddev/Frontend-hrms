@@ -186,7 +186,9 @@ export class PublicCareerComponent implements OnInit {
     }
 
     applyForJob(job: JobOpeningDto): void {
-        this.router.navigate(['/jobs/apply', job.jobId]);
+        if (job.jobCode) {
+            this.router.navigate(['/career/job', job.jobCode]);
+        }
     }
 
     getMetaLine(job: JobOpeningDto): string {

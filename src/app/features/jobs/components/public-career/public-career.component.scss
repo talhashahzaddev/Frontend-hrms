@@ -47,11 +47,72 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // ══════════════════════════════════════════════════
-//  HERO BANNER  (visual strip only – no text inside)
+//  TOP HEADER BAR
+// ══════════════════════════════════════════════════
+.career-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid $border;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.05);
+}
+
+.header-inner {
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-logo-wrap {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: $bg;
+  border: 1.5px solid $border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.header-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 3px;
+}
+
+.header-company-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: $text;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+// ══════════════════════════════════════════════════
+//  HERO BANNER  (background image + text overlay)
 // ══════════════════════════════════════════════════
 .hero-banner {
   position: relative;
-  height: 260px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-size: cover;
   background-position: center;
   background-color: #1E293B;
@@ -62,111 +123,29 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg,
-      rgba(30, 41, 59, 0.30) 0%,
-      rgba(30, 41, 59, 0.65) 100%);
+      rgba(15, 23, 42, 0.45) 0%,
+      rgba(15, 23, 42, 0.75) 100%);
 }
 
-// ══════════════════════════════════════════════════
-//  COMPANY INFO SECTION  (below banner)
-// ══════════════════════════════════════════════════
-.company-info-section {
-  background: $zone-info;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.10);
-  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.06);
-}
-
-.company-info-inner {
-  max-width: 90%;
-  margin: 0 auto;
-  padding: 32px 24px 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-// Logo + Name row
-.company-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  animation: fadeUp 0.6s ease-out both;
-}
-
-.company-logo-wrap {
-  flex-shrink: 0;
-  width: 72px;
-  height: 72px;
-  border-radius: 18px;
-  background: $bg;
-  border: 2px solid $border;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-}
-
-.company-logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  padding: 6px;
-}
-
-.company-meta {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-
-.company-name {
-  font-size: 22px;
-  font-weight: 800;
-  color: $text;
-  letter-spacing: -0.4px;
-  line-height: 1.2;
-}
-
-.company-hiring-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.22);
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #059669;
-  width: fit-content;
-}
-
-.hiring-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #10B981;
-  animation: pulse 1.8s ease-in-out infinite;
-}
-
-// Headline + Description block
-.company-text {
-  animation: fadeUp 0.75s ease-out both;
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  padding: 48px 32px;
   text-align: center;
+  animation: fadeUp 0.7s ease-out both;
 }
 
-.company-headline {
-  margin: 0 0 10px;
-  font-size: 30px;
+.hero-headline {
+  margin: 0 0 14px;
+  font-size: 36px;
   font-weight: 800;
-  color: $text;
+  color: #FFFFFF;
   letter-spacing: -0.6px;
   line-height: 1.25;
-  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 
-  // Reset any HTML injected styles so they match our theme
+  // Allow Quill alignment to pass through
   ::ng-deep p {
     margin: 0;
     font-size: inherit;
@@ -184,13 +163,25 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-.company-description {
+// ══════════════════════════════════════════════════
+//  DESCRIPTION SECTION  (below hero banner)
+// ══════════════════════════════════════════════════
+.description-section {
+  background: linear-gradient(160deg, #EFF6FF 0%, #EEF2FF 100%);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.10);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.06);
+}
+
+.description-inner {
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 28px 24px;
   font-size: 15px;
   font-weight: 400;
   color: $text-muted;
   line-height: 1.7;
-  max-width: 100%;
 
+  // Respect Quill alignment classes
   ::ng-deep p {
     margin: 0 0 6px;
     font-size: inherit;
@@ -202,6 +193,18 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
+  ::ng-deep .ql-align-center {
+    text-align: center;
+  }
+
+  ::ng-deep .ql-align-right {
+    text-align: right;
+  }
+
+  ::ng-deep .ql-align-justify {
+    text-align: justify;
+  }
+
   ::ng-deep strong {
     font-weight: 600;
     color: $text;
@@ -209,6 +212,12 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   ::ng-deep em {
     font-style: italic;
+  }
+
+  ::ng-deep ul,
+  ::ng-deep ol {
+    padding-left: 20px;
+    margin: 6px 0;
   }
 }
 

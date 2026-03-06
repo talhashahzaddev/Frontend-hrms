@@ -1,0 +1,210 @@
+<div class="career-detail-page">
+
+    <!-- ═══════════════════ HERO BANNER ═══════════════════ -->
+    <section class="hero-banner"
+        [style.backgroundImage]="companyDetails?.careerBgImageUrl ? 'url(' + companyDetails!.careerBgImageUrl + ')' : ''">
+        <div class="hero-banner-overlay"></div>
+    </section>
+
+    <!-- ═══════════════════ COMPANY INFO BAR ═══════════════════ -->
+    <section class="company-info-section" *ngIf="companyDetails">
+        <div class="company-info-inner">
+            <div class="company-header" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
+                <div class="company-logo-wrap" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" class="company-logo" />
+                </div>
+                <div class="company-meta">
+                    <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
+                    <span class="company-hiring-badge">
+                        <span class="hiring-dot"></span>
+                        We're Hiring
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ BACK NAVIGATION ═══════════════════ -->
+    <section class="nav-section">
+        <button class="btn-back" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Back to Openings
+        </button>
+    </section>
+
+    <!-- ═══════════════════ LOADING ═══════════════════ -->
+    <section class="content-section" *ngIf="isLoading">
+        <div class="loading-glass-card">
+            <mat-spinner diameter="36"></mat-spinner>
+            <span>Loading job details...</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ ERROR ═══════════════════ -->
+    <section class="content-section" *ngIf="!isLoading && errorMessage">
+        <div class="empty-glass-card">
+            <mat-icon class="empty-icon">error_outline</mat-icon>
+            <p class="empty-title">{{ errorMessage }}</p>
+            <p class="empty-sub">The position may have been filled or the link may be invalid.</p>
+            <button class="btn-primary" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon>
+                View All Openings
+            </button>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ JOB DETAIL CONTENT ═══════════════════ -->
+    <section class="content-section" *ngIf="!isLoading && !errorMessage && job">
+
+        <!-- Job Header Card -->
+        <div class="job-header-card">
+            <div class="job-header-top">
+                <div class="job-title-group">
+                    <h1 class="job-title">{{ job.jobRoleName }}</h1>
+                    <span class="job-code-chip" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
+                </div>
+                <div class="job-status-row">
+                    <span class="status-badge" [class.status-open]="job.status === 'Open'"
+                        [class.status-closed]="job.status === 'Closed'">
+                        <span class="status-dot"></span>{{ job.status }}
+                    </span>
+                    <span class="posted-badge" *ngIf="getTimeAgo(job.createdAt)">
+                        <mat-icon class="badge-icon">schedule</mat-icon>
+                        Posted {{ getTimeAgo(job.createdAt) }}
+                    </span>
+                    <span class="deadline-badge" *ngIf="job.lastDate && getDaysRemaining(job.lastDate)"
+                        [class.deadline-urgent]="isDeadlineUrgent(job.lastDate)">
+                        <mat-icon class="badge-icon">event</mat-icon>
+                        {{ getDaysRemaining(job.lastDate) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Details Grid -->
+        <div class="detail-grid">
+
+            <!-- Main Content (Left) -->
+            <div class="detail-main">
+
+                <!-- Job Introduction -->
+                <div class="detail-card" *ngIf="job.jobIntroduction">
+                    <div class="detail-card-header">
+                        <mat-icon class="detail-card-icon">info</mat-icon>
+                        <h2>About the Role</h2>
+                    </div>
+                    <div class="detail-card-body rich-content" [innerHTML]="job.jobIntroduction"></div>
+                </div>
+
+                <!-- Responsibilities -->
+                <div class="detail-card" *ngIf="job.responsibilities">
+                    <div class="detail-card-header">
+                        <mat-icon class="detail-card-icon">checklist</mat-icon>
+                        <h2>Key Responsibilities</h2>
+                    </div>
+                    <div class="detail-card-body rich-content" [innerHTML]="job.responsibilities"></div>
+                </div>
+
+                <!-- Required Skillset -->
+                <div class="detail-card" *ngIf="job.skillset">
+                    <div class="detail-card-header">
+                        <mat-icon class="detail-card-icon">psychology</mat-icon>
+                        <h2>Required Skillset</h2>
+                    </div>
+                    <div class="detail-card-body rich-content" [innerHTML]="job.skillset"></div>
+                </div>
+            </div>
+
+            <!-- Sidebar (Right) -->
+            <div class="detail-sidebar">
+
+                <!-- Quick Overview -->
+                <div class="sidebar-card">
+                    <h3 class="sidebar-card-title">Quick Overview</h3>
+
+                    <div class="sidebar-item" *ngIf="job.departmentName">
+                        <mat-icon class="sidebar-item-icon">business</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Department</span>
+                            <span class="sidebar-value">{{ job.departmentName }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="job.location">
+                        <mat-icon class="sidebar-item-icon">location_on</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Location</span>
+                            <span class="sidebar-value">{{ job.location }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="job.workMode">
+                        <mat-icon class="sidebar-item-icon">{{ job.workMode === 'Remote' ? 'wifi' : (job.workMode ===
+                            'Hybrid' ? 'sync_alt' : 'apartment') }}</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Work Mode</span>
+                            <span class="sidebar-value">{{ job.workMode }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="job.employmentType">
+                        <mat-icon class="sidebar-item-icon">work</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Employment Type</span>
+                            <span class="sidebar-value">{{ job.employmentType }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="getExperienceText(job)">
+                        <mat-icon class="sidebar-item-icon">trending_up</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Experience</span>
+                            <span class="sidebar-value">{{ getExperienceText(job) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="getCtcText(job)">
+                        <mat-icon class="sidebar-item-icon">payments</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Compensation</span>
+                            <span class="sidebar-value">{{ getCtcText(job) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="job.vacancies">
+                        <mat-icon class="sidebar-item-icon">group</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Vacancies</span>
+                            <span class="sidebar-value">{{ job.vacancies }} {{ job.vacancies === 1 ? 'Position' :
+                                'Positions' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-item" *ngIf="job.lastDate">
+                        <mat-icon class="sidebar-item-icon">calendar_today</mat-icon>
+                        <div class="sidebar-item-content">
+                            <span class="sidebar-label">Apply Before</span>
+                            <span class="sidebar-value">{{ job.lastDate | date:'longDate' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apply CTA -->
+                <div class="sidebar-cta-card">
+                    <h3 class="cta-title">Interested in this role?</h3>
+                    <p class="cta-subtitle">Submit your application today and take the next step in your career.</p>
+                    <button class="btn-primary btn-cta" (click)="applyForJob()">
+                        Apply Now
+                        <mat-icon class="btn-arrow">arrow_forward</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="career-footer">
+        <span>© {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.</span>
+    </footer>
+
+</div>

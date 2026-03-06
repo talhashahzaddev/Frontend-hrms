@@ -1,0 +1,817 @@
+// ──────────────────────────────────────────────────
+// Career Apply Dialog – Premium Glassmorphic Theme
+// ──────────────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+// ── Variables ──
+$primary: #2563EB;
+$primary-dark: #1D4ED8;
+$primary-light: rgba(37, 99, 235, 0.08);
+$text: #1E293B;
+$text-muted: #64748B;
+$border: #E2E8F0;
+$bg-subtle: #F8FAFC;
+$bg-page: #F1F5F9;
+$success: #10B981;
+$success-bg: rgba(16, 185, 129, 0.08);
+$error: #EF4444;
+$error-bg: rgba(239, 68, 68, 0.06);
+$radius: 16px;
+$radius-sm: 10px;
+$transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+// Global panel class – applied on cdk-overlay so must be unscoped
+.career-apply-dialog-panel {
+    .mat-mdc-dialog-container {
+        overflow: hidden !important;
+    }
+
+    .mat-mdc-dialog-surface {
+        overflow: hidden !important;
+        border-radius: $radius !important;
+    }
+}
+
+.apply-dialog {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: $text;
+    overflow: hidden;
+    border-radius: $radius;
+    max-width: 100%;
+}
+
+// ══════════════════════════════════════════════════
+//  DIALOG HEADER
+// ══════════════════════════════════════════════════
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -60%;
+        left: -10%;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.04);
+    }
+}
+
+.dialog-header-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.dialog-header-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dialog-header-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: #fff;
+}
+
+.dialog-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+}
+
+.dialog-job-name {
+    margin: 2px 0 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.80);
+}
+
+.dialog-job-code {
+    display: inline-block;
+    padding: 1px 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    margin-left: 6px;
+    letter-spacing: 0.3px;
+}
+
+.dialog-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition;
+    position: relative;
+    z-index: 1;
+
+    mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.22);
+        color: #fff;
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  DIALOG BODY
+// ══════════════════════════════════════════════════
+.dialog-body {
+    padding: 24px 28px;
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: $bg-subtle;
+
+    // Scrollbar styling
+    &::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $border;
+        border-radius: 8px;
+    }
+}
+
+// ── Error Banner ──
+.form-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: $error-bg;
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    border-radius: $radius-sm;
+    margin-bottom: 20px;
+    color: $error;
+    font-size: 13px;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease-out both;
+}
+
+.error-banner-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+// ── Form Section Labels ──
+.form-section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: $text;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid $primary-light;
+
+    &:not(:first-child) {
+        margin-top: 24px;
+    }
+}
+
+.form-section-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $primary;
+}
+
+.form-section-optional {
+    font-weight: 500;
+    font-size: 11px;
+    color: $text-muted;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+// ── Form Layout ──
+.form-row {
+    margin-bottom: 4px;
+}
+
+.form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-field {
+    width: 100%;
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+        background: #FFFFFF !important;
+        border-radius: $radius-sm !important;
+    }
+
+    ::ng-deep .mdc-notched-outline__leading,
+    ::ng-deep .mdc-notched-outline__notch,
+    ::ng-deep .mdc-notched-outline__trailing {
+        border-color: $border !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field-focus-overlay {
+        background: transparent !important;
+    }
+
+    ::ng-deep .mat-mdc-floating-label {
+        color: $text-muted !important;
+        font-weight: 500;
+    }
+
+    ::ng-deep .mdc-text-field--focused {
+
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+            border-color: $primary !important;
+            border-width: 2px !important;
+        }
+    }
+
+    ::ng-deep input,
+    ::ng-deep textarea {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: $text;
+        font-weight: 500;
+    }
+
+    ::ng-deep textarea {
+        line-height: 1.6;
+    }
+}
+
+.field-prefix-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: $text-muted !important;
+    margin-right: 4px;
+}
+
+.form-field-textarea {
+    ::ng-deep .mat-mdc-text-field-wrapper {
+        min-height: 100px;
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  RESUME UPLOAD AREA
+// ══════════════════════════════════════════════════
+.resume-file-input-hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.resume-upload-area {
+    background: #FFFFFF;
+    border: 1.5px dashed $border;
+    border-radius: $radius-sm;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    margin-top: 8px;
+    transition: $transition;
+    position: relative;
+
+    &:hover {
+        border-color: rgba(37, 99, 235, 0.35);
+        background: rgba(37, 99, 235, 0.02);
+    }
+
+    &.resume-uploading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+}
+
+.resume-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    color: $text;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.resume-label-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $primary;
+}
+
+.resume-hint {
+    font-weight: 500;
+    font-size: 11px;
+    color: $text-muted;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
+}
+
+.resume-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 18px;
+    background: transparent;
+    color: $primary;
+    border: 1.5px solid $primary;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition;
+    white-space: nowrap;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover:not(:disabled) {
+        background: rgba(37, 99, 235, 0.06);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.btn-remove-resume {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1.5px solid $border;
+    background: transparent;
+    color: $text-muted;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition;
+    flex-shrink: 0;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover {
+        background: $error-bg;
+        border-color: rgba(239, 68, 68, 0.3);
+        color: $error;
+    }
+}
+
+.resume-loading-overlay {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $primary;
+
+    ::ng-deep .mat-mdc-progress-spinner circle {
+        stroke: $primary !important;
+    }
+}
+
+.resume-file-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(37, 99, 235, 0.04);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: 8px;
+}
+
+.resume-file-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $primary;
+    flex-shrink: 0;
+}
+
+.resume-file-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: $text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resume-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $error;
+}
+
+.resume-error-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.resume-open-link {
+    font-size: 13px;
+    font-weight: 700;
+    color: $primary;
+    text-decoration: none;
+    flex-shrink: 0;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  QUILL EDITOR
+// ══════════════════════════════════════════════════
+.quill-wrapper {
+    width: 100%;
+}
+
+.quill-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-muted;
+    margin-bottom: 8px;
+    letter-spacing: 0.2px;
+}
+
+.quill-editor-wrap {
+    border: 1px solid $border;
+    border-radius: $radius-sm;
+    overflow: hidden;
+    background: #FFFFFF;
+    transition: $transition;
+
+    &:focus-within {
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .ql-toolbar {
+        border: none !important;
+        border-bottom: 1px solid $border !important;
+        background: $bg-subtle !important;
+        padding: 8px 12px !important;
+
+        .ql-formats {
+            margin-right: 10px !important;
+        }
+
+        button {
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 4px !important;
+            transition: background 0.15s ease;
+
+            &:hover {
+                background: rgba(37, 99, 235, 0.08) !important;
+            }
+
+            &.ql-active {
+                color: $primary !important;
+                background: rgba(37, 99, 235, 0.10) !important;
+            }
+        }
+
+        .ql-stroke {
+            stroke: $text-muted !important;
+        }
+
+        .ql-fill {
+            fill: $text-muted !important;
+        }
+
+        button:hover .ql-stroke,
+        button.ql-active .ql-stroke {
+            stroke: $primary !important;
+        }
+
+        button:hover .ql-fill,
+        button.ql-active .ql-fill {
+            fill: $primary !important;
+        }
+    }
+
+    .ql-container {
+        border: none !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 14px !important;
+    }
+
+    .ql-editor {
+        min-height: 120px;
+        padding: 14px 16px !important;
+        color: $text;
+        line-height: 1.65;
+
+        &.ql-blank::before {
+            color: $text-muted !important;
+            font-style: normal !important;
+            font-size: 14px;
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  DIALOG FOOTER
+// ══════════════════════════════════════════════════
+.dialog-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 28px;
+    border-top: 1px solid $border;
+    background: #fff;
+}
+
+.btn-cancel {
+    height: 42px;
+    padding: 0 22px;
+    background: transparent;
+    color: $text-muted;
+    border: 1.5px solid $border;
+    border-radius: $radius-sm;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.03);
+        color: $text;
+        border-color: darken($border, 8%);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 42px;
+    padding: 0 24px;
+    background: $primary;
+    color: #fff;
+    border: none;
+    border-radius: $radius-sm;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: $transition;
+    white-space: nowrap;
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover:not(:disabled) {
+        background: $primary-dark;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.30);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+.submit-spinner {
+    ::ng-deep circle {
+        stroke: #fff !important;
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  SUCCESS STATE
+// ══════════════════════════════════════════════════
+.success-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 40px;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out both;
+    background: #FFFFFF;
+}
+
+.success-icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: $success-bg;
+    border: 3px solid rgba(16, 185, 129, 0.20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 0.15s;
+}
+
+.success-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: $success;
+}
+
+.success-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 800;
+    color: $text;
+    letter-spacing: -0.3px;
+    animation: fadeIn 0.5s ease-out both;
+    animation-delay: 0.3s;
+}
+
+.success-subtitle {
+    margin: 0 0 28px;
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-muted;
+    line-height: 1.6;
+    max-width: 360px;
+    animation: fadeIn 0.5s ease-out both;
+    animation-delay: 0.4s;
+
+    strong {
+        color: $text;
+        font-weight: 700;
+    }
+}
+
+.btn-done {
+    animation: fadeIn 0.5s ease-out both;
+    animation-delay: 0.5s;
+}
+
+// ══════════════════════════════════════════════════
+//  ANIMATIONS
+// ══════════════════════════════════════════════════
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+// ══════════════════════════════════════════════════
+//  RESPONSIVE
+// ══════════════════════════════════════════════════
+@media (max-width: 600px) {
+    .dialog-header {
+        padding: 20px;
+    }
+
+    .dialog-body {
+        padding: 20px;
+    }
+
+    .dialog-footer {
+        padding: 16px 20px;
+        flex-direction: column-reverse;
+        gap: 10px;
+
+        .btn-cancel,
+        .btn-primary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .form-row-2col {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .dialog-title {
+        font-size: 16px;
+    }
+
+    .success-state {
+        padding: 40px 24px;
+    }
+}
