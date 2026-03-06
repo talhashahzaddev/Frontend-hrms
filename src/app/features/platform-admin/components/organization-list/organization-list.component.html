@@ -1,0 +1,157 @@
+<div class="org-list-page">
+  <div class="page-header">
+    <div>
+      <h1>Organizations</h1>
+      <p class="page-subtitle">Manage all registered organizations</p>
+    </div>
+    @if (!isLoading) {
+      <span class="org-count">{{ totalCount }} total</span>
+    }
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search organizations</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange($event)"
+                 placeholder="Name, email, or industry...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Statuses</mat-option>
+            @for (status of statusOptions; track status) {
+              <mat-option [value]="status">
+                {{ status | titlecase }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Plan</mat-label>
+          <mat-select [(ngModel)]="planFilter" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Plans</mat-option>
+            @for (plan of planOptions; track plan) {
+              <mat-option [value]="plan">
+                {{ plan }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @if (searchTerm || statusFilter || planFilter) {
+          <button mat-icon-button matTooltip="Clear filters" (click)="clearFilters()">
+            <mat-icon>filter_alt_off</mat-icon>
+          </button>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <!-- Loading -->
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+        </div>
+      }
+
+      <div class="table-container">
+        <table mat-table [dataSource]="organizations" matSort (matSortChange)="onSortChange($event)"
+               matSortActive="createdAt" matSortDirection="desc">
+
+          <!-- Name -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Organization</th>
+            <td mat-cell *matCellDef="let org">
+              <div class="org-name-cell">
+                <span class="org-name">{{ org.name }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Industry -->
+          <ng-container matColumnDef="industry">
+            <th mat-header-cell *matHeaderCellDef>Industry</th>
+            <td mat-cell *matCellDef="let org">{{ org.industry || '—' }}</td>
+          </ng-container>
+
+          <!-- Employee Count -->
+          <ng-container matColumnDef="totalActiveEmployees">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Employees</th>
+            <td mat-cell *matCellDef="let org">{{ org.totalActiveEmployees | number }}</td>
+          </ng-container>
+
+          <!-- Plan -->
+          <ng-container matColumnDef="subscriptionPlanName">
+            <th mat-header-cell *matHeaderCellDef>Plan</th>
+            <td mat-cell *matCellDef="let org">
+              <span class="plan-badge">{{ org.subscriptionPlanName || 'None' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="subscriptionStatus">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let org">
+              <span class="status-chip"
+                    [style.background]="getStatusColor(org.subscriptionStatus) + '18'"
+                    [style.color]="getStatusColor(org.subscriptionStatus)">
+                {{ org.subscriptionStatus || 'N/A' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Subscription Expiry -->
+          <ng-container matColumnDef="subscriptionExpiryDate">
+            <th mat-header-cell *matHeaderCellDef>Expiry</th>
+            <td mat-cell *matCellDef="let org">{{ org.subscriptionExpiryDate ? (org.subscriptionExpiryDate | date:'mediumDate') : '—' }}</td>
+          </ng-container>
+
+          <!-- Created -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Joined</th>
+            <td mat-cell *matCellDef="let org">{{ org.createdAt | date:'mediumDate' }}</td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let org">
+              <button mat-icon-button matTooltip="View details" (click)="viewOrganization(org)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              class="org-row" (click)="viewOrganization(row)"></tr>
+        </table>
+
+        <!-- Empty -->
+        @if (!isLoading && organizations.length === 0) {
+          <div class="empty-state">
+            <mat-icon>business_off</mat-icon>
+            <p>No organizations found</p>
+          </div>
+        }
+      </div>
+
+      <mat-paginator [length]="totalCount"
+                     [pageIndex]="pageIndex"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="[10, 15, 25, 50]"
+                     (page)="onPageChange($event)"
+                     showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

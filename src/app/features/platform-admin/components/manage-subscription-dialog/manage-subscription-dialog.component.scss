@@ -1,0 +1,143 @@
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  margin: 0;
+
+  mat-icon {
+    color: #3f51b5;
+  }
+}
+
+.dialog-subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  margin: -8px 0 16px 0;
+  padding: 0 24px;
+}
+
+mat-dialog-content {
+  min-width: 420px;
+}
+
+.current-sub {
+  background: #f8f9ff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.current-sub-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+
+  .sub-label {
+    font-size: 0.82rem;
+    color: #888;
+  }
+
+  .sub-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.no-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  color: #f57f17;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fdecea;
+  color: #b71c1c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.action-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.cancel-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fce4ec;
+  color: #c62828;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+mat-dialog-actions {
+  padding: 8px 24px 16px !important;
+
+  button {
+    min-width: 100px;
+  }
+
+  mat-progress-spinner {
+    display: inline-block;
+    margin-right: 4px;
+
+    ::ng-deep circle {
+      stroke: #fff;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  mat-dialog-content {
+    min-width: auto;
+  }
+}

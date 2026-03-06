@@ -1,6 +1,7 @@
 // ──────────────────────────────────────────────────
 // Career Apply Dialog – Premium Glassmorphic Theme
 // ──────────────────────────────────────────────────
+@use "sass:color";
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -631,7 +632,7 @@ $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     &:hover {
         background: rgba(0, 0, 0, 0.03);
         color: $text;
-        border-color: darken($border, 8%);
+        border-color: color.adjust($border, $lightness: -8%);
     }
 
     &:disabled {

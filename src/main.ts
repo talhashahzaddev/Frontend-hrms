@@ -59,6 +59,7 @@ import { appRoutes } from './app/app.routes';
 import { AuthInterceptor } from './app/core/interceptors/auth.interceptor';
 import { ErrorInterceptor } from './app/core/interceptors/error.interceptor';
 import { LoadingInterceptor } from './app/core/interceptors/loading.interceptor';
+import { PlatformAdminInterceptor } from './app/features/platform-admin/interceptors/platform-admin.interceptor';
 
 import { environment } from './environments/environment';
 import { APP_INITIALIZER } from '@angular/core';
@@ -166,6 +167,11 @@ bootstrapApplication(AppComponent, {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: LoadingInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: PlatformAdminInterceptor,
       multi: true
     },
     { provide: LOCALE_ID, useValue: 'en-GB' },
