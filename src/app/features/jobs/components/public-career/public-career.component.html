@@ -1,36 +1,29 @@
 <div class="career-page">
 
-    <!-- ═══════════════════ HERO BANNER (background only) ═══════════════════ -->
+    <!-- ═══════════════════ TOP HEADER BAR ═══════════════════ -->
+    <header class="career-header-bar" *ngIf="companyDetails">
+        <div class="header-inner">
+            <div class="header-left" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
+                <div class="header-logo-wrap" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" class="header-logo" />
+                </div>
+                <span class="header-company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ HERO BANNER with text content ═══════════════════ -->
     <section class="hero-banner"
         [style.backgroundImage]="companyDetails?.careerBgImageUrl ? 'url(' + companyDetails!.careerBgImageUrl + ')' : ''">
         <div class="hero-banner-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-headline" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'"></h1>
+        </div>
     </section>
 
-    <!-- ═══════════════════ COMPANY INFO SECTION ═══════════════════ -->
-    <section class="company-info-section">
-        <div class="company-info-inner">
-            <!-- Logo + Name -->
-            <div class="company-header" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
-                <div class="company-logo-wrap" *ngIf="companyDetails?.logoUrl">
-                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" class="company-logo" />
-                </div>
-                <div class="company-meta">
-                    <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
-                    <span class="company-hiring-badge">
-                        <span class="hiring-dot"></span>
-                        We're Hiring
-                    </span>
-                </div>
-            </div>
-            <!-- Header text & Description -->
-            <div class="company-text">
-                <h1 class="company-headline" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'">
-                </h1>
-                <div class="company-description" *ngIf="companyDetails?.careerDescription"
-                    [innerHTML]="companyDetails!.careerDescription">
-                </div>
-            </div>
-        </div>
+    <!-- ═══════════════════ DESCRIPTION SECTION ═══════════════════ -->
+    <section class="description-section" *ngIf="companyDetails?.careerDescription">
+        <div class="description-inner" [innerHTML]="companyDetails!.careerDescription"></div>
     </section>
 
     <!-- ═══════════════════ FILTER BAR ═══════════════════ -->
