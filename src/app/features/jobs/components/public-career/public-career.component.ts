@@ -65,15 +65,18 @@ export class PublicCareerComponent implements OnInit {
     companyDetails: CompanyCareerDetails | null = null;
 
     // Filter options
-    statusOptions = [
-        { value: '', label: 'All Statuses' },
-        { value: 'Open', label: 'Open' },
-        { value: 'Closed', label: 'Closed' }
+    employmentTypeOptions = [
+        { value: '', label: 'All Types' },
+        { value: 'Full-time', label: 'Full-time' },
+        { value: 'Part-time', label: 'Part-time' },
+        { value: 'Contract', label: 'Contract' },
+        { value: 'Internship', label: 'Internship' }
     ];
 
     currentYear = new Date().getFullYear();
 
     private currentJob: JobOpeningDto | null = null;
+    private readonly defaultHeroImage = 'https://wallpaperaccess.com/full/2053215.jpg';
 
     constructor(
         private fb: FormBuilder,
@@ -83,7 +86,7 @@ export class PublicCareerComponent implements OnInit {
     ) {
         this.searchForm = this.fb.group({
             search: [''],
-            status: ['Open'],
+            employmentType: ['Full-time'],
             lastDateFrom: [null as Date | null],
             lastDateTo: [null as Date | null]
         });
@@ -130,12 +133,12 @@ export class PublicCareerComponent implements OnInit {
     // ── Load Jobs ──
     private loadJobs(): Observable<PagedResult<JobOpeningDto>> {
         this.isLoading = true;
-        const { search, status, lastDateFrom, lastDateTo } = this.searchForm.value;
+        const { search, employmentType, lastDateFrom, lastDateTo } = this.searchForm.value;
         const domain = this.getDomainFromUrl();
 
         return this.publicCareerService.getExternalJobOpeningsPaged(domain, {
             search: search?.trim() || undefined,
-            status: status || undefined,
+            employmentType: employmentType || undefined,
             lastDateFrom: lastDateFrom ? lastDateFrom.toISOString().split('T')[0] : undefined,
             lastDateTo: lastDateTo ? lastDateTo.toISOString().split('T')[0] : undefined,
             page: this.page,
@@ -157,14 +160,14 @@ export class PublicCareerComponent implements OnInit {
     }
 
     clearFilters(): void {
-        this.searchForm.patchValue({ search: '', status: 'Open', lastDateFrom: null, lastDateTo: null });
+        this.searchForm.patchValue({ search: '', employmentType: 'Full-time', lastDateFrom: null, lastDateTo: null });
         this.page = 1;
         this.loadJobs().subscribe();
     }
 
     hasFilters(): boolean {
         const v = this.searchForm.value;
-        return !!(v.search?.trim() || v.status !== 'Open' || v.lastDateFrom || v.lastDateTo);
+        return !!(v.search?.trim() || v.employmentType !== 'Full-time' || v.lastDateFrom || v.lastDateTo);
     }
 
     onPageChange(event: PageEvent): void {
@@ -239,6 +242,11 @@ export class PublicCareerComponent implements OnInit {
         if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
         if (diffWeeks < 5) return `${diffWeeks} ${diffWeeks === 1 ? 'week' : 'weeks'} ago`;
         return `${diffMonths} ${diffMonths === 1 ? 'month' : 'months'} ago`;
+    }
+
+    getHeroBackground(): string {
+        const url = this.companyDetails?.careerBgImageUrl || this.defaultHeroImage;
+        return url ? `url(${url})` : '';
     }
 }
 

@@ -1,0 +1,262 @@
+<div class="career-apply-page">
+
+    <!-- Header -->
+    <header class="career-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="logo-box" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Company'" />
+                </div>
+                <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails?.name }}</span>
+            </div>
+            <div class="header-right">
+                <a class="header-link" href="#">View Website</a>
+                <div class="profile-icon">
+                    <mat-icon>person_outline</mat-icon>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div class="state-container" *ngIf="isLoadingJob">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading application...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="state-container empty-state" *ngIf="!isLoadingJob && errorMessage">
+        <mat-icon>error_outline</mat-icon>
+        <h3>{{ errorMessage }}</h3>
+        <button class="btn-primary" (click)="goHome()">Back to Openings</button>
+    </div>
+
+    <!-- Success State -->
+    <main class="page-container success-layout" *ngIf="!isLoadingJob && submitSuccess">
+        <div class="success-card-modern">
+            <div class="success-icon-wrapper">
+                <div class="success-icon-main">
+                    <mat-icon>check_circle</mat-icon>
+                </div>
+                <!-- Decorative elements -->
+                <div class="icon-deco-1"></div>
+                <div class="icon-deco-2"></div>
+            </div>
+
+            <h1>Application Submitted!</h1>
+
+            <p class="success-message">
+                Thank you for applying for the <strong>{{ job?.jobRoleName }}</strong> position at {{
+                companyDetails?.name || 'our company' }}.
+                We'll review your application and get back to you soon.
+            </p>
+
+            <button class="btn-primary" (click)="goHome()">
+                <mat-icon>arrow_back</mat-icon>
+                Back to Jobs
+            </button>
+
+            <!-- <div class="success-card-footer">
+                <p>Need help? <a href="#">Contact Support</a></p>
+            </div> -->
+        </div>
+    </main>
+
+    <!-- Main Application Form -->
+    <main class="page-container flex-col" *ngIf="!isLoadingJob && !errorMessage && !submitSuccess && job">
+
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs">
+            <a (click)="goHome()">Home</a>
+            <span class="separator">/</span>
+            <a (click)="goHome()">Jobs</a>
+            <span class="separator">/</span>
+            <a (click)="goBack()">{{ job.jobRoleName }}</a>
+            <span class="separator">/</span>
+            <span class="current">Apply</span>
+        </nav>
+
+        <div class="form-container">
+            <div class="form-header">
+                <h1>
+                    <mat-icon>assignment</mat-icon>
+                    Apply for {{ job.jobRoleName }}
+                </h1>
+                <p>Fill in the form below to submit your application and resume. All fields marked with an asterisk (*)
+                    are required.</p>
+            </div>
+
+            <!-- Global Error -->
+            <div class="form-alert error-alert" *ngIf="submitError">
+                <mat-icon>error</mat-icon>
+                <span>{{ submitError }}</span>
+            </div>
+
+            <form [formGroup]="applyForm" (ngSubmit)="onSubmit()" class="application-form">
+
+                <!-- Section 1: Personal Information -->
+                <div class="form-section">
+                    <h2 class="section-title">Personal Information</h2>
+
+                    <div class="input-grid-2">
+                        <div class="form-group">
+                            <label>First Name <span>*</span></label>
+                            <input type="text" formControlName="firstName" class="form-input" placeholder="e.g. Alex" />
+                            <div class="error-text"
+                                *ngIf="applyForm.get('firstName')?.invalid && applyForm.get('firstName')?.touched">
+                                First name is required.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name <span>*</span></label>
+                            <input type="text" formControlName="lastName" class="form-input" placeholder="e.g. Smith" />
+                            <div class="error-text"
+                                *ngIf="applyForm.get('lastName')?.invalid && applyForm.get('lastName')?.touched">
+                                Last name is required.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-grid-2">
+                        <div class="form-group">
+                            <label>Email Address <span>*</span></label>
+                            <input type="email" formControlName="candidateEmail" class="form-input"
+                                placeholder="e.g. alex.smith@example.com" />
+                            <div class="error-text"
+                                *ngIf="applyForm.get('candidateEmail')?.invalid && applyForm.get('candidateEmail')?.touched">
+                                A valid email is required.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number <span>*</span></label>
+                            <input type="tel" formControlName="phone" class="form-input"
+                                placeholder="e.g. +1 (555) 000-0000" />
+                            <div class="error-text"
+                                *ngIf="applyForm.get('phone')?.invalid && applyForm.get('phone')?.touched">
+                                Phone number is required.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Section 2: Links -->
+                <div class="form-section">
+                    <h2 class="section-title">Professional Profiles</h2>
+
+                    <div class="form-group">
+                        <label>LinkedIn Profile <span class="optional">(Optional)</span></label>
+                        <input type="url" formControlName="linkedInUrl" class="form-input"
+                            placeholder="https://linkedin.com/in/alexsmith" />
+                    </div>
+                </div>
+
+                <!-- Section 3: Resume Upload -->
+                <div class="form-section">
+                    <h2 class="section-title">Resume <span>*</span></h2>
+
+                    <div class="upload-dropzone" (click)="triggerResumeInput(fileInput)"
+                        [class.has-file]="currentResumeUrl">
+                        <input type="file" #fileInput [accept]="acceptedResumeTypes"
+                            (change)="onResumeFileSelected($event, fileInput)" style="display: none;" />
+
+                        <ng-container *ngIf="!currentResumeUrl && !isUploadingResume">
+                            <div class="upload-icon"><mat-icon>cloud_upload</mat-icon></div>
+                            <h4 class="upload-title">Click to upload your resume</h4>
+                            <p class="upload-hint">PDF, DOC, DOCX up to {{ maxResumeSizeMb }}MB</p>
+                            <button type="button" class="btn-outline">Choose File</button>
+                        </ng-container>
+
+                        <ng-container *ngIf="isUploadingResume">
+                            <mat-spinner diameter="32"></mat-spinner>
+                            <p class="upload-hint mt-2">Uploading...</p>
+                        </ng-container>
+
+                        <ng-container *ngIf="currentResumeUrl && !isUploadingResume">
+                            <div class="file-success">
+                                <mat-icon class="file-icon">description</mat-icon>
+                                <div class="file-info">
+                                    <span class="file-name">{{ resumeFileName || 'Resume uploaded' }}</span>
+                                    <span class="file-size">Ready to submit</span>
+                                </div>
+                                <button type="button" class="btn-icon"
+                                    (click)="clearResume(); $event.stopPropagation()">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+                    <div class="error-text"
+                        *ngIf="applyForm.get('resumeUrl')?.invalid && applyForm.get('resumeUrl')?.touched">
+                        Please upload your resume.
+                    </div>
+                </div>
+
+                <!-- Section 4: Cover Letter -->
+                <div class="form-section">
+                    <h2 class="section-title">Cover Letter <span class="optional">(Optional)</span></h2>
+                    <p class="section-hint">Share why you'd be a great fit for this role and what excites you about our
+                        company.</p>
+
+                    <div class="quill-wrapper">
+                        <quill-editor formControlName="coverLetter" [modules]="quillConfig"
+                            placeholder="Write your cover letter here..." [format]="'html'">
+                        </quill-editor>
+                    </div>
+                </div>
+
+                <hr class="form-divider" />
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-submit" [disabled]="isSubmitting || applyForm.invalid">
+                        <ng-container *ngIf="!isSubmitting">
+                            Submit Application <mat-icon>send</mat-icon>
+                        </ng-container>
+                        <ng-container *ngIf="isSubmitting">
+                            <mat-spinner diameter="20" class="spinner-white"></mat-spinner> Submitting...
+                        </ng-container>
+                    </button>
+                </div>
+
+                <p class="privacy-note">
+                    By submitting your application, you agree to our
+                    <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                </p>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="career-footer">
+        <div class="footer-top">
+            <span class="powered-by">POWERED BY BRISKPEOPLE</span>
+        </div>
+        <div class="footer-bottom">
+            <span class="footer-text">
+                © {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.
+            </span>
+            <div class="footer-social">
+                <a
+                    class="social-icon linkedin"
+                    href="https://www.linkedin.com"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="LinkedIn"
+                >
+                    in
+                </a>
+                <a
+                    class="social-icon x-icon"
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="X (Twitter)"
+                >
+                    X
+                </a>
+            </div>
+        </div>
+    </footer>
+</div>

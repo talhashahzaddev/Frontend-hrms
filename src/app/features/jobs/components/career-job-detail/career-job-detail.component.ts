@@ -10,7 +10,6 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto } from '@core/models/jobs.models';
 import { CompanyCareerDetails } from '../public-career/public-career.component';
-import { CareerApplyDialogComponent } from '../career-apply-dialog/career-apply-dialog.component';
 
 @Component({
     selector: 'app-career-job-detail',
@@ -111,18 +110,7 @@ export class CareerJobDetailComponent implements OnInit {
 
     applyForJob(): void {
         if (!this.job) return;
-
-        const domain = this.getDomainFromUrl();
-        this.dialog.open(CareerApplyDialogComponent, {
-            width: '620px',
-            maxHeight: '90vh',
-            panelClass: 'career-apply-dialog-panel',
-            disableClose: false,
-            data: {
-                job: this.job,
-                domain: domain
-            }
-        });
+        this.router.navigate(['/career/job', this.job.jobCode, 'apply']);
     }
 
     getExperienceText(job: JobOpeningDto): string {

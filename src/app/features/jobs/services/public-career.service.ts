@@ -24,14 +24,14 @@ export class PublicCareerService {
         domain: string,
         params: {
             search?: string;
-            status?: string;
+            employmentType?: string;
             lastDateFrom?: string;
             lastDateTo?: string;
             page?: number;
             pageSize?: number;
         } = {}
     ): Observable<PagedResult<JobOpeningDto>> {
-        const { search, status = 'Open', lastDateFrom, lastDateTo, page = 1, pageSize = 10 } = params;
+        const { search, employmentType = 'Full-time', lastDateFrom, lastDateTo, page = 1, pageSize = 10 } = params;
 
         const queryParams: Record<string, string | number> = {
             domain,
@@ -40,7 +40,7 @@ export class PublicCareerService {
         };
 
         if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
-        if (status != null && status !== '') queryParams['status'] = status;
+        if (employmentType != null && employmentType !== '') queryParams['employmentType'] = employmentType;
         if (lastDateFrom) queryParams['lastDateFrom'] = lastDateFrom;
         if (lastDateTo) queryParams['lastDateTo'] = lastDateTo;
 
