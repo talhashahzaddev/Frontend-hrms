@@ -121,6 +121,7 @@ main {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
 
       .toggle-info {
         display: flex;
@@ -128,9 +129,10 @@ main {
         gap: 0.75rem;
 
         .toggle-label {
-          font-size: 0.875rem;
-          font-weight: 700;
-          color: $slate-900;
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: $slate-700;
+          white-space: nowrap;
         }
 
         .toggle-switch {
@@ -189,6 +191,8 @@ main {
         color: $slate-500;
         font-style: italic;
         margin: 0;
+        flex-basis: 100%;
+        margin-top: 0.25rem;
       }
     }
   }
