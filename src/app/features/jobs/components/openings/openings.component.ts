@@ -25,7 +25,7 @@ import {
 import { JobsService } from '../../services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@core/services/auth.service';
-import { JobOpeningDto, PagedResult } from '@core/models/jobs.models';
+import { JobOpeningDto, PagedResult, JobOpeningStatsDto } from '@core/models/jobs.models';
 
 @Component({
   selector: 'app-openings',
@@ -51,6 +51,7 @@ import { JobOpeningDto, PagedResult } from '@core/models/jobs.models';
 })
 export class OpeningsComponent implements OnInit {
   openings: JobOpeningDto[] = [];
+  stats: JobOpeningStatsDto | null = null;
   isLoading = false;
   filterForm: FormGroup;
   page = 1;
@@ -91,7 +92,19 @@ export class OpeningsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadStats();
     this.loadOpenings();
+  }
+
+  loadStats(): void {
+    this.jobsService.getOpeningOverallDetails().subscribe({
+      next: (res) => {
+        this.stats = res;
+      },
+      error: () => {
+        this.stats = null;
+      }
+    });
   }
 
   loadOpenings(): void {

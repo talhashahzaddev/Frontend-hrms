@@ -1,44 +1,82 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>label</mat-icon>
-    {{ data.mode === 'create' ? 'Create Stage' : 'Edit Stage' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
-
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="stageForm" class="stage-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Stage Name *</mat-label>
-      <input matInput formControlName="stageName" placeholder="e.g. Screening, Interview" maxlength="100">
-      <mat-hint>Required. Max 100 characters.</mat-hint>
-      <mat-error *ngIf="stageForm.get('stageName')?.hasError('required')">Stage name is required</mat-error>
-      <mat-error *ngIf="stageForm.get('stageName')?.hasError('maxlength')">Stage name cannot exceed 100
-        characters</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Order</mat-label>
-      <input matInput type="number" formControlName="stageOrder" placeholder="Optional display order" min="0">
-      <mat-hint>Optional. Lower numbers appear first.</mat-hint>
-    </mat-form-field>
-
-    <div class="checkbox-container">
-      <mat-checkbox formControlName="isInterviewStage" color="primary">
-        For Interview
-      </mat-checkbox>
-      <mat-hint class="small-hint">Check this if the stage requires an interview schedule.</mat-hint>
+<div class="dialog-wrapper">
+  <!-- BEGIN: ModalHeader -->
+  <header>
+    <div class="header-title-box">
+      <!-- Blue Tag Icon -->
+      <div class="icon-box">
+        <svg fill="currentColor" height="20" viewBox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M243.31,136,144,36.69A15.86,15.86,0,0,0,132.69,32H40a16,16,0,0,0-16,16v92.69A15.86,15.86,0,0,0,28.69,152l99.31,99.31a16,16,0,0,0,22.62,0l92.69-92.69A16,16,0,0,0,243.31,136ZM136,236.69,40,140.69V48h92.69l96,96ZM92,84A12,12,0,1,1,80,72,12,12,0,0,1,92,84Z">
+          </path>
+        </svg>
+      </div>
+      <h2>{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }}</h2>
     </div>
-  </form>
-</mat-dialog-content>
+    <!-- Close Button -->
+    <button aria-label="Close" class="close-btn" type="button" mat-dialog-close>
+      <svg fill="currentColor" height="24" viewBox="0 0 256 256" width="24" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z">
+        </path>
+      </svg>
+    </button>
+  </header>
+  <!-- END: ModalHeader -->
 
-<mat-dialog-actions class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close type="button">Cancel</button>
-  <button mat-flat-button [disabled]="stageForm.invalid || isSubmitting" (click)="onSubmit()" class="submit-button">
-    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-    <span *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'Create' : 'Update' }}</span>
-    <span *ngIf="isSubmitting">{{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}</span>
-  </button>
-</mat-dialog-actions>
+  <!-- BEGIN: ModalBody -->
+  <main>
+    <form [formGroup]="stageForm">
+      <!-- Row 1: Stage Name -->
+      <section>
+        <label class="field-label" for="stage-name">Stage Name*</label>
+        <input class="input-field" id="stage-name" formControlName="stageName" maxlength="100"
+          placeholder="e.g. Technical Interview, HR Round" type="text" />
+        <div class="hint-container">
+          <span class="hint-text text-danger"
+            *ngIf="stageForm.get('stageName')?.touched && stageForm.get('stageName')?.invalid">Stage name is
+            required.</span>
+          <span class="hint-text"
+            *ngIf="!(stageForm.get('stageName')?.touched && stageForm.get('stageName')?.invalid)">Required. Max 100
+            characters.</span>
+          <span class="char-counter">{{ stageForm.get('stageName')?.value?.length || 0 }} / 100</span>
+        </div>
+      </section>
+
+      <!-- Row 2: Order -->
+      <section>
+        <label class="field-label" for="stage-order">Order</label>
+        <input class="input-field" id="stage-order" formControlName="stageOrder" placeholder="1" type="number" />
+        <div class="hint-container">
+          <span class="hint-text">Optional. Lower numbers appear first.</span>
+        </div>
+      </section>
+
+      <!-- Row 4: Interview Toggle Card -->
+      <section class="toggle-card">
+        <div class="toggle-info">
+          <!-- Toggle Switch -->
+          <label class="toggle-switch">
+            <input formControlName="isInterviewStage" class="sr-only" type="checkbox" />
+            <div class="toggle-bg"></div>
+          </label>
+          <span class="toggle-label">For Interview</span>
+        </div>
+        <p class="toggle-desc">Enable if this requires an interview</p>
+      </section>
+    </form>
+  </main>
+  <!-- END: ModalBody -->
+
+  <!-- BEGIN: ModalFooter -->
+  <footer>
+    <button class="btn-cancel" type="button" mat-dialog-close>
+      Cancel
+    </button>
+    <button class="btn-primary" type="button" [disabled]="stageForm.invalid || isSubmitting" (click)="onSubmit()">
+      <mat-spinner *ngIf="isSubmitting" diameter="16" color="accent"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'Create Stage' : 'Update Stage' }}</span>
+      <span *ngIf="isSubmitting">{{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}</span>
+    </button>
+  </footer>
+  <!-- END: ModalFooter -->
+</div>
