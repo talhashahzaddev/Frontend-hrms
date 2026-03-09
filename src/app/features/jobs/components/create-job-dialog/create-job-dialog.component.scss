@@ -1,433 +1,499 @@
-// ─── Dialog shell ─────────────────────────────────────────────────────────
-::ng-deep .mat-mdc-dialog-container {
-  border-radius: 18px !important;
-  padding: 0 !important;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important;
+// Public Sans font usage
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap');
+
+// Colors
+$primary: #2563EB;
+$slate-50: #f8fafc;
+$slate-100: #f1f5f9;
+$slate-200: #e2e8f0;
+$slate-300: #cbd5e1;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-600: #475569;
+$slate-700: #334155;
+$slate-800: #1e293b;
+$slate-900: #0f172a;
+$green-100: #dcfce7;
+$green-500: #22c55e;
+$green-700: #15803d;
+
+.bp-create-job-bg {
+  font-family: 'Public Sans', sans-serif;
+  background-color: $slate-50;
+  min-height: 100vh;
+  color: $slate-900;
+  padding-bottom: 96px; // space for fixed footer
+  box-sizing: border-box;
+  position: relative;
 }
 
-.dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.bp-create-job-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
 
-  h2 {
+// Header
+.bp-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  .bp-back-btn {
+    background: $primary;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    color: white;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: white !important;
-    letter-spacing: -0.3px;
-
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-      color: white !important;
-    }
-  }
-
-  // Force mat-dialog-title directive colour override
-  ::ng-deep .mat-mdc-dialog-title,
-  ::ng-deep [mat-dialog-title] {
-    color: white !important;
-  }
-
-  .close-button {
-    color: white;
-    opacity: 0.85;
-    transition: opacity 0.2s, transform 0.25s;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s;
+    margin-top: 4px; // Align optically
 
     &:hover {
-      opacity: 1;
-      transform: rotate(90deg);
-      background: rgba(255, 255, 255, 0.15);
+      background: #1d4ed8; // deeper blue, same hover tone as primary button
     }
   }
-}
 
-// ─── Content scroll area ───────────────────────────────────────────────────
-.dialog-content {
-  padding: 0 !important;
-  max-height: 75vh;
-  overflow-y: auto;
-  background: #f7f8fc;
-
-  &::-webkit-scrollbar {
-    width: 4px;
+  h2.bp-page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: $slate-900;
+    line-height: 1.2;
+    margin: 0 0 4px 0;
   }
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.35);
-    border-radius: 4px;
+  p.bp-page-subtitle {
+    color: $slate-500;
+    margin: 0;
+    font-size: 16px;
   }
 }
 
-// ─── Form wrapper ─────────────────────────────────────────────────────────
-.job-form {
+// Grid Layout
+.bp-content-grid {
+  display: flex;
+  gap: 32px;
+}
+
+.bp-form-col {
+  flex: 1;
+  max-width: 840px;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 24px;
 }
 
-// ─── Sections ─────────────────────────────────────────────────────────────
-.form-section {
-  padding: 20px 28px 12px;
-  border-bottom: 1px solid #ecedf5;
-  background: #fff;
-  margin-bottom: 6px;
+.bp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
-  &:last-child,
-  &.last-section {
-    border-bottom: none;
+.bp-sidebar-col {
+  flex: 0 0 320px;
+}
+
+.bp-sticky-sidebar {
+  position: sticky;
+  top: 96px; // approx from header
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// Cards
+.bp-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid $slate-200;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.bp-card-header {
+  padding: 16px 24px;
+  border-left: 4px solid $primary;
+  background-color: rgba(248, 250, 252, 0.5); // slate-50/50 approx
+
+  &.bp-b-bottom {
+    border-left: none;
+    border-bottom: 1px solid $slate-100;
+  }
+
+  h3 {
+    margin: 0;
+    font-weight: 700;
+    color: $slate-800;
+    font-size: 16px;
+  }
+}
+
+.bp-card-body {
+  padding: 24px;
+
+  &.bp-quill-group {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+}
+
+// Forms
+.bp-row {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 24px;
+
+  &.bp-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &.bp-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &:last-child {
     margin-bottom: 0;
   }
 }
 
-.section-header {
+.mt-16 {
+  margin-top: 16px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.w-50 {
+  width: calc(50% - 12px);
+}
+
+.bp-form-field {
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: $slate-700;
+    margin-bottom: 6px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid $slate-200;
+    border-radius: 8px;
+    background: white;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: $slate-900;
+    font-family: inherit;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); // $primary/20
+    }
+
+    &::placeholder {
+      color: $slate-400;
+    }
+
+    &.ng-invalid.ng-touched {
+      border-color: #ef4444; // red-500
+    }
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .error {
+    color: #ef4444; // red-500
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+// Sidebar Cards
+.bp-sidebar-card-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid $slate-100;
+  background-color: rgba(248, 250, 252, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: $slate-800;
+  }
+
+  .bp-badge {
+    padding: 2px 8px;
+    background: $green-100;
+    color: $green-700;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 9999px;
+  }
+}
+
+.bp-summary-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bp-summary-title {
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: $slate-900;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: $slate-500;
+  }
+}
+
+.bp-summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bp-summary-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  color: $slate-600;
+  font-size: 14px;
 
-  .section-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .section-title {
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: white;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $slate-400;
   }
 }
 
-// Section header pill — wraps icon + title
-.section-header::before {
-  content: '';
-  display: none;
-}
-
-// Re-style section-header as a pill chip
-.section-header {
-  display: inline-flex;
+.bp-summary-footer {
+  padding-top: 16px;
+  border-top: 1px solid $slate-50;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px 5px 8px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  margin-bottom: 16px;
+
+  .label {
+    font-size: 12px;
+    color: $slate-500;
+    font-weight: 500;
+  }
+
+  .value {
+    font-size: 12px;
+    color: $slate-900;
+    font-weight: 600;
+  }
 }
 
-// ─── Row layouts ──────────────────────────────────────────────────────────
-.form-row {
+// Checklist
+.bp-checklist-body {
+  padding: 20px;
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 4px;
-
-  &.two-col .full-width {
-    flex: 1;
-  }
-
-  &.role-row {
-    .field-role {
-      flex: 1;
-    }
-
-    .field-code {
-      flex: 1;
-    }
-  }
-
-  &.four-col {
-    flex-wrap: nowrap;
-    gap: 10px;
-
-    .field-currency {
-      flex: 0 0 88px;
-    }
-
-    .field-vacancies {
-      flex: 0 0 96px;
-    }
-
-    .full-width {
-      flex: 1;
-    }
-  }
 }
 
-.field-department {
-  width: 50%;
-  max-width: 50%;
-  flex: 0 0 50%;
-  min-width: 160px;
-}
-
-// ─── Material form field — deep premium override ───────────────────────────
-// Since ViewEncapsulation.None is set, these apply globally from this component.
-// We scope under .job-form to reduce blast radius.
-.job-form {
-
-  mat-form-field.mat-form-field-appearance-outline {
-    width: 100%;
-
-    // The outer text-field wrapper
-    .mdc-text-field--outlined {
-      border-radius: 10px !important;
-      background: #f5f6fd !important;
-      transition: background 0.2s ease;
-    }
-
-    // Remove Material's default border drawing — we control it via outline
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: #dde1f0 !important;
-      border-width: 1.5px !important;
-      transition: border-color 0.2s ease;
-    }
-
-    .mdc-notched-outline__leading {
-      border-radius: 10px 0 0 10px !important;
-    }
-
-    .mdc-notched-outline__trailing {
-      border-radius: 0 10px 10px 0 !important;
-    }
-
-    // Hover
-    &:not(.mdc-text-field--focused):hover {
-
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: #a8b4e8 !important;
-      }
-
-      .mdc-text-field--outlined {
-        background: #f0f2fb !important;
-      }
-    }
-
-    // Focus
-    &.mdc-text-field--focused {
-
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: #667eea !important;
-        border-width: 2px !important;
-      }
-
-      .mdc-text-field--outlined {
-        background: #fff !important;
-      }
-    }
-
-    // Infix — controls the input height
-    .mat-mdc-form-field-infix {
-      padding-top: 11px !important;
-      padding-bottom: 11px !important;
-      min-height: 44px !important;
-    }
-
-    // Input text
-    input.mat-mdc-input-element,
-    .mat-mdc-select-value-text {
-      font-size: 13px !important;
-      font-weight: 500 !important;
-      color: #1f2937 !important;
-    }
-
-    // Placeholder
-    input.mat-mdc-input-element::placeholder {
-      color: #b0b8d4 !important;
-    }
-
-    // Label
-    .mdc-floating-label {
-      font-size: 13px !important;
-      color: #6b7a9e !important;
-      font-weight: 500 !important;
-    }
-
-    .mdc-floating-label--float-above {
-      color: #667eea !important;
-      font-weight: 600 !important;
-    }
-
-    // Error text
-    mat-error {
-      font-size: 10.5px !important;
-      color: #ef4444 !important;
-    }
-
-    // Select arrow
-    .mat-mdc-select-arrow svg {
-      fill: #667eea !important;
-    }
-
-    // Datepicker toggle icon
-    .mat-datepicker-toggle .mat-mdc-icon-button mat-icon {
-      color: #667eea !important;
-      font-size: 20px;
-    }
-
-    // Subscript (error area) spacing
-    .mat-mdc-form-field-subscript-wrapper {
-      padding: 0 2px !important;
-    }
-  }
-}
-
-// ─── Dialog actions ───────────────────────────────────────────────────────
-.dialog-actions {
-  padding: 16px 28px !important;
-  background: #fff;
-  border-top: 1px solid #ecedf5;
+.bp-check-item {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   gap: 12px;
 
-  button {
-    height: 42px;
-    padding: 0 24px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.01em !important;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $slate-300;
+    transition: color 0.3s;
+
+    &.done {
+      color: $green-500;
+    }
   }
 
-  .submit-button:not([disabled]) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
+  span:not(mat-icon) {
+    font-size: 14px;
+    color: $slate-400;
+    transition: color 0.3s;
+
+    &.done {
+      color: $slate-700;
+    }
+  }
+}
+
+// Quill Editor Overrides
+.bp-quill-field {
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: $slate-500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.bp-quill-wrapper {
+  border: 1px solid $slate-200;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  }
+
+  .ql-toolbar.ql-snow {
     border: none !important;
-    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    border-bottom: 1px solid $slate-200 !important;
+    background: $slate-50;
+    padding: 10px 12px !important;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    .ql-formats {
+      margin-right: 8px;
+    }
+
+    button {
+      border-radius: 6px;
+      transition: background 0.2s;
+      width: 32px !important;
+      height: 32px !important;
+      padding: 6px !important;
+
+      &:hover {
+        background: $slate-200;
+      }
+    }
+
+    .ql-stroke {
+      stroke: $slate-600 !important;
+    }
+
+    .ql-fill {
+      fill: $slate-600 !important;
+    }
+
+    button:hover .ql-stroke,
+    button.ql-active .ql-stroke {
+      stroke: $primary !important;
+    }
+
+    button:hover .ql-fill,
+    button.ql-active .ql-fill {
+      fill: $primary !important;
+    }
+
+    .ql-picker-label {
+      color: $slate-600 !important;
+    }
+  }
+
+  .ql-container.ql-snow {
+    border: none !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+  }
+
+  .ql-editor {
+    min-height: 120px;
+    font-size: 14px;
+    font-family: inherit;
+    color: $slate-700;
+    padding: 16px;
+    line-height: 1.6;
+
+    &.ql-blank::before {
+      font-style: normal !important;
+      color: $slate-400 !important;
+      font-size: 14px;
+      left: 16px !important;
+      right: 16px !important;
+    }
+  }
+}
+
+.bp-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid $slate-200;
+
+  .bp-btn-cancel {
+    padding: 10px 24px;
+    border: 1px solid $slate-300;
+    background: white;
+    color: $slate-600;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 14px;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 22px rgba(102, 126, 234, 0.5) !important;
+      background: $slate-50;
     }
   }
-}
 
-// ─── Quill rich-text fields ───────────────────────────────────────────────
-.quill-field {
-  margin-bottom: 14px;
-
-  .quill-field-label {
+  .bp-btn-primary {
+    padding: 10px 32px;
+    background: $primary;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2); // primary color shadow
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #4b5563;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
+    gap: 8px;
+    transition: all 0.2s;
 
-    mat-icon {
-      font-size: 15px;
-      width: 15px;
-      height: 15px;
-      color: #667eea;
+    &:hover:not([disabled]) {
+      background: #1d4ed8; // deeper blue
     }
 
-    .quill-field-hint {
-      font-size: 11px;
-      font-weight: 400;
-      color: #9ca3af;
-      text-transform: none;
-      letter-spacing: 0;
+    &[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
     }
-  }
-
-  .quill-editor-wrap {
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1.5px solid #dde1f0;
-    background: #f5f6fd;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-
-    &:focus-within {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
-      background: #fff;
-    }
-  }
-}
-
-// ─── Quill global overrides ───────────────────────────────────────────────
-.ql-toolbar.ql-snow {
-  border: none !important;
-  border-bottom: 1px solid #e5e7f0 !important;
-  background: #eef0f9;
-  padding: 5px 10px !important;
-
-  .ql-formats {
-    margin-right: 6px;
-  }
-
-  button,
-  .ql-picker-label {
-    color: #4b5563 !important;
-  }
-
-  .ql-stroke {
-    stroke: #4b5563 !important;
-  }
-
-  .ql-fill {
-    fill: #4b5563 !important;
-  }
-
-  button:hover .ql-stroke,
-  button.ql-active .ql-stroke {
-    stroke: #667eea !important;
-  }
-
-  button:hover,
-  button.ql-active {
-    color: #667eea !important;
-  }
-}
-
-.ql-container.ql-snow {
-  border: none !important;
-  font-family: inherit;
-  font-size: 13px;
-}
-
-.ql-editor {
-  min-height: 90px;
-  max-height: 180px;
-  overflow-y: auto;
-  padding: 10px 13px;
-  color: #1f2937;
-  font-weight: 500;
-  line-height: 1.65;
-
-  &.ql-blank::before {
-    color: #b0b8d4;
-    font-style: normal;
-    font-size: 13px;
   }
 }

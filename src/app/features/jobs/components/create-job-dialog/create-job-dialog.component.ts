@@ -1,7 +1,8 @@
-import { Component, Inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, OnInit, ViewEncapsulation, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -49,8 +50,9 @@ export class CreateJobDialogComponent implements OnInit {
   isSubmitting = false;
   departments: Department[] = [];
   get isEditMode(): boolean {
-    return this.data?.mode === 'edit' && !!this.data?.job;
+    return this.data?.mode === 'edit' || !!this.editJobId;
   }
+  editJobId?: string | null;
 
   /** Quill toolbar for plain-ish text (intro) */
   readonly quillBasicConfig = {
@@ -95,10 +97,12 @@ export class CreateJobDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private jobsService: JobsService,
-    private dialogRef: MatDialogRef<CreateJobDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CreateJobDialogData,
+    @Optional() private dialogRef: MatDialogRef<CreateJobDialogComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: CreateJobDialogData,
     private notification: NotificationService,
-    private employeeService: EmployeeService
+    private employeeService: EmployeeService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.jobForm = this.fb.group({
       jobRoleName: ['', [Validators.required, Validators.maxLength(200)]],
@@ -124,11 +128,40 @@ export class CreateJobDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.data?.mode) this.data = { mode: 'create' };
-    if (this.isEditMode && this.data.job) this.patchFormWithJob(this.data.job);
+    if (!this.data) this.data = { mode: 'create' };
+
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.editJobId = id;
+        this.data.mode = 'edit';
+        this.loadJobDetails(id);
+      } else if (this.isEditMode && this.data.job) {
+        this.patchFormWithJob(this.data.job);
+      }
+    });
+
     this.employeeService.getDepartments().subscribe({
       next: (depts: Department[]) => (this.departments = depts),
       error: () => this.notification.showError('Failed to load departments')
+    });
+  }
+
+  private loadJobDetails(id: string): void {
+    this.jobsService.getJobOpeningById(id).subscribe({
+      next: (job) => {
+        if (job) {
+          this.data.job = job;
+          this.patchFormWithJob(job);
+        } else {
+          this.notification.showError('Job not found');
+          this.router.navigate(['/jobs/openings']);
+        }
+      },
+      error: () => {
+        this.notification.showError('Failed to load job details');
+        this.router.navigate(['/jobs/openings']);
+      }
     });
   }
 
@@ -162,7 +195,10 @@ export class CreateJobDialogComponent implements OnInit {
     const v = this.jobForm.value;
     const lastDateStr = v.lastDate ? new Date(v.lastDate).toISOString() : null;
 
-    if (this.isEditMode && this.data.job?.jobId) {
+    if (this.isEditMode && (this.data.job?.jobId || this.editJobId)) {
+      const targetId = this.data.job?.jobId || this.editJobId;
+      if (!targetId) return;
+
       const request: UpdateJobOpeningRequest = {
         jobRoleName: v.jobRoleName,
         jobCode: v.jobCode || null,
@@ -185,10 +221,10 @@ export class CreateJobDialogComponent implements OnInit {
         status: v.status || 'Open'
       };
       this.isSubmitting = true;
-      this.jobsService.updateJobOpening(this.data.job.jobId, request).subscribe({
+      this.jobsService.updateJobOpening(targetId, request).subscribe({
         next: (updated: JobOpeningDto) => {
           this.notification.showSuccess('Job opening updated successfully');
-          this.dialogRef.close(updated);
+          this.closeComponent(updated);
         },
         error: (err: { message?: string }) => {
           this.isSubmitting = false;
@@ -221,7 +257,7 @@ export class CreateJobDialogComponent implements OnInit {
       this.jobsService.createJobOpening(request).subscribe({
         next: (created: JobOpeningDto) => {
           this.notification.showSuccess('Job opening created successfully');
-          this.dialogRef.close(created);
+          this.closeComponent(created);
         },
         error: (err: { message?: string }) => {
           this.isSubmitting = false;
@@ -231,7 +267,42 @@ export class CreateJobDialogComponent implements OnInit {
     }
   }
 
+  private closeComponent(result?: any): void {
+    if (this.dialogRef) {
+      this.dialogRef.close(result);
+    } else {
+      this.router.navigate(['/jobs/openings']);
+    }
+  }
+
+  getDepartmentName(): string {
+    const deptId = this.jobForm.value.departmentId;
+    if (!deptId) return '';
+    const dept = this.departments.find(d => d.departmentId === deptId);
+    return dept ? dept.departmentName : '';
+  }
+
+  getExperienceText(): string {
+    const min = this.jobForm.value.experienceMin;
+    const max = this.jobForm.value.experienceMax;
+    if (min != null && max != null) return `${min}-${max} yrs`;
+    if (min != null) return `${min}+ yrs`;
+    if (max != null) return `Up to ${max} yrs`;
+    return '';
+  }
+
+  getCtcText(): string {
+    const min = this.jobForm.value.ctcMin;
+    const max = this.jobForm.value.ctcMax;
+    const cur = this.jobForm.value.currency || '';
+    if (min == null && max == null) return '';
+    if (min != null && max != null) return `${cur} ${min} - ${max}`;
+    if (min != null) return `${cur} ${min}+`;
+    if (max != null) return `Up to ${cur} ${max}`;
+    return '';
+  }
+
   onCancel(): void {
-    this.dialogRef.close();
+    this.closeComponent();
   }
 }

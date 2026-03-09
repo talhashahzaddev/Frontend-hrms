@@ -159,16 +159,7 @@ export class OpeningsComponent implements OnInit {
   }
 
   openCreateJobDialog(): void {
-    const dialogRef = this.dialog.open(CreateJobDialogComponent, {
-      width: '900px',
-      maxHeight: '90vh',
-      panelClass: 'create-job-dialog-panel',
-      data: { mode: 'create' }
-    });
-    dialogRef.afterClosed().subscribe(() => {
-      this.page = 1;
-      this.loadOpenings();
-    });
+    this.router.navigate(['/jobs/create']);
   }
 
   viewDetails(job: JobOpeningDto): void {
@@ -209,16 +200,7 @@ export class OpeningsComponent implements OnInit {
   }
 
   editJob(job: JobOpeningDto): void {
-    const dialogRef = this.dialog.open(CreateJobDialogComponent, {
-      width: '900px',
-      maxHeight: '90vh',
-      panelClass: 'create-job-dialog-panel',
-      data: { mode: 'edit', job }
-    });
-    dialogRef.afterClosed().subscribe(() => {
-      this.page = 1;
-      this.loadOpenings();
-    });
+    this.router.navigate(['/jobs/edit', job.jobId]);
   }
 
   deleteJob(job: JobOpeningDto): void {

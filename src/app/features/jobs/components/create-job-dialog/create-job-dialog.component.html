@@ -1,219 +1,278 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>work</mat-icon>
-    {{ isEditMode ? 'Edit Job Opening' : 'Create Job Opening' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
+<div class="bp-create-job-bg">
+  <div class="bp-create-job-main">
+
+    <!-- PAGE HEADER -->
+    <div class="bp-header">
+      <button class="bp-back-btn" (click)="onCancel()" type="button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h2 class="bp-page-title">{{ isEditMode ? 'Edit Job Opening' : 'Create Job Opening' }}</h2>
+        <p class="bp-page-subtitle">Fill in the details to post a new job opening to your career page and job boards.
+        </p>
+      </div>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="bp-content-grid">
+
+      <!-- LEFT COLUMN (FORM) -->
+      <div class="bp-form-col">
+        <form [formGroup]="jobForm" class="bp-form">
+
+          <!-- Job Identity -->
+          <div class="bp-card">
+            <div class="bp-card-header">
+              <h3>Job Identity</h3>
+            </div>
+            <div class="bp-card-body">
+              <div class="bp-row bp-cols-2">
+                <div class="bp-form-field">
+                  <label>Job Role Name*</label>
+                  <input type="text" formControlName="jobRoleName" placeholder="e.g. Senior Product Designer">
+                </div>
+                <div class="bp-form-field">
+                  <label>Job Code*</label>
+                  <input type="text" formControlName="jobCode" placeholder="BP-2024-001">
+                </div>
+              </div>
+              <div class="bp-row bp-cols-2">
+                <div class="bp-form-field">
+                  <label>Department</label>
+                  <select formControlName="departmentId">
+                    <option [ngValue]="null">Select Department</option>
+                    <option *ngFor="let d of departments" [value]="d.departmentId">{{ d.departmentName }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Experience & Compensation -->
+          <div class="bp-card">
+            <div class="bp-card-header">
+              <h3>Experience &amp; Compensation</h3>
+            </div>
+            <div class="bp-card-body">
+              <div class="bp-row bp-cols-4">
+                <div class="bp-form-field">
+                  <label>Exp Min (yrs)</label>
+                  <input type="number" formControlName="experienceMin" placeholder="0">
+                </div>
+                <div class="bp-form-field">
+                  <label>Exp Max (yrs)</label>
+                  <input type="number" formControlName="experienceMax" placeholder="5">
+                </div>
+                <div class="bp-form-field">
+                  <label>Salary Min (CTC)</label>
+                  <input type="number" formControlName="ctcMin" placeholder="Min Amount">
+                </div>
+                <div class="bp-form-field">
+                  <label>Salary Max (CTC)</label>
+                  <input type="number" formControlName="ctcMax" placeholder="Max Amount">
+                </div>
+              </div>
+              <div class="bp-row bp-cols-4">
+                <div class="bp-form-field">
+                  <label>Currency</label>
+                  <select formControlName="currency">
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="INR">INR (₹)</option>
+                  </select>
+                </div>
+                <div class="bp-form-field">
+                  <label>Vacancies*</label>
+                  <input type="number" formControlName="vacancies" placeholder="1">
+                </div>
+                <div class="bp-form-field">
+                  <label>Posted As*</label>
+                  <select formControlName="postedAs">
+                    <option value="External">External</option>
+                    <option value="Internal">Internal</option>
+                  </select>
+                </div>
+                <div class="bp-form-field">
+                  <label>Status</label>
+                  <select formControlName="status">
+                    <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location & Work Details -->
+          <div class="bp-card">
+            <div class="bp-card-header">
+              <h3>Location &amp; Work Details</h3>
+            </div>
+            <div class="bp-card-body">
+              <div class="bp-row bp-cols-2">
+                <div class="bp-form-field">
+                  <label>Location</label>
+                  <input type="text" formControlName="location" placeholder="e.g. San Francisco, CA">
+                </div>
+                <div class="bp-form-field">
+                  <label>Work Mode</label>
+                  <select formControlName="workMode">
+                    <option [ngValue]="null">Select Work Mode</option>
+                    <option *ngFor="let o of workModeOptions" [value]="o.value">{{ o.label }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="bp-row bp-cols-2">
+                <div class="bp-form-field">
+                  <label>Employment Type</label>
+                  <select formControlName="employmentType">
+                    <option [ngValue]="null">Select Employment</option>
+                    <option *ngFor="let o of employmentTypeOptions" [value]="o.value">{{ o.label }}</option>
+                  </select>
+                </div>
+                <div class="bp-form-field">
+                  <label>Last Date to Apply</label>
+                  <input type="date" formControlName="lastDate">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Job Content -->
+          <div class="bp-card">
+            <div class="bp-card-header bp-b-bottom">
+              <h3>Job Content</h3>
+            </div>
+            <div class="bp-card-body bp-quill-group">
+              <div class="bp-quill-field">
+                <h4>JOB INTRODUCTION</h4>
+                <div class="bp-quill-wrapper">
+                  <quill-editor formControlName="jobIntroduction" [modules]="quillBasicConfig" theme="snow"
+                    placeholder="Briefly introduce the role and the team..."></quill-editor>
+                </div>
+              </div>
+              <div class="bp-quill-field">
+                <h4>RESPONSIBILITIES</h4>
+                <div class="bp-quill-wrapper">
+                  <quill-editor formControlName="responsibilities" [modules]="quillRichConfig" theme="snow"
+                    placeholder="List the core duties and expectations..."></quill-editor>
+                </div>
+              </div>
+              <div class="bp-quill-field">
+                <h4>SKILLSET</h4>
+                <div class="bp-quill-wrapper">
+                  <quill-editor formControlName="skillset" [modules]="quillRichConfig" theme="snow"
+                    placeholder="Required skills, tools, and expertise..."></quill-editor>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- BOTTOM ACTION BUTTONS -->
+        <div class="bp-form-actions">
+          <button class="bp-btn-cancel" type="button" (click)="onCancel()">Cancel</button>
+          <button class="bp-btn-primary" type="button" [disabled]="jobForm.invalid || isSubmitting"
+            (click)="onSubmit()">
+            <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+            <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Job' : 'Create Job' }}</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN (SIDEBAR) -->
+      <div class="bp-sidebar-col">
+        <div class="bp-sticky-sidebar">
+
+          <!-- Job Summary Preview -->
+          <div class="bp-card">
+            <div class="bp-sidebar-card-header">
+              <h3>Job Summary Preview</h3>
+              <span class="bp-badge">{{ jobForm.value.status || 'Active' }}</span>
+            </div>
+            <div class="bp-card-body bp-summary-body">
+              <div class="bp-summary-title">
+                <h4>{{ jobForm.value.jobRoleName || 'New Job Role' }}</h4>
+                <p>{{ getDepartmentName() || 'Department' }} &middot; {{ jobForm.value.jobCode || 'Code' }}</p>
+              </div>
+              <div class="bp-summary-details">
+                <div class="bp-summary-item">
+                  <mat-icon>location_on</mat-icon>
+                  <span>{{ jobForm.value.location || 'Location' }}</span>
+                </div>
+                <div class="bp-summary-item">
+                  <mat-icon>home_work</mat-icon>
+                  <span>{{ jobForm.value.workMode || 'Work Mode' }} &middot; {{ jobForm.value.employmentType ||
+                    'Employment Type' }}</span>
+                </div>
+                <div class="bp-summary-item">
+                  <mat-icon>work_history</mat-icon>
+                  <span>{{ getExperienceText() || 'Experience' }}</span>
+                </div>
+                <div class="bp-summary-item">
+                  <mat-icon>payments</mat-icon>
+                  <span>{{ getCtcText() || 'Compensation' }} &middot; {{ jobForm.value.postedAs || 'Visibility'
+                    }}</span>
+                </div>
+                <div class="bp-summary-item">
+                  <mat-icon>groups</mat-icon>
+                  <span>{{ jobForm.value.vacancies || 0 }} Vacancies</span>
+                </div>
+              </div>
+              <div class="bp-summary-footer" *ngIf="jobForm.value.lastDate">
+                <span class="label">Last Date to Apply</span>
+                <span class="value">{{ jobForm.value.lastDate | date:'mediumDate' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Publish Checklist -->
+          <div class="bp-card">
+            <div class="bp-sidebar-card-header">
+              <h3>Publish Checklist</h3>
+            </div>
+            <div class="bp-card-body bp-checklist-body">
+              <div class="bp-check-item">
+                <mat-icon [class.done]="jobForm.value.jobRoleName && jobForm.value.jobCode">
+                  {{ (jobForm.value.jobRoleName && jobForm.value.jobCode) ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span [class.done]="jobForm.value.jobRoleName && jobForm.value.jobCode">Job Title &amp; Code</span>
+              </div>
+              <div class="bp-check-item">
+                <mat-icon [class.done]="jobForm.value.departmentId">
+                  {{ jobForm.value.departmentId ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span [class.done]="jobForm.value.departmentId">Department</span>
+              </div>
+              <div class="bp-check-item">
+                <mat-icon [class.done]="jobForm.value.location || jobForm.value.workMode">
+                  {{ (jobForm.value.location || jobForm.value.workMode) ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span [class.done]="jobForm.value.location || jobForm.value.workMode">Location Details</span>
+              </div>
+              <div class="bp-check-item">
+                <mat-icon [class.done]="jobForm.value.vacancies > 0">
+                  {{ jobForm.value.vacancies > 0 ? 'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span [class.done]="jobForm.value.vacancies > 0">Number of Vacancies</span>
+              </div>
+              <div class="bp-check-item">
+                <mat-icon
+                  [class.done]="jobForm.value.jobIntroduction || jobForm.value.responsibilities || jobForm.value.skillset">
+                  {{ (jobForm.value.jobIntroduction || jobForm.value.responsibilities || jobForm.value.skillset) ?
+                  'check_circle' : 'radio_button_unchecked' }}
+                </mat-icon>
+                <span
+                  [class.done]="jobForm.value.jobIntroduction || jobForm.value.responsibilities || jobForm.value.skillset">Job
+                  Description</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
-
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="jobForm" class="job-form">
-
-    <!-- ── Section: Identity ─────────────────────────────────────── -->
-    <div class="form-section">
-      <div class="section-header">
-        <mat-icon class="section-icon">badge</mat-icon>
-        <span class="section-title">Job Identity</span>
-      </div>
-
-      <!-- Row 1: Role Name (wide) + Job Code (narrow) -->
-      <div class="form-row role-row">
-        <mat-form-field appearance="outline" class="field-role">
-          <mat-label>Job role name *</mat-label>
-          <input matInput formControlName="jobRoleName" placeholder="e.g. Senior Software Engineer" maxlength="200">
-          <mat-error *ngIf="jobForm.get('jobRoleName')?.hasError('required')">Job role name is required</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="field-code">
-          <mat-label>Job code *</mat-label>
-          <input matInput formControlName="jobCode" placeholder="e.g. SWE001" maxlength="8">
-          <mat-error *ngIf="jobForm.get('jobCode')?.hasError('required')">Required</mat-error>
-          <mat-error *ngIf="jobForm.get('jobCode')?.hasError('minlength')">Min 4 chars</mat-error>
-          <mat-error *ngIf="jobForm.get('jobCode')?.hasError('maxlength')">Max 8 chars</mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Row 2: Department (half-width) -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="field-department">
-          <mat-label>Department</mat-label>
-          <mat-select formControlName="departmentId" placeholder="Select department">
-            <mat-option [value]="null">— None —</mat-option>
-            <mat-option *ngFor="let d of departments" [value]="d.departmentId">
-              {{ d.departmentName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- ── Section: Experience & Compensation ────────────────────── -->
-    <div class="form-section">
-      <div class="section-header">
-        <mat-icon class="section-icon">payments</mat-icon>
-        <span class="section-title">Experience & Compensation</span>
-      </div>
-
-      <!-- Row: Exp Min + Exp Max -->
-      <div class="form-row two-col">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Experience (min yrs)</mat-label>
-          <input matInput type="number" formControlName="experienceMin" placeholder="0" min="0" step="1">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Experience (max yrs)</mat-label>
-          <input matInput type="number" formControlName="experienceMax" placeholder="0" min="0" step="1">
-        </mat-form-field>
-      </div>
-
-      <!-- Row: CTC Min + CTC Max -->
-      <div class="form-row two-col">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>CTC min</mat-label>
-          <input matInput type="number" formControlName="ctcMin" placeholder="0" min="0" step="0.01">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>CTC max</mat-label>
-          <input matInput type="number" formControlName="ctcMax" placeholder="0" min="0" step="0.01">
-        </mat-form-field>
-      </div>
-
-      <!-- Row: Currency (narrow) + Vacancies (narrow) + Posted as + Status — all 4 in one line -->
-      <div class="form-row four-col">
-        <mat-form-field appearance="outline" class="field-currency">
-          <mat-label>Currency</mat-label>
-          <input matInput formControlName="currency" placeholder="USD" maxlength="10">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="field-vacancies">
-          <mat-label>Vacancies *</mat-label>
-          <input matInput type="number" formControlName="vacancies" placeholder="1" min="1" step="1">
-          <mat-error *ngIf="jobForm.get('vacancies')?.hasError('min')">Min 1</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Posted as *</mat-label>
-          <mat-select formControlName="postedAs" placeholder="Internal / External">
-            <mat-option value="Internal">Internal</mat-option>
-            <mat-option value="External">External</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status" placeholder="Status">
-            <mat-option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- ── Section: Location & Work ──────────────────────────────── -->
-    <div class="form-section">
-      <div class="section-header">
-        <mat-icon class="section-icon">location_on</mat-icon>
-        <span class="section-title">Location & Work Details</span>
-      </div>
-
-      <!-- Row: Location + Work mode -->
-      <div class="form-row two-col">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Location</mat-label>
-          <input matInput formControlName="location" placeholder="e.g. New York, Remote" maxlength="200">
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Work mode</mat-label>
-          <mat-select formControlName="workMode" placeholder="Select">
-            <mat-option [value]="null">— None —</mat-option>
-            <mat-option *ngFor="let o of workModeOptions" [value]="o.value">{{ o.label }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- Row: Employment type + Last date -->
-      <div class="form-row two-col">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Employment type</mat-label>
-          <mat-select formControlName="employmentType" placeholder="Select">
-            <mat-option [value]="null">— None —</mat-option>
-            <mat-option *ngFor="let o of employmentTypeOptions" [value]="o.value">{{ o.label }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Last date to apply</mat-label>
-          <input matInput [matDatepicker]="lastDatePicker" formControlName="lastDate" placeholder="Choose date">
-          <mat-datepicker-toggle matSuffix [for]="lastDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #lastDatePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- ── Section: Job Content (Quill editors) ───────────────────── -->
-    <div class="form-section last-section">
-      <div class="section-header">
-        <mat-icon class="section-icon">description</mat-icon>
-        <span class="section-title">Job Content</span>
-      </div>
-
-      <!-- External link (commented out for now) -->
-      <!--
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>External link</mat-label>
-          <input matInput formControlName="externalLink" placeholder="URL for external applications">
-        </mat-form-field>
-      </div>
-      -->
-
-      <!-- Job Introduction (rich text) -->
-      <div class="quill-field">
-        <label class="quill-field-label">
-          <mat-icon>info_outline</mat-icon>
-          Job Introduction
-          <span class="quill-field-hint">Brief overview of the role</span>
-        </label>
-        <div class="quill-editor-wrap">
-          <quill-editor formControlName="jobIntroduction" [modules]="quillBasicConfig"
-            placeholder="Brief about the role..." theme="snow" id="job-introduction">
-          </quill-editor>
-        </div>
-      </div>
-
-      <!-- Responsibilities (rich text) -->
-      <div class="quill-field">
-        <label class="quill-field-label">
-          <mat-icon>checklist</mat-icon>
-          Responsibilities
-          <span class="quill-field-hint">Key responsibilities for this position</span>
-        </label>
-        <div class="quill-editor-wrap">
-          <quill-editor formControlName="responsibilities" [modules]="quillRichConfig"
-            placeholder="List key responsibilities..." theme="snow" id="job-responsibilities">
-          </quill-editor>
-        </div>
-      </div>
-
-      <!-- Skillset (rich text) -->
-      <div class="quill-field">
-        <label class="quill-field-label">
-          <mat-icon>psychology</mat-icon>
-          Skillset
-          <span class="quill-field-hint">Required skills and qualifications</span>
-        </label>
-        <div class="quill-editor-wrap">
-          <quill-editor formControlName="skillset" [modules]="quillRichConfig" placeholder="List required skills..."
-            theme="snow" id="job-skillset">
-          </quill-editor>
-        </div>
-      </div>
-    </div>
-
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions class="dialog-actions">
-  <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
-  <button mat-flat-button [disabled]="jobForm.invalid || isSubmitting" (click)="onSubmit()" class="submit-button">
-    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-    <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Job' : 'Create Job' }}</span>
-    <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Creating...' }}</span>
-  </button>
-</mat-dialog-actions>
