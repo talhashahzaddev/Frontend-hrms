@@ -58,7 +58,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     {
       label: 'Dashboard',
       icon: 'dashboard',
-      route: '/performance/dashboard',
+      route: '/employee/dashboard',
       roles: ['Manager', 'Employee']
     }
     ,
@@ -135,7 +135,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager'],
       children: [
         { label: 'Types of Assets', icon: 'category', route: '/assets/types', roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Create Assets', icon: 'add_box', route: '/assets/create', roles: ['Super Admin', 'HR Manager', 'Manager'] }
+        { label: 'Assets', icon: 'add_box', route: '/assets/create', roles: ['Super Admin', 'HR Manager', 'Manager'] }
       ]
     },
     {
@@ -183,7 +183,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'event_available',
       children: [
         { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' },
-        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, roles: ['Super Admin', 'HR Manager']  }
+        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, roles: ['Super Admin', 'HR Manager'] }
 
       ]
     },
@@ -199,11 +199,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       label: 'Settings',
-      icon: 'work',
+      icon: 'settings',
       children: [
         { label: 'Currency Settings', icon: 'work_outline', route: '/settings/general' },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address' },
-      
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', roles: ['Super Admin'] },
+        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', roles: ['Super Admin'] }
       ]
     }
   ];

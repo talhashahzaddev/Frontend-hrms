@@ -56,6 +56,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isAuthenticated$ = this.authService.isAuthenticated$;
   isLoggingOut$ = this.authService.isLoggingOut$;
   isAiAssistantPage = false;
+  isAuthPage = false;
 
   // Computed observable for loading message
   // Show "Signing out..." only when explicitly logging out
@@ -71,7 +72,7 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     })
   );
-  
+
   loadingMessage$ = combineLatest([this.isLoggingOut$, this.isLoading$, this.isAuthenticated$]).pipe(
     map(([isLoggingOut, isLoading, isAuthenticated]) => {
       if (isLoggingOut) {
@@ -100,29 +101,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.handleRouteChanges();
     this.setupRouterProgress();
     this.setFavicon();
-
-    // 🔥 Subscribe to authentication/user changes
-    // this.authService.isAuthenticated$
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(isAuth => {
-    //     if (isAuth) {
-    //       const user = this.authService.getCurrentUserValue();
-    //       if (user?.userId) {
-    //         this.serverNotificationService.loadNotifications(user.userId);
-    //       }
-    //     } else {
-    //       // Optional: clear notifications on logout
-    //       // this.serverNotificationService.clearNotifications();
-    //     }
-    //   });
-
-    // // Optional: refresh notifications every 60 seconds
-    // interval(60000)
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(() => {
-    //     const user = this.authService.getCurrentUserValue();
-    //     if (user?.userId) this.serverNotificationService.loadNotifications(user.userId);
-    //   });
 
   }
 
@@ -186,6 +164,10 @@ export class AppComponent implements OnInit, OnDestroy {
         // Check if we're on the AI assistant page
         this.isAiAssistantPage = url.includes('/ai-assistant');
 
+        // Check if we're on an auth-style page (login, register, etc.)
+        const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
+        this.isAuthPage = authRoutes.some(route => url.startsWith(route));
+
         // Update page title based on route
         this.updatePageTitle(url);
 
@@ -198,25 +180,27 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // Check initial route
     this.isAiAssistantPage = this.router.url.includes('/ai-assistant');
+    const initialAuthRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
+    this.isAuthPage = initialAuthRoutes.some(route => this.router.url.startsWith(route));
   }
 
 
   private redirectUserOnInit(): void {
-  this.router.events
-    .pipe(
-      filter(event => event instanceof NavigationEnd),
-      takeUntil(this.destroy$) // keeps subscription alive until component destroyed
-    )
-    .subscribe((event: NavigationEnd) => {
-      const user = this.authService.getCurrentUserValue();
-      if (!user) return; // user not logged in, let guards handle it
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$) // keeps subscription alive until component destroyed
+      )
+      .subscribe((event: NavigationEnd) => {
+        const user = this.authService.getCurrentUserValue();
+        if (!user) return; // user not logged in, let guards handle it
 
-      const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
-      const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
+        const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
+        const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
 
       // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
       if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
-        this.router.navigate(['/performance/dashboard']);
+        this.router.navigate(['/employee/dashboard']);
       }
     });
 }

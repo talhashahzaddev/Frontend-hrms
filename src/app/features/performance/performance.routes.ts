@@ -13,7 +13,6 @@ export const performanceRoutes: Routes = [
   {
     path: 'appraisals',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/appraisals/appraisals.component').then(m => m.AppraisalsComponent)
   },
   {

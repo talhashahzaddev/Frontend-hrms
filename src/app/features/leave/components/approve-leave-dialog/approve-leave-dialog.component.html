@@ -1,0 +1,148 @@
+<div class="approve-dialog-container">
+
+  <!-- ══ HEADER ══ -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="header-titles">
+        <h2 class="dialog-title">Approve Leave Request</h2>
+        <p class="dialog-subtitle">Review the details before approving this request</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCROLLABLE BODY ══ -->
+  <mat-dialog-content class="dialog-body">
+
+    <!-- ── Section Card 1: Request Details ── -->
+    <div class="section-card">
+      <div class="section-card-title">
+        <div class="section-icon-box section-purple">
+          <mat-icon>info</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Request Details</p>
+          <p class="section-hint">Review the leave request before approving</p>
+        </div>
+      </div>
+
+      <div class="details-grid">
+
+        <!-- Employee -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>person</mat-icon>
+            Employee
+          </label>
+          <div class="field-display">{{ data.employeeName }}</div>
+        </div>
+
+        <!-- Leave Type -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>event_note</mat-icon>
+            Leave Type
+          </label>
+          <div class="field-display">
+            <span class="leave-type-badge">{{ data.leaveTypeName }}</span>
+          </div>
+        </div>
+
+        <!-- Start Date -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>today</mat-icon>
+            Start Date
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">calendar_month</mat-icon>
+            {{ data.startDate | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="detail-field">
+          <label class="field-label">
+            <mat-icon>event</mat-icon>
+            End Date
+          </label>
+          <div class="field-display date-box">
+            <mat-icon class="date-icon">calendar_month</mat-icon>
+            {{ data.endDate | date:'dd / MM / yyyy' }}
+          </div>
+        </div>
+
+        <!-- Duration — full width -->
+        <div class="detail-field detail-field-full">
+          <label class="field-label">
+            <mat-icon>schedule</mat-icon>
+            Duration
+          </label>
+          <div class="field-display">
+            <span class="days-badge">
+              {{ data.daysRequested }} {{ data.daysRequested === 1 ? 'day' : 'days' }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Section Card 2: Reason (if provided) ── -->
+    <div class="section-card" *ngIf="data.reason">
+      <div class="section-card-title">
+        <div class="section-icon-box section-green">
+          <mat-icon>notes</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Employee's Reason</p>
+          <p class="section-hint">Reason provided by the employee for this leave</p>
+        </div>
+      </div>
+
+      <div class="reason-box">
+        <mat-icon>format_quote</mat-icon>
+        <p>{{ data.reason }}</p>
+      </div>
+    </div>
+
+    <!-- ── Section Card 3: Confirmation ── -->
+    <div class="section-card confirmation-card">
+      <div class="section-card-title">
+        <div class="section-icon-box section-green">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+        <div>
+          <p class="section-label">Confirm Approval</p>
+          <p class="section-hint">This action will notify the employee immediately</p>
+        </div>
+      </div>
+
+      <div class="confirmation-body">
+        <mat-icon class="confirm-check-icon">check_circle</mat-icon>
+        <p>
+          You are about to approve <strong>{{ data.daysRequested }} {{ data.daysRequested === 1 ? 'day' : 'days' }}</strong>
+          of <strong>{{ data.leaveTypeName }}</strong> for <strong>{{ data.employeeName }}</strong>.
+          The employee will be notified of this decision.
+        </p>
+      </div>
+    </div>
+
+  </mat-dialog-content>
+
+  <!-- ══ FOOTER ══ -->
+  <mat-dialog-actions class="dialog-footer">
+    <button mat-stroked-button class="btn-cancel" type="button" (click)="onCancel()" [disabled]="isSubmitting">
+      <mat-icon>close</mat-icon>
+      Cancel
+    </button>
+    <button mat-raised-button class="btn-approve" type="button" (click)="onApprove()" [disabled]="isSubmitting">
+      <mat-spinner diameter="15" *ngIf="isSubmitting"></mat-spinner>
+      <mat-icon *ngIf="!isSubmitting">check_circle</mat-icon>
+      {{ isSubmitting ? 'Approving...' : 'Approve Request' }}
+    </button>
+  </mat-dialog-actions>
+
+</div>

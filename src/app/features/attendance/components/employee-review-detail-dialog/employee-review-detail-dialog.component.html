@@ -228,6 +228,7 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
             [class.row-highlight]="shouldHighlightRow(row)"
+            [class.row-override]="row.isManagerOverride && !row.isFinalized && !shouldHighlightRow(row)"
             [class.row-weekend]="row.isWeekend"
             [class.row-finalized]="row.isFinalized"
             [class.row-no-record]="!row.hasRecord"></tr>

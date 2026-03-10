@@ -1,0 +1,332 @@
+
+<div class="employee-dashboard-container">
+
+  <!-- Welcome Header -->
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h2 class="welcome-title">
+        👋 Welcome, {{ currentUser?.firstName || 'User' }}
+      </h2>
+      <p class="welcome-subtitle">Here's your Employee dashboard overview</p>
+    </div>
+    <!-- <div class="date-time-display" style="display: flex; flex-direction: column; align-items: flex-end; margin-left: auto;">
+      <span class="current-time" style="font-size: 1.2em; font-weight: 500;">
+        {{ currentTime | date:'HH:mm:ss' }}
+      </span>
+      <span class="current-date" style="font-size: 1em; color: #888;">
+        {{ currentTime | date:'dd-MM-yyyy' }}
+      </span>
+    </div> -->
+    <div class="clock-display-side">
+      <span *ngIf="currentSession?.isActive" class="banner-label">CURRENTLY WORKING </span>
+      <div class="current-working-info">
+        <span *ngIf="currentSession?.isActive; else notWorking">
+          <strong>Started At:</strong>
+          {{ currentSession?.checkInTime != null ? (currentSession?.checkInTime | date:'shortTime') : '--:--' }}
+          &nbsp;|&nbsp;
+          <strong>Duration:</strong>
+          {{ formatElapsedTime(currentSession?.elapsedHours || 0) }}
+        </span>
+        <ng-template #notWorking>
+          <span>Not working</span>
+        </ng-template>
+      </div>
+    </div>
+    <button mat-flat-button
+            class="clock-btn main-action"
+            (click)="clockIn()"
+            [disabled]="currentSession?.isActive || isClockActionLoading">
+      <mat-icon>login</mat-icon>
+      CLOCK IN
+    </button>
+    <button mat-flat-button
+            class="side-btn primary"
+            (click)="clockOut()"
+            [disabled]="!currentSession?.isActive || isClockActionLoading">
+      <mat-icon>logout</mat-icon>
+      CLOCK OUT
+    </button>
+  </div>
+
+  <!-- ================= STATS ROW ================= -->
+  <div class="stats-grid-row">
+
+    <!-- CURRENT RATING -->
+    <mat-card class="mini-stat-card">
+      <mat-card-content>
+        <div class="mini-stat-content">
+          <div class="stat-icon-box purple-bg">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">CURRENT RATING</span>
+            <div class="stat-value-group">
+              <span class="main-val">{{ currentRating || 0 | number:'1.1-1' }}</span>
+              <span class="sub-val">/ 5.0</span>
+            </div>
+            <div class="rating-stars">
+              <mat-icon *ngFor="let star of starRatings"
+                        [class.filled]="star <= (currentRating || 0)">
+                {{ star <= (currentRating || 0) ? 'star' : 'star_border' }}
+              </mat-icon>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- OVERALL RATING -->
+    <mat-card class="mini-stat-card">
+      <mat-card-content>
+        <div class="mini-stat-content">
+          <div class="stat-icon-box green-bg">
+            <mat-icon>assessment</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">OVERALL RATING</span>
+            <div class="stat-value-group">
+              <span class="main-val">{{ overallRating || 0 | number:'1.1-1' }}</span>
+              <span class="sub-val">/ 5.0</span>
+            </div>
+            <div class="rating-stars">
+              <mat-icon *ngFor="let star of starRatings"
+                        [class.filled]="star <= (overallRating || 0)">
+                {{ star <= (overallRating || 0) ? 'star' : 'star_border' }}
+              </mat-icon>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- TOTAL HOURS -->
+    <mat-card class="mini-stat-card">
+      <mat-card-content>
+        <div class="mini-stat-content">
+          <div class="stat-icon-box blue-bg">
+            <mat-icon>access_time</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">TOTAL HOURS</span>
+            <div class="stat-value-group">
+              <span class="main-val">{{ formatElapsedTime(attendanceSummary?.totalHours || 0) }}</span>
+              <span class="sub-val">Worked</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- LATE DAYS -->
+    <mat-card class="mini-stat-card">
+      <mat-card-content>
+        <div class="mini-stat-content">
+          <div class="stat-icon-box amber-bg">
+            <mat-icon>warning</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">LATE DAYS</span>
+            <div class="stat-value-group">
+              <span class="main-val">{{ attendanceSummary?.lateDays || 0 }}</span>
+              <span class="sub-val">Days</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- PRESENT DAYS -->
+    <mat-card class="mini-stat-card">
+      <mat-card-content>
+        <div class="mini-stat-content">
+          <div class="stat-icon-box teal-bg">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">PRESENT DAYS</span>
+            <div class="stat-value-group">
+              <span class="main-val">{{ attendanceSummary?.presentDays || 0 }}</span>
+              <span class="sub-val">Days</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ABSENT DAYS -->
+    <mat-card class="mini-stat-card">
+      <mat-card-content>
+        <div class="mini-stat-content">
+          <div class="stat-icon-box red-bg">
+            <mat-icon>cancel</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">ABSENT DAYS</span>
+            <div class="stat-value-group">
+              <span class="main-val">{{ attendanceSummary?.absentDays || 0 }}</span>
+              <span class="sub-val">Days</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+
+  <!-- ================= ATTENDANCE BANNER ================= -->
+  <!-- <mat-card class="attendance-banner-card">
+    <mat-card-content class="banner-content">
+      <div class="clock-display-side">
+        <span class="banner-label">ATTENDANCE CLOCK</span>
+        <div class="timer-text">
+          {{ currentSession?.isActive
+            ? formatElapsedTime(currentSession?.elapsedHours || 0)
+            : '00:00:00' }}
+        </div>
+      </div>
+
+      <div class="clock-actions-side">
+        <button mat-flat-button
+                class="clock-btn main-action"
+                (click)="clockIn()"
+                [disabled]="currentSession?.isActive || isClockActionLoading">
+          <mat-icon>login</mat-icon>
+          CLOCK IN
+        </button>
+
+        <div class="vertical-actions">
+          <button mat-flat-button
+                  class="side-btn secondary"
+                  (click)="openLeaveRequestDialog()">
+            <mat-icon>add</mat-icon>
+            REQUEST LEAVE
+          </button>
+
+          <button mat-flat-button
+                  class="side-btn primary"
+                  (click)="clockOut()"
+                  [disabled]="!currentSession?.isActive || isClockActionLoading">
+            <mat-icon>logout</mat-icon>
+            CLOCK OUT
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card> -->
+
+  <!-- ================= MAIN GRID ================= -->
+  <div class="dashboard-main-grid">
+
+    <!-- NEWS CARD -->
+    <mat-card class="grid-card">
+      <div class="card-header-row">
+        <h3 class="card-title">Latest News</h3>
+      </div>
+
+      <div class="card-body">
+        <div class="table-container" *ngIf="topNews.data.length > 0">
+          <table mat-table [dataSource]="topNews" class="compact-table">
+
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef>Title</th>
+              <td mat-cell *matCellDef="let news">{{ news.title }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let news">{{ news.category }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let news">
+                <span class="status-chip" [ngClass]="'status-' + getStatusClass(news.status)">
+                  {{ news.status }}
+                </span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="publishedAt">
+              <th mat-header-cell *matHeaderCellDef>Published</th>
+              <td mat-cell *matCellDef="let news">
+                {{ news.publishedAt | date:'dd MMM' }}
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedNewsColumns"></tr>
+            <tr mat-row *matRowDef="let news; columns: displayedNewsColumns;"
+                (click)="onNewsClick(news)"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="topNews.data.length === 0" class="empty-state">
+          <mat-icon>newspaper</mat-icon>
+          <p>No News Available</p>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- RECENT ATTENDANCE -->
+    <mat-card class="grid-card">
+      <div class="card-header-row">
+        <h3 class="card-title">Recent Attendance</h3>
+        <span class="record-badge">{{ recentAttendance.length }} Records</span>
+      </div>
+
+      <div class="card-body">
+        <mat-spinner *ngIf="isRecentLoading" diameter="32" class="center-spinner"></mat-spinner>
+
+        <div class="table-container" *ngIf="!isRecentLoading && recentAttendance.length > 0">
+          <table mat-table [dataSource]="recentAttendance" class="compact-table">
+
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let record">
+                {{ record.workDate | date:'dd/MM/yyyy' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="checkIn">
+              <th mat-header-cell *matHeaderCellDef>Check-in</th>
+              <td mat-cell *matCellDef="let record">
+                {{ record.checkInTime ? (record.checkInTime | date:'HH:mm') : '--:--' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="checkOut">
+              <th mat-header-cell *matHeaderCellDef>Check-out</th>
+              <td mat-cell *matCellDef="let record">
+                {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : '--:--' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="hours">
+              <th mat-header-cell *matHeaderCellDef>Hours</th>
+              <td mat-cell *matCellDef="let record">
+                {{ formatHours(record.totalHours) }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let record">
+                <span class="status-chip" [ngClass]="'status-' + record.status">
+                  {{ record.status | titlecase }}
+                </span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedAttendanceColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedAttendanceColumns;"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="!isRecentLoading && recentAttendance.length === 0" class="empty-state">
+          <mat-icon>schedule</mat-icon>
+          <p>No Attendance Records Found</p>
+        </div>
+      </div>
+    </mat-card>
+
+  </div>
+</div>

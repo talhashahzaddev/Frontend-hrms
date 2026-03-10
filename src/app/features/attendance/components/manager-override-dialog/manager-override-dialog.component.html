@@ -86,17 +86,10 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width reason-field">
-        <mat-label>Why are you overriding this record? *</mat-label>
+        <mat-label>Reason for Override (Optional)</mat-label>
         <textarea matInput formControlName="reason" rows="3"
-          placeholder="Provide a clear reason for this override (minimum 10 characters)..."></textarea>
+          placeholder="Optionally describe why you are overriding this record..."></textarea>
         <mat-icon matPrefix>rate_review</mat-icon>
-        <mat-hint align="end">{{ (overrideForm.get('reason')?.value || '').length }} / 10 min</mat-hint>
-        @if (overrideForm.get('reason')?.hasError('required') && overrideForm.get('reason')?.touched) {
-          <mat-error>Reason is required</mat-error>
-        }
-        @if (overrideForm.get('reason')?.hasError('minlength') && overrideForm.get('reason')?.touched) {
-          <mat-error>Reason must be at least 10 characters</mat-error>
-        }
       </mat-form-field>
 
     </form>
@@ -107,7 +100,7 @@
     <button mat-stroked-button (click)="onCancel()" [disabled]="isSubmitting">
       Cancel
     </button>
-    <button mat-raised-button color="warn" (click)="onSubmit()" [disabled]="isSubmitting || overrideForm.invalid" class="submit-btn">
+    <button mat-flat-button (click)="onSubmit()" [disabled]="isSubmitting || overrideForm.invalid" class="submit-btn">
       @if (isSubmitting) {
         <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
       } @else {

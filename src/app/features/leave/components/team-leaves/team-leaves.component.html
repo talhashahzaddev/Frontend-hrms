@@ -11,10 +11,88 @@
   <form [formGroup]="filterForm">
     <!-- Filters Row -->
     <div class="filters-row single-line-filters">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput formControlName="search" placeholder="Search by employee name...">
-      </mat-form-field>
+
+      <!-- ── Employee Select2 Dropdown ── -->
+      <div class="employee-select-wrapper" [class.open]="employeeDropdownOpen" [class.has-value]="selectedEmployee">
+
+        <!-- Trigger: shows plain text when closed, becomes live search input when open -->
+        <div class="employee-select-trigger" (click)="openEmployeeDropdown()">
+          <mat-icon class="select-prefix-icon">person_search</mat-icon>
+
+          <!-- When closed + no selection: placeholder -->
+          <span class="select-display-value"
+                *ngIf="!employeeDropdownOpen && !selectedEmployee">
+            Search employee...
+          </span>
+
+          <!-- When closed + has selection: show name -->
+          <span class="select-display-value selected-name"
+                *ngIf="!employeeDropdownOpen && selectedEmployee">
+            {{ selectedEmployee.fullName }}
+          </span>
+
+          <!-- When open: inline search input replaces text -->
+          <input
+            *ngIf="employeeDropdownOpen"
+            #employeeSearchInput
+            class="trigger-search-input"
+            type="text"
+            [placeholder]="selectedEmployee ? selectedEmployee.fullName : 'Type to search...'"
+            [(ngModel)]="employeeSearchQuery"
+            [ngModelOptions]="{standalone: true}"
+            (input)="onEmployeeSearch()"
+            (click)="$event.stopPropagation()"
+            autocomplete="off"
+          />
+
+          <mat-spinner *ngIf="isLoadingEmployees" diameter="14" class="trigger-spinner"></mat-spinner>
+          <mat-icon class="select-clear-icon"
+                    *ngIf="selectedEmployee && !employeeDropdownOpen"
+                    (click)="clearEmployeeSelection($event)">close</mat-icon>
+          <mat-icon class="select-arrow-icon">
+            {{ employeeDropdownOpen ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </div>
+
+        <!-- Dropdown panel: list only, no search box header -->
+        <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+          <div class="dropdown-list">
+            <div
+              *ngFor="let emp of filteredEmployees"
+              class="dropdown-option"
+              [class.active]="selectedEmployee?.fullName === emp.fullName"
+              (click)="selectEmployee(emp)"
+            >
+
+              <!-- Name + Email -->
+              <div class="option-info">
+                <span class="option-name">{{ emp.fullName }}</span>
+                <span class="option-email" *ngIf="emp.email">{{ emp.email }}</span>
+              </div>
+
+              <!-- Employee Code badge -->
+              <span class="option-emp-code" *ngIf="emp.employeeCode">{{ emp.employeeCode }}</span>
+
+              <!-- Active check -->
+              <mat-icon class="option-check" *ngIf="selectedEmployee?.fullName === emp.fullName">check</mat-icon>
+            </div>
+
+            <div *ngIf="filteredEmployees.length === 0 && !isLoadingEmployees" class="dropdown-empty">
+              <mat-icon>search_off</mat-icon>
+              <span>No employees found</span>
+            </div>
+
+            <div *ngIf="isLoadingEmployees && filteredEmployees.length === 0" class="dropdown-loading">
+              <mat-spinner diameter="20"></mat-spinner>
+              <span>Loading employees...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop -->
+        <div class="dropdown-backdrop" *ngIf="employeeDropdownOpen" (click)="closeEmployeeDropdown()"></div>
+      </div>
+      <!-- ── End Employee Dropdown ── -->
 
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Status</mat-label>
@@ -27,81 +105,14 @@
         </mat-select>
       </mat-form-field>
 
-      <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFiltersApplied()"
-        class="clear-btn">
+      <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFiltersApplied()" class="clear-btn">
         <mat-icon>clear</mat-icon>
         Clear
       </button>
     </div>
   </form>
 
-  <!-- Pending Approvals Section (Only for Managers, not HR Manager) -->
-  <div class="pending-section" *ngIf="!isHRManager && pendingApprovals.length > 0">
-    <div class="section-title">
-      <mat-icon class="pending-icon">pending_actions</mat-icon>
-      Pending Approvals ({{ pendingApprovals.length }})
-    </div>
-
-    <div class="pending-list">
-      <div *ngFor="let request of pendingApprovals" class="pending-item">
-        <div class="item-header">
-          <div class="employee-info">
-            <div class="employee-avatar">
-              <ng-container *ngIf="request.profilePreviewUrl; else initialsFallback">
-                <img [src]="request.profilePreviewUrl" alt="{{ request.employeeName }}" class="avatar-img" />
-              </ng-container>
-              <ng-template #initialsFallback>
-                <div class="avatar-initials">
-                  {{ getInitials(request.employeeName) }}
-                </div>
-              </ng-template>
-            </div>
-            <div class="employee-details">
-              <h4 class="employee-name">{{ request.employeeName }}</h4>
-              <p class="leave-type">
-                <span class="type-indicator" [style.background-color]="getLeaveTypeColor(request.leaveTypeId)"></span>
-                {{ request.leaveTypeName }}
-              </p>
-            </div>
-          </div>
-
-          <div class="request-dates">
-            <div class="date-badge">
-              <mat-icon>event</mat-icon>
-              <span>{{ request.startDate | date:'dd-MM-yyyy' }} &minus; {{ request.endDate | date:'dd-MM-yyyy' }}</span>
-            </div>
-            <div class="days-badge">
-              {{ request.daysRequested }} {{ request.daysRequested === 1 ? 'day' : 'days' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="item-content" *ngIf="request.reason">
-          <p class="reason-label">Reason:</p>
-          <p class="reason-text">{{ request.reason }}</p>
-        </div>
-
-        <div class="item-footer">
-          <div class="submitted-info">
-            <mat-icon>schedule</mat-icon>
-            <span>Submitted {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}</span>
-          </div>
-          <div class="action-buttons">
-            <button mat-stroked-button color="warn" class="reject-btn" (click)="openRejectDialog(request)"
-              [disabled]="isProcessing">
-              <mat-icon>close</mat-icon>
-              Reject
-            </button>
-            <button mat-raised-button color="primary" class="approve-btn" (click)="approveRequest(request)"
-              [disabled]="isProcessing">
-              <mat-icon>check</mat-icon>
-              Approve
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
   <!-- Table Card -->
   <div class="table-card" style="margin-top: 24px;">
@@ -141,9 +152,10 @@
         <ng-container matColumnDef="leaveType">
           <th mat-header-cell *matHeaderCellDef>Leave Type</th>
           <td mat-cell *matCellDef="let request">
-            <span class="badge badge-dept" [style.color]="getLeaveTypeColor(request.leaveTypeId)"
-              [style.background-color]="getLeaveTypeColor(request.leaveTypeId) + '1A'"
-              [style.border]="'1px solid ' + getLeaveTypeColor(request.leaveTypeId) + '4D'">
+            <span class="badge badge-dept"
+                  [style.color]="getLeaveTypeColor(request.leaveTypeId)"
+                  [style.background-color]="getLeaveTypeColor(request.leaveTypeId) + '1A'"
+                  [style.border]="'1px solid ' + getLeaveTypeColor(request.leaveTypeId) + '4D'">
               {{ request.leaveTypeName }}
             </span>
           </td>
@@ -153,8 +165,7 @@
           <th mat-header-cell *matHeaderCellDef>Duration</th>
           <td mat-cell *matCellDef="let request" class="date-cell">
             {{ request.startDate | date:'dd-MM-yyyy' }} &ndash; {{ request.endDate | date:'dd-MM-yyyy' }}
-            <span style="color: #6366f1; font-weight: 600; font-size: 11px; margin-left: 4px;">({{ request.daysRequested
-              }} days)</span>
+            <span style="color: #6366f1; font-weight: 600; font-size: 11px; margin-left: 4px;">({{ request.daysRequested }} days)</span>
           </td>
         </ng-container>
 
@@ -177,19 +188,30 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let request">
-            <button mat-icon-button [matMenuTriggerFor]="menu" class="action-menu-btn" [disabled]="!isPending(request.status)">
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="action-menu-btn">
               <mat-icon>more_horiz</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item *ngIf="isPending(request.status)" (click)="approveRequest(request)">
+
+              <button mat-menu-item
+                      (click)="approveRequest(request)"
+                      [disabled]="!isPending(request.status)">
                 <mat-icon>check_circle</mat-icon>
                 <span>Approve</span>
               </button>
-              <button mat-menu-item *ngIf="isPending(request.status)" (click)="openRejectDialog(request)"
-                class="danger-action">
+
+              <button mat-menu-item
+                      (click)="openRejectDialog(request)"
+                      [disabled]="!isPending(request.status)"
+                      class="danger-action">
                 <mat-icon>cancel</mat-icon>
                 <span>Reject</span>
               </button>
+              <button mat-menu-item (click)="openDetailsDialog(request)">
+                <mat-icon>info</mat-icon>
+                <span>View Details</span>
+              </button>
+
             </mat-menu>
           </td>
         </ng-container>
@@ -198,21 +220,19 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
 
-      <!-- Empty State -->
       <div *ngIf="teamRequests.length === 0" class="empty-state">
-        <div class="empty-icon">
-          <mat-icon>inbox</mat-icon>
-        </div>
+        <div class="empty-icon"><mat-icon>inbox</mat-icon></div>
         <h3>No Team Requests</h3>
         <p>There are no leave requests to display with current filters.</p>
       </div>
     </div>
 
-    <!-- Pagination -->
-    <mat-paginator *ngIf="!isLoading && totalCount > 0" [length]="totalCount" [pageSize]="pageSize"
-      [pageSizeOptions]="[10, 25, 50, 100]" [pageIndex]="currentPage - 1" (page)="onPageChange($event)"
-      showFirstLastButtons>
+    <mat-paginator *ngIf="!isLoading && totalCount > 0"
+                   [length]="totalCount" [pageSize]="pageSize"
+                   [pageSizeOptions]="[10, 25, 50, 100]"
+                   [pageIndex]="currentPage - 1"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
     </mat-paginator>
-
   </div>
 </div>

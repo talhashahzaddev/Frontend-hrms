@@ -13,6 +13,18 @@ export const jobsRoutes: Routes = [
     title: 'Job Openings - HRMS'
   },
   {
+    path: 'create',
+    loadComponent: () =>
+      import('./components/create-job-dialog/create-job-dialog.component').then(m => m.CreateJobDialogComponent),
+    title: 'Create Job - HRMS'
+  },
+  {
+    path: 'edit/:id',
+    loadComponent: () =>
+      import('./components/create-job-dialog/create-job-dialog.component').then(m => m.CreateJobDialogComponent),
+    title: 'Edit Job - HRMS'
+  },
+  {
     path: 'applied',
     loadComponent: () =>
       import('./components/applied-jobs/applied-jobs.component').then(m => m.AppliedJobsComponent),

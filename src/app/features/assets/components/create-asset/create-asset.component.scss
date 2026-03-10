@@ -315,6 +315,42 @@
         mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 6px; }
       }
     }
+
+    // ─── Pagination ───────────────────────────────────────────────
+    ::ng-deep mat-paginator {
+      background: #fafafa;
+      border-top: 1px solid #e5e7eb;
+
+      .mat-mdc-paginator-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 16px;
+        padding: 8px 20px;
+        min-height: 52px;
+      }
+
+      .mat-mdc-paginator-page-size {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+      }
+
+      .mat-mdc-paginator-range-label {
+        white-space: nowrap;
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .mat-mdc-paginator-navigation {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+      }
+    }
   }
 
   // ─── Shared Action Menu ───────────────────────────────────────
@@ -369,6 +405,57 @@
     }
 
     .toolbar-row { border-radius: 12px 12px 0 0; }
+
+    .table-card {
+      ::ng-deep mat-paginator {
+        .mat-mdc-paginator-container {
+          flex-wrap: nowrap;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 6px;
+          padding: 2px 6px;
+          min-height: 36px;
+        }
+
+        .mat-mdc-paginator-page-size {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin: 0;
+          font-size: 11px;
+          white-space: nowrap;
+        }
+
+        .mat-mdc-paginator-page-size-label { font-size: 11px; }
+
+        .mat-mdc-select-trigger {
+          height: 22px;
+          font-size: 11px;
+          padding: 0 4px;
+        }
+
+        .mat-mdc-paginator-range-label {
+          font-size: 11px;
+          white-space: nowrap;
+          margin: 0;
+        }
+
+        .mat-mdc-paginator-navigation {
+          display: flex;
+          align-items: center;
+          gap: 0;
+        }
+
+        button {
+          width: 22px !important;
+          height: 22px !important;
+          min-width: 22px !important;
+          padding: 0 !important;
+
+          mat-icon { font-size: 14px; }
+        }
+      }
+    }
   }
 }
 

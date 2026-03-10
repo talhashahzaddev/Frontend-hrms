@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
+import { PlatformAdminGuard } from './features/platform-admin/guards/platform-admin.guard';
 // import { RoleRedirectGuard } from './core/guards/role-redirect.guard';
 // import { EmptyRouteComponent } from './shared/components/Empty-Component/empty-route.component';
 
@@ -31,6 +32,20 @@ export const appRoutes: Routes = [
     loadComponent: () =>
       import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
   },
+  {
+    path: 'employee/dashboard',
+    canActivate: [AuthGuard],
+    data: { roles: ['Employee','Manager'] },
+    loadComponent: () =>
+      import('./features/employee-dashboard/employee-dashboard.component').then(m => m.EmployeeDashboardComponent),
+    pathMatch: 'full'
+  },
+  // Redirect old path for backward compatibility
+  // {
+  //   path: 'employee-dashboard',
+  //   redirectTo: 'employee/dashboard',
+  //   pathMatch: 'full'
+  // },
 
 
 
@@ -69,10 +84,10 @@ export const appRoutes: Routes = [
   {
     path: 'assets',
     canActivate: [AuthGuard],
-    loadChildren: () => 
+    loadChildren: () =>
       import('./features/assets/assets.routes').then(m => m.assetsRoutes)
   },
-  
+
   // Leave Management Routes
   {
     path: 'leave',
@@ -106,7 +121,7 @@ export const appRoutes: Routes = [
       import('./features/calendar/calendar.routes').then(m => m.calendarRoutes),
     title: 'Calendar - HRMS'
   },
-   {
+  {
     path: 'news',
     canActivate: [AuthGuard],
     loadChildren: () =>
@@ -121,6 +136,14 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('./features/jobs/jobs.routes').then(m => m.jobsRoutes),
     title: 'Jobs - HRMS'
+  },
+
+  // Public Career Routes (no authentication required)
+  {
+    path: 'career',
+    loadChildren: () =>
+      import('./features/jobs/public-career.routes').then(m => m.publicCareerRoutes),
+    title: 'Careers - Codified Labs'
   },
 
   // AI Assistant Route (accessible to all roles)
@@ -180,6 +203,45 @@ export const appRoutes: Routes = [
     path: 'verify-email',
     loadComponent: () =>
       import('./features/auth/components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
+  },
+  {
+    path: 'platform-admin/login',
+    loadComponent: () =>
+      import('./features/platform-admin/components/platform-login/platform-login.component').then(m => m.PlatformLoginComponent),
+    title: 'Platform Admin Login - Brisk People'
+  },
+  {
+    path: 'platform-admin',
+    canActivate: [PlatformAdminGuard],
+    loadComponent: () =>
+      import('./features/platform-admin/layout/platform-layout.component').then(m => m.PlatformLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/platform-admin/components/platform-dashboard/platform-dashboard.component').then(m => m.PlatformDashboardComponent),
+        title: 'Platform Dashboard - Brisk People'
+      },
+      {
+        path: 'organizations',
+        loadComponent: () =>
+          import('./features/platform-admin/components/organization-list/organization-list.component').then(m => m.OrganizationListComponent),
+        title: 'Organizations - Brisk People'
+      },
+      {
+        path: 'organizations/:id',
+        loadComponent: () =>
+          import('./features/platform-admin/components/organization-detail/organization-detail.component').then(m => m.OrganizationDetailComponent),
+        title: 'Organization Details - Brisk People'
+      },
+      {
+        path: 'inquiries',
+        loadComponent: () =>
+          import('./features/platform-admin/components/inquiry-list/inquiry-list.component').then(m => m.InquiryListComponent),
+        title: 'Demo Inquiries - Brisk People'
+      }
+    ]
   },
 
   // Error Pages

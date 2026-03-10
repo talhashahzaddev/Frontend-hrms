@@ -1,8 +1,9 @@
-@import '../leave-types/leave-types-dialog.scss';
+@use '../leave-types/leave-types-dialog' as dialog;
 
 // ══════════════════════════════════════════════════════════════
 // CUSTOM FIELD PATTERN
 // ══════════════════════════════════════════════════════════════
+
 
 .custom-field {
   display: flex;

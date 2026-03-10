@@ -21,6 +21,8 @@ import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
+import { ApproveLeaveDialogComponent } from '../approve-leave-dialog/approve-leave-dialog.component';
+import { LeaveRequestDetailsDialogComponent } from '../leave-request-details-dialog/leave-request-details-dialog.component';
 import {
   LeaveRequest,
   LeaveType,
@@ -53,7 +55,8 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private backendBaseUrl = 'https://localhost:60485';
 
-  // ── Data ──────────────────────────────────────────────────────────────────
+  activeTab: 'pending' | 'balance' = 'pending';
+
   leaveTypes: LeaveType[] = [];
   pendingApprovals: LeaveRequest[] = [];
 
@@ -64,12 +67,10 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   teamRemainingLeavesPageSize = 10;
   teamRemainingLeavesPageSizeOptions = [5, 10, 25, 50];
 
-  // ── State ─────────────────────────────────────────────────────────────────
   isLoading = false;
   isLoadingTeamLeaves = false;
   currentYear = new Date().getFullYear();
 
-  // ── Filters ───────────────────────────────────────────────────────────────
   employeeNameFilter = new FormControl('');
 
   constructor(
@@ -89,8 +90,6 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Bootstrap ─────────────────────────────────────────────────────────────
-
   private loadInitialData(): void {
     this.isLoading = true;
 
@@ -103,9 +102,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.leaveTypes = data.leaveTypes || [];
 
-          // Map profile picture URLs
           this.pendingApprovals = Array.isArray(data.pendingApprovals)
             ? data.pendingApprovals.map((req: any) => {
+                req.leaveTypeName = req.leaveTypeName || req.typename || req.TypeName || '';
                 if (req.profilePictureUrl) {
                   req.profilePreviewUrl = req.profilePictureUrl.startsWith('http')
                     ? req.profilePictureUrl
@@ -119,8 +118,6 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
           this.isLoading = false;
           this.cdr.markForCheck();
-
-          // Load team leaves after initial data is ready
           this.loadTeamRemainingLeaves();
         },
         error: (error) => {
@@ -153,7 +150,6 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
             this.teamRemainingLeavesTotalCount = (data as any).__pagination.totalCount || 0;
           }
 
-          // Build dynamic column list from all leave type names present in the data
           if (this.teamRemainingLeaves.length > 0) {
             const allLeaveTypes = new Set<string>();
             this.teamRemainingLeaves.forEach(emp => {
@@ -161,10 +157,7 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
                 emp.leaveBalances.forEach(b => allLeaveTypes.add(b.leaveTypeName));
               }
             });
-            this.teamRemainingLeavesColumns = [
-              'employeeName',
-              ...Array.from(allLeaveTypes).sort()
-            ];
+            this.teamRemainingLeavesColumns = ['employeeName', ...Array.from(allLeaveTypes).sort()];
           } else {
             this.teamRemainingLeavesColumns = ['employeeName'];
           }
@@ -182,8 +175,6 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Filters ───────────────────────────────────────────────────────────────
-
   private setupFilters(): void {
     this.employeeNameFilter.valueChanges
       .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
@@ -199,27 +190,42 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
     this.loadTeamRemainingLeaves();
   }
 
-  // ── Pagination ────────────────────────────────────────────────────────────
-
   onPageChange(event: PageEvent): void {
     this.teamRemainingLeavesPage = event.pageIndex + 1;
     this.teamRemainingLeavesPageSize = event.pageSize;
     this.loadTeamRemainingLeaves();
   }
 
-  // ── Approve / Reject ──────────────────────────────────────────────────────
-
+  // ✅ Opens ApproveLeaveDialogComponent — API is called only after confirmation
   approveRequest(request: LeaveRequest): void {
-    this.leaveService.approveLeaveRequest(request.requestId)
+    const dialogRef = this.dialog.open(ApproveLeaveDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName:  request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate:     request.startDate,
+        endDate:       request.endDate,
+        daysRequested: request.daysRequested,
+        reason:        request.reason
+      }
+    });
+
+    dialogRef.afterClosed()
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Leave request approved successfully');
-          this.loadInitialData();
-        },
-        error: (error) => {
-          const msg = error?.error?.message || error?.message || 'Failed to approve leave request';
-          this.notificationService.showError(msg);
+      .subscribe(result => {
+        if (result?.approved) {
+          this.leaveService.approveLeaveRequest(request.requestId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request approved successfully');
+                this.loadInitialData();
+              },
+              error: (error) => {
+                const msg = error?.error?.message || error?.message || 'Failed to approve leave request';
+                this.notificationService.showError(msg);
+              }
+            });
         }
       });
   }
@@ -228,11 +234,11 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
       width: '650px',
       data: {
-        employeeName:   request.employeeName,
-        leaveTypeName:  request.leaveTypeName,
-        startDate:      request.startDate,
-        endDate:        request.endDate,
-        daysRequested:  request.daysRequested
+        employeeName:  request.employeeName,
+        leaveTypeName: request.leaveTypeName,
+        startDate:     request.startDate,
+        endDate:       request.endDate,
+        daysRequested: request.daysRequested
       }
     });
 
@@ -254,7 +260,47 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  viewRequestDetails(request: LeaveRequest): void {
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName:    request.employeeName,
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        reason:          request.reason,
+        status:          request.status,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason
+      }
+    });
+  }
+
+  // ✅ View Details — always available regardless of status
+  openDetailsDialog(request: LeaveRequest): void {
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        employeeName:    request.employeeName,
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        status:          request.status,
+        reason:          request.reason,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason,
+        isSelfView:      false
+      }
+    });
+  }
 
   getLeaveTypeColor(leaveTypeId: string): string {
     const lt = this.leaveTypes.find(t => t.leaveTypeId === leaveTypeId);
@@ -272,8 +318,7 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
   getLeaveTypeTotal(leaveTypeName: string): number {
     if (!this.teamRemainingLeaves.length) return 0;
-    const balance = this.teamRemainingLeaves[0].leaveBalances
-      ?.find(b => b.leaveTypeName === leaveTypeName);
+    const balance = this.teamRemainingLeaves[0].leaveBalances?.find(b => b.leaveTypeName === leaveTypeName);
     return balance?.totalDays ?? 0;
   }
 

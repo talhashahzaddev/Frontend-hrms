@@ -5,15 +5,14 @@
   <app-progress-bar></app-progress-bar>
 
   <!-- Global Loading Spinner -->
-  <app-loading-spinner 
-    *ngIf="(isLoading$ | async) || (isLoggingOut$ | async)"
+  <app-loading-spinner *ngIf="(isLoading$ | async) || (isLoggingOut$ | async)"
     [title]="(loadingTitle$ | async) || 'Loading...'"
     [message]="(loadingMessage$ | async) || 'Please wait while we process your request'">
   </app-loading-spinner>
 
   <!-- Main Layout Container -->
   <div class="main-content">
-    
+
     <!-- Authenticated Layout -->
     <!-- Keep authenticated layout visible during logout to prevent screen shrinking -->
     <app-layout *ngIf="(isAuthenticated$ | async) || (isLoggingOut$ | async); else unauthenticated">
@@ -22,11 +21,14 @@
 
     <!-- Unauthenticated Routes (Login, Register, etc.) -->
     <ng-template #unauthenticated>
-      <div class="auth-container">
+      <div class="auth-container" *ngIf="isAuthPage; else publicLayout">
         <div class="auth-wrapper">
           <router-outlet></router-outlet>
         </div>
       </div>
+      <ng-template #publicLayout>
+        <router-outlet></router-outlet>
+      </ng-template>
     </ng-template>
   </div>
 
@@ -52,7 +54,7 @@
     <button mat-icon-button onclick="document.getElementById('pwa-update-banner').style.display = 'none'">
       <mat-icon>close</mat-icon>
     </button>
-</div>
+  </div>
 </div>
 
 <!-- Chat Widget - Show only when authenticated and not on AI Assistant page -->

@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,11 +10,16 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { RouterModule } from '@angular/router';
+import { Observable, Subject } from 'rxjs';
+import { map, startWith, takeUntil } from 'rxjs/operators';
 
 import { Asset, AssetType } from '../../../../core/models/assets.models';
 import { AssetTypeService } from '../../services/asset-type.service';
@@ -43,12 +48,14 @@ import { LoadingService } from '@core/services/loading.service';
     MatDialogModule,
     MatMenuModule,
     MatDividerModule,
-    MatChipsModule
+    MatChipsModule,
+    MatPaginatorModule,
+    MatAutocompleteModule
   ],
   templateUrl: './create-asset.component.html',
   styleUrls: ['./create-asset.component.scss']
 })
-export class CreateAssetComponent implements OnInit {
+export class CreateAssetComponent implements OnInit, OnDestroy {
   @ViewChild('assetDialog') assetDialogTemplate!: TemplateRef<any>;
   @ViewChild('assignDialog') assignDialogTemplate!: TemplateRef<any>;
   @ViewChild('historyDialog') historyDialogTemplate!: TemplateRef<any>;
@@ -58,15 +65,21 @@ export class CreateAssetComponent implements OnInit {
   form!: FormGroup;
   dialogForm!: FormGroup;
   assignForm!: FormGroup;
+  returnForm!: FormGroup;
   types: AssetType[] = [];
   assets: Asset[] = [];
   filteredAssets: Asset[] = [];
+  private allFilteredAssets: Asset[] = [];
+
   employees: any[] = [];
   filteredEmployees: any[] = [];
+  filteredEmployees$!: Observable<any[]>;
+  employeeSearchControl = new FormControl('');
   selectedAsset: any;
   selectedAssignment: any;
   editingAssetId: string | null = null;
   isEditMode = false;
+  private destroy$ = new Subject<void>();
 
   dialogRef!: MatDialogRef<any>;
   assignDialogRef!: MatDialogRef<any>;
@@ -81,12 +94,26 @@ export class CreateAssetComponent implements OnInit {
   dateFromFilter: Date | null = null;
   dateToFilter: Date | null = null;
 
+  // Pagination
+  totalCount = 0;
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [10, 25, 50];
+
   // Status dropdown options
   statusOptions = [
     { value: 'Available', label: 'Available' },
     { value: 'Assigned', label: 'Assigned' },
     { value: 'Maintenance', label: 'Maintenance' },
     { value: 'Retired', label: 'Retired' }
+  ];
+
+  // Condition dropdown options
+  conditionOptions = [
+    { value: 'Good', label: 'Good' },
+    { value: 'Fair', label: 'Fair' },
+    { value: 'Poor', label: 'Poor' },
+    { value: 'Damaged', label: 'Damaged' }
   ];
 
   displayedColumns: string[] = ['name', 'type', 'code', 'purchaseDate', 'status', 'assignedTo', 'actions'];
@@ -108,6 +135,11 @@ export class CreateAssetComponent implements OnInit {
     this.loadEmployees();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private initializeForms(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -121,7 +153,8 @@ export class CreateAssetComponent implements OnInit {
     this.assignForm = this.fb.group({
       employeeId: ['', Validators.required],
       assignDate: [new Date(), Validators.required],
-      returnDate: [null]
+      returnDate: [null],
+      condition: ['Good', Validators.required]
     });
     // dialogForm references the same controls as `form` for template compatibility
     this.dialogForm = this.form;
@@ -131,7 +164,6 @@ export class CreateAssetComponent implements OnInit {
     });
   }
 
-  returnForm!: FormGroup;
 
   getAssignedToDisplay(asset: any): string {
     if (!asset) return 'Not Assigned';
@@ -176,7 +208,10 @@ export class CreateAssetComponent implements OnInit {
       next: items => {
         console.log('Loaded assets:', items);
         this.assets = items;
-        this.filteredAssets = [...items];
+        this.allFilteredAssets = [...items];
+        this.totalCount = items.length;
+        this.pageIndex = 0;
+        this.applyPagination();
         
         // Fetch current assignment for each asset to populate "Assigned To" column
         items.forEach((asset: any) => {
@@ -229,6 +264,39 @@ export class CreateAssetComponent implements OnInit {
     });
   }
 
+  filterEmployees(searchTerm: string): void {
+    if (!searchTerm) {
+      this.filteredEmployees = [...this.employees];
+    } else {
+      const term = searchTerm.toLowerCase();
+      this.filteredEmployees = this.employees.filter(employee =>
+        employee.firstName?.toLowerCase().includes(term) ||
+        employee.lastName?.toLowerCase().includes(term) ||
+        employee.email?.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  displayEmployee(employeeId: string): string {
+    if (!employeeId) return '';
+    const employee = this.employees.find(emp => emp.employeeId === employeeId);
+    return employee ? `${employee.firstName} ${employee.lastName} — ${employee.email}` : '';
+  }
+
+  // =========================
+  // PAGINATION
+  // =========================
+  private applyPagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.filteredAssets = this.allFilteredAssets.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.applyPagination();
+  }
+
   openCreateDialog(): void {
     this.isEditMode = false;
     this.form.reset();
@@ -262,27 +330,45 @@ deleteAsset(asset: Asset): void {
     return;
   }
 
-  if (!confirm(`Are you sure you want to delete "${asset.name}"?`)) return;
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Asset',
+      message: 'Are you sure you want to delete this asset?',
+      itemName: asset.name,
+      confirmButtonText: 'Yes, Delete'
+    };
 
-  this.loading.show();
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
 
-  this.assetsService.delete(asset.id).subscribe({
-    next: (response) => {
-      console.log('Delete response:', response);
-      this.assets = this.assets.filter(a => a.id !== asset.id);
-      this.filteredAssets = this.filteredAssets.filter(a => a.id !== asset.id);
-
-      this.notification.success(`Asset "${asset.name}" deleted successfully`);
-      this.loading.hide();
-    },
-    error: (err) => {
-      console.error('Delete error:', err);
-      const errorMessage = err?.message || err?.error?.message || 'Failed to delete asset';
-      this.notification.error(errorMessage);
-      this.loading.hide();
-    }
-  });
-}
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading.show();
+        this.assetsService.delete(asset.id).subscribe({
+          next: (response) => {
+            console.log('Delete response:', response);
+            this.assets = this.assets.filter(a => a.id !== asset.id);
+            this.allFilteredAssets = this.allFilteredAssets.filter(a => a.id !== asset.id);
+            this.totalCount = this.allFilteredAssets.length;
+            if (this.pageIndex > 0 && this.pageIndex * this.pageSize >= this.totalCount) {
+              this.pageIndex = Math.max(0, this.pageIndex - 1);
+            }
+            this.applyPagination();
+            this.notification.success(`Asset "${asset.name}" deleted successfully`);
+            this.loading.hide();
+          },
+          error: (err) => {
+            console.error('Delete error:', err);
+            const errorMessage = err?.message || err?.error?.message || 'Failed to delete asset';
+            this.notification.error(errorMessage);
+            this.loading.hide();
+          }
+        });
+      }
+    });
+  }
 
   onDialogSubmit(): void {
     if (!this.form.valid) return;
@@ -363,8 +449,49 @@ deleteAsset(asset: Asset): void {
     }
     
     this.selectedAsset = asset;
-    this.assignForm.reset({ employeeId: '', assignDate: new Date(), returnDate: null });
+    this.assignForm.reset({ employeeId: '', assignDate: new Date(), returnDate: null, condition: 'Good' });
+    this.employeeSearchControl.reset('');
+    
+    // Set up the autocomplete filtered employees Observable
+    this.filteredEmployees$ = this.employeeSearchControl.valueChanges.pipe(
+      startWith(''),
+      map(searchTerm => this.filterEmployeesBySearchTerm(searchTerm)),
+      takeUntil(this.destroy$)
+    );
+    
     this.assignDialogRef = this.dialog.open(this.assignDialogTemplate, { width: '500px' });
+  }
+
+  private filterEmployeesBySearchTerm(searchTerm: string | null | any): any[] {
+    if (!searchTerm) {
+      return [...this.employees];
+    }
+    
+    // If the value is an object (employee was selected), return all employees
+    if (typeof searchTerm === 'object') {
+      return [...this.employees];
+    }
+    
+    const term = (searchTerm || '').toString().toLowerCase();
+    return this.employees.filter(employee =>
+      employee.firstName?.toLowerCase().includes(term) ||
+      employee.lastName?.toLowerCase().includes(term) ||
+      employee.email?.toLowerCase().includes(term)
+    );
+  }
+
+  displayEmployeeInAutocomplete(employee: any): string {
+    if (!employee) return '';
+    return `${employee.firstName} ${employee.lastName} — ${employee.email}`;
+  }
+
+  onEmployeeSelected(employee: any): void {
+    if (employee && employee.employeeId) {
+      this.assignForm.patchValue({
+        employeeId: employee.employeeId
+      });
+      console.log('Selected employee ID:', employee.employeeId);
+    }
   }
 
   openHistoryDialog(asset: any): void {
@@ -492,11 +619,13 @@ deleteAsset(asset: Asset): void {
 
     this.loading.show();
 
+    const condition = formData.condition;
     this.assetsService.assignAsset(
       this.selectedAsset.id,
       formData.employeeId,
       assignDate,
-      returnDate
+      returnDate,
+      condition
     ).subscribe({
       next: (response) => {
         console.log('✅ BACKEND RESPONSE SUCCESS:', response);
@@ -556,11 +685,14 @@ deleteAsset(asset: Asset): void {
     this.statusFilter = '';
     this.dateFromFilter = null;
     this.dateToFilter = null;
-    this.filteredAssets = [...this.assets];
+    this.allFilteredAssets = [...this.assets];
+    this.totalCount = this.allFilteredAssets.length;
+    this.pageIndex = 0;
+    this.applyPagination();
   }
 
   applyFilters(): void {
-    this.filteredAssets = this.assets.filter(asset => {
+    this.allFilteredAssets = this.assets.filter(asset => {
       if (this.searchQuery) {
         const q = this.searchQuery;
         if (!(
@@ -577,5 +709,8 @@ deleteAsset(asset: Asset): void {
       if (this.dateToFilter && asset.purchaseDate && new Date(asset.purchaseDate) > this.dateToFilter) return false;
       return true;
     });
+    this.totalCount = this.allFilteredAssets.length;
+    this.pageIndex = 0;
+    this.applyPagination();
   }
 }

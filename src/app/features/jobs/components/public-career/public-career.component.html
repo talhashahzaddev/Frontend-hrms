@@ -1,0 +1,216 @@
+<div class="career-page">
+    <!-- ═══════════════════ TOP HEADER BAR ═══════════════════ -->
+    <header class="career-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="logo-box" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" />
+                </div>
+                <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails?.name }}</span>
+            </div>
+            <div class="header-right">
+                <a class="header-link" href="#">View Website</a>
+                <div class="profile-icon">
+                    <mat-icon>person_outline</mat-icon>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ HERO BANNER ═══════════════════ -->
+    <section class="career-hero" [style.backgroundImage]="getHeroBackground()">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-headline" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'"></h1>
+            <div class="hero-subtext" *ngIf="companyDetails?.careerDescription"
+                [innerHTML]="companyDetails!.careerDescription"></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FILTER BAR ═══════════════════ -->
+    <section class="career-filters">
+        <form [formGroup]="searchForm" class="filter-strip" (ngSubmit)="searchJobs()">
+            <div class="filter-search">
+                <mat-icon>search</mat-icon>
+                <input matInput formControlName="search" placeholder="Search jobs by title, keyword..." />
+            </div>
+            <div class="filter-dropdowns">
+                <mat-form-field appearance="outline" class="dropdown-item">
+                    <mat-label>Type</mat-label>
+                    <mat-select formControlName="employmentType">
+                        <mat-option *ngFor="let opt of employmentTypeOptions" [value]="opt.value">
+                            {{ opt.label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="dropdown-item">
+                    <mat-label>From Date</mat-label>
+                    <input matInput [matDatepicker]="lastDateFromPicker" formControlName="lastDateFrom"
+                        placeholder="From Date">
+                    <mat-datepicker-toggle matIconSuffix [for]="lastDateFromPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #lastDateFromPicker></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="dropdown-item">
+                    <mat-label>To Date</mat-label>
+                    <input matInput [matDatepicker]="lastDateToPicker" formControlName="lastDateTo"
+                        placeholder="To Date">
+                    <mat-datepicker-toggle matIconSuffix [for]="lastDateToPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #lastDateToPicker></mat-datepicker>
+                </mat-form-field>
+            </div>
+            <div class="filter-count" *ngIf="jobs.length > 0">
+                <span class="count-badge">{{ totalCount }} Open Positions</span>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn-primary btn-sm">Filter</button>
+                <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()"
+                    *ngIf="hasFilters()">Clear</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- ═══════════════════ LOADING ═══════════════════ -->
+    <section class="career-content" *ngIf="isLoading">
+        <div class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Fetching opportunities...</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ JOB LISTINGS GRID ═══════════════════ -->
+    <section class="career-content" *ngIf="!isLoading">
+        <div class="jobs-layout" *ngIf="jobs.length > 0">
+            <div class="section-heading">
+                <h2>All Locations</h2>
+            </div>
+            <div class="jobs-grid">
+                <div class="job-card" *ngFor="let job of jobs">
+                    <div class="card-top">
+                        <span class="badge" [ngClass]="{
+                            'badge-remote': job.workMode === 'Remote',
+                            'badge-default': job.workMode !== 'Remote'
+                        }">{{ job.employmentType || 'Full-time' }}</span>
+                        <button class="bookmark-btn"><mat-icon>bookmark_border</mat-icon></button>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="job-title" (click)="viewJobDetails(job)">{{ job.jobRoleName }}</h3>
+                        <p class="job-meta">
+                            <mat-icon>location_on</mat-icon> {{ job.location || 'Anywhere' }}
+                        </p>
+                        <p class="job-meta" *ngIf="job.departmentName">
+                            <mat-icon>business</mat-icon> {{ job.departmentName }}
+                        </p>
+                        <p class="job-meta job-code" *ngIf="job.jobCode">
+                            <mat-icon>tag</mat-icon> {{ job.jobCode }}
+                        </p>
+                        <p class="job-meta">
+                            <mat-icon>schedule</mat-icon> {{ getTimeAgo(job.createdAt) || 'Recently added' }}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-apply" (click)="applyForJob(job)">Apply Now</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Pagination -->
+            <div class="pagination-container" *ngIf="totalCount > 0">
+                <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+                    [pageSizeOptions]="[6, 12, 24, 48]" (page)="onPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </div>
+
+        <!-- Empty States -->
+        <div class="empty-state" *ngIf="jobs.length === 0 && hasFilters()">
+            <mat-icon>search_off</mat-icon>
+            <h3>No positions match your filters</h3>
+            <button class="btn-primary btn-sm" (click)="clearFilters()">Clear Filters</button>
+        </div>
+        <div class="empty-state" *ngIf="jobs.length === 0 && !hasFilters()">
+            <mat-icon>work_off</mat-icon>
+            <h3>No openings at the moment</h3>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="career-footer">
+        <div class="footer-top">
+            <span class="powered-by">POWERED BY BRISKPEOPLE</span>
+        </div>
+        <div class="footer-bottom">
+            <span class="footer-text">
+                © {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.
+            </span>
+            <div class="footer-social">
+                <a class="social-icon linkedin" href="https://www.linkedin.com" target="_blank" rel="noopener"
+                    aria-label="LinkedIn">
+                    in
+                </a>
+                <a class="social-icon x-icon" href="https://twitter.com" target="_blank" rel="noopener"
+                    aria-label="X (Twitter)">
+                    X
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════ JOB DETAILS DIALOG ═══════════════════ -->
+    <ng-template #jobDetailsDialog let-job>
+        <div class="job-details-dialog">
+            <div class="dialog-header">
+                <h2>{{ job.jobRoleName }}</h2>
+            </div>
+
+            <div class="job-details-content">
+                <div class="job-meta-grid">
+                    <div class="meta-detail-card" *ngIf="job.departmentName">
+                        <label>Department</label>
+                        <span>{{ job.departmentName }}</span>
+                    </div>
+                    <div class="meta-detail-card" *ngIf="job.location">
+                        <label>Location</label>
+                        <span>{{ job.location }}</span>
+                    </div>
+                    <div class="meta-detail-card" *ngIf="job.workMode">
+                        <label>Work Mode</label>
+                        <span>{{ job.workMode }}</span>
+                    </div>
+                    <div class="meta-detail-card" *ngIf="getExperienceText(job)">
+                        <label>Experience</label>
+                        <span>{{ getExperienceText(job) }}</span>
+                    </div>
+                    <div class="meta-detail-card" *ngIf="getCtcText(job)">
+                        <label>Expected CTC</label>
+                        <span>{{ getCtcText(job) }}</span>
+                    </div>
+                    <div class="meta-detail-card" *ngIf="job.lastDate">
+                        <label>Deadline</label>
+                        <span>{{ job.lastDate | date:'longDate' }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section" *ngIf="job.jobIntroduction">
+                    <h3>About the Role</h3>
+                    <p>{{ job.jobIntroduction }}</p>
+                </div>
+
+                <div class="detail-section" *ngIf="job.responsibilities">
+                    <h3>Key Responsibilities</h3>
+                    <p>{{ job.responsibilities }}</p>
+                </div>
+
+                <div class="detail-section" *ngIf="job.skillset">
+                    <h3>Required Skillset</h3>
+                    <p>{{ job.skillset }}</p>
+                </div>
+            </div>
+
+            <div class="dialog-footer">
+                <button mat-button (click)="closeJobDetailsDialog()">Close</button>
+                <button mat-flat-button color="primary" (click)="applyForJob(job)" class="btn-apply">
+                    Apply Now
+                </button>
+            </div>
+        </div>
+    </ng-template>
+</div>

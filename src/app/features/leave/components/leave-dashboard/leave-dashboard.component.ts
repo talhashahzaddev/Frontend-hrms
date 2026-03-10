@@ -16,8 +16,8 @@ import { of, catchError } from 'rxjs';
 import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { RejectLeaveDialogComponent } from '../reject-leave-dialog/reject-leave-dialog.component';
-import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { LeaveRequestDetailsDialogComponent } from '../leave-request-details-dialog/leave-request-details-dialog.component';
+import { CancelLeaveDialogComponent } from '../cancel-leave-dialog/cancel-leave-dialog.component';  // ← new
 import {
   LeaveRequest,
   LeaveType,
@@ -93,10 +93,12 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.leaveBalances    = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
-          this.leaveTypes       = data.leaveTypes || [];
-          this.myLeaveRequests  = Array.isArray(data.myRequests)  ? data.myRequests . map((r : any) => ({...r, leaveTypeName: r.leaveTypeName || r.typename || ''})) : [];
-          this.isLoading        = false;
+          this.leaveBalances   = Array.isArray(data.leaveBalance) ? data.leaveBalance : [];
+          this.leaveTypes      = data.leaveTypes || [];
+          this.myLeaveRequests = Array.isArray(data.myRequests)
+            ? data.myRequests.map((r: any) => ({ ...r, leaveTypeName: r.leaveTypeName || r.typename || '' }))
+            : [];
+          this.isLoading = false;
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -114,7 +116,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       width: '600px',
       maxWidth: '90vw',
       disableClose: true,
-      panelClass: 'custom-dialog-container'
+      panelClass: 'custom-dialog-container',
+      data: { userId: this.currentUser?.userId }
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -128,7 +131,7 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
       maxWidth: '90vw',
       disableClose: true,
       panelClass: 'custom-dialog-container',
-      data: { requestId: request.requestId }
+      data: { requestId: request.requestId, userId: this.currentUser?.userId }
     });
 
     dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
@@ -136,33 +139,58 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ── Cancel — uses new CancelLeaveDialogComponent ──────────────────────────
   cancelRequest(request: LeaveRequest): void {
-    const dialogData: ConfirmDeleteData = {
-      title: 'Cancel Leave Request',
-      message: 'Are you sure you want to cancel this leave request?',
-      itemName: `${request.leaveTypeName} - ${new Date(request.startDate).toLocaleDateString()} to ${new Date(request.endDate).toLocaleDateString()}`
-    };
-
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '450px',
-      data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
+    const dialogRef = this.dialog.open(CancelLeaveDialogComponent, {
+      width: '520px',
+      maxWidth: '90vw',
+      panelClass: 'custom-dialog-container',
+      data: {
+        leaveTypeName:  request.leaveTypeName,
+        leaveTypeColor: this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:      request.startDate,
+        endDate:        request.endDate,
+        daysRequested:  request.daysRequested,
+        reason:         request.reason
+      }
     });
 
-    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-      if (result === true) {
-        this.leaveService.cancelLeaveRequest(request.requestId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: () => {
-              this.notificationService.showSuccess('Leave request cancelled successfully');
-              this.loadInitialData();
-            },
-            error: (error) => {
-              const errorMessage = error?.error?.message || error?.message || 'Failed to cancel leave request';
-              this.notificationService.showError(errorMessage);
-            }
-          });
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result === true) {
+          this.leaveService.cancelLeaveRequest(request.requestId)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.notificationService.showSuccess('Leave request cancelled successfully');
+                this.loadInitialData();
+              },
+              error: (error) => {
+                const errorMessage = error?.error?.message || error?.message || 'Failed to cancel leave request';
+                this.notificationService.showError(errorMessage);
+              }
+            });
+        }
+      });
+  }
+
+  openDetailsDialog(request: LeaveRequest): void {
+    this.dialog.open(LeaveRequestDetailsDialogComponent, {
+      width: '650px',
+      data: {
+        leaveTypeName:   request.leaveTypeName,
+        leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),
+        startDate:       request.startDate,
+        endDate:         request.endDate,
+        daysRequested:   request.daysRequested,
+        status:          request.status,
+        reason:          request.reason,
+        submittedAt:     request.submittedAt,
+        approverName:    request.approverName,
+        approvedAt:      request.approvedAt,
+        rejectionReason: request.rejectionReason,
+        isSelfView:      true
       }
     });
   }
@@ -170,8 +198,6 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   isPending(status: string): boolean {
     return status?.toLowerCase() === 'pending';
   }
-
-  // ── Balance card helpers ─────────────────────────────────────────────────────
 
   getBalanceCardColor(balance: LeaveBalance): string {
     const leaveType = this.leaveTypes.find(lt => lt.typeName === balance.leaveTypeName);

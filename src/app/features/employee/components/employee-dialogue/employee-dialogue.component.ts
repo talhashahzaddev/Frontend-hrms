@@ -1,5 +1,5 @@
 import { MatIconModule } from '@angular/material/icon';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
@@ -10,7 +10,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatChipsModule } from '@angular/material/chips';
 import { EmployeeService } from '../../services/employee.service';
-
+import { SettingsService } from '../../../settings/services/settings.service';
+import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-employee-dialogue',
   standalone: true,
@@ -28,26 +29,30 @@ import { EmployeeService } from '../../services/employee.service';
   templateUrl: './employee-dialogue.component.html',
   styleUrls: ['./employee-dialogue.component.scss']
 })
-export class EmployeeDialogueComponent implements OnInit {
+export class EmployeeDialogueComponent implements OnInit, OnDestroy {
   
   isViewMode = true;   // always view style unless editing
   employeeForm!: FormGroup;
   private backendBaseUrl = 'https://localhost:60485';
+  private destroy$ = new Subject<void>();
 
   departments: Department[] = [];
   positions: Position[] = [];
   managers: Employee[] = [];
+  currencySymbol: string = '$';
+  organizationCurrency: string = 'USD';
 
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
+    private settingsService: SettingsService,
     public dialogRef: MatDialogRef<EmployeeDialogueComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { employee: Employee; viewOnly: boolean }
   ) {}
 
   ngOnInit(): void {
     this.isViewMode = this.data.viewOnly === true;
-
+    this.loadInitialData();
     // Fix profile image URL
     if (this.data.employee.profilePictureUrl && !this.data.employee.profilePictureUrl.startsWith('http')) {
       this.data.employee.profilePictureUrl = `${this.backendBaseUrl}${this.data.employee.profilePictureUrl}`;
@@ -115,4 +120,26 @@ export class EmployeeDialogueComponent implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+  private loadInitialData(): void {
+      // Load organization currency first
+      this.settingsService.getOrganizationSettings()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (settings) => {
+            this.organizationCurrency = settings.currency || 'USD';
+            const currency = this.settingsService.getAvailableCurrencies().find(c => c.code === this.organizationCurrency);
+            this.currencySymbol = currency?.symbol || '$';
+          },
+          error: (error) => {
+            console.error('Error loading organization currency:', error);
+            // Default to USD if error
+            
+            this.currencySymbol = '$';
+          }
+        });
+    }
 }

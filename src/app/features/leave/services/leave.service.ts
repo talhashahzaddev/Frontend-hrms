@@ -29,6 +29,7 @@ import { ApiResponse } from '../../../core/models/auth.models';
 })
 export class LeaveService {
   private readonly apiUrl = `${environment.apiUrl}/Leave`;
+  private readonly employeeapiUrl = `${environment.apiUrl}/employee`;
 
   constructor(private http: HttpClient) { }
 
@@ -213,6 +214,20 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
 
   // Leave Types
   getLeaveTypes(): Observable<LeaveType[]> {
+    return this.http.get<ApiResponse<LeaveType[]>>(`${this.apiUrl}/typesforrequest`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch leave types');
+          }
+          return response.data!;
+        })
+      );
+  }
+  getEmployeesByOrganization(): Observable<any> {
+  return this.http.get<any>(`${this.employeeapiUrl}/GetEmployeebyOrganization`);
+}
+    getLeaveTypesforadmin(): Observable<LeaveType[]> {
     return this.http.get<ApiResponse<LeaveType[]>>(`${this.apiUrl}/types`)
       .pipe(
         map(response => {
@@ -576,6 +591,9 @@ createLeaveRequest(request: CreateLeaveRequest): Observable<LeaveRequest> {
         })
       );
   }
+getCurrentShift(userId: string): Observable<any> {
+  return this.http.get<any>(`${environment.apiUrl}/Attendance/CurrentShift/${userId}`);
+}
 
   // Helper to parse API date strings
   parseApiDate(dateString: string): Date {

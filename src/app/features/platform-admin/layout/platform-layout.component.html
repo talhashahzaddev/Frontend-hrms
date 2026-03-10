@@ -1,0 +1,75 @@
+<div class="platform-layout" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      @if (!sidebarCollapsed) {
+        <div class="brand">
+          <mat-icon class="brand-icon">admin_panel_settings</mat-icon>
+          <span class="brand-text">Brisk Admin</span>
+        </div>
+      } @else {
+        <mat-icon class="brand-icon-mini">admin_panel_settings</mat-icon>
+      }
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.route) {
+        <a class="nav-item"
+           [class.active]="isActive(item.route)"
+           [routerLink]="item.route"
+           [matTooltip]="sidebarCollapsed ? item.label : ''"
+           matTooltipPosition="right">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          @if (!sidebarCollapsed) {
+            <span class="nav-label">{{ item.label }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="nav-item logout-item" (click)="logout()"
+         [matTooltip]="sidebarCollapsed ? 'Logout' : ''"
+         matTooltipPosition="right">
+        <mat-icon>logout</mat-icon>
+        @if (!sidebarCollapsed) {
+          <span class="nav-label">Logout</span>
+        }
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button mat-icon-button (click)="toggleSidebar()" class="menu-toggle">
+        <mat-icon>{{ sidebarCollapsed ? 'menu' : 'menu_open' }}</mat-icon>
+      </button>
+
+      <div class="topbar-spacer"></div>
+
+      <div class="topbar-actions">
+        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="user-menu-header">
+            <strong>{{ adminName }}</strong>
+            <span class="role-badge">Platform Admin</span>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

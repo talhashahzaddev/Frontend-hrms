@@ -1,0 +1,199 @@
+<div class="career-detail-page">
+    <!-- ═══════════════════ TOP HEADER BAR ═══════════════════ -->
+    <header class="career-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="logo-box" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" />
+                </div>
+                <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails?.name }}</span>
+            </div>
+            <div class="header-right">
+                <a class="header-link" href="#">View Website</a>
+                <div class="profile-icon">
+                    <mat-icon>person_outline</mat-icon>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ LOADING ═══════════════════ -->
+    <section class="state-container" *ngIf="isLoading">
+        <div class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Loading job details...</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ ERROR ═══════════════════ -->
+    <section class="state-container" *ngIf="!isLoading && errorMessage">
+        <div class="empty-state">
+            <mat-icon>error_outline</mat-icon>
+            <h3>{{ errorMessage }}</h3>
+            <p>The position may have been filled or the link may be invalid.</p>
+            <button class="btn-secondary" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon> View All Openings
+            </button>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ MAIN CONTENT AREA ═══════════════════ -->
+    <main class="page-container" *ngIf="!isLoading && !errorMessage && job">
+
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs">
+            <a (click)="goBack()">Home</a>
+            <span class="separator">/</span>
+            <a (click)="goBack()">Jobs</a>
+            <span class="separator">/</span>
+            <span class="current">{{ job.jobRoleName }}</span>
+        </nav>
+
+        <!-- Main Hero / Job Header -->
+        <section class="job-hero">
+            <!-- Mobile actions row -->
+            <div class="hero-actions-mobile">
+                <button class="btn-primary" (click)="applyForJob()">Apply Now</button>
+            </div>
+
+            <div class="hero-content">
+                <h1 class="job-title">
+                    <mat-icon>work_outline</mat-icon>
+                    {{ job.jobRoleName }}
+                </h1>
+                <div class="job-meta">
+                    <span class="meta-item"><mat-icon>business</mat-icon> {{ companyDetails?.name || 'Company' }}</span>
+                    <span class="meta-item" *ngIf="job.location"><mat-icon>location_on</mat-icon> {{ job.location
+                        }}</span>
+                    <span class="meta-item" *ngIf="getTimeAgo(job.createdAt)"><mat-icon>schedule</mat-icon> {{
+                        getTimeAgo(job.createdAt) }}</span>
+                </div>
+                <!-- Badges -->
+                <div class="job-badges">
+                    <span class="badge" *ngIf="job.employmentType">{{ job.employmentType }}</span>
+                    <span class="badge" *ngIf="job.workMode">{{ job.workMode }}</span>
+                    <span class="badge badge-active" *ngIf="job.status === 'Open'">Active</span>
+                </div>
+            </div>
+
+            <div class="hero-actions-desktop">
+                <button class="btn-secondary" (click)="goBack()">
+                    <mat-icon>share</mat-icon> Share Job
+                </button>
+                <button class="btn-primary" (click)="applyForJob()">
+                    Apply Now
+                </button>
+            </div>
+        </section>
+
+        <!-- Two Column Grid -->
+        <div class="content-grid">
+
+            <!-- Left Column: Details -->
+            <div class="main-column">
+                <div class="detail-section" *ngIf="job.jobIntroduction">
+                    <h2>About the Role</h2>
+                    <div class="rich-content" [innerHTML]="job.jobIntroduction"></div>
+                </div>
+
+                <div class="detail-section" *ngIf="job.responsibilities">
+                    <h2>Key Responsibilities</h2>
+                    <div class="rich-content custom-list checked-list" [innerHTML]="job.responsibilities"></div>
+                </div>
+
+                <div class="detail-section" *ngIf="job.skillset">
+                    <h2>Requirements</h2>
+                    <div class="rich-content custom-list checked-list" [innerHTML]="job.skillset"></div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="sidebar-column">
+                <div class="summary-card sticky-card">
+                    <h3>Job Summary</h3>
+
+                    <div class="summary-list">
+                        <div class="summary-item" *ngIf="job.location">
+                            <mat-icon>location_on</mat-icon>
+                            <div class="summary-text">
+                                <label>Location</label>
+                                <span>{{ job.location }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-item" *ngIf="job.departmentName">
+                            <mat-icon>business</mat-icon>
+                            <div class="summary-text">
+                                <label>Department</label>
+                                <span>{{ job.departmentName }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-item" *ngIf="job.employmentType">
+                            <mat-icon>work</mat-icon>
+                            <div class="summary-text">
+                                <label>Employment Type</label>
+                                <span>{{ job.employmentType }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-item" *ngIf="getExperienceText(job)">
+                            <mat-icon>school</mat-icon>
+                            <div class="summary-text">
+                                <label>Experience Level</label>
+                                <span>{{ getExperienceText(job) }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-item" *ngIf="getCtcText(job)">
+                            <mat-icon>payments</mat-icon>
+                            <div class="summary-text">
+                                <label>Salary Range</label>
+                                <span>{{ getCtcText(job) }}</span>
+                            </div>
+                        </div>
+                        <div class="summary-item" *ngIf="job.lastDate">
+                            <mat-icon>calendar_today</mat-icon>
+                            <div class="summary-text">
+                                <label>Application Deadline</label>
+                                <span>{{ job.lastDate | date:'mediumDate' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary btn-block" (click)="applyForJob()">Apply Now</button>
+                    <a class="back-link" (click)="goBack()">View all jobs</a>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="career-footer">
+        <div class="footer-top">
+            <span class="powered-by">POWERED BY BRISKPEOPLE</span>
+        </div>
+        <div class="footer-bottom">
+            <span class="footer-text">
+                © {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.
+            </span>
+            <div class="footer-social">
+                <a
+                    class="social-icon linkedin"
+                    href="https://www.linkedin.com"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="LinkedIn"
+                >
+                    in
+                </a>
+                <a
+                    class="social-icon x-icon"
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="X (Twitter)"
+                >
+                    X
+                </a>
+            </div>
+        </div>
+    </footer>
+</div>

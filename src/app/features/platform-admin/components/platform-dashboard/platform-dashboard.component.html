@@ -1,0 +1,79 @@
+<div class="dashboard-page">
+  <div class="page-header">
+    <h1>Platform Dashboard</h1>
+    <p class="page-subtitle">Overview of your SaaS platform</p>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (errorMessage && !isLoading) {
+    <div class="error-container">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage }}</p>
+      <button mat-flat-button color="primary" (click)="loadDashboard()">Retry</button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!isLoading && !errorMessage && dashboard) {
+    <div class="dashboard-content">
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        @for (kpi of kpiCards; track kpi.label) {
+          <mat-card class="kpi-card"
+                    [routerLink]="kpi.route || null"
+                    [class.clickable]="!!kpi.route">
+            <mat-card-content>
+              <div class="kpi-icon-wrapper" [style.background]="kpi.color + '15'">
+                <mat-icon [style.color]="kpi.color">{{ kpi.icon }}</mat-icon>
+              </div>
+              <div class="kpi-info">
+                <span class="kpi-value">{{ kpi.label === 'Monthly Revenue' ? ('$' + (kpi.value | number:'1.0-0')) : (kpi.value | number) }}</span>
+                <span class="kpi-label">{{ kpi.label }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Subscriptions by Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="orgByPlanChartData"
+              type="doughnut"
+              [options]="orgByPlanChartOptions">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Organization Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="subStatusChartData"
+              type="pie"
+              [options]="subStatusChartOptions">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    </div>
+  }
+</div>

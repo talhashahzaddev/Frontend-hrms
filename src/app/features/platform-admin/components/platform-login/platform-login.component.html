@@ -1,0 +1,83 @@
+<div class="platform-login-page">
+  <div class="login-container">
+    <!-- Left Branding -->
+    <div class="branding-panel">
+      <div class="branding-content">
+        <mat-icon class="platform-icon">admin_panel_settings</mat-icon>
+        <h1>Brisk People</h1>
+        <p class="subtitle">Platform Administration</p>
+        <div class="branding-divider"></div>
+        <p class="branding-desc">Manage organizations, subscriptions, and monitor platform health from a single dashboard.</p>
+      </div>
+    </div>
+
+    <!-- Right Login Form -->
+    <div class="login-panel">
+      <div class="login-wrapper">
+        <div class="login-header">
+          <mat-icon class="lock-icon">lock</mat-icon>
+          <h2>Admin Login</h2>
+          <p>Sign in to the platform administration portal</p>
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage) {
+          <div class="error-banner">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+        }
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+          <!-- Email -->
+          <div class="field-group">
+            <label class="field-label">Email Address</label>
+            <mat-form-field appearance="outline" class="form-field">
+              <input matInput type="email" formControlName="email"
+                     placeholder="admin@briskpeople.com" autocomplete="email">
+              <mat-icon matPrefix>email</mat-icon>
+              @if (loginForm.get('email')?.hasError('required')) {
+                <mat-error>Email is required</mat-error>
+              }
+              @if (loginForm.get('email')?.hasError('email')) {
+                <mat-error>Enter a valid email</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Password -->
+          <div class="field-group">
+            <label class="field-label">Password</label>
+            <mat-form-field appearance="outline" class="form-field">
+              <input matInput [type]="hidePassword ? 'password' : 'text'"
+                     formControlName="password" placeholder="Enter your password"
+                     autocomplete="current-password">
+              <mat-icon matPrefix>vpn_key</mat-icon>
+              <button mat-icon-button matSuffix type="button"
+                      (click)="togglePasswordVisibility()" tabindex="-1">
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (loginForm.get('password')?.hasError('required')) {
+                <mat-error>Password is required</mat-error>
+              }
+              @if (loginForm.get('password')?.hasError('minlength')) {
+                <mat-error>Password must be at least 6 characters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" mat-flat-button color="primary" class="login-btn"
+                  [disabled]="isLoading">
+            @if (isLoading) {
+              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+            }
+            <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
+          </button>
+        </form>
+
+        <p class="footer-text">Authorized personnel only</p>
+      </div>
+    </div>
+  </div>
+</div>

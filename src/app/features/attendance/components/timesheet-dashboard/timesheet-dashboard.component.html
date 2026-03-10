@@ -48,74 +48,68 @@
   <!-- Snapshots Grid -->
   @if (!isLoading && timesheets.length > 0) {
     <div class="snapshots-grid">
-      <mat-card *ngFor="let snapshot of timesheets" class="snapshot-card employee-summary-card">
-        <!-- Use approvals-like header structure -->
-        <div class="card-header">
-          <div class="employee-avatar">
-            <mat-icon>date_range</mat-icon>
-          </div>
-          <div class="employee-info">
-            <h3 class="employee-name">{{ snapshot.timesheetName }}</h3>
-            <span class="employee-meta">{{ getMonthYearDisplay(snapshot) }}</span>
-          </div>
-          <div class="month-badge">
+      <div *ngFor="let snapshot of timesheets" class="snap-card">
+
+        <!-- Top accent + title -->
+        <div class="snap-top">
+          <div class="snap-month-icon">
             <mat-icon>calendar_month</mat-icon>
-            <span>{{ getMonthYearDisplay(snapshot) }}</span>
+          </div>
+          <div class="snap-title-block">
+            <span class="snap-month">{{ getMonthYearDisplay(snapshot) }}</span>
+            <span class="snap-name">{{ snapshot.timesheetName }}</span>
+          </div>
+          <span class="snap-status-badge" [class.finalized]="snapshot.status === 'Finalized'">
+            {{ snapshot.status === 'Finalized' ? 'Finalized' : 'Draft' }}
+          </span>
+        </div>
+
+        <!-- Stats grid (3 + 2 rows) -->
+        <div class="snap-stats">
+          <div class="snap-stat-row">
+            <div class="snap-stat">
+              @if (isEmployee()) {
+                <span class="ss-val ss-name-val">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</span>
+                <span class="ss-lbl">Employee</span>
+              } @else {
+                <span class="ss-val">{{ snapshot.totalEmployees }}</span>
+                <span class="ss-lbl">Employees</span>
+              }
+            </div>
+            <div class="snap-stat accent-blue">
+              <span class="ss-val">{{ snapshot.attendancePercentage | number:'1.1-1' }}%</span>
+              <span class="ss-lbl">{{ isEmployee() ? 'Attendance Rate' : 'Org Attendance %' }}</span>
+            </div>
+            <div class="snap-stat accent-green">
+              <span class="ss-val">{{ snapshot.totalPresentDays }}</span>
+              <span class="ss-lbl">Present Days</span>
+            </div>
+          </div>
+          <div class="snap-stat-row bottom-row">
+            <div class="snap-stat accent-red">
+              <span class="ss-val">{{ snapshot.totalAbsentDays }}</span>
+              <span class="ss-lbl">Absent Days</span>
+            </div>
+            <div class="snap-stat accent-teal">
+              <span class="ss-val">{{ snapshot.totalHoursWorked | number:'1.0-1' }}h</span>
+              <span class="ss-lbl">Hours Worked</span>
+            </div>
           </div>
         </div>
 
-        <mat-divider></mat-divider>
-
-        <div class="stats-row">
-          <div class="stat-pill">
-            <mat-icon>groups</mat-icon>
-            <span class="value">{{ snapshot.totalEmployees }}</span>
-            <span class="label">Total Employees</span>
-          </div>
-
-          <div class="stat-pill">
-            <mat-icon class="attendance">assessment</mat-icon>
-            <span class="value">{{ snapshot.attendancePercentage | number:'1.1-1' }}%</span>
-            <span class="label">Org Attendance Rate</span>
-          </div>
-
-          <div class="stat-pill">
-            <mat-icon class="present">check_circle</mat-icon>
-            <span class="value">{{ snapshot.totalPresentDays }}</span>
-            <span class="label">Present Days</span>
-          </div>
-
-          <div class="stat-pill">
-            <mat-icon class="absent">cancel</mat-icon>
-            <span class="value">{{ snapshot.totalAbsentDays }}</span>
-            <span class="label">Absent Days</span>
-          </div>
-
-          <div class="stat-pill">
-            <mat-icon class="hours">access_time</mat-icon>
-            <span class="value">{{ snapshot.totalHoursWorked | number:'1.1-1' }}</span>
-            <span class="label">Total Hours</span>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button class="btn btn-outline-primary" (click)="openTimesheetDetailDialog(snapshot)">
-            <mat-icon>visibility</mat-icon>
-            <span>View Details</span>
+        <!-- Actions -->
+        <div class="snap-actions">
+          <button class="snap-btn outline" (click)="openTimesheetDetailDialog(snapshot)">
+            <mat-icon>visibility</mat-icon> View Details
           </button>
-
           @if (!isEmployee() && snapshot.status !== 'Finalized') {
-            <button class="btn btn-primary" (click)="finalizeSnapshot(snapshot)">
-              <mat-icon>lock</mat-icon>
-              <span>Finalize</span>
+            <button class="snap-btn filled" (click)="finalizeSnapshot(snapshot)">
+              <mat-icon>lock</mat-icon> Finalize
             </button>
           }
-
-          @if (!isEmployee()) {
-            <!-- Delete action removed per request -->
-          }
         </div>
-      </mat-card>
+
+      </div>
     </div>
   }
 </div>

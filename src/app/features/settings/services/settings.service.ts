@@ -5,6 +5,7 @@ import { map, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/auth.models';
 
+
 export interface OrganizationSettings {
   organizationId: string;
   currency: string | null;
@@ -13,6 +14,22 @@ export interface OrganizationSettings {
 
 export interface UpdateCurrencyRequest {
   currency: string;
+}
+
+export interface CareerPageSettings {
+  organizationId: string;
+  name: string | null;
+  logoUrl: string | null;
+  careerBgImageUrl: string | null;
+  careerHeaderText: string | null;
+  careerDescription: string | null;
+}
+
+export interface UpdateCareerPageRequest {
+  careerBgImageUrl?: string | null;
+  careerHeaderText?: string | null;
+  careerDescription?: string | null;
+  logoUrl?: string | null;
 }
 
 @Injectable({
@@ -131,5 +148,38 @@ export class SettingsService {
       { code: 'MXN', name: 'Mexican Peso', symbol: '$' }
     ];
   }
+
+  /** GET /api/Settings/career-page — loads career branding for current org */
+  getCareerPage(): Observable<CareerPageSettings> {
+    return this.http.get<ApiResponse<CareerPageSettings>>(`${this.apiUrl}/career-page`).pipe(
+      map(res => {
+        if (!res.success || !res.data) throw new Error(res.message || 'Failed to load career page settings');
+        return res.data;
+      })
+    );
+  }
+
+  /** PUT /api/Settings/career-page — saves career branding */
+  updateCareerPage(request: UpdateCareerPageRequest): Observable<boolean> {
+    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/career-page`, request).pipe(
+      map(res => {
+        if (!res.success) throw new Error(res.message || 'Failed to update career page settings');
+        return res.data ?? true;
+      })
+    );
+  }
+
+  /** POST /api/uploads/files — upload image and get back its URL */
+  uploadFile(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ url: string }>(`${environment.apiUrl}/uploads/files`, formData).pipe(
+      map(res => {
+        if (!res?.url) throw new Error('Upload failed');
+        return res.url;
+      })
+    );
+  }
 }
+
 

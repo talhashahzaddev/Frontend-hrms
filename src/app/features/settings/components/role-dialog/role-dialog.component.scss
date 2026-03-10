@@ -1,0 +1,641 @@
+// Role Dialog – Horizontal Scrollable Card Design
+// Matches HRMS standard color scheme (#6366f1 / #8b5cf6)
+
+.role-dialog-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: 88vh;
+  background: #ffffff;
+  overflow: hidden;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+
+  // ─── Header ────────────────────────────────────────────────────
+  // FIX: Removed gradient background from header — only icon has color now
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: transparent; // removed gradient
+    border-bottom: 1px solid #e9eaf0;
+    flex-shrink: 0;
+    gap: 12px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    // FIX: Only the icon gets the gradient background
+    .header-icon {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+
+      mat-icon {
+        color: white;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .dialog-title {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1e2235; // dark text now (no more white)
+      letter-spacing: -0.2px;
+    }
+
+    .dialog-subtitle {
+      margin: 0;
+      font-size: 12px;
+      color: #6b7280; // subtle gray text
+    }
+
+    .close-btn {
+      color: #6b7280;
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      transition: background 0.15s;
+
+      &:hover { background: #e5e7eb; color: #374151; }
+
+      mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    }
+  }
+
+  // ─── Body ──────────────────────────────────────────────────────
+  .dialog-body {
+    flex: 1;
+    overflow: auto; // FIX: vertical scroll on body
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    background: #f5f6fa;
+     min-height: 0;
+    
+
+    // Custom scrollbar for body
+    &::-webkit-scrollbar { width: 5px; }
+    &::-webkit-scrollbar-track { background: #f0f1f5; border-radius: 3px; }
+    &::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 3px; }
+    &::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+  }
+
+  // ─── Form Section ──────────────────────────────────────────────
+  // FIX: Input fields — proper spacing so icon and placeholder don't overlap
+  .form-section {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px 40px; // increased bottom padding
+    background: white;
+    border-bottom: 1px solid #e9eaf0;
+    flex-shrink: 0;
+
+    .form-field {
+  flex: 1;
+
+  &.desc-field { flex: 1.6; }
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: #f8f9fc !important;
+      border-radius: 8px !important;
+    }
+    
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #e5e7eb !important;
+    }
+
+    // FIX: Proper infix padding and flex layout
+    .mat-mdc-form-field-flex {
+      align-items: center !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      display: flex !important;
+      align-items: center !important;
+      padding: 16px 12px !important;
+      min-height: unset;
+      width: auto !important;
+    }
+
+    input {
+      font-size: 13.5px !important;
+      color: #374151 !important;
+      margin-left: 2px !important; // Add space after icon
+    }
+
+    // FIX: Icon container positioning
+    .mat-mdc-form-field-icon-prefix {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 !important;
+      margin-right: 4px !important; // Space between icon and input
+      
+      mat-icon {
+        color: #9ca3af;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    // FIX: Placeholder text positioning
+    .mat-mdc-form-field-label-wrapper {
+      overflow: visible !important;
+    }
+
+    .mdc-floating-label {
+      left: 20px !important; // Push label to the right of icon
+      transform-origin: left !important;
+    }
+
+    // FIX: Input text positioning
+    .mdc-text-field--outlined .mdc-floating-label--float-above {
+      transform: translateY(-26px) scale(0.75) !important;
+    }
+
+    .mat-mdc-input-element {
+      padding-left: 4px !important; // Extra padding for input text
+    }
+
+    &.mat-focused .mdc-notched-outline__leading,
+    &.mat-focused .mdc-notched-outline__notch,
+    &.mat-focused .mdc-notched-outline__trailing {
+      border-color: #6366f1 !important;
+      border-width: 1.5px !important;
+    }
+  }
+}
+  }
+
+  // ─── Permissions Bar ───────────────────────────────────────────
+  // FIX: Removed dark background — only security icon gets a colored background
+  .permissions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: transparent; // removed #1e2235
+    border-bottom: 1px solid #e9eaf0;
+    flex-shrink: 0;
+
+    .permissions-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      // FIX: Only the security icon gets a gradient background
+      .perm-bar-icon-wrap {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+
+        mat-icon {
+          color: white !important;
+          font-size: 17px;
+          width: 17px;
+          height: 17px;
+        }
+      }
+
+      // fallback if no wrapper div is used
+      & > mat-icon {
+        color: #6366f1;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .bar-title {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e2235; // dark text (readable on white bg)
+        line-height: 1.3;
+      }
+
+      .bar-sub {
+        display: block;
+        font-size: 11px;
+        color: #9ca3af;
+        line-height: 1.3;
+      }
+    }
+
+    .permissions-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+
+      .grant-label {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #374151; // dark text on white bg
+        white-space: nowrap;
+      }
+    }
+  }
+
+  // ─── Loading ───────────────────────────────────────────────────
+  .menus-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 48px 24px;
+    color: #9ca3af;
+    font-size: 13px;
+    flex: 1;
+
+    ::ng-deep .mat-mdc-progress-spinner circle { stroke: #6366f1; }
+  }
+
+  // ─── Horizontal Cards Scroll ───────────────────────────────────
+  .cards-scroll-area {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 20px 20px;
+    min-height: 400px; // ensures area is always visible
+
+    // Custom scrollbar
+    &::-webkit-scrollbar { height: 6px; }
+    &::-webkit-scrollbar-track { background: #f0f1f5; border-radius: 3px; }
+    &::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 3px; }
+    &::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+
+    .cards-track {
+      display: flex;
+      gap: 12px;
+      height: 100%;
+      align-items: flex-start;
+    }
+  }
+
+  // ─── Permission Card ───────────────────────────────────────────
+  .perm-card {
+    flex: 0 0 240px;
+    width: 240px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9eaf0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.18s, transform 0.18s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12);
+      transform: translateY(-1px);
+    }
+
+    // ── Card Header ──
+    // FIX: Removed dark card header background — only icon gets color
+    .card-header {
+      .toggle-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.9); // Slightly smaller in header
+    transform-origin: center;
+  }
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      background: transparent; // removed #2d3344
+      border-bottom: 1px solid #e9eaf0;
+      flex-shrink: 0;
+      gap: 8px;
+
+      .card-header-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+        // FIX: prevent overflow from pushing toggle out
+        overflow: hidden;
+      }
+
+      // FIX: Only the card icon wrap gets gradient background
+      .card-icon-wrap {
+        width: 28px;
+        height: 28px;
+        min-width: 28px; // prevent shrinking
+        border-radius: 7px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
+
+        mat-icon {
+          font-size: 15px;
+          width: 15px;
+          height: 15px;
+          color: white;
+        }
+      }
+
+      .card-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #1e2235; // dark text on white bg
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        flex: 1;
+      }
+
+      // FIX: Toggle must never overflow — force shrink-0
+      .toggle-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.95); // Slightly smaller to ensure it fits
+    transform-origin: center;
+  }
+    }
+
+    // ── Card Body ──
+    .card-body {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 280px;
+
+      &::-webkit-scrollbar { width: 3px; }
+      &::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+
+      .submenu-divider {
+        padding: 7px 14px 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        span {
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.7px;
+          color: #9ca3af;
+          white-space: nowrap;
+        }
+
+        &::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: #f0f1f5;
+        }
+
+        &:first-child { padding-top: 10px; }
+      }
+
+      // FIX: Action row — toggle constrained so it never overflows card width
+      .action-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 14px;
+        border-bottom: 1px solid #f9fafb;
+        transition: background 0.1s;
+        gap: 8px;
+        box-sizing: border-box; // ensures padding is within card width
+        width: 100%;
+        min-height: 40px;
+
+        &:last-child { border-bottom: none; }
+
+        &:hover { background: #fafbff; }
+
+        .action-label {
+          font-size: 12.5px;
+          color: #374151;
+          line-height: 1.3;
+          flex: 1;
+          min-width: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          padding-right: 4px;
+        }
+
+        // FIX: Toggle in action rows also forced to not shrink/overflow
+        .toggle-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: scale(0.95); // Slightly smaller to ensure it fits
+    transform-origin: center;
+  }
+      }
+
+      .no-actions {
+        padding: 16px 14px;
+        font-size: 12px;
+        color: #d1d5db;
+        font-style: italic;
+        text-align: center;
+      }
+    }
+
+    // ── Card Footer ──
+    .card-footer {
+      padding: 8px 14px;
+      background: #fafafa;
+      border-top: 1px solid #f0f1f5;
+      flex-shrink: 0;
+
+      .enabled-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6b7280;
+
+        mat-icon {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          color: #6366f1;
+        }
+      }
+    }
+  }
+
+  // ─── Dialog Footer ─────────────────────────────────────────────
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-top: 1px solid #e9eaf0;
+    flex-shrink: 0;
+    background: white;
+
+    .cancel-btn {
+      height: 38px;
+      padding: 0 18px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #6b7280 !important;
+      border-color: #e5e7eb !important;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+      &:hover { background: #f9fafb !important; border-color: #d1d5db !important; color: #374151 !important; }
+    }
+
+    .submit-btn {
+      height: 38px;
+      padding: 0 22px !important;
+      border-radius: 8px !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+      color: white !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease !important;
+
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+      &:hover:not([disabled]) {
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45) !important;
+        transform: translateY(-1px);
+      }
+
+      &[disabled] { opacity: 0.55; cursor: not-allowed; transform: none !important; }
+
+      ::ng-deep .mat-mdc-progress-spinner circle { stroke: white !important; }
+    }
+  }
+}
+
+// ─── Toggle Switch (reusable) ─────────────────────────────────────────────────
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0; // FIX: always prevent toggle from overflowing
+  overflow: hidden;
+  box-sizing: border-box;
+
+  // sizes
+  width: 44px;  height: 24px;
+  &.sm  { width: 36px; height: 20px; }
+  &.xs  { width: 32px; height: 18px; }
+
+  &.disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    margin: 0;
+
+    &:checked ~ .toggle-track {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-color: transparent;
+    }
+
+    &:checked ~ .toggle-track .toggle-thumb {
+      transform: translateX(calc(100% - 2px));
+    }
+  }
+
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #d1d5db;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    transition: background 0.22s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
+    box-sizing: border-box;
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+    transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+
+    width: calc(24px - 8px);
+    height: calc(24px - 8px);
+
+    max-width: calc(100% - 4px);
+    max-height: calc(100% - 4px);
+
+    .sm & { width: calc(20px - 8px); height: calc(20px - 8px); }
+    .xs & { width: calc(18px - 8px); height: calc(18px - 8px); }
+  }
+}
+
+// ─── Dialog panel override ────────────────────────────────────────────────────
+::ng-deep .role-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+
+    .mdc-dialog__surface {
+      border-radius: 14px !important;
+      overflow: hidden !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+    }
+  }
+}

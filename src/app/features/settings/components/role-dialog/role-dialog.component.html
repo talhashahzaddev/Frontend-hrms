@@ -1,0 +1,164 @@
+<!-- Role Dialog -->
+<div class="role-dialog-container">
+
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>{{ isViewMode ? 'visibility' : isEditMode ? 'edit' : 'admin_panel_settings' }}</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2 class="dialog-title">
+          {{ isViewMode ? 'View Role' : isEditMode ? 'Edit Role' : 'Add New Role' }}
+        </h2>
+        <p class="dialog-subtitle">
+          {{ isViewMode ? 'Role permissions and access details' : 'Configure role name, description and permissions' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog Body -->
+  <div class="dialog-body">
+
+    <!-- Form Fields Row -->
+    <div class="form-section" [formGroup]="roleForm">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Role Name</mat-label>
+        <mat-icon matPrefix>shield</mat-icon>
+        <input matInput formControlName="roleName" placeholder="e.g. HR Manager, Finance Officer">
+        <mat-error *ngIf="roleForm.get('roleName')?.hasError('required')">Role name is required</mat-error>
+        <mat-error *ngIf="roleForm.get('roleName')?.hasError('minlength')">Minimum 2 characters</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field desc-field">
+        <mat-label>Description</mat-label>
+        <mat-icon matPrefix>notes</mat-icon>
+        <input matInput formControlName="description" placeholder="Describe what this role can do...">
+      </mat-form-field>
+    </div>
+
+    <!-- Permissions Header Bar -->
+    <div class="permissions-bar">
+      <div class="permissions-bar-left">
+        <!-- FIX: Icon wrapped in div so only icon gets colored background -->
+        <div class="perm-bar-icon-wrap">
+          <mat-icon>security</mat-icon>
+        </div>
+        <div>
+          <span class="bar-title">Menu Permissions</span>
+          <span class="bar-sub">Toggle individual actions per menu section</span>
+        </div>
+      </div>
+      <div class="permissions-bar-right" *ngIf="!isViewMode">
+        <span class="grant-label">Grant Full Access</span>
+        <label class="toggle-switch" [class.disabled]="isViewMode">
+          <input type="checkbox"
+            [(ngModel)]="grantFullAccess"
+            (change)="onGrantFullAccessChange()"
+            [disabled]="isViewMode">
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoadingMenus" class="menus-loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Loading permissions...</span>
+    </div>
+
+    <!-- Horizontal Scrollable Cards -->
+    <div *ngIf="!isLoadingMenus" class="cards-scroll-area">
+      <div class="cards-track">
+
+        <div *ngFor="let menuGroup of permissionGroups" class="perm-card">
+
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="card-icon-wrap">
+                <mat-icon>{{ getMenuIcon(menuGroup.menuName) }}</mat-icon>
+              </div>
+              <span class="card-title">{{ menuGroup.menuName }}</span>
+            </div>
+            <!-- Master toggle -->
+            <label class="toggle-switch sm" [class.disabled]="isViewMode"
+              [matTooltip]="isMenuFullyEnabled(menuGroup) ? 'Disable all' : 'Enable all'">
+              <input type="checkbox"
+                [checked]="isMenuFullyEnabled(menuGroup)"
+                (change)="toggleAllMenuActions(menuGroup, $event)"
+                [disabled]="isViewMode">
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+            </label>
+          </div>
+
+          <!-- Card Body: actions grouped by submenu -->
+          <div class="card-body">
+            <ng-container *ngFor="let subMenu of menuGroup.subMenus; let si = index">
+
+              <!-- SubMenu divider label if multiple submenus -->
+              <div class="submenu-divider" *ngIf="menuGroup.subMenus.length > 1">
+                <span>{{ subMenu.subMenuName }}</span>
+              </div>
+
+              <!-- Action rows -->
+              <div class="action-row" *ngFor="let action of subMenu.actions">
+                <span class="action-label">{{ action.actionName }}</span>
+                <label class="toggle-switch xs" [class.disabled]="isViewMode">
+                  <input type="checkbox"
+                    [(ngModel)]="action.hasPermission"
+                    [ngModelOptions]="{standalone: true}"
+                    [disabled]="isViewMode">
+                  <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
+                  </span>
+                </label>
+              </div>
+
+              <div *ngIf="subMenu.actions.length === 0" class="no-actions">
+                No actions defined
+              </div>
+
+            </ng-container>
+
+            <div *ngIf="menuGroup.subMenus.length === 0" class="no-actions">
+              No permissions defined
+            </div>
+          </div>
+
+          <!-- Card Footer: enabled count -->
+          <div class="card-footer">
+            <span class="enabled-count">
+              <mat-icon>check_circle</mat-icon>
+              {{ getEnabledCount(menuGroup) }} / {{ getTotalCount(menuGroup) }} enabled
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dialog Footer -->
+  <div class="dialog-footer">
+    <button mat-stroked-button (click)="onClose()" class="cancel-btn">
+      <mat-icon>{{ isViewMode ? 'close' : 'cancel' }}</mat-icon>
+      {{ isViewMode ? 'Close' : 'Cancel' }}
+    </button>
+    <button *ngIf="!isViewMode" mat-flat-button
+      (click)="onSubmit()"
+      [disabled]="roleForm.invalid || isSaving"
+      class="submit-btn">
+      <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+      <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add_circle' }}</mat-icon>
+      <span>{{ isEditMode ? 'Save Changes' : 'Add Role' }}</span>
+    </button>
+  </div>
+
+</div>

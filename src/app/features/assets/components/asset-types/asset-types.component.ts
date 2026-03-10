@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AssetType } from '../../../../core/models/assets.models';
 import { AssetTypeService } from '../../services/asset-type.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -33,7 +34,8 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
     MatMenuModule,
     MatChipsModule,
     MatDialogModule,
-    MatDividerModule
+    MatDividerModule,
+    MatPaginatorModule
   ],
   templateUrl: './asset-types.component.html',
   styleUrls: ['./asset-types.component.scss']
@@ -41,8 +43,16 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
 export class AssetTypesComponent implements OnInit {
   types: AssetType[] = [];
   filteredTypes: AssetType[] = [];
+  private allFilteredTypes: AssetType[] = [];
+
   searchQuery = '';
   displayedColumns = ['name', 'description', 'createdAt', 'actions'];
+
+  // Pagination
+  totalCount = 0;
+  pageSize = 10;
+  pageIndex = 0;
+  pageSizeOptions = [10, 25, 50];
 
   private gradients = [
     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -74,10 +84,27 @@ export class AssetTypesComponent implements OnInit {
     this.assetTypeService.getAll$().subscribe({
       next: types => {
         this.types = types;
-        this.filteredTypes = [...types];
+        this.allFilteredTypes = [...types];
+        this.totalCount = types.length;
+        this.pageIndex = 0;
+        this.applyPagination();
       },
       error: err => console.error('Failed to load asset types', err)
     });
+  }
+
+  // =========================
+  // PAGINATION
+  // =========================
+  private applyPagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.filteredTypes = this.allFilteredTypes.slice(start, start + this.pageSize);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.applyPagination();
   }
 
   // ── CREATE / EDIT ──────────────────────────────────────────────
@@ -135,7 +162,8 @@ export class AssetTypesComponent implements OnInit {
     this.assetTypeService.update({ id, name, description }).subscribe({
       next: (type) => {
         this.types = this.types.map(t => t.id === id ? type : t);
-        this.filteredTypes = this.filteredTypes.map(t => t.id === id ? type : t);
+        this.allFilteredTypes = this.allFilteredTypes.map(t => t.id === id ? type : t);
+        this.applyPagination();
         this.notification.success(`Updated asset type "${type.name}"`);
         this.loading.hide();
       },
@@ -172,7 +200,12 @@ export class AssetTypesComponent implements OnInit {
         this.assetTypeService.delete(item.id).subscribe({
           next: () => {
             this.types = this.types.filter(t => t.id !== item.id);
-            this.filteredTypes = this.filteredTypes.filter(t => t.id !== item.id);
+            this.allFilteredTypes = this.allFilteredTypes.filter(t => t.id !== item.id);
+            this.totalCount = this.allFilteredTypes.length;
+            if (this.pageIndex > 0 && this.pageIndex * this.pageSize >= this.totalCount) {
+              this.pageIndex = Math.max(0, this.pageIndex - 1);
+            }
+            this.applyPagination();
             this.notification.info(`Deleted asset type "${item.name}"`);
             this.loading.hide();
           },
@@ -196,14 +229,20 @@ export class AssetTypesComponent implements OnInit {
 
   clearFilters(): void {
     this.searchQuery = '';
-    this.filteredTypes = [...this.types];
+    this.allFilteredTypes = [...this.types];
+    this.totalCount = this.allFilteredTypes.length;
+    this.pageIndex = 0;
+    this.applyPagination();
   }
 
   applyFilters(): void {
-    this.filteredTypes = this.types.filter(t =>
+    this.allFilteredTypes = this.types.filter(t =>
       t.name.toLowerCase().includes(this.searchQuery) ||
       (t.description && t.description.toLowerCase().includes(this.searchQuery))
     );
+    this.totalCount = this.allFilteredTypes.length;
+    this.pageIndex = 0;
+    this.applyPagination();
   }
 
   // ── CARD STYLING ───────────────────────────────────────────────

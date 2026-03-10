@@ -179,6 +179,292 @@
     }
   }
 
+  // ─── Employee Select2 Dropdown ────────────────────────────────
+  .employee-select-wrapper {
+    flex: 1;
+    position: relative;
+    z-index: 100;
+
+    // ── Trigger (the visible "field") ──
+    .employee-select-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 42px;
+      padding: 0 12px;
+      background: #f8f9fc;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+
+      .select-prefix-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #9ca3af;
+        flex-shrink: 0;
+      }
+
+      .select-display-value {
+        flex: 1;
+        font-size: 13px;
+        color: #9ca3af;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &.selected-name {
+          color: #374151;
+          font-weight: 500;
+        }
+      }
+
+      .select-arrow-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #9ca3af;
+        transition: transform 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      .select-clear-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #9ca3af;
+        flex-shrink: 0;
+        border-radius: 50%;
+        transition: color 0.15s ease, background 0.15s ease;
+        padding: 2px;
+
+        &:hover {
+          color: #374151;
+          background: #e5e7eb;
+        }
+      }
+    }
+
+    &.open .employee-select-trigger {
+      border-color: #6366f1;
+      border-width: 1.5px;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+      background: white;
+
+      .select-arrow-icon {
+        transform: rotate(180deg);
+      }
+    }
+
+    &.has-value .employee-select-trigger {
+      background: white;
+    }
+
+    // ── Dropdown Panel ──
+    .employee-dropdown-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+      z-index: 1000;
+      overflow: hidden;
+      animation: dropdownFadeIn 0.15s ease;
+
+      @keyframes dropdownFadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    }
+
+    // ── Inline search input inside trigger ──
+    .trigger-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 400;
+      color: #374151;
+      font-family: 'Inter', 'DM Sans', sans-serif;
+      min-width: 0;
+      caret-color: #6366f1;
+
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
+    }
+
+    .trigger-spinner {
+      flex-shrink: 0;
+      ::ng-deep circle { stroke: #6366f1; }
+    }
+
+    // ── Dropdown list ──
+    .dropdown-list {
+      max-height: 260px;
+      overflow-y: auto;
+      padding: 4px;
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #e5e7eb;
+        border-radius: 4px;
+      }
+    }
+
+    // ── Each option ──
+    .dropdown-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background 0.12s ease;
+
+      &:hover {
+        background: #f5f6fa;
+      }
+
+      &.active {
+        background: #eef2ff;
+
+        .option-emp-code {
+          background: #dde3ff;
+          border-color: #a5b4fc;
+        }
+      }
+
+      // ── Square avatar with initials ──
+      .option-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 8px;
+        }
+
+        span {
+          font-size: 11px;
+          font-weight: 700;
+          color: white;
+          letter-spacing: 0.3px;
+        }
+      }
+
+      // ── Name + email stacked ──
+      .option-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+        min-width: 0;
+
+        .option-name {
+          font-size: 13px;
+          font-weight: 600;
+          color: #111827;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .option-email {
+          font-size: 11.5px;
+          color: #9ca3af;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-top: 1px;
+        }
+      }
+
+      // ── Employee code badge — right side ──
+      .option-emp-code {
+        flex-shrink: 0;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #6366f1;
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 5px;
+        padding: 3px 7px;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+        font-family: 'Fira Code', 'Courier New', monospace;
+        transition: background 0.12s ease, border-color 0.12s ease;
+      }
+
+      .option-check {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: #6366f1;
+        flex-shrink: 0;
+      }
+    }
+
+    // ── Empty / loading states ──
+    .dropdown-empty,
+    .dropdown-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 28px 16px;
+      color: #9ca3af;
+      font-size: 13px;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #d1d5db;
+      }
+
+      ::ng-deep .mat-mdc-progress-spinner circle {
+        stroke: #6366f1;
+      }
+    }
+
+    .dropdown-loading {
+      flex-direction: row;
+      gap: 10px;
+      padding: 16px;
+    }
+
+    // ── Backdrop ──
+    .dropdown-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: transparent;
+    }
+  }
+
   // ─── Bulk Actions ─────────────────────────────────────────────
   .bulk-actions {
     display: flex;
@@ -350,8 +636,6 @@
           font-size: 10px;
           font-weight: 600;
           color: #000000;
-          //font-family: 'Fira Code', 'Courier New', monospace;
-          //background: #eef2ff;
           padding: 3px 7px;
           border-radius: 4px;
         }
@@ -473,11 +757,6 @@
           mat-icon {
             font-size: 20px;
           }
-
-          //&:hover {
-          //background: #ffffff !important;
-          //color: #374151 !important;
-          //}
         }
       }
 
@@ -678,37 +957,31 @@
   .team-leaves-container {
     padding: 24px 20px;
 
-    .filters-row .filters-right .search-field {
-      width: 220px;
-    }
-
     .filters-row {
       flex-wrap: wrap;
       gap: 10px;
 
-      .search-field,
+      .employee-select-wrapper,
       .filter-field {
         flex: 1 1 calc(50% - 6px);
-        margin-bottom: -22px;
       }
 
       .clear-btn {
         flex-basis: 100%;
         width: fit-content;
         align-self: flex-end;
-        margin-top: 22px;
+        margin-top: 10px;
       }
     }
   }
 }
 
-// Mobile (≤768px) — full redesign
+// Mobile (≤768px)
 @media (max-width: 768px) {
   .team-leaves-container {
     padding: 16px 14px;
     background: #f5f6fa;
 
-    // ── Header: title left, button right inline ──
     .page-header {
       flex-direction: row;
       justify-content: space-between;
@@ -750,9 +1023,6 @@
       }
     }
 
-    // removed toolbar-row
-
-    // ── Filters: 2-column grid, compact ──
     .filters-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -760,7 +1030,10 @@
       padding: 10px 14px 14px;
       align-items: start;
 
-      .search-field,
+      .employee-select-wrapper {
+        flex: unset;
+      }
+
       .filter-field {
         flex: unset;
         margin-bottom: -22px;
@@ -781,14 +1054,27 @@
         grid-column: span 2;
         width: fit-content;
         justify-self: end;
-        margin-top: 20px;
+        margin-top: 10px;
         height: 34px !important;
         font-size: 12px !important;
         padding: 0 12px !important;
       }
     }
 
-    // ── Bulk Actions: scrollable horizontal strip ──
+    .employee-select-wrapper {
+      .employee-select-trigger {
+        height: 38px;
+        font-size: 12.5px;
+      }
+
+      .employee-dropdown-panel {
+        position: fixed;
+        left: 14px;
+        right: 14px;
+        top: auto;
+      }
+    }
+
     .bulk-actions {
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -819,7 +1105,6 @@
       }
     }
 
-    // ── Table Card ──
     .table-card {
       border-radius: 0 0 10px 10px;
 
@@ -829,25 +1114,14 @@
         .total-count {
           font-size: 12px;
         }
-
-        .export-btn {
-          height: 30px !important;
-          padding: 0 10px !important;
-          font-size: 12px !important;
-
-          mat-icon {
-            display: none;
-          }
-        }
       }
 
       .table-container {
-        // Horizontal scroll on mobile — table stays intact
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
 
         .employee-table {
-          min-width: 680px; // Prevent squishing — let it scroll naturally
+          min-width: 680px;
 
           ::ng-deep {
             .mat-mdc-header-row {
@@ -869,11 +1143,6 @@
                 font-size: 12.5px;
               }
             }
-          }
-
-          .employee-number {
-            font-size: 11.5px;
-            padding: 2px 6px;
           }
 
           .employee-info {
@@ -915,30 +1184,16 @@
             padding: 0 6px !important;
           }
         }
-
-        // Scroll hint shadow on right edge
-        &::after {
-          content: '';
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          width: 20px;
-          background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.04));
-          pointer-events: none;
-        }
       }
 
-      // Pagination: compact on mobile
       ::ng-deep mat-paginator {
-
         .mat-mdc-paginator-container {
-          flex-wrap: nowrap; // keep single line
+          flex-wrap: nowrap;
           align-items: center;
           justify-content: flex-start;
           gap: 6px;
-          padding: 2px 6px; // ⬅️ smaller padding
-          min-height: 36px; // ⬅️ reduce height
+          padding: 2px 6px;
+          min-height: 36px;
         }
 
         .mat-mdc-paginator-page-size {
@@ -950,16 +1205,6 @@
           white-space: nowrap;
         }
 
-        .mat-mdc-paginator-page-size-label {
-          font-size: 11px;
-        }
-
-        .mat-mdc-select-trigger {
-          height: 22px; // ⬅️ smaller dropdown
-          font-size: 11px;
-          padding: 0 4px;
-        }
-
         .mat-mdc-paginator-range-label {
           font-size: 11px;
           white-space: nowrap;
@@ -969,22 +1214,21 @@
         .mat-mdc-paginator-navigation {
           display: flex;
           align-items: center;
-          gap: 0; // ⬅️ tighter arrows
+          gap: 0;
         }
 
         button {
-          width: 22px !important; // ⬅️ smaller buttons
+          width: 22px !important;
           height: 22px !important;
           min-width: 22px !important;
           padding: 0 !important;
 
           mat-icon {
-            font-size: 14px; // ⬅️ smaller icons
+            font-size: 14px;
           }
         }
       }
 
-      // Empty state: compact on mobile
       .table-container .empty-state {
         padding: 48px 20px;
 
@@ -1008,13 +1252,6 @@
         p {
           font-size: 13px;
         }
-
-        .add-first-employee,
-        .upgrade-button-empty {
-          height: 38px !important;
-          font-size: 13px !important;
-          padding: 0 18px !important;
-        }
       }
     }
   }
@@ -1031,11 +1268,13 @@
       }
     }
 
-    // removed toolbar-row
-
     .filters-row {
-      grid-template-columns: 1fr; // Single column on very small screens
+      grid-template-columns: 1fr;
       padding: 8px 12px 12px;
+
+      .employee-select-wrapper {
+        grid-column: span 1;
+      }
 
       .clear-btn {
         grid-column: span 1;

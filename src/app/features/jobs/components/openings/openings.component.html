@@ -1,60 +1,95 @@
 <div class="openings-container">
+  <!-- Page Header -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
+    <div class="header-left">
+      <div class="icon-box">
         <mat-icon>work</mat-icon>
-        Job Openings
-      </h1>
-      <p class="page-subtitle">View and manage job openings</p>
+      </div>
+      <div>
+        <h2 class="page-title">Job Openings</h2>
+        <p class="page-subtitle">View and manage all job openings</p>
+      </div>
     </div>
-    <div class="header-actions" *ngIf="canManageJobs">
-      <button mat-flat-button (click)="openCreateJobDialog()" class="add-button">
+    <div class="header-right" *ngIf="canManageJobs">
+      <button class="btn-primary" (click)="openCreateJobDialog()">
         <mat-icon>add</mat-icon>
         Create Job
       </button>
     </div>
   </div>
 
-  <!-- Filters -->
-  <mat-card class="filters-card">
-    <mat-card-content>
-      <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search</mat-label>
-          <input matInput formControlName="search" placeholder="Role, location, department, skills...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="status">
-            <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="filter-field date-field">
-          <mat-label>Last date to apply (from)</mat-label>
-          <input matInput [matDatepicker]="lastDateFromPicker" formControlName="lastDateFrom" placeholder="From">
-          <mat-datepicker-toggle matIconSuffix [for]="lastDateFromPicker"></mat-datepicker-toggle>
-          <mat-datepicker #lastDateFromPicker></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="filter-field date-field">
-          <mat-label>Last date to apply (to)</mat-label>
-          <input matInput [matDatepicker]="lastDateToPicker" formControlName="lastDateTo" placeholder="To">
-          <mat-datepicker-toggle matIconSuffix [for]="lastDateToPicker"></mat-datepicker-toggle>
-          <mat-datepicker #lastDateToPicker></mat-datepicker>
-        </mat-form-field>
-        <div class="filter-actions">
-          <button mat-flat-button type="submit" class="apply-filters-btn">
-            <mat-icon>filter_list</mat-icon>
-            Apply
-          </button>
-          <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
-            <mat-icon>clear</mat-icon>
-            Clear
-          </button>
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon bg-blue"><mat-icon>list_alt</mat-icon></div>
+      <div class="stat-info">
+        <p class="stat-label">Total Jobs</p>
+        <p class="stat-value">{{ stats?.totalJobs || 0 }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-green"><mat-icon>check_circle</mat-icon></div>
+      <div class="stat-info">
+        <p class="stat-label">Open Positions</p>
+        <p class="stat-value">{{ stats?.openPositions || 0 }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-red"><mat-icon>cancel</mat-icon></div>
+      <div class="stat-info">
+        <p class="stat-label">Closed Positions</p>
+        <p class="stat-value">{{ stats?.closedPositions || 0 }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon bg-orange"><mat-icon>groups</mat-icon></div>
+      <div class="stat-info">
+        <p class="stat-label">Total Vacancies</p>
+        <p class="stat-value">{{ stats?.totalVacancies || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-card">
+    <form [formGroup]="filterForm" class="filter-grid" (ngSubmit)="applyFilters()">
+      <div class="filter-group">
+        <label>Search Job</label>
+        <div class="input-with-icon">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input type="text" formControlName="search" placeholder="Title or Code" class="native-input pl-10">
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select formControlName="status" class="native-select">
+          <option [ngValue]="null">All Status</option>
+          <option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Posted As</label>
+        <select class="native-select">
+          <option>All Types</option>
+          <option>Internal</option>
+          <option>External</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Date Range</label>
+        <div class="date-range-group">
+          <input type="date" formControlName="lastDateFrom" class="native-input flex-1 px-2">
+          <span class="range-separator">-</span>
+          <input type="date" formControlName="lastDateTo" class="native-input flex-1 px-2">
+        </div>
+      </div>
+      <div class="filter-actions h-full">
+        <button type="submit" class="btn-primary flex-1">Search</button>
+        <button type="button" class="btn-clear" (click)="clearFilters()"
+          [disabled]="!hasFiltersApplied()">Clear</button>
+      </div>
+    </form>
+  </div>
 
   <!-- Loading -->
   <div class="jobs-loading" *ngIf="isLoading">
@@ -71,7 +106,10 @@
             <mat-icon>work</mat-icon>
           </div>
           <div class="job-post-heading">
-            <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
+            <div class="job-post-title-row">
+              <h2 class="job-post-title">{{ job.jobRoleName }}</h2>
+              <span class="job-code-badge" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
+            </div>
             <p class="job-post-meta" *ngIf="getMetaLine(job)">
               {{ getMetaLine(job) }}
             </p>
@@ -88,7 +126,7 @@
           </div>
         </div>
         <div class="job-post-body" *ngIf="job.jobIntroduction">
-          <p class="job-intro">{{ job.jobIntroduction }}</p>
+          <div class="job-intro clamp-one-line" [innerHTML]="job.jobIntroduction"></div>
         </div>
         <div class="job-post-tags" *ngIf="getExperienceText(job) || getCtcText(job) || job.vacancies">
           <span class="job-tag" *ngIf="getExperienceText(job)">
