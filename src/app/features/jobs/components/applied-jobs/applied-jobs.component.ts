@@ -63,6 +63,14 @@ export class AppliedJobsComponent implements OnInit {
   totalCount = 0;
   totalPages = 0;
 
+  /** My Applications (Self) – Employee / Manager */
+  myApps: JobApplicationDto[] = [];
+  myAppsFilterForm: FormGroup;
+  myAppsPage = 1;
+  myAppsPageSize = 10;
+  myAppsTotalCount = 0;
+  myAppsIsLoading = false;
+
   /** Received Application By My Job Post – HR Manager + Super Admin */
   postedByMeApplications: JobApplicationDto[] = [];
   postedByMeFilterForm: FormGroup;
@@ -110,6 +118,11 @@ export class AppliedJobsComponent implements OnInit {
       stageId: [''],
       status: ['']
     });
+    this.myAppsFilterForm = this.fb.group({
+      search: [''],
+      stageId: [''],
+      status: ['']
+    });
     this.postedByMeFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
@@ -136,6 +149,28 @@ export class AppliedJobsComponent implements OnInit {
     return this.authService.hasRole('Super Admin');
   }
 
+  // --- Summary Dashboards for Super Admin ---
+  get inProgressStat(): number {
+    return this.receivedApplications.filter(a => 
+      !['Rejected', 'Selected', 'Hired'].includes(a.status || '') &&
+      !['Rejected', 'Selected', 'Hired'].includes(a.currentStageName || '')
+    ).length;
+  }
+
+  get selectedStat(): number {
+    return this.receivedApplications.filter(a => 
+      ['Selected', 'Hired'].includes(a.status || '') || 
+      ['Selected', 'Hired'].includes(a.currentStageName || '')
+    ).length;
+  }
+
+  get rejectedStat(): number {
+    return this.receivedApplications.filter(a => 
+      a.status === 'Rejected' || 
+      a.currentStageName === 'Rejected'
+    ).length;
+  }
+
   ngOnInit(): void {
     this.jobsService.getStages().subscribe({
       next: (list) => {
@@ -157,6 +192,14 @@ export class AppliedJobsComponent implements OnInit {
       }
     });
     this.loadApplications();
+
+    if (!this.canSeeReceivedTab) {
+      this.loadMySelfApplications();
+    }
+
+    if (this.canSeeAllApplicationsTab) {
+      this.loadReceivedApplications();
+    }
   }
 
   loadApplications(): void {
@@ -206,6 +249,61 @@ export class AppliedJobsComponent implements OnInit {
     this.page = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadApplications();
+  }
+
+  // ==================== My Applications (Self) – Employee / Manager ====================
+
+  loadMySelfApplications(): void {
+    this.myAppsIsLoading = true;
+    const search = this.myAppsFilterForm.get('search')?.value;
+    const stageId = this.myAppsFilterForm.get('stageId')?.value;
+    const status = this.myAppsFilterForm.get('status')?.value;
+    this.jobsService.getMySelfJobApplicationsPaged({
+      page: this.myAppsPage,
+      pageSize: this.myAppsPageSize,
+      search: search?.trim() || undefined,
+      stageId: stageId || undefined,
+      status: status || undefined
+    }).subscribe({
+      next: (result: PagedResult<JobApplicationDto>) => {
+        this.myApps = result.data ?? [];
+        this.myAppsTotalCount = result.totalCount ?? 0;
+        this.myAppsIsLoading = false;
+      },
+      error: () => {
+        this.myApps = [];
+        this.myAppsTotalCount = 0;
+        this.myAppsIsLoading = false;
+      }
+    });
+  }
+
+  applyMyAppsFilters(): void {
+    this.myAppsPage = 1;
+    this.loadMySelfApplications();
+  }
+
+  clearMyAppsFilters(): void {
+    this.myAppsFilterForm.patchValue({ search: '', stageId: '', status: '' });
+    this.myAppsPage = 1;
+    this.loadMySelfApplications();
+  }
+
+  hasMyAppsFiltersApplied(): boolean {
+    const v = this.myAppsFilterForm.value;
+    return !!(v.search?.trim() || v.stageId || v.status);
+  }
+
+  onMyAppsPageChange(event: PageEvent): void {
+    this.myAppsPage = event.pageIndex + 1;
+    this.myAppsPageSize = event.pageSize;
+    this.loadMySelfApplications();
+  }
+
+  onEmployeeTabChange(index: number): void {
+    if (index === 1) {
+      this.loadMySelfApplications();
+    }
   }
 
   loadPostedByMeApplications(): void {

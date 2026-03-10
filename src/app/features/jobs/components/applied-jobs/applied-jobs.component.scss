@@ -217,76 +217,83 @@
 .jobs-board-row {
   display: flex;
   flex-direction: row;
-  gap: 16px;
+  gap: 24px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 24px;
   min-height: 200px;
 }
 
 .jobs-board-column {
-  flex: 0 0 300px;
-  min-width: 300px;
+  flex: 0 0 280px;
+  min-width: 280px;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 16px;
+  background: transparent;
+  border: none;
   max-height: 70vh;
   overflow: hidden;
-  transition: box-shadow 0.2s ease;
 
-  // Column header with title + count badge
-  .board-column-header {
+  // Stitch AI style column header
+  .st-col-header {
+    background: #f1f5f9; // slate-100
+    padding: 12px;
+    border-radius: 8px;
+    border-top: 3px solid #64748b; // neutral by default
+    border-bottom: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 14px;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 10;
     flex-shrink: 0;
-  }
 
-  .board-column-title {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 700;
-    color: #1f2937;
-  }
+    &.col-applied {
+      border-top-color: #2563eb; // primary color for Applied
+    }
+    
+    .board-column-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a; // slate-900
+      margin: 0;
+    }
 
-  .board-column-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
+    .board-column-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 9999px;
+      background: #2563eb;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+    }
   }
 
   .board-column-cards {
     flex: 1;
     overflow-y: auto;
-    padding: 10px;
+    padding: 2px; // padding instead of 10px gaps from container to avoid clipping box-shadow
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
     min-height: 80px; // always a droppable surface
 
-    // CDK DnD active state – column turns highlighted when a card hovers over it
+    // CDK DnD active state
     &.cdk-drop-list-dragging {
-      background: rgba(102, 126, 234, 0.04);
-      border-radius: 0 0 12px 12px;
+      background: rgba(37, 99, 235, 0.04);
+      border-radius: 12px;
     }
 
     &.cdk-drop-list-receiving {
-      background: rgba(102, 126, 234, 0.08);
-      outline: 2px dashed rgba(102, 126, 234, 0.4);
+      background: rgba(37, 99, 235, 0.08);
+      outline: 2px dashed rgba(37, 99, 235, 0.4);
       outline-offset: -4px;
-      border-radius: 0 0 12px 12px;
+      border-radius: 12px;
     }
   }
 
@@ -297,84 +304,165 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 24px 0;
-    color: #d1d5db;
+    gap: 8px;
+    padding: 24px;
+    color: #94a3b8;
     font-size: 12px;
     font-weight: 500;
+    text-align: center;
+    border: 2px dashed rgba(37, 99, 235, 0.2);
+    border-radius: 12px;
+    min-height: 200px;
+    margin-top: 8px;
 
     mat-icon {
-      font-size: 28px;
-      width: 28px;
-      height: 28px;
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: rgba(37, 99, 235, 0.3);
+    }
+  }
+}
+
+// ==========================================
+// STITCH AI KANBAN CARD STYLES
+// ==========================================
+
+.st-job-card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0; // slate-200
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  
+  &:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+  }
+
+  .st-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    .st-candidate-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .st-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 9999px;
+        background: #2563eb;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .st-candidate-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+      }
+
+      .st-status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        background: rgba(16, 185, 129, 0.1); // emerald-100/30 ~
+        color: #15803d; // green-700
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 4px;
+        margin-top: 4px;
+      }
+    }
+
+    .st-drag-handle {
+      color: #cbd5e1; // slate-300
+      cursor: grab;
+      font-size: 20px;
+      transition: color 0.2s;
+
+      &:active {
+        cursor: grabbing;
+      }
     }
   }
 
-  .job-post-card {
-    min-height: unset;
-    padding: 12px 14px;
-    flex-shrink: 0;
-    position: relative;
+  &:hover .st-drag-handle {
+    color: #64748b; // slate-500
   }
 
-  .job-post-footer {
-    position: relative;
-    z-index: 0;
-  }
+  .st-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
 
-  .action-btn.view-btn.board-view-details-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    max-width: 120px;
-    min-width: auto;
-    padding: 0 10px !important;
-    height: 36px;
-    position: relative;
-    z-index: 2;
-    cursor: pointer;
-    pointer-events: auto;
-    border: 1px solid #667eea;
-    color: #667eea;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    box-sizing: border-box;
-    background: transparent;
+    .st-body-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .st-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
 
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      margin-right: 4px;
+      &.st-job-role {
+        background: #f8fafc; // slate-50
+        padding: 4px 8px;
+        border-radius: 4px;
+        width: fit-content;
+
+        .st-icon { color: #94a3b8; } // slate-400
+        span {
+          font-size: 12px;
+          color: #475569; // slate-600
+          font-weight: 500;
+        }
+      }
+
+      &.st-meta-text {
+        color: #64748b; // slate-500
+        .st-icon { color: #64748b; }
+        span { font-size: 11px; }
+
+        .st-truncate {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 180px;
+        }
+      }
     }
   }
 
-  .action-btn.process-btn.board-process-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    min-width: 32px;
-    padding: 0 !important;
-    height: 32px;
-    position: relative;
-    z-index: 2;
-    cursor: pointer;
-    pointer-events: auto;
-    border: 1px solid #059669;
-    color: #059669;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    box-sizing: border-box;
+  .st-process-btn {
+    width: 100%;
+    padding: 8px 0;
+    border: 1px solid #2563eb;
+    color: #2563eb;
     background: transparent;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
 
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      margin-right: 0;
+    &:hover {
+      background: rgba(37, 99, 235, 0.05);
     }
   }
 }
@@ -674,12 +762,17 @@
   border-radius: 8px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2) !important;
+  background: rgba(37, 99, 235, 0.1) !important; // matches st-icon-box
+  color: #2563eb !important;
+  box-shadow: none !important;
+
+  &:hover {
+    background: rgba(37, 99, 235, 0.18) !important;
+  }
 
   mat-icon {
     margin-right: 8px;
+    color: #2563eb;
   }
 }
 
@@ -1046,3 +1139,269 @@
     }
   }
 }
+
+/* --- Kanban Summary Dashboard (Super Admin) --- */
+.kanban-summary-dashboard {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  .stat-card {
+    flex: 1;
+    min-width: 200px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  .stat-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    &.total {
+      background: #e0e7ff; // indigo-100
+      color: #4f46e5;      // indigo-600
+    }
+    &.in-progress {
+      background: #fef3c7; // amber-100
+      color: #d97706;      // amber-600
+    }
+    &.selected {
+      background: #dcfce7; // green-100
+      color: #16a34a;      // green-600
+    }
+    &.rejected {
+      background: #fee2e2; // red-100
+      color: #dc2626;      // red-600
+    }
+  }
+
+  .stat-details {
+    display: flex;
+    flex-direction: column;
+
+    .stat-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1;
+    }
+  }
+}
+
+/* Adjust date wrapper inner padding for filters */
+.bp-filter-form .bp-filter-input-wrap.date-wrap {
+  width: 160px !important;
+  padding: 0 12px !important;
+
+  .bp-filter-input {
+    color: #475569;
+    font-size: 13px;
+    cursor: text;
+  }
+}
+
+// ==========================================
+// STITCH AI TABS STYLES
+// ==========================================
+::ng-deep .applied-jobs-tabs {
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid #e2e8f0; // slate-200
+  }
+
+  .mat-mdc-tab-labels {
+    // Override MDC default horizontal centering if needed
+    justify-content: flex-start !important;
+  }
+
+  .mdc-tab {
+    padding: 0 !important; // override MDC default side padding
+    padding-bottom: 12px !important; // pb-3
+    min-width: 0 !important; // remove MDC default min-widths
+    margin-right: 32px; // gap-8 between tabs
+    flex-grow: 0 !important; // Prevent the tab from expanding
+    flex-shrink: 0 !important;
+    background: transparent;
+    opacity: 1;
+
+    // Remove margin from the last tab to prevent extra space
+    &:last-child {
+      margin-right: 0;
+    }
+
+    // Remove ripple to match simple stitch look
+    .mat-ripple-element {
+      display: none !important;
+    }
+
+    .mdc-tab__text-label {
+      color: #64748b; // text-slate-500
+      font-size: 14px; // text-sm
+      font-weight: 500; // font-medium
+      transition: color 0.2s ease;
+      letter-spacing: normal;
+      padding: 0; // ensure no inner padding text wraps
+    }
+
+    &:hover .mdc-tab__text-label {
+      color: #334155; // text-slate-700
+    }
+
+    &.mdc-tab--active {
+      .mdc-tab__text-label {
+        color: #2563eb; // text-primary
+        font-weight: 700; // font-bold
+      }
+    }
+  }
+
+  .mdc-tab-indicator__content--underline {
+    border-color: #2563eb !important; // primary blue link
+    border-top-width: 3px !important; // h-[3px]
+    border-radius: 9999px 9999px 0 0 !important; // rounded-t-full
+  }
+}
+
+// ==========================================
+// STITCH AI HEADER & STATS STYLES
+// ==========================================
+
+.st-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px; // padding before the tabs/stats
+  padding-bottom: 8px;
+
+  .st-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px; // items-center gap-4
+  }
+
+  .st-icon-box {
+    padding: 12px; // p-3
+    background: rgba(37, 99, 235, 0.1); // bg-primary/10
+    color: #2563eb; // text-primary
+    border-radius: 12px; // rounded-xl
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 28px; // !text-3xl approx
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .st-title-group {
+    display: flex;
+    flex-direction: column;
+
+    .st-page-title {
+      font-size: 28px; // text-[28px]
+      font-weight: 700; // font-bold
+      color: #0f172a; // text-slate-900
+      line-height: 1; // leading-none
+      margin: 0;
+    }
+
+    .st-page-subtitle {
+      color: #64748b; // text-slate-500
+      margin: 4px 0 0 0; // mt-1
+      font-size: 14px;
+    }
+  }
+}
+
+.st-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px; // gap-4
+  margin-bottom: 24px;
+
+  .st-stat-pill {
+    padding: 8px 16px; // px-4 py-2
+    border-radius: 9999px; // rounded-full
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px; // gap-3
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    .st-label {
+      font-size: 14px; // text-sm
+      font-weight: 500; // font-medium
+    }
+
+    // Colors
+    &.blue {
+      background: rgba(37, 99, 235, 0.05); // bg-primary/5
+      border-color: rgba(37, 99, 235, 0.1); // border-primary/10
+      .st-label { color: #334155; } // text-slate-700
+      .st-badge.blue {
+        background: #2563eb; // bg-primary
+      }
+    }
+
+    &.green {
+      background: #f0fdf4; // bg-green-50
+      border-color: #dcfce7; // border-green-100
+      .st-label { color: #15803d; } // text-green-700
+      .st-badge.green {
+        background: #16a34a; // bg-green-600
+      }
+    }
+
+    &.red {
+      background: #fef2f2; // bg-red-50
+      border-color: #fee2e2; // border-red-100
+      .st-label { color: #b91c1c; } // text-red-700
+      .st-badge.red {
+        background: #dc2626; // bg-red-600
+      }
+    }
+
+    .st-badge {
+      color: white; // text-white
+      font-size: 12px; // text-xs
+      font-weight: 700; // font-bold
+      padding: 2px 8px; // px-2 py-0.5
+      border-radius: 9999px; // rounded-full
+    }
+  }
+}
