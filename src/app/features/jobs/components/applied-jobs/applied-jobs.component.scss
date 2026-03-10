@@ -928,6 +928,130 @@
         opacity: 0.7;
       }
     }
+
+    // ── Small laptops (≤1280px) ──────────────────────────────────────
+    @media (max-width: 1280px) {
+      .bp-filter-input-wrap {
+        width: 220px;
+        flex: 1 1 220px;
+      }
+
+      .bp-filter-select-wrap {
+        width: 160px;
+        flex: 1 1 160px;
+      }
+    }
+
+    // ── Tablets (≤900px) ─────────────────────────────────────────────
+    @media (max-width: 900px) {
+      gap: 12px;
+
+      .bp-filter-input-wrap {
+        flex: 1 1 calc(50% - 12px);
+        width: auto;
+      }
+
+      .bp-filter-select-wrap {
+        flex: 1 1 calc(50% - 12px);
+        width: auto;
+
+        .bp-filter-select {
+          width: 100%;
+        }
+      }
+
+      .bp-btn-primary,
+      .bp-btn-clear {
+        flex: 1 1 calc(50% - 12px);
+        height: 40px;
+        text-align: center;
+      }
+    }
+
+    // ── Mobile (≤600px) ──────────────────────────────────────────────
+    @media (max-width: 600px) {
+      flex-direction: column;
+      gap: 10px;
+
+      .bp-filter-input-wrap,
+      .bp-filter-select-wrap {
+        flex: unset;
+        width: 100%;
+
+        .bp-filter-select {
+          width: 100%;
+        }
+      }
+
+      .bp-btn-primary {
+        width: 100%;
+        border-radius: 8px !important;
+      }
+
+      .bp-btn-clear {
+        width: 100%;
+        text-align: center;
+        padding: 8px 0;
+      }
+    }
+  }
+}
+
+// Compact filter (only search + select): search grows, select stays fixed
+.bp-filter-card .bp-filter-form.bp-filter-form--compact {
+  align-items: center;
+
+  // Search input grows to fill available space
+  .bp-filter-input-wrap {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: 360px;
+    min-width: 140px;
+
+    @media (max-width: 1280px) {
+      max-width: 280px;
+    }
+
+    @media (max-width: 900px) {
+      flex: 1 1 calc(50% - 12px);
+      max-width: unset;
+    }
+
+    @media (max-width: 600px) {
+      flex: unset;
+      width: 100%;
+      max-width: unset;
+    }
+  }
+
+  // Select stays fixed at 160px — won't grow even on small laptops
+  .bp-filter-select-wrap {
+    flex: 0 0 160px !important;
+    width: 160px !important;
+    max-width: 160px;
+
+    @media (max-width: 900px) {
+      flex: 1 1 calc(50% - 12px) !important;
+      width: auto !important;
+      max-width: unset;
+    }
+
+    @media (max-width: 600px) {
+      flex: unset !important;
+      width: 100% !important;
+      max-width: unset;
+    }
+  }
+
+  // Buttons take only their natural size
+  .bp-btn-primary,
+  .bp-btn-clear {
+    flex: 0 0 auto;
+
+    @media (max-width: 600px) {
+      flex: unset;
+      width: 100%;
+    }
   }
 }
 
