@@ -1,7 +1,7 @@
-import { Component, Inject, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,20 +12,15 @@ import { QuillModule } from 'ngx-quill';
 
 import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto, CreateJobApplicationRequest } from '@core/models/jobs.models';
-
-export interface CareerApplyDialogData {
-    job: JobOpeningDto;
-    domain: string;
-}
+import { CompanyCareerDetails } from '../public-career/public-career.component';
 
 @Component({
-    selector: 'app-career-apply-dialog',
+    selector: 'app-career-apply-page',
     standalone: true,
     encapsulation: ViewEncapsulation.None,
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
@@ -34,10 +29,16 @@ export interface CareerApplyDialogData {
         MatTooltipModule,
         QuillModule
     ],
-    templateUrl: './career-apply-dialog.component.html',
-    styleUrls: ['./career-apply-dialog.component.scss']
+    templateUrl: './career-apply-page.component.html',
+    styleUrls: ['./career-apply-page.component.scss']
 })
-export class CareerApplyDialogComponent {
+export class CareerApplyPageComponent implements OnInit {
+    job: JobOpeningDto | null = null;
+    companyDetails: CompanyCareerDetails | null = null;
+    isLoadingJob = true;
+    errorMessage = '';
+    currentYear = new Date().getFullYear();
+
     applyForm: FormGroup;
     isSubmitting = false;
     submitSuccess = false;
@@ -53,7 +54,6 @@ export class CareerApplyDialogComponent {
     private static readonly ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
     private static readonly ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 
-    // Quill editor config
     quillConfig = {
         toolbar: [
             ['bold', 'italic', 'underline'],
@@ -66,18 +66,73 @@ export class CareerApplyDialogComponent {
 
     constructor(
         private fb: FormBuilder,
-        private dialogRef: MatDialogRef<CareerApplyDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: CareerApplyDialogData,
+        private route: ActivatedRoute,
+        private router: Router,
+        private location: Location,
         private publicCareerService: PublicCareerService
     ) {
         this.applyForm = this.fb.group({
-            candidateName: ['', [Validators.required, Validators.maxLength(200)]],
+            firstName: ['', [Validators.required, Validators.maxLength(100)]],
+            lastName: ['', [Validators.required, Validators.maxLength(100)]],
             candidateEmail: ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
-            phone: ['', [Validators.maxLength(50)]],
+            phone: ['', [Validators.required, Validators.maxLength(50)]],
             linkedInUrl: [''],
+            salaryExpectation: [''],
             resumeUrl: ['', [Validators.required]],
             coverLetter: ['']
         });
+    }
+
+    ngOnInit(): void {
+        const jobCode = this.route.snapshot.paramMap.get('jobCode');
+        if (!jobCode) {
+            this.errorMessage = 'Job code not provided.';
+            this.isLoadingJob = false;
+            return;
+        }
+
+        this.loadCompanyDetails();
+        this.loadJobDetails(jobCode);
+    }
+
+    private getDomainFromUrl(): string {
+        const hostname = window.location.hostname;
+        if (hostname.includes('.briskpeople.com')) return hostname.split('.briskpeople.com')[0];
+        if (hostname.includes('.localhost')) return hostname.split('.localhost')[0];
+        const parts = hostname.split('.');
+        if (parts.length > 1) return parts[0];
+        return hostname;
+    }
+
+    private loadCompanyDetails(): void {
+        const domain = this.getDomainFromUrl();
+        this.publicCareerService.getCompanyCareerDetails(domain).subscribe({
+            next: (details) => this.companyDetails = details,
+            error: (err) => console.error('Failed to load company config', err)
+        });
+    }
+
+    private loadJobDetails(jobCode: string): void {
+        const domain = this.getDomainFromUrl();
+        this.publicCareerService.getExternalJobByJobCode(jobCode, domain).subscribe({
+            next: (job) => {
+                if (job) this.job = job;
+                else this.errorMessage = 'Job opening not found.';
+                this.isLoadingJob = false;
+            },
+            error: () => {
+                this.errorMessage = 'Failed to load job details.';
+                this.isLoadingJob = false;
+            }
+        });
+    }
+
+    goBack(): void {
+        this.location.back();
+    }
+
+    goHome(): void {
+        this.router.navigate(['/career']);
     }
 
     // ── Resume Upload ──
@@ -95,13 +150,13 @@ export class CareerApplyDialogComponent {
     private validateResumeFile(file: File): { valid: boolean; error?: string } {
         if (!file?.name) return { valid: false, error: 'No file selected' };
         const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
-        if (!CareerApplyDialogComponent.ALLOWED_EXTENSIONS.includes(ext)) {
+        if (!CareerApplyPageComponent.ALLOWED_EXTENSIONS.includes(ext)) {
             return { valid: false, error: 'Allowed formats: PDF, JPG, JPEG, PNG, GIF' };
         }
-        if (!CareerApplyDialogComponent.ALLOWED_TYPES.includes(file.type) && file.type !== 'image/jpg') {
+        if (!CareerApplyPageComponent.ALLOWED_TYPES.includes(file.type) && file.type !== 'image/jpg') {
             return { valid: false, error: 'Invalid file type' };
         }
-        if (file.size > CareerApplyDialogComponent.MAX_RESUME_BYTES) {
+        if (file.size > CareerApplyPageComponent.MAX_RESUME_BYTES) {
             return { valid: false, error: `File size must be ${this.maxResumeSizeMb} MB or less` };
         }
         return { valid: true };
@@ -134,22 +189,18 @@ export class CareerApplyDialogComponent {
                 this.isUploadingResume = false;
             }
         });
-
         input.value = '';
     }
 
     clearResume(): void {
         const currentUrl = this.currentResumeUrl;
         if (currentUrl) {
-            this.publicCareerService.deleteFile(currentUrl).subscribe({
-                error: (err) => console.error('Failed to delete file', err)
-            });
+            this.publicCareerService.deleteFile(currentUrl).subscribe();
         }
         this.applyForm.patchValue({ resumeUrl: '' });
         this.resumeFileName = null;
     }
 
-    // ── Submit ──
     onSubmit(): void {
         if (this.applyForm.invalid) {
             this.applyForm.markAllAsTouched();
@@ -160,9 +211,13 @@ export class CareerApplyDialogComponent {
         this.submitError = '';
 
         const formVal = this.applyForm.value;
+
+        // Combine first and last name since the API payload signature holds 'candidateName'
+        const combinedName = `${formVal.firstName || ''} ${formVal.lastName || ''}`.trim();
+
         const request: CreateJobApplicationRequest = {
-            jobId: this.data.job.jobId,
-            candidateName: formVal.candidateName?.trim() || null,
+            jobId: this.job!.jobId,
+            candidateName: combinedName || null,
             candidateEmail: formVal.candidateEmail?.trim() || null,
             phone: formVal.phone?.trim() || null,
             linkedInUrl: formVal.linkedInUrl?.trim() || null,
@@ -172,7 +227,8 @@ export class CareerApplyDialogComponent {
             status: 'Applied'
         };
 
-        this.publicCareerService.applyJobByExternalCandidate(this.data.domain, request).subscribe({
+        const domain = this.getDomainFromUrl();
+        this.publicCareerService.applyJobByExternalCandidate(domain, request).subscribe({
             next: (res) => {
                 this.isSubmitting = false;
                 if (res.success) {
@@ -186,9 +242,5 @@ export class CareerApplyDialogComponent {
                 this.submitError = err?.error?.message || 'Failed to submit application. Please try again.';
             }
         });
-    }
-
-    close(): void {
-        this.dialogRef.close(this.submitSuccess);
     }
 }

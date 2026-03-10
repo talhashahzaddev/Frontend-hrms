@@ -1,161 +1,157 @@
 <div class="career-page">
-
     <!-- ═══════════════════ TOP HEADER BAR ═══════════════════ -->
-    <header class="career-header-bar" *ngIf="companyDetails">
+    <header class="career-header">
         <div class="header-inner">
-            <div class="header-left" *ngIf="companyDetails?.logoUrl || companyDetails?.name">
-                <div class="header-logo-wrap" *ngIf="companyDetails?.logoUrl">
-                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" class="header-logo" />
+            <div class="header-left">
+                <div class="logo-box" *ngIf="companyDetails?.logoUrl">
+                    <img [src]="companyDetails!.logoUrl" [alt]="companyDetails?.name || 'Logo'" />
                 </div>
-                <span class="header-company-name" *ngIf="companyDetails?.name">{{ companyDetails!.name }}</span>
+                <span class="company-name" *ngIf="companyDetails?.name">{{ companyDetails?.name }}</span>
+            </div>
+            <div class="header-right">
+                <a class="header-link" href="#">View Website</a>
+                <div class="profile-icon">
+                    <mat-icon>person_outline</mat-icon>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- ═══════════════════ HERO BANNER with text content ═══════════════════ -->
-    <section class="hero-banner"
-        [style.backgroundImage]="companyDetails?.careerBgImageUrl ? 'url(' + companyDetails!.careerBgImageUrl + ')' : ''">
-        <div class="hero-banner-overlay"></div>
+    <!-- ═══════════════════ HERO BANNER ═══════════════════ -->
+    <section class="career-hero" [style.backgroundImage]="getHeroBackground()">
+        <div class="hero-overlay"></div>
         <div class="hero-content">
             <h1 class="hero-headline" [innerHTML]="companyDetails?.careerHeaderText || 'Join Our Team'"></h1>
+            <div class="hero-subtext" *ngIf="companyDetails?.careerDescription"
+                [innerHTML]="companyDetails!.careerDescription"></div>
         </div>
     </section>
 
-    <!-- ═══════════════════ DESCRIPTION SECTION ═══════════════════ -->
-    <section class="description-section" *ngIf="companyDetails?.careerDescription">
-        <div class="description-inner" [innerHTML]="companyDetails!.careerDescription"></div>
-    </section>
-
     <!-- ═══════════════════ FILTER BAR ═══════════════════ -->
-    <section class="filter-section">
-        <form [formGroup]="searchForm" class="filter-glass-bar" (ngSubmit)="searchJobs()">
-            <div class="filter-input-group">
-                <mat-icon class="filter-input-icon">search</mat-icon>
-                <input matInput formControlName="search" placeholder="Search jobs by title, skill, keyword..."
-                    class="filter-text-input" />
+    <section class="career-filters">
+        <form [formGroup]="searchForm" class="filter-strip" (ngSubmit)="searchJobs()">
+            <div class="filter-search">
+                <mat-icon>search</mat-icon>
+                <input matInput formControlName="search" placeholder="Search jobs by title, keyword..." />
             </div>
-            <div class="filter-select-group">
-                <mat-form-field appearance="outline" class="filter-select">
-                    <mat-label>Status</mat-label>
-                    <mat-select formControlName="status">
-                        <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+            <div class="filter-dropdowns">
+                <mat-form-field appearance="outline" class="dropdown-item">
+                    <mat-label>Type</mat-label>
+                    <mat-select formControlName="employmentType">
+                        <mat-option *ngFor="let opt of employmentTypeOptions" [value]="opt.value">
+                            {{ opt.label }}
+                        </mat-option>
                     </mat-select>
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="filter-select filter-date">
-                    <mat-label>Last date from</mat-label>
+                <mat-form-field appearance="outline" class="dropdown-item">
+                    <mat-label>From Date</mat-label>
                     <input matInput [matDatepicker]="lastDateFromPicker" formControlName="lastDateFrom"
-                        placeholder="From">
+                        placeholder="From Date">
                     <mat-datepicker-toggle matIconSuffix [for]="lastDateFromPicker"></mat-datepicker-toggle>
                     <mat-datepicker #lastDateFromPicker></mat-datepicker>
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="filter-select filter-date">
-                    <mat-label>Last date to</mat-label>
-                    <input matInput [matDatepicker]="lastDateToPicker" formControlName="lastDateTo" placeholder="To">
+                <mat-form-field appearance="outline" class="dropdown-item">
+                    <mat-label>To Date</mat-label>
+                    <input matInput [matDatepicker]="lastDateToPicker" formControlName="lastDateTo"
+                        placeholder="To Date">
                     <mat-datepicker-toggle matIconSuffix [for]="lastDateToPicker"></mat-datepicker-toggle>
                     <mat-datepicker #lastDateToPicker></mat-datepicker>
                 </mat-form-field>
             </div>
+            <div class="filter-count" *ngIf="jobs.length > 0">
+                <span class="count-badge">{{ totalCount }} Open Positions</span>
+            </div>
             <div class="filter-actions">
-                <button type="submit" class="filter-btn">
-                    <mat-icon>tune</mat-icon>
-                    Filter
-                </button>
-                <button type="button" class="filter-btn filter-btn-clear" (click)="clearFilters()" *ngIf="hasFilters()">
-                    <mat-icon>clear</mat-icon>
-                    Clear
-                </button>
+                <button type="submit" class="btn-primary btn-sm">Filter</button>
+                <button type="button" class="btn-secondary btn-sm" (click)="clearFilters()"
+                    *ngIf="hasFilters()">Clear</button>
             </div>
         </form>
     </section>
 
-
     <!-- ═══════════════════ LOADING ═══════════════════ -->
-    <section class="content-section" *ngIf="isLoading">
-        <div class="loading-glass-card">
-            <mat-spinner diameter="36"></mat-spinner>
-            <span>Fetching opportunities...</span>
+    <section class="career-content" *ngIf="isLoading">
+        <div class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Fetching opportunities...</p>
         </div>
     </section>
 
-    <!-- ═══════════════════ JOB LISTINGS ═══════════════════ -->
-    <section class="content-section" *ngIf="!isLoading">
-
-        <div class="jobs-count-bar" *ngIf="jobs.length > 0">
-            <span class="jobs-count-text">{{ totalCount }} open position{{ totalCount !== 1 ? 's' : '' }}</span>
-        </div>
-
-        <div class="job-list" *ngIf="jobs.length > 0">
-            <article class="job-row-card" *ngFor="let job of jobs">
-
-                <!-- Left: Title + Location -->
-                <div class="job-row-left">
-                    <div class="job-row-title-group">
-                        <h3 class="job-row-title">{{ job.jobRoleName }}</h3>
-                        <span class="job-code-badge" *ngIf="job.jobCode"># {{ job.jobCode }}</span>
+    <!-- ═══════════════════ JOB LISTINGS GRID ═══════════════════ -->
+    <section class="career-content" *ngIf="!isLoading">
+        <div class="jobs-layout" *ngIf="jobs.length > 0">
+            <div class="section-heading">
+                <h2>All Locations</h2>
+            </div>
+            <div class="jobs-grid">
+                <div class="job-card" *ngFor="let job of jobs">
+                    <div class="card-top">
+                        <span class="badge" [ngClass]="{
+                            'badge-remote': job.workMode === 'Remote',
+                            'badge-default': job.workMode !== 'Remote'
+                        }">{{ job.employmentType || 'Full-time' }}</span>
+                        <button class="bookmark-btn"><mat-icon>bookmark_border</mat-icon></button>
                     </div>
-                    <div class="job-row-subtitle">
-                        <span *ngIf="job.location">
-                            <mat-icon class="inline-icon">location_on</mat-icon>
-                            {{ job.location }}
-                        </span>
-                        <span *ngIf="job.workMode" class="work-mode-label">
-                            <mat-icon class="inline-icon">{{ job.workMode === 'Remote' ? 'wifi' : (job.workMode ===
-                                'Hybrid' ? 'sync_alt' : 'business') }}</mat-icon>
-                            {{ job.workMode }}
-                        </span>
+                    <div class="card-body">
+                        <h3 class="job-title" (click)="viewJobDetails(job)">{{ job.jobRoleName }}</h3>
+                        <p class="job-meta">
+                            <mat-icon>location_on</mat-icon> {{ job.location || 'Anywhere' }}
+                        </p>
+                        <p class="job-meta" *ngIf="job.departmentName">
+                            <mat-icon>business</mat-icon> {{ job.departmentName }}
+                        </p>
+                        <p class="job-meta job-code" *ngIf="job.jobCode">
+                            <mat-icon>tag</mat-icon> {{ job.jobCode }}
+                        </p>
+                        <p class="job-meta">
+                            <mat-icon>schedule</mat-icon> {{ getTimeAgo(job.createdAt) || 'Recently added' }}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn-apply" (click)="applyForJob(job)">Apply Now</button>
                     </div>
                 </div>
-
-                <!-- Middle: Badges -->
-                <div class="job-row-badges">
-                    <span class="badge badge-dept" *ngIf="job.departmentName">{{ job.departmentName }}</span>
-                    <span class="badge badge-type" *ngIf="job.employmentType">{{ job.employmentType }}</span>
-                    <span class="badge badge-exp" *ngIf="getExperienceText(job)">{{ getExperienceText(job) }}</span>
-                    <span class="badge badge-posted" *ngIf="getTimeAgo(job.createdAt)">
-                        <mat-icon class="badge-icon">schedule</mat-icon>
-                        {{ getTimeAgo(job.createdAt) }}
-                    </span>
-                </div>
-
-                <!-- Right: Apply Button -->
-                <div class="job-row-right">
-                    <!-- <button class="btn-view" (click)="viewJobDetails(job)">View</button> -->
-                    <button class="btn-apply" (click)="applyForJob(job)">Apply Now
-                        <mat-icon class="btn-arrow">arrow_forward</mat-icon>
-                    </button>
-                </div>
-            </article>
+            </div>
+            <!-- Pagination -->
+            <div class="pagination-container" *ngIf="totalCount > 0">
+                <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+                    [pageSizeOptions]="[6, 12, 24, 48]" (page)="onPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
+            </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination-glass-card" *ngIf="jobs.length > 0 && totalCount > 0">
-            <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
-                [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
-            </mat-paginator>
+        <!-- Empty States -->
+        <div class="empty-state" *ngIf="jobs.length === 0 && hasFilters()">
+            <mat-icon>search_off</mat-icon>
+            <h3>No positions match your filters</h3>
+            <button class="btn-primary btn-sm" (click)="clearFilters()">Clear Filters</button>
         </div>
-
-        <!-- Empty State: with filters -->
-        <div class="empty-glass-card" *ngIf="jobs.length === 0 && hasFilters()">
-            <mat-icon class="empty-icon">search_off</mat-icon>
-            <p class="empty-title">No positions match your filters</p>
-            <p class="empty-sub">Try adjusting your search criteria or clearing filters.</p>
-            <button class="btn-apply" (click)="clearFilters()">
-                <mat-icon>refresh</mat-icon>
-                Clear Filters
-            </button>
-        </div>
-
-        <!-- Empty State: no jobs -->
-        <div class="empty-glass-card" *ngIf="jobs.length === 0 && !hasFilters()">
-            <mat-icon class="empty-icon">work_off</mat-icon>
-            <p class="empty-title">No openings at the moment</p>
-            <p class="empty-sub">Check back soon — exciting opportunities are on the way!</p>
+        <div class="empty-state" *ngIf="jobs.length === 0 && !hasFilters()">
+            <mat-icon>work_off</mat-icon>
+            <h3>No openings at the moment</h3>
         </div>
     </section>
 
     <!-- ═══════════════════ FOOTER ═══════════════════ -->
     <footer class="career-footer">
-        <span>© {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.</span>
+        <div class="footer-top">
+            <span class="powered-by">POWERED BY BRISKPEOPLE</span>
+        </div>
+        <div class="footer-bottom">
+            <span class="footer-text">
+                © {{ currentYear }} {{ companyDetails?.name || 'Company' }}. All rights reserved.
+            </span>
+            <div class="footer-social">
+                <a class="social-icon linkedin" href="https://www.linkedin.com" target="_blank" rel="noopener"
+                    aria-label="LinkedIn">
+                    in
+                </a>
+                <a class="social-icon x-icon" href="https://twitter.com" target="_blank" rel="noopener"
+                    aria-label="X (Twitter)">
+                    X
+                </a>
+            </div>
+        </div>
     </footer>
 
     <!-- ═══════════════════ JOB DETAILS DIALOG ═══════════════════ -->

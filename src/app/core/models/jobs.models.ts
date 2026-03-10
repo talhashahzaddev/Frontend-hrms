@@ -29,6 +29,13 @@ export interface JobOpeningDto {
   updatedAt?: string | null;
 }
 
+export interface JobOpeningStatsDto {
+  totalJobs: number;
+  openPositions: number;
+  closedPositions: number;
+  totalVacancies: number;
+}
+
 export interface CreateJobOpeningRequest {
   jobRoleName: string;
   jobCode: string;

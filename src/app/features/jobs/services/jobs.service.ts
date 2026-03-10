@@ -21,7 +21,8 @@ import {
   ReceivedJobApplicationsFilterParams,
   CreateApplicationStageRequest,
   ApplicationStageDto,
-  UpdateApplicationStageRequest
+  UpdateApplicationStageRequest,
+  JobOpeningStatsDto
 } from '../../../core/models/jobs.models';
 
 @Injectable({
@@ -60,6 +61,14 @@ export class JobsService {
           }
           return res.data;
         })
+      );
+  }
+
+  getOpeningOverallDetails(): Observable<JobOpeningStatsDto | null> {
+    return this.http
+      .get<ServiceResponse<JobOpeningStatsDto>>(`${this.apiUrl}/OpeningOverallDetails`)
+      .pipe(
+        map((res) => (res.success && res.data ? res.data : null))
       );
   }
 
