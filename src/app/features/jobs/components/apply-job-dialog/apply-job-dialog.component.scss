@@ -1,76 +1,96 @@
-// ─── Dialog container (panel class: apply-job-dialog-panel) ───────────────
+// ─── Panel override ────────────────────────────────────────────────────────
 .apply-job-dialog-panel .mat-mdc-dialog-container {
-  border-radius: 18px !important;
+  border-radius: 12px !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  font-family: 'Public Sans', sans-serif;
 }
 
-// ─── Host wrapper ─────────────────────────────────────────────────────────
-.apply-job-dialog {
+// ─── Container ─────────────────────────────────────────────────────────────
+.ajd-container {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  max-height: 90vh;
+  width: 100%;
+  background: #fff;
+  overflow: hidden;
+  overflow-x: hidden;
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────
-.dialog-header {
+// ─── Header ────────────────────────────────────────────────────────────────
+.ajd-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 20px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 
-  h2 {
+  .ajd-header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: white !important;
-    letter-spacing: -0.3px;
+    gap: 12px;
+  }
+
+  .ajd-header-icon {
+    background: rgba(37, 99, 235, 0.1);
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
 
     mat-icon {
       font-size: 24px;
       width: 24px;
       height: 24px;
-      color: white !important;
     }
   }
 
-  // mat-dialog-title directive override
-  .mat-mdc-dialog-title,
-  [mat-dialog-title] {
-    color: white !important;
+  h2 {
+    margin: 0 0 2px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
   }
 
-  .close-button {
-    color: white;
-    opacity: 0.85;
-    transition: opacity 0.2s, transform 0.25s;
+  .ajd-header-sub {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+
+    span {
+      font-weight: 600;
+      color: #334155;
+    }
+  }
+
+  .ajd-close-btn {
+    color: #94a3b8;
+    transition: color 0.2s;
 
     &:hover {
-      opacity: 1;
-      transform: rotate(90deg);
-      background: rgba(255, 255, 255, 0.15);
+      color: #475569;
     }
   }
 }
 
-// ─── Content scroll area ───────────────────────────────────────────────────
-.dialog-content {
-  padding: 0 !important;
-  max-height: 75vh;
+// ─── Body ──────────────────────────────────────────────────────────────────
+.ajd-body {
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: #f7f8fc;
-  flex: 1 1 auto;
+  background: #fff;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
 
   &::-webkit-scrollbar-track {
@@ -78,304 +98,326 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.35);
-    border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 10px;
   }
 }
 
-// ─── Form ─────────────────────────────────────────────────────────────────
-.apply-form {
+// ─── Form ──────────────────────────────────────────────────────────────────
+.ajd-form {
+  padding: 24px;
   display: flex;
   flex-direction: column;
-}
-
-// ─── Hidden subtitle hint ─────────────────────────────────────────────────
-.dialog-subtitle {
-  margin: 0;
-  padding: 10px 28px 0;
-  color: #6b7a9e;
-  font-size: 12px;
-  background: #fff;
-}
-
-// ─── Sections ─────────────────────────────────────────────────────────────
-.form-section {
-  padding: 18px 28px 10px;
-  border-bottom: 1px solid #ecedf5;
-  background: #fff;
-  margin-bottom: 6px;
-
-  &:last-child,
-  &.last-section {
-    border-bottom: none;
-    margin-bottom: 0;
-  }
-}
-
-.section-header {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px 5px 8px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  margin-bottom: 16px;
-
-  .section-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .section-title {
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: white;
-  }
-}
-
-// ─── Row layouts ──────────────────────────────────────────────────────────
-.form-row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 4px;
-
-  &.two-col .full-width {
-    flex: 1;
-  }
-
-  .full-width {
-    width: 100%;
-  }
-}
-
-.full-width {
+  gap: 28px;
   width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-// ─── Material form field — deep premium override ───────────────────────────
-.apply-form {
+// ─── Sections ──────────────────────────────────────────────────────────────
+.ajd-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  mat-form-field.mat-form-field-appearance-outline {
-    width: 100%;
 
-    .mdc-text-field--outlined {
-      border-radius: 10px !important;
-      background: #f5f6fd !important;
-      transition: background 0.2s ease;
-    }
+.ajd-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 3px solid #2563eb;
+
+  h3 {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+}
+
+.ajd-optional-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+// ─── Grid ──────────────────────────────────────────────────────────────────
+.ajd-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  width: 100%;
+  min-width: 0;
+  /* Prevent grid blowout */
+
+  >* {
+    min-width: 0;
+    /* Allow children to shrink inside grid columns */
+  }
+}
+
+// ─── Field ─────────────────────────────────────────────────────────────────
+.ajd-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+
+  >label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+  }
+}
+
+// ─── Material Form Fields ──────────────────────────────────────────────────
+
+.ajd-mat-field {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+
+  .mdc-text-field--outlined {
+    border-radius: 8px !important;
+    background: #fff !important;
+  }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #e2e8f0 !important;
+    border-width: 1px !important;
+  }
+
+  .mdc-notched-outline__leading {
+    border-radius: 8px 0 0 8px !important;
+  }
+
+  .mdc-notched-outline__trailing {
+    border-radius: 0 8px 8px 0 !important;
+  }
+
+  &:not(.mdc-text-field--focused):hover {
 
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
-      border-color: #dde1f0 !important;
-      border-width: 1.5px !important;
-      transition: border-color 0.2s ease;
+      border-color: #93c5fd !important;
     }
+  }
 
-    .mdc-notched-outline__leading {
-      border-radius: 10px 0 0 10px !important;
-    }
+  &.mdc-text-field--focused {
 
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
     .mdc-notched-outline__trailing {
-      border-radius: 0 10px 10px 0 !important;
+      border-color: #2563eb !important;
+      border-width: 2px !important;
     }
 
-    &:not(.mdc-text-field--focused):hover {
-
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: #a8b4e8 !important;
-      }
-
-      .mdc-text-field--outlined {
-        background: #f0f2fb !important;
-      }
+    .mdc-text-field--outlined {
+      background: #fff !important;
     }
+  }
 
-    &.mdc-text-field--focused {
+  .mat-mdc-form-field-infix {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    min-height: 40px !important;
+  }
 
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: #667eea !important;
-        border-width: 2px !important;
-      }
+  .mdc-floating-label {
+    display: none !important;
+  }
 
-      .mdc-text-field--outlined {
-        background: #fff !important;
-      }
-    }
+  .mdc-notched-outline__notch {
+    border-top: 1px solid #e2e8f0 !important;
+  }
 
-    .mat-mdc-form-field-infix {
-      padding-top: 11px !important;
-      padding-bottom: 11px !important;
-      min-height: 44px !important;
-    }
+  input.mat-mdc-input-element {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+    font-family: inherit !important;
+  }
 
-    input.mat-mdc-input-element,
-    .mat-mdc-select-value-text {
-      font-size: 13px !important;
-      font-weight: 500 !important;
-      color: #1f2937 !important;
-    }
+  input.mat-mdc-input-element::placeholder {
+    color: #94a3b8 !important;
+  }
 
-    input.mat-mdc-input-element::placeholder {
-      color: #b0b8d4 !important;
-    }
+  mat-error {
+    font-size: 11px !important;
+    color: #ef4444 !important;
+  }
 
-    .mdc-floating-label {
-      font-size: 13px !important;
-      color: #6b7a9e !important;
-      font-weight: 500 !important;
-    }
-
-    .mdc-floating-label--float-above {
-      color: #667eea !important;
-      font-weight: 600 !important;
-    }
-
-    mat-error {
-      font-size: 10.5px !important;
-      color: #ef4444 !important;
-    }
-
-    .mat-mdc-form-field-subscript-wrapper {
-      padding: 0 2px !important;
-    }
+  .mat-mdc-form-field-subscript-wrapper {
+    padding: 0 2px !important;
   }
 }
 
-// ─── Resume upload block ───────────────────────────────────────────────────
-.resume-upload {
-  margin-bottom: 6px;
-  position: relative;
-  min-height: 80px;
-  width: 100%;
+// Prefix icon
+.ajd-prefix-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #94a3b8;
+  margin-right: 4px;
+}
 
-  &.resume-upload-loading {
-    pointer-events: none;
+// ─── Resume Drop Zone ──────────────────────────────────────────────────────
+.ajd-drop-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 250, 252, 0.5);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
 
-    .resume-actions button[mat-stroked-button] {
-      pointer-events: none;
-    }
+  &:hover {
+    background: #f1f5f9;
+    border-color: #93c5fd;
   }
 
-  .resume-loading-overlay {
-    position: absolute;
-    inset: 0;
+  .ajd-drop-icon {
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    padding: 12px;
+    border-radius: 9999px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.88);
-    border-radius: 10px;
-    z-index: 2;
-
-    .resume-loading-text {
-      font-size: 13px;
-      color: #6b7280;
-      font-weight: 500;
-    }
-  }
-
-  .resume-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #374151;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-  }
-
-  .resume-hint {
-    font-size: 11px;
-    color: #9ca3af;
-    margin: 0 0 10px;
-  }
-
-  .resume-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-
-    button[mat-stroked-button] {
-      border-radius: 10px !important;
-      border-color: #dde1f0 !important;
-      color: #4b5563 !important;
-      font-size: 13px !important;
-      font-weight: 600 !important;
-      height: 38px;
-      padding: 0 16px !important;
-      transition: border-color 0.2s, background 0.2s;
-
-      &:hover:not([disabled]) {
-        border-color: #667eea !important;
-        background: #f0f2fb !important;
-        color: #667eea !important;
-      }
-
-      mat-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        margin-right: 6px;
-        vertical-align: middle;
-      }
-    }
-  }
-
-  .resume-current {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-    padding: 10px 14px;
-    background: #f5f6fd;
-    border-radius: 10px;
-    border: 1.5px solid #dde1f0;
+    margin-bottom: 12px;
+    transition: transform 0.2s;
 
     mat-icon {
-      color: #667eea;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  &:hover .ajd-drop-icon {
+    transform: scale(1.1);
+  }
+
+  .ajd-drop-text {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    text-align: center;
+  }
+
+  .ajd-drop-browse {
+    color: #2563eb;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .ajd-drop-hint {
+    margin: 0;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+}
+
+// ─── Resume Uploading ──────────────────────────────────────────────────────
+.ajd-resume-uploading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+// ─── Resume chip (uploaded) ────────────────────────────────────────────────
+.ajd-resume-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  .ajd-chip-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #2563eb;
+    flex-shrink: 0;
+  }
+
+  .ajd-chip-name {
+    flex: 1;
+    font-size: 13px;
+    color: #334155;
+    font-weight: 500;
+    word-break: break-all;
+  }
+
+  .ajd-chip-link {
+    font-size: 12px;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    flex-shrink: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .ajd-chip-remove {
+    color: #94a3b8;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
 
-    .resume-name {
-      flex: 1;
-      font-size: 13px;
-      color: #374151;
-      font-weight: 500;
-      word-break: break-all;
-    }
-
-    .resume-link {
-      font-size: 12px;
-      color: #667eea;
-      font-weight: 600;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
+    &:hover {
+      color: #ef4444;
     }
   }
 }
 
-// Hidden native file input
+// ─── Resume error ──────────────────────────────────────────────────────────
+.ajd-resume-error {
+  font-size: 11px !important;
+  color: #ef4444 !important;
+  margin-top: 4px;
+}
+
+// ─── Hidden file input ─────────────────────────────────────────────────────
 .resume-file-input-hidden {
   position: absolute !important;
   width: 0 !important;
@@ -386,74 +428,25 @@
   clip: rect(0, 0, 0, 0) !important;
 }
 
-// ─── Cover letter quill field ─────────────────────────────────────────────
-.quill-wrapper-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-bottom: 4px;
-}
-
-.quill-field-label-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-
-  mat-icon {
-    font-size: 15px;
-    width: 15px;
-    height: 15px;
-    color: #667eea;
-  }
-
-  .quill-field-hint {
-    font-size: 11px;
-    font-weight: 400;
-    color: #9ca3af;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-}
-
-// legacy .quill-label support
-.quill-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
-
+// ─── Cover letter Quill ────────────────────────────────────────────────────
 .quill-editor-wrap {
-  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   overflow: hidden;
-  border: 1.5px solid #dde1f0;
-  background: #f5f6fd;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
 
   &:focus-within {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
-    background: #fff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
   }
 }
 
-// Quill global overrides (ViewEncapsulation.None)
 .ql-toolbar.ql-snow {
   border: none !important;
-  border-bottom: 1px solid #e5e7f0 !important;
-  background: #eef0f9;
-  padding: 5px 10px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: #f8fafc;
+  padding: 8px 10px !important;
 
   .ql-formats {
     margin-right: 6px;
@@ -461,85 +454,113 @@
 
   button,
   .ql-picker-label {
-    color: #4b5563 !important;
+    color: #334155 !important;
   }
 
   .ql-stroke {
-    stroke: #4b5563 !important;
+    stroke: #334155 !important;
   }
 
   .ql-fill {
-    fill: #4b5563 !important;
+    fill: #334155 !important;
   }
 
   button:hover .ql-stroke,
   button.ql-active .ql-stroke {
-    stroke: #667eea !important;
+    stroke: #2563eb !important;
+  }
+
+  button:hover .ql-fill,
+  button.ql-active .ql-fill {
+    fill: #2563eb !important;
   }
 
   button:hover,
   button.ql-active {
-    color: #667eea !important;
+    color: #2563eb !important;
   }
 }
 
 .ql-container.ql-snow {
   border: none !important;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .ql-editor {
   min-height: 110px;
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 10px 13px;
-  color: #1f2937;
-  font-weight: 500;
+  padding: 12px 14px;
+  color: #0f172a;
+  font-size: 14px;
   line-height: 1.65;
+  word-break: break-word;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 
   &.ql-blank::before {
-    color: #b0b8d4;
+    color: #94a3b8;
     font-style: normal;
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
-// ─── Dialog actions ───────────────────────────────────────────────────────
-.dialog-actions {
-  padding: 16px 28px !important;
-  background: #fff;
-  border-top: 1px solid #ecedf5;
+// ─── Footer ────────────────────────────────────────────────────────────────
+.ajd-footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
   flex-shrink: 0;
+}
 
-  button {
-    height: 42px;
-    padding: 0 24px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.01em !important;
+.ajd-btn-cancel {
+  padding: 8px 24px;
+  border: 1px solid #cbd5e1;
+  background: transparent;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.ajd-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 28px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  font-family: inherit;
+
+  &:hover:not([disabled]) {
+    background: #1d4ed8;
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);
+    transform: translateY(-1px);
   }
 
-  .submit-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+  &:active:not([disabled]) {
+    transform: scale(0.98);
+  }
 
-    &:not([disabled]) {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      border: none !important;
-      box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4) !important;
-      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 22px rgba(102, 126, 234, 0.5) !important;
-      }
-    }
+  &[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
   }
 }

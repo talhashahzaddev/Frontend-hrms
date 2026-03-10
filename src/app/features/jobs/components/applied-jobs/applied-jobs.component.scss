@@ -717,3 +717,332 @@
     color: #6b7280;
   }
 }
+
+// ==========================================
+// MY REFERENCED APPLICATIONS - TABLE LAYOUT
+// ==========================================
+
+.bp-filter-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  padding: 16px;
+
+  .bp-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+
+    .bp-filter-input-wrap {
+      width: 280px;
+      position: relative;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+
+      .bp-filter-icon {
+        color: #94a3b8;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+      }
+
+      .bp-filter-input {
+        flex: 1;
+        height: 40px;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-size: 14px;
+        color: #0f172a;
+
+        &::placeholder {
+          color: #94a3b8;
+        }
+      }
+    }
+
+    .bp-filter-select-wrap {
+      width: 192px;
+
+      .bp-filter-select {
+        width: 100%;
+        height: 40px;
+        background: #f8fafc;
+        border: none;
+        outline: none;
+        border-radius: 8px;
+        padding: 0 16px;
+        font-size: 14px;
+        color: #0f172a;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+      }
+    }
+
+    .bp-btn-primary {
+      background: #2563eb;
+      color: white;
+      border: none;
+      height: 40px;
+      padding: 0 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover:not(:disabled) {
+        background: #1d4ed8;
+      }
+
+      &:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+    }
+
+    .bp-btn-clear {
+      background: transparent;
+      border: none;
+      color: #2563eb;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0 8px;
+      transition: color 0.2s;
+
+      &:hover:not(:disabled) {
+        color: #1d4ed8;
+        text-decoration: underline;
+      }
+
+      &:disabled {
+        color: #94a3b8;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+    }
+  }
+}
+
+.bp-table-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 24px;
+
+  .bp-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    .bp-more-btn {
+      color: #94a3b8;
+    }
+  }
+
+  .bp-table-responsive {
+    overflow-x: auto;
+  }
+
+  table.bp-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+
+    thead {
+      background: #f8fafc;
+
+      th {
+        padding: 16px 24px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+    }
+
+    tbody {
+      tr {
+        transition: background 0.2s;
+
+        &:hover {
+          background: rgba(37, 99, 235, 0.03);
+
+          .bp-td-actions .bp-action-btn {
+            opacity: 1;
+          }
+        }
+
+        td {
+          padding: 16px 24px;
+          border-bottom: 1px solid #f1f5f9;
+          vertical-align: middle;
+        }
+
+        &:last-child td {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+
+  .bp-table-footer {
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 8px 24px;
+  }
+}
+
+// Table Cells Specifics
+.bp-td-candidate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .bp-td-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .bp-td-info {
+    p {
+      margin: 0;
+    }
+
+    .bp-td-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 2px;
+    }
+
+    .bp-td-email {
+      font-size: 12px;
+      color: #64748b;
+    }
+  }
+}
+
+.bp-td-job {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.bp-td-stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #475569;
+
+  .bp-stage-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fbbf24; // Amber 400
+  }
+}
+
+.bp-td-date {
+  font-size: 14px;
+  color: #475569;
+}
+
+.bp-td-source {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #f1f5f9; // Slate 100
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.bp-td-status {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(37, 99, 235, 0.1); // Primary 10
+  color: #2563eb; // Primary
+
+  &.status-applied {
+    background: rgba(16, 185, 129, 0.1); // Emerald 10
+    color: #059669; // Emerald
+  }
+}
+
+.bp-td-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .bp-action-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.7; // dim until row hover
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &.view:hover,
+    &.edit:hover {
+      color: #2563eb;
+      background: rgba(37, 99, 235, 0.1);
+    }
+
+    &.delete:hover {
+      color: #ef4444; // Red 500
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+}
