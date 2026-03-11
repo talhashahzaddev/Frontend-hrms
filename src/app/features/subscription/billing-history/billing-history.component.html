@@ -1,0 +1,179 @@
+<div class="billing-page">
+  <div class="billing-container">
+    <div class="page-header">
+      <button class="back-btn" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-text">
+        <h1>Billing History</h1>
+        <p>View your payment transactions and invoices</p>
+      </div>
+    </div>
+
+    <mat-card class="billing-card">
+      <mat-tab-group (selectedIndexChange)="onTabChange($event)" [selectedIndex]="activeTabIndex" animationDuration="200ms">
+        <!-- Transactions Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">receipt_long</mat-icon>
+            Transactions
+          </ng-template>
+
+          @if (isLoadingTransactions) {
+            <div class="loading-container">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (transactions.length === 0) {
+            <div class="empty-state">
+              <mat-icon>receipt_long</mat-icon>
+              <h3>No transactions yet</h3>
+              <p>Your payment transactions will appear here</p>
+            </div>
+          } @else {
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="transactions">
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let txn">{{ txn.createdAt | date:'mediumDate' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="plan">
+                  <th mat-header-cell *matHeaderCellDef>Plan</th>
+                  <td mat-cell *matCellDef="let txn">
+                    <span class="plan-name">{{ txn.planName }}</span>
+                    <span class="billing-cycle">{{ txn.billingCycle }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Amount</th>
+                  <td mat-cell *matCellDef="let txn">
+                    <span class="amount">${{ txn.amount | number:'1.2-2' }}</span>
+                    <span class="currency">{{ txn.currency }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="gateway">
+                  <th mat-header-cell *matHeaderCellDef>Gateway</th>
+                  <td mat-cell *matCellDef="let txn">
+                    <span class="gateway-badge">
+                      <mat-icon>{{ getGatewayIcon(txn.gateway) }}</mat-icon>
+                      {{ txn.gateway | titlecase }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let txn">
+                    <span class="status-chip" [attr.data-status]="getStatusColor(txn.status)">
+                      <mat-icon>{{ getStatusIcon(txn.status) }}</mat-icon>
+                      {{ txn.status | titlecase }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="method">
+                  <th mat-header-cell *matHeaderCellDef>Method</th>
+                  <td mat-cell *matCellDef="let txn">
+                    @if (txn.cardLast4) {
+                      <span class="card-info">
+                        <mat-icon>credit_card</mat-icon>
+                        •••• {{ txn.cardLast4 }}
+                      </span>
+                    } @else {
+                      <span class="method-text">{{ txn.paymentMethod || '—' }}</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
+              </table>
+            </div>
+
+            <mat-paginator
+              [length]="transactionTotalCount"
+              [pageSize]="transactionPageSize"
+              [pageSizeOptions]="[5, 10, 25]"
+              (page)="onTransactionPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          }
+        </mat-tab>
+
+        <!-- Invoices Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">description</mat-icon>
+            Invoices
+          </ng-template>
+
+          @if (isLoadingInvoices) {
+            <div class="loading-container">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else if (invoices.length === 0) {
+            <div class="empty-state">
+              <mat-icon>description</mat-icon>
+              <h3>No invoices yet</h3>
+              <p>Your invoices will appear here after payments</p>
+            </div>
+          } @else {
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="invoices">
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                  <td mat-cell *matCellDef="let inv">
+                    <span class="invoice-number">{{ inv.invoiceNumber }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef>Date</th>
+                  <td mat-cell *matCellDef="let inv">{{ inv.issuedAt | date:'mediumDate' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="plan">
+                  <th mat-header-cell *matHeaderCellDef>Plan</th>
+                  <td mat-cell *matCellDef="let inv">
+                    <span class="plan-name">{{ inv.planName }}</span>
+                    <span class="billing-cycle">{{ inv.billingCycle }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Total</th>
+                  <td mat-cell *matCellDef="let inv">
+                    <span class="amount">${{ inv.totalAmount | number:'1.2-2' }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let inv">
+                    <span class="status-chip" [attr.data-status]="getStatusColor(inv.status)">
+                      <mat-icon>{{ getStatusIcon(inv.status) }}</mat-icon>
+                      {{ inv.status | titlecase }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="invoiceColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: invoiceColumns;"></tr>
+              </table>
+            </div>
+
+            <mat-paginator
+              [length]="invoiceTotalCount"
+              [pageSize]="invoicePageSize"
+              [pageSizeOptions]="[5, 10, 25]"
+              (page)="onInvoicePageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          }
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </div>
+</div>

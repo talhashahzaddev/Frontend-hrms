@@ -168,6 +168,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: ['Super Admin']
     },
     {
+      label: 'Billing',
+      icon: 'receipt_long',
+      route: '/subscription/billing',
+      roles: ['Super Admin']
+    },
+    {
       label: 'Expense',
       icon: 'receipt_long',
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee'],

@@ -1,0 +1,467 @@
+<div class="payment-management">
+  <div class="page-header">
+    <h1>
+      <mat-icon>payments</mat-icon>
+      Payment Management
+    </h1>
+    <p>Monitor transactions, manage invoices, and view revenue analytics</p>
+  </div>
+
+  <mat-tab-group (selectedIndexChange)="onTabChange($event)" [selectedIndex]="activeTabIndex" animationDuration="200ms">
+    <!-- ========== Dashboard Tab ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">dashboard</mat-icon>
+        Dashboard
+      </ng-template>
+
+      @if (isLoadingDashboard) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else if (dashboard) {
+        <div class="dashboard-content">
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <mat-card class="stat-card revenue">
+              <div class="stat-icon">
+                <mat-icon>trending_up</mat-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">{{ formatCurrency(dashboard.totalRevenue) }}</span>
+                <span class="stat-label">Total Revenue</span>
+              </div>
+            </mat-card>
+
+            <mat-card class="stat-card monthly">
+              <div class="stat-icon">
+                <mat-icon>calendar_month</mat-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">{{ formatCurrency(dashboard.monthlyRevenue) }}</span>
+                <span class="stat-label">Monthly Revenue</span>
+              </div>
+            </mat-card>
+
+            <mat-card class="stat-card transactions">
+              <div class="stat-icon">
+                <mat-icon>receipt_long</mat-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">{{ dashboard.totalTransactions }}</span>
+                <span class="stat-label">Total Transactions</span>
+              </div>
+            </mat-card>
+
+            <mat-card class="stat-card success">
+              <div class="stat-icon">
+                <mat-icon>check_circle</mat-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">{{ dashboard.successfulTransactions }}</span>
+                <span class="stat-label">Successful</span>
+              </div>
+            </mat-card>
+
+            <mat-card class="stat-card failed">
+              <div class="stat-icon">
+                <mat-icon>error</mat-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">{{ dashboard.failedTransactions }}</span>
+                <span class="stat-label">Failed</span>
+              </div>
+            </mat-card>
+
+            <mat-card class="stat-card refunds">
+              <div class="stat-icon">
+                <mat-icon>replay</mat-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-value">{{ formatCurrency(dashboard.refundAmount) }}</span>
+                <span class="stat-label">Refunds ({{ dashboard.totalRefunds }})</span>
+              </div>
+            </mat-card>
+          </div>
+
+          <!-- Recent Transactions -->
+          @if (dashboard.recentTransactions.length) {
+            <mat-card class="recent-transactions-card">
+              <mat-card-header>
+                <mat-card-title>Recent Transactions</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="table-wrapper">
+                  <table mat-table [dataSource]="dashboard.recentTransactions">
+                    <ng-container matColumnDef="date">
+                      <th mat-header-cell *matHeaderCellDef>Date</th>
+                      <td mat-cell *matCellDef="let txn">{{ txn.createdAt | date:'short' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="company">
+                      <th mat-header-cell *matHeaderCellDef>Company</th>
+                      <td mat-cell *matCellDef="let txn">{{ txn.companyName }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="amount">
+                      <th mat-header-cell *matHeaderCellDef>Amount</th>
+                      <td mat-cell *matCellDef="let txn">
+                        <span class="amount">${{ txn.amount | number:'1.2-2' }}</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>Status</th>
+                      <td mat-cell *matCellDef="let txn">
+                        <span class="status-chip" [attr.data-status]="getStatusColor(txn.status)">
+                          <mat-icon>{{ getStatusIcon(txn.status) }}</mat-icon>
+                          {{ txn.status | titlecase }}
+                        </span>
+                      </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="['date','company','amount','status']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['date','company','amount','status'];"></tr>
+                  </table>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </mat-tab>
+
+    <!-- ========== Transactions Tab ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">receipt_long</mat-icon>
+        Transactions
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Filters -->
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-label>Search transactions...</mat-label>
+            <input matInput (input)="onTransactionSearch($event)" placeholder="Company, plan, transaction ID...">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Status</mat-label>
+            <mat-select (selectionChange)="onTransactionStatusFilter($event.value)">
+              <mat-option value="">All</mat-option>
+              <mat-option value="completed">Completed</mat-option>
+              <mat-option value="pending">Pending</mat-option>
+              <mat-option value="failed">Failed</mat-option>
+              <mat-option value="refunded">Refunded</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Gateway</mat-label>
+            <mat-select (selectionChange)="onTransactionGatewayFilter($event.value)">
+              <mat-option value="">All</mat-option>
+              <mat-option value="stripe">Stripe</mat-option>
+              <mat-option value="razorpay">Razorpay</mat-option>
+              <mat-option value="manual">Bank Transfer</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (isLoadingTransactions) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        } @else if (transactions.length === 0) {
+          <div class="empty-state">
+            <mat-icon>receipt_long</mat-icon>
+            <h3>No transactions found</h3>
+            <p>Transactions will appear here once payments are processed</p>
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="transactions">
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let txn">{{ txn.createdAt | date:'mediumDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="company">
+                <th mat-header-cell *matHeaderCellDef>Company</th>
+                <td mat-cell *matCellDef="let txn">
+                  <span class="company-name">{{ txn.companyName }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="plan">
+                <th mat-header-cell *matHeaderCellDef>Plan</th>
+                <td mat-cell *matCellDef="let txn">
+                  <span class="plan-name">{{ txn.planName }}</span>
+                  <span class="billing-cycle">{{ txn.billingCycle }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let txn">
+                  <span class="amount">${{ txn.amount | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="gateway">
+                <th mat-header-cell *matHeaderCellDef>Gateway</th>
+                <td mat-cell *matCellDef="let txn">{{ txn.gateway | titlecase }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let txn">
+                  <span class="status-chip" [attr.data-status]="getStatusColor(txn.status)">
+                    <mat-icon>{{ getStatusIcon(txn.status) }}</mat-icon>
+                    {{ txn.status | titlecase }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let txn">
+                  <button mat-icon-button matTooltip="View Details" (click)="viewTransactionDetail(txn)">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  @if (txn.status === 'completed') {
+                    <button mat-icon-button matTooltip="Refund" color="warn" (click)="initiateRefund(txn)">
+                      <mat-icon>replay</mat-icon>
+                    </button>
+                  }
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="transactionTotalCount"
+            [pageSize]="transactionFilter.pageSize"
+            [pageSizeOptions]="[10, 25, 50]"
+            (page)="onTransactionPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ========== Invoices Tab ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">description</mat-icon>
+        Invoices
+      </ng-template>
+
+      <div class="tab-content">
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-label>Search invoices...</mat-label>
+            <input matInput (input)="onInvoiceSearch($event)" placeholder="Invoice number, company...">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Status</mat-label>
+            <mat-select (selectionChange)="onInvoiceStatusFilter($event.value)">
+              <mat-option value="">All</mat-option>
+              <mat-option value="paid">Paid</mat-option>
+              <mat-option value="pending">Pending</mat-option>
+              <mat-option value="overdue">Overdue</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (isLoadingInvoices) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        } @else if (invoices.length === 0) {
+          <div class="empty-state">
+            <mat-icon>description</mat-icon>
+            <h3>No invoices found</h3>
+            <p>Invoices will be generated after successful payments</p>
+          </div>
+        } @else {
+          <div class="table-wrapper">
+            <table mat-table [dataSource]="invoices">
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let inv">
+                  <span class="invoice-number">{{ inv.invoiceNumber }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let inv">{{ inv.issuedAt | date:'mediumDate' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="company">
+                <th mat-header-cell *matHeaderCellDef>Company</th>
+                <td mat-cell *matCellDef="let inv">
+                  <span class="company-name">{{ inv.companyName }}</span>
+                  @if (inv.companyEmail) {
+                    <span class="company-email">{{ inv.companyEmail }}</span>
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="plan">
+                <th mat-header-cell *matHeaderCellDef>Plan</th>
+                <td mat-cell *matCellDef="let inv">
+                  <span class="plan-name">{{ inv.planName }}</span>
+                  <span class="billing-cycle">{{ inv.billingCycle }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let inv">
+                  <span class="amount">${{ inv.totalAmount | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let inv">
+                  <span class="status-chip" [attr.data-status]="getStatusColor(inv.status)">
+                    <mat-icon>{{ getStatusIcon(inv.status) }}</mat-icon>
+                    {{ inv.status | titlecase }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="invoiceColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: invoiceColumns;"></tr>
+            </table>
+          </div>
+
+          <mat-paginator
+            [length]="invoiceTotalCount"
+            [pageSize]="invoiceFilter.pageSize"
+            [pageSizeOptions]="[10, 25, 50]"
+            (page)="onInvoicePageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- ========== Revenue Analytics Tab ========== -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">analytics</mat-icon>
+        Revenue Analytics
+      </ng-template>
+
+      <div class="tab-content">
+        <div class="analytics-toolbar">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Period</mat-label>
+            <mat-select [value]="analyticsMonths" (selectionChange)="onAnalyticsMonthsChange($event.value)">
+              <mat-option [value]="3">Last 3 months</mat-option>
+              <mat-option [value]="6">Last 6 months</mat-option>
+              <mat-option [value]="12">Last 12 months</mat-option>
+              <mat-option [value]="24">Last 24 months</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        @if (isLoadingAnalytics) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+        } @else if (analytics) {
+          <!-- Summary Cards -->
+          <div class="analytics-summary">
+            <mat-card class="analytics-stat">
+              <span class="analytics-value">{{ formatCurrency(analytics.totalRevenue) }}</span>
+              <span class="analytics-label">Total Revenue</span>
+            </mat-card>
+            <mat-card class="analytics-stat">
+              <span class="analytics-value">{{ analytics.totalTransactions }}</span>
+              <span class="analytics-label">Total Transactions</span>
+            </mat-card>
+            <mat-card class="analytics-stat">
+              <span class="analytics-value">{{ formatCurrency(analytics.averageTransactionValue) }}</span>
+              <span class="analytics-label">Avg. Transaction</span>
+            </mat-card>
+          </div>
+
+          <!-- Monthly Revenue Chart (CSS bars) -->
+          @if (analytics.monthlyRevenue.length) {
+            <mat-card class="chart-card">
+              <mat-card-header>
+                <mat-card-title>Monthly Revenue</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="bar-chart">
+                  @for (month of analytics.monthlyRevenue; track month.month) {
+                    <div class="bar-item">
+                      <div class="bar-value">{{ formatCurrency(month.revenue) }}</div>
+                      <div class="bar-track">
+                        <div class="bar-fill" [style.width]="getMaxRevenueBarWidth(month.revenue)"></div>
+                      </div>
+                      <div class="bar-label">{{ month.month }}</div>
+                      <div class="bar-count">{{ month.transactionCount }} txns</div>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Revenue by Plan -->
+          @if (analytics.revenueByPlan.length) {
+            <mat-card class="chart-card">
+              <mat-card-header>
+                <mat-card-title>Revenue by Plan</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="plan-revenue-grid">
+                  @for (plan of analytics.revenueByPlan; track plan.planName) {
+                    <div class="plan-revenue-item">
+                      <div class="plan-info">
+                        <span class="plan-name">{{ plan.planName }}</span>
+                        <span class="plan-count">{{ plan.transactionCount }} transactions</span>
+                      </div>
+                      <span class="plan-amount">{{ formatCurrency(plan.revenue) }}</span>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Revenue by Billing Cycle -->
+          @if (analytics.revenueByCycle.length) {
+            <mat-card class="chart-card">
+              <mat-card-header>
+                <mat-card-title>Revenue by Billing Cycle</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="cycle-revenue-grid">
+                  @for (cycle of analytics.revenueByCycle; track cycle.billingCycle) {
+                    <div class="cycle-item">
+                      <mat-icon>{{ cycle.billingCycle === 'annual' ? 'event' : 'calendar_month' }}</mat-icon>
+                      <div class="cycle-info">
+                        <span class="cycle-name">{{ cycle.billingCycle | titlecase }}</span>
+                        <span class="cycle-count">{{ cycle.transactionCount }} transactions</span>
+                      </div>
+                      <span class="cycle-amount">{{ formatCurrency(cycle.revenue) }}</span>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

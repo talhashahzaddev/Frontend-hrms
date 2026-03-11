@@ -164,6 +164,30 @@ export const appRoutes: Routes = [
       import('./features/subscription/subscription.component').then(m => m.SubscriptionComponent),
     title: 'Subscription Plans - HRMS'
   },
+  {
+    path: 'subscription/checkout',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin'] },
+    loadComponent: () =>
+      import('./features/subscription/payment-checkout/payment-checkout.component').then(m => m.PaymentCheckoutComponent),
+    title: 'Checkout - HRMS'
+  },
+  {
+    path: 'subscription/confirmation',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin'] },
+    loadComponent: () =>
+      import('./features/subscription/payment-confirmation/payment-confirmation.component').then(m => m.PaymentConfirmationComponent),
+    title: 'Payment Confirmation - HRMS'
+  },
+  {
+    path: 'subscription/billing',
+    canActivate: [AuthGuard],
+    data: { roles: ['Super Admin'] },
+    loadComponent: () =>
+      import('./features/subscription/billing-history/billing-history.component').then(m => m.BillingHistoryComponent),
+    title: 'Billing History - HRMS'
+  },
 
   // Expense Management Routes (HR Manager, Employee)
   {
@@ -240,6 +264,12 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/platform-admin/components/inquiry-list/inquiry-list.component').then(m => m.InquiryListComponent),
         title: 'Demo Inquiries - Brisk People'
+      },
+      {
+        path: 'payments',
+        loadComponent: () =>
+          import('./features/platform-admin/components/payment-management/payment-management.component').then(m => m.PaymentManagementComponent),
+        title: 'Payment Management - Brisk People'
       }
     ]
   },
