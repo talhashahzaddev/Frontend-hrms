@@ -1,60 +1,83 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
-    {{ data.mode === 'create' ? 'Add stage' : 'Edit stage' }} — {{ stageName || 'Stage' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
+<div class="edit-stage-dialog">
+  <header class="dialog-header">
+    <div class="header-content">
+      <button class="back-button" mat-dialog-close>
+        <mat-icon style="background-color: #2563eb;">arrow_back</mat-icon>
+      </button>
+      <h2 class="title">{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }} — {{ stageName || 'Stage' }}</h2>
+    </div>
+    <button class="close-button" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="dialog-body custom-scrollbar">
+    <form [formGroup]="form" class="edit-stage-form">
+      <ng-container *ngIf="showExtraFields">
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <div class="input-container">
+            <input type="text" formControlName="type" class="custom-input" placeholder="e.g. Technical, HR"
+              maxlength="50">
+          </div>
+        </div>
+
+        <div class="grid-row">
+          <div class="form-group">
+            <label class="form-label">Interview date</label>
+            <div class="input-container mat-form-field-container icon-right">
+              <mat-form-field appearance="outline" class="custom-mat-form-field">
+                <input matInput [matDatepicker]="interviewDatePicker" formControlName="interviewDate"
+                  [min]="minInterviewDate" class="cursor-pointer" placeholder="Select date"
+                  (click)="interviewDatePicker.open()" readonly>
+                <mat-datepicker #interviewDatePicker></mat-datepicker>
+              </mat-form-field>
+              <mat-icon class="input-icon pointer-events-none">calendar_today</mat-icon>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Interview time</label>
+            <div class="input-container">
+              <input type="time" formControlName="interviewTime" [min]="minInterviewTime" class="custom-input"
+                placeholder="HH:mm">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Interview place</label>
+          <div class="input-container">
+            <input type="text" formControlName="interviewPlace" class="custom-input"
+              placeholder="e.g. Room 101, Video Call" maxlength="200">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Interviewers</label>
+          <div class="input-container mat-form-field-container">
+            <mat-form-field appearance="outline" class="custom-mat-form-field">
+              <mat-select formControlName="interviewerIds" multiple placeholder="Select interviewers">
+                <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                  {{ getEmployeeDisplay(emp) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-spinner *ngIf="employeesLoading" class="spinner-icon" diameter="20"></mat-spinner>
+          </div>
+        </div>
+      </ng-container>
+
+      <mat-form-field appearance="outline" class="full-width notes-field">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="4" placeholder="Notes for this stage"></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <footer class="dialog-footer">
+    <button type="button" class="btn-cancel" mat-dialog-close>Cancel</button>
+    <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+      {{ saving ? 'Saving...' : 'Save Stage' }}
+    </button>
+  </footer>
 </div>
-
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="form" class="edit-stage-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Notes</mat-label>
-      <textarea matInput formControlName="notes" rows="3" placeholder="Notes for this stage"></textarea>
-    </mat-form-field>
-
-    <ng-container *ngIf="showExtraFields">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Type</mat-label>
-        <input matInput formControlName="type" placeholder="e.g. Technical, HR" maxlength="50">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interview date</mat-label>
-        <input matInput [matDatepicker]="interviewDatePicker" formControlName="interviewDate" [min]="minInterviewDate"
-          placeholder="Select date">
-        <mat-datepicker-toggle matIconSuffix [for]="interviewDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #interviewDatePicker></mat-datepicker>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interview time</mat-label>
-        <input matInput type="time" formControlName="interviewTime" [min]="minInterviewTime" placeholder="HH:mm">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interview place</mat-label>
-        <input matInput formControlName="interviewPlace" placeholder="e.g. Room 101, Video Call" maxlength="200">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interviewers</mat-label>
-        <mat-select formControlName="interviewerIds" multiple placeholder="Select interviewers">
-          <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-            {{ getEmployeeDisplay(emp) }}
-          </mat-option>
-        </mat-select>
-        <mat-spinner *ngIf="employeesLoading" matSuffix diameter="20"></mat-spinner>
-      </mat-form-field>
-    </ng-container>
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions class="dialog-actions">
-  <button mat-button mat-dialog-close class="cancel-btn">Cancel</button>
-  <button mat-flat-button class="save-btn" (click)="save()" [disabled]="saving">
-    {{ saving ? 'Saving...' : 'Save' }}
-  </button>
-</mat-dialog-actions>
