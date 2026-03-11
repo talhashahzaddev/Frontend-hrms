@@ -1,8 +1,7 @@
-
 <div class="dialog-header">
-  <h2 style="color: white;">
+  <h2>
     <mat-icon>swap_horiz</mat-icon>
-    Swap Shift
+    Swap Shift Request
   </h2>
   <button mat-icon-button mat-dialog-close class="close-button">
     <mat-icon>close</mat-icon>
@@ -10,37 +9,80 @@
 </div>
 
 <div class="dialog-content">
-  <form [formGroup]="swapForm" class="period-form">
+  <form [formGroup]="swapForm" class="swap-form">
     
-    <!-- Requested Shift Dropdown -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Requested Shift</mat-label>
-      <mat-select formControlName="requestedShiftId">
-        <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
-          {{ shift.shiftName }} ({{ shift.startTime }} - {{ shift.endTime }})
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <!-- Current Shift Info Banner -->
+    <div class="current-shift-banner">
+      <div class="shift-info-left">
+        <span class="shift-label">YOUR CURRENT SHIFT</span>
+        <span class="shift-time">{{ currentShift?.startTime || '08:00' }} - {{ currentShift?.endTime || '17:00' }}</span>
+        <span class="shift-name">{{ currentShift?.shiftName || 'Morning Shift' }}</span>
+      </div>
+      <div class="shift-info-right">
+        <span class="time-label">TIME SLOT</span>
+      </div>
+    </div>
+
+    <!-- Requested Shift -->
+    <div class="form-group">
+      <label class="form-label">Requested Shift<span class="required">*</span></label>
+      <mat-form-field appearance="outline" class="custom-field">
+        <mat-select formControlName="requestedShiftId" placeholder="Select the shift you want to request">
+          <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
+            {{ shift.shiftName }} ({{ shift.startTime }} - {{ shift.endTime }})
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="swapForm.get('requestedShiftId')?.hasError('required')">
+          Please select a shift
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Swap With (Optional) -->
+    <!-- <div class="form-group">
+      <label class="form-label">Swap With (Optional)</label>
+      <mat-form-field appearance="outline" class="custom-field">
+        <mat-select formControlName="swapWithEmployeeId" placeholder="Select an employee">
+          <mat-option [value]="null">No specific employee</mat-option>
+          <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+            {{ emp.firstName }} {{ emp.lastName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <p class="hint-text">If empty, this request will be open for any eligible staff</p>
+    </div> -->
 
     <!-- Reason -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Reason</mat-label>
-      <textarea matInput formControlName="reason" rows="3" placeholder="Enter reason for shift swap"></textarea>
-    </mat-form-field>
+    <div class="form-group">
+      <label class="form-label">Reason<span class="required">*</span></label>
+      <mat-form-field appearance="outline" class="custom-field">
+        <textarea 
+          matInput 
+          formControlName="reason" 
+          rows="4" 
+          maxlength="300"
+          placeholder="Please provide a brief reason for the swap..."></textarea>
+        <mat-hint align="end">{{ swapForm.get('reason')?.value?.length || 0 }}/300</mat-hint>
+        <mat-error *ngIf="swapForm.get('reason')?.hasError('required')">
+          Please provide a reason
+        </mat-error>
+      </mat-form-field>
+    </div>
 
   </form>
 </div>
 
-<div class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close>Cancel</button>
+<div class="dialog-footer">
+  <button mat-stroked-button mat-dialog-close [disabled]="isSubmitting" class="btn-cancel">
+    Cancel
+  </button>
   <button
     mat-flat-button
-    color="primary"
+    class="btn-submit"
     [disabled]="swapForm.invalid || isSubmitting"
-    (click)="onSubmit()"
-  >
-    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+    (click)="onSubmit()">
+    <mat-spinner diameter="18" *ngIf="isSubmitting"></mat-spinner>
     <span *ngIf="!isSubmitting">Submit Swap Request</span>
+    <span *ngIf="isSubmitting">Submitting...</span>
   </button>
 </div>
-

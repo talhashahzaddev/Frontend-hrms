@@ -95,6 +95,18 @@ export interface AttendanceRecord {
   notes?: string;
 }
 
+export interface TimeZoneDto {
+  id: string;          // Asia/Karachi
+  displayName: string; // Asia/Karachi (formatted if you want)
+}
+
+export interface ShiftSummary {
+  totalShifts: number;
+  shiftAssignedEmployee: number;
+  unassignedShiftsEmp: number;
+  shiftSwapRequests: number;
+}
+
 export interface CheckInRequest {
   action: string;
   location?: { [key: string]: any };

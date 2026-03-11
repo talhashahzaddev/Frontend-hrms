@@ -1,6 +1,6 @@
 
-
-import { Component, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { takeUntil } from 'rxjs';
+import { Component, ChangeDetectionStrategy, Inject ,OnInit, OnDestroy} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,6 +16,11 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { AttendanceService } from '../../services/attendance.service';
 import { OverlayModule, OverlayContainer } from '@angular/cdk/overlay';
 import { UpdateShiftDto } from '../../../../../app/core/models/attendance.models';
+import { ChangeDetectorRef } from '@angular/core';
+import { MatTimepickerModule } from '@dhutaryan/ngx-mat-timepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { SettingsService } from '@/app/features/settings/services/settings.service';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-create-shift',
@@ -26,6 +31,8 @@ import { UpdateShiftDto } from '../../../../../app/core/models/attendance.models
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatTimepickerModule,
+    MatNativeDateModule,
     MatSelectModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -38,13 +45,16 @@ import { UpdateShiftDto } from '../../../../../app/core/models/attendance.models
   styleUrls: ['./create-shift.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateShiftComponent {
+export class CreateShiftComponent  implements OnInit,OnDestroy {
   shiftForm: FormGroup;
   isSubmitting = false;
   isEditMode = false;
   shiftId: string = '';
   userRole: string = '';
-
+  timezone: { value: string; label: string }[] = [];
+  timeSlots: string[] = []; 
+  organizationTimeZone: string = 'UTC';
+private destroy$ = new Subject<void>();
   days = [
     { value: 1, label: 'Monday' },
     { value: 2, label: 'Tuesday' },
@@ -54,20 +64,13 @@ export class CreateShiftComponent {
     { value: 6, label: 'Saturday' },
     { value: 0, label: 'Sunday' }
   ];
-
-  timezone = [
-    { value: 'UTC', label: 'UTC' },
-    { value: 'Asia/Karachi', label: '(GMT+5) Asia/Karachi' },
-    { value: 'Asia/Dubai', label: '(GMT+4) Asia/Dubai' },
-    { value: 'Europe/London', label: '(GMT+0) Europe/London' },
-    { value: 'America/New_York', label: '(GMT-5) America/New_York' },
-  ];
-
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CreateShiftComponent>,
     private attendanceService: AttendanceService,
     private overlayContainer: OverlayContainer,
+    private  settingsService: SettingsService,
+    private cdr: ChangeDetectorRef,
     private notification: NotificationService,
     @Inject(MAT_DIALOG_DATA) public data?: any,
   ) {
@@ -88,7 +91,14 @@ export class CreateShiftComponent {
       this.patchForm(data);
     }
   }
+ngOnInit(): void {
+   this.loadInitialData();
+}
 
+ngOnDestroy(): void {
+  this.destroy$.next();
+  this.destroy$.complete();
+}
 
   private patchForm(data: any): void {
     this.shiftForm.patchValue({
@@ -104,6 +114,37 @@ export class CreateShiftComponent {
 
     });
   }
+
+private loadInitialData(): void {
+
+  this.settingsService.getOrganizationSettings()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (settings) => {
+
+        this.organizationTimeZone = settings.timeZone || 'UTC';
+
+        // ⭐ IMPORTANT: form control me set karo
+        this.shiftForm.patchValue({
+          timezone: this.organizationTimeZone
+        });
+
+        this.cdr.markForCheck();
+
+      },
+      error: (error) => {
+        console.error('Error loading organization timezone:', error);
+
+        this.organizationTimeZone = 'UTC';
+
+        this.shiftForm.patchValue({
+          timezone: 'UTC'
+        });
+
+        this.cdr.markForCheck();
+      }
+    });
+}
 
 
   onSubmit(): void {
@@ -172,6 +213,19 @@ export class CreateShiftComponent {
     }
   }
 
+toggleDay(value: number): void {
+  const control = this.shiftForm.get('daysofWeek');
+  if (!control) return;
+  
+  const current: number[] = control.value ?? [];
+  const updated = current.includes(value)
+    ? current.filter(d => d !== value)
+    : [...current, value];
+  
+  control.setValue(updated);
+  control.markAsTouched();
+}
+  
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.get(key);

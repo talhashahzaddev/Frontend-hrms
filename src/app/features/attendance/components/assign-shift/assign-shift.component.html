@@ -1,44 +1,141 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>assignment_ind</mat-icon>
+      </div>
+      <h2 class="header-title">Assign Shift</h2>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-<div class="dialog-header">
-  <h2 style="color: white;">
-    <mat-icon>assignment_ind</mat-icon>
-    Assign Shift
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
+  <mat-dialog-content class="dialog-body">
+    <form [formGroup]="assignShiftForm" autocomplete="off">
+      <div class="form-grid">
 
-<div class="dialog-content">
-  <form [formGroup]="assignShiftForm" class="period-form">
+        <div class="field-full custom-field">
+          <label class="field-label">Shift <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="mat-field">
+            <mat-select formControlName="shiftId" placeholder="Select a shift">
+              <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
+                {{ shift.shiftName }} — {{ shift.startTime }}-{{ shift.endTime }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-    <!-- Employee Dropdown -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Employee</mat-label>
-      <mat-select formControlName="employeeId">
-        <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-          {{ emp.fullName }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+        <div class="field-full custom-field" *ngIf="!isManager">
+          <label class="field-label">Department</label>
+          <mat-form-field appearance="outline" class="mat-field">
+            <mat-select [formControl]="departmentControl" placeholder="All Departments">
+              <mat-option value="">All Departments</mat-option>
+              <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+                {{ dept.departmentName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-    <!-- Shift Dropdown -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Shift</mat-label>
-      <mat-select formControlName="shiftId">
-        <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
-          {{ shift.shiftName }} ({{ shift.startTime }} - {{ shift.endTime }})
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+        <div class="field-full custom-field">
+          <label class="field-label">Select Employees <span class="required">*</span></label>
 
-  </form>
-</div>
+          <!-- Hidden form control binding -->
+          <input type="hidden" formControlName="SelectedEmployees">
 
-<div class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close>Cancel</button>
-  <button mat-flat-button color="primary" class="submit-button" [disabled]="assignShiftForm.invalid || isSubmitting" (click)="onSubmit()">
-    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
-    <span *ngIf="!isSubmitting">Assign Shift</span>
-  </button>
+          <!-- Employee Dropdown Container -->
+          <div class="employee-dropdown-container"
+               [class.is-open]="employeeDropdownOpen"
+               [class.has-error]="submitted && assignShiftForm.get('SelectedEmployees')?.invalid">
+
+            <!-- Input Box with Select All -->
+            <div class="employee-input-box">
+              <input #employeeInput
+                class="employee-search-input"
+                type="text"
+                [placeholder]="employeeDropdownOpen ? 'Search or select employees' : (assignShiftForm.get('SelectedEmployees')?.value?.length ? assignShiftForm.get('SelectedEmployees')?.value?.length + ' employee(s) selected' : 'Search or select employees')"
+                [value]="employeeDropdownOpen ? employeeFilter : ''"
+                (focus)="openEmployeeDropdown()"
+                (input)="onEmployeeSearch($any($event.target).value)"
+                autocomplete="off">
+
+              <!-- Select All Checkbox - Right Side -->
+              <div class="select-all-container" *ngIf="employeeDropdownOpen">
+                <input type="checkbox"
+                       class="select-all-checkbox"
+                       [checked]="isAllVisibleSelected()"
+                       (change)="toggleSelectAll()"
+                       id="selectAllEmployees">
+                <label for="selectAllEmployees" class="select-all-text">SELECT ALL</label>
+              </div>
+            </div>
+
+            <!-- Dropdown Panel -->
+            <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+
+              <!-- Empty state -->
+              <div *ngIf="filteredEmployees.length === 0" class="employee-no-results">
+                No employees found
+              </div>
+
+              <!-- Employee List -->
+              <div class="employee-list-container">
+                <div *ngFor="let emp of filteredEmployees"
+                     class="employee-item"
+                     [class.is-selected]="isEmployeeSelected(emp.employeeId)"
+                     (mousedown)="$event.preventDefault(); toggleEmployee(emp)">
+                  
+                  <input type="checkbox"
+                         class="employee-checkbox"
+                         [checked]="isEmployeeSelected(emp.employeeId)"
+                         (mousedown)="$event.stopPropagation()"
+                         readonly>
+                  
+                  <div class="employee-avatar"
+                       [style.background-color]="getAvatarBg(emp)"
+                       [style.color]="getAvatarColor(emp)">
+                    {{ getInitials(emp) }}
+                  </div>
+                  
+                  <div class="employee-info">
+                    <div class="employee-name">{{ displayName(emp) }}</div>
+                    <div class="employee-metadata">
+                      {{ emp.departmentName || 'No Department' }} • 
+                      <span [class.current-shift]="emp.currentShift">
+                        {{ emp.currentShift || 'No Shift' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <span *ngIf="submitted && assignShiftForm.get('SelectedEmployees')?.invalid" class="error-message">
+            Please select at least one employee.
+          </span>
+        </div>
+
+        <div class="selection-summary" *ngIf="assignShiftForm.get('SelectedEmployees')?.value?.length > 0">
+          <span class="summary-text">{{ assignShiftForm.get('SelectedEmployees')?.value?.length }} employees selected</span>
+          <button type="button" class="clear-all-btn" (click)="clearAllEmployees()">CLEAR ALL</button>
+        </div>
+
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" mat-dialog-close [disabled]="isSubmitting" class="btn-cancel">
+      Cancel
+    </button>
+    <button mat-flat-button class="btn-save"
+            [disabled]="assignShiftForm.invalid || isSubmitting"
+            (click)="onSubmit()">
+      <span *ngIf="!isSubmitting">Assign to {{ assignShiftForm.get('SelectedEmployees')?.value?.length || 0 }} Employees</span>
+      <mat-spinner diameter="18" *ngIf="isSubmitting"></mat-spinner>
+    </button>
+  </div>
 </div>
