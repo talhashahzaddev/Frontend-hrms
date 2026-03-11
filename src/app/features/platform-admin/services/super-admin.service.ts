@@ -13,6 +13,18 @@ import {
   SubscriptionHistoryItem,
   SubscriptionPlan
 } from '../models/super-admin.models';
+import {
+  TransactionDto,
+  TransactionDetailDto,
+  TransactionFilterRequest,
+  InvoiceDto,
+  InvoiceFilterRequest,
+  RefundDto,
+  CreateRefundRequest,
+  PaymentDashboardDto,
+  RevenueAnalyticsDto,
+  PagedResult as PaymentPagedResult
+} from '@core/models/payment-management.models';
 
 @Injectable({ providedIn: 'root' })
 export class SuperAdminService {
@@ -59,5 +71,51 @@ export class SuperAdminService {
   // ========== Subscription Plans (reuse existing payment endpoint) ==========
   getSubscriptionPlans(): Observable<ApiResponse<SubscriptionPlan[]>> {
     return this.http.get<ApiResponse<SubscriptionPlan[]>>(`${this.PAYMENT_URL}/subscription-plans`);
+  }
+
+  // ========== Payment Management (Admin) ==========
+
+  getPaymentDashboard(): Observable<ApiResponse<PaymentDashboardDto>> {
+    return this.http.get<ApiResponse<PaymentDashboardDto>>(`${this.API_URL}/payment-dashboard`);
+  }
+
+  getTransactions(filter: TransactionFilterRequest): Observable<ApiResponse<PaymentPagedResult<TransactionDto>>> {
+    let params = new HttpParams()
+      .set('page', filter.page.toString())
+      .set('pageSize', filter.pageSize.toString());
+
+    if (filter.search) params = params.set('search', filter.search);
+    if (filter.status) params = params.set('status', filter.status);
+    if (filter.gateway) params = params.set('gateway', filter.gateway);
+    if (filter.dateFrom) params = params.set('dateFrom', filter.dateFrom);
+    if (filter.dateTo) params = params.set('dateTo', filter.dateTo);
+
+    return this.http.get<ApiResponse<PaymentPagedResult<TransactionDto>>>(`${this.API_URL}/transactions`, { params });
+  }
+
+  getTransactionDetail(transactionId: string): Observable<ApiResponse<TransactionDetailDto>> {
+    return this.http.get<ApiResponse<TransactionDetailDto>>(`${this.API_URL}/transactions/${transactionId}`);
+  }
+
+  getInvoices(filter: InvoiceFilterRequest): Observable<ApiResponse<PaymentPagedResult<InvoiceDto>>> {
+    let params = new HttpParams()
+      .set('page', filter.page.toString())
+      .set('pageSize', filter.pageSize.toString());
+
+    if (filter.search) params = params.set('search', filter.search);
+    if (filter.status) params = params.set('status', filter.status);
+    if (filter.dateFrom) params = params.set('dateFrom', filter.dateFrom);
+    if (filter.dateTo) params = params.set('dateTo', filter.dateTo);
+
+    return this.http.get<ApiResponse<PaymentPagedResult<InvoiceDto>>>(`${this.API_URL}/invoices`, { params });
+  }
+
+  createRefund(request: CreateRefundRequest): Observable<ApiResponse<RefundDto>> {
+    return this.http.post<ApiResponse<RefundDto>>(`${this.API_URL}/refunds`, request);
+  }
+
+  getRevenueAnalytics(months: number = 12): Observable<ApiResponse<RevenueAnalyticsDto>> {
+    const params = new HttpParams().set('months', months.toString());
+    return this.http.get<ApiResponse<RevenueAnalyticsDto>>(`${this.API_URL}/revenue-analytics`, { params });
   }
 }

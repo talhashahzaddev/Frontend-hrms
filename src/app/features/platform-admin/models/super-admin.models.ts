@@ -169,3 +169,19 @@ export interface SubscriptionPlan {
   isCustom: boolean;
   isActive: boolean;
 }
+
+// Re-export payment management models for convenience
+export type {
+  TransactionDto,
+  TransactionDetailDto,
+  TransactionFilterRequest,
+  InvoiceDto,
+  InvoiceFilterRequest,
+  RefundDto,
+  CreateRefundRequest,
+  PaymentDashboardDto,
+  RevenueAnalyticsDto,
+  MonthlyRevenueDto,
+  PlanRevenueDto,
+  CycleRevenueDto
+} from '@core/models/payment-management.models';

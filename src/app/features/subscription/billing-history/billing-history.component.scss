@@ -1,0 +1,239 @@
+.billing-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px;
+  background: #f8fafc;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.billing-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    mat-icon {
+      color: #64748b;
+      font-size: 20px;
+    }
+  }
+
+  .header-text {
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+  }
+}
+
+.billing-card {
+  border-radius: 16px;
+  overflow: hidden;
+
+  .tab-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  padding: 0 8px;
+
+  table {
+    width: 100%;
+    min-width: 600px;
+  }
+
+  th.mat-mdc-header-cell {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td.mat-mdc-cell {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    color: #334155;
+  }
+
+  tr.mat-mdc-row:hover {
+    background: #f8fafc;
+  }
+}
+
+.plan-name {
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+}
+
+.billing-cycle {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: capitalize;
+}
+
+.amount {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.currency {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
+.gateway-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #475569;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &[data-status="success"] {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  &[data-status="warning"] {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  &[data-status="error"] {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  &[data-status="info"] {
+    background: #e0e7ff;
+    color: #4f46e5;
+  }
+
+  &[data-status="default"] {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+}
+
+.card-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: #475569;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+  }
+}
+
+.method-text {
+  color: #94a3b8;
+}
+
+.invoice-number {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-weight: 600;
+  color: #6366f1;
+  font-size: 0.85rem;
+}
+
+mat-paginator {
+  border-top: 1px solid #e2e8f0;
+}
