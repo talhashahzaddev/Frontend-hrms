@@ -119,10 +119,16 @@
                         <div class="bp-td-actions">
                           <button class="bp-action-btn view" matTooltip="View details"
                             (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
-                          <button class="bp-action-btn edit" matTooltip="Edit application"
-                            (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
-                          <button class="bp-action-btn delete" matTooltip="Withdraw"
-                            (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                          <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Edit application'"
+                             [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
+                            <button class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                              (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
+                          </span>
+                          <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Withdraw'"
+                             [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
+                            <button class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                              (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -496,10 +502,16 @@
                         <div class="bp-td-actions">
                           <button class="bp-action-btn view" matTooltip="View details"
                             (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
-                          <button class="bp-action-btn edit" matTooltip="Edit application"
-                            (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
-                          <button class="bp-action-btn delete" matTooltip="Withdraw"
-                            (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                          <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Edit application'"
+                             [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
+                            <button class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                              (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
+                          </span>
+                          <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Withdraw'"
+                             [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
+                            <button class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                              (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -600,10 +612,16 @@
                         <div class="bp-td-actions">
                           <button class="bp-action-btn view" matTooltip="View details"
                             (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
-                          <button class="bp-action-btn edit" matTooltip="Edit application"
-                            (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
-                          <button class="bp-action-btn delete" matTooltip="Withdraw"
-                            (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                          <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Edit application'"
+                             [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
+                            <button class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                              (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
+                          </span>
+                          <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Withdraw'"
+                             [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
+                            <button class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                              (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                          </span>
                         </div>
                       </td>
                     </tr>

@@ -1,19 +1,22 @@
-<div class="edit-stage-dialog">
-  <header class="dialog-header">
-    <div class="header-content">
-      <button class="back-button" mat-dialog-close>
-        <mat-icon style="background-color: #2563eb;">arrow_back</mat-icon>
+<ng-container *ngIf="showExtraFields">
+  <div class="edit-stage-dialog">
+    <header class="minimal-header">
+      <div class="header-left">
+        <div class="icon-box">
+          <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
+        </div>
+        <div class="title-group">
+          <h2 class="title">{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }} — {{ stageName || 'Stage' }}</h2>
+          <p class="subtitle">Interview stage details · Schedule and interviewers</p>
+        </div>
+      </div>
+      <button class="close-button" mat-dialog-close>
+        <mat-icon>close</mat-icon>
       </button>
-      <h2 class="title">{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }} — {{ stageName || 'Stage' }}</h2>
-    </div>
-    <button class="close-button" mat-dialog-close>
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
+    </header>
 
-  <div class="dialog-body custom-scrollbar">
-    <form [formGroup]="form" class="edit-stage-form">
-      <ng-container *ngIf="showExtraFields">
+    <div class="dialog-body custom-scrollbar">
+      <form [formGroup]="form" class="edit-stage-form">
         <div class="form-group">
           <label class="form-label">Type</label>
           <div class="input-container">
@@ -65,19 +68,63 @@
             <mat-spinner *ngIf="employeesLoading" class="spinner-icon" diameter="20"></mat-spinner>
           </div>
         </div>
-      </ng-container>
 
-      <mat-form-field appearance="outline" class="full-width notes-field">
-        <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" rows="4" placeholder="Notes for this stage"></textarea>
-      </mat-form-field>
-    </form>
+          <div class="minimal-form-group" style="margin-top: 8px;">
+          <label class="minimal-label">Notes</label>
+          <div class="relative-container">
+            <textarea formControlName="notes" class="minimal-textarea custom-scrollbar" placeholder="Notes for this stage"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <footer class="dialog-footer">
+      <button type="button" class="btn-cancel" mat-dialog-close>Cancel</button>
+      <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save Stage' }}
+      </button>
+    </footer>
   </div>
+</ng-container>
 
-  <footer class="dialog-footer">
-    <button type="button" class="btn-cancel" mat-dialog-close>Cancel</button>
-    <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
-      {{ saving ? 'Saving...' : 'Save Stage' }}
-    </button>
-  </footer>
-</div>
+<ng-container *ngIf="!showExtraFields">
+  <div class="minimal-stage-dialog">
+    <header class="minimal-header">
+      <div class="header-left">
+        <div class="icon-box">
+          <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
+        </div>
+        <div class="title-group">
+          <h2 class="title">{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }} — {{ stageName || 'Stage' }}</h2>
+          <p class="subtitle">Assessment stage · Add notes for this candidate</p>
+        </div>
+      </div>
+      <button class="close-button" mat-dialog-close>
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="minimal-body">
+      <div class="info-chip">
+        <mat-icon>content_paste_search</mat-icon>
+        <span>{{ stageName || 'Stage' }} · Assessment Stage</span>
+      </div>
+
+      <form [formGroup]="form" class="minimal-form">
+        <div class="minimal-form-group">
+          <label class="minimal-label">Notes</label>
+          <div class="relative-container">
+            <textarea formControlName="notes" class="minimal-textarea custom-scrollbar" placeholder="Add evaluation notes, test results, observations..."></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <footer class="minimal-footer">
+      <button type="button" class="btn-cancel" mat-dialog-close>Cancel</button>
+      <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save Stage' }}
+      </button>
+    </footer>
+  </div>
+</ng-container>
