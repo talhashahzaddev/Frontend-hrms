@@ -87,17 +87,17 @@
       <span class="status-chip">Active</span>
     </div>
     <div class="card-body">
-      <p><strong>Shift Name:</strong> {{ currentShift?.shiftName }}</p>
+      <p><strong>Shift Name:</strong> {{ currentShift.shiftName }}</p>
       <p>
-        <strong>Start:</strong> {{ currentShift?.startTime }} |
-        <strong>End:</strong> {{ currentShift?.endTime }} |
-        <strong>Break:</strong> {{ currentShift?.breakDuration }} min
-        <strong *ngIf="currentShift?.marginHours">
-          | Margin Hours: ±{{ currentShift?.marginHours }} hrs
+        <strong>Start:</strong> {{ currentShift.startTime }} |
+        <strong>End:</strong> {{ currentShift.endTime }} |
+        <strong>Break:</strong> {{ currentShift.breakDuration }} min
+        <strong *ngIf="currentShift.marginHours">
+          | Margin Hours: ±{{ currentShift.marginHours }} hrs
         </strong>
       </p>
       <p *ngIf="currentShift?.daysOfWeek">
-        <strong>Days:</strong> {{ formatShiftDays(currentShift?.daysOfWeek) }}
+        <strong>Days:</strong> {{ formatShiftDays(currentShift.daysOfWeek) }}
       </p>
     </div>
   </div>
