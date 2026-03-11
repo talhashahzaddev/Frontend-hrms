@@ -26,9 +26,9 @@ import { AuthService } from '@/app/core/services/auth.service';
 import { EmployeeService } from '../../../../features/employee/services/employee.service';
 import { Subject, takeUntil } from 'rxjs';
 import { EmployeeSearchRequest, Employee } from '@/app/core/models/employee.models';
-import { PendingShiftSwap, ShiftDto, UpdateShiftDto } from '@/app/core/models/attendance.models';
+import { PendingShiftSwap, ShiftDto, UpdateShiftDto,ShiftSummary } from '@/app/core/models/attendance.models';
 import { PerformanceService } from '@/app/features/performance/services/performance.service';
-
+import {ShiftRejectDialogComponent} from './shiftReject';
 
 @Component({
   selector: 'app-shift',
@@ -60,6 +60,10 @@ export class ShiftComponent implements OnInit {
   selectedTabIndex = 0;
   isLoading = false;
   allEmployees: Employee[] = [];
+  shiftSummary: ShiftSummary | null = null;
+  // Pagination for shift details
+  currentPage = 1;
+  pageSize = 8;
 
   employeeShiftSwaps: PendingShiftSwap[] = [];
   currentUser: any = null;
@@ -77,12 +81,14 @@ export class ShiftComponent implements OnInit {
   ngOnInit(): void {
     this.loadCurrentUser();
     this.loadAllShifts();
-
+  this.loadShiftSummary(); 
     if (this.isAdminOrHR) {
       this.loadSuperAdminPendingSwaps();
+       this.loadEmployeeCurrentShift();
     }
     if (this.isHRManager) {
       this.loadSuperAdminPendingSwaps();
+       this.loadEmployeeCurrentShift();
     }
     if (this.isManager) {
       this.loadSuperAdminPendingSwaps();
@@ -155,7 +161,10 @@ export class ShiftComponent implements OnInit {
     this.attendanceService.getEmployeesByShift(shiftId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (employees: EmployeeShift[]) => (this.employeesByShift = employees),
+        next: (employees: EmployeeShift[]) => {
+          this.employeesByShift = employees;
+          this.currentPage = 1;
+        },
         error: (error: any) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to load employees';
           this.notification.showError(errorMessage);
@@ -198,6 +207,7 @@ export class ShiftComponent implements OnInit {
         next: (response) => {
           this.allEmployees = response.employees || [];
           this.isLoading = false;
+          this.currentPage = 1;
         },
         error: () => {
           this.notification.showError('Failed to load employees');
@@ -207,7 +217,18 @@ export class ShiftComponent implements OnInit {
       });
   }
 
-
+private loadShiftSummary(): void {
+  this.attendanceService.getShiftSummary().subscribe({
+    next: (summary) => {
+      this.shiftSummary = summary;
+    },
+    error: (error) => {
+      const errorMessage =
+        error?.error?.message || error?.message || 'Failed to load shift summary';
+      this.notification.showError(errorMessage);
+    }
+  });
+}
 
   private loadSuperAdminPendingSwaps(): void {
     this.attendanceService.getPendingShiftSwapsForAdmin().subscribe({
@@ -220,6 +241,34 @@ export class ShiftComponent implements OnInit {
         this.notification.showError(errorMessage);
       }
     });
+  }
+
+  // Pagination helpers
+  get currentList(): any[] {
+    return this.selectedShiftId ? this.employeesByShift : this.allEmployees;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil((this.currentList?.length || 0) / this.pageSize));
+  }
+
+  get pagedEmployees(): any[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return (this.currentList || []).slice(start, start + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1) page = 1;
+    if (page > this.totalPages) page = this.totalPages;
+    this.currentPage = page;
+  }
+
+  nextPage(): void { if (this.currentPage < this.totalPages) this.currentPage++; }
+  prevPage(): void { if (this.currentPage > 1) this.currentPage--; }
+
+  // Template helper to avoid using global Math in templates
+  min(a: number, b: number): number {
+    return Math.min(a, b);
   }
 
 
@@ -250,37 +299,57 @@ export class ShiftComponent implements OnInit {
       }
     });
   }
+rejectRequest(swap: PendingShiftSwap): void {
+  if (!this.currentUser?.userId) return;
 
-  rejectRequest(swap: PendingShiftSwap): void {
-    if (!this.currentUser?.userId) return;
+  const dialogRef = this.dialog.open(ShiftRejectDialogComponent, {
+    width: '450px',
+    disableClose: true,
+    data: {
+      title: 'Reject Shift Swap',
+      message: 'Are you sure you want to reject shift swap request for',
+      employeeName: swap.employeeName || 'Employee'
+    }
+  });
 
-    const rejectionReason = prompt('Enter rejection reason:', 'Not suitable for schedule') || '';
+  dialogRef.afterClosed().subscribe(result => {
+
+    if (!result?.rejected) return;
 
     const payload = {
       requestId: swap.requestId,
       approvedBy: this.currentUser.userId,
       isApproved: false,
-      rejectionReason
+      rejectionReason: result.reason || 'Shift swap rejected'
     };
 
     this.attendanceService.approvedshiftRequest(payload).subscribe({
       next: (res: any) => {
         if (res.success) {
+
           console.log('Shift swap rejected:', res.message);
-          this.superAdminPendingSwaps = this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
+
+          this.superAdminPendingSwaps =
+            this.superAdminPendingSwaps.filter(s => s.requestId !== swap.requestId);
+
           this.loadSuperAdminPendingSwaps();
+
           this.notification.showSuccess('Shift swap rejected');
+
         } else {
           this.notification.showError(res.message || 'Failed to reject shift swap');
         }
       },
       error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Error rejecting shift swap';
+        const errorMessage =
+          error?.error?.message || error?.message || 'Error rejecting shift swap';
+
         this.notification.showError(errorMessage);
       }
     });
-  }
 
+  });
+}
 
   private loadEmployeeShiftSwaps(): void {
     if (!this.currentUser?.userId) return;
@@ -379,7 +448,6 @@ export class ShiftComponent implements OnInit {
   }
 
 
-
   openCreateShiftDialog(): void {
     const dialogRef = this.dialog.open(CreateShiftComponent, {
       width: '600px',
@@ -429,6 +497,19 @@ export class ShiftComponent implements OnInit {
         this.loadAllShifts();
       }
     });
+  }
+
+  formatShiftDays(days?: number[]): string {
+    if (!days || days.length === 0) return '—';
+    const uniq = Array.from(new Set(days)).sort((a, b) => a - b);
+    const usesZero = uniq.includes(0);
+    const zeroMap: Record<number, string> = { 0: 'Sun', 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat' };
+    const oneMap: Record<number, string> = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 7: 'Sun' };
+    const map = usesZero ? zeroMap : oneMap;
+    const names = uniq.map(n => map[n] || `Day ${n}`);
+    const allDays = usesZero ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 7];
+    if (names.length === allDays.length) return 'Every day';
+    return names.join(', ');
   }
 }
 

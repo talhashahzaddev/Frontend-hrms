@@ -1,109 +1,99 @@
-<!-- Create/Edit Shift Dialog -->
-<div class="dialog-header">
-  <h2>
-    <mat-icon>schedule</mat-icon>
-    {{ isEditMode ? 'Edit Shift' : 'Create Shift' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
-
-<div class="dialog-content">
-  <form [formGroup]="shiftForm" class="period-form">
-    <!-- Shift Name -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Shift Name</mat-label>
-      <input matInput placeholder="e.g. Morning Shift" formControlName="shiftName" />
-      <mat-error *ngIf="shiftForm.get('shiftName')?.hasError('required')">
-        Shift name is required
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Start & End Time -->
-    <div class="date-row">
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Start Time</mat-label>
-        <input matInput type="time" formControlName="startTime" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>End Time</mat-label>
-        <input matInput type="time" formControlName="endTime" />
-      </mat-form-field>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>schedule</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-title">{{ isEditMode ? 'Edit Shift' : 'Create Shift' }}</h2>
+      </div>
     </div>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-    <!-- Break Duration & Time Zone -->
-    <div class="date-row">
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Break Duration (Minutes)</mat-label>
-        <input matInput type="number" formControlName="breakDuration" min="0" />
-      </mat-form-field>
+  <mat-dialog-content class="dialog-body">
+    <form [formGroup]="shiftForm" autocomplete="off">
+      
+      <div class="form-row">
+        <label class="field-label">Shift Name <span class="required">*</span></label>
+        <mat-form-field appearance="outline" class="mat-field">
+          <input matInput placeholder="e.g. Morning Shift" formControlName="shiftName" />
+        </mat-form-field>
+      </div>
 
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Time Zone</mat-label>
-        <mat-select formControlName="timezone">
-          <mat-option *ngFor="let tz of timezone" [value]="tz.value">
-            {{ tz.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+      <div class="form-row-grid two-col">
+        <div class="form-col">
+          <label class="field-label">Start Time <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="mat-field time-field">
+            <mat-icon matPrefix class="prefix-icon">schedule</mat-icon>
+            <input matInput type="time" formControlName="startTime" />
+          </mat-form-field>
+        </div>
+        <div class="form-col">
+          <label class="field-label">End Time <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="mat-field time-field">
+            <mat-icon matPrefix class="prefix-icon">schedule</mat-icon>
+            <input matInput type="time" formControlName="endTime" />
+          </mat-form-field>
+        </div>
+      </div>
 
-        <!-- Apply Margin Hours Toggle -->
-      <mat-slide-toggle
-        formControlName="applyMarginhours"
-        color="primary">
-        Apply Margin Hours
-      </mat-slide-toggle>
+      <div class="form-row-grid two-col">
+        <div class="form-col">
+          <label class="field-label">Break (Min) <span class="required">*</span></label>
+          <div class="stepper-wrapper">
+            <button type="button" class="stepper-btn" (click)="shiftForm.get('breakDuration')?.setValue((+shiftForm.get('breakDuration')?.value > 0 ? +shiftForm.get('breakDuration')?.value - 1 : 0))">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <input class="stepper-input" type="number" formControlName="breakDuration" min="0" step="1" placeholder="" />
+            <button type="button" class="stepper-btn" (click)="shiftForm.get('breakDuration')?.setValue(+shiftForm.get('breakDuration')?.value + 1)">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="form-col">
+          <label class="field-label">Time Zone</label>
+          <mat-form-field appearance="outline" class="mat-field">
+            <input matInput formControlName="timezone" readonly />
+          </mat-form-field>
+        </div>
+      </div>
 
-      <mat-hint *ngIf="!shiftForm.get('applyMarginhours')?.value">
-        Margin hours will be ignored for this shift
-      </mat-hint>
+      <div class="form-row">
+        <div class="margin-card">
+          <div class="toggle-row">
+            <span class="toggle-label">Apply Margin Hours</span>
+            <mat-slide-toggle formControlName="applyMarginhours" color="primary"></mat-slide-toggle>
+          </div>
+          <div class="margin-hours-inner" *ngIf="shiftForm.get('applyMarginhours')?.value">
+            <mat-form-field appearance="outline" class="mat-field margin-hours-field">
+              <input matInput type="number" formControlName="marginHours" placeholder="Enter Margin Hours" />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
 
-      <!-- Margin Hours (only when enabled) -->
-      <mat-form-field
-        *ngIf="shiftForm.get('applyMarginhours')?.value"
-        appearance="outline"
-        class="date-field">
+      <div class="form-row">
+        <label class="field-label">Days of Week <span class="required">*</span></label>
+        <div class="days-chips-row">
+          <span *ngFor="let day of days" class="day-chip" 
+                [class.active]="shiftForm.get('daysofWeek')?.value?.includes(day.value)"
+                (click)="toggleDay(day.value)">
+            {{ day.label }}
+          </span>
+        </div>
+      </div>
 
-        <mat-label>Margin Hours</mat-label>
-        <input
-          matInput
-          type="number"
-          formControlName="marginHours"
-          min="0"
-          max="5"
-          placeholder="e.g. 1" />
+    </form>
+  </mat-dialog-content>
 
-        <mat-hint>Allowed clock-in window ± Margin Hours</mat-hint>
-      </mat-form-field>
-
-
-
-    <!-- Days of Week -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Days of Week</mat-label>
-      <mat-select formControlName="daysofWeek" multiple>
-        <mat-option *ngFor="let day of days" [value]="day.value">
-          {{ day.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-  </form>
-</div>
-
-<!-- Dialog Actions -->
-<div class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close>Cancel</button>
-  <button
-    mat-flat-button
-    color="primary"
-    class="submit-button"
-    [disabled]="shiftForm.invalid || isSubmitting"
-    (click)="onSubmit()"
-  >
-    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
-    <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Shift' : 'Create Shift' }}</span>
-  </button>
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" mat-dialog-close class="btn-cancel">Cancel</button>
+    <button mat-flat-button class="btn-save" [disabled]="shiftForm.invalid || isSubmitting" (click)="onSubmit()">
+      <mat-spinner diameter="18" *ngIf="isSubmitting"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Shift' : 'Create Shift' }}</span>
+    </button>
+  </div>
 </div>

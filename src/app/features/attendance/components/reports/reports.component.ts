@@ -136,10 +136,6 @@ this.attendanceService.getDepartmentEmployees(departmentId)
       this.notification.showError(errorMessage);
     }
   });
-
-
-
-
   }
 
   generateReport(): void {

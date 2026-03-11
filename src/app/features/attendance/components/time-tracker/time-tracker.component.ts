@@ -286,7 +286,7 @@ currentShiftId: string | null = null;
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response:any) => {
-          const successMessage=response?.message || 'Clocked in successfully!'
+          const successMessage=response?.data?.message || 'Clocked in successfully!'
           this.notification.showSuccess(successMessage);
           this.loadCurrentSession();
           this.loadTodayAttendance();
@@ -334,7 +334,7 @@ currentShiftId: string | null = null;
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response:any) => {
-          const successMessage=response?.message || 'Clocked out successfully!'
+          const successMessage=response?.data?.message || 'Clocked out successfully!'
           this.notification.showSuccess(successMessage);
             this.loadCurrentSession();
             this.loadTodayAttendance();

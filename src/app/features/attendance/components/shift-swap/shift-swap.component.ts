@@ -1,6 +1,6 @@
 
 
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -48,6 +48,7 @@ export interface ShiftDto {
 export class ShiftSwapComponent implements OnInit, OnDestroy {
   swapForm: FormGroup;
   shifts: ShiftDto[] = [];
+  employees: any[] = [];
   currentShift: ShiftDto | null = null;
 
   isSubmitting = false;
@@ -60,19 +61,36 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
     private dialogRef: MatDialogRef<ShiftSwapComponent>,
     private attendanceService: AttendanceService,
     private notification: NotificationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.swapForm = this.fb.group({
       currentShiftId: null,
       requestedShiftId: ['', Validators.required],
+      swapWithEmployeeId: [null],
       reason: ['', [Validators.required, Validators.minLength(5)]]
     });
   }
 
   ngOnInit(): void {
-    this.loadCurrentUser();
-    this.loadShifts();
-     this.loadCurrentShift();
+    // If a user is already loaded, use it immediately
+    const immediateUser = this.authService.getCurrentUserValue();
+    if (immediateUser) {
+      this.currentUser = immediateUser;
+      this.loadShifts();
+      this.loadCurrentShift();
+    }
+
+    // Subscribe to auth state so we load shifts/current shift as soon as a user becomes available
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        if (!user) return;
+        if (this.currentUser?.userId === user.userId) return;
+        this.currentUser = user;
+        this.loadShifts();
+        this.loadCurrentShift();
+      });
   }
 
   private loadCurrentUser(): void {
@@ -119,27 +137,32 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
       });
   }
 private loadCurrentShift(): void {
-  if (!this.currentUser?.userId) return;
+    if (!this.currentUser?.userId) return;
 
-  this.attendanceService.getCurrentShift(this.currentUser.userId)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (res: any) => {
-        if (!res?.data) return;
+    this.attendanceService.getCurrentShift(this.currentUser.userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          // Accept either ApiResponse-wrapped { data: ShiftDto } or raw ShiftDto
+          const payload = res?.data ?? res;
+          if (!payload) return;
 
-        this.currentShift = res.data;
+          this.currentShift = payload as ShiftDto;
 
-        this.swapForm.patchValue({
-          currentShiftId: this.currentShift?.shiftId
-        });
+          this.swapForm.patchValue({
+            currentShiftId: this.currentShift?.shiftId
+          });
 
-        console.log('Current shift loaded:', this.currentShift);
-      },
-      error: (error) => {
-        const errorMessage = error?.error?.message || error?.message || 'Failed to load current shift';
-        this.notification.showError(errorMessage);
-      }
-    });
+          // With OnPush change detection, ensure view updates
+          try { this.cdr.markForCheck(); } catch {}
+
+          console.log('Current shift loaded:', this.currentShift);
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load current shift';
+          this.notification.showError(errorMessage);
+        }
+      });
 }
 
   ngOnDestroy(): void {

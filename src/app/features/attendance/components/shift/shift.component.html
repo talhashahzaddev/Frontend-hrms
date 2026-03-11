@@ -1,45 +1,391 @@
 <div class="shift-dashboard-container">
 
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <h1 class="page-title">
+  <!-- ═══ PAGE HEADER ═══ -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
         <mat-icon>schedule</mat-icon>
-        Shift Management
-      </h1>
-      <p class="page-subtitle">Manage your shifts and assignments</p>
+      </div>
+      <div>
+        <h1 class="page-title">Shift Management</h1>
+        <p class="page-subtitle">Manage your shifts and assignments</p>
+      </div>
     </div>
-
-    <!-- Create Shift Button -->
     <div class="header-actions" *ngIf="isAdminOrHR">
-      <button mat-raised-button color="primary" (click)="openCreateShiftDialog()">
+      <button mat-flat-button (click)="openCreateShiftDialog()" class="add-button">
         <mat-icon>add</mat-icon>
         Create Shift
       </button>
     </div>
   </div>
 
-  <!-- Current Shift (Employee View) -->
-  <div *ngIf="isEmployee && currentShift" class="current-shift-card">
+  <!-- ═══ SUMMARY STATS ROW ═══ -->
+  <div class="stats-row" *ngIf="shiftSummary">
+
+    <div class="stat-box">
+      <div class="stat-box-left">
+        <p class="stat-box-label">Total Shifts</p>
+        <h3 class="stat-box-value">{{ shiftSummary.totalShifts }}</h3>
+      </div>
+      <div class="stat-box-icon stat-box-icon-blue">
+        <mat-icon>schedule</mat-icon>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-box-left">
+        <p class="stat-box-label">Assigned Employees</p>
+        <h3 class="stat-box-value">{{ shiftSummary.shiftAssignedEmployee }}</h3>
+      </div>
+      <div class="stat-box-icon stat-box-icon-green">
+        <mat-icon>groups</mat-icon>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-box-left">
+        <p class="stat-box-label">Pending Swap Requests</p>
+        <h3 class="stat-box-value">{{ shiftSummary.shiftSwapRequests }}</h3>
+      </div>
+      <div class="stat-box-icon stat-box-icon-orange">
+        <mat-icon>swap_horiz</mat-icon>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-box-left">
+        <p class="stat-box-label">Unassigned Employees</p>
+        <h3 class="stat-box-value">{{ shiftSummary.unassignedShiftsEmp }}</h3>
+      </div>
+      <div class="stat-box-icon stat-box-icon-red">
+        <mat-icon>person_off</mat-icon>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ ACTION BUTTONS ═══ -->
+  <div class="action-buttons-row">
+    <button mat-stroked-button class="action-btn action-btn-primary"
+            *ngIf="isAdminOrHR || isManager"
+            (click)="openAssignShiftDialog()">
+      <mat-icon>assignment_ind</mat-icon>
+      Assign Employees to Shift
+    </button>
+    <button mat-stroked-button class="action-btn action-btn-teal"
+            *ngIf="!isSuperAdmin"
+            (click)="openSwapShift()">
+      <mat-icon>swap_horiz</mat-icon>
+      Request Shift Swap
+    </button>
+  </div>
+
+  <!-- ═══ CURRENT SHIFT CARD (non-admin) ══ -->
+  <div class="current-shift-card" *ngIf="currentShift">
     <div class="card-header">
       <h3>Current Shift</h3>
       <span class="status-chip">Active</span>
     </div>
     <div class="card-body">
-      <p><strong>Shift Name:</strong> {{ currentShift.shiftName }}</p>
+      <p><strong>Shift Name:</strong> {{ currentShift?.shiftName }}</p>
       <p>
-        <strong>Start:</strong> {{ currentShift.startTime }} |
-        <strong>End:</strong> {{ currentShift.endTime }} |
-        <strong>Break:</strong> {{ currentShift.breakDuration }} min
-        <strong *ngIf="currentShift.marginHours">| Margin Hours: ±{{ currentShift.marginHours }} hrs</strong>
+        <strong>Start:</strong> {{ currentShift?.startTime }} |
+        <strong>End:</strong> {{ currentShift?.endTime }} |
+        <strong>Break:</strong> {{ currentShift?.breakDuration }} min
+        <strong *ngIf="currentShift?.marginHours">
+          | Margin Hours: ±{{ currentShift?.marginHours }} hrs
+        </strong>
+      </p>
+      <p *ngIf="currentShift?.daysOfWeek">
+        <strong>Days:</strong> {{ formatShiftDays(currentShift?.daysOfWeek) }}
       </p>
     </div>
   </div>
 
-  <!-- Quick Navigation (Stat Cards Style) -->
-  <div class="quick-nav-grid">
-    <!-- Assign Shift -->
-    <mat-card class="stat-card stat-card-primary" *ngIf="isAdminOrHR || isManager" (click)="openAssignShiftDialog()">
+  <!-- ═══ ALL SHIFTS TABLE ═══ -->
+  <div *ngIf="isAdminOrHR" class="table-card">
+
+    <div class="table-card-header">
+      <div class="table-card-title-row">
+        <h4 class="table-card-title">All Shifts</h4>
+        <span class="shifts-badge">{{ shifts.length || 0 }} Shifts</span>
+      </div>
+      <button mat-icon-button class="more-btn" [matMenuTriggerFor]="shiftMenu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #shiftMenu="matMenu">
+        <button mat-menu-item>Export</button>
+        <button mat-menu-item>Refresh</button>
+      </mat-menu>
+    </div>
+
+    <div class="table-scroll">
+      <mat-table [dataSource]="shifts" class="data-table">
+
+        <ng-container matColumnDef="shiftName">
+          <mat-header-cell *matHeaderCellDef>Shift Name</mat-header-cell>
+          <mat-cell *matCellDef="let shift">
+            <div class="shift-name-cell">
+              <span class="shift-dot"></span>
+              <span class="shift-name-text">{{ shift.shiftName }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="startTime">
+          <mat-header-cell *matHeaderCellDef>Start Time</mat-header-cell>
+          <mat-cell *matCellDef="let shift">{{ shift.startTime }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="endTime">
+          <mat-header-cell *matHeaderCellDef>End Time</mat-header-cell>
+          <mat-cell *matCellDef="let shift">{{ shift.endTime }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="marginHours">
+          <mat-header-cell *matHeaderCellDef>Margin Hours</mat-header-cell>
+          <mat-cell *matCellDef="let shift">{{ shift.marginHours }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="breakDuration">
+          <mat-header-cell *matHeaderCellDef>Break</mat-header-cell>
+          <mat-cell *matCellDef="let shift">{{ shift.breakDuration }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef class="actions-col">Actions</mat-header-cell>
+          <mat-cell *matCellDef="let shift" class="actions-col">
+            <button mat-icon-button class="edit-btn" [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="onEditShift(shift)">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <button mat-menu-item (click)="onDeleteShift(shift)" class="danger-action">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </mat-menu>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="['shiftName','startTime','endTime','marginHours','breakDuration','actions']"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: ['shiftName','startTime','endTime','marginHours','breakDuration','actions'];"></mat-row>
+      </mat-table>
+
+      <div *ngIf="shifts.length === 0" class="empty-state">
+        <div class="empty-icon"><mat-icon>schedule</mat-icon></div>
+        <h3>No Shifts Found</h3>
+        <p>Create a new shift to get started.</p>
+        <button mat-raised-button color="primary" (click)="openCreateShiftDialog()">
+          <mat-icon>add</mat-icon>
+          Create Shift
+        </button>
+      </div>
+    </div>
+
+    <div class="table-footer">
+      <span class="table-footer-info">Showing <strong>1</strong> to <strong>{{ shifts.length }}</strong> of <strong>{{ shifts.length }}</strong> entries</span>
+      <div class="pagination">
+        <button class="page-btn" disabled>Previous</button>
+        <button class="page-btn page-btn-active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span class="page-dots">...</span>
+        <button class="page-btn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- ═══ BOTTOM GRID: Swap Requests + Shift Details ═══ -->
+  <div class="bottom-grid">
+
+    <!-- Team Swap Requests -->
+    <div class="bottom-card">
+      <div class="bottom-card-header">
+        <h4 class="bottom-card-title">Team Swap Requests</h4>
+      </div>
+
+      <div class="swap-list">
+
+        <!-- MY REQUESTS (employee view) -->
+        <ng-container *ngIf="isManager || isEmployee || isHRManager">
+          <div *ngIf="employeeShiftSwaps.length > 0; else noMyRequests">
+            <div *ngFor="let swap of employeeShiftSwaps" class="swap-item">
+              <div class="swap-item-top">
+                <div class="swap-requester">
+                  <div class="swap-avatar-placeholder">
+                    <mat-icon>person</mat-icon>
+                  </div>
+                  <div>
+                    <p class="swap-name">{{ swap.employeeName }}</p>
+                    <p class="swap-role">{{ swap.currentShiftName }}</p>
+                  </div>
+                </div>
+                <div class="swap-badges">
+                  <span class="shift-badge shift-badge-gray">{{ swap.currentShiftName }}</span>
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                  <span class="shift-badge shift-badge-purple">{{ swap.requestedShiftName }}</span>
+                </div>
+              </div>
+              <div class="swap-actions">
+                <span class="swap-status-chip">{{ swap.status || 'Pending' }}</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noMyRequests>
+            <div class="empty-state-sm">
+              <mat-icon>hourglass_empty</mat-icon>
+              <p>No requests yet</p>
+            </div>
+          </ng-template>
+        </ng-container>
+
+        <!-- TEAM REQUESTS (manager/admin view) -->
+        <ng-container *ngIf="isManager || isAdminOrHR">
+          <div *ngIf="superAdminPendingSwaps.length > 0; else noTeamRequests">
+            <div *ngFor="let swap of superAdminPendingSwaps" class="swap-item">
+              <div class="swap-item-top">
+                <div class="swap-requester">
+                  <div class="swap-avatar-placeholder">
+                    <mat-icon>person</mat-icon>
+                  </div>
+                  <div>
+                    <p class="swap-name">{{ swap.employeeName }}</p>
+                    <p class="swap-role">{{ swap.currentShiftName }}</p>
+                  </div>
+                </div>
+                <div class="swap-badges">
+                  <span class="shift-badge shift-badge-gray">{{ swap.currentShiftName }}</span>
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                  <span class="shift-badge shift-badge-purple">{{ swap.requestedShiftName }}</span>
+                </div>
+              </div>
+              <div class="swap-actions">
+                <button mat-stroked-button class="btn-reject" (click)="rejectRequest(swap)">Reject</button>
+                <button mat-flat-button class="btn-approve" (click)="approveRequest(swap)">Approve</button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noTeamRequests>
+            <div class="empty-state-sm">
+              <mat-icon>hourglass_empty</mat-icon>
+              <p>No pending team requests</p>
+            </div>
+          </ng-template>
+        </ng-container>
+
+      </div>
+    </div>
+
+    <!-- Shift Details -->
+    <div class="bottom-card" *ngIf="isAdminOrHR || isManager">
+      <div class="bottom-card-header">
+        <h4 class="bottom-card-title">Shift Details</h4>
+        <mat-form-field appearance="outline" class="shift-select">
+          <mat-select [(ngModel)]="selectedShiftId" (selectionChange)="onShiftChange($event.value)">
+            <mat-option [value]="''">Default</mat-option>
+            <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
+              {{ shift.shiftName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="details-table-wrap" *ngIf="selectedShiftId">
+        <mat-table [dataSource]="pagedEmployees" class="details-table">
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
+            <mat-cell *matCellDef="let emp">
+              <div class="emp-cell">
+                <div class="emp-avatar-placeholder"><mat-icon>person</mat-icon></div>
+                <div>
+                  <p class="emp-name">{{ emp.fullName }} {{ emp.lastName }}</p>
+                  <p class="emp-email">{{ emp.email }}</p>
+                </div>
+              </div>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="position">
+            <mat-header-cell *matHeaderCellDef>Position</mat-header-cell>
+            <mat-cell *matCellDef="let emp">{{ emp.positionName || 'Employee' }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="department">
+            <mat-header-cell *matHeaderCellDef>Department</mat-header-cell>
+            <mat-cell *matCellDef="let emp">{{ emp.departmentName }}</mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="['name','position','department']"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: ['name','position','department'];"></mat-row>
+        </mat-table>
+        <div *ngIf="employeesByShift.length === 0" class="empty-state-sm">
+          <mat-icon>group_off</mat-icon>
+          <p>No employees assigned to this shift yet.</p>
+        </div>
+        <!-- Pagination controls for shift-specific employees -->
+        <div class="table-footer" *ngIf="employeesByShift.length > 0">
+          <div class="pagination">
+            <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+            <button *ngFor="let p of [].constructor(totalPages); let i = index" class="page-btn" [class.page-btn-active]="currentPage === (i+1)" (click)="goToPage(i+1)">{{ i+1 }}</button>
+            <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+          </div>
+          <span class="table-footer-info">Showing <strong>{{ (currentPage-1)*pageSize + 1 }}</strong> to <strong>{{ min(currentPage*pageSize, employeesByShift.length) }}</strong> of <strong>{{ employeesByShift.length }}</strong> entries</span>
+        </div>
+      </div>
+
+      <div class="details-table-wrap" *ngIf="!selectedShiftId">
+        <mat-table [dataSource]="pagedEmployees" class="details-table">
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
+            <mat-cell *matCellDef="let emp">
+              <div class="emp-cell">
+                <div class="emp-avatar-placeholder"><mat-icon>person</mat-icon></div>
+                <div>
+                  <p class="emp-name">{{ emp.fullName }}</p>
+                  <p class="emp-email">{{ emp.email }}</p>
+                </div>
+              </div>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="position">
+            <mat-header-cell *matHeaderCellDef>Position</mat-header-cell>
+            <mat-cell *matCellDef="let emp">{{ emp.position?.name || 'Employee' }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="department">
+            <mat-header-cell *matHeaderCellDef>Department</mat-header-cell>
+            <mat-cell *matCellDef="let emp">{{ emp.departmentName }}</mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="['name','position','department']"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: ['name','position','department'];"></mat-row>
+        </mat-table>
+        <div *ngIf="allEmployees.length === 0" class="empty-state-sm">
+          <mat-icon>group_off</mat-icon>
+          <p>No employees available.</p>
+        </div>
+        <!-- Pagination controls for all employees -->
+        <div class="table-footer" *ngIf="allEmployees.length > 0">
+          <div class="pagination">
+            <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">Previous</button>
+            <button *ngFor="let p of [].constructor(totalPages); let i = index" class="page-btn" [class.page-btn-active]="currentPage === (i+1)" (click)="goToPage(i+1)">{{ i+1 }}</button>
+            <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+          </div>
+          <span class="table-footer-info">Showing <strong>{{ (currentPage-1)*pageSize + 1 }}</strong> to <strong>{{ min(currentPage*pageSize, allEmployees.length) }}</strong> of <strong>{{ allEmployees.length }}</strong> entries</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ═══ QUICK NAV STAT CARDS (non-admin) ═══ -->
+  <div class="quick-nav-grid" *ngIf="!isAdminOrHR">
+
+    <mat-card class="stat-card stat-card-primary"
+              *ngIf="isManager"
+              (click)="openAssignShiftDialog()">
       <mat-card-content>
         <div class="stat-item">
           <div class="stat-icon-wrapper">
@@ -56,257 +402,6 @@
         </div>
       </mat-card-content>
     </mat-card>
-
-    <!-- Swap Shift -->
-    <mat-card class="stat-card stat-card-success" (click)="openSwapShift()" *ngIf="!isSuperAdmin">
-      <mat-card-content>
-        <div class="stat-item">
-          <div class="stat-icon-wrapper">
-            <mat-icon class="stat-icon">swap_horiz</mat-icon>
-          </div>
-          <div class="stat-details">
-            <div class="stat-label">Swap Shift</div>
-            <div class="stat-value">Request</div>
-            <div class="stat-footer">
-              <mat-icon class="stat-indicator">cached</mat-icon>
-              <span>Swap with colleague</span>
-            </div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
   </div>
 
-  <!-- All Shifts Table -->
-  <div *ngIf="isAdminOrHR" class="table-container">
-     <h1>All Shifts</h1>
-    <mat-table [dataSource]="shifts" class="shift-table">
-
-      <ng-container matColumnDef="shiftName">
-        <mat-header-cell *matHeaderCellDef>Shift Name</mat-header-cell>
-        <mat-cell *matCellDef="let shift">{{ shift.shiftName }}</mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="startTime">
-        <mat-header-cell *matHeaderCellDef>Start Time</mat-header-cell>
-        <mat-cell *matCellDef="let shift">{{ shift.startTime }}</mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="endTime">
-        <mat-header-cell *matHeaderCellDef>End Time</mat-header-cell>
-        <mat-cell *matCellDef="let shift">{{ shift.endTime }}</mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="breakDuration">
-        <mat-header-cell *matHeaderCellDef>Break (min)</mat-header-cell>
-        <mat-cell *matCellDef="let shift">{{ shift.breakDuration }}</mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="marginHours">
-        <mat-header-cell *matHeaderCellDef>Margin Hours</mat-header-cell>
-        <mat-cell *matCellDef="let shift">{{ shift.marginHours }}</mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
-        <mat-cell *matCellDef="let shift">
-          <button mat-icon-button [matMenuTriggerFor]="menu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item (click)="onEditShift(shift)">
-              <mat-icon>edit</mat-icon>
-              Edit
-            </button>
-            <button mat-menu-item (click)="onDeleteShift(shift)">
-              <mat-icon>delete</mat-icon>
-              Delete
-            </button>
-          </mat-menu>
-        </mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="['shiftName','startTime','endTime','marginHours','breakDuration','actions']"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: ['shiftName','startTime','endTime','marginHours','breakDuration','actions'];"></mat-row>
-    </mat-table>
-
-    <div *ngIf="shifts.length === 0" class="empty-state">
-      <mat-icon>schedule</mat-icon>
-      <h3>No Shifts Found</h3>
-      <p>Create a new shift to get started.</p>
-      <button mat-raised-button color="primary" (click)="openCreateShiftDialog()">
-        <mat-icon>add</mat-icon>
-        Create Shift
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Tabs -->
-  <mat-card class="main-content-card">
-    <mat-tab-group>
-      
-      <!-- Request Tab -->
-      <mat-tab label="Requests">
-        <div class="tab-content">
-<!-- MY REQUESTS (Manager's own requests) -->
-<div *ngIf="isManager || isEmployee || isHRManager" class="requests-section my-requests-section">
-  <div class="section-header">
-    <mat-icon class="section-icon">person</mat-icon>
-    <h2 class="section-title">My Requests</h2>
-  </div>
-
-  <div *ngIf="employeeShiftSwaps.length > 0; else noMyRequests" class="requests-list">
-    <div *ngFor="let swap of employeeShiftSwaps" class="request-card my-request-card">
-      <div class="card-header">
-        <h3>{{ swap.employeeName }}</h3>
-        <mat-chip color="primary" selected>{{ swap.status || 'Pending' }}</mat-chip>
-      </div>
-
-      <div class="card-body">
-        <p><strong>Current:</strong> {{ swap.currentShiftName }}</p>
-        <p><strong>Requested:</strong> {{ swap.requestedShiftName }}</p>
-      </div>
-    </div>
-  </div>
-
-  <ng-template #noMyRequests>
-    <div class="empty-state my-requests-empty">
-      <mat-icon>hourglass_empty</mat-icon>
-      <h3>No My Requests</h3>
-      <p>You haven't made any shift swap requests yet.</p>
-    </div>
-  </ng-template>
-</div>
-
-
-<!-- TEAM REQUESTS (Requests coming to Manager/Admin) -->
-<div *ngIf="isManager || isAdminOrHR" class="requests-section team-requests-section">
-  <div class="section-header">
-    <mat-icon class="section-icon">groups</mat-icon>
-    <h2 class="section-title">Team Requests</h2>
-  </div>
-
-  <div *ngIf="superAdminPendingSwaps.length > 0; else noTeamRequests" class="requests-list">
-    <div *ngFor="let swap of superAdminPendingSwaps" class="request-card team-request-card">
-      <div class="card-header">
-        <h3>{{ swap.employeeName }}</h3>
-        <mat-chip color="primary" selected>{{ swap.status || 'Pending' }}</mat-chip>
-      </div>
-
-      <div class="card-body">
-        <p><strong>Current Shift:</strong> {{ swap.currentShiftName }}</p>
-        <p><strong>Requested Shift:</strong> {{ swap.requestedShiftName }}</p>
-      </div>
-
-      <div class="approval-actions">
-        <button mat-stroked-button color="warn" (click)="rejectRequest(swap)">
-          <mat-icon>close</mat-icon>
-          Reject
-        </button>
-        <button mat-raised-button color="primary" (click)="approveRequest(swap)">
-          <mat-icon>check</mat-icon>
-          Approve
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <ng-template #noTeamRequests>
-    <div class="empty-state team-requests-empty">
-      <mat-icon>hourglass_empty</mat-icon>
-      <h3>No Team Requests</h3>
-      <p>There are no pending team requests to review.</p>
-    </div>
-  </ng-template>
-</div>
-
-
-          
-        </div>
-      </mat-tab>
-
-      <!-- Details Tab -->
-      <mat-tab label="Details" *ngIf="isAdminOrHR ||isManager">
-        <div class="tab-content">
-          <h3>Select Shift</h3>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Choose a Shift</mat-label>
-            <mat-select [(ngModel)]="selectedShiftId" (selectionChange)="onShiftChange($event.value)">
-              <mat-option [value]="''">Default</mat-option>
-              <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
-                {{ shift.shiftName }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <div class="table-container" *ngIf="selectedShiftId">
-            <mat-table [dataSource]="employeesByShift" class="shift-table">
-              <ng-container matColumnDef="name">
-                <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.fullName }} {{ emp.lastName }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="position">
-                <mat-header-cell *matHeaderCellDef>Position</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.positionName || 'Employee' }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="department">
-                <mat-header-cell *matHeaderCellDef>Department</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.departmentName }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="email">
-                <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.email }}</mat-cell>
-              </ng-container>
-
-              <mat-header-row *matHeaderRowDef="['name','email','position','department']"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: ['name','email','position','department'];"></mat-row>
-            </mat-table>
-
-            <div *ngIf="employeesByShift.length === 0" class="empty-state">
-              <mat-icon>group_off</mat-icon>
-              <h3>No Employees Found</h3>
-              <p>No employees assigned to this shift yet.</p>
-            </div>
-          </div>
-
-          <div class="table-container" *ngIf="!selectedShiftId">
-            <mat-table [dataSource]="allEmployees" class="shift-table">
-              <ng-container matColumnDef="name">
-                <mat-header-cell *matHeaderCellDef>Employee</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.fullName }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="position">
-                <mat-header-cell *matHeaderCellDef>Position</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.position?.name || 'Employee' }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="department">
-                <mat-header-cell *matHeaderCellDef>Department</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.departmentName }}</mat-cell>
-              </ng-container>
-
-              <ng-container matColumnDef="email">
-                <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
-                <mat-cell *matCellDef="let emp">{{ emp.email }}</mat-cell>
-              </ng-container>
-
-              <mat-header-row *matHeaderRowDef="['name','email','position','department']"></mat-header-row>
-              <mat-row *matRowDef="let row; columns: ['name','email','position','department'];"></mat-row>
-            </mat-table>
-
-            <div *ngIf="allEmployees.length === 0" class="empty-state">
-              <mat-icon>group_off</mat-icon>
-              <h3>No Employees Found</h3>
-              <p>No employees available.</p>
-            </div>
-          </div>
-        </div>
-      </mat-tab>
-
-    </mat-tab-group>
-  </mat-card>
 </div>

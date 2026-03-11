@@ -16,6 +16,8 @@ import {
   DailyAttendanceStats,
   AttendanceSessionDto,
   ShiftDto,
+  TimeZoneDto,
+  ShiftSummary,
   AttendanceSession,
   DepartmentEmployee,
   UpdateShiftDto,
@@ -78,6 +80,8 @@ export class AttendanceService {
         })
       );
   }
+
+
 
   getCurrentSession(): Observable<TimeTrackingSession | null> {
     return this.http.get<ApiResponse<TimeTrackingSession>>(`${this.apiUrl}/current-session`)
@@ -222,7 +226,12 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
     );
 }
 
-
+//Getting all timezones
+getAllTimeZones() {
+  return this.http.get<any[]>(
+    'https://restcountries.com/v3.1/all?fields=name,capital,timezones,region'
+  );
+}
 
 
   getMyAttendanceSummary(startDate: string, endDate: string): Observable<AttendanceSummary> {
@@ -445,6 +454,19 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         })
       );
   }
+
+  //Shift-summary
+  getShiftSummary(): Observable<ShiftSummary | null> {
+  return this.http.get<ApiResponse<ShiftSummary>>(`${this.apiUrl}/shift-summary`)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          return null;
+        }
+        return response.data || null;
+      })
+    );
+}
 
 
   getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
