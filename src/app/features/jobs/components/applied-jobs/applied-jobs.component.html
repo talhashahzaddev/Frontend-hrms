@@ -1,11 +1,33 @@
 <div class="openings-container">
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
-        <mat-icon>how_to_reg</mat-icon>
-        Job applications
-      </h1>
-      <!-- <p class="page-subtitle">Your job applications</p> -->
+  <div class="st-page-header">
+    <div class="st-header-left">
+      <div class="st-icon-box">
+        <mat-icon>badge</mat-icon>
+      </div>
+      <div class="st-title-group">
+        <h2 class="st-page-title">Job Applications</h2>
+        <p class="st-page-subtitle" *ngIf="canSeeReceivedTab">Track and manage all candidate applications</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Summary Stats Component for Super Admin -->
+  <div class="st-stats-row" *ngIf="canSeeAllApplicationsTab">
+    <div class="st-stat-pill blue">
+      <span class="st-label">Total Applications</span>
+      <span class="st-badge blue">{{ receivedTotalCount }}</span>
+    </div>
+    <div class="st-stat-pill blue">
+      <span class="st-label">In Progress</span>
+      <span class="st-badge blue">{{ inProgressStat }}</span>
+    </div>
+    <div class="st-stat-pill green">
+      <span class="st-label">Selected</span>
+      <span class="st-badge green">{{ selectedStat }}</span>
+    </div>
+    <div class="st-stat-pill red">
+      <span class="st-label">Rejected</span>
+      <span class="st-badge red">{{ rejectedStat }}</span>
     </div>
   </div>
 
@@ -14,92 +36,107 @@
     <mat-tab-group (selectedIndexChange)="onTabChange($event)" animationDuration="200ms" class="applied-jobs-tabs">
       <mat-tab>
         <ng-template mat-tab-label>
-          <span class="tab-label">MY Referenced Applications</span>
+          <span class="tab-label">My Referenced Applications</span>
         </ng-template>
         <ng-template matTabContent>
           <div class="tab-content my-applications-tab">
-            <!-- MY: Filters -->
-            <mat-card class="filters-card">
-              <mat-card-content>
-                <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
-                  <mat-form-field appearance="outline" class="filter-field search-field">
-                    <mat-label>Search</mat-label>
-                    <input matInput formControlName="search" placeholder="Job role name...">
-                    <mat-icon matSuffix>search</mat-icon>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Stage</mat-label>
-                    <mat-select formControlName="stageId">
-                      <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <!-- <mat-form-field appearance="outline" class="filter-field"> -->
-                  <!-- <mat-label>Status</mat-label>
-                    <mat-select formControlName="status">
-                      <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field> -->
-                  <div class="filter-actions">
-                    <button mat-flat-button type="submit" class="apply-filters-btn">
-                      <mat-icon>filter_list</mat-icon>
-                      Apply
-                    </button>
-                    <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
-                      <mat-icon>clear</mat-icon>
-                      Clear
-                    </button>
-                  </div>
-                </form>
-              </mat-card-content>
-            </mat-card>
-            <!-- MY: Loading / Feed / Empty -->
+            <!-- Filter Bar -->
+            <div class="bp-filter-card">
+              <form [formGroup]="filterForm" class="bp-filter-form bp-filter-form--compact" (ngSubmit)="applyFilters()">
+                <div class="bp-filter-input-wrap">
+                  <mat-icon class="bp-filter-icon">search</mat-icon>
+                  <input type="text" formControlName="search" class="bp-filter-input"
+                    placeholder="Search job role name...">
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="stageId" class="bp-filter-select">
+                    <option value="">Stage</option>
+                    <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <button type="submit" class="bp-btn-primary" [disabled]="!hasFiltersApplied()">Search</button>
+                <button type="button" class="bp-btn-clear" [disabled]="!hasFiltersApplied()"
+                  (click)="clearFilters()">Clear</button>
+              </form>
+            </div>
+
+            <!-- Loading State -->
             <div class="jobs-loading" *ngIf="isLoading">
               <mat-spinner diameter="40"></mat-spinner>
               <span>Loading applications...</span>
             </div>
-            <div class="jobs-feed-wrapper" *ngIf="!isLoading">
-              <div class="jobs-feed" *ngIf="applications.length > 0">
-                <article class="job-post-card" *ngFor="let app of applications">
-                  <div class="job-post-header">
-                    <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
-                    <div class="job-post-heading">
-                      <div class="job-post-title-row">
-                        <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                        <span class="job-code-badge" *ngIf="app.jobCode"># {{ app.jobCode }}</span>
-                      </div>
-                      <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{ getAppliedDate(app)
-                        }}</p>
-                    </div>
-                    <div class="job-post-status">
-                      <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
-                        app.currentStageName || app.status || 'Applied' }}</span>
-                    </div>
-                  </div>
-                  <div class="job-post-footer">
-                    <span class="job-last-date" *ngIf="app.status">{{ app.status }}</span>
-                    <div class="job-post-actions">
-                      <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
-                        matTooltip="View application details">
-                        <mat-icon>visibility</mat-icon> View details
-                      </button>
-                      <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn"
-                        matTooltip="Edit application">
-                        <mat-icon>edit</mat-icon> Edit
-                      </button>
-                      <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn"
-                        matTooltip="Withdraw application">
-                        <mat-icon>delete</mat-icon> Delete
-                      </button>
-                    </div>
-                  </div>
-                </article>
+
+            <!-- Table Card -->
+            <div class="bp-table-card" *ngIf="!isLoading && applications.length > 0">
+              <div class="bp-table-header">
+                <h3>My Referenced Applications ({{totalCount}})</h3>
+                <button mat-icon-button class="bp-more-btn"><mat-icon>more_horiz</mat-icon></button>
               </div>
-              <div class="jobs-pagination" *ngIf="applications.length > 0 && totalCount > 0">
+              <div class="bp-table-responsive">
+                <table class="bp-table">
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Job Applied</th>
+                      <th>Current Stage</th>
+                      <th>Applied Date</th>
+                      <th>Source</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let app of applications">
+                      <td>
+                        <div class="bp-td-candidate">
+                          <div class="bp-td-avatar">{{ (app.candidateName || 'U').charAt(0).toUpperCase() }}</div>
+                          <div class="bp-td-info">
+                            <p class="bp-td-name">{{ app.candidateName || 'Self' }}</p>
+                            <p class="bp-td-email" *ngIf="app.candidateEmail">{{ app.candidateEmail }}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="bp-td-job">{{ app.jobRoleName || 'Job' }}</span>
+                      </td>
+                      <td>
+                        <div class="bp-td-stage">
+                          <span class="bp-stage-dot"></span>
+                          <span>{{ app.currentStageName || app.status || 'Applied' }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="bp-td-date">{{ getAppliedDate(app) }}</span>
+                      </td>
+                      <td>
+                        <span class="bp-td-source">{{ app.applicationSource || 'Internal' }}</span>
+                      </td>
+                      <td>
+                        <span class="bp-td-status" [class.status-applied]="app.status === 'Applied'">{{ app.status ||
+                          'Active' }}</span>
+                      </td>
+                      <td>
+                        <div class="bp-td-actions">
+                          <button class="bp-action-btn view" matTooltip="View details"
+                            (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
+                          <button class="bp-action-btn edit" matTooltip="Edit application"
+                            (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
+                          <button class="bp-action-btn delete" matTooltip="Withdraw"
+                            (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="bp-table-footer">
                 <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
-                  [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)"
-                  showFirstLastButtons></mat-paginator>
+                  [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)">
+                </mat-paginator>
               </div>
             </div>
+
+            <!-- Empty States -->
             <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && hasFiltersApplied()">
               <mat-card-content>
                 <mat-icon class="empty-icon">search_off</mat-icon>
@@ -113,8 +150,9 @@
                 <mat-icon class="empty-icon">work_off</mat-icon>
                 <p class="empty-text">You haven't applied to any jobs yet.</p>
                 <p class="empty-subtext">Browse job openings and apply from there.</p>
-                <a mat-flat-button routerLink="/jobs/openings"
-                  class="add-button empty-action"><mat-icon>work_outline</mat-icon> Browse Openings</a>
+                <a mat-flat-button routerLink="/jobs/openings" class="add-button empty-action">
+                  <mat-icon>work_outline</mat-icon> Browse Openings
+                </a>
               </mat-card-content>
             </mat-card>
           </div>
@@ -127,48 +165,39 @@
         <ng-template matTabContent>
           <div class="tab-content posted-by-me-tab">
             <!-- Posted By Me: Filters -->
-            <mat-card class="filters-card">
-              <mat-card-content>
-                <form [formGroup]="postedByMeFilterForm" class="filters-form" (ngSubmit)="applyPostedByMeFilters()">
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Search</mat-label>
-                    <input matInput formControlName="search" placeholder="Candidate, email, job role...">
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field date-field">
-                    <mat-label>Apply date (from)</mat-label>
-                    <input matInput [matDatepicker]="postedByMeApplyFromPicker" formControlName="applyDateFrom"
-                      placeholder="From">
-                    <mat-datepicker-toggle matIconSuffix [for]="postedByMeApplyFromPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #postedByMeApplyFromPicker></mat-datepicker>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field date-field">
-                    <mat-label>Apply date (to)</mat-label>
-                    <input matInput [matDatepicker]="postedByMeApplyToPicker" formControlName="applyDateTo"
-                      placeholder="To">
-                    <mat-datepicker-toggle matIconSuffix [for]="postedByMeApplyToPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #postedByMeApplyToPicker></mat-datepicker>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Stage</mat-label>
-                    <mat-select formControlName="stageId">
-                      <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Job</mat-label>
-                    <mat-select formControlName="jobId">
-                      <mat-option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <div class="filter-actions">
-                    <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon>
-                      Apply</button>
-                    <button mat-stroked-button type="button" (click)="clearPostedByMeFilters()"
-                      [disabled]="!hasPostedByMeFiltersApplied()"><mat-icon>clear</mat-icon> Clear</button>
-                  </div>
-                </form>
-              </mat-card-content>
-            </mat-card>
+            <div class="bp-filter-card">
+              <form [formGroup]="postedByMeFilterForm" class="bp-filter-form" (ngSubmit)="applyPostedByMeFilters()">
+                <div class="bp-filter-input-wrap">
+                  <mat-icon class="bp-filter-icon">search</mat-icon>
+                  <input type="text" formControlName="search" class="bp-filter-input"
+                    placeholder="Search job role name...">
+                </div>
+                <!-- Native date inputs to match bp-filter styling -->
+                <div class="bp-filter-input-wrap date-wrap">
+                  <input type="date" formControlName="applyDateFrom" class="bp-filter-input" title="Apply date (from)"
+                    placeholder="From">
+                </div>
+                <div class="bp-filter-input-wrap date-wrap">
+                  <input type="date" formControlName="applyDateTo" class="bp-filter-input" title="Apply date (to)"
+                    placeholder="To">
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="stageId" class="bp-filter-select">
+                    <option value="">Stage</option>
+                    <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="jobId" class="bp-filter-select">
+                    <option value="">Job</option>
+                    <option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <button type="submit" class="bp-btn-primary" [disabled]="!hasPostedByMeFiltersApplied()">Search</button>
+                <button type="button" class="bp-btn-clear" [disabled]="!hasPostedByMeFiltersApplied()"
+                  (click)="clearPostedByMeFilters()">Clear</button>
+              </form>
+            </div>
             <!-- Posted By Me: Loading / Feed / Empty -->
             <div class="jobs-loading" *ngIf="postedByMeIsLoading">
               <mat-spinner diameter="40"></mat-spinner>
@@ -177,50 +206,51 @@
             <div class="jobs-board-wrapper" *ngIf="!postedByMeIsLoading">
               <div class="jobs-board-row" *ngIf="postedByMeColumnData.length > 0">
                 <div class="jobs-board-column" *ngFor="let colData of postedByMeColumnData; let i = index">
-                  <div class="board-column-header">
-                    <h3 class="board-column-title">{{ colData.col.stageName }}</h3>
+                  <div class="board-column-header st-col-header"
+                    [class.col-applied]="colData.col.stageName === 'Applied'">
+                    <span class="board-column-title">{{ colData.col.stageName }}</span>
                     <span class="board-column-count">{{ colData.apps.length }}</span>
                   </div>
                   <div class="board-column-cards" cdkDropList [id]="'pbm-col-' + i" [cdkDropListData]="colData.apps"
                     [cdkDropListConnectedTo]="postedByMeDropIds" (cdkDropListDropped)="onPostedByMeDrop($event, i)">
-                    <article class="job-post-card clickable-card dnd-card" cdkDrag [cdkDragData]="app"
+
+                    <article class="st-job-card dnd-card group" cdkDrag [cdkDragData]="app"
                       *ngFor="let app of colData.apps" (click)="openProcessDialog(app)">
-                      <!-- Drag handle indicator -->
-                      <div class="dnd-drag-handle" cdkDragHandle title="Drag to move stage">
-                        <mat-icon>drag_indicator</mat-icon>
-                      </div>
                       <!-- Drag preview placeholder -->
                       <div *cdkDragPlaceholder class="dnd-placeholder"></div>
-                      <div class="job-post-header">
-                        <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
-                        <div class="job-post-heading">
-                          <div class="job-post-title-row">
-                            <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                            <span class="job-code-badge" *ngIf="app.jobCode"># {{ app.jobCode }}</span>
-                          </div>
-                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{
-                            getAppliedDate(app)
-                            }}</p>
-                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{
-                            app.candidateEmail ?
-                            ' · ' + app.candidateEmail : '' }}</p>
-                        </div>
-                        <div class="job-post-status">
-                          <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
-                            app.currentStageName || app.status || 'Applied' }}</span>
-                        </div>
-                      </div>
-                      <div class="job-post-footer">
-                        <div class="job-post-actions">
-                          <div class="action-btn process-btn board-process-btn"
-                            (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
-                            role="button" tabindex="0" (keydown.enter)="openProcessDialog(app)"
-                            (keydown.space)="openProcessDialog(app); $event.preventDefault()">
-                            <mat-icon>expand_more</mat-icon>
+
+                      <div class="st-card-header">
+                        <div class="st-candidate-info">
+                          <div class="st-avatar">{{ (app.candidateName || 'U').substring(0, 2).toUpperCase() }}</div>
+                          <div>
+                            <h4 class="st-candidate-name">{{ app.candidateName || 'Self' }}</h4>
+                            <span class="st-status-badge">{{ app.currentStageName || app.status || 'Applied' }}</span>
                           </div>
                         </div>
+                        <mat-icon class="st-drag-handle" cdkDragHandle
+                          title="Drag to move stage">drag_indicator</mat-icon>
                       </div>
+
+                      <div class="st-card-body">
+                        <div class="st-body-item st-job-role">
+                          <mat-icon class="st-icon">work</mat-icon>
+                          <span>{{ app.jobRoleName || 'Job' }} <ng-container
+                              *ngIf="app.jobCode">(#{{app.jobCode}})</ng-container></span>
+                        </div>
+                        <div class="st-body-item st-meta-text" *ngIf="getAppliedDate(app)">
+                          <mat-icon class="st-icon">calendar_today</mat-icon>
+                          <span>Applied {{ getAppliedDate(app) }}</span>
+                        </div>
+                        <div class="st-body-item st-meta-text" *ngIf="app.candidateEmail">
+                          <mat-icon class="st-icon">mail</mat-icon>
+                          <span class="st-truncate" [title]="app.candidateEmail">{{ app.candidateEmail }}</span>
+                        </div>
+                      </div>
+
+                      <button class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
+                        Application &rarr;</button>
                     </article>
+
                     <!-- Empty column drop zone -->
                     <div class="board-column-empty" *ngIf="colData.apps.length === 0">
                       <mat-icon>inbox</mat-icon>
@@ -263,48 +293,38 @@
         <ng-template matTabContent>
           <div class="tab-content received-tab">
             <!-- All: Filters -->
-            <mat-card class="filters-card">
-              <mat-card-content>
-                <form [formGroup]="receivedFilterForm" class="filters-form" (ngSubmit)="applyReceivedFilters()">
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Search</mat-label>
-                    <input matInput formControlName="search" placeholder="Candidate, email, job role...">
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field date-field">
-                    <mat-label>Apply date (from)</mat-label>
-                    <input matInput [matDatepicker]="receivedApplyFromPicker" formControlName="applyDateFrom"
-                      placeholder="From">
-                    <mat-datepicker-toggle matIconSuffix [for]="receivedApplyFromPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #receivedApplyFromPicker></mat-datepicker>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field date-field">
-                    <mat-label>Apply date (to)</mat-label>
-                    <input matInput [matDatepicker]="receivedApplyToPicker" formControlName="applyDateTo"
-                      placeholder="To">
-                    <mat-datepicker-toggle matIconSuffix [for]="receivedApplyToPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #receivedApplyToPicker></mat-datepicker>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Stage</mat-label>
-                    <mat-select formControlName="stageId">
-                      <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Job</mat-label>
-                    <mat-select formControlName="jobId">
-                      <mat-option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                    </mat-select>
-                  </mat-form-field>
-                  <div class="filter-actions">
-                    <button mat-flat-button type="submit" class="apply-filters-btn"><mat-icon>filter_list</mat-icon>
-                      Apply</button>
-                    <button mat-stroked-button type="button" (click)="clearReceivedFilters()"
-                      [disabled]="!hasReceivedFiltersApplied()"><mat-icon>clear</mat-icon> Clear</button>
-                  </div>
-                </form>
-              </mat-card-content>
-            </mat-card>
+            <div class="bp-filter-card">
+              <form [formGroup]="receivedFilterForm" class="bp-filter-form" (ngSubmit)="applyReceivedFilters()">
+                <div class="bp-filter-input-wrap">
+                  <mat-icon class="bp-filter-icon">search</mat-icon>
+                  <input type="text" formControlName="search" class="bp-filter-input"
+                    placeholder="Search job role name...">
+                </div>
+                <div class="bp-filter-input-wrap date-wrap">
+                  <input type="date" formControlName="applyDateFrom" class="bp-filter-input" title="Apply date (from)"
+                    placeholder="From">
+                </div>
+                <div class="bp-filter-input-wrap date-wrap">
+                  <input type="date" formControlName="applyDateTo" class="bp-filter-input" title="Apply date (to)"
+                    placeholder="To">
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="stageId" class="bp-filter-select">
+                    <option value="">Stage</option>
+                    <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="jobId" class="bp-filter-select">
+                    <option value="">Job</option>
+                    <option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <button type="submit" class="bp-btn-primary" [disabled]="!hasReceivedFiltersApplied()">Search</button>
+                <button type="button" class="bp-btn-clear" [disabled]="!hasReceivedFiltersApplied()"
+                  (click)="clearReceivedFilters()">Clear</button>
+              </form>
+            </div>
             <!-- Received: Loading / Board / Empty -->
             <div class="jobs-loading" *ngIf="receivedIsLoading">
               <mat-spinner diameter="40"></mat-spinner>
@@ -313,48 +333,50 @@
             <div class="jobs-board-wrapper" *ngIf="!receivedIsLoading">
               <div class="jobs-board-row" *ngIf="receivedColumnData.length > 0">
                 <div class="jobs-board-column" *ngFor="let colData of receivedColumnData; let i = index">
-                  <div class="board-column-header">
-                    <h3 class="board-column-title">{{ colData.col.stageName }}</h3>
+                  <div class="board-column-header st-col-header"
+                    [class.col-applied]="colData.col.stageName === 'Applied'">
+                    <span class="board-column-title">{{ colData.col.stageName }}</span>
                     <span class="board-column-count">{{ colData.apps.length }}</span>
                   </div>
                   <div class="board-column-cards" cdkDropList [id]="'rec-col-' + i" [cdkDropListData]="colData.apps"
                     [cdkDropListConnectedTo]="receivedDropIds" (cdkDropListDropped)="onReceivedDrop($event, i)">
-                    <article class="job-post-card clickable-card dnd-card" cdkDrag [cdkDragData]="app"
+
+                    <article class="st-job-card dnd-card group" cdkDrag [cdkDragData]="app"
                       *ngFor="let app of colData.apps" (click)="openProcessDialog(app)">
-                      <div class="dnd-drag-handle" cdkDragHandle title="Drag to move stage">
-                        <mat-icon>drag_indicator</mat-icon>
-                      </div>
                       <div *cdkDragPlaceholder class="dnd-placeholder"></div>
-                      <div class="job-post-header">
-                        <div class="job-post-avatar"><mat-icon>work</mat-icon></div>
-                        <div class="job-post-heading">
-                          <div class="job-post-title-row">
-                            <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-                            <span class="job-code-badge" *ngIf="app.jobCode"># {{ app.jobCode }}</span>
-                          </div>
-                          <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">Applied {{
-                            getAppliedDate(app)
-                            }}</p>
-                          <p class="job-post-meta" *ngIf="app.candidateName">{{ app.candidateName }}{{
-                            app.candidateEmail ?
-                            ' · ' + app.candidateEmail : '' }}</p>
-                        </div>
-                        <div class="job-post-status">
-                          <span class="status-chip" [class.status-applied]="app.status === 'Applied'">{{
-                            app.currentStageName || app.status || 'Applied' }}</span>
-                        </div>
-                      </div>
-                      <div class="job-post-footer">
-                        <div class="job-post-actions">
-                          <div class="action-btn process-btn board-process-btn"
-                            (mousedown)="openProcessDialog(app); $event.preventDefault(); $event.stopPropagation()"
-                            role="button" tabindex="0" (keydown.enter)="openProcessDialog(app)"
-                            (keydown.space)="openProcessDialog(app); $event.preventDefault()">
-                            <mat-icon>expand_more</mat-icon>
+
+                      <div class="st-card-header">
+                        <div class="st-candidate-info">
+                          <div class="st-avatar">{{ (app.candidateName || 'U').substring(0, 2).toUpperCase() }}</div>
+                          <div>
+                            <h4 class="st-candidate-name">{{ app.candidateName || 'Self' }}</h4>
+                            <span class="st-status-badge">{{ app.currentStageName || app.status || 'Applied' }}</span>
                           </div>
                         </div>
+                        <mat-icon class="st-drag-handle" cdkDragHandle
+                          title="Drag to move stage">drag_indicator</mat-icon>
                       </div>
+
+                      <div class="st-card-body">
+                        <div class="st-body-item st-job-role">
+                          <mat-icon class="st-icon">work</mat-icon>
+                          <span>{{ app.jobRoleName || 'Job' }} <ng-container
+                              *ngIf="app.jobCode">(#{{app.jobCode}})</ng-container></span>
+                        </div>
+                        <div class="st-body-item st-meta-text" *ngIf="getAppliedDate(app)">
+                          <mat-icon class="st-icon">calendar_today</mat-icon>
+                          <span>Applied {{ getAppliedDate(app) }}</span>
+                        </div>
+                        <div class="st-body-item st-meta-text" *ngIf="app.candidateEmail">
+                          <mat-icon class="st-icon">mail</mat-icon>
+                          <span class="st-truncate" [title]="app.candidateEmail">{{ app.candidateEmail }}</span>
+                        </div>
+                      </div>
+
+                      <button class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
+                        Application &rarr;</button>
                     </article>
+
                     <div class="board-column-empty" *ngIf="colData.apps.length === 0">
                       <mat-icon>inbox</mat-icon>
                       <span>Drop here</span>
@@ -392,118 +414,233 @@
     </mat-tab-group>
   </div>
 
-  <!-- No tabs: show only MY applications (current behavior) -->
-  <ng-container *ngIf="!canSeeReceivedTab">
-    <mat-card class="filters-card">
-      <mat-card-content>
-        <form [formGroup]="filterForm" class="filters-form" (ngSubmit)="applyFilters()">
-          <mat-form-field appearance="outline" class="filter-field search-field">
-            <mat-label>Search</mat-label>
-            <input matInput formControlName="search" placeholder="Job role name...">
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Stage</mat-label>
-            <mat-select formControlName="stageId">
-              <mat-option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <!-- <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-              <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-            </mat-select>
-          </mat-form-field> -->
-          <div class="filter-actions">
-            <button mat-flat-button type="submit" class="apply-filters-btn">
-              <mat-icon>filter_list</mat-icon>
-              Apply
-            </button>
-            <button mat-stroked-button type="button" (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
+  <!-- Employee / Manager: two-tab layout -->
+  <div class="tabs-wrapper" *ngIf="!canSeeReceivedTab">
+    <mat-tab-group (selectedIndexChange)="onEmployeeTabChange($event)" animationDuration="200ms"
+      class="applied-jobs-tabs">
+
+      <!-- Tab 1: My Referenced Applications -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">My Referenced Applications</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <div class="tab-content my-applications-tab">
+            <div class="bp-filter-card">
+              <form [formGroup]="filterForm" class="bp-filter-form bp-filter-form--compact" (ngSubmit)="applyFilters()">
+                <div class="bp-filter-input-wrap">
+                  <mat-icon class="bp-filter-icon">search</mat-icon>
+                  <input type="text" formControlName="search" class="bp-filter-input"
+                    placeholder="Search job role name...">
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="stageId" class="bp-filter-select">
+                    <option value="">Stage</option>
+                    <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <button type="submit" class="bp-btn-primary" [disabled]="!hasFiltersApplied()">Search</button>
+                <button type="button" class="bp-btn-clear" [disabled]="!hasFiltersApplied()"
+                  (click)="clearFilters()">Clear</button>
+              </form>
+            </div>
+
+            <div class="jobs-loading" *ngIf="isLoading">
+              <mat-spinner diameter="40"></mat-spinner>
+              <span>Loading applications...</span>
+            </div>
+
+            <div class="bp-table-card" *ngIf="!isLoading && applications.length > 0">
+              <div class="bp-table-header">
+                <h3>My Referenced Applications ({{totalCount}})</h3>
+                <button mat-icon-button class="bp-more-btn"><mat-icon>more_horiz</mat-icon></button>
+              </div>
+              <div class="bp-table-responsive">
+                <table class="bp-table">
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Job Applied</th>
+                      <th>Current Stage</th>
+                      <th>Applied Date</th>
+                      <th>Source</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let app of applications">
+                      <td>
+                        <div class="bp-td-candidate">
+                          <div class="bp-td-avatar">{{ (app.candidateName || 'U').charAt(0).toUpperCase() }}</div>
+                          <div class="bp-td-info">
+                            <p class="bp-td-name">{{ app.candidateName || 'Self' }}</p>
+                            <p class="bp-td-email" *ngIf="app.candidateEmail">{{ app.candidateEmail }}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="bp-td-job">{{ app.jobRoleName || 'Job' }}</span></td>
+                      <td>
+                        <div class="bp-td-stage">
+                          <span class="bp-stage-dot"></span>
+                          <span>{{ app.currentStageName || app.status || 'Applied' }}</span>
+                        </div>
+                      </td>
+                      <td><span class="bp-td-date">{{ getAppliedDate(app) }}</span></td>
+                      <td><span class="bp-td-source">{{ app.applicationSource || 'Internal' }}</span></td>
+                      <td>
+                        <span class="bp-td-status" [class.status-applied]="app.status === 'Applied'">{{ app.status ||
+                          'Active' }}</span>
+                      </td>
+                      <td>
+                        <div class="bp-td-actions">
+                          <button class="bp-action-btn view" matTooltip="View details"
+                            (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
+                          <button class="bp-action-btn edit" matTooltip="Edit application"
+                            (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
+                          <button class="bp-action-btn delete" matTooltip="Withdraw"
+                            (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="bp-table-footer">
+                <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
+                  [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)">
+                </mat-paginator>
+              </div>
+            </div>
+
+            <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && hasFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <p class="empty-text">No applications match your filters.</p>
+                <p class="empty-subtext">Try changing stage or status.</p>
+                <button mat-stroked-button (click)="clearFilters()"><mat-icon>clear</mat-icon> Clear filters</button>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && !hasFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">work_off</mat-icon>
+                <p class="empty-text">You haven't referenced any applications yet.</p>
+                <p class="empty-subtext">Browse job openings and apply from there.</p>
+                <a mat-flat-button routerLink="/jobs/openings" class="add-button empty-action">
+                  <mat-icon>work_outline</mat-icon> Browse Openings
+                </a>
+              </mat-card-content>
+            </mat-card>
           </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
+        </ng-template>
+      </mat-tab>
 
-    <div class="jobs-loading" *ngIf="isLoading">
-      <mat-spinner diameter="40"></mat-spinner>
-      <span>Loading applications...</span>
-    </div>
+      <!-- Tab 2: My Applications (Self) -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">My Applications</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <div class="tab-content my-applications-tab">
+            <div class="bp-filter-card">
+              <form [formGroup]="myAppsFilterForm" class="bp-filter-form" (ngSubmit)="applyMyAppsFilters()">
+                <div class="bp-filter-input-wrap">
+                  <mat-icon class="bp-filter-icon">search</mat-icon>
+                  <input type="text" formControlName="search" class="bp-filter-input"
+                    placeholder="Search job role name...">
+                </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="stageId" class="bp-filter-select">
+                    <option value="">Stage</option>
+                    <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
+                  </select>
+                </div>
+                <button type="submit" class="bp-btn-primary" [disabled]="!hasMyAppsFiltersApplied()">Search</button>
+                <button type="button" class="bp-btn-clear" [disabled]="!hasMyAppsFiltersApplied()"
+                  (click)="clearMyAppsFilters()">Clear</button>
+              </form>
+            </div>
 
-    <div class="jobs-feed-wrapper" *ngIf="!isLoading">
-      <div class="jobs-feed" *ngIf="applications.length > 0">
-        <article class="job-post-card" *ngFor="let app of applications">
-          <div class="job-post-header">
-            <div class="job-post-avatar">
-              <mat-icon>work</mat-icon>
+            <div class="jobs-loading" *ngIf="myAppsIsLoading">
+              <mat-spinner diameter="40"></mat-spinner>
+              <span>Loading your applications...</span>
             </div>
-            <div class="job-post-heading">
-              <h2 class="job-post-title">{{ app.jobRoleName || 'Job' }}</h2>
-              <p class="job-post-meta job-post-date" *ngIf="getAppliedDate(app)">
-                Applied {{ getAppliedDate(app) }}
-              </p>
+
+            <div class="bp-table-card" *ngIf="!myAppsIsLoading && myApps.length > 0">
+              <div class="bp-table-header">
+                <h3>My Applications ({{myAppsTotalCount}})</h3>
+                <button mat-icon-button class="bp-more-btn"><mat-icon>more_horiz</mat-icon></button>
+              </div>
+              <div class="bp-table-responsive">
+                <table class="bp-table">
+                  <thead>
+                    <tr>
+                      <th>Job Applied</th>
+                      <th>Current Stage</th>
+                      <th>Applied Date</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let app of myApps">
+                      <td><span class="bp-td-job">{{ app.jobRoleName || 'Job' }}</span></td>
+                      <td>
+                        <div class="bp-td-stage">
+                          <span class="bp-stage-dot"></span>
+                          <span>{{ app.currentStageName || app.status || 'Applied' }}</span>
+                        </div>
+                      </td>
+                      <td><span class="bp-td-date">{{ getAppliedDate(app) }}</span></td>
+                      <td>
+                        <span class="bp-td-status" [class.status-applied]="app.status === 'Applied'">{{ app.status ||
+                          'Active' }}</span>
+                      </td>
+                      <td>
+                        <div class="bp-td-actions">
+                          <button class="bp-action-btn view" matTooltip="View details"
+                            (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
+                          <button class="bp-action-btn edit" matTooltip="Edit application"
+                            (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
+                          <button class="bp-action-btn delete" matTooltip="Withdraw"
+                            (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="bp-table-footer">
+                <mat-paginator [length]="myAppsTotalCount" [pageSize]="myAppsPageSize" [pageIndex]="myAppsPage - 1"
+                  [pageSizeOptions]="[5, 10, 25, 50]" (page)="onMyAppsPageChange($event)">
+                </mat-paginator>
+              </div>
             </div>
-            <div class="job-post-status">
-              <span class="status-chip" [class.status-applied]="app.status === 'Applied'">
-                {{ app.currentStageName || app.status || 'Applied' }}
-              </span>
-            </div>
+
+            <mat-card class="empty-card" *ngIf="!myAppsIsLoading && myApps.length === 0 && hasMyAppsFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <p class="empty-text">No applications match your filters.</p>
+                <p class="empty-subtext">Try changing stage or status.</p>
+                <button mat-stroked-button (click)="clearMyAppsFilters()"><mat-icon>clear</mat-icon> Clear
+                  filters</button>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="empty-card" *ngIf="!myAppsIsLoading && myApps.length === 0 && !hasMyAppsFiltersApplied()">
+              <mat-card-content>
+                <mat-icon class="empty-icon">work_off</mat-icon>
+                <p class="empty-text">You haven't applied to any jobs yet.</p>
+                <p class="empty-subtext">Browse job openings and apply from there.</p>
+                <a mat-flat-button routerLink="/jobs/openings" class="add-button empty-action">
+                  <mat-icon>work_outline</mat-icon> Browse Openings
+                </a>
+              </mat-card-content>
+            </mat-card>
           </div>
-          <div class="job-post-footer">
-            <span class="job-last-date" *ngIf="app.status">{{ app.status }}</span>
-            <div class="job-post-actions">
-              <button mat-stroked-button (click)="viewJobDetails(app)" class="action-btn view-btn"
-                matTooltip="View application details">
-                <mat-icon>visibility</mat-icon>
-                View details
-              </button>
-              <button mat-stroked-button (click)="editApplication(app)" class="action-btn edit-btn"
-                matTooltip="Edit application">
-                <mat-icon>edit</mat-icon>
-                Edit
-              </button>
-              <button mat-stroked-button (click)="deleteApplication(app)" class="action-btn delete-btn"
-                matTooltip="Withdraw application">
-                <mat-icon>delete</mat-icon>
-                Delete
-              </button>
-            </div>
-          </div>
-        </article>
-      </div>
+        </ng-template>
+      </mat-tab>
 
-      <div class="jobs-pagination" *ngIf="applications.length > 0 && totalCount > 0">
-        <mat-paginator [length]="totalCount" [pageSize]="pageSize" [pageIndex]="page - 1"
-          [pageSizeOptions]="[5, 10, 25, 50]" (page)="onPageChange($event)" showFirstLastButtons>
-        </mat-paginator>
-      </div>
-    </div>
+    </mat-tab-group>
+  </div>
 
-    <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && hasFiltersApplied()">
-      <mat-card-content>
-        <mat-icon class="empty-icon">search_off</mat-icon>
-        <p class="empty-text">No applications match your filters.</p>
-        <p class="empty-subtext">Try changing stage or status.</p>
-        <button mat-stroked-button (click)="clearFilters()">
-          <mat-icon>clear</mat-icon>
-          Clear filters
-        </button>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="empty-card" *ngIf="!isLoading && applications.length === 0 && !hasFiltersApplied()">
-      <mat-card-content>
-        <mat-icon class="empty-icon">work_off</mat-icon>
-        <p class="empty-text">You haven't applied to any jobs yet.</p>
-        <p class="empty-subtext">Browse job openings and apply from there.</p>
-        <a mat-flat-button routerLink="/jobs/openings" class="add-button empty-action">
-          <mat-icon>work_outline</mat-icon>
-          Browse Openings
-        </a>
-      </mat-card-content>
-    </mat-card>
-  </ng-container>
 </div>

@@ -29,16 +29,19 @@ export class JobViewDialogComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
+  activeTab: 'intro' | 'resp' | 'skill' = 'intro';
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: JobViewDialogData,
     private dialogRef: MatDialogRef<JobViewDialogComponent>,
     private jobsService: JobsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.jobsService.getJobOpeningById(this.data.jobId).subscribe({
       next: (j) => {
         this.job = j;
+        this.setDefaultTab();
         this.isLoading = false;
       },
       error: () => {
@@ -46,6 +49,18 @@ export class JobViewDialogComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  setDefaultTab(): void {
+    if (this.job) {
+      if (this.job.jobIntroduction) {
+        this.activeTab = 'intro';
+      } else if (this.job.responsibilities) {
+        this.activeTab = 'resp';
+      } else if (this.job.skillset) {
+        this.activeTab = 'skill';
+      }
+    }
   }
 
   getMetaLine(job: JobOpeningDto): string {
