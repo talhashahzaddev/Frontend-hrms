@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="cm-page-header-right">
-            <button mat-stroked-button class="cm-btn cm-btn--outline"
+            <button mat-flat-button class="cm-btn cm-btn--primary"
                 *ngIf="!isLoading && isSuperAdmin && !isEditMode && hasAnyData()" (click)="enterEditMode()"
                 id="career-edit-btn">
                 <mat-icon>edit</mat-icon>
@@ -344,15 +344,15 @@
 
         <!-- Sticky Bottom Action Bar -->
         <div class="cm-action-bar">
-            <button type="button" class="cm-discard-btn" [disabled]="isSaving"
-                (click)="cancelEdit()" id="career-cancel-btn">
-                Discard Changes
-            </button>
             <div class="cm-action-bar-right">
                 <span class="cm-save-hint" *ngIf="isUploadingLogo || isUploadingBg">
                     <mat-icon>hourglass_top</mat-icon>
                     Waiting for uploads…
                 </span>
+                <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving"
+                    (click)="cancelEdit()" id="career-cancel-btn">
+                    Discard Changes
+                </button>
                 <button type="submit" class="cm-btn cm-btn--primary"
                     [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
                     <mat-spinner *ngIf="isSaving" diameter="18" class="cm-btn-spinner"></mat-spinner>
