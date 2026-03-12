@@ -315,14 +315,75 @@ $primary-hover: rgba(37, 99, 235, 0.9);
     .stats-row {
       grid-template-columns: repeat(2, 1fr);
     }
+  }
 
-    .filter-card .filter-grid {
+  @media (max-width: 640px) {
+    padding: 1rem;
+
+    .page-header {
       flex-direction: column;
-      align-items: stretch;
+      align-items: flex-start;
+      gap: 0.75rem;
 
-      .filter-group,
-      .filter-actions {
+      .header-right {
         width: 100%;
+        
+        .btn-primary {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+      .header-left {
+        .page-title {
+          font-size: 1.5rem;
+        }
+      }
+    }
+
+    .stats-row {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .filter-card {
+      padding: 1rem;
+
+      .filter-grid {
+        gap: 0.75rem;
+        
+        .filter-group {
+          flex: 1 1 100%; // Stacks inputs horizontally but with less gap
+
+          .date-range-group {
+            flex-direction: row;
+            align-items: center;
+
+            .range-separator {
+              display: block; // Show the dash when horizontal
+            }
+          }
+        }
+
+        .filter-actions {
+          flex: 1 1 100%;
+          flex-direction: row; // Side by side
+          justify-content: flex-start; // Align to start (left)
+          height: auto;
+          margin-top: 0.5rem;
+          gap: 1rem;
+
+          button,
+          .btn-primary,
+          .btn-clear {
+            width: auto; // Let them size naturally
+            min-width: 100px;
+            height: 2.5rem !important; // Force height because flex container is auto
+            justify-content: center;
+            margin: 0;
+            padding: 0 1rem;
+          }
+        }
       }
     }
   }
@@ -353,11 +414,11 @@ $primary-hover: rgba(37, 99, 235, 0.9);
 
 .jobs-feed {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 12px;
 
   @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -730,4 +791,46 @@ $primary-hover: rgba(37, 99, 235, 0.9);
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .job-post-card {
+    padding: 16px 12px;
+  }
+
+  .job-post-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .job-post-status {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .job-post-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    .job-last-date {
+      margin-bottom: 8px;
+    }
+  }
+
+  .job-post-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+
+    button,
+    a,
+    .action-btn,
+    .apply-self-btn,
+    .apply-btn {
+      width: 100% !important;
+      justify-content: center;
+      display: flex;
+    }
+  }
 }
