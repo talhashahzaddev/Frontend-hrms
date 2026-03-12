@@ -1282,32 +1282,58 @@
 // Responsive Design
 @media (max-width: 768px) {
   .header-actions {
-    gap: var(--spacing-sm);
-    margin-left: var(--spacing-sm);
+    gap: 4px;
+    margin-left: auto;
   }
 
-  .action-button {
-    width: 40px;
-    height: 40px;
+  // Hide the zoom dropdown entirely on mobile since it takes up too much horizontal space
+  .zoom-dropdown {
+    display: none !important;
+  }
+
+  .action-button,
+  .search-trigger-button {
+    width: 38px;
+    height: 38px;
 
     mat-icon {
-      font-size: 1.125rem;
-      width: 1.125rem;
-      height: 1.125rem;
+      font-size: 1.2rem;
+      width: 1.2rem;
+      height: 1.2rem;
     }
   }
 
+  // Make the search input take over the header banner when expanded on mobile
+  .search-container {
+    position: static;
+  }
+
+  .header-search {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    right: 12px;
+    transform: translateY(-50%);
+    width: auto;
+    z-index: 200;
+  }
+
   .search-input-wrapper {
-    width: 250px !important;
+    width: 100% !important;
+    height: 48px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
   }
 
   .user-menu-button-pic {
-    width: 40px !important;
-    height: 40px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-width: 2px !important;
 
     .user-status-indicator {
-      width: 10px;
-      height: 10px;
+      width: 11px;
+      height: 11px;
+      border-width: 2px;
     }
   }
 
