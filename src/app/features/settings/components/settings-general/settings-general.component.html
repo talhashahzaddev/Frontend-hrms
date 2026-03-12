@@ -42,11 +42,7 @@
 
       <mat-card-content class="card-content">
 
-        <form
-          [formGroup]="settingsForm"
-          (ngSubmit)="onSave()"
-          class="settings-form"
-        >
+        <form [formGroup]="settingsForm" (ngSubmit)="onSave()" class="settings-form">
 
           <!-- Currency -->
           <div class="section-row">
@@ -57,10 +53,7 @@
 
               <mat-select formControlName="currency">
 
-                <mat-option
-                  *ngFor="let currency of availableCurrencies"
-                  [value]="currency.code"
-                >
+                <mat-option *ngFor="let currency of availableCurrencies" [value]="currency.code">
 
                   <div class="option-row">
                     <span class="code-badge">
@@ -88,42 +81,38 @@
 
 
           <!-- TIMEZONE -->
-<div class="section-row">
-<mat-form-field appearance="outline" class="full-width" >
-    <mat-label>System Time Zone</mat-label>
-    <mat-select
-      formControlName="timeZone"
-      [disabled]="timezone.length === 0">
-      <!-- Default option when nothing selected -->
-      <mat-option [value]="null" disabled>
-        Select Time Zone
-      </mat-option>
-      <!-- Loading -->
-      <mat-option *ngIf="timezone.length === 0" disabled>
-        Loading timezones...
-      </mat-option>
-      <!-- Timezone list -->
-      <mat-option
-        *ngFor="let tz of timezone"
-        [value]="tz.label">
-        {{ tz.label }}
-      </mat-option>
+          <div class="section-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>System Time Zone</mat-label>
+              <mat-select formControlName="timeZone" [disabled]="timezone.length === 0">
+                <!-- Default option when nothing selected -->
+                <mat-option [value]="null" disabled>
+                  Select Time Zone
+                </mat-option>
+                <!-- Loading -->
+                <mat-option *ngIf="timezone.length === 0" disabled>
+                  Loading timezones...
+                </mat-option>
+                <!-- Timezone list -->
+                <mat-option *ngFor="let tz of timezone" [value]="tz.label">
+                  {{ tz.label }}
+                </mat-option>
 
-    </mat-select>
+              </mat-select>
 
-    <mat-icon matPrefix>schedule</mat-icon>
+              <mat-icon matPrefix>schedule</mat-icon>
 
-    <mat-hint>
-      Used for attendance logs and system time
-    </mat-hint>
+              <mat-hint>
+                Used for attendance logs and system time
+              </mat-hint>
 
-    <mat-error *ngIf="settingsForm.get('timeZone')?.hasError('required')">
-      System time zone is required
-    </mat-error>
+              <mat-error *ngIf="settingsForm.get('timeZone')?.hasError('required')">
+                System time zone is required
+              </mat-error>
 
-  </mat-form-field>
+            </mat-form-field>
 
-</div>
+          </div>
           <!-- CULTURE -->
           <div class="section-row">
 
@@ -133,10 +122,7 @@
 
               <mat-select formControlName="culture">
 
-                <mat-option
-                  *ngFor="let culture of availableCultures"
-                  [value]="culture.code"
-                >
+                <mat-option *ngFor="let culture of availableCultures" [value]="culture.code">
 
                   <div class="culture-option-container">
 
@@ -177,23 +163,14 @@
           <!-- BUTTONS -->
           <div class="form-actions">
 
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="save-button"
-              [disabled]="settingsForm.invalid || isSaving"
-            >
+            <button mat-raised-button color="primary" type="submit" class="save-button"
+              [disabled]="settingsForm.invalid || isSaving">
 
               <mat-icon *ngIf="!isSaving">
                 save
               </mat-icon>
 
-              <mat-spinner
-                *ngIf="isSaving"
-                diameter="20"
-                class="button-spinner"
-              >
+              <mat-spinner *ngIf="isSaving" diameter="20" class="button-spinner">
               </mat-spinner>
 
               <span>
@@ -204,12 +181,7 @@
 
 
 
-            <button
-              mat-stroked-button
-              type="button"
-              (click)="loadSettings()"
-              class="cancel-button"
-            >
+            <button mat-stroked-button type="button" (click)="loadSettings()" class="cancel-button">
 
               <mat-icon>refresh</mat-icon>
 

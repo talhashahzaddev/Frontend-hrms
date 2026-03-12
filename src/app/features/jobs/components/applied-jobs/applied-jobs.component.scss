@@ -1262,6 +1262,18 @@
       background: rgba(239, 68, 68, 0.1);
     }
   }
+
+  .action-wrap {
+    display: inline-block;
+    
+    &.disabled-wrap {
+      cursor: not-allowed;
+      
+      .bp-action-btn {
+        pointer-events: none; /* Let the span handle hover events */
+      }
+    }
+  }
 }
 
 /* --- Kanban Summary Dashboard (Super Admin) --- */

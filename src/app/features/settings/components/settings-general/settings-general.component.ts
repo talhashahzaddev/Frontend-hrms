@@ -46,7 +46,7 @@ export interface CultureOption {
 })
 export class SettingsGeneralComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   settingsForm: FormGroup;
   organizationSettings: OrganizationSettings | null = null;
   availableCurrencies: Array<{ code: string; name: string; symbol: string }> = [];
@@ -61,8 +61,8 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   availableCultures: CultureOption[] = [];
   // availableTimeZones: string[] = [];
 
- timezone: { value: string; label: string }[] = [];
-  timeSlots: string[] = []; 
+  timezone: { value: string; label: string }[] = [];
+  timeSlots: string[] = [];
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
@@ -74,15 +74,15 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   ) {
     this.settingsForm = this.fb.group({
       currency: ['', Validators.required],
-      timeZone: ['',Validators.required], // Yeh add karein
-  culture: ['', Validators.required]
+      timeZone: ['', Validators.required], // Yeh add karein
+      culture: ['', Validators.required]
     });
     this.availableCurrencies = this.settingsService.getAvailableCurrencies();
   }
 
   ngOnInit(): void {
     this.checkUserRole();
-     this.loadTimeZones(); 
+    this.loadTimeZones();
     this.generateCultureOptions();
     if (this.isSuperAdmin) {
       this.loadSettings();
@@ -98,27 +98,27 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     this.isSuperAdmin = this.authService.hasRole('Super Admin');
   }
 
-  
-loadTimeZones(): void {
-  this.settingsService.getAllTimeZones().subscribe({
-    next: (countries: any[]) => {
 
-      this.timezone = countries
-        .filter(c => c.capital?.length && c.timezones?.length)
-        .map(country => ({
-          value: country.timezones[0],
-          label: `${country.name.common}/${country.capital[0]}`
-        }))
-        .sort((a, b) => a.label.localeCompare(b.label));
+  loadTimeZones(): void {
+    this.settingsService.getAllTimeZones().subscribe({
+      next: (countries: any[]) => {
 
-      this.cdr.markForCheck();
-    },
-    error: () => {
-      this.notification.showError('Failed to load timezones');
-      this.cdr.markForCheck();
-    }
-  });
-}
+        this.timezone = countries
+          .filter(c => c.capital?.length && c.timezones?.length)
+          .map(country => ({
+            value: country.timezones[0],
+            label: `${country.name.common}/${country.capital[0]}`
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.notification.showError('Failed to load timezones');
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
 
   loadSettings(): void {
@@ -154,54 +154,54 @@ loadTimeZones(): void {
     this.isDropdownOpen = false;
   }
 
- 
+
   onSave(): void {
-  if (this.settingsForm.invalid || !this.isSuperAdmin) {
-    return;
+    if (this.settingsForm.invalid || !this.isSuperAdmin) {
+      return;
+    }
+
+    const selectedCurrency = this.settingsForm.get('currency')?.value;
+    const selectedTimeZone = this.settingsForm.get('timeZone')?.value;
+    const selectedCulture = this.settingsForm.get('culture')?.value;
+
+
+    const request: UpdateLocalizationRequest = {
+      currency: selectedCurrency,
+      timeZone: selectedTimeZone,
+      culture: selectedCulture
+    };
+
+    this.isSaving = true;
+
+    this.settingsService.updateLocalization(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Update current values
+          this.currentCurrency = selectedCurrency;
+          this.currentTimeZone = selectedTimeZone;
+          this.currentCulture = selectedCulture;
+
+          this.notificationService.showSuccess('Settings updated successfully');
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Error updating settings:', error);
+          this.notificationService.showError(
+            error.message || 'Failed to update settings'
+          );
+          this.isSaving = false;
+        }
+      });
   }
 
-  const selectedCurrency = this.settingsForm.get('currency')?.value;
-  const selectedTimeZone = this.settingsForm.get('timeZone')?.value;
-  const selectedCulture = this.settingsForm.get('culture')?.value;
-
- 
-  const request: UpdateLocalizationRequest = {
-    currency: selectedCurrency,
-    timeZone: selectedTimeZone,
-    culture: selectedCulture
-  };
-
-  this.isSaving = true;
-
-  this.settingsService.updateLocalization(request)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: () => {
-        // Update current values
-        this.currentCurrency = selectedCurrency;
-        this.currentTimeZone = selectedTimeZone;
-        this.currentCulture = selectedCulture;
-
-        this.notificationService.showSuccess('Settings updated successfully');
-        this.isSaving = false;
-      },
-      error: (error) => {
-        console.error('Error updating settings:', error);
-        this.notificationService.showError(
-          error.message || 'Failed to update settings'
-        );
-        this.isSaving = false;
-      }
-    });
-}
 
 
-
-// 5. Ye function codes ko human-readable formats mein convert karega
+  // 5. Ye function codes ko human-readable formats mein convert karega
   private generateCultureOptions(): void {
     // Ye wahi codes hain jo aapki image mein thay
     const codes = [
-      'en-US', 'en-GB', 'ur-PK', 'az-AZ', 'ar-SA', 'be-BY', 
+      'en-US', 'en-GB', 'ur-PK', 'az-AZ', 'ar-SA', 'be-BY',
       'bg-BG', 'bn-BD', 'fr-FR', 'de-DE', 'tr-TR'
     ];
 
