@@ -24,7 +24,7 @@ export const attendanceRoutes: Routes = [
   {
     path: 'reports',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
+    data: { roles: ['Super Admin', 'HR Manager','Manager'] },
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
   {

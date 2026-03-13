@@ -153,6 +153,7 @@ export interface ManualAttendanceRequest {
 }
 
 export interface AttendanceSearchRequest {
+  SearchTerm?: string;
   employeeId?: string;
   departmentId?: string;
   startDate: string;

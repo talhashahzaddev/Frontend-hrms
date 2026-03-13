@@ -98,7 +98,7 @@ export class AttendanceService {
 
   getAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
     let params = new HttpParams();
-
+    if(searchRequest.SearchTerm) params=params.set('searchTerm', searchRequest.SearchTerm);
     if (searchRequest.employeeId) params = params.set('employeeId', searchRequest.employeeId);
     if (searchRequest.departmentId) params = params.set('departmentId', searchRequest.departmentId);
     if (searchRequest.status) params = params.set('status', searchRequest.status);

@@ -439,6 +439,9 @@
 // ══════════════════════════════════════════════════════════════
 // BOTTOM GRID
 // ══════════════════════════════════════════════════════════════
+.bottom-grid-full {
+  grid-template-columns: 1fr !important;
+}
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

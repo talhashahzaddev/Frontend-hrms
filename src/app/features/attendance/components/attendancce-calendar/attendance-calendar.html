@@ -1,30 +1,13 @@
-<div class="calendar-container">
+<div class="calendar-wrapper">
   <!-- Header -->
-  <div
-    class="calendar-header"
-    style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 760px; margin: 0 auto 12px;"
-  >
-    <div>
-      <button mat-icon-button color="primary" (click)="previousMonth()">
+  <div class="cal-header">
+    <h3 class="cal-title">{{ currentMonthYear }}</h3>
+    <div class="cal-nav">
+      <button mat-icon-button (click)="previousMonth()" class="nav-btn">
         <mat-icon>chevron_left</mat-icon>
       </button>
-      <button mat-icon-button color="primary" (click)="nextMonth()">
+      <button mat-icon-button (click)="nextMonth()" class="nav-btn">
         <mat-icon>chevron_right</mat-icon>
-      </button>
-    </div>
-
-    <!-- <h3 style="margin: 0;">
-      {{ (new Date(currentYear, currentMonth)).toLocaleString(undefined, { month: 'long', year: 'numeric' }) }}
-    </h3> -->
-
-    <h3 style="margin: 0;">
-  {{ currentMonthYear }}
-    </h3>
-
-    <div>
-      <button mat-stroked-button color="primary" (click)="goToCurrentMonth()">
-        <mat-icon>today</mat-icon>
-        Current Month
       </button>
     </div>
   </div>
@@ -38,27 +21,29 @@
   <div class="calendar-grid">
     <div
       *ngFor="let cell of daysGrid"
-      class="calendar-cell"
-      [ngClass]="getDateClass(cell)"
+      class="cal-cell"
+      [class.other-month]="!cell.inCurrentMonth"
+      [class.is-today]="cell.isToday"
       [matTooltip]="getTooltip(cell)"
       matTooltipPosition="above"
     >
-      <div
-        class="date-number"
-        [style.opacity]="cell.inCurrentMonth ? '1' : '0.4'"
-      >
+      <span class="day-number">
         {{ cell.date.getDate() }}
-      </div>
+      </span>
+      <span
+        *ngIf="cell.inCurrentMonth"
+        class="status-dot"
+        [ngClass]="getStatusDotClass(cell)"
+      ></span>
     </div>
   </div>
 
   <!-- Legend -->
-  <div class="calendar-legend" style="margin-top: 16px;">
-    <div class="legend-item"><div class="legend-color present"></div> Present</div>
-    <div class="legend-item"><div class="legend-color absent"></div> Absent</div>
-    <div class="legend-item"><div class="legend-color half-day"></div> Half Day</div>
-    <div class="legend-item"><div class="legend-color leave"></div> On Leave</div>
-    <div class="legend-item"><div class="legend-color weekend"></div> Weekend</div>
-    <div class="legend-item"><div class="legend-color late"></div> Late</div>
+  <div class="cal-legend">
+    <div class="legend-item"><span class="dot dot-present"></span> Present</div>
+    <div class="legend-item"><span class="dot dot-absent"></span> Absent</div>
+    <div class="legend-item"><span class="dot dot-late"></span> Late</div>
+    <div class="legend-item"><span class="dot dot-leave"></span> Leave</div>
+    <div class="legend-item"><span class="dot dot-half"></span> Half Day</div>
   </div>
 </div>
