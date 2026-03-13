@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="cm-page-header-right">
-            <button mat-stroked-button class="cm-btn cm-btn--outline"
+            <button mat-flat-button class="cm-btn cm-btn--primary"
                 *ngIf="!isLoading && isSuperAdmin && !isEditMode && hasAnyData()" (click)="enterEditMode()"
                 id="career-edit-btn">
                 <mat-icon>edit</mat-icon>
@@ -61,71 +61,30 @@
             </button>
         </div>
 
-        <!-- Data view -->
+        <!-- Live Career Page Preview -->
         <ng-container *ngIf="hasAnyData()">
 
-            <!-- Hero preview -->
-            <div class="cm-hero-preview" *ngIf="savedData?.careerBgImageUrl || savedData?.logoUrl">
-                <div class="cm-hero-bg"
+            <!-- Preview Label -->
+            <div class="cm-preview-label">
+                <mat-icon>visibility</mat-icon>
+                <span>Career Page Preview</span>
+            </div>
+
+            <!-- Hero Banner Preview (mirrors public career page) -->
+            <div class="cm-live-preview">
+                <section class="cm-preview-hero"
                     [style.backgroundImage]="savedData?.careerBgImageUrl ? 'url(' + savedData!.careerBgImageUrl + ')' : 'none'"
-                    [class.no-bg]="!savedData?.careerBgImageUrl">
-                    <div class="cm-hero-overlay"></div>
-                    <div class="cm-hero-content">
-                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo" class="cm-hero-logo">
-                        <h2 class="cm-hero-header" *ngIf="savedData?.careerHeaderText" [innerHTML]="savedData!.careerHeaderText"></h2>
-                        <span class="cm-hero-badge" *ngIf="!savedData?.careerBgImageUrl">No background image set</span>
+                    [class.cm-preview-hero--no-bg]="!savedData?.careerBgImageUrl">
+                    <div class="cm-preview-hero-overlay"></div>
+                    <div class="cm-preview-hero-content">
+                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo" class="cm-preview-logo">
+                        <h1 class="cm-preview-headline" [innerHTML]="savedData?.careerHeaderText || 'Join Our Team'"></h1>
+                        <div class="cm-preview-subtext" *ngIf="savedData?.careerDescription"
+                            [innerHTML]="savedData!.careerDescription"></div>
                     </div>
-                </div>
+                </section>
             </div>
 
-            <!-- Branding section -->
-            <div class="cm-section">
-                <div class="cm-section-header">
-                    <span class="cm-section-num">1</span>
-                    <h2 class="cm-section-title">Organization Branding</h2>
-                </div>
-                <div class="cm-section-body">
-                    <div class="cm-two-col">
-                        <div>
-                            <p class="cm-field-label">Organization Logo</p>
-                            <ng-container *ngIf="savedData?.logoUrl; else noLogo">
-                                <div class="cm-logo-thumb-wrap"><img [src]="savedData!.logoUrl" alt="Logo" class="cm-logo-thumb"></div>
-                                <a [href]="savedData!.logoUrl" target="_blank" rel="noopener" class="cm-view-link">
-                                    <mat-icon>open_in_new</mat-icon> View full image
-                                </a>
-                            </ng-container>
-                            <ng-template #noLogo><span class="cm-no-value">Not set</span></ng-template>
-                        </div>
-                        <div>
-                            <p class="cm-field-label">Career Background Image</p>
-                            <ng-container *ngIf="savedData?.careerBgImageUrl; else noBg">
-                                <div class="cm-bg-thumb-wrap"><img [src]="savedData!.careerBgImageUrl" alt="Background" class="cm-bg-thumb"></div>
-                                <a [href]="savedData!.careerBgImageUrl" target="_blank" rel="noopener" class="cm-view-link">
-                                    <mat-icon>open_in_new</mat-icon> View full image
-                                </a>
-                            </ng-container>
-                            <ng-template #noBg><span class="cm-no-value">Not set</span></ng-template>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Page content section -->
-            <div class="cm-section">
-                <div class="cm-section-header">
-                    <span class="cm-section-num">2</span>
-                    <h2 class="cm-section-title">Page Content</h2>
-                </div>
-                <div class="cm-section-body">
-                    <p class="cm-field-label">Page Header</p>
-                    <p class="cm-header-value" *ngIf="savedData?.careerHeaderText; else noHeader" [innerHTML]="savedData!.careerHeaderText"></p>
-                    <ng-template #noHeader><span class="cm-no-value">Not set</span></ng-template>
-                    <div class="cm-divider"></div>
-                    <p class="cm-field-label">Career Description</p>
-                    <div class="cm-desc-value" *ngIf="savedData?.careerDescription; else noDesc" [innerHTML]="savedData!.careerDescription"></div>
-                    <ng-template #noDesc><span class="cm-no-value">Not set</span></ng-template>
-                </div>
-            </div>
 
             <!-- Page Settings section (view mode) -->
             <div class="cm-section">
@@ -344,15 +303,15 @@
 
         <!-- Sticky Bottom Action Bar -->
         <div class="cm-action-bar">
-            <button type="button" class="cm-discard-btn" [disabled]="isSaving"
-                (click)="cancelEdit()" id="career-cancel-btn">
-                Discard Changes
-            </button>
             <div class="cm-action-bar-right">
                 <span class="cm-save-hint" *ngIf="isUploadingLogo || isUploadingBg">
                     <mat-icon>hourglass_top</mat-icon>
                     Waiting for uploads…
                 </span>
+                <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving"
+                    (click)="cancelEdit()" id="career-cancel-btn">
+                    Discard Changes
+                </button>
                 <button type="submit" class="cm-btn cm-btn--primary"
                     [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
                     <mat-spinner *ngIf="isSaving" diameter="18" class="cm-btn-spinner"></mat-spinner>

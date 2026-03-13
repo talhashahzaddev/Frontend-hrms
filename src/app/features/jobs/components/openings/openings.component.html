@@ -166,10 +166,10 @@
               <mat-icon>edit</mat-icon>
               Edit
             </button>
-            <button *ngIf="canManageJobs" mat-stroked-button (click)="deleteJob(job)" class="action-btn delete-btn"
-              matTooltip="Delete">
-              <mat-icon>delete</mat-icon>
-              Delete
+            <button *ngIf="canManageJobs && job.status !== 'Closed'" mat-stroked-button (click)="closeJob(job)" class="action-btn close-btn"
+              matTooltip="Close this job">
+              <mat-icon>block</mat-icon>
+              Close
             </button>
             <a *ngIf="job.externalLink" [href]="job.externalLink" target="_blank" rel="noopener noreferrer"
               mat-stroked-button class="action-btn external-apply-btn" matTooltip="Apply via external link">

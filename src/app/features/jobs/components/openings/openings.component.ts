@@ -203,12 +203,12 @@ export class OpeningsComponent implements OnInit {
     this.router.navigate(['/jobs/edit', job.jobId]);
   }
 
-  deleteJob(job: JobOpeningDto): void {
+  closeJob(job: JobOpeningDto): void {
     const dialogData: ConfirmDeleteData = {
-      title: 'Delete Job Opening',
-      message: `Are you sure you want to delete "${job.jobRoleName}"?`,
+      title: 'Close Job Opening',
+      message: `Are you sure you want to close "${job.jobRoleName}"? This will mark the position as closed.`,
       itemName: job.jobRoleName,
-      confirmButtonText: 'Yes, Delete'
+      confirmButtonText: 'Yes, Close'
     };
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '450px',
@@ -217,15 +217,14 @@ export class OpeningsComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        this.jobsService.deleteJobOpening(job.jobId).subscribe({
+        this.jobsService.updateJobOpening(job.jobId, { status: 'Closed' }).subscribe({
           next: () => {
-            this.notification.showSuccess('Job opening deleted successfully');
-            this.page = 1;
+            this.notification.showSuccess('Job opening closed successfully');
+            this.loadStats();
             this.loadOpenings();
           },
           error: (err) => {
-            this.notification.showError(err?.message || 'Failed to delete job opening');
-            this.loadOpenings();
+            this.notification.showError(err?.message || 'Failed to close job opening');
           }
         });
       }

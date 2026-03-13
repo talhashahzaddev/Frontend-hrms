@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -278,18 +278,19 @@ export class JobsService {
   }
 
   getJobApplicationsPostedByMePaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId, jobId } = params;
-    const queryParams: Record<string, string | number> = {
-      pageNumber: page,
-      pageSize
-    };
-    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
-    if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
-    if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
-    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
-    if (jobId != null && jobId !== '') queryParams['jobId'] = jobId;
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId, jobIds } = params;
+    let httpParams = new HttpParams()
+      .set('pageNumber', page.toString())
+      .set('pageSize', pageSize.toString());
+    if (search != null && search.trim() !== '') httpParams = httpParams.set('search', search.trim());
+    if (applyDateFrom) httpParams = httpParams.set('applyDateFrom', applyDateFrom);
+    if (applyDateTo) httpParams = httpParams.set('applyDateTo', applyDateTo);
+    if (stageId != null && stageId !== '') httpParams = httpParams.set('stageId', stageId);
+    if (jobIds && jobIds.length > 0) {
+      jobIds.forEach(id => { httpParams = httpParams.append('jobIds', id); });
+    }
     return this.http
-      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/posted-by-me`, { params: queryParams })
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/posted-by-me`, { params: httpParams })
       .pipe(
         map((res) => {
           if (!res.success || !res.data) {
@@ -309,18 +310,19 @@ export class JobsService {
   }
 
   getReceivedJobApplicationsPaged(params: ReceivedJobApplicationsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId, jobId } = params;
-    const queryParams: Record<string, string | number> = {
-      pageNumber: page,
-      pageSize
-    };
-    if (search != null && search.trim() !== '') queryParams['search'] = search.trim();
-    if (applyDateFrom) queryParams['applyDateFrom'] = applyDateFrom;
-    if (applyDateTo) queryParams['applyDateTo'] = applyDateTo;
-    if (stageId != null && stageId !== '') queryParams['stageId'] = stageId;
-    if (jobId != null && jobId !== '') queryParams['jobId'] = jobId;
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, stageId, jobIds } = params;
+    let httpParams = new HttpParams()
+      .set('pageNumber', page.toString())
+      .set('pageSize', pageSize.toString());
+    if (search != null && search.trim() !== '') httpParams = httpParams.set('search', search.trim());
+    if (applyDateFrom) httpParams = httpParams.set('applyDateFrom', applyDateFrom);
+    if (applyDateTo) httpParams = httpParams.set('applyDateTo', applyDateTo);
+    if (stageId != null && stageId !== '') httpParams = httpParams.set('stageId', stageId);
+    if (jobIds && jobIds.length > 0) {
+      jobIds.forEach(id => { httpParams = httpParams.append('jobIds', id); });
+    }
     return this.http
-      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/received`, { params: queryParams })
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/received`, { params: httpParams })
       .pipe(
         map((res) => {
           if (!res.success || !res.data) {
