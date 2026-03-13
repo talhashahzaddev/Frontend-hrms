@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -54,6 +54,10 @@ import { EditApplicationStageDialogComponent } from '../edit-application-stage-d
   styleUrls: ['./applied-jobs.component.scss']
 })
 export class AppliedJobsComponent implements OnInit {
+  @HostListener('document:click') onDocumentClick(): void {
+    this.closeAllDropdowns();
+  }
+
   applications: JobApplicationDto[] = [];
   stages: StageMasterDto[] = [];
   isLoading = false;
@@ -88,8 +92,13 @@ export class AppliedJobsComponent implements OnInit {
   receivedIsLoading = false;
 
   stageOptions: { value: string; label: string }[] = [];
-  jobOptions: { value: string; label: string }[] = [];
+  jobOptions: { value: string; label: string; status: string }[] = [];
   allJobs: JobOpeningDto[] = [];
+
+  /** Multi-select job filter state */
+  selectedJobIds: string[] = [];
+  postedByMeJobDropdownOpen = false;
+  receivedJobDropdownOpen = false;
 
   /** Mutable per-column arrays for CDK DnD – Posted By Me board */
   postedByMeColumnData: { col: { stageId: string | null; stageName: string }; apps: JobApplicationDto[] }[] = [];
@@ -127,15 +136,13 @@ export class AppliedJobsComponent implements OnInit {
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: [''],
-      jobId: ['']
+      stageId: ['']
     });
     this.receivedFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: [''],
-      jobId: ['']
+      stageId: ['']
     });
   }
 
@@ -185,10 +192,7 @@ export class AppliedJobsComponent implements OnInit {
     this.jobsService.getJobOpeningsPaged({ pageSize: 100 }).subscribe({
       next: (result) => {
         this.allJobs = result.data ?? [];
-        this.jobOptions = [
-          { value: '', label: 'All jobs' },
-          ...this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName }))
-        ];
+        this.jobOptions = this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName, status: j.status || 'Open' }));
       }
     });
     this.loadApplications();
@@ -319,7 +323,7 @@ export class AppliedJobsComponent implements OnInit {
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
       stageId: v.stageId || undefined,
-      jobId: v.jobId || undefined
+      jobIds: this.selectedJobIds.length > 0 ? this.selectedJobIds : undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.postedByMeApplications = result.data ?? [];
@@ -346,9 +350,9 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: '',
-      jobId: ''
+      stageId: ''
     });
+    this.selectedJobIds = [];
     this.postedByMePage = 1;
     this.loadPostedByMeApplications();
   }
@@ -357,7 +361,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.postedByMeFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || this.selectedJobIds.length > 0);
   }
 
   onPostedByMePageChange(event: PageEvent): void {
@@ -379,7 +383,7 @@ export class AppliedJobsComponent implements OnInit {
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
       stageId: v.stageId || undefined,
-      jobId: v.jobId || undefined
+      jobIds: this.selectedJobIds.length > 0 ? this.selectedJobIds : undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.receivedApplications = result.data ?? [];
@@ -406,9 +410,9 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: '',
-      jobId: ''
+      stageId: ''
     });
+    this.selectedJobIds = [];
     this.receivedPage = 1;
     this.loadReceivedApplications();
   }
@@ -417,13 +421,71 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.receivedFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || this.selectedJobIds.length > 0);
   }
 
   onReceivedPageChange(event: PageEvent): void {
     this.receivedPage = event.pageIndex + 1;
     this.receivedPageSize = event.pageSize;
     this.loadReceivedApplications();
+  }
+
+  // ==================== Multi-select Job Filter Helpers ====================
+
+  toggleJobSelection(jobId: string): void {
+    const idx = this.selectedJobIds.indexOf(jobId);
+    if (idx === -1) {
+      this.selectedJobIds = [...this.selectedJobIds, jobId];
+    } else {
+      this.selectedJobIds = this.selectedJobIds.filter(id => id !== jobId);
+    }
+  }
+
+  toggleSelectAllJobs(): void {
+    if (this.areAllJobsSelected()) {
+      this.selectedJobIds = [];
+    } else {
+      this.selectedJobIds = this.jobOptions.map(j => j.value);
+    }
+  }
+
+  areAllJobsSelected(): boolean {
+    return this.jobOptions.length > 0 && this.selectedJobIds.length === this.jobOptions.length;
+  }
+
+  isJobSelected(jobId: string): boolean {
+    return this.selectedJobIds.includes(jobId);
+  }
+
+  getSelectedJobsDisplayText(): string {
+    if (this.selectedJobIds.length === 0) return 'Select Jobs';
+    if (this.areAllJobsSelected()) return 'All Jobs';
+    if (this.selectedJobIds.length === 1) {
+      const job = this.jobOptions.find(j => j.value === this.selectedJobIds[0]);
+      return job ? job.label : '1 Job';
+    }
+    return `${this.selectedJobIds.length} Jobs Selected`;
+  }
+
+  togglePostedByMeJobDropdown(event: Event): void {
+    event.stopPropagation();
+    this.postedByMeJobDropdownOpen = !this.postedByMeJobDropdownOpen;
+    this.receivedJobDropdownOpen = false;
+  }
+
+  toggleReceivedJobDropdown(event: Event): void {
+    event.stopPropagation();
+    this.receivedJobDropdownOpen = !this.receivedJobDropdownOpen;
+    this.postedByMeJobDropdownOpen = false;
+  }
+
+  onDropdownItemClick(event: Event): void {
+    event.stopPropagation();
+  }
+
+  closeAllDropdowns(): void {
+    this.postedByMeJobDropdownOpen = false;
+    this.receivedJobDropdownOpen = false;
   }
 
   onTabChange(index: number): void {

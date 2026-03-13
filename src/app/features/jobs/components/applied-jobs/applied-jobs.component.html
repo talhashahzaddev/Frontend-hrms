@@ -193,11 +193,25 @@
                     <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
                   </select>
                 </div>
-                <div class="bp-filter-select-wrap">
-                  <select formControlName="jobId" class="bp-filter-select">
-                    <option value="">Job</option>
-                    <option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</option>
-                  </select>
+                <div class="bp-filter-select-wrap bp-multi-select-wrap">
+                  <div class="bp-multi-select-trigger bp-filter-select" (click)="togglePostedByMeJobDropdown($event)">
+                    <span class="bp-multi-select-text">{{ getSelectedJobsDisplayText() }}</span>
+                    <mat-icon class="bp-multi-select-arrow">{{ postedByMeJobDropdownOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </div>
+                  <div class="bp-multi-select-dropdown" *ngIf="postedByMeJobDropdownOpen" (click)="onDropdownItemClick($event)">
+                    <div class="bp-multi-select-item bp-select-all-item" (click)="toggleSelectAllJobs()">
+                      <input type="checkbox" [checked]="areAllJobsSelected()" (click)="$event.stopPropagation(); toggleSelectAllJobs()" />
+                      <span class="bp-multi-select-label">Select All</span>
+                    </div>
+                    <div class="bp-multi-select-divider"></div>
+                    <div class="bp-multi-select-options">
+                      <div class="bp-multi-select-item" *ngFor="let opt of jobOptions" (click)="toggleJobSelection(opt.value)">
+                        <input type="checkbox" [checked]="isJobSelected(opt.value)" (click)="$event.stopPropagation(); toggleJobSelection(opt.value)" />
+                        <span class="bp-multi-select-label">{{ opt.label }}</span>
+                        <span class="bp-multi-select-status" [class.status-open]="opt.status === 'Open'" [class.status-closed]="opt.status === 'Closed'">{{ opt.status }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <button type="submit" class="bp-btn-primary" [disabled]="!hasPostedByMeFiltersApplied()">Search</button>
                 <button type="button" class="bp-btn-clear" [disabled]="!hasPostedByMeFiltersApplied()"
@@ -320,11 +334,25 @@
                     <option *ngFor="let opt of stageOptions" [value]="opt.value">{{ opt.label }}</option>
                   </select>
                 </div>
-                <div class="bp-filter-select-wrap">
-                  <select formControlName="jobId" class="bp-filter-select">
-                    <option value="">Job</option>
-                    <option *ngFor="let opt of jobOptions" [value]="opt.value">{{ opt.label }}</option>
-                  </select>
+                <div class="bp-filter-select-wrap bp-multi-select-wrap">
+                  <div class="bp-multi-select-trigger bp-filter-select" (click)="toggleReceivedJobDropdown($event)">
+                    <span class="bp-multi-select-text">{{ getSelectedJobsDisplayText() }}</span>
+                    <mat-icon class="bp-multi-select-arrow">{{ receivedJobDropdownOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </div>
+                  <div class="bp-multi-select-dropdown" *ngIf="receivedJobDropdownOpen" (click)="onDropdownItemClick($event)">
+                    <div class="bp-multi-select-item bp-select-all-item" (click)="toggleSelectAllJobs()">
+                      <input type="checkbox" [checked]="areAllJobsSelected()" (click)="$event.stopPropagation(); toggleSelectAllJobs()" />
+                      <span class="bp-multi-select-label">Select All</span>
+                    </div>
+                    <div class="bp-multi-select-divider"></div>
+                    <div class="bp-multi-select-options">
+                      <div class="bp-multi-select-item" *ngFor="let opt of jobOptions" (click)="toggleJobSelection(opt.value)">
+                        <input type="checkbox" [checked]="isJobSelected(opt.value)" (click)="$event.stopPropagation(); toggleJobSelection(opt.value)" />
+                        <span class="bp-multi-select-label">{{ opt.label }}</span>
+                        <span class="bp-multi-select-status" [class.status-open]="opt.status === 'Open'" [class.status-closed]="opt.status === 'Closed'">{{ opt.status }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <button type="submit" class="bp-btn-primary" [disabled]="!hasReceivedFiltersApplied()">Search</button>
                 <button type="button" class="bp-btn-clear" [disabled]="!hasReceivedFiltersApplied()"
