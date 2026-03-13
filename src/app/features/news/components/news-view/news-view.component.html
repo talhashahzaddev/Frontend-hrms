@@ -1,56 +1,4 @@
-<div class="news-view-container" *ngIf="!isLoading && news; else loadingOrError">
-  <article class="main-content-card">
-    
-    <!-- ================= HEADER ================= -->
-    <header class="header-section">
-      <h1 class="article-title">{{ news.title }}</h1>
-
-      <div class="article-subtitle">
-        <span class="author-name">By {{ news.authorName }}</span>
-
-        <span class="separator" *ngIf="news.publishedAt">•</span>
-
-        <span class="publish-date" *ngIf="news.publishedAt">
-          {{ news.publishedAt | date:'longDate' }}
-        </span>
-      </div>
-
-      <!-- ✅ CATEGORY + STATUS MOVED HERE -->
-      <div class="header-meta">
-        <div class="meta-group">
-          <span class="label">Category</span>
-          <span class="value">{{ news.category }}</span>
-        </div>
-
-        <div class="meta-group">
-          <span class="label">Status</span>
-          <span class="status-tag" [ngClass]="news.status.toLowerCase()">
-            {{ news.status }}
-          </span>
-        </div>
-      </div>
-    </header>
-
-    <!-- ================= IMAGE SECTION ================= -->
-    <div class="article-top-layout">
-      <div class="news-image" *ngIf="news.imageUrl">
-        <img [src]="news.imageUrl" alt="News image" />
-      </div>
-    </div>
-
-    <hr class="section-divider">
-
-    <!-- ================= DESCRIPTION ================= -->
-    <section class="body-section">
-      <h2 class="description-heading">Description</h2>
-      <div class="news-description">
-        <div [innerHTML]="news.description" class="ql-editor"></div>
-      </div>
-    </section>
-
-  </article>
-</div>
-
+<!-- ================= LOADING & ERROR STATES ================= -->
 <ng-template #loadingOrError>
   <div class="loading-state">
     <mat-spinner *ngIf="isLoading" diameter="40"></mat-spinner>
@@ -59,3 +7,70 @@
     </div>
   </div>
 </ng-template>
+
+<!-- ================= MAIN CONTENT ================= -->
+<div class="news-view-container" *ngIf="!isLoading && news; else loadingOrError">
+  <div class="content-wrapper">
+    
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs">
+      <a class="breadcrumb-link">News</a>
+      <mat-icon class="breadcrumb-chevron">chevron_right</mat-icon>
+      <span class="breadcrumb-current">{{ news.category }}</span>
+    </nav>
+
+    <!-- Back Link -->
+    <a class="back-link" (click)="goBack()">
+      <mat-icon class="back-icon">arrow_back</mat-icon>
+      <span>Back to News Dashboard</span>
+    </a>
+
+    <!-- Article Card -->
+    <article class="article-card">
+      <div class="article-content">
+        
+        <!-- ================= BADGES ================= -->
+        <div class="badges-container">
+          <span class="badge badge-category">{{ news.category }}</span>
+          <span class="badge badge-status" [ngClass]="news.status.toLowerCase()">
+            {{ news.status }}
+          </span>
+        </div>
+
+        <!-- ================= TITLE ================= -->
+        <h1 class="article-title">{{ news.title }}</h1>
+
+        <!-- ================= METADATA ================= -->
+        <div class="article-metadata">
+          <div class="metadata-item">
+            <!-- <div class="author-avatar"></div> -->
+            <span class="author-name">{{ news.authorName }}</span>
+          </div>
+
+          <div class="metadata-item" *ngIf="news.publishedAt">
+            <mat-icon class="metadata-icon">calendar_today</mat-icon>
+            <span>{{ news.publishedAt | date:'d MMMM yyyy' }}</span>
+          </div>
+
+          <div class="metadata-item" *ngIf="news.views !== undefined">
+            <mat-icon class="metadata-icon">visibility</mat-icon>
+            <span>{{ news.views }} views</span>
+          </div>
+        </div>
+
+        <!-- ================= HERO IMAGE ================= -->
+        <div class="hero-image-container" *ngIf="news.imageUrl">
+          <img [src]="news.imageUrl" [alt]="news.title" class="hero-image" />
+        </div>
+
+        <!-- ================= DESCRIPTION CARD ================= -->
+        <div class="description-card">
+          <h2 class="description-heading">Description</h2>
+          <div class="description-content" [innerHTML]="news.description"></div>
+        </div>
+
+      </div>
+    </article>
+
+  </div>
+</div>

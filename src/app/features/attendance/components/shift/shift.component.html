@@ -202,7 +202,8 @@
   
 
   <!-- ═══ BOTTOM GRID: Swap Requests + Shift Details ═══ -->
-  <div class="bottom-grid">
+  <!-- <div class="bottom-grid"> -->
+  <div class="bottom-grid" [class.bottom-grid-full]="!(isAdminOrHR || isManager)">
 
     <!-- Team Swap Requests -->
     <div class="bottom-card">
@@ -381,7 +382,7 @@
   </div>
 
   <!-- ═══ QUICK NAV STAT CARDS (non-admin) ═══ -->
-  <div class="quick-nav-grid" *ngIf="!isAdminOrHR">
+  <!-- <div class="quick-nav-grid" *ngIf="!isAdminOrHR">
 
     <mat-card class="stat-card stat-card-primary"
               *ngIf="isManager"
@@ -402,6 +403,6 @@
         </div>
       </mat-card-content>
     </mat-card>
-  </div>
+  </div> -->
 
 </div>

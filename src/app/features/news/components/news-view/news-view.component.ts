@@ -7,6 +7,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-news-view',
@@ -28,7 +29,8 @@ export class NewsViewComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private newsService: NewsService
+    private newsService: NewsService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -48,5 +50,8 @@ export class NewsViewComponent implements OnInit {
       this.error = 'No news ID provided.';
       this.isLoading = false;
     }
+  }
+  goBack():void{
+    this.router.navigate(['/news/dashboard'])
   }
 }

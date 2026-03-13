@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject, HostListener, ElementRef ,ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, AbstractControl, FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -74,6 +74,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private attendanceService: AttendanceService,
     private notification: NotificationService,
+    private cdr: ChangeDetectorRef,
     private dialogRef: MatDialogRef<AssignShiftComponent>,
     private performanceService: PerformanceService,
     private elementRef: ElementRef,
@@ -128,6 +129,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   closeEmployeeDropdown(): void {
     this.employeeDropdownOpen = false;
     this.employeeFilter = '';
+    this.cdr.markForCheck();
   }
 
   /** Fires on every keystroke inside the search input */
@@ -146,6 +148,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     } else {
       control.setValue([...current, id]);
     }
+     this.cdr.markForCheck(); 
   }
 
   /** Returns true if a given employeeId is in the current selection */
@@ -349,6 +352,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
       const next = Array.from(new Set([...(current || []), ...ids]));
       control.setValue(next);
     }
+     this.cdr.markForCheck(); 
   }
 
   onSubmit(): void {
