@@ -190,19 +190,22 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 1rem;
+  overflow: visible;
 }
 
 .filters-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
   gap: 1rem;
   flex: 1;
   width: 100%;
+  overflow: visible;
 }
 
 .filter-field {
   width: 100% !important;
   min-width: 0 !important;
+  overflow: visible !important;
 }
 
 .generate-report-btn {
@@ -555,7 +558,7 @@ body {
   margin: 0;
 }
 
-/* Table Pagination - FIXED HOVER */
+/* Table Pagination */
 .table-pagination {
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--gray-100);
@@ -577,7 +580,6 @@ body {
   transition: all 0.2s ease;
 }
 
-/* FIXED: Pagination button hover - keeps border visible */
 .pagination-btn:hover:not(:disabled) {
   background: var(--gray-50);
   border-color: var(--gray-300);
@@ -662,11 +664,13 @@ body {
    ======================================== */
 
 ::ng-deep {
+
   /* FORM FIELD BASE STYLES - COMPACT */
   .date-input-field.mat-mdc-form-field,
   .filter-field.mat-mdc-form-field {
     width: 100% !important;
     display: block !important;
+    overflow: visible !important;
   }
 
   /* Remove Material's default subscript wrapper */
@@ -681,6 +685,7 @@ body {
     background: white !important;
     border-radius: 8px !important;
     padding: 0 !important;
+    overflow: visible !important;
   }
 
   /* Form field flex container - COMPACT HEIGHT */
@@ -689,9 +694,10 @@ body {
     padding: 0 0.75rem !important;
     height: 38px !important;
     align-items: center !important;
+    overflow: visible !important;
   }
 
-  /* Input infix - CRITICAL FOR TEXT DISPLAY */
+  /* Input infix */
   .date-input-field .mat-mdc-form-field-infix,
   .filter-field .mat-mdc-form-field-infix {
     padding: 6px 0 !important;
@@ -699,6 +705,7 @@ body {
     border-top: none !important;
     width: auto !important;
     max-width: none !important;
+    overflow: visible !important;
   }
 
   /* Border/Outline styling */
@@ -733,31 +740,42 @@ body {
     padding: 0 !important;
   }
 
-  /* SELECT VALUE - SHOW FULL TEXT WITHOUT TRUNCATION */
+  /* =============================================
+     SELECT VALUE - FULL TEXT FIX (KEY CHANGES)
+     ============================================= */
+
   .filter-field .mat-mdc-select-value {
     font-size: 0.875rem !important;
     color: var(--gray-900) !important;
     max-width: none !important;
-    overflow: visible !important;
-  }
-
-  /* SELECT VALUE TEXT - CRITICAL FIX */
-  .filter-field .mat-mdc-select-value-text {
-    overflow: visible !important;
-    text-overflow: clip !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
     white-space: nowrap !important;
+    flex: 1 !important;
+    min-width: 0 !important;
   }
 
-  /* SELECT MIN WIDTH - ALLOW FULL TEXT */
+  .filter-field .mat-mdc-select-value-text {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: block !important;
+  }
+
   .filter-field .mat-mdc-select-min-line {
-    overflow: visible !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: block !important;
   }
 
-  /* Select trigger - ALLOW OVERFLOW */
+  /* Select trigger */
   .filter-field .mat-mdc-select-trigger {
     height: 100% !important;
     display: flex !important;
     align-items: center !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
 
   /* Date picker toggle button */
@@ -778,7 +796,7 @@ body {
     height: 20px !important;
   }
 
-  /* Select arrow - position fix */
+  /* Select arrow */
   .filter-field .mat-mdc-select-arrow-wrapper {
     transform: none !important;
     flex-shrink: 0 !important;
@@ -788,10 +806,10 @@ body {
     color: var(--gray-400) !important;
   }
 
-  /* =====================================
-     SELECT DROPDOWN PANEL - FULL TEXT
-     ===================================== */
-  
+  /* =============================================
+     SELECT DROPDOWN PANEL - FULL TEXT FIX
+     ============================================= */
+
   .mat-mdc-select-panel {
     border-radius: 8px !important;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
@@ -799,9 +817,11 @@ body {
     background: white !important;
     max-height: 300px !important;
     padding: 8px 0 !important;
+    min-width: fit-content !important;
+    width: auto !important;
   }
 
-  /* Clean option styling - SINGLE LINE TEXT */
+  /* Option styling - FULL TEXT VISIBLE */
   .mat-mdc-option {
     border-radius: 6px !important;
     margin: 2px 8px !important;
@@ -812,6 +832,7 @@ body {
     font-family: 'Manrope', sans-serif !important;
     color: var(--gray-700) !important;
     white-space: nowrap !important;
+    overflow: visible !important;
   }
 
   .mat-mdc-option:hover {
@@ -825,11 +846,13 @@ body {
     font-weight: 600 !important;
   }
 
-  /* Option text - FULL DISPLAY */
+  /* Option text - FULL DISPLAY, NO TRUNCATION */
   .mat-mdc-option .mdc-list-item__primary-text {
     font-size: 0.875rem !important;
     color: inherit !important;
     white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
   }
 
   /* Remove checkmark */
@@ -865,7 +888,7 @@ body {
     stroke: var(--primary-color) !important;
   }
 
-  /* Remove any extra margins/paddings */
+  /* Remove extra margins/paddings */
   .mat-mdc-form-field-bottom-align::before {
     display: none !important;
   }
