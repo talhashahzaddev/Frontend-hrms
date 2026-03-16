@@ -37,6 +37,7 @@ export interface ServerNotification {
   isRead: boolean;
   moduletype:string;
   createdAt: string;
+  requestStatus:String
 }
 
 
