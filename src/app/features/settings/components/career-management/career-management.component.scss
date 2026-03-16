@@ -233,14 +233,16 @@
 .cm-preview-hero {
     position: relative;
     width: 100%;
+    box-sizing: border-box;
     min-height: 340px;
     background-color: #111;
     background-size: cover;
     background-position: center;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 80px 32px;
+    overflow: hidden;
 
     &.cm-preview-hero--no-bg {
         background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
@@ -256,13 +258,14 @@
 .cm-preview-hero-content {
     position: relative;
     z-index: 10;
-    text-align: center;
-    max-width: 800px;
+    text-align: left;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    /* CRITICAL: Prevents flex child from expanding infinitely */
+    box-sizing: border-box;
     color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+    display: block;
 }
 
 .cm-preview-logo {
@@ -273,25 +276,34 @@
     background: rgba(255, 255, 255, 0.15);
     padding: 8px 14px;
     backdrop-filter: blur(4px);
+    margin: 0 auto 16px auto;
+    /* Centers the logo and adds bottom margin */
+    display: block;
 }
 
 .cm-preview-headline {
     font-size: 42px;
     font-weight: 800;
     letter-spacing: -0.02em;
-    margin: 0;
+    margin: 0 0 16px 0;
+    /* Replaces flex gap */
     line-height: 1.15;
     text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     color: #ffffff;
+    text-align: center;
+    /* Center the headline */
 
     * {
         color: #ffffff !important;
+        text-align: center !important;
+        /* Centers inner HTML tags like <p> */
     }
 
     p {
         margin: 0;
         font-size: inherit;
         font-weight: inherit;
+        text-align: center;
     }
 }
 
@@ -301,11 +313,34 @@
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 0;
     line-height: 1.6;
-    max-width: 640px;
-    text-align: justify;
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    text-align: left;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
 
-    * {
+    p,
+    span,
+    div,
+    strong,
+    em,
+    b,
+    i,
+    u,
+    ul,
+    ol,
+    li {
         color: rgba(255, 255, 255, 0.9) !important;
+        text-align: left !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        min-width: 0 !important;
     }
 
     p {
@@ -622,6 +657,11 @@
 }
 
 .cm-quill-field {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+
     &:not(:last-child) {
         margin-bottom: 24px;
     }
@@ -641,7 +681,19 @@
     border-radius: 12px;
     overflow: hidden;
     background: white;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
+
+    quill-editor {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
 
     &:focus-within {
         border-color: #2563eb;
@@ -704,6 +756,8 @@
         font-family: inherit !important;
         font-size: 14px !important;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
         box-sizing: border-box;
     }
 
@@ -714,20 +768,36 @@
         color: #334155;
         padding: 16px;
         line-height: 1.6;
-        width: 100%;
-        box-sizing: border-box;
-        word-wrap: break-word;
-        white-space: pre-wrap;
-        max-width: 100%;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        overflow-x: hidden;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        word-wrap: break-word !important;
+        white-space: pre-wrap !important;
+        word-break: normal !important;
+        overflow-x: hidden !important;
 
-        * {
-            word-break: break-word;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-            max-width: 100%;
+        p,
+        span,
+        div,
+        h1,
+        h2,
+        h3,
+        h4,
+        strong,
+        em,
+        b,
+        i,
+        u,
+        ul,
+        ol,
+        li,
+        a {
+            word-wrap: break-word !important;
+            white-space: pre-wrap !important;
+            word-break: normal !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         &.ql-blank::before {

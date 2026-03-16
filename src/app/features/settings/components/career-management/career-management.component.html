@@ -10,7 +10,8 @@
             </div>
             <div>
                 <h1 class="cm-page-title">Career Management</h1>
-                <p class="cm-page-subtitle">Configure and manage your organization's public career page and employer branding.</p>
+                <p class="cm-page-subtitle">Configure and manage your organization's public career page and employer
+                    branding.</p>
             </div>
         </div>
         <div class="cm-page-header-right">
@@ -55,7 +56,8 @@
         <div class="cm-state-card cm-state-card--dashed" *ngIf="!hasAnyData()">
             <div class="cm-state-icon"><mat-icon>rocket_launch</mat-icon></div>
             <p class="cm-state-title">Your career page isn't configured yet</p>
-            <p class="cm-state-sub">Add a logo, background image, header and description to make it shine for applicants.</p>
+            <p class="cm-state-sub">Add a logo, background image, header and description to make it shine for
+                applicants.</p>
             <button mat-flat-button class="cm-btn cm-btn--primary" (click)="enterEditMode()">
                 <mat-icon>add</mat-icon>Set Up Career Page
             </button>
@@ -77,8 +79,10 @@
                     [class.cm-preview-hero--no-bg]="!savedData?.careerBgImageUrl">
                     <div class="cm-preview-hero-overlay"></div>
                     <div class="cm-preview-hero-content">
-                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo" class="cm-preview-logo">
-                        <h1 class="cm-preview-headline" [innerHTML]="savedData?.careerHeaderText || 'Join Our Team'"></h1>
+                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo"
+                            class="cm-preview-logo">
+                        <h1 class="cm-preview-headline" [innerHTML]="savedData?.careerHeaderText || 'Join Our Team'">
+                        </h1>
                         <div class="cm-preview-subtext" *ngIf="savedData?.careerDescription"
                             [innerHTML]="savedData!.careerDescription"></div>
                     </div>
@@ -144,7 +148,8 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- EDIT MODE                                                    -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="isSuperAdmin && !isLoading && isEditMode" class="cm-edit-form">
+    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="isSuperAdmin && !isLoading && isEditMode"
+        class="cm-edit-form">
 
         <!-- Section 1: Branding -->
         <div class="cm-section">
@@ -177,8 +182,10 @@
                                 <p class="cm-drop-filename">{{ logoFileName || 'logo' }}</p>
                                 <p class="cm-drop-hint">PNG, JPG up to {{ maxFileMb }} MB</p>
                                 <div class="cm-drop-file-actions">
-                                    <button type="button" class="cm-link-btn cm-link-btn--primary" (click)="triggerLogoInput(logoInput); $event.stopPropagation()">Replace</button>
-                                    <button type="button" class="cm-link-btn cm-link-btn--danger" (click)="clearLogo(); $event.stopPropagation()">Delete</button>
+                                    <button type="button" class="cm-link-btn cm-link-btn--primary"
+                                        (click)="triggerLogoInput(logoInput); $event.stopPropagation()">Replace</button>
+                                    <button type="button" class="cm-link-btn cm-link-btn--danger"
+                                        (click)="clearLogo(); $event.stopPropagation()">Delete</button>
                                 </div>
                             </ng-container>
                         </div>
@@ -196,14 +203,17 @@
                                 <p class="cm-drop-hint">Click to upload or drag &amp; drop</p>
                                 <p class="cm-drop-sub">Recommended: 1920×1080px</p>
                                 <mat-spinner *ngIf="isUploadingBg" diameter="24"></mat-spinner>
-                                <button type="button" class="cm-select-file-btn" (click)="triggerBgInput(bgInput); $event.stopPropagation()">Select File</button>
+                                <button type="button" class="cm-select-file-btn"
+                                    (click)="triggerBgInput(bgInput); $event.stopPropagation()">Select File</button>
                             </ng-container>
                             <ng-container *ngIf="currentBgUrl && !isUploadingBg">
                                 <img [src]="currentBgUrl" alt="Background" class="cm-bg-preview">
                                 <p class="cm-drop-filename">{{ bgFileName || 'background' }}</p>
                                 <div class="cm-drop-file-actions">
-                                    <button type="button" class="cm-link-btn cm-link-btn--primary" (click)="triggerBgInput(bgInput); $event.stopPropagation()">Replace</button>
-                                    <button type="button" class="cm-link-btn cm-link-btn--danger" (click)="clearBg(); $event.stopPropagation()">Delete</button>
+                                    <button type="button" class="cm-link-btn cm-link-btn--primary"
+                                        (click)="triggerBgInput(bgInput); $event.stopPropagation()">Replace</button>
+                                    <button type="button" class="cm-link-btn cm-link-btn--danger"
+                                        (click)="clearBg(); $event.stopPropagation()">Delete</button>
                                 </div>
                             </ng-container>
                         </div>
@@ -234,7 +244,8 @@
                     <p class="cm-field-label">Career Description</p>
                     <div class="cm-quill-wrap">
                         <quill-editor formControlName="careerDescription" [modules]="quillDescConfig"
-                            placeholder="Describe your company culture and benefits..." theme="snow" id="career-description">
+                            placeholder="Describe your company culture and benefits..." theme="snow"
+                            id="career-description">
                         </quill-editor>
                     </div>
                 </div>
@@ -308,8 +319,8 @@
                     <mat-icon>hourglass_top</mat-icon>
                     Waiting for uploads…
                 </span>
-                <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving"
-                    (click)="cancelEdit()" id="career-cancel-btn">
+                <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving" (click)="cancelEdit()"
+                    id="career-cancel-btn">
                     Discard Changes
                 </button>
                 <button type="submit" class="cm-btn cm-btn--primary"
