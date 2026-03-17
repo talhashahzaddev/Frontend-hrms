@@ -1,0 +1,115 @@
+<h2 mat-dialog-title>
+  <mat-icon>cloud_download</mat-icon>
+  Import Holidays from Catalog
+</h2>
+<mat-dialog-content>
+  <!-- Step 1: Select Country -->
+  @if (step === 'country') {
+    <div class="step-section">
+      <p class="step-desc">Select a country to browse its public holidays</p>
+
+      @if (loadingCountries) {
+        <div class="loading-center">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+      } @else {
+        <div class="country-grid">
+          @for (country of countries; track country.countryCode) {
+            <div class="country-card" (click)="selectCountry(country)"
+              [class.selected]="selectedCountry?.countryCode === country.countryCode">
+              <span class="country-flag">{{ getCountryFlag(country.countryCode) }}</span>
+              <div class="country-info">
+                <span class="country-name">{{ country.countryName }}</span>
+                <span class="country-count">{{ country.holidayCount }} holidays</span>
+              </div>
+              <mat-icon class="check-icon">check_circle</mat-icon>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 2: Select Holidays -->
+  @if (step === 'holidays') {
+    <div class="step-section">
+      <div class="step-header">
+        <button mat-icon-button (click)="step = 'country'" matTooltip="Back to countries">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h3>
+          <span class="country-flag-sm">{{ getCountryFlag(selectedCountry!.countryCode) }}</span>
+          {{ selectedCountry!.countryName }} Holidays
+        </h3>
+      </div>
+
+      <div class="controls-row">
+        <mat-checkbox [checked]="allSelected" [indeterminate]="someSelected && !allSelected"
+          (change)="toggleSelectAll($event.checked)">
+          Select All
+        </mat-checkbox>
+
+        <mat-form-field appearance="outline" class="type-select">
+          <mat-label>Import As</mat-label>
+          <mat-select [(value)]="importType">
+            <mat-option value="mandatory">Mandatory</mat-option>
+            <mat-option value="restricted">Restricted</mat-option>
+            <mat-option value="optional">Optional</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      @if (loadingHolidays) {
+        <div class="loading-center">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+      } @else {
+        <div class="holiday-list">
+          @for (holiday of catalogHolidays; track holiday.catalogId) {
+            <div class="holiday-item" (click)="toggleHoliday(holiday.catalogId)"
+              [class.selected]="selectedHolidayIds.has(holiday.catalogId)">
+              <mat-checkbox [checked]="selectedHolidayIds.has(holiday.catalogId)"
+                (click)="$event.stopPropagation()"
+                (change)="toggleHoliday(holiday.catalogId)">
+              </mat-checkbox>
+              <div class="holiday-details">
+                <span class="holiday-name">{{ holiday.holidayName }}</span>
+                <span class="holiday-date">{{ holiday.holidayDate | date:'EEE, MMM dd, yyyy' }}</span>
+              </div>
+              @if (holiday.description) {
+                <span class="holiday-desc">{{ holiday.description }}</span>
+              }
+              @if (holiday.isRecurring) {
+                <mat-icon class="recurring-icon" matTooltip="Recurring annually">repeat</mat-icon>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="selection-summary">
+          <span>{{ selectedHolidayIds.size }} of {{ catalogHolidays.length }} selected</span>
+        </div>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  @if (step === 'country') {
+    <button mat-raised-button color="primary" [disabled]="!selectedCountry" (click)="loadHolidays()">
+      Next
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  }
+  @if (step === 'holidays') {
+    <button mat-raised-button color="primary" [disabled]="selectedHolidayIds.size === 0 || importing"
+      (click)="importSelected()">
+      @if (importing) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        Import {{ selectedHolidayIds.size }} Holidays
+      }
+    </button>
+  }
+</mat-dialog-actions>

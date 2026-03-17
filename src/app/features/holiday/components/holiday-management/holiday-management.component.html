@@ -1,0 +1,401 @@
+<div class="holiday-management-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Holiday Management</h1>
+      <p class="subtitle">Manage company holidays, import from country catalogs, and configure holiday policies</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="openImportDialog()">
+        <mat-icon>cloud_download</mat-icon>
+        Import from Catalog
+      </button>
+      <button mat-raised-button color="primary" (click)="openAddHolidayDialog()">
+        <mat-icon>add</mat-icon>
+        Add Holiday
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-section">
+    <div class="summary-card total">
+      <mat-icon>event</mat-icon>
+      <div class="card-content">
+        <span class="card-value">{{ summary?.totalHolidays || 0 }}</span>
+        <span class="card-label">Total Holidays</span>
+      </div>
+    </div>
+    <div class="summary-card mandatory">
+      <mat-icon>verified</mat-icon>
+      <div class="card-content">
+        <span class="card-value">{{ summary?.mandatoryCount || 0 }}</span>
+        <span class="card-label">Mandatory</span>
+      </div>
+    </div>
+    <div class="summary-card restricted">
+      <mat-icon>lock</mat-icon>
+      <div class="card-content">
+        <span class="card-value">{{ summary?.restrictedCount || 0 }}</span>
+        <span class="card-label">Restricted</span>
+      </div>
+    </div>
+    <div class="summary-card optional">
+      <mat-icon>stars</mat-icon>
+      <div class="card-content">
+        <span class="card-value">{{ summary?.optionalCount || 0 }}</span>
+        <span class="card-label">Optional</span>
+      </div>
+    </div>
+    @if (summary?.upcomingHoliday) {
+      <div class="summary-card upcoming">
+        <mat-icon>celebration</mat-icon>
+        <div class="card-content">
+          <span class="card-value">{{ summary?.upcomingHoliday?.holidayName }}</span>
+          <span class="card-label">{{ summary?.upcomingHoliday?.holidayDate | date:'MMM dd' }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Filters & Year Selector -->
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" class="year-selector">
+      <mat-label>Year</mat-label>
+      <mat-select [(value)]="selectedYear" (selectionChange)="onYearChange()">
+        @for (y of availableYears; track y) {
+          <mat-option [value]="y">{{ y }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="type-filter">
+      <mat-label>Holiday Type</mat-label>
+      <mat-select [(value)]="selectedType" (selectionChange)="applyFilters()">
+        <mat-option value="all">All Types</mat-option>
+        <mat-option value="mandatory">Mandatory</mat-option>
+        <mat-option value="restricted">Restricted</mat-option>
+        <mat-option value="optional">Optional</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search holidays</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" placeholder="Search by name...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="view-toggle">
+      <button mat-icon-button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" matTooltip="Table View">
+        <mat-icon>view_list</mat-icon>
+      </button>
+      <button mat-icon-button [class.active]="viewMode === 'timeline'" (click)="viewMode = 'timeline'" matTooltip="Timeline View">
+        <mat-icon>timeline</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading holidays...</p>
+    </div>
+  }
+
+  <!-- Table View -->
+  @if (!loading && viewMode === 'table') {
+    <div class="table-container mat-elevation-z2">
+      <table mat-table [dataSource]="filteredHolidays" matSort (matSortChange)="sortData($event)">
+        <!-- Date Column -->
+        <ng-container matColumnDef="holidayDate">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+          <td mat-cell *matCellDef="let holiday">
+            <div class="date-cell">
+              <span class="date-day">{{ holiday.holidayDate | date:'dd' }}</span>
+              <div class="date-details">
+                <span class="date-month">{{ holiday.holidayDate | date:'MMM yyyy' }}</span>
+                <span class="date-weekday">{{ holiday.holidayDate | date:'EEEE' }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="holidayName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Holiday Name</th>
+          <td mat-cell *matCellDef="let holiday">
+            <div class="name-cell">
+              <span class="holiday-name">{{ holiday.holidayName }}</span>
+              @if (holiday.description) {
+                <span class="holiday-desc">{{ holiday.description }}</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="holidayType">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+          <td mat-cell *matCellDef="let holiday">
+            <span class="type-badge" [ngClass]="'type-' + holiday.holidayType">
+              {{ holiday.holidayType | titlecase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Half Day Column -->
+        <ng-container matColumnDef="isHalfDay">
+          <th mat-header-cell *matHeaderCellDef>Half Day</th>
+          <td mat-cell *matCellDef="let holiday">
+            @if (holiday.isHalfDay) {
+              <mat-icon class="half-day-icon">brightness_6</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Applicable To Column -->
+        <ng-container matColumnDef="applicableTo">
+          <th mat-header-cell *matHeaderCellDef>Applicable To</th>
+          <td mat-cell *matCellDef="let holiday">
+            <span class="applicable-badge">
+              @switch (holiday.applicableTo) {
+                @case ('all') { All Employees }
+                @case ('department') { Dept: {{ holiday.applicableValue || 'N/A' }} }
+                @case ('location') { Location: {{ holiday.applicableValue || 'N/A' }} }
+                @case ('employee') { {{ holiday.employeeIds?.length || 0 }} Employee(s) }
+                @default { {{ holiday.applicableTo | titlecase }} }
+              }
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let holiday">
+            @if (isPast(holiday.holidayDate)) {
+              <span class="status-badge past">Passed</span>
+            } @else {
+              <span class="status-badge upcoming">Upcoming</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let holiday">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" (click)="$event.stopPropagation()">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item (click)="openEditHolidayDialog(holiday)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="confirmDelete(holiday)" class="delete-action">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="holiday-row"></tr>
+      </table>
+
+      @if (filteredHolidays.length === 0) {
+        <div class="empty-state">
+          <mat-icon>event_busy</mat-icon>
+          <h3>No holidays found</h3>
+          <p>Add holidays manually or import from a country catalog</p>
+          <button mat-stroked-button color="primary" (click)="openImportDialog()">
+            <mat-icon>cloud_download</mat-icon>
+            Import Holidays
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Timeline View -->
+  @if (!loading && viewMode === 'timeline') {
+    <div class="timeline-container">
+      @for (month of getTimelineMonths(); track month.key) {
+        <div class="timeline-month">
+          <h3 class="month-header">{{ month.label }}</h3>
+          <div class="timeline-items">
+            @for (holiday of month.holidays; track holiday.holidayId) {
+              <div class="timeline-item" [ngClass]="{'past': isPast(holiday.holidayDate)}">
+                <div class="timeline-dot" [ngClass]="'type-' + holiday.holidayType"></div>
+                <div class="timeline-content">
+                  <div class="timeline-date">
+                    <span class="day">{{ holiday.holidayDate | date:'dd' }}</span>
+                    <span class="weekday">{{ holiday.holidayDate | date:'EEE' }}</span>
+                  </div>
+                  <div class="timeline-details">
+                    <span class="timeline-name">{{ holiday.holidayName }}</span>
+                    <div class="timeline-meta">
+                      <span class="type-badge" [ngClass]="'type-' + holiday.holidayType">
+                        {{ holiday.holidayType | titlecase }}
+                      </span>
+                      @if (holiday.isHalfDay) {
+                        <span class="half-day-tag">Half Day</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="timeline-actions">
+                    <button mat-icon-button (click)="openEditHolidayDialog(holiday)" matTooltip="Edit">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="confirmDelete(holiday)" matTooltip="Delete">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (filteredHolidays.length === 0) {
+        <div class="empty-state">
+          <mat-icon>event_busy</mat-icon>
+          <h3>No holidays configured for {{ selectedYear }}</h3>
+          <p>Import holidays from a country catalog or add them manually</p>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Add/Edit Holiday Dialog Template -->
+<ng-template #holidayFormDialog>
+  <h2 mat-dialog-title>{{ editingHoliday ? 'Edit Holiday' : 'Add Holiday' }}</h2>
+  <mat-dialog-content>
+    <form [formGroup]="holidayForm" class="holiday-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Holiday Name</mat-label>
+        <input matInput formControlName="holidayName" placeholder="e.g. Independence Day">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="holidayDate">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Holiday Type</mat-label>
+        <mat-select formControlName="holidayType">
+          <mat-option value="mandatory">Mandatory (All employees off)</mat-option>
+          <mat-option value="restricted">Restricted (Employee choice)</mat-option>
+          <mat-option value="optional">Optional</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="2" placeholder="Optional description"></textarea>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-checkbox formControlName="isHalfDay">Half Day Holiday</mat-checkbox>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Applicable To</mat-label>
+        <mat-select formControlName="applicableTo">
+          <mat-option value="all">All Employees</mat-option>
+          <mat-option value="department">Specific Department</mat-option>
+          <mat-option value="location">Specific Location</mat-option>
+          <mat-option value="employee">Specific Employees</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Department Picker (shown when applicableTo = 'department') -->
+      @if (holidayForm.get('applicableTo')?.value === 'department') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Select Department</mat-label>
+          <mat-select formControlName="applicableValue">
+            @for (dept of departments; track dept.departmentId) {
+              <mat-option [value]="dept.departmentId">{{ dept.departmentName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      <!-- Location Input (shown when applicableTo = 'location') -->
+      @if (holidayForm.get('applicableTo')?.value === 'location') {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Work Location</mat-label>
+          <input matInput formControlName="applicableValue" placeholder="e.g. New York, Mumbai, London">
+          <mat-hint>Enter the exact work location name</mat-hint>
+        </mat-form-field>
+      }
+
+      <!-- Employee Multi-Select (shown when applicableTo = 'employee') -->
+      @if (holidayForm.get('applicableTo')?.value === 'employee') {
+        <div class="employee-picker">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Search Employees</mat-label>
+            <input matInput
+              [value]="employeeSearchText"
+              (input)="filterEmployees($any($event.target).value)"
+              placeholder="Type to search employees...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <!-- Selected employees chips -->
+          @if (selectedEmployeeIds.length > 0) {
+            <div class="selected-employees-chips">
+              @for (empId of selectedEmployeeIds; track empId) {
+                <span class="employee-chip">
+                  {{ getEmployeeName(empId) }}
+                  <mat-icon class="chip-remove" (click)="removeEmployee(empId)">cancel</mat-icon>
+                </span>
+              }
+            </div>
+          }
+
+          <!-- Employee list -->
+          <div class="employee-list">
+            @for (emp of filteredEmployees; track emp.employeeId) {
+              <div class="employee-option" (click)="toggleEmployee(emp.employeeId)"
+                   [class.selected]="isEmployeeSelected(emp.employeeId)">
+                <mat-icon class="check-icon">
+                  {{ isEmployeeSelected(emp.employeeId) ? 'check_box' : 'check_box_outline_blank' }}
+                </mat-icon>
+                <div class="emp-info">
+                  <span class="emp-name">{{ emp.fullName }}</span>
+                  @if (emp.departmentName) {
+                    <span class="emp-dept">{{ emp.departmentName }}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (filteredEmployees.length === 0) {
+              <div class="no-employees">No employees found</div>
+            }
+          </div>
+          <div class="selection-count">{{ selectedEmployeeIds.length }} employee(s) selected</div>
+        </div>
+      }
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="primary" (click)="saveHoliday()"
+      [disabled]="holidayForm.invalid || saving">
+      @if (saving) {
+        <mat-spinner diameter="20"></mat-spinner>
+      } @else {
+        {{ editingHoliday ? 'Update' : 'Create' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</ng-template>

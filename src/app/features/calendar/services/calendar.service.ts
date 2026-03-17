@@ -4,7 +4,10 @@ import { map, catchError } from 'rxjs/operators';
 
 import { AttendanceService } from '../../attendance/services/attendance.service';
 import { LeaveService } from '../../leave/services/leave.service';
+import { HolidayService } from '../../holiday/services/holiday.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { CalendarEvent } from '../models/calendar.models';
+import { HolidayRange } from '../../../core/models/holiday.models';
 
 @Injectable({
     providedIn: 'root'
@@ -13,7 +16,9 @@ export class CalendarService {
 
     constructor(
         private attendanceService: AttendanceService,
-        private leaveService: LeaveService
+        private leaveService: LeaveService,
+        private holidayService: HolidayService,
+        private authService: AuthService
     ) { }
 
     /**
@@ -56,21 +61,50 @@ export class CalendarService {
                     console.error('Failed to fetch leave types:', error);
                     return of([]);
                 })
+            ),
+            holidays: (this.authService.hasAnyRole(['Super Admin', 'HR Manager'])
+                ? this.holidayService.getHolidaysInRange(startDateISO, endDateISO)
+                : this.holidayService.getMyHolidaysInRange(startDateISO, endDateISO)
+            ).pipe(
+                catchError(error => {
+                    console.error('Failed to fetch holidays:', error);
+                    return of([]);
+                })
             )
         }).pipe(
-            map(({ attendance, leaves, leaveTypes }) => {
+            map(({ attendance, leaves, leaveTypes, holidays }) => {
                 const events: CalendarEvent[] = [];
 
                 // Create a Color Map for robust lookup
                 const colorMap = new Map<string, string>();
                 leaveTypes.forEach(type => colorMap.set(type.leaveTypeId, type.color));
 
+                // Map holiday data to CalendarEvents
+                holidays.forEach(holiday => {
+                    events.push({
+                        date: new Date(holiday.holidayDate),
+                        type: 'HOLIDAY',
+                        title: holiday.holidayName,
+                        status: holiday.holidayType || 'mandatory',
+                        color: '#ec4899', // Pink for holidays
+                        details: {
+                            holidayName: holiday.holidayName,
+                            isOptional: holiday.holidayType === 'optional' || holiday.holidayType === 'restricted'
+                        }
+                    });
+                });
+
+                // Build a set of holiday dates for quick lookup
+                const holidayDates = new Set<string>(
+                    holidays.map(h => new Date(h.holidayDate).toDateString())
+                );
+
                 // Map attendance data to CalendarEvents
                 attendance.forEach(att => {
                     const status = (att.status || '').toLowerCase();
 
-                    // Skip weekends and no-record days
-                    if (status === 'weekend' || status === 'no record' || status === 'upcoming') {
+                    // Skip weekends, no-record days, and holidays (already added above)
+                    if (status === 'weekend' || status === 'no record' || status === 'upcoming' || status === 'holiday') {
                         return;
                     }
 

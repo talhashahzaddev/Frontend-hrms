@@ -200,6 +200,7 @@
                   <span class="status-badge" [ngClass]="{
                     'present':  getEffectiveStatus(record) === 'present',
                     'absent':   getEffectiveStatus(record) === 'absent',
+                    'holiday':  getEffectiveStatus(record).includes('holiday'),
                     'weekend':  getEffectiveStatus(record) === 'weekend',
                     'leave':    getEffectiveStatus(record) === 'on leave' || getEffectiveStatus(record) === 'leave',
                     'late':     getEffectiveStatus(record) === 'late',
