@@ -68,7 +68,7 @@ export class ShiftSwapComponent implements OnInit, OnDestroy {
       currentShiftId: null,
       requestedShiftId: ['', Validators.required],
       swapWithEmployeeId: [null],
-      reason: ['', [Validators.required, Validators.minLength(5)]]
+      reason: ['']
     });
   }
 
