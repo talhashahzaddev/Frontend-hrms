@@ -118,6 +118,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
+      label: 'Holidays',
+      icon: 'celebration',
+      children: [
+        { label: 'Holiday Management', icon: 'event', route: '/holidays', exact: true, roles: ['Super Admin', 'HR Manager'] },
+        { label: 'My Holidays', icon: 'beach_access', route: '/holidays/my-holidays' },
+      ]
+    },
+    {
       label: 'Payroll',
       icon: 'payments',
       roles: ['Super Admin'],

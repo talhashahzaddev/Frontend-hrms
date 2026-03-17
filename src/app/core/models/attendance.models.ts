@@ -252,6 +252,7 @@ export interface AttendanceCalendarData {
   totalHours: number;
   isWorkingDay: boolean;
   isHoliday: boolean;
+  holidayName?: string;
   notes?: string;
 }
 

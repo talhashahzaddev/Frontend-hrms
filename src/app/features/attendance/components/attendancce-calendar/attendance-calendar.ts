@@ -157,6 +157,10 @@ get currentMonthYear(): string {
         return 'weekend-day';
       }
 
+      if (status === 'holiday') {
+        return 'holiday-day';
+      }
+
       if (status === 'leave' || status === 'on_leave') {
         return 'leave-day';
       }
@@ -214,7 +218,7 @@ get currentMonthYear(): string {
       if (a.checkInTime) t += ` | In: ${this.shortTime(a.checkInTime)}`;
       if (a.checkOutTime) t += ` | Out: ${this.shortTime(a.checkOutTime)}`;
       if (a.totalHours) t += ` | Hours: ${a.totalHours}`;
-      if (a.isHoliday) t += ' | Holiday';
+      if (a.isHoliday) t += ` | Holiday${a.holidayName ? ': ' + a.holidayName : ''}`;
       return t;
     }
     if (cell.isWeekend) return `Weekend (${this.weekDays[cell.date.getDay()]})`;

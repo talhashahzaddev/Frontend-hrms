@@ -113,6 +113,15 @@ export const appRoutes: Routes = [
       import('./features/performance/performance.routes').then(m => m.performanceRoutes)
   },
 
+  // Holiday Management Routes
+  {
+    path: 'holidays',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/holiday/holiday.routes').then(m => m.holidayRoutes),
+    title: 'Holidays - HRMS'
+  },
+
   // Calendar Route (Unified View)
   {
     path: 'calendar',

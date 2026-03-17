@@ -457,6 +457,14 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     onRightClick(event: MouseEvent, day: CalendarDay): void {
         event.preventDefault();
+        this.openDayMenu(event, day);
+    }
+
+    onDayClick(event: MouseEvent, day: CalendarDay): void {
+        this.openDayMenu(event, day);
+    }
+
+    private openDayMenu(event: MouseEvent, day: CalendarDay): void {
         this.selectedDay = day;
         this.contextMenuPosition.x = event.clientX + 'px';
         this.contextMenuPosition.y = event.clientY + 'px';
@@ -466,6 +474,11 @@ export class CalendarComponent implements OnInit, OnDestroy {
     // Menu Action: Apply for Leave
     applyForLeave(): void {
         if (!this.selectedDay) return;
+
+        if (this.hasHoliday(this.selectedDay)) {
+            this.notificationService.showInfo('Leave cannot be applied on a holiday.');
+            return;
+        }
 
         // Open dialog to prompt for date range
         const dialogRef = this.dialog.open(PromptDialogComponent, {
@@ -713,7 +726,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     // 5. Logic: Apply Leave (Enabled for future dates)
     canApplyLeave(): boolean {
         if (!this.selectedDay) return false;
-        return !this.isPastDate();
+        return !this.isPastDate() && !this.hasHoliday(this.selectedDay);
     }
 
     // 6. Logic: Clock In (Today Only)

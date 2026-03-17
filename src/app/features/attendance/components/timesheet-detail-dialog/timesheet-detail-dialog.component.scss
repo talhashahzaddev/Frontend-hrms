@@ -883,6 +883,18 @@
 
       .status-badge.leave   { background: #f59e0b; color: #fff; }
 
+      .status-badge.holiday {
+
+        background: #fdf2f8;
+
+        color: #be185d;
+
+        border: 1.5px solid #fbcfe8;
+
+        box-shadow: 0 1px 3px rgba(190,24,93,0.16);
+
+      }
+
       .status-badge.late {
 
         background: #fde047;

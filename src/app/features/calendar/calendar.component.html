@@ -103,6 +103,7 @@
             <div class="calendar-body">
                 <div *ngFor="let day of calendarDays" class="calendar-day" [class.other-month]="!day.isCurrentMonth"
                     [class.today]="day.isToday" [class.weekend]="day.isWeekend" [class.has-holiday]="hasHoliday(day)"
+                    (click)="onDayClick($event, day)"
                     (contextmenu)="onRightClick($event, day)">
 
                     <div class="day-number">{{ day.dayNumber }}</div>
