@@ -1,7 +1,7 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,25 +15,18 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import {
   Role,
   MenuPermissionGroup,
-  SubMenuPermissionGroup,
   ActionPermission,
   CreateRoleRequest,
   ApiMenu
 } from '../../../../core/models/role.models';
 
-export interface RoleDialogData {
-  mode: 'add' | 'edit' | 'view';
-  role?: Role;
-}
-
 @Component({
-  selector: 'app-role-dialog',
+  selector: 'app-role-form',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -41,41 +34,49 @@ export interface RoleDialogData {
     MatProgressSpinnerModule,
     MatTooltipModule
   ],
-  templateUrl: './role-dialog.component.html',
-  styleUrls: ['./role-dialog.component.scss']
+  templateUrl: './role-form.component.html',
+  styleUrls: ['./role-form.component.scss']
 })
-export class RoleDialogComponent implements OnInit {
+export class RoleFormComponent implements OnInit {
   roleForm!: FormGroup;
   permissionGroups: MenuPermissionGroup[] = [];
   isLoadingMenus = false;
   isSaving = false;
   grantFullAccess = false;
 
-  get isViewMode(): boolean { return this.data.mode === 'view'; }
-  get isEditMode(): boolean { return this.data.mode === 'edit'; }
+  // Populated from route params / state
+  mode: 'add' | 'edit' | 'view' = 'add';
+  role?: Role;
+
+  get isViewMode(): boolean { return this.mode === 'view'; }
+  get isEditMode(): boolean { return this.mode === 'edit'; }
 
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<RoleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: RoleDialogData,
+    private route: ActivatedRoute,
+    private router: Router,
     private roleService: RoleService,
     private menuService: MenuService,
     private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
+    // Resolve mode & role from route data or navigation state
+    const state = history.state as { mode?: 'add' | 'edit' | 'view'; role?: Role };
+    this.mode = state?.mode || (this.route.snapshot.data['mode'] as any) || 'add';
+    this.role = state?.role;
+
     this.buildForm();
     this.loadMenus();
   }
 
   private buildForm(): void {
-    const role = this.data.role;
     this.roleForm = this.fb.group({
       roleName: [
-        { value: role?.roleName || '', disabled: this.isViewMode },
+        { value: this.role?.roleName || '', disabled: this.isViewMode },
         [Validators.required, Validators.minLength(2)]
       ],
-      description: [{ value: role?.description || '', disabled: this.isViewMode }]
+      description: [{ value: this.role?.description || '', disabled: this.isViewMode }]
     });
   }
 
@@ -84,8 +85,8 @@ export class RoleDialogComponent implements OnInit {
     this.menuService.getMenus().subscribe({
       next: (response) => {
         this.buildPermissionGroups(response.data);
-        if ((this.isEditMode || this.isViewMode) && this.data.role?.menus) {
-          this.populateExistingPermissions(this.data.role.menus);
+        if ((this.isEditMode || this.isViewMode) && this.role?.menus) {
+          this.populateExistingPermissions(this.role.menus);
         }
         this.isLoadingMenus = false;
       },
@@ -115,22 +116,21 @@ export class RoleDialogComponent implements OnInit {
   }
 
   private populateExistingPermissions(existingMenus: any[]): void {
-  existingMenus.forEach(existingMenu => {
-    const group = this.permissionGroups.find(g => g.menuId === existingMenu.menuId);
-    if (!group) return;
+    existingMenus.forEach(existingMenu => {
+      const group = this.permissionGroups.find(g => g.menuId === existingMenu.menuId);
+      if (!group) return;
 
-    existingMenu.subMenus?.forEach((existingSub: any) => {
-      const sub = group.subMenus.find(s => s.subMenuId === existingSub.subMenuId);
-      if (!sub) return;
+      existingMenu.subMenus?.forEach((existingSub: any) => {
+        const sub = group.subMenus.find(s => s.subMenuId === existingSub.subMenuId);
+        if (!sub) return;
 
-      existingSub.actions?.forEach((existingAction: any) => {
-        // FIX: match by actionKey instead of actionId
-        const action = sub.actions.find(a => a.actionKey === existingAction.actionKey);
-        if (action) action.hasPermission = existingAction.hasPermission;
+        existingSub.actions?.forEach((existingAction: any) => {
+          const action = sub.actions.find(a => a.actionKey === existingAction.actionKey);
+          if (action) action.hasPermission = existingAction.hasPermission;
+        });
       });
     });
-  });
-}
+  }
 
   // ─── Toggle helpers ────────────────────────────────────────────
 
@@ -161,7 +161,7 @@ export class RoleDialogComponent implements OnInit {
     );
   }
 
-  // ─── Count helpers (for card footer) ──────────────────────────
+  // ─── Count helpers ─────────────────────────────────────────────
 
   getEnabledCount(group: MenuPermissionGroup): number {
     return this.getAllActionsForMenu(group).filter(a => a.hasPermission).length;
@@ -188,10 +188,17 @@ export class RoleDialogComponent implements OnInit {
       'Dashboard': 'dashboard',
       'Subscription': 'credit_card',
       'AI Assistant': 'smart_toy',
-      'Calendar': 'calendar_month'
+      'Calendar': 'calendar_month',
+      'Recruitment': 'person_add'
     };
     return iconMap[menuName] || 'widgets';
   }
+
+  // ─── Navigation ────────────────────────────────────────────────
+
+  onBack(): void {
+  this.router.navigate(['/settings/roles']);
+}
 
   // ─── Submit ────────────────────────────────────────────────────
 
@@ -222,13 +229,16 @@ export class RoleDialogComponent implements OnInit {
     };
 
     const request$ = this.isEditMode
-      ? this.roleService.updateRole(this.data.role!.roleId, payload)
+      ? this.roleService.updateRole(this.role!.roleId, payload)
       : this.roleService.createRole(payload);
 
     request$.subscribe({
-      next: (result) => {
+      next: () => {
         this.isSaving = false;
-        this.dialogRef.close(result);
+        this.notificationService.showSuccess(
+          this.isEditMode ? 'Role updated successfully' : 'Role created successfully'
+        );
+        this.onBack();
       },
       error: () => {
         this.isSaving = false;
@@ -237,9 +247,5 @@ export class RoleDialogComponent implements OnInit {
         );
       }
     });
-  }
-
-  onClose(): void {
-    this.dialogRef.close(null);
   }
 }
