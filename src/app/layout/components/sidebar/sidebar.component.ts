@@ -199,6 +199,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
+      label: 'Payroll',
+      icon: 'payments',
+      children: [
+        { label: 'Rules', icon: 'rule', route: '/payroll/rules' }
+      ]
+    },
+    {
       label: 'Settings',
       icon: 'settings',
       children: [

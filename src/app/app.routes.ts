@@ -138,6 +138,15 @@ export const appRoutes: Routes = [
     title: 'Jobs - HRMS'
   },
 
+  // Payroll Management Routes
+  {
+    path: 'payroll',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/payroll/payroll.routes').then(m => m.payrollRoutes),
+    title: 'Payroll - HRMS'
+  },
+
   // Public Career Routes (no authentication required)
   {
     path: 'career',
