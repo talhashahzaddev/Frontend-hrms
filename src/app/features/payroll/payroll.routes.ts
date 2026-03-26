@@ -3,13 +3,13 @@ import { Routes } from '@angular/router';
 export const payrollRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'rules',
+    redirectTo: 'policies',
     pathMatch: 'full'
   },
   {
-    path: 'rules',
+    path: 'policies',
     loadComponent: () =>
       import('./components/payroll-rules/payroll-rules.component').then(m => m.PayrollRulesComponent),
-    title: 'Payroll Rules - HRMS'
+    title: 'Payroll Policies - HRMS'
   }
 ];

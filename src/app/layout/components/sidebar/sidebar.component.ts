@@ -202,7 +202,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Payroll',
       icon: 'payments',
       children: [
-        { label: 'Rules', icon: 'rule', route: '/payroll/rules' }
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies' }
       ]
     },
     {
