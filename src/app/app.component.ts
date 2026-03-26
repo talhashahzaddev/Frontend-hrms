@@ -213,7 +213,6 @@ export class AppComponent implements OnInit, OnDestroy {
       '/employees': 'Employee Management',
       '/attendance': 'Attendance Tracking',
       '/leave': 'Leave Management',
-      '/payroll': 'Payroll Management',
       '/performance': 'Performance Management',
       '/settings': 'Settings',
       '/profile': 'My Profile'
