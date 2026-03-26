@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -19,7 +19,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { RouterModule } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { map, startWith, takeUntil } from 'rxjs/operators';
 
 import { Asset, AssetType } from '../../../../core/models/assets.models';
 import { AssetTypeService } from '../../services/asset-type.service';
@@ -73,13 +72,16 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
 
   employees: any[] = [];
   filteredEmployees: any[] = [];
-  filteredEmployees$!: Observable<any[]>;
-  employeeSearchControl = new FormControl('');
   selectedAsset: any;
   selectedAssignment: any;
   editingAssetId: string | null = null;
   isEditMode = false;
   private destroy$ = new Subject<void>();
+
+  // Employee dropdown state (custom, non-Observable pattern)
+  employeeDropdownOpen = false;
+  employeeFilter = '';
+  selectedEmployeeId: string | null = null;
 
   dialogRef!: MatDialogRef<any>;
   assignDialogRef!: MatDialogRef<any>;
@@ -138,6 +140,15 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // Auto-close dropdown when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.employee-dropdown-container')) {
+      this.employeeDropdownOpen = false;
+    }
   }
 
   private initializeForms(): void {
@@ -450,48 +461,62 @@ deleteAsset(asset: Asset): void {
     
     this.selectedAsset = asset;
     this.assignForm.reset({ employeeId: '', assignDate: new Date(), returnDate: null, condition: 'Good' });
-    this.employeeSearchControl.reset('');
     
-    // Set up the autocomplete filtered employees Observable
-    this.filteredEmployees$ = this.employeeSearchControl.valueChanges.pipe(
-      startWith(''),
-      map(searchTerm => this.filterEmployeesBySearchTerm(searchTerm)),
-      takeUntil(this.destroy$)
-    );
+    // Reset dropdown state and auto-open
+    this.selectedEmployeeId = null;
+    this.employeeDropdownOpen = true;
+    this.employeeFilter = '';
+    this.applyEmployeeFilter();
     
     this.assignDialogRef = this.dialog.open(this.assignDialogTemplate, { width: '500px' });
   }
 
-  private filterEmployeesBySearchTerm(searchTerm: string | null | any): any[] {
-    if (!searchTerm) {
-      return [...this.employees];
+  // ===== EMPLOYEE DROPDOWN METHODS (Custom State-Driven Pattern) =====
+  
+  openEmployeeDropdown(): void {
+    this.employeeDropdownOpen = true;
+    this.employeeFilter = '';
+    this.applyEmployeeFilter();
+  }
+
+  onEmployeeSearch(searchTerm: string): void {
+    this.employeeFilter = searchTerm;
+    this.applyEmployeeFilter();
+  }
+
+  private applyEmployeeFilter(): void {
+    if (!this.employeeFilter) {
+      this.filteredEmployees = [...this.employees];
+      return;
     }
-    
-    // If the value is an object (employee was selected), return all employees
-    if (typeof searchTerm === 'object') {
-      return [...this.employees];
-    }
-    
-    const term = (searchTerm || '').toString().toLowerCase();
-    return this.employees.filter(employee =>
-      employee.firstName?.toLowerCase().includes(term) ||
-      employee.lastName?.toLowerCase().includes(term) ||
-      employee.email?.toLowerCase().includes(term)
+    const term = this.employeeFilter.toLowerCase();
+    this.filteredEmployees = this.employees.filter(employee =>
+      (employee.firstName || '').toLowerCase().includes(term) ||
+      (employee.lastName || '').toLowerCase().includes(term) ||
+      (employee.email || '').toLowerCase().includes(term)
     );
   }
 
-  displayEmployeeInAutocomplete(employee: any): string {
-    if (!employee) return '';
-    return `${employee.firstName} ${employee.lastName} — ${employee.email}`;
+  toggleEmployee(employee: any): void {
+    if (!employee || !employee.employeeId) return;
+    if (this.selectedEmployeeId === employee.employeeId) {
+      this.selectedEmployeeId = null;
+      this.assignForm.patchValue({ employeeId: '' });
+    } else {
+      this.selectedEmployeeId = employee.employeeId;
+      this.assignForm.patchValue({ employeeId: employee.employeeId });
+    }
   }
 
-  onEmployeeSelected(employee: any): void {
-    if (employee && employee.employeeId) {
-      this.assignForm.patchValue({
-        employeeId: employee.employeeId
-      });
-      console.log('Selected employee ID:', employee.employeeId);
-    }
+  isEmployeeSelected(employeeId: string): boolean {
+    return this.selectedEmployeeId === employeeId;
+  }
+
+  displaySelectedEmployee(): string {
+    if (!this.selectedEmployeeId) return '';
+    const employee = this.employees.find(emp => emp.employeeId === this.selectedEmployeeId);
+    if (!employee) return '';
+    return `${employee.firstName} ${employee.lastName} — ${employee.email}`;
   }
 
   openHistoryDialog(asset: any): void {
