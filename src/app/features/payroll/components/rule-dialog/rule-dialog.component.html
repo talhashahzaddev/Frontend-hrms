@@ -6,8 +6,8 @@
         <mat-icon>rule</mat-icon>
       </div>
       <div>
-        <h2>Create Policy</h2>
-        <p class="rd-header-sub">Configure a new Policy</p>
+        <h2>{{ data.policyId === 1 ? (isEditMode ? 'Edit Overtime Rules' : 'Create Overtime Rules') : 'Create Policy' }}</h2>
+        <p class="rd-header-sub">{{ data.policyId ? 'Configure a new rule' : 'Configure a new Policy' }}</p>
       </div>
     </div>
     <button mat-icon-button mat-dialog-close class="rd-close-btn" aria-label="Close">
@@ -20,7 +20,7 @@
     <form [formGroup]="ruleForm" class="rd-form" (ngSubmit)="onSubmit(); $event.preventDefault()">
 
       <!-- Section: Select Policy -->
-      <section class="rd-section">
+      <section class="rd-section" *ngIf="!data.policyId">
         <div class="rd-section-title">
           <h3>Policy Selection</h3>
         </div>
@@ -86,7 +86,7 @@
           <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'fixed'">
             <label>Fixed Amount *</label>
             <mat-form-field appearance="outline" class="rd-mat-field">
-              <span matTextPrefix>{{ currencySymbol }}&nbsp;</span>
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
               <input matInput type="number" formControlName="fixedAmount" placeholder="0.00">
               <mat-error *ngIf="ruleForm.get('fixedAmount')?.hasError('required')">Fixed amount is required</mat-error>
             </mat-form-field>
@@ -125,10 +125,10 @@
   <!-- ── Footer ── -->
   <footer class="rd-footer">
     <button class="rd-btn-cancel" type="button" (click)="onCancel()">Cancel</button>
-    <button class="rd-btn-submit" type="button" [disabled]="ruleForm.invalid || isSubmitting" (click)="onSubmit()">
-      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
-      <span *ngIf="!isSubmitting">Save Rule</span>
-      <span *ngIf="isSubmitting">Saving...</span>
+    <button class="rd-btn-submit" type="button" [disabled]="ruleForm.invalid || isSubmitting()" (click)="onSubmit()">
+      <mat-spinner *ngIf="isSubmitting()" diameter="18"></mat-spinner>
+      <span *ngIf="!isSubmitting()">Save Rule</span>
+      <span *ngIf="isSubmitting()">Saving...</span>
     </button>
   </footer>
 </div>

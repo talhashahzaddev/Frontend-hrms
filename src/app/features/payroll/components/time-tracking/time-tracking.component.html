@@ -1,0 +1,231 @@
+<div class="time-tracking-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Attendance & Payroll Records</h1>
+      <p class="subtitle">Manage overtime, absences, late arrivals, and leave summaries for the current period</p>
+    </div>
+    <!-- <div class="actions">
+      <button class="export-btn">
+        <mat-icon>file_download</mat-icon>
+        Export Report
+      </button>
+    </div> -->
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <a href="javascript:void(0)" class="tab active">
+      <span>Overtime</span>
+      <span class="badge active-badge">12</span>
+    </a>
+    <a href="javascript:void(0)" class="tab">
+      <span>Absents</span>
+      <span class="badge">5</span>
+    </a>
+    <a href="javascript:void(0)" class="tab">
+      <span>Late / Half-day</span>
+      <span class="badge">8</span>
+    </a>
+    <a href="javascript:void(0)" class="tab">
+      <span>Leave Summary</span>
+      <span class="badge">4</span>
+    </a>
+  </div>
+
+  <!-- Summary Stat Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total OT Hours</span>
+          <span class="value">{{ totalOtHours | number:'1.0-2' }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>schedule</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">this period</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total OT Amount</span>
+          <span class="value">{{ currencySymbol() }} {{ totalOtAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">{{ totalEmployees }} employees</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Regular OT</span>
+          <span class="value">{{ regularOtHours | number:'1.0-2' }}h</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>work</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Regular hours sum</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Holiday OT</span>
+          <span class="value">{{ holidayOtHours | number:'1.0-2' }}h</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>event_busy</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Holiday hours sum</p>
+    </div>
+  </div>
+
+  <!-- Content Area (Table + Toolbar) -->
+  <div class="content-card">
+    <div class="toolbar">
+      <!-- Filter row -->
+      <div class="filters-row">
+        <!-- Search -->
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
+        </div>
+
+        <!-- Overtime Type filter -->
+        <select class="filter-select" [(ngModel)]="pendingType">
+          <option value="">All types</option>
+          <option value="Regular">Regular</option>
+          <option value="Holiday">Holiday</option>
+          <option value="Weekend">Weekend</option>
+        </select>
+
+        <!-- Rule filter -->
+        <select class="filter-select" [(ngModel)]="pendingRule">
+          <option value="">All rules</option>
+          @for (rule of overtimeRules; track rule.ruleId) {
+          <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriod">
+          <option value="">All periods</option>
+          @for (p of periods; track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Add button -->
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openDialog('add')">
+          <mat-icon>add</mat-icon>
+          Add Overtime
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Hours</th>
+            <th>Rate ({{ currencySymbol() }}/hr)</th>
+            <th>Amount</th>
+            <th>Type</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records; track record.overtimeId) {
+          <tr class="table-row">
+            <td>
+              <div class="employee-info">
+                <div class="avatar" [ngClass]="'bg-' + record.color">{{ record.initials }}</div>
+                <span class="font-semibold">{{ record.name }}</span>
+              </div>
+            </td>
+            <td class="font-semibold">{{ record.hours }}</td>
+            <td>{{ record.rate }}</td>
+            <td class="font-semibold highlight-val">{{ record.amount }}</td>
+            <td>
+              <span class="badge" [ngClass]="record.typeClass">{{ record.type }}</span>
+            </td>
+            <td class="action-cell">
+              <button class="action-btn hover-primary" (click)="openDialog('edit', record)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-btn hover-danger" (click)="onDelete(record)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (totalCount === 0) {
+        No records found
+        } @else {
+        Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalCount }} records
+        }
+      </p>
+      <div class="pagination">
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="page === 1" [disabled]="page === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- First page shortcut + ellipsis -->
+        @if (pageRange[0] > 1) {
+        <button class="page-btn" (click)="goToPage(1)">1</button>
+        @if (pageRange[0] > 2) {
+        <span class="page-ellipsis">&hellip;</span>
+        }
+        }
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === page" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Last page shortcut + ellipsis -->
+        @if (pageRange[pageRange.length - 1] < totalPages) { @if (pageRange[pageRange.length - 1] < totalPages - 1) {
+          <span class="page-ellipsis">&hellip;</span>
+          }
+          <button class="page-btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+          }
+
+          <!-- Next -->
+          <button class="page-btn" [class.disabled]="page === totalPages" [disabled]="page === totalPages"
+            (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+      </div>
+    </div>
+  </div>
+</div>

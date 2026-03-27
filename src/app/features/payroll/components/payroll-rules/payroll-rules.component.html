@@ -53,7 +53,7 @@
       </div>
       } @else {
       @for (policy of policyCards; track policy.key) {
-      <div class="rule-card active-highlight">
+      <div class="rule-card active-highlight" (click)="onPolicyClick(policy)">
         <div class="card-header">
           <div class="icon-wrapper" [ngClass]="getIconColorClass(policy.title)">
             <mat-icon data-weight="fill">

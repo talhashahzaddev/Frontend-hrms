@@ -65,9 +65,116 @@ export class PayrollService {
       .pipe(
         map((response: any) => {
           if (response && !response.success && response.message) {
-             throw new Error(response.message);
+            throw new Error(response.message);
           }
           return response?.data || response;
+        })
+      );
+  }
+
+  updateOvertimeRule(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/overtime-rules/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (response && !response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response?.data || response;
+        })
+      );
+  }
+
+  getOvertimeRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/overtime-rules`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+  getOvertimeActiveRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/overtime-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  deleteOvertimeRule(id: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/overtime-rules/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
+        })
+      );
+  }
+
+  getOvertimeEntries(params?: any): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/overtime-entries`, { params })
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  createOvertimeEntry(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/overtime-entries`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateOvertimeEntry(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/overtime-entries/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteOvertimeEntry(id: string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/overtime-entries/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  toggleOvertimeRuleStatus(id: string): Observable<boolean> {
+    return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/overtime-rules/${id}/toggle-status`, {})
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
         })
       );
   }

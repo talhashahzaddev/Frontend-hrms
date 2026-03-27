@@ -1,0 +1,70 @@
+<div class="attendance-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2>{{ title }}</h2>
+    <button class="close-btn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body" [formGroup]="form">
+    <!-- Row 1: Employee & Rule -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Employee</label>
+        <select class="form-control" formControlName="employee">
+          <option disabled selected value="">Select employee</option>
+          <option *ngFor="let emp of employees" [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
+        </select>
+      </div>
+      <div class="form-group" *ngIf="data.type === 'overtime'">
+        <label>Overtime Rule</label>
+        <select class="form-control" formControlName="rule" (change)="onRuleChange($event)">
+          <option disabled selected value="">Select rule</option>
+          <option *ngFor="let rule of rules" [value]="rule.ruleId">{{ rule.ruleName }} ({{ rule.overtimeType }})</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 3: Hours & Rate -->
+    <div class="form-row" *ngIf="data.type === 'overtime'">
+      <div class="form-group">
+        <label>Hours</label>
+        <input type="number" class="form-control" formControlName="hours" placeholder="e.g. 3.5" step="0.5" />
+      </div>
+      <div class="form-group">
+        <label>Rate per hour ({{ currencySymbol() }})</label>
+        <input type="number" class="form-control" formControlName="rate" placeholder="e.g. 1200" />
+      </div>
+    </div>
+
+    <!-- Row 4: Period -->
+    <div class="form-row" *ngIf="data.type === 'overtime'">
+      <div class="form-group">
+        <label>Period</label>
+        <select class="form-control" formControlName="period">
+          <option disabled selected value="">Select period</option>
+          <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 4: Amount -->
+    <div class="form-group" *ngIf="data.type === 'overtime'">
+      <label>Amount ({{ currencySymbol() }})</label>
+      <div class="relative">
+        <input type="text" class="form-control" formControlName="amount" placeholder="Auto-calculated from Hours × Rate" readonly />
+        <div class="suffix-icon">
+          <mat-icon>lock</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="close()">Cancel</button>
+    <button class="save-btn" (click)="save()">Save record</button>
+  </div>
+</div>

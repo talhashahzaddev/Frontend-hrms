@@ -1,4 +1,4 @@
-import { Component, Inject, ViewEncapsulation, OnInit } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -17,6 +17,15 @@ import { take } from 'rxjs';
 export interface RuleDialogData {
   // Pass any initial data if needed, e.g., for edit mode
   mode?: 'create' | 'edit';
+  policyId?: number;
+  rule?: {
+    ruleId: string;
+    ruleName: string;
+    description?: string;
+    overtimeType: string;
+    fixedAmount: number | null;
+    percentage: number | null;
+  };
 }
 
 @Component({
@@ -38,9 +47,16 @@ export interface RuleDialogData {
   styleUrls: ['./rule-dialog.component.scss']
 })
 export class RuleDialogComponent implements OnInit {
-  ruleForm: FormGroup;
-  isSubmitting = false;
-  currencySymbol = '$';
+  private readonly fb = inject(FormBuilder);
+  private readonly payrollService = inject(PayrollService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly dialogRef = inject(MatDialogRef<RuleDialogComponent>);
+  private readonly injectedData = inject<RuleDialogData | null>(MAT_DIALOG_DATA, { optional: true });
+  public readonly data: RuleDialogData = this.injectedData ?? {};
+  private readonly notification = inject(NotificationService);
+
+  readonly isSubmitting = signal(false);
+  readonly currencySymbol = signal('$');
 
   readonly policies = [
     { id: 1, name: 'Overtime Policy' },
@@ -58,35 +74,30 @@ export class RuleDialogComponent implements OnInit {
 
   readonly overtimeTypes = ['regular', 'holiday', 'weekend'];
 
-  constructor(
-    private fb: FormBuilder,
-    private payrollService: PayrollService,
-    private settingsService: SettingsService,
-    private dialogRef: MatDialogRef<RuleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: RuleDialogData,
-    private notification: NotificationService
-  ) {
-    this.ruleForm = this.fb.group({
-      selectedPolicy: ['', Validators.required],
-      // Overtime Policy fields
-      ruleName: [''],
-      description: [''],
-      overtimeType: [''],
-      amountType: ['fixed'],
-      fixedAmount: [null],
-      percentage: [null]
-    });
+  get isEditMode(): boolean {
+    return this.data?.mode === 'edit';
   }
+
+  readonly ruleForm = this.fb.group({
+    selectedPolicy: [this.data?.policyId || '', Validators.required],
+    // Overtime Policy fields
+    ruleName: [''],
+    description: [''],
+    overtimeType: [''],
+    amountType: ['fixed'],
+    fixedAmount: [null as number | null],
+    percentage: [null as number | null]
+  });
 
   ngOnInit(): void {
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
         next: (currencyCode) => {
-          this.currencySymbol = this.settingsService.getCurrencySymbol(currencyCode);
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
         },
         error: () => {
-          this.currencySymbol = this.settingsService.getCurrencySymbol();
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
 
@@ -95,18 +106,35 @@ export class RuleDialogComponent implements OnInit {
       this.updateValidation(policy);
     });
 
+    if (this.selectedPolicy) {
+      this.updateValidation(this.selectedPolicy);
+    }
+
     // When amount type changes, update validation logic
     this.ruleForm.get('amountType')?.valueChanges.subscribe(() => {
       this.updateAmountValidation();
     });
+
+    if (this.isEditMode && this.data?.rule) {
+      const isFixedAmount = this.data.rule.fixedAmount !== null && this.data.rule.fixedAmount !== undefined;
+      this.ruleForm.patchValue({
+        selectedPolicy: this.data.policyId || 1,
+        ruleName: this.data.rule.ruleName || '',
+        description: this.data.rule.description || '',
+        overtimeType: (this.data.rule.overtimeType || '').toLowerCase(),
+        amountType: isFixedAmount ? 'fixed' : 'percentage',
+        fixedAmount: isFixedAmount ? this.data.rule.fixedAmount : null,
+        percentage: isFixedAmount ? null : this.data.rule.percentage
+      });
+    }
   }
 
   get selectedPolicy(): number {
-    return this.ruleForm.get('selectedPolicy')?.value;
+    return Number(this.ruleForm.get('selectedPolicy')?.value) || 0;
   }
 
-  private updateValidation(policyId: number) {
-    const isOvertime = policyId === 1;
+  private updateValidation(policyId: number | string | null | undefined) {
+    const isOvertime = Number(policyId) === 1;
 
     const overtimeControls = ['ruleName', 'overtimeType', 'amountType'];
 
@@ -154,12 +182,12 @@ export class RuleDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.ruleForm.invalid || this.isSubmitting) {
+    if (this.ruleForm.invalid || this.isSubmitting()) {
       this.ruleForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmitting = true;
+    this.isSubmitting.set(true);
     const formValue = this.ruleForm.getRawValue();
 
     // We only send back the relevant fields based on the selected policy
@@ -175,22 +203,29 @@ export class RuleDialogComponent implements OnInit {
         fixedAmount: formValue.amountType === 'fixed' ? formValue.fixedAmount : null,
         percentage: formValue.amountType === 'percentage' ? formValue.percentage : null
       };
+      const request$ = this.isEditMode && this.data?.rule?.ruleId
+        ? this.payrollService.updateOvertimeRule(this.data.rule.ruleId, resultPayload)
+        : this.payrollService.createOvertimeRule(resultPayload);
 
-      this.payrollService.createOvertimeRule(resultPayload)
-        .pipe(finalize(() => this.isSubmitting = false))
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
         .subscribe({
           next: (res) => {
-            this.notification.showSuccess('Overtime rule created successfully');
+            this.notification.showSuccess(
+              this.isEditMode ? 'Overtime rule updated successfully' : 'Overtime rule created successfully'
+            );
             this.dialogRef.close({ success: true, data: res, policyId: 1 });
           },
           error: (err: any) => {
-            this.notification.showError(err?.message || 'Failed to create overtime rule');
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update overtime rule' : 'Failed to create overtime rule')
+            );
           }
         });
     } else {
       // Simulate API call for now or pass back to parent (Not Implemented)
       setTimeout(() => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         this.dialogRef.close(resultPayload);
       }, 500);
     }
