@@ -357,7 +357,7 @@
       type="text"
       [placeholder]="selectedEmployeeId ? displaySelectedEmployee() : 'Select an employee'"
       [value]="employeeDropdownOpen ? employeeFilter : displaySelectedEmployee()"
-      (focus)="openEmployeeDropdown()"
+      (click)="openEmployeeDropdown()"
       (input)="onEmployeeSearch($any($event.target).value)"
       autocomplete="off">
   </div>
@@ -474,12 +474,8 @@
             <span class="view-value">{{ selectedAsset.name }}</span>
           </div>
           <div class="view-row">
-            <span class="view-label">Asset Code</span>
+            <span class="view-label">Asset Code/Tag</span>
             <span class="view-value">{{ selectedAsset.code || '—' }}</span>
-          </div>
-          <div class="view-row">
-            <span class="view-label">Asset Tag</span>
-            <span class="view-value">{{ selectedAsset.assetTag || '—' }}</span>
           </div>
           <div class="view-row">
             <span class="view-label">Asset Type</span>
