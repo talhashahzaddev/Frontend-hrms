@@ -234,38 +234,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager']
     },
 
-    // Payroll - Super Admin only
-    {
-      name: 'Payroll Periods',
-      route: '/payroll/periods',
-      keywords: ['payroll periods', 'payroll period', 'periods', 'pay period', 'salary period'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Process Payroll',
-      route: '/payroll/process',
-      keywords: ['process payroll', 'payroll process', 'run payroll', 'calculate payroll', 'generate payroll'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Salary Components',
-      route: '/payroll/salary-component',
-      keywords: ['salary components', 'salary component', 'components', 'pay components', 'salary structure'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Payroll Reports',
-      route: '/payroll/reports',
-      keywords: ['payroll reports', 'payroll report', 'salary reports', 'payroll analytics'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Salary Slips',
-      route: '/payroll/slips',
-      keywords: ['salary slips', 'salary slip', 'payslips', 'payslip', 'pay slip', 'pay slips'],
-      roles: ['Super Admin']
-    },
-
     // Profile & Settings
     {
       name: 'My Profile',

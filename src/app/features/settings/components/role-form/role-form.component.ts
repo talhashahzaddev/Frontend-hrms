@@ -176,7 +176,6 @@ export class RoleFormComponent implements OnInit {
       'Employee Management': 'people',
       'Attendance': 'schedule',
       'Leave Management': 'event_available',
-      'Payroll': 'payments',
       'Assets Management': 'inventory_2',
       'Performance': 'trending_up',
       'Expense': 'receipt_long',

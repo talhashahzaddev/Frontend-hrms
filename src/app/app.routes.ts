@@ -95,15 +95,6 @@ export const appRoutes: Routes = [
       import('./features/leave/leave.routes').then(m => m.leaveRoutes)
   },
 
-  // Payroll Management Routes (SuperAdmin only)
-  {
-    path: 'payroll',
-    canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
-    loadChildren: () =>
-      import('./features/payroll/payroll.routes').then(m => m.payrollRoutes)
-  },
-
   // Performance Management Routes
   {
     path: 'performance',
@@ -144,6 +135,15 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('./features/jobs/jobs.routes').then(m => m.jobsRoutes),
     title: 'Jobs - HRMS'
+  },
+
+  // Payroll Management Routes
+  {
+    path: 'payroll',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/payroll/payroll.routes').then(m => m.payrollRoutes),
+    title: 'Payroll - HRMS'
   },
 
   // Public Career Routes (no authentication required)
