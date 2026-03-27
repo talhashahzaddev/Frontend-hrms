@@ -15,6 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { EmployeeService } from '../../services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Employee } from '../../../../core/models/employee.models';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-employee-detail',
@@ -69,20 +70,20 @@ import { Employee } from '../../../../core/models/employee.models';
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="editEmployee()">
+                <button mat-menu-item *ngIf="hasPermission('edit_employee')" (click)="editEmployee()">
                   <mat-icon>edit</mat-icon>
                   <span>Edit Employee</span>
                 </button>
-                <button mat-menu-item (click)="activateEmployee()" *ngIf="employee.status !== 'active'">
+                <button mat-menu-item *ngIf="hasPermission('activate/deactivate_employee') && employee.status !== 'active'" (click)="activateEmployee()">
                   <mat-icon>check_circle</mat-icon>
                   <span>Activate</span>
                 </button>
-                <button mat-menu-item (click)="deactivateEmployee()" *ngIf="employee.status === 'active'">
+                <button mat-menu-item *ngIf="hasPermission('activate/deactivate_employee') && employee.status === 'active'" (click)="deactivateEmployee()">
                   <mat-icon>block</mat-icon>
                   <span>Deactivate</span>
                 </button>
                 <mat-divider></mat-divider>
-                <button mat-menu-item (click)="deleteEmployee()" class="delete-action">
+                <button mat-menu-item *ngIf="hasPermission('delete_employee')" (click)="deleteEmployee()" class="delete-action">
                   <mat-icon>delete</mat-icon>
                   <span>Delete Employee</span>
                 </button>
@@ -242,7 +243,7 @@ import { Employee } from '../../../../core/models/employee.models';
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-          <button mat-raised-button color="primary" (click)="editEmployee()">
+          <button mat-raised-button color="primary" *ngIf="hasPermission('edit_employee')" (click)="editEmployee()">
             <mat-icon>edit</mat-icon>
             Edit Employee
           </button>
@@ -536,7 +537,8 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private employeeService: EmployeeService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -639,5 +641,9 @@ export class EmployeeDetailComponent implements OnInit, OnDestroy {
       default:
         return 'accent';
     }
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Employee Management', 'All Employees', actionKey);
   }
 }

@@ -44,7 +44,6 @@ export class RoleFormComponent implements OnInit {
   isSaving = false;
   grantFullAccess = false;
 
-  // Populated from route params / state
   mode: 'add' | 'edit' | 'view' = 'add';
   role?: Role;
 
@@ -61,7 +60,6 @@ export class RoleFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Resolve mode & role from route data or navigation state
     const state = history.state as { mode?: 'add' | 'edit' | 'view'; role?: Role };
     this.mode = state?.mode || (this.route.snapshot.data['mode'] as any) || 'add';
     this.role = state?.role;
@@ -197,8 +195,8 @@ export class RoleFormComponent implements OnInit {
   // ─── Navigation ────────────────────────────────────────────────
 
   onBack(): void {
-  this.router.navigate(['/settings/roles']);
-}
+    this.router.navigate(['/settings/roles']);
+  }
 
   // ─── Submit ────────────────────────────────────────────────────
 
@@ -206,6 +204,7 @@ export class RoleFormComponent implements OnInit {
     if (this.roleForm.invalid || this.isSaving) return;
     this.isSaving = true;
 
+    // Build the menus array — shape matches MenuPermissionDto on the backend
     const menus = this.permissionGroups
       .map(group => ({
         menuId: group.menuId,
@@ -214,13 +213,14 @@ export class RoleFormComponent implements OnInit {
           .map(sub => ({
             subMenuId: sub.subMenuId,
             actions: sub.actions.map(action => ({
-              actionId: action.actionId,
+              actionId: action.actionId,      // Guid required by ActionPermissionDto
               hasPermission: action.hasPermission
             }))
           }))
       }))
       .filter(m => m.subMenus.length > 0);
 
+    // Base payload shared by both create and update
     const payload: CreateRoleRequest = {
       roleName: this.roleForm.get('roleName')!.value,
       description: this.roleForm.get('description')!.value || '',
@@ -228,6 +228,7 @@ export class RoleFormComponent implements OnInit {
       menus
     };
 
+    // For edit: roleService.updateRole injects roleId into the body automatically
     const request$ = this.isEditMode
       ? this.roleService.updateRole(this.role!.roleId, payload)
       : this.roleService.createRole(payload);
@@ -240,11 +241,11 @@ export class RoleFormComponent implements OnInit {
         );
         this.onBack();
       },
-      error: () => {
+      error: (err) => {
         this.isSaving = false;
-        this.notificationService.showError(
-          this.isEditMode ? 'Failed to update role' : 'Failed to create role'
-        );
+        const message = err?.message
+          || (this.isEditMode ? 'Failed to update role' : 'Failed to create role');
+        this.notificationService.showError(message);
       }
     });
   }

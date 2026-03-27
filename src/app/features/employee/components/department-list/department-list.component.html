@@ -8,7 +8,7 @@
       <p class="page-subtitle">Manage and organize your departments</p>
     </div>
     <div class="header-actions">
-      <button mat-flat-button (click)="openCreateDialog()" class="add-button">
+      <button mat-flat-button *ngIf="hasPermission('add_department')" (click)="openCreateDialog()" class="add-button">
         <mat-icon>add</mat-icon>
         Add Department
       </button>
@@ -149,37 +149,37 @@
               <mat-icon>more_horiz</mat-icon>
             </button>
             <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="viewDepartment(department)">
+              <button mat-menu-item *ngIf="hasPermission('view_department_details')" (click)="viewDepartment(department)">
                 <mat-icon>visibility</mat-icon>
                 <span>View Details</span>
               </button>
-              <button mat-menu-item (click)="editDepartment(department)">
+              <button mat-menu-item *ngIf="hasPermission('edit_department')" (click)="editDepartment(department)">
                 <mat-icon>edit</mat-icon>
                 <span>Edit Department</span>
               </button>
-              <button mat-menu-item (click)="viewDepartmentEmployees(department)">
+              <button mat-menu-item *ngIf="hasPermission('view_department_emloyees')" (click)="viewDepartmentEmployees(department)">
                 <mat-icon>group</mat-icon>
                 <span>View Employees</span>
               </button>
               <mat-divider></mat-divider>
               <button mat-menu-item
-                      *ngIf="department.isActive"
+                      *ngIf="hasPermission('deactivat/activate_department') && department.isActive"
                       (click)="toggleDepartmentStatus(department, false)"
                       class="warning-action">
                 <mat-icon>block</mat-icon>
                 <span>Deactivate</span>
               </button>
               <button mat-menu-item
-                      *ngIf="!department.isActive"
+                      *ngIf="hasPermission('deactivat/activate_department') && !department.isActive"
                       (click)="toggleDepartmentStatus(department, true)"
                       class="success-action">
                 <mat-icon>check_circle</mat-icon>
                 <span>Activate</span>
               </button>
               <button mat-menu-item
+                      *ngIf="hasPermission('delete_department') && department.employeeCount === 0"
                       (click)="deleteDepartment(department)"
-                      class="danger-action"
-                      *ngIf="department.employeeCount === 0">
+                      class="danger-action">
                 <mat-icon>delete</mat-icon>
                 <span>Delete</span>
               </button>
@@ -199,7 +199,7 @@
         </div>
         <h3>No Departments Found</h3>
         <p>No departments match your current filters.</p>
-        <button mat-flat-button (click)="openCreateDialog()" class="add-first-department">
+        <button mat-flat-button *ngIf="hasPermission('add_department')" (click)="openCreateDialog()" class="add-first-department">
           <mat-icon>add</mat-icon>
           Add Your First Department
         </button>

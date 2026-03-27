@@ -8,7 +8,7 @@
       <p class="page-subtitle">Manage and organize job positions</p>
     </div>
     <div class="header-actions">
-      <button mat-flat-button (click)="openCreateDialog()" class="add-button">
+      <button mat-flat-button *ngIf="hasPermission('add_position')" (click)="openCreateDialog()" class="add-button">
         <mat-icon>add</mat-icon>
         Add Position
       </button>
@@ -160,37 +160,37 @@
               <mat-icon>more_horiz</mat-icon>
             </button>
             <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="viewPosition(position)">
+              <button mat-menu-item *ngIf="hasPermission('view_position_detaisl')" (click)="viewPosition(position)">
                 <mat-icon>visibility</mat-icon>
                 <span>View Details</span>
               </button>
-              <button mat-menu-item (click)="viewEmployees(position)">
+              <button mat-menu-item *ngIf="hasPermission('view_position_employees')" (click)="viewEmployees(position)">
                 <mat-icon>people</mat-icon>
                 <span>View Employees</span>
               </button>
-              <button mat-menu-item (click)="editPosition(position)">
+              <button mat-menu-item *ngIf="hasPermission('edit_position')" (click)="editPosition(position)">
                 <mat-icon>edit</mat-icon>
                 <span>Edit Position</span>
               </button>
               <mat-divider></mat-divider>
               <button mat-menu-item
-                      *ngIf="position.isActive"
+                      *ngIf="hasPermission('deactivat/activate_position') && position.isActive"
                       (click)="togglePositionStatus(position, false)"
                       class="warning-action">
                 <mat-icon>block</mat-icon>
                 <span>Deactivate</span>
               </button>
               <button mat-menu-item
-                      *ngIf="!position.isActive"
+                      *ngIf="hasPermission('deactivat/activate_position') && !position.isActive"
                       (click)="togglePositionStatus(position, true)"
                       class="success-action">
                 <mat-icon>check_circle</mat-icon>
                 <span>Activate</span>
               </button>
               <button mat-menu-item
+                      *ngIf="hasPermission('delete_position') && position.employeeCount === 0"
                       (click)="deletePosition(position)"
-                      class="danger-action"
-                      *ngIf="position.employeeCount === 0">
+                      class="danger-action">
                 <mat-icon>delete</mat-icon>
                 <span>Delete</span>
               </button>
@@ -210,7 +210,7 @@
         </div>
         <h3>No Positions Found</h3>
         <p>No positions match your current filters.</p>
-        <button mat-flat-button (click)="openCreateDialog()" class="add-first-position">
+        <button mat-flat-button *ngIf="hasPermission('add_position')" (click)="openCreateDialog()" class="add-first-position">
           <mat-icon>add</mat-icon>
           Add Your First Position
         </button>
