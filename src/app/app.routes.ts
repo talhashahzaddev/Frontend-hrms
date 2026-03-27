@@ -68,7 +68,6 @@ export const appRoutes: Routes = [
   {
     path: 'employees',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadChildren: () =>
       import('./features/employee/employee.routes').then(m => m.employeeRoutes)
   },

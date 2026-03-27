@@ -94,3 +94,39 @@ export interface PagedResult<T> {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
 }
+
+// Permissions Models
+export interface Permission {
+  actionId: string;
+  actionName: string;
+  actionKey: string;
+  hasPermission: boolean;
+}
+
+export interface SubMenu {
+  subMenuId: string;
+  subMenuName: string;
+  actions: Permission[];
+}
+
+export interface Menu {
+  menuId: string;
+  menuName: string;
+  subMenus: SubMenu[];
+}
+
+export interface UserPermissions {
+  userId: string;
+  userName: string | null;
+  email: string;
+  roleId: string;
+  roleName: string;
+  menus: Menu[];
+}
+
+export interface UserPermissionsResponse {
+  data: UserPermissions;
+  success: boolean;
+  message: string;
+  errors: string[] | null;
+}

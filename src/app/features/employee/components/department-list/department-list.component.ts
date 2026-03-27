@@ -27,6 +27,7 @@ import { DepartmentEmployeeViewComponent, DepartmentEmployeesViewData } from './
 import { DepartmentEmployee } from '@/app/core/models/attendance.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-department-list',
@@ -97,7 +98,8 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private attendanceService: AttendanceService,
     private dialog: MatDialog,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -187,6 +189,10 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
       this.statusControl.value ||
       this.managerControl.value
     );
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Employee Management', 'Department', actionKey);
   }
 
   openCreateDialog(): void {

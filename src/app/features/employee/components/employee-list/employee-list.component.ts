@@ -28,6 +28,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { Employee, Department, Position, EmployeeSearchRequest } from '../../../../core/models/employee.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { PaymentService } from '../../../../core/services/payment.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 
 @Component({
@@ -123,7 +124,8 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private paymentService: PaymentService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) { }
   async onAddEmployeeClick(): Promise<void> {
     // Always fetch latest departments and positions before checking
@@ -146,6 +148,11 @@ export class EmployeeListComponent implements OnInit, OnDestroy {
       this.notificationService.showError('Failed to check departments and positions.');
     }
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Employee Management', 'All Employees', actionKey);
+  }
+
 
   ngOnInit(): void {
     this.checkSubscription();

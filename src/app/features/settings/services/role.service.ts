@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Role, CreateRoleRequest, UpdateRoleRequest } from '../../../core/models/role.models';
+import { ApiResponse } from '../../../core/models/auth.models';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -17,27 +18,36 @@ export class RoleService {
 
   /** GET /Auth/get-roles-by-organization */
   getRoles(): Observable<Role[]> {
-    return this.http.get<{ data: Role[]; success: boolean; message: string; errors: null }>
-      (`${this.apiUrl}/get-roles-by-organization`)
-      .pipe(map(res => res.data));
+    return this.http.get<ApiResponse<Role[]>>(`${this.apiUrl}/get-roles-by-organization`)
+      .pipe(map(res => res.data ?? []));
   }
 
   /** POST /Auth/create-role */
   createRole(payload: CreateRoleRequest): Observable<any> {
-    return this.http.post<{ data: any; success: boolean }>
-      (`${this.apiUrl}/create-role`, payload)
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/create-role`, payload)
       .pipe(map(res => res.data));
   }
 
-  /** PUT /Auth/update-role/{roleId} — update endpoint, confirm path with backend */
-  updateRole(roleId: string, payload: UpdateRoleRequest): Observable<any> {
-    return this.http.put<{ data: any; success: boolean }>
-      (`${this.apiUrl}/update-role/${roleId}`, payload)
+  /**
+   * PUT /Auth/update-role
+   * RoleId is sent INSIDE the request body (not in the URL path).
+   * Backend signature: [HttpPut("update-role")]
+   */
+  updateRole(roleId: string, payload: CreateRoleRequest): Observable<any> {
+    const body: UpdateRoleRequest = {
+      ...payload,
+      roleId   // inject roleId into body as required by UpdateRoleRequest
+    };
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/update-role`, body)
       .pipe(map(res => res.data));
   }
 
-  /** DELETE /Auth/delete-role/{roleId} — confirm path with backend */
-  deleteRole(roleId: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete-role/${roleId}`);
+  /**
+   * DELETE /Auth/delete-role/{roleId}
+   * Backend signature: [HttpDelete("delete-role/{roleId}")]
+   */
+  deleteRole(roleId: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/delete-role/${roleId}`)
+      .pipe(map(res => res.data ?? false));
   }
 }
