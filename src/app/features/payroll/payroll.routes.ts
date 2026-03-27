@@ -11,5 +11,11 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/payroll-rules/payroll-rules.component').then(m => m.PayrollRulesComponent),
     title: 'Payroll Policies - HRMS'
+  },
+  {
+    path: 'policies/overtime-rules',
+    loadComponent: () =>
+      import('./components/overtime-rules/overtime-rules.component').then(m => m.OvertimeRulesComponent),
+    title: 'Overtime Rules - HRMS'
   }
 ];

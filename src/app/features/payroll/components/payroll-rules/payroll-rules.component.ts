@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { PayrollService, PayRollRulesGroupedDto } from '../../services/payroll.service';
 import { RuleDialogComponent } from '../rule-dialog/rule-dialog.component';
 
@@ -18,7 +19,11 @@ export class PayrollRulesComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
 
-  constructor(private payrollService: PayrollService, private dialog: MatDialog) { }
+  constructor(
+    private payrollService: PayrollService,
+    private dialog: MatDialog,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.fetchRules();
@@ -142,5 +147,12 @@ export class PayrollRulesComponent implements OnInit {
         this.fetchRules();
       }
     });
+  }
+
+  onPolicyClick(policy: { key: string; title: string; rulesCount: number }): void {
+    if (policy.key === 'overtimePolicy') {
+      this.router.navigate(['/payroll/policies/overtime-rules']);
+    }
+    // additional navigations can be handled here if required
   }
 }
