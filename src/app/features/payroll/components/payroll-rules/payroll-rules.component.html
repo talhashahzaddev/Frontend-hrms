@@ -1,0 +1,85 @@
+<div class="payroll-rules-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="title">
+      <mat-icon>payments</mat-icon>
+      Payroll Policies
+    </h1>
+    <p class="subtitle">Configure rules for all payroll modules</p>
+  </div>
+
+  <!-- Summary Bar -->
+  <div class="summary-cards">
+    <div class="card">
+      <span class="label">Total Policies</span>
+      <span class="value">{{ totalModules }}</span>
+    </div>
+    <div class="card">
+      <span class="label">Total rules</span>
+      <span class="value">{{ totalRulesConfigured }}</span>
+    </div>
+    <div class="card active-card">
+      <span class="label">Active rules</span>
+      <span class="value">{{ activeRulesCount }}</span>
+    </div>
+    <div class="card inactive-card">
+      <span class="label">Inactive rules</span>
+      <span class="value">{{ inactiveRulesCount }}</span>
+    </div>
+  </div>
+
+  <!-- Grid Section -->
+  <section class="modules-section">
+    <div class="section-header">
+      <h2>All modules</h2>
+      <button class="btn-link">
+        View global defaults <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </div>
+
+    <div class="rules-grid">
+      @if (isLoading) {
+      <div class="loading">Loading rules...</div>
+      } @else if (error) {
+      <div class="error" style="color: red;">{{ error }}</div>
+      } @else if (policyCards.length === 0) {
+      <div class="empty-rules-state"
+        style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 16px;">
+        <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure policy for your Payroll</h3>
+        <div class="add-card" (click)="openRuleDialog()">
+          <mat-icon>add_circle</mat-icon>
+          <p>Create Policy</p>
+        </div>
+      </div>
+      } @else {
+      @for (policy of policyCards; track policy.key) {
+      <div class="rule-card active-highlight">
+        <div class="card-header">
+          <div class="icon-wrapper" [ngClass]="getIconColorClass(policy.title)">
+            <mat-icon data-weight="fill">
+              {{ getIconName(policy.title) }}
+            </mat-icon>
+          </div>
+        </div>
+
+        <h3 class="rule-title">{{ policy.title }}</h3>
+        <p class="rule-desc">Rules to manage {{ policy.title.toLowerCase() }}</p>
+
+        <div class="rule-meta">
+          <mat-icon>settings_suggest</mat-icon>
+          <span class="meta-text">
+            {{ policy.rulesCount }} rules configured
+          </span>
+        </div>
+      </div>
+      }
+
+      <!-- Add New Card -->
+      <div class="add-card" (click)="openRuleDialog()">
+        <mat-icon>add_circle</mat-icon>
+        <p>Create Policy</p>
+      </div>
+      }
+    </div>
+  </section>
+</div>

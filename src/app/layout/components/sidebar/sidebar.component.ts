@@ -126,18 +126,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      label: 'Payroll',
-      icon: 'payments',
-      roles: ['Super Admin'],
-      children: [
-        { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods' },
-        { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process' },
-        { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component' },
-        { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports' },
-        { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips' }
-      ]
-    },
-    {
       label: 'Assets Management',
       icon: 'inventory_2',
       roles: ['Super Admin', 'HR Manager', 'Manager'],
@@ -208,6 +196,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Openings', icon: 'work_outline', route: '/jobs/openings' },
         { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied' },
         { label: 'Stage', icon: 'label', route: '/jobs/stage', roles: ['Super Admin'] }
+      ]
+    },
+    {
+      label: 'Payroll',
+      icon: 'payments',
+      children: [
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies' }
       ]
     },
     {

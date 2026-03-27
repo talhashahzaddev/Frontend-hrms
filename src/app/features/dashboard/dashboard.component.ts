@@ -23,7 +23,6 @@ import {
   DashboardSummary,
   AttendanceStats,
   LeaveStats,
-  PayrollStats,
   PerformanceStats,
   RecentActivity,
   DepartmentStats,
@@ -80,7 +79,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   dashboardSummary: DashboardSummary | null = null;
   attendanceStats: AttendanceStats | null = null;
   leaveStats: LeaveStats | null = null;
-  payrollStats: PayrollStats | null = null;
   performanceStats: PerformanceStats | null = null;
   
   recentActivities: RecentActivity[] = [];
@@ -129,12 +127,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       description: 'Add leave types and start tracking employee time-off',
       completed: false
     },
-    {
-      id: 5,
-      title: 'Process Payroll',
-      description: 'Define salary structures and process payroll with just a single click',
-      completed: false
-    }
   ];
 
   get onboardingProgress(): number {
@@ -192,7 +184,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.onboardingSteps[1].completed = status.createTeam;
           this.onboardingSteps[2].completed = status.markAttendance;
           this.onboardingSteps[3].completed = status.defineLeaveTypes;
-          this.onboardingSteps[4].completed = status.processPayroll;
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -257,12 +248,6 @@ hasAnyRole(roles: string[]): boolean {
           return of(null);
         })
       ),
-      payrollStats: this.dashboardService.getPayrollStats(this.selectedPeriod).pipe(
-        catchError(error => {
-          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load payroll stats'));
-          return of(null);
-        })
-      ),
       performanceStats: this.dashboardService.getPerformanceStats().pipe(
         catchError(error => {
           this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load performance stats'));
@@ -303,7 +288,6 @@ hasAnyRole(roles: string[]): boolean {
         this.dashboardSummary = data.summary;
         this.attendanceStats = data.attendanceStats;
         this.leaveStats = data.leaveStats;
-        this.payrollStats = data.payrollStats;
         this.performanceStats = data.performanceStats;
         
         this.recentActivities = data.recentActivities;

@@ -10,7 +10,6 @@ import {
   DashboardSummary,
   AttendanceStats,
   LeaveStats,
-  PayrollStats,
   PerformanceStats,
   RecentActivity,
   EmployeeGrowth,
@@ -81,19 +80,6 @@ getLeaveStats(period?: string): Observable<LeaveStats> {
   );
 }
 
-  /**
-   * Get payroll statistics
-   */
-
-getPayrollStats(period?: string): Observable<PayrollStats> {
-  let params = new HttpParams();
-  if (period) {
-    params = params.set('period', period);
-  }
-  return this.http.get<ServiceResponse<PayrollStats>>(`${this.apiUrl}/payroll-stats`, { params }).pipe(
-    map(res => res.data)
-  );
-}
 
   /**
    * Get performance statistics
@@ -178,15 +164,6 @@ getEmployeeGrowth(period: string = '12m'): Observable<EmployeeGrowth> {
   }
 
   /**
-   * Get payroll trends for chart display
-   */
-  getPayrollTrends(period: string = '12m'): Observable<any> {
-    const params = new HttpParams().set('period', period);
-    return this.http.get<ServiceResponse<any>>(`${this.apiUrl}/payroll-trends`, { params }).pipe(
-      map(res => res.data)
-    );
-  }
-  /**
    * Get top performers data
    */
    getTopPerformers(limit: number = 5): Observable<any[]> {
@@ -229,8 +206,7 @@ getEmployeeGrowth(period: string = '12m'): Observable<EmployeeGrowth> {
           signUp: true,
           createTeam: false,
           defineLeaveTypes: false,
-          markAttendance: false,
-          processPayroll: false
+          markAttendance: false
         } as OnboardingStatus);
       })
     );
