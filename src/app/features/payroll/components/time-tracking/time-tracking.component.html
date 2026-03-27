@@ -5,12 +5,12 @@
       <h1 class="title">Attendance & Payroll Records</h1>
       <p class="subtitle">Manage overtime, absences, late arrivals, and leave summaries for the current period</p>
     </div>
-    <div class="actions">
+    <!-- <div class="actions">
       <button class="export-btn">
         <mat-icon>file_download</mat-icon>
         Export Report
       </button>
-    </div>
+    </div> -->
   </div>
 
   <!-- Tab Navigation -->
@@ -47,12 +47,12 @@
       </div>
       <p class="card-footer">this period</p>
     </div>
-    
+
     <div class="card">
       <div class="card-content">
         <div class="info">
           <span class="label">Total OT Amount</span>
-          <span class="value">PKR 38,200</span>
+          <span class="value">{{ currencySymbol() }} 38,200</span>
         </div>
         <div class="icon-wrapper color-green">
           <mat-icon>payments</mat-icon>
@@ -103,7 +103,7 @@
           <option>Weekend</option>
         </select>
       </div>
-      <button class="add-btn">
+      <button class="add-btn" (click)="openDialog('add')">
         <mat-icon>add</mat-icon>
         Add Overtime
       </button>
@@ -114,9 +114,8 @@
         <thead>
           <tr>
             <th>Employee</th>
-            <th>Date</th>
             <th>Hours</th>
-            <th>Rate (PKR/hr)</th>
+            <th>Rate ({{ currencySymbol() }}/hr)</th>
             <th>Amount</th>
             <th>Type</th>
             <th class="text-right">Actions</th>
@@ -131,7 +130,6 @@
                 <span class="font-semibold">{{ record.name }}</span>
               </div>
             </td>
-            <td>{{ record.date }}</td>
             <td class="font-semibold">{{ record.hours }}</td>
             <td>{{ record.rate }}</td>
             <td class="font-semibold highlight-val">{{ record.amount }}</td>
@@ -139,10 +137,10 @@
               <span class="badge" [ngClass]="record.typeClass">{{ record.type }}</span>
             </td>
             <td class="action-cell">
-              <button class="action-btn hover-primary">
+              <button class="action-btn hover-primary" (click)="openDialog('edit', record)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button class="action-btn hover-danger">
+              <button class="action-btn hover-danger" (click)="onDelete(record)">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
