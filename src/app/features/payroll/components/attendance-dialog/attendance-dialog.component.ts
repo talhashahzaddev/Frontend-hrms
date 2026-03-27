@@ -5,6 +5,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatIconModule } from '@angular/material/icon';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
+import { EmployeeService } from '../../../employee/services/employee.service';
+import { PayrollService } from '../../services/payroll.service';
 
 export interface AttendanceDialogData {
   type: 'leave' | 'absent' | 'late' | 'half-day' | 'overtime';
@@ -23,12 +25,22 @@ export class AttendanceDialogComponent implements OnInit {
   form!: FormGroup;
   title = '';
   currencySymbol = signal('$');
+  employees: any[] = [];
+  rules: any[] = [];
+  periods = [
+    { id: '11111111-1111-1111-1111-111111111111', name: 'January 2025' },
+    { id: '22222222-2222-2222-2222-222222222222', name: 'February 2025' },
+    { id: '33333333-3333-3333-3333-333333333333', name: 'March 2025' },
+    { id: '44444444-4444-4444-4444-444444444444', name: 'April 2025' }
+  ];
 
   constructor(
     public dialogRef: MatDialogRef<AttendanceDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AttendanceDialogData,
     private fb: FormBuilder,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private employeeService: EmployeeService,
+    private payrollService: PayrollService
   ) {
     this.setTitle();
   }
@@ -37,7 +49,7 @@ export class AttendanceDialogComponent implements OnInit {
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
-        next: (currencyCode) => {
+        next: (currencyCode: any) => {
           this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
         },
         error: () => {
@@ -46,10 +58,24 @@ export class AttendanceDialogComponent implements OnInit {
       });
 
     this.initForm();
+    this.loadData();
+
     if (this.data.mode === 'edit' && this.data.record) {
-      this.form.patchValue(this.data.record);
+      if (this.data.type === 'overtime') {
+        this.form.patchValue({
+          employee: this.data.record.employeeId,
+          rule: this.data.record.ruleId,
+          period: this.data.record.periodId,
+          hours: this.data.record.hours,
+          rate: this.data.record.rate,
+          amount: this.data.record.amount,
+          overtimeDate: new Date(this.data.record.overtimeDate).toISOString().split('T')[0]
+        });
+      } else {
+        this.form.patchValue(this.data.record);
+      }
     }
-    
+
     // Auto-calculate amount if it's overtime
     if (this.data.type === 'overtime') {
       this.form.valueChanges.subscribe(val => {
@@ -67,6 +93,22 @@ export class AttendanceDialogComponent implements OnInit {
     }
   }
 
+  loadData() {
+    this.employeeService.getEmployees({ page: 1, pageSize: 100 } as any).subscribe((res: any) => {
+      this.employees = res.employees;
+    });
+    this.payrollService.getOvertimeActiveRules().subscribe((res: any) => {
+      this.rules = res;
+    });
+  }
+
+  onRuleChange(event: any) {
+    const selectedRule = this.rules.find(r => r.ruleId === event.target.value);
+    if (selectedRule) {
+      // You can auto-fill rate if percentage/fixed amounts dictate it or clear rate
+    }
+  }
+
   setTitle() {
     const action = this.data.mode === 'add' ? 'Add' : 'Edit';
     const typeLabel = this.data.type.replace('-', ' ');
@@ -76,11 +118,13 @@ export class AttendanceDialogComponent implements OnInit {
   initForm() {
     this.form = this.fb.group({
       employee: ['', Validators.required],
-      type: [this.data.type !== 'overtime' ? this.data.type : '', Validators.required],
+      type: [this.data.type !== 'overtime' ? this.data.type : ''],
       period: ['', Validators.required],
-      
+
       // Overtime specific fields
       ...(this.data.type === 'overtime' ? {
+        rule: ['', Validators.required],
+        overtimeDate: [''],
         hours: ['', [Validators.required, Validators.min(0.5)]],
         rate: ['', [Validators.required, Validators.min(1)]],
         amount: [{ value: '', disabled: true }]
@@ -94,7 +138,19 @@ export class AttendanceDialogComponent implements OnInit {
 
   save() {
     if (this.form.valid) {
-      this.dialogRef.close({ ...this.form.getRawValue(), recordType: this.data.type });
+      const rawValue = this.form.getRawValue();
+      let payload = rawValue;
+
+      if (this.data.type === 'overtime') {
+        payload = {
+          employeeId: rawValue.employee,
+          periodId: rawValue.period,
+          ruleId: rawValue.rule,
+          hoursWorked: rawValue.hours,
+          finalAmount: rawValue.amount
+        };
+      }
+      this.dialogRef.close({ ...payload, recordType: this.data.type });
     } else {
       this.form.markAllAsTouched();
     }

@@ -39,7 +39,7 @@
       <div class="card-content">
         <div class="info">
           <span class="label">Total OT Hours</span>
-          <span class="value">42.5</span>
+          <span class="value">{{ totalOtHours | number:'1.0-2' }}</span>
         </div>
         <div class="icon-wrapper color-blue">
           <mat-icon>schedule</mat-icon>
@@ -52,61 +52,97 @@
       <div class="card-content">
         <div class="info">
           <span class="label">Total OT Amount</span>
-          <span class="value">{{ currencySymbol() }} 38,200</span>
+          <span class="value">{{ currencySymbol() }} {{ totalOtAmount | number:'1.2-2' }}</span>
         </div>
         <div class="icon-wrapper color-green">
           <mat-icon>payments</mat-icon>
         </div>
       </div>
-      <p class="card-footer">6 employees</p>
+      <p class="card-footer">{{ totalEmployees }} employees</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
           <span class="label">Regular OT</span>
-          <span class="value">28h</span>
+          <span class="value">{{ regularOtHours | number:'1.0-2' }}h</span>
         </div>
         <div class="icon-wrapper color-amber">
           <mat-icon>work</mat-icon>
         </div>
       </div>
-      <p class="card-footer">1.5x rate</p>
+      <p class="card-footer">Regular hours sum</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
           <span class="label">Holiday OT</span>
-          <span class="value">14.5h</span>
+          <span class="value">{{ holidayOtHours | number:'1.0-2' }}h</span>
         </div>
         <div class="icon-wrapper color-purple">
           <mat-icon>event_busy</mat-icon>
         </div>
       </div>
-      <p class="card-footer">2x rate</p>
+      <p class="card-footer">Holiday hours sum</p>
     </div>
   </div>
 
   <!-- Content Area (Table + Toolbar) -->
   <div class="content-card">
     <div class="toolbar">
-      <div class="filters">
+      <!-- Filter row -->
+      <div class="filters-row">
+        <!-- Search -->
         <div class="search-box">
           <mat-icon>search</mat-icon>
-          <input type="text" placeholder="Search employee..." />
+          <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
         </div>
-        <select class="type-filter">
-          <option>All types</option>
-          <option>Regular</option>
-          <option>Holiday</option>
-          <option>Weekend</option>
+
+        <!-- Overtime Type filter -->
+        <select class="filter-select" [(ngModel)]="pendingType">
+          <option value="">All types</option>
+          <option value="Regular">Regular</option>
+          <option value="Holiday">Holiday</option>
+          <option value="Weekend">Weekend</option>
         </select>
+
+        <!-- Rule filter -->
+        <select class="filter-select" [(ngModel)]="pendingRule">
+          <option value="">All rules</option>
+          @for (rule of overtimeRules; track rule.ruleId) {
+          <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriod">
+          <option value="">All periods</option>
+          @for (p of periods; track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
       </div>
-      <button class="add-btn" (click)="openDialog('add')">
-        <mat-icon>add</mat-icon>
-        Add Overtime
-      </button>
+
+      <!-- Add button -->
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openDialog('add')">
+          <mat-icon>add</mat-icon>
+          Add Overtime
+        </button>
+      </div>
     </div>
 
     <div class="table-responsive">
@@ -122,7 +158,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (record of records; track record.name) {
+          @for (record of records; track record.overtimeId) {
           <tr class="table-row">
             <td>
               <div class="employee-info">
@@ -151,12 +187,44 @@
     </div>
 
     <div class="table-footer">
-      <p>Showing 1 to 6 of 12 records</p>
+      <p>
+        @if (totalCount === 0) {
+        No records found
+        } @else {
+        Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalCount }} records
+        }
+      </p>
       <div class="pagination">
-        <button class="page-btn disabled"><mat-icon>chevron_left</mat-icon></button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn"><mat-icon>chevron_right</mat-icon></button>
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="page === 1" [disabled]="page === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- First page shortcut + ellipsis -->
+        @if (pageRange[0] > 1) {
+        <button class="page-btn" (click)="goToPage(1)">1</button>
+        @if (pageRange[0] > 2) {
+        <span class="page-ellipsis">&hellip;</span>
+        }
+        }
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === page" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Last page shortcut + ellipsis -->
+        @if (pageRange[pageRange.length - 1] < totalPages) { @if (pageRange[pageRange.length - 1] < totalPages - 1) {
+          <span class="page-ellipsis">&hellip;</span>
+          }
+          <button class="page-btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+          }
+
+          <!-- Next -->
+          <button class="page-btn" [class.disabled]="page === totalPages" [disabled]="page === totalPages"
+            (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
       </div>
     </div>
   </div>

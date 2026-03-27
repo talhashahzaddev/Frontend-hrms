@@ -9,25 +9,20 @@
 
   <!-- Body -->
   <div class="dialog-body" [formGroup]="form">
-    <!-- Row 1: Employee & Type -->
+    <!-- Row 1: Employee & Rule -->
     <div class="form-row">
       <div class="form-group">
         <label>Employee</label>
         <select class="form-control" formControlName="employee">
           <option disabled selected value="">Select employee</option>
-          <option value="Ali Hassan">Ali Hassan</option>
-          <option value="Sara Ahmed">Sara Ahmed</option>
-          <option value="Usman Khan">Usman Khan</option>
-          <option value="Fatima Malik">Fatima Malik</option>
-          <option value="Bilal Raza">Bilal Raza</option>
+          <option *ngFor="let emp of employees" [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
         </select>
       </div>
       <div class="form-group" *ngIf="data.type === 'overtime'">
-        <label>Type</label>
-        <select class="form-control" formControlName="type">
-          <option value="Regular">Regular</option>
-          <option value="Holiday">Holiday</option>
-          <option value="Weekend">Weekend</option>
+        <label>Overtime Rule</label>
+        <select class="form-control" formControlName="rule" (change)="onRuleChange($event)">
+          <option disabled selected value="">Select rule</option>
+          <option *ngFor="let rule of rules" [value]="rule.ruleId">{{ rule.ruleName }} ({{ rule.overtimeType }})</option>
         </select>
       </div>
     </div>
@@ -45,15 +40,14 @@
     </div>
 
     <!-- Row 4: Period -->
-    <div class="form-group">
-      <label>Period</label>
-      <select class="form-control" formControlName="period">
-        <option disabled selected value="">Select period</option>
-        <option value="January 2025">January 2025</option>
-        <option value="February 2025">February 2025</option>
-        <option value="March 2025">March 2025</option>
-        <option value="April 2025">April 2025</option>
-      </select>
+    <div class="form-row" *ngIf="data.type === 'overtime'">
+      <div class="form-group">
+        <label>Period</label>
+        <select class="form-control" formControlName="period">
+          <option disabled selected value="">Select period</option>
+          <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
     </div>
 
     <!-- Row 4: Amount -->
