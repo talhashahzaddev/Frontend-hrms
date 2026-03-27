@@ -65,7 +65,7 @@ export class PayrollService {
       .pipe(
         map((response: any) => {
           if (response && !response.success && response.message) {
-             throw new Error(response.message);
+            throw new Error(response.message);
           }
           return response?.data || response;
         })

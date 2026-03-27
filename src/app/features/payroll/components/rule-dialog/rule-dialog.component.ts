@@ -51,7 +51,8 @@ export class RuleDialogComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<RuleDialogComponent>);
-  public readonly data = inject<RuleDialogData>(MAT_DIALOG_DATA);
+  private readonly injectedData = inject<RuleDialogData | null>(MAT_DIALOG_DATA, { optional: true });
+  public readonly data: RuleDialogData = this.injectedData ?? {};
   private readonly notification = inject(NotificationService);
 
   readonly isSubmitting = signal(false);
