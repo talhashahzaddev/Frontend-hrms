@@ -1,0 +1,516 @@
+.performance-pay-page {
+  padding: 2rem;
+  background: #f7f9fb;
+  min-height: calc(100vh - 64px);
+  font-family: 'Inter', 'Public Sans', sans-serif;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+
+    h1 {
+      margin: 0;
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 2rem;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #191c1e;
+    }
+
+    p {
+      margin: 0.45rem 0 0;
+      color: #434655;
+      font-size: 0.98rem;
+    }
+  }
+
+  .ledger-switch {
+    display: inline-flex;
+    gap: 0.25rem;
+    background: #f2f4f6;
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+
+    a {
+      text-decoration: none;
+      color: #434655;
+      border-radius: 0.6rem;
+      font-size: 0.85rem;
+      padding: 0.55rem 1rem;
+      font-weight: 600;
+
+      &.active {
+        color: #004ac6;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    border: 1px solid rgba(195, 198, 215, 0.35);
+    border-radius: 0.85rem;
+    background: #fff;
+    padding: 1rem 1.1rem;
+
+    .stat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.65rem;
+
+      small {
+        color: #434655;
+        font-size: 0.75rem;
+        font-weight: 700;
+
+        &.positive {
+          background: #e6f4ea;
+          color: #1a8a3c;
+          padding: 0.2rem 0.45rem;
+          border-radius: 999px;
+        }
+
+        &.primary {
+          color: #004ac6;
+        }
+      }
+
+      .card-icon {
+        width: 1.95rem;
+        height: 1.95rem;
+        border-radius: 0.45rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 1.15rem;
+          width: 1.15rem;
+          height: 1.15rem;
+        }
+
+        &.blue {
+          background: #dbe1ff;
+          color: #004ac6;
+        }
+
+        &.indigo {
+          background: #dbe1ff;
+          color: #31447b;
+        }
+
+        &.peach {
+          background: #ffdbcd;
+          color: #7d2d00;
+        }
+
+        &.deep {
+          background: #31447b;
+          color: #fff;
+        }
+      }
+    }
+
+    .stat-label {
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+      color: #434655;
+      margin-bottom: 0.35rem;
+      font-weight: 800;
+    }
+
+    .stat-value {
+      margin: 0;
+      color: #191c1e;
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 1.6rem;
+      line-height: 1.15;
+    }
+  }
+
+  .ledger-table-shell {
+    border-radius: 0.95rem;
+    overflow: hidden;
+    border: 1px solid rgba(195, 198, 215, 0.35);
+    background: #f2f4f6;
+
+    .toolbar {
+      background: #fff;
+      padding: 0.8rem 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+
+      .toolbar-filters {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        min-width: 250px;
+        background: #f2f4f6;
+        border-radius: 0.55rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0 0.7rem;
+
+        mat-icon {
+          color: #737686;
+          font-size: 1.1rem;
+          width: 1.1rem;
+          height: 1.1rem;
+        }
+
+        input {
+          border: 0;
+          background: transparent;
+          height: 2.3rem;
+          width: 100%;
+          outline: 0;
+          color: #191c1e;
+        }
+      }
+
+      .filter-select-field {
+        min-width: 170px;
+
+        ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+
+        ::ng-deep .mat-mdc-text-field-wrapper {
+          height: 2.3rem;
+          background: #f2f4f6;
+          border-radius: 0.55rem;
+        }
+
+        ::ng-deep .mat-mdc-form-field-flex {
+          height: 100%;
+          align-items: center;
+        }
+
+        ::ng-deep .mat-mdc-form-field-infix {
+          min-height: 2.3rem;
+          padding-top: 0;
+          padding-bottom: 0;
+          display: flex;
+          align-items: center;
+        }
+
+        ::ng-deep .mdc-notched-outline__leading,
+        ::ng-deep .mdc-notched-outline__notch,
+        ::ng-deep .mdc-notched-outline__trailing {
+          border-color: rgba(195, 198, 215, 0.45);
+        }
+
+        ::ng-deep .mat-mdc-select-trigger {
+          color: #434655;
+          font-size: 0.92rem;
+          height: 100%;
+          align-items: center;
+        }
+
+        ::ng-deep .mat-mdc-select-arrow {
+          color: #646b7c;
+        }
+      }
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
+      color: #fff;
+      border: 0;
+      height: 2.3rem;
+      border-radius: 0.55rem;
+      padding: 0 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0, 74, 198, 0.2);
+
+      mat-icon {
+        width: 1.15rem;
+        height: 1.15rem;
+        font-size: 1.15rem;
+      }
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+
+      th {
+        background: #f2f4f6;
+        color: #434655;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        font-size: 0.66rem;
+        font-weight: 800;
+        padding: 0.85rem 1rem;
+        text-align: left;
+      }
+
+      td {
+        padding: 0.9rem 1rem;
+        border-top: 1px solid #f1f4f7;
+        color: #191c1e;
+        font-size: 0.88rem;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .score {
+        color: #004ac6;
+        font-weight: 800;
+      }
+
+      .amount {
+        color: #1a8a3c;
+        font-weight: 800;
+      }
+
+      .calculated {
+        color: #434655;
+        font-style: italic;
+      }
+
+      .employee-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+
+        p {
+          margin: 0;
+          font-weight: 700;
+        }
+
+        small {
+          color: #737686;
+          font-size: 0.75rem;
+        }
+      }
+
+      .avatar {
+        width: 1.8rem;
+        height: 1.8rem;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.64rem;
+        font-weight: 800;
+
+        &.blue {
+          background: #dbe1ff;
+          color: #003ea8;
+        }
+
+        &.lavender {
+          background: #dbe1ff;
+          color: #31447b;
+        }
+
+        &.peach {
+          background: #ffdbcd;
+          color: #7d2d00;
+        }
+
+        &.gray {
+          background: #e0e3e5;
+          color: #434655;
+        }
+
+        &.slate {
+          background: #eceef0;
+          color: #31447b;
+        }
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .badge.excellent {
+        background: #1a8a3c;
+        color: #fff;
+      }
+
+      .badge.good {
+        background: #2563eb;
+        color: #fff;
+      }
+
+      .badge.average {
+        background: #495c95;
+        color: #fff;
+      }
+
+      .badge.below-average {
+        background: #943700;
+        color: #fff;
+      }
+
+      .row-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.35rem;
+
+        button {
+          width: 1.8rem;
+          height: 1.8rem;
+          border: 0;
+          background: transparent;
+          border-radius: 0.45rem;
+          color: #737686;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover {
+            background: #f2f4f6;
+          }
+
+          &.danger {
+            color: #ba1a1a;
+          }
+
+          mat-icon {
+            font-size: 1.05rem;
+            width: 1.05rem;
+            height: 1.05rem;
+          }
+        }
+      }
+
+      .empty-row {
+        text-align: center;
+        color: #737686;
+        padding: 2rem 1rem;
+      }
+    }
+
+    .table-footer {
+      background: #fff;
+      border-top: 1px solid #f1f4f7;
+      color: #434655;
+      font-size: 0.8rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .pagination {
+        display: inline-flex;
+        gap: 0.35rem;
+
+        button {
+          border: 0;
+          width: 1.8rem;
+          height: 1.8rem;
+          border-radius: 0.4rem;
+          background: #f2f4f6;
+          color: #434655;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: default;
+          }
+
+          mat-icon {
+            font-size: 1rem;
+            width: 1rem;
+            height: 1rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+::ng-deep .payroll-filter-panel {
+  border-radius: 0.65rem;
+  border: 1px solid rgba(195, 198, 215, 0.45);
+
+  .mat-mdc-option {
+    font-size: 0.9rem;
+    min-height: 2.25rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .performance-pay-page {
+    .stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .performance-pay-page {
+    padding: 1rem;
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .stats-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ledger-table-shell .toolbar .search-box {
+      min-width: 100%;
+    }
+
+    .ledger-table-shell .table-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+  }
+}

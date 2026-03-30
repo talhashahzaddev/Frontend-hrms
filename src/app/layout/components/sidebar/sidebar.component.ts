@@ -17,6 +17,7 @@ interface MenuItem {
   label: string;
   icon: string;
   route?: string;
+  activeRoutes?: string[];
   children?: MenuItem[];
   menuName?: string;
   subMenuName?: string;
@@ -235,6 +236,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Payroll',
       icon: 'payments',
       children: [
+        {
+          label: 'Bonus & Performance',
+          icon: 'card_giftcard',
+          route: '/payroll/bonus',
+          activeRoutes: ['/payroll/performance']
+        },
         { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
         { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' }
       ]
@@ -291,10 +298,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   isParentActive(item: MenuItem): boolean {
     if (!item.children) return false;
-    return item.children.some(child => {
-      if (!child.route) return false;
-      return this.activeRoute === child.route || this.activeRoute.startsWith(child.route + '/');
-    });
+    return item.children.some(child => this.isItemRouteMatch(child, this.activeRoute));
   }
 
   isGroupContainsActive(item: MenuItem): boolean {
@@ -338,7 +342,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const visibleItems = this.getFilteredMenuItems();
     for (const item of visibleItems) {
       if (!item.children || item.children.length === 0) {
-        if (item.route && this.isActiveRoute(item.route, true)) {
+        if (this.isItemRouteMatch(item, url, true)) {
           this.activeItemKey = this.getItemKey(item);
           return;
         }
@@ -347,7 +351,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     for (const parent of visibleItems) {
       const children = parent.children ? this.getFilteredChildren(parent.children) : [];
       for (const child of children) {
-        if (child.route && this.isActiveRoute(child.route, !!child.exact)) {
+        if (this.isItemRouteMatch(child, url, !!child.exact)) {
           this.activeItemKey = this.getItemKey(child);
           return;
         }
@@ -370,6 +374,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.activeRoute = (event as NavigationEnd).url;
         this.setActiveItemByRoute(this.activeRoute);
       });
+  }
+
+  private isItemRouteMatch(item: MenuItem, url: string, exact = false): boolean {
+    const primaryMatch = item.route
+      ? (exact
+        ? url === item.route
+        : (url === item.route || url.startsWith(item.route + '/')))
+      : false;
+
+    if (primaryMatch) {
+      return true;
+    }
+
+    const aliases = item.activeRoutes ?? [];
+    return aliases.some(alias => url === alias || url.startsWith(alias + '/'));
   }
 
   private collapseAllGroups(): void {

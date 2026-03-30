@@ -1,0 +1,121 @@
+.delete-dialog-panel .mat-mdc-dialog-container {
+  padding: 0;
+  border-radius: 0.95rem;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 20, 60, 0.14);
+}
+
+.delete-dialog-panel .mdc-dialog__surface {
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.delete-modal {
+  color: #191c1e;
+  font-family: 'Inter', 'Public Sans', sans-serif;
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    padding: 1rem 1.2rem;
+    background: rgba(242, 244, 246, 0.75);
+
+    .title-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .warn-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffdad6;
+      color: #ba1a1a;
+
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
+    h2 {
+      margin: 0;
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    button {
+      border: 0;
+      background: transparent;
+      color: #434655;
+      cursor: pointer;
+      border-radius: 0.4rem;
+      width: 2rem;
+      height: 2rem;
+
+      &:hover {
+        background: #eceef0;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.1rem 1.2rem 1.25rem;
+
+    p {
+      margin: 0;
+      color: #434655;
+      line-height: 1.5;
+      font-size: 0.93rem;
+    }
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.55rem;
+    padding: 0.9rem 1.2rem 1.1rem;
+    border-top: 1px solid rgba(195, 198, 215, 0.2);
+    background: rgba(242, 244, 246, 0.5);
+
+    button {
+      height: 2.35rem;
+      border-radius: 0.55rem;
+      border: 0;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0 1.15rem;
+      font-family: inherit;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: #004ac6;
+
+      &:hover {
+        background: rgba(37, 99, 235, 0.1);
+      }
+    }
+
+    .btn-danger {
+      color: #fff;
+      background: linear-gradient(135deg, #ba1a1a 0%, #dc2626 100%);
+      box-shadow: 0 6px 14px rgba(186, 26, 26, 0.25);
+
+      &:hover {
+        opacity: 0.95;
+      }
+    }
+  }
+}

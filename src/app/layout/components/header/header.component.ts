@@ -248,6 +248,26 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
     },
 
+    // Payroll
+    {
+      name: 'Bonus Pay',
+      route: '/payroll/bonus',
+      keywords: ['payroll', 'bonus', 'bonus pay', 'incentive', 'bonus ledger'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Performance Pay',
+      route: '/payroll/performance',
+      keywords: ['payroll', 'performance pay', 'performance bonus', 'performance ledger'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Payroll Policies',
+      route: '/payroll/policies',
+      keywords: ['payroll policies', 'policy', 'rules', 'salary policy'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+
     // AI Assistant
     {
       name: 'AI Assistant',
