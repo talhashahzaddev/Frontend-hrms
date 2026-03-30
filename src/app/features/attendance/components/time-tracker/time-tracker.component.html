@@ -45,7 +45,8 @@
         <button
           class="btn-clock-in"
           (click)="clockIn()"
-          [disabled]="currentSession?.isActive || isClockActionLoading">
+          [disabled]="currentSession?.isActive || isClockActionLoading || !hasPermission('time_tracket_clock_in')"
+          *ngIf="hasPermission('time_tracket_clock_in')">
           <mat-spinner *ngIf="isClockActionLoading && !currentSession?.isActive" diameter="14"></mat-spinner>
           Clock In
         </button>
@@ -53,7 +54,8 @@
         <button
           class="btn-clock-out"
           (click)="clockOut()"
-          [disabled]="!currentSession?.isActive || isClockActionLoading">
+          [disabled]="!currentSession?.isActive || isClockActionLoading || !hasPermission('time_tracket_clock_out')"
+          *ngIf="hasPermission('time_tracket_clock_out')">
           <mat-spinner *ngIf="isClockActionLoading && currentSession?.isActive" diameter="14"></mat-spinner>
           Clock Out
         </button>

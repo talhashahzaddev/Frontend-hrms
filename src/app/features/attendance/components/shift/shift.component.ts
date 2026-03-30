@@ -511,6 +511,10 @@ rejectRequest(swap: PendingShiftSwap): void {
     if (names.length === allDays.length) return 'Every day';
     return names.join(', ');
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Shifts', actionKey);
+  }
 }
 
 

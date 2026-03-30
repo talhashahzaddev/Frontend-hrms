@@ -257,7 +257,7 @@
 
                   <!-- Manager override button -->
                   <button
-                    *ngIf="isManagerOrAdmin() && !isOwnTimesheetSelected() && !isFutureDay(record) && canManagerOverride(record)"
+                    *ngIf="hasPermission('edit_or_override_attendace_recored') && !isOwnTimesheetSelected() && !isFutureDay(record) && canManagerOverride(record)"
                     type="button"
                     (click)="openManagerOverride(se, record)"
                     [title]="record.is_manager_override ? 'Re-override record' : record.hasPendingRequest ? 'Override (supersedes pending request)' : 'Manager override'"

@@ -382,4 +382,9 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       return ipString || null;
     }
   }
+  
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Team Attendance', actionKey);
+  }
+
 }

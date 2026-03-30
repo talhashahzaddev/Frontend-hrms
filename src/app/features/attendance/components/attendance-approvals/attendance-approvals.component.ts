@@ -35,6 +35,7 @@ import {
 import { RejectRequestDialogComponent } from '../reject-request-dialog/reject-request-dialog.component';
 import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../manager-override-dialog/manager-override-dialog.component';
 import { EmployeeReviewDetailDialogComponent, EmployeeReviewDetailDialogData } from '../employee-review-detail-dialog/employee-review-detail-dialog.component';
+import { AuthService } from '@/app/core/services/auth.service';
 
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
@@ -97,6 +98,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   constructor(
     private attendanceService: AttendanceService,
     private notificationService: NotificationService,
+    private authService: AuthService,
     private dialog: MatDialog
   ) {}
 
@@ -848,5 +850,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   formatHours(hours?: number): string {
     if (hours === null || hours === undefined) return '0h';
     return `${hours.toFixed(1)}h`;
+  }
+     hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Timesheet Dashboard', actionKey);
   }
 }

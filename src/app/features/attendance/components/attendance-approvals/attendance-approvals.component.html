@@ -315,6 +315,7 @@
           <!-- Card Actions -->
           <div class="card-actions">
             <button class="btn btn-outline-primary"
+            *ngIf="hasPermission('timesheet_dashboard_view_details')"
                     (click)="viewEmployeeDetails(pkg)">
               <mat-icon>visibility</mat-icon>
               <span>View Details</span>
@@ -322,6 +323,7 @@
 
             @if (hasPendingRequests(pkg)) {
               <button class="btn btn-action-approve"
+                      *ngIf="hasPermission('approve_updated_timesheet')"
                       (click)="approveAllForEmployee(pkg)"
                       [disabled]="isPackageProcessing(pkg.employeeId)"
                       matTooltip="Approve all pending correction requests">
@@ -335,6 +337,7 @@
             }
 
             <button class="btn btn-primary"
+              *ngIf="hasPermission('timesheet_dashboard_finalize')"
                     (click)="finalizeEmployeeApprovals(pkg)"
                     [disabled]="isPackageProcessing(pkg.employeeId) || !canFinalize(pkg)"
                     [matTooltip]="pkg.isFinalized
