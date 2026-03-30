@@ -23,5 +23,11 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/time-tracking/time-tracking.component').then(m => m.TimeTrackingComponent),
     title: 'Time Tracking - HRMS'
+  },
+  {
+    path: 'periods',
+    loadComponent: () =>
+      import('./components/payroll-period/payroll-period.component').then(m => m.PayrollPeriodComponent),
+    title: 'Payroll Periods - HRMS'
   }
 ];

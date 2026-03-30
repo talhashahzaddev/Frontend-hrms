@@ -1,0 +1,187 @@
+<div class="time-tracking-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Payroll periods</h1>
+      <p class="subtitle">Manage and track organizational payroll cycles</p>
+    </div>
+    <div class="actions">
+      <button class="add-btn" (click)="openDialog('add')">
+        <mat-icon>add</mat-icon>
+        Create period
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Stat Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total periods</span>
+          <span class="value">{{ totalPeriods }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>calendar_month</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Open</span>
+          <span class="value">{{ openCount }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>lock_open</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Processed</span>
+          <span class="value">{{ processedCount }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Locked</span>
+          <span class="value">{{ lockedCount }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>lock</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area (Table + Toolbar) -->
+  <div class="content-card">
+    <div class="toolbar">
+      <!-- Filter row -->
+      <div class="filters-row">
+        <!-- Search -->
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search periods..." [(ngModel)]="pendingSearch" />
+        </div>
+
+        <!-- Status filter -->
+        <select class="filter-select" [(ngModel)]="pendingStatus">
+          <option value="All">All</option>
+          <option value="Open">Open</option>
+          <option value="Processed">Processed</option>
+          <option value="Closed">Closed</option>
+          <option value="Locked">Locked</option>
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Period name</th>
+            <th>Start date</th>
+            <th>End date</th>
+            <th>Payment date</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of records; track record.id) {
+          <tr class="table-row" [class.opacity-80]="record.status === 'Locked' || record.status === 'Closed'"
+            [class.opacity-90]="record.status === 'Processed'">
+            <td class="font-semibold">{{ record.name }}</td>
+            <td>{{ record.startDate }}</td>
+            <td>{{ record.endDate }}</td>
+            <td>{{ record.paymentDate }}</td>
+            <td>
+              <span class="badge" [ngClass]="record.statusClass">{{ record.status }}</span>
+            </td>
+            <td class="action-cell">
+              @if(record.status === 'Open') {
+              <button class="action-btn hover-primary" (click)="openDialog('edit', record)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              }
+              <button class="action-btn hover-primary" (click)="onView(record)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              @if(record.status === 'Open') {
+              <button class="action-btn hover-danger" (click)="onDelete(record)">
+                <mat-icon>delete</mat-icon>
+              </button>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (totalCount === 0) {
+        No records found
+        } @else {
+        Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalCount }} periods
+        }
+      </p>
+      <div class="pagination">
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="page === 1" [disabled]="page === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- First page shortcut + ellipsis -->
+        @if (pageRange[0] > 1) {
+        <button class="page-btn" (click)="goToPage(1)">1</button>
+        @if (pageRange[0] > 2) {
+        <span class="page-ellipsis">&hellip;</span>
+        }
+        }
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === page" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Last page shortcut + ellipsis -->
+        @if (pageRange[pageRange.length - 1] < totalPages) { @if (pageRange[pageRange.length - 1] < totalPages - 1) {
+          <span class="page-ellipsis">&hellip;</span>
+          }
+          <button class="page-btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+          }
+
+          <!-- Next -->
+          <button class="page-btn" [class.disabled]="page === totalPages" [disabled]="page === totalPages"
+            (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+      </div>
+    </div>
+  </div>
+</div>
