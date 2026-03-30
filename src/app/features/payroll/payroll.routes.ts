@@ -19,6 +19,12 @@ export const payrollRoutes: Routes = [
     title: 'Overtime Rules - HRMS'
   },
   {
+    path: 'policies/attendance-deduction-rules',
+    loadComponent: () =>
+      import('./components/attendance-deduction-rules/attendance-deduction-rules.component').then(m => m.AttendanceDeductionRulesComponent),
+    title: 'Attendance Deduction Rules - HRMS'
+  },
+  {
     path: 'time-tracking',
     loadComponent: () =>
       import('./components/time-tracking/time-tracking.component').then(m => m.TimeTrackingComponent),
