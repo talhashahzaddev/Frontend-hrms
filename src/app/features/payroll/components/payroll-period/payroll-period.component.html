@@ -98,6 +98,7 @@
       </div>
     </div>
 
+    @if (totalCount > 0) {
     <div class="table-responsive">
       <table class="custom-table">
         <thead>
@@ -127,9 +128,9 @@
                 <mat-icon>edit</mat-icon>
               </button>
               }
-              <button class="action-btn hover-primary" (click)="onView(record)">
+              <!-- <button class="action-btn hover-primary" (click)="onView(record)">
                 <mat-icon>visibility</mat-icon>
-              </button>
+              </button> -->
               @if(record.status === 'Open') {
               <button class="action-btn hover-danger" (click)="onDelete(record)">
                 <mat-icon>delete</mat-icon>
@@ -144,11 +145,7 @@
 
     <div class="table-footer">
       <p>
-        @if (totalCount === 0) {
-        No records found
-        } @else {
         Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalCount }} periods
-        }
       </p>
       <div class="pagination">
         <!-- Prev -->
@@ -183,5 +180,19 @@
           </button>
       </div>
     </div>
+    } @else {
+    <div class="empty-state">
+      <div class="empty-icon-wrapper">
+        <mat-icon>calendar_today</mat-icon>
+      </div>
+      <h3>Create a payroll period</h3>
+      <p>You haven't defined any payroll cycles yet. Start by creating the first one to manage your organization's
+        payroll.</p>
+      <button class="create-period-btnn" (click)="openDialog('add')">
+        <mat-icon>add</mat-icon>
+        Create period
+      </button>
+    </div>
+    }
   </div>
 </div>
