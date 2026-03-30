@@ -102,7 +102,8 @@
             <button 
               class="generate-report-btn" 
               (click)="generateReport()" 
-              [disabled]="isLoading">
+              [disabled]="isLoading"
+              *ngIf="hasPermission('reports_genrate_report')">
               Generate Report
               <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -158,12 +159,12 @@
           <span class="count-bold">{{ reportData.records.totalCount }}</span> records found
         </span>
         <div class="export-buttons">
-          <button class="export-btn" (click)="exportToCSV()" title="Export to CSV">
+          <button class="export-btn" (click)="exportToCSV()" title="Export to CSV" *ngIf="hasPermission('reports_export')">
             <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
             </svg>
           </button>
-          <button class="export-btn" (click)="exportToExcel()" title="Export to Excel">
+          <button class="export-btn" (click)="exportToExcel()" title="Export to Excel" *ngIf="hasPermission('reports_export')">
             <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
             </svg>

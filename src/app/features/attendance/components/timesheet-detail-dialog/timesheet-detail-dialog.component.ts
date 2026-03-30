@@ -1788,5 +1788,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     return recordDate > today;
 
   }
+    hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Timesheet', actionKey);
+  }
 
 }

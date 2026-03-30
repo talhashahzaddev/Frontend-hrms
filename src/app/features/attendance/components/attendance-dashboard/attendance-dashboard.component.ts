@@ -385,4 +385,8 @@ loadEmployeeAttendance(pageNumber: number = 1, pageSize: number = 10): void {
     const mins = Math.round((hours - hrs) * 60);
     return `${hrs}h ${mins}m`;
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'My Attendance', actionKey);
+  }
 }

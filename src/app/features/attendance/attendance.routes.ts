@@ -17,14 +17,14 @@ export const attendanceRoutes: Routes = [
   },
   {
     path: 'team-attendance',
-    canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
+    // canActivate: [AuthGuard],
+    // data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/team-attandence/team-attandence.component').then(m => m.TeamAttandenceComponent)
   },
   {
     path: 'reports',
-    canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager','Manager'] },
+    // canActivate: [AuthGuard],
+    // data: { roles: ['Super Admin', 'HR Manager','Manager'] },
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
   {

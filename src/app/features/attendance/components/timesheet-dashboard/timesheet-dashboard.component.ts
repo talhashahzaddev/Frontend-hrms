@@ -233,4 +233,8 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
         });
     });
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Timesheet', actionKey);
+  }
 }

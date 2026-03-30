@@ -9,7 +9,7 @@
       </div>
     </div>
     <div class="header-actions">
-      @if (!isEmployee()) {
+      @if (hasPermission('timesheet_create_new_snapshot')) {
         <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" [disabled]="isLoading">
           <mat-icon>add_circle</mat-icon>
           Create New Snapshot
@@ -37,7 +37,7 @@
       } @else {
         <p>You haven't created any monthly timesheet snapshots yet.</p>
         <p class="hint-text">Click <strong>Create New Snapshot</strong> to get started.</p>
-        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()">
+        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" *ngIf="hasPermission('timesheet_create_new_snapshot')">
           <mat-icon>add_circle</mat-icon>
           Create First Snapshot
         </button>
@@ -99,10 +99,10 @@
 
         <!-- Actions -->
         <div class="snap-actions">
-          <button class="snap-btn outline" (click)="openTimesheetDetailDialog(snapshot)">
+          <button class="snap-btn outline" (click)="openTimesheetDetailDialog(snapshot)" *ngIf="hasPermission('timesheet_view_details')">
             <mat-icon>visibility</mat-icon> View Details
           </button>
-          @if (!isEmployee() && snapshot.status !== 'Finalized') {
+          @if ( snapshot.status !== 'Finalized' && hasPermission('finalize_timesheet')) {
             <button class="snap-btn filled" (click)="finalizeSnapshot(snapshot)">
               <mat-icon>lock</mat-icon> Finalize
             </button>

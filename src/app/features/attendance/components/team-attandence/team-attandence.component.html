@@ -62,7 +62,11 @@
 
     <!-- Filter Actions -->
     <div class="filter-actions">
-      <button mat-flat-button (click)="exportReport()" class="export-button" [disabled]="isLoading">
+      <button mat-flat-button 
+        (click)="exportReport()" 
+        class="export-button" 
+        [disabled]="isLoading"
+        *ngIf="hasPermission('team_attendance_export')">
         <mat-icon>download</mat-icon>
         Export
       </button>
@@ -287,11 +291,15 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="viewAttendanceDetails(attendance)">
+              <button mat-menu-item 
+                (click)="viewAttendanceDetails(attendance)"
+                *ngIf="hasPermission('team_attendance_view_details')">
                 <mat-icon>visibility</mat-icon>
                 View Details
               </button>
-              <button mat-menu-item (click)="editAttendance(attendance)">
+              <button mat-menu-item 
+                (click)="editAttendance(attendance)"
+                *ngIf="hasPermission('team_attendance_edit_record')">
                 <mat-icon>edit</mat-icon>
                 Edit Record
               </button>

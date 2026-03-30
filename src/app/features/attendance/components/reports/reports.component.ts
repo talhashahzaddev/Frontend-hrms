@@ -15,6 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
@@ -90,7 +91,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
   constructor(
     private attendanceService: AttendanceService,
     private employeeService: EmployeeService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -275,4 +277,8 @@ export class ReportsComponent implements OnInit, OnDestroy {
     const mins = Math.round((hours - hrs) * 60);
     return `${hrs}h ${mins}m`;
   }
+   hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Reports', actionKey);
+  }
+
 }

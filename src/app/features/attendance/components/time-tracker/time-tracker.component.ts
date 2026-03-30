@@ -365,5 +365,8 @@ currentShiftId: string | null = null;
     return `${hrs}h ${mins}m`;
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'TimeTracker', actionKey);
+  }
 
 }

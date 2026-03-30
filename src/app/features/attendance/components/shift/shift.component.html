@@ -11,7 +11,7 @@
         <p class="page-subtitle">Manage your shifts and assignments</p>
       </div>
     </div>
-    <div class="header-actions" *ngIf="isAdminOrHR">
+    <div class="header-actions" *ngIf="hasPermission('shifts_create_shift')">
       <button mat-flat-button (click)="openCreateShiftDialog()" class="add-button">
         <mat-icon>add</mat-icon>
         Create Shift
@@ -67,13 +67,13 @@
   <!-- ═══ ACTION BUTTONS ═══ -->
   <div class="action-buttons-row">
     <button mat-stroked-button class="action-btn action-btn-primary"
-            *ngIf="isAdminOrHR || isManager"
+            *ngIf="hasPermission('shifts_assign_shift')"
             (click)="openAssignShiftDialog()">
       <mat-icon>assignment_ind</mat-icon>
       Assign Employees to Shift
     </button>
     <button mat-stroked-button class="action-btn action-btn-teal"
-            *ngIf="!isSuperAdmin"
+            *ngIf="hasPermission('shifts_swap_shift')"
             (click)="openSwapShift()">
       <mat-icon>swap_horiz</mat-icon>
       Request Shift Swap
@@ -103,7 +103,7 @@
   </div>
 
   <!-- ═══ ALL SHIFTS TABLE ═══ -->
-  <div *ngIf="isAdminOrHR" class="table-card">
+  <div class="table-card">
 
     <div class="table-card-header">
       <div class="table-card-title-row">
@@ -159,11 +159,11 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="onEditShift(shift)">
+              <button mat-menu-item (click)="onEditShift(shift)" *ngIf="hasPermission('shifts_edit')">
                 <mat-icon>edit</mat-icon>
                 Edit
               </button>
-              <button mat-menu-item (click)="onDeleteShift(shift)" class="danger-action">
+              <button mat-menu-item (click)="onDeleteShift(shift)" class="danger-action" *ngIf="hasPermission('shifts_delete')">
                 <mat-icon>delete</mat-icon>
                 Delete
               </button>
@@ -179,7 +179,7 @@
         <div class="empty-icon"><mat-icon>schedule</mat-icon></div>
         <h3>No Shifts Found</h3>
         <p>Create a new shift to get started.</p>
-        <button mat-raised-button color="primary" (click)="openCreateShiftDialog()">
+        <button mat-raised-button color="primary" (click)="openCreateShiftDialog()" *ngIf="hasPermission('shifts_create_shift')">
           <mat-icon>add</mat-icon>
           Create Shift
         </button>
