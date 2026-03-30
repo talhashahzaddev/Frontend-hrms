@@ -1,0 +1,22 @@
+<div class="delete-modal">
+  <header class="modal-header">
+    <div class="title-wrap">
+      <span class="warn-icon">
+        <mat-icon>warning</mat-icon>
+      </span>
+      <h2>{{ data.title || 'Delete record' }}</h2>
+    </div>
+    <button type="button" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <section class="modal-body">
+    <p>{{ data.message || 'Are you sure you want to delete this record? This action cannot be undone.' }}</p>
+  </section>
+
+  <footer class="modal-footer">
+    <button type="button" class="btn-cancel" (click)="close()">{{ data.cancelText || 'Cancel' }}</button>
+    <button type="button" class="btn-danger" (click)="confirm()">{{ data.confirmText || 'Delete' }}</button>
+  </footer>
+</div>

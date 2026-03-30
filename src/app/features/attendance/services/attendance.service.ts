@@ -82,7 +82,6 @@ export class AttendanceService {
   }
 
 
-
   getCurrentSession(): Observable<TimeTrackingSession | null> {
     return this.http.get<ApiResponse<TimeTrackingSession>>(`${this.apiUrl}/current-session`)
       .pipe(

@@ -1,0 +1,74 @@
+<div class="payroll-modal">
+  <header class="modal-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <form class="modal-body" [formGroup]="form" (ngSubmit)="save()">
+    <div class="field full">
+      <label>Employee</label>
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-select formControlName="employee" [panelClass]="'payroll-dialog-select-panel'" placeholder="Select employee">
+          <mat-option value="" disabled>Select employee</mat-option>
+          @for (employee of employees; track employee) {
+            <mat-option [value]="employee">{{ employee }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="field">
+      <label>Payroll period</label>
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-select formControlName="payrollPeriod" [panelClass]="'payroll-dialog-select-panel'">
+          <mat-option value="Oct 2023">Oct 2023</mat-option>
+          <mat-option value="Nov 2023">Nov 2023</mat-option>
+          <mat-option value="Dec 2023">Dec 2023</mat-option>
+          <mat-option value="Jan 2024">Jan 2024</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>calendar_month</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="field">
+      <label>Type</label>
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-select formControlName="type" [panelClass]="'payroll-dialog-select-panel'">
+          <mat-option value="Fixed">Fixed</mat-option>
+          <mat-option value="Performance">Performance</mat-option>
+          <mat-option value="Festival">Festival</mat-option>
+          <mat-option value="Referral">Referral</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>category</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="field">
+      <label>Amount PKR</label>
+      <input type="number" formControlName="amount" placeholder="e.g. 5000" />
+    </div>
+
+    <div class="field">
+      <label>Status</label>
+      <mat-form-field appearance="outline" class="select-field">
+        <mat-select formControlName="status" [panelClass]="'payroll-dialog-select-panel'">
+          <mat-option value="Active">Active</mat-option>
+          <mat-option value="Cancelled">Cancelled</mat-option>
+        </mat-select>
+        <mat-icon matSuffix>check_circle</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="field full">
+      <label>Description</label>
+      <textarea rows="3" formControlName="description" placeholder="Add reason or notes"></textarea>
+    </div>
+  </form>
+
+  <footer class="modal-footer">
+    <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
+    <button type="button" class="btn-save" (click)="save()">{{ submitLabel }}</button>
+  </footer>
+</div>

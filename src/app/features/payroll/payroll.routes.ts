@@ -3,8 +3,20 @@ import { Routes } from '@angular/router';
 export const payrollRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'policies',
+    redirectTo: 'bonus',
     pathMatch: 'full'
+  },
+  {
+    path: 'bonus',
+    loadComponent: () =>
+      import('./components/bonus-pay/bonus-pay.component').then(m => m.BonusPayComponent),
+    title: 'Bonus Pay - HRMS'
+  },
+  {
+    path: 'performance',
+    loadComponent: () =>
+      import('./components/performance-pay/performance-pay.component').then(m => m.PerformancePayComponent),
+    title: 'Performance Pay - HRMS'
   },
   {
     path: 'policies',

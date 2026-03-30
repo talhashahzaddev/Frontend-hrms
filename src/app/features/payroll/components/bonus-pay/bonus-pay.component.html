@@ -1,0 +1,153 @@
+<section class="payroll-ledger-page bonus-pay-page">
+  <header class="page-header">
+    <div>
+      <h1>Bonus &amp; Performance Pay</h1>
+      <p>Manage bonus payouts and performance-based compensation for the current period</p>
+    </div>
+
+    <div class="ledger-switch">
+      <a routerLink="/payroll/bonus" routerLinkActive="active">Bonus</a>
+      <a routerLink="/payroll/performance" routerLinkActive="active">Performance pay</a>
+    </div>
+  </header>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-label">Total bonuses</span>
+      <h2 class="stat-value primary">PKR {{ totalBonuses | number }}</h2>
+      <small>(this period)</small>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Employees</span>
+      <h2 class="stat-value">{{ rows.length }}</h2>
+      <small>receiving bonus</small>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Active status</span>
+      <div class="active-line">
+        <h2 class="stat-value">{{ activeCount }}</h2>
+        <small class="danger">({{ cancelledCount }} cancelled)</small>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Avg bonus</span>
+      <h2 class="stat-value">PKR {{ averageBonus | number }}</h2>
+      <small>per employee</small>
+    </article>
+  </section>
+
+  <section class="toolbar">
+    <div class="toolbar-filters">
+      <label class="search-box" aria-label="Search employees">
+        <mat-icon>search</mat-icon>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search employees..."
+        />
+      </label>
+
+      <mat-form-field appearance="outline" class="filter-select-field">
+        <mat-select
+          [(ngModel)]="selectedType"
+          [panelClass]="'payroll-filter-panel'"
+          aria-label="Bonus type filter"
+        >
+          <mat-select-trigger>Type: {{ selectedType }}</mat-select-trigger>
+          @for (type of typeOptions; track type) {
+            <mat-option [value]="type">Type: {{ type }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-select-field">
+        <mat-select
+          [(ngModel)]="selectedStatus"
+          [panelClass]="'payroll-filter-panel'"
+          aria-label="Bonus status filter"
+        >
+          <mat-select-trigger>Status: {{ selectedStatus }}</mat-select-trigger>
+          @for (status of statusOptions; track status) {
+            <mat-option [value]="status">Status: {{ status }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <button type="button" class="btn-primary" (click)="openAddBonusDialog()">
+      + Add bonus
+    </button>
+  </section>
+
+  <section class="ledger-table-card">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Period</th>
+            <th class="text-right">Amount (PKR)</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Description</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (filteredRows.length === 0) {
+            <tr>
+              <td class="empty-row" colspan="7">No bonus records found.</td>
+            </tr>
+          } @else {
+            @for (row of filteredRows; track trackById($index, row)) {
+              <tr [class.cancelled]="row.status === 'Cancelled'">
+                <td>
+                  <div class="employee-cell">
+                    <div class="avatar" [class]="'avatar ' + row.avatarTone">{{ row.initials }}</div>
+                    <span>{{ row.employeeName }}</span>
+                  </div>
+                </td>
+                <td>{{ row.period }}</td>
+                <td class="text-right amount">{{ row.amount | number }}</td>
+                <td>
+                  <span class="badge bonus-type" [class]="'badge bonus-type ' + row.type.toLowerCase()">
+                    {{ row.type }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge status" [class]="'badge status ' + row.status.toLowerCase()">
+                    {{ row.status }}
+                  </span>
+                </td>
+                <td [class.italic]="row.status === 'Cancelled'">{{ row.description }}</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" aria-label="Edit" (click)="openEditBonusDialog(row)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button type="button" aria-label="Delete" class="danger" (click)="requestDeleteRow(row)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="table-footer">
+    <span>Showing {{ filteredRows.length }} of {{ rows.length }} results</span>
+    <div class="pagination">
+      <button type="button" disabled>Previous</button>
+      <button type="button" class="active">1</button>
+      <button type="button" disabled>Next</button>
+    </div>
+  </footer>
+</section>
