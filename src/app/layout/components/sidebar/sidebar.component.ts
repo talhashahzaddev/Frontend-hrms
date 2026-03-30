@@ -211,6 +211,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
       ]
     },
+      {
+      label: 'Help Desk',
+      icon: 'event_available',
+      children: [
+        { label: 'Tickets Dashbaord', icon: 'event', route: '/help-desk/tickets' },
+        { label: 'Agent Group', icon: 'event', route: '/help-desk/agent-group' },
+        { label: 'Ticket Invlovement', icon: 'event', route: '/help-desk/ticket-invlovement' },
+        { label: 'Ticket Category', icon: 'event', route: '/help-desk/ticket-category', exact: true }
+      ]
+    },
     {
       label: 'Jobs',
       icon: 'work',

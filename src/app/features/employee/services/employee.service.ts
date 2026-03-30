@@ -80,6 +80,22 @@ export class EmployeeService {
         })
       );
   }
+getSelectedEmployees(recipientIds: string[]): Observable<Employee[]> {
+  return this.http.post<ApiResponse<Employee[]>>(
+    `${this.apiUrl}/get-selected-employees`,
+    recipientIds
+  ).pipe(
+    map(response => {
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to fetch employees');
+      }
+      return response.data!;
+    })
+  );
+}
+
+
+
 
   createEmployee(request: CreateEmployeeRequest): Observable<Employee> {
     return this.http.post<ApiResponse<Employee>>(`${this.apiUrl}`, request)

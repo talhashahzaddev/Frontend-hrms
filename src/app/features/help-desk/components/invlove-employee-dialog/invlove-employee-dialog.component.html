@@ -1,0 +1,167 @@
+<div class="dialog-container">
+  <!-- HEADER -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>group_add</mat-icon>
+      </div>
+      <h2 class="header-title">Involve Employee</h2>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- BODY -->
+  <mat-dialog-content class="dialog-body">
+    <form [formGroup]="involveEmployeeForm" autocomplete="off">
+      <div class="form-grid">
+
+        <!-- GROUP SELECTION (only show when no group is assigned) -->
+        <div class="field-full custom-field" *ngIf="!assignedGroupId">
+          <label class="field-label">GROUP NAME <span class="required">*</span></label>
+          <mat-form-field appearance="outline" class="mat-field">
+            <mat-select formControlName="groupId" placeholder="Select group...">
+              <mat-option *ngFor="let group of groups" [value]="group.id">
+                {{ group.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Display assigned group name when a group is already assigned -->
+        <div class="field-full custom-field" *ngIf="assignedGroupId">
+          <label class="field-label">GROUP NAME</label>
+          <mat-form-field appearance="outline" class="mat-field">
+            <input matInput [value]="assignedGroupName || assignedGroupId" disabled>
+          </mat-form-field>
+        </div>
+
+        <!-- DEPARTMENT FILTER -->
+        <div class="field-full custom-field">
+          <label class="field-label">DEPARTMENT</label>
+          <mat-form-field appearance="outline" class="mat-field">
+            <mat-select [formControl]="departmentControl" placeholder="Select department...">
+              <mat-option value="">All Departments</mat-option>
+              <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+                {{ dept.departmentName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- EMPLOYEE MULTI-SELECT DROPDOWN -->
+        <div class="field-full custom-field">
+          <label class="field-label">ALL EMPLOYEES <span class="required">*</span></label>
+
+          <!-- Hidden Form Control -->
+          <input type="hidden" formControlName="SelectedEmployees">
+
+          <!-- Dropdown -->
+          <div class="employee-dropdown-container"
+               [class.is-open]="employeeDropdownOpen"
+               [class.has-error]="submitted && involveEmployeeForm.get('SelectedEmployees')?.invalid">
+
+            <!-- Input with Search -->
+            <div class="employee-input-box">
+              <input #employeeInput
+                     class="employee-search-input"
+                     type="text"
+                     [placeholder]="employeeDropdownOpen 
+                                  ? 'Search or select employees' 
+                                  : (selectedEmployeeIds.length ? selectedEmployeeIds.length + ' employee(s) selected' : 'Select employees...')"
+                     [value]="employeeDropdownOpen ? employeeFilter : ''"
+                     (focus)="openEmployeeDropdown()"
+                     (input)="onEmployeeSearch($any($event.target).value)"
+                     autocomplete="off">
+
+              <!-- SELECT ALL -->
+              <div class="select-all-container" *ngIf="employeeDropdownOpen">
+                <input type="checkbox"
+                       class="select-all-checkbox"
+                       [checked]="isAllVisibleSelected()"
+                       (change)="toggleSelectAll()"
+                       id="selectAllEmployees">
+                <label for="selectAllEmployees" class="select-all-text">SELECT ALL</label>
+              </div>
+            </div>
+
+            <!-- DROPDOWN PANEL -->
+            <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+
+              <!-- EMPTY STATE -->
+              <div *ngIf="getFilteredEmployeesList().length === 0" class="employee-no-results">
+                No employees found
+              </div>
+
+              <!-- EMPLOYEE LIST -->
+              <div class="employee-list-container">
+                <div *ngFor="let emp of getFilteredEmployeesList()"
+                     class="employee-item"
+                     [class.is-selected]="isEmployeeSelected(emp.employeeId)"
+                     (mousedown)="$event.preventDefault(); toggleEmployee(emp)">
+
+                  <!-- Checkbox -->
+                  <input type="checkbox"
+                         class="employee-checkbox"
+                         [checked]="isEmployeeSelected(emp.employeeId)"
+                         (mousedown)="$event.stopPropagation()"
+                         readonly>
+
+                  <!-- Avatar -->
+                  <div class="employee-avatar"
+                       [style.background-color]="getAvatarBg(emp)"
+                       [style.color]="getAvatarColor(emp)">
+                    {{ getInitials(emp) }}
+                  </div>
+
+                  <!-- Info -->
+                  <div class="employee-info">
+                    <div class="employee-name">{{ displayName(emp) }}</div>
+                    <div class="employee-metadata">{{ emp.departmentName || 'No Department' }}</div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- VALIDATION ERROR -->
+          <span *ngIf="submitted && involveEmployeeForm.get('SelectedEmployees')?.invalid" class="error-message">
+            Please select at least one employee.
+          </span>
+        </div>
+
+        <!-- SELECTION SUMMARY -->
+        <div class="selection-summary" *ngIf="selectedEmployeeIds.length > 0">
+          <span class="summary-text">{{ selectedEmployeeIds.length }} employees selected</span>
+          <button type="button" class="clear-all-btn" (click)="clearAllEmployees()">CLEAR ALL</button>
+        </div>
+
+        <!-- REASON -->
+        <div class="field-full custom-field">
+          <label class="field-label">REASON</label>
+          <textarea formControlName="reason"
+                    class="reason-textarea"
+                    placeholder="Provide a reason for involvement..."
+                    rows="3"></textarea>
+        </div>
+
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <!-- FOOTER -->
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" mat-dialog-close [disabled]="isSubmitting" class="btn-cancel">
+      Cancel
+    </button>
+    <button mat-flat-button class="btn-save"
+            [disabled]="involveEmployeeForm.invalid || isSubmitting"
+            (click)="onSubmit()">
+      <span *ngIf="!isSubmitting">Involve</span>
+      <mat-spinner diameter="18" *ngIf="isSubmitting"></mat-spinner>
+    </button>
+  </div>
+</div>
