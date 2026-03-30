@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -20,6 +21,7 @@ export interface ReplyChatDialogData {
   selector: 'app-reply-chat-dialog',
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
