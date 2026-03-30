@@ -1,0 +1,311 @@
+<div class="ticket-page">
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="loading">
+    <div class="loader-spinner"></div>
+    <p>Loading ticket details...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && ticket" class="ticket-content">
+
+    <!-- ============================================ -->
+    <!-- LEFT COLUMN (CHAT) - REDESIGNED              -->
+    <!-- ============================================ -->
+    <div class="chat-container">
+
+      <!-- Sub-Header: Mail Inbox + Action Buttons -->
+      <div class="chat-subheader">
+        <a href="#" class="chat-inbox-link">Mail Inbox</a>
+        <div class="chat-subheader-actions">
+          <button mat-raised-button class="btn btn-primary chat-action-btn" (click)="openInvolveEmployeeDialog()">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            Involve Employees
+          </button>
+          <button class="btn btn-primary chat-action-btn" (click)="openReplyDialog(ticket)">
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+            Reply
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages List -->
+      <div class="chat-body">
+        <div *ngFor="let msg of messages; let i = index"
+             class="chat-message-card"
+             [class.chat-message-reply]="i > 0">
+
+          <!-- Message Header -->
+          <div class="msg-header">
+            <div class="msg-sender-info">
+              <!-- <div class="msg-avatar" [class.msg-avatar-primary]="i === 0" [class.msg-avatar-secondary]="i > 0">
+                {{ msg.senderFullName?.charAt(0) || 'U' }}{{ msg.senderFullName?.split(' ')[1]?.charAt(0) || '' }}
+              </div> -->
+              <div class="msg-sender-details">
+                <span class="msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
+                <span class="msg-separator">|</span>
+                <a class="msg-sender-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
+              </div>
+            </div>
+            <span class="msg-time">{{ msg.createdAt | date:'MMM d, y, h:mm a' }}</span>
+          </div>
+
+          <!-- Message Body -->
+          <div class="msg-body">
+            {{ msg.message }}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Reply Composer -->
+      <div class="reply-composer" id="reply-composer">
+        <textarea
+          class="reply-textarea"
+          placeholder="Type your reply here..."
+          [(ngModel)]="replyText">
+        </textarea>
+        <div class="reply-composer-footer">
+          <button class="reply-attach-btn">
+            <span class="attach-plus">+</span> Attach File
+          </button>
+          <div class="reply-send-actions">
+            <button class="btn btn-reply-cancel" (click)="cancelReply()">Cancel</button>
+            <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText?.trim()">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- ============================================ -->
+    <!-- END LEFT COLUMN                              -->
+    <!-- ============================================ -->
+
+    <!-- Right Column — UNTOUCHED -->
+    <div class="ticket-right">
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          *ngIf="!isEditMode"
+          class="btn btn-primary"
+          (click)="enableEditMode()">
+          <span class="material-icons">edit</span>
+          Edit Ticket
+        </button>
+
+        <div *ngIf="isEditMode" class="edit-actions">
+          <button
+            class="btn btn-secondary"
+            (click)="cancelEdit()"
+            [disabled]="updating">
+            Cancel
+          </button>
+
+          <button
+            class="btn btn-primary"
+            (click)="updateTicket()"
+            [disabled]="updating">
+            <span class="material-icons">check</span>
+            {{ updating ? 'Updating...' : 'Update' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Details Card -->
+      <div class="card details-card">
+        <div class="card-header">
+          <h3>Ticket Details</h3>
+          <span class="material-icons">info</span>
+        </div>
+
+        <div class="card-body">
+
+          <!-- Two Column Grid -->
+          <div class="details-grid">
+
+            <!-- Department -->
+            <div class="detail-field">
+              <label class="field-label">Department</label>
+              <div *ngIf="!isEditMode" class="field-value">{{ ticket.departmentName || 'N/A' }}</div>
+              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.departmentId">
+                <option value="">Select Department</option>
+                <option *ngFor="let dept of departments" [value]="dept.departmentId">{{ dept.departmentName }}</option>
+              </select>
+            </div>
+
+            <!-- Type -->
+            <div class="detail-field">
+              <label class="field-label">Type</label>
+              <div *ngIf="!isEditMode" class="field-value">{{ ticket.ticketType || 'N/A' }}</div>
+              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.ticketType">
+                <option value="">Select Type</option>
+                <option *ngFor="let type of ticketTypes" [value]="type">{{ type }}</option>
+              </select>
+            </div>
+
+            <!-- Category -->
+            <div class="detail-field">
+              <label class="field-label">Category</label>
+              <div *ngIf="!isEditMode" class="field-value">{{ getCategoryName(ticket.category) }}</div>
+              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.category" (change)="onCategoryChange(ticket.category)">
+                <option value="">Select Category</option>
+                <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.categoryName }}</option>
+              </select>
+            </div>
+
+            <!-- Priority -->
+            <div class="detail-field">
+              <label class="field-label">Priority</label>
+              <div *ngIf="!isEditMode" class="field-value priority-value">
+                <span class="priority-dot" [class]="'priority-' + (ticket.priority?.toLowerCase() || 'medium')"></span>
+                {{ ticket.priority || 'N/A' }}
+              </div>
+              <div *ngIf="isEditMode" class="priority-select-wrapper">
+                <span class="priority-dot" [class]="'priority-' + (ticket.priority?.toLowerCase() || 'medium')"></span>
+                <select class="field-input priority-select" [(ngModel)]="ticket.priority">
+                  <option value="">Select Priority</option>
+                  <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="detail-field">
+              <label class="field-label">Status</label>
+              <div *ngIf="!isEditMode" class="field-value status-value">{{ ticket.status || 'N/A' }}</div>
+              <select *ngIf="isEditMode" class="field-input status-select" [(ngModel)]="ticket.status">
+                <option value="">Select Status</option>
+                <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+              </select>
+            </div>
+
+            <!-- Group -->
+            <div class="detail-field">
+              <label class="field-label">Group Name</label>
+              <div *ngIf="!isEditMode" class="field-value">{{ getGroupName(ticket.groupId) }}</div>
+              <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.groupId" [disabled]="groups.length === 0">
+                <option value="">Select Group</option>
+                <option *ngFor="let group of groups" [value]="group.groupId">{{ group.groupTitle }}</option>
+              </select>
+            </div>
+
+            <!-- ✅ Group Employees (ONLY if groupId exists) -->
+            <!-- <div class="detail-field"
+              *ngIf="ticket?.groupId && (ticket?.groupEmployeeNames?.length ?? 0) > 0">
+              <label class="field-label">Group Employees</label>
+                <div class="field-value">
+                 <span class="employee-chip" *ngFor="let emp of ticket?.groupEmployeeNames">
+                      {{ emp }}
+                      </span>
+                    </div>
+                   </div>
+
+          </div> -->
+
+  <!-- Group Employees -->
+  <div class="detail-field"
+>
+    <label class="field-label">Group Employees</label>
+
+    <div class="field-value">
+      <span class="employee-chip" *ngFor="let emp of ticket.groupEmployeeNames">
+        {{ emp }}
+      </span>
+    </div>
+  </div>
+
+
+          <!-- Assigned Employees (Full Width) -->
+          <div class="detail-field full-width">
+            <label class="field-label">Assigned Employees</label>
+            <div *ngIf="!isEditMode" class="field-value">{{ getSelectedEmployeeNames() }}</div>
+            <div *ngIf="isEditMode" class="employee-dropdown-container">
+              <div class="employee-search-header">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" class="employee-search-input" placeholder="Search employees..."
+                  [value]="employeeFilter" (input)="onEmployeeSearch($event)" (click)="$event.stopPropagation()"/>
+              </div>
+              <div class="employee-list-container">
+                <label class="employee-checkbox-item select-all">
+                  <input type="checkbox" class="employee-checkbox" [checked]="isAllVisibleSelected()"
+                    (change)="toggleSelectAll()" (click)="$event.stopPropagation()"/>
+                  <span class="select-all-label">Select All</span>
+                </label>
+                <div class="divider"></div>
+                <label *ngFor="let emp of filteredEmployees" class="employee-checkbox-item">
+                  <input type="checkbox" class="employee-checkbox" [checked]="isEmployeeSelected(emp.id)"
+                    (change)="toggleEmployee(emp)"/>
+                  <div class="employee-info">
+                    <div class="employee-avatar">{{ emp.name?.charAt(0) || 'U' }}</div>
+                    <span class="employee-name">{{ emp.name }}</span>
+                    <span *ngIf="emp.code" class="employee-code">({{ emp.code }})</span>
+                  </div>
+                </label>
+                <div *ngIf="filteredEmployees.length === 0" class="no-results">No employees found</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadata Section -->
+          <div class="metadata-section">
+            <div class="metadata-row">
+              <span class="metadata-label">Created By</span>
+              <span class="metadata-value">{{ ticket.createdByName || 'N/A' }}</span>
+            </div>
+            <div class="metadata-row">
+              <span class="metadata-label">Created Date</span>
+              <span class="metadata-value">{{ ticket.createdat | date:'short' }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Description Card -->
+      <div class="card description-card">
+        <div class="card-header">
+          <span class="material-icons">notes</span>
+          <h3>Description</h3>
+        </div>
+        <div class="card-body">
+          <textarea *ngIf="isEditMode" class="description-textarea" [(ngModel)]="ticket.description" placeholder="Describe the issue in detail..."></textarea>
+          <p *ngIf="!isEditMode" class="description-text">{{ ticket.description || 'No description provided' }}</p>
+        </div>
+      </div>
+
+      <!-- Attachment Card -->
+      <div class="card attachment-card">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="material-icons">attach_file</span>
+            <h3>Attachment</h3>
+          </div>
+          <span class="attachment-count">1 File</span>
+        </div>
+        <div class="card-body">
+          <div *ngIf="ticket.attachment" class="attachment-item">
+            <div class="attachment-info">
+              <span class="material-icons file-icon">image</span>
+              <div class="file-details">
+                <span class="file-name">screenshot_error.png</span>
+                <span class="file-size">845 KB</span>
+              </div>
+            </div>
+            <button class="remove-btn"><span class="material-icons">close</span></button>
+          </div>
+          <div class="upload-area">
+            <span class="material-icons upload-icon">cloud_upload</span>
+            <p class="upload-text">Upload or drag</p>
+          </div>
+          <p *ngIf="!ticket.attachment" class="no-attachment">No attachment</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

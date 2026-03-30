@@ -1,0 +1,209 @@
+<!-- tickets-dashboard.component.html -->
+
+<div class="tickets-page">
+
+  <!-- ===================================================
+       FILTER CARD
+       =================================================== -->
+  <section class="filter-section">
+
+    <div class="filter-header">
+      <h1 class="page-title">Ticket Request</h1>
+      <button class="btn-create" (click)="openCreateTicketDialog()">
+        + Create Request Ticket
+      </button>
+    </div>
+
+    <!-- 3 filters: Status | Department | Ticket Type -->
+    <div class="filters-grid">
+
+      <div class="filter-field-group">
+        <label class="filter-label" for="statusSelect">Status</label>
+        <select class="filter-select" id="statusSelect" [formControl]="statusControl">
+          <option value="">--ALL--</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Pending">Pending</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Open">Open</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+
+      <div class="filter-field-group">
+        <label class="filter-label" for="departmentSelect">Department</label>
+        <select class="filter-select" id="departmentSelect" [formControl]="departmentControl">
+          <option [value]="''">--ALL--</option>
+          <option *ngFor="let dept of departments" [value]="dept.departmentId">
+            {{ dept.departmentName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field-group">
+        <label class="filter-label" for="ticketTypeSelect">Ticket Type</label>
+        <select class="filter-select" id="ticketTypeSelect" [formControl]="ticketTypeControl">
+          <option value="">--ALL--</option>
+          <option value="Request">Request</option>
+          <option value="Complaint">Complaint</option>
+          <option value="Issue">Issue</option>
+        </select>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================
+       LOADER
+       =================================================== -->
+  <div *ngIf="loading" class="loader-wrapper">
+    <div class="spinner-border"></div>
+    <p>Loading tickets...</p>
+  </div>
+
+
+  <!-- ===================================================
+       TABLE + PAGINATION — single white card
+       =================================================== -->
+  <div class="table-container" *ngIf="!loading && tickets.length > 0">
+
+    <div class="table-scroll">
+      <table class="tickets-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Ticket Type</th>
+            <th>Category</th>
+            <th class="text-center">Status</th>
+            <th>Department</th>
+            <th class="text-center">Priority</th>
+            <th>Created Date</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let ticket of tickets; let even = even"
+            [class.row-alt]="even"
+          >
+            <td class="td-title">{{ ticket.ticketTitle }}</td>
+            <td>
+              <span class="ticket-type-text">{{ ticket.ticketType || 'N/A' }}</span>
+            </td>
+            <td>{{ ticket.category }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="{
+                'badge-status-open':        ticket.status === 'Open',
+                'badge-status-inprogress':  ticket.status === 'In Progress',
+                'badge-status-resolved':    ticket.status === 'Resolved',
+                'badge-status-pending':     ticket.status === 'Pending',
+                'badge-status-closed':      ticket.status === 'Closed',
+                'badge-status-default':     ticket.status !== 'Open'
+                                         && ticket.status !== 'In Progress'
+                                         && ticket.status !== 'Resolved'
+                                         && ticket.status !== 'Pending'
+                                         && ticket.status !== 'Closed'
+              }">{{ ticket.status }}</span>
+            </td>
+            <td>{{ ticket.departmentName }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="{
+                'badge-priority-high':    ticket.priority === 'High',
+                'badge-priority-medium':  ticket.priority === 'Medium',
+                'badge-priority-low':     ticket.priority === 'Low',
+                'badge-priority-default': !ticket.priority
+                                       || (ticket.priority !== 'High'
+                                        && ticket.priority !== 'Medium'
+                                        && ticket.priority !== 'Low')
+              }">{{ ticket.priority || 'N/A' }}</span>
+            </td>
+            <td class="td-date">{{ ticket.createdat | date: 'MM/dd/yy' }}</td>
+
+            <!-- Three-dot action menu -->
+        <td class="text-center">
+  <div class="action-wrapper">
+
+    <!-- 3 DOT BUTTON -->
+    <button
+      class="btn-dots"
+      (click)="toggleMenu(ticket, $event)"
+      title="Actions">
+
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </button>
+
+    <!-- DROPDOWN MENU -->
+    <div 
+      class="action-menu" 
+      *ngIf="ticket._menuOpen"
+      (click)="$event.stopPropagation()"
+    >
+      <button class="action-item"  (click)="viewTicket(ticket); $event.stopPropagation()">
+        👁 View
+      </button>
+
+      <button 
+        class="action-item action-item--delete" 
+        (click)="deleteTicket(ticket)">
+        🗑 Delete
+      </button>
+    </div>
+
+  </div>
+</td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination — fused inside same card -->
+    <div class="pagination-section">
+      <div class="pagination-left">
+        <span class="pagination-label">Show Records</span>
+        <select class="pagination-select">
+          <option>10</option>
+          <option>25</option>
+          <option>50</option>
+        </select>
+      </div>
+      <div class="pagination-right">
+        <div class="pagination-buttons">
+          <button
+            class="btn-page"
+            (click)="searchModel.page = searchModel.page! - 1; getTickets()"
+            [disabled]="searchModel.page === 1"
+            title="Previous">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+          </button>
+          <button
+            class="btn-page"
+            (click)="searchModel.page = searchModel.page! + 1; getTickets()"
+            title="Next">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       NO DATA
+       =================================================== -->
+  <div *ngIf="!loading && tickets.length === 0" class="no-data">
+    <p>No tickets found.</p>
+  </div>
+
+</div>
+
+<!-- Global click to close any open menu -->
+<!-- Add (click)="closeAllMenus()" on the host or a global listener in TS -->

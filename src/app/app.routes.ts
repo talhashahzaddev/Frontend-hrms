@@ -162,6 +162,12 @@ export const appRoutes: Routes = [
       import('./features/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
     title: 'AI Assistant - HRMS'
   },
+  {
+    path:'help-desk',
+    canActivate:[AuthGuard],
+     loadChildren: () =>
+      import('./features/help-desk/help-desk.routes').then(m => m.helpdeskRoutes) ,
+    title:'help-desk-HRMS'},
 
   // Subscription Route (Super Admin only)
   {

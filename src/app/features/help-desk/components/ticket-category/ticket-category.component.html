@@ -1,0 +1,121 @@
+<div class="ticket-categories-page">
+
+  <!-- ===== MAIN CONTENT CARD ===== -->
+  <section class="main-card">
+
+    <!-- Header Section -->
+    <div class="card-header">
+      <div class="header-text">
+        <h1 class="page-title">Ticket Categories</h1>
+        <p class="page-subtitle">Manage and view all helpdesk ticket categories</p>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filters-grid">
+        <!-- Search Input -->
+        <div class="filter-field">
+          <label class="filter-label">Search</label>
+          <div class="search-input-wrapper">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              type="text"
+              class="filter-input with-icon"
+              placeholder="Search categories..."
+              [formControl]="searchControl"
+            />
+          </div>
+        </div>
+
+        <!-- Department Dropdown -->
+        <div class="filter-field">
+          <label class="filter-label">Department</label>
+          <select class="filter-select" [formControl]="departmentControl">
+            <option value="">--ALL--</option>
+            <option *ngFor="let dept of departments" [value]="dept.departmentId">
+              {{ dept.departmentName }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Create Category Button -->
+        <div class="filter-field">
+          <button mat-raised-button color="primary" class="btn-create" (click)="openCreateCategoryDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Create Category</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LOADER ===== -->
+  <div *ngIf="loading" class="loader-wrapper">
+    <div class="spinner-border"></div>
+    <p>Loading categories...</p>
+  </div>
+
+  <!-- ===== TABLE SECTION ===== -->
+  <section class="table-card" *ngIf="!loading && categories.length > 0">
+    <div class="table-wrapper">
+      <table class="categories-table">
+        <thead>
+          <tr>
+            <th>CATEGORY NAME</th>
+            <th>DEPARTMENT</th>
+            <th>STATUS</th>
+            <th>CREATED AT</th>
+            <th class="text-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let category of paginatedCategories; let even = even; let odd = odd"
+              [class.row-even]="even"
+              [class.row-odd]="odd">
+            <td>{{ category.categoryName }}</td>
+            <td>{{ category.departmentName || 'N/A' }}</td>
+            <td>{{ category.status ? 'Active' : 'Inactive' }}</td>
+            <td>{{ category.createdAt | date:'short' }}</td>
+            <td class="text-center">
+              <button 
+                mat-icon-button 
+                [matMenuTriggerFor]="actionMenu"
+                class="action-menu-btn"
+                aria-label="Actions menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #actionMenu="matMenu" class="custom-action-menu">
+                <button mat-menu-item (click)="editCategory(category)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="deleteCategory(category)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Material Paginator -->
+    <mat-paginator
+      [length]="totalCategories"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      class="custom-paginator">
+    </mat-paginator>
+  </section>
+
+  <!-- ===== NO DATA ===== -->
+  <div *ngIf="!loading && categories.length === 0" class="no-data">
+    <p>No categories found.</p>
+  </div>
+</div>
