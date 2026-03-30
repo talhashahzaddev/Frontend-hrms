@@ -138,6 +138,32 @@
   }
 }
 
+.rd-info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: #fff9eb;
+  border: 1px solid rgba(255, 228, 163, 0.3);
+  border-radius: 8px;
+
+  mat-icon {
+    color: #b45309;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    font-variation-settings: 'FILL' 1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #92400e;
+    flex: 1;
+  }
+}
+
 .rd-optional-badge {
   font-size: 10px;
   font-weight: 700;
