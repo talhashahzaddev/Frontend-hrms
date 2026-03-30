@@ -152,7 +152,8 @@ export class PayrollRulesComponent implements OnInit {
   onPolicyClick(policy: { key: string; title: string; rulesCount: number }): void {
     if (policy.key === 'overtimePolicy') {
       this.router.navigate(['/payroll/policies/overtime-rules']);
+    } else if (policy.key === 'attendanceDeductionPolicy') {
+      this.router.navigate(['/payroll/policies/attendance-deduction-rules']);
     }
-    // additional navigations can be handled here if required
   }
 }

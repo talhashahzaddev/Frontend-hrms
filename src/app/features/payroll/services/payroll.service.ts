@@ -178,4 +178,53 @@ export class PayrollService {
         })
       );
   }
+
+  // Payroll Periods
+  getPayrollPeriods(params?: any): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/periods`, { params })
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  createPayrollPeriod(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/periods`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updatePayrollPeriod(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/periods/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deletePayrollPeriod(id: string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/periods/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
 }

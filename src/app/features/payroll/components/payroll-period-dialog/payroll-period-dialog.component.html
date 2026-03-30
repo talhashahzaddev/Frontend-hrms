@@ -1,0 +1,85 @@
+<div class="attendance-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">calendar_month</mat-icon>
+      <div class="header-text">
+        <h2>{{ title }}</h2>
+        <p>Set the time range and payment date for the payroll cycle</p>
+      </div>
+    </div>
+    <button class="close-btn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body" [formGroup]="form">
+    <!-- Period Name -->
+    <div class="form-group">
+      <label>Period Name</label>
+      <input type="text" class="form-control" formControlName="name" placeholder="e.g. October 2025" />
+      <div class="error-msg" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+        Period name is required.
+      </div>
+    </div>
+
+    <!-- Start Date & End Date -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" class="form-control" formControlName="startDate" />
+        <div class="error-msg" *ngIf="form.get('startDate')?.invalid && form.get('startDate')?.touched">
+          Start date is required.
+        </div>
+      </div>
+      <div class="form-group">
+        <label>End Date</label>
+        <input type="date" class="form-control" formControlName="endDate" />
+        <div class="error-msg" *ngIf="form.get('endDate')?.invalid && form.get('endDate')?.touched">
+          End date is required.
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Date & Status -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Payment Date</label>
+        <input type="date" class="form-control" formControlName="paymentDate" />
+        <div class="error-msg" *ngIf="form.get('paymentDate')?.invalid && form.get('paymentDate')?.touched">
+          Payment date is required.
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" formControlName="status">
+          <option value="Open">Open</option>
+          <option value="Processed">Processed</option>
+          <option value="Closed">Closed</option>
+          <option value="Locked">Locked</option>
+        </select>
+        <div class="error-msg" *ngIf="form.get('status')?.invalid && form.get('status')?.touched">
+          Status is required.
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label>Description</label>
+      <textarea class="form-control" formControlName="description" rows="3" placeholder="Add any notes about this specific period..."></textarea>
+    </div>
+
+    <div class="alert-info">
+      <mat-icon>info</mat-icon>
+      <p>Ensure the end date covers all attendance logs for this period.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="close()">Cancel</button>
+    <button class="save-btn" (click)="save()">{{ data.mode === 'add' ? 'Create Period' : 'Save Changes' }}</button>
+  </div>
+</div>

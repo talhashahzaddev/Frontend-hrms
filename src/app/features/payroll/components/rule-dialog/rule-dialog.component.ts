@@ -25,6 +25,7 @@ export interface RuleDialogData {
     overtimeType: string;
     fixedAmount: number | null;
     percentage: number | null;
+    halfDayMultiplier?: number;
   };
 }
 
@@ -86,7 +87,8 @@ export class RuleDialogComponent implements OnInit {
     overtimeType: [''],
     amountType: ['fixed'],
     fixedAmount: [null as number | null],
-    percentage: [null as number | null]
+    percentage: [null as number | null],
+    halfDayMultiplier: [0.5, [Validators.required, Validators.min(0)]]
   });
 
   ngOnInit(): void {
@@ -116,15 +118,21 @@ export class RuleDialogComponent implements OnInit {
     });
 
     if (this.isEditMode && this.data?.rule) {
-      const isFixedAmount = this.data.rule.fixedAmount !== null && this.data.rule.fixedAmount !== undefined;
+      const rule = this.data.rule as any;
+      const fixedVal = rule.fixedAmount !== undefined ? rule.fixedAmount : rule.fixedDeduction;
+      const percentVal = rule.percentage !== undefined ? rule.percentage : rule.percentageDeduction;
+      
+      const isFixedAmount = fixedVal !== null && fixedVal !== undefined;
+
       this.ruleForm.patchValue({
         selectedPolicy: this.data.policyId || 1,
-        ruleName: this.data.rule.ruleName || '',
-        description: this.data.rule.description || '',
-        overtimeType: (this.data.rule.overtimeType || '').toLowerCase(),
+        ruleName: rule.ruleName || '',
+        description: rule.description || '',
+        overtimeType: (rule.overtimeType || '').toLowerCase(),
         amountType: isFixedAmount ? 'fixed' : 'percentage',
-        fixedAmount: isFixedAmount ? this.data.rule.fixedAmount : null,
-        percentage: isFixedAmount ? null : this.data.rule.percentage
+        fixedAmount: isFixedAmount ? fixedVal : null,
+        percentage: isFixedAmount ? null : percentVal,
+        halfDayMultiplier: rule.halfDayMultiplier ?? 0.5
       });
     }
   }
@@ -149,16 +157,26 @@ export class RuleDialogComponent implements OnInit {
     });
 
     this.updateAmountValidation();
+
+    const halfDayControl = this.ruleForm.get('halfDayMultiplier');
+    if (Number(policyId) === 2) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      halfDayControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else if (Number(policyId) !== 1) {
+      halfDayControl?.clearValidators();
+    }
+    this.ruleForm.get('ruleName')?.updateValueAndValidity();
+    halfDayControl?.updateValueAndValidity();
   }
 
   private updateAmountValidation() {
-    const isOvertime = this.selectedPolicy === 1;
+    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2;
     const amountType = this.ruleForm.get('amountType')?.value;
 
     const fixedControl = this.ruleForm.get('fixedAmount');
     const percentControl = this.ruleForm.get('percentage');
 
-    if (isOvertime) {
+    if (isSpecialPolicy) {
       if (amountType === 'fixed') {
         fixedControl?.setValidators(Validators.required);
         percentControl?.clearValidators();
@@ -222,6 +240,23 @@ export class RuleDialogComponent implements OnInit {
             );
           }
         });
+    } else if (formValue.selectedPolicy === 2) { // 2 is Attendance Deduction Policy
+      resultPayload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        fixedDeduction: formValue.amountType === 'fixed' ? formValue.fixedAmount : null,
+        percentageDeduction: formValue.amountType === 'percentage' ? formValue.percentage : null,
+        halfDayMultiplier: formValue.halfDayMultiplier
+      };
+
+      // Simulate API call for ID 2 for now as requested
+      setTimeout(() => {
+        this.isSubmitting.set(false);
+        this.notification.showSuccess(
+          this.isEditMode ? 'Attendance deduction rule updated successfully' : 'Attendance deduction rule created successfully'
+        );
+        this.dialogRef.close({ success: true, data: resultPayload, policyId: 2 });
+      }, 800);
     } else {
       // Simulate API call for now or pass back to parent (Not Implemented)
       setTimeout(() => {
