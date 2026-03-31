@@ -55,9 +55,11 @@
           @for (rule of deductionRules(); track rule.ruleId) {
           <tr class="table-row" [class.inactive-row]="!rule.isActive">
             <td class="text-left font-semibold">{{ rule.ruleName }}</td>
-            <td class="text-right">{{ rule.fixedDeduction !== null && rule.fixedDeduction !== undefined ? (currencySymbol() + ' ' + (rule.fixedDeduction | number)) : '—' }}</td>
+            <td class="text-right">{{ rule.fixedDeduction !== null && rule.fixedDeduction !== undefined ?
+              (currencySymbol() + ' ' + (rule.fixedDeduction | number)) : '—' }}</td>
             <td class="text-right">
-              <span class="highlight-val">{{ rule.percentageDeduction !== null && rule.percentageDeduction !== undefined ? rule.percentageDeduction + '%' : '—' }}</span>
+              <span class="highlight-val">{{ rule.percentageDeduction !== null && rule.percentageDeduction !== undefined
+                ? rule.percentageDeduction + '%' : '—' }}</span>
             </td>
             <td class="text-center">{{ rule.halfDayMultiplier | number:'1.2-2' }}</td>
             <td class="text-center">
@@ -93,7 +95,7 @@
   </div>
 
   <!-- Info Banner -->
-  <div class="info-banner">
+  <!-- <div class="info-banner">
     <div class="info-icon">
       <mat-icon>info</mat-icon>
     </div>
@@ -104,5 +106,5 @@
         Percentage-based deductions are capped at 50% of daily pro-rated pay by default to comply with local labor regulations.
       </p>
     </div>
-  </div>
+  </div> -->
 </div>

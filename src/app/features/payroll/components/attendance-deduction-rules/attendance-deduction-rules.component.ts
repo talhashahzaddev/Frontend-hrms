@@ -49,40 +49,6 @@ export class AttendanceDeductionRulesComponent implements OnInit {
 
   fetchRules(): void {
     this.isLoading.set(true);
-    // Note: Since deduction rule specific API methods are not yet in PayrollService, 
-    // we use mock data for now to match the provided stitch design.
-    setTimeout(() => {
-      this.deductionRules.set([
-        { 
-          ruleId: '1', 
-          ruleName: 'Standard Deduction', 
-          fixedDeduction: 1000, 
-          percentageDeduction: null, 
-          halfDayMultiplier: 0.50, 
-          isActive: true 
-        },
-        { 
-          ruleId: '2', 
-          ruleName: 'Strict Deduction', 
-          fixedDeduction: null, 
-          percentageDeduction: 10, 
-          halfDayMultiplier: 0.50, 
-          isActive: true 
-        },
-        { 
-          ruleId: '3', 
-          ruleName: 'Lenient Deduction', 
-          fixedDeduction: 500, 
-          percentageDeduction: null, 
-          halfDayMultiplier: 0.25, 
-          isActive: false 
-        }
-      ]);
-      this.isLoading.set(false);
-    }, 800);
-
-    /* 
-    // Real implementation would look like this:
     this.payrollService.getAttendanceDeductionRules().subscribe({
       next: (data) => {
         this.deductionRules.set(data || []);
@@ -94,7 +60,6 @@ export class AttendanceDeductionRulesComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
-    */
   }
 
   goBack(): void {
@@ -134,17 +99,11 @@ export class AttendanceDeductionRulesComponent implements OnInit {
   }
 
   onToggleStatus(id: string): void {
-    // Mock status toggle
-    const currentRules = this.deductionRules();
-    const ruleIndex = currentRules.findIndex(r => r.ruleId === id);
-    if (ruleIndex !== -1) {
-      currentRules[ruleIndex].isActive = !currentRules[ruleIndex].isActive;
-      this.deductionRules.set([...currentRules]);
-      this.notification.showSuccess('Status updated successfully');
-    }
-    
-    /*
-    this.payrollService.toggleAttendanceDeductionRuleStatus(id).subscribe({
+    const rule = this.deductionRules().find(r => r.ruleId === id);
+    if (!rule) return;
+
+    const updatedRule = { ...rule, isActive: !rule.isActive };
+    this.payrollService.updateAttendanceDeductionRule(id, updatedRule).subscribe({
       next: () => {
         this.notification.showSuccess('Status updated successfully');
         this.fetchRules();
@@ -154,7 +113,6 @@ export class AttendanceDeductionRulesComponent implements OnInit {
         this.notification.showError('Failed to toggle status');
       }
     });
-    */
   }
 
   onDelete(id: string, ruleName?: string): void {
@@ -173,11 +131,6 @@ export class AttendanceDeductionRulesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        // Mock delete
-        this.deductionRules.set(this.deductionRules().filter(r => r.ruleId !== id));
-        this.notification.showSuccess('Rule deleted successfully');
-
-        /*
         this.payrollService.deleteAttendanceDeductionRule(id).subscribe({
           next: () => {
             this.notification.showSuccess('Rule deleted successfully');
@@ -188,7 +141,6 @@ export class AttendanceDeductionRulesComponent implements OnInit {
             this.notification.showError('Failed to delete rule');
           }
         });
-        */
       }
     });
   }

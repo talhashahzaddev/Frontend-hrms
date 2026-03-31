@@ -227,4 +227,53 @@ export class PayrollService {
         })
       );
   }
+
+  // Attendance Deduction Rules
+  getAttendanceDeductionRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/attendance-deduction-rules`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  createAttendanceDeductionRule(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/attendance-deduction-rules`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateAttendanceDeductionRule(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/attendance-deduction-rules/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteAttendanceDeductionRule(id: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/attendance-deduction-rules/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
+        })
+      );
+  }
 }

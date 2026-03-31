@@ -6,7 +6,8 @@
         <mat-icon>rule</mat-icon>
       </div>
       <div>
-        <h2>{{ data.policyId === 1 ? (isEditMode ? 'Edit Overtime Rules' : 'Create Overtime Rules') : 'Create Policy' }}</h2>
+        <h2>{{ data.policyId === 1 ? (isEditMode ? 'Edit Overtime Rules' : 'Create Overtime Rules') : 'Create Policy' }}
+        </h2>
         <p class="rd-header-sub">{{ data.policyId ? 'Configure a new rule' : 'Configure a new Policy' }}</p>
       </div>
     </div>
@@ -122,7 +123,7 @@
         <div class="rd-field">
           <label>Rule Name *</label>
           <mat-form-field appearance="outline" class="rd-mat-field">
-            <input matInput formControlName="ruleName" placeholder="e.g. Unpaid Leave Deduction" maxlength="100">
+            <input matInput formControlName="ruleName" placeholder="e.g. Absent Deduction" maxlength="100">
             <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
           </mat-form-field>
         </div>
@@ -131,7 +132,8 @@
         <div class="rd-field">
           <label>Description (Optional)</label>
           <mat-form-field appearance="outline" class="rd-mat-field">
-            <textarea matInput formControlName="description" placeholder="Explain the logic for this deduction rule..."></textarea>
+            <textarea matInput formControlName="description"
+              placeholder="Explain the logic for this deduction rule..."></textarea>
           </mat-form-field>
         </div>
 
@@ -173,7 +175,8 @@
           <mat-form-field appearance="outline" class="rd-mat-field">
             <input matInput type="number" formControlName="halfDayMultiplier" step="0.1" placeholder="0.5">
             <mat-hint>Value multiplied by the daily rate for 4-hour shifts.</mat-hint>
-            <mat-error *ngIf="ruleForm.get('halfDayMultiplier')?.hasError('required')">Multiplier is required</mat-error>
+            <mat-error *ngIf="ruleForm.get('halfDayMultiplier')?.hasError('required')">Multiplier is
+              required</mat-error>
           </mat-form-field>
         </div>
       </section>

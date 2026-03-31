@@ -241,22 +241,35 @@ export class RuleDialogComponent implements OnInit {
           }
         });
     } else if (formValue.selectedPolicy === 2) { // 2 is Attendance Deduction Policy
-      resultPayload = {
+      const payload = {
         ruleName: formValue.ruleName,
         description: formValue.description,
         fixedDeduction: formValue.amountType === 'fixed' ? formValue.fixedAmount : null,
         percentageDeduction: formValue.amountType === 'percentage' ? formValue.percentage : null,
-        halfDayMultiplier: formValue.halfDayMultiplier
+        halfDayMultiplier: formValue.halfDayMultiplier,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
       };
 
-      // Simulate API call for ID 2 for now as requested
-      setTimeout(() => {
-        this.isSubmitting.set(false);
-        this.notification.showSuccess(
-          this.isEditMode ? 'Attendance deduction rule updated successfully' : 'Attendance deduction rule created successfully'
-        );
-        this.dialogRef.close({ success: true, data: resultPayload, policyId: 2 });
-      }, 800);
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updateAttendanceDeductionRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createAttendanceDeductionRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Attendance deduction rule updated successfully' : 'Attendance deduction rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 2 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update rule' : 'Failed to create rule')
+            );
+          }
+        });
     } else {
       // Simulate API call for now or pass back to parent (Not Implemented)
       setTimeout(() => {
