@@ -15,24 +15,25 @@
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
-    <a href="javascript:void(0)" class="tab active">
+    <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'overtime'" (click)="setTab('overtime')">
       <span>Overtime</span>
-      <span class="badge active-badge">12</span>
+      <span class="badge" [class.active-badge]="currentTab === 'overtime'">12</span>
     </a>
-    <a href="javascript:void(0)" class="tab">
+    <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'absents'" (click)="setTab('absents')">
       <span>Absents</span>
-      <span class="badge">5</span>
+      <span class="badge" [class.active-badge]="currentTab === 'absents'">5</span>
     </a>
-    <a href="javascript:void(0)" class="tab">
+    <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'late'" (click)="setTab('late')">
       <span>Late / Half-day</span>
-      <span class="badge">8</span>
+      <span class="badge" [class.active-badge]="currentTab === 'late'">8</span>
     </a>
-    <a href="javascript:void(0)" class="tab">
+    <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'leave'" (click)="setTab('leave')">
       <span>Leave Summary</span>
-      <span class="badge">4</span>
+      <span class="badge" [class.active-badge]="currentTab === 'leave'">4</span>
     </a>
   </div>
 
+  @if (currentTab === 'overtime') {
   <!-- Summary Stat Cards -->
   <div class="summary-cards">
     <div class="card">
@@ -228,4 +229,7 @@
       </div>
     </div>
   </div>
+  } @else if (currentTab === 'absents') {
+  <app-time-tracking-absents></app-time-tracking-absents>
+  }
 </div>

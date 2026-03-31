@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AttendanceDialogComponent } from '../attendance-dialog/attendance-dialog.component';
+import { TimeTrackingAbsentsComponent } from '../time-tracking-absents/time-tracking-absents.component';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
 import {
@@ -16,12 +17,13 @@ import { PayrollService } from '../../services/payroll.service';
 @Component({
   selector: 'app-time-tracking',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule, TimeTrackingAbsentsComponent],
   templateUrl: './time-tracking.component.html',
   styleUrl: './time-tracking.component.scss'
 })
 export class TimeTrackingComponent implements OnInit {
   currencySymbol = signal('$');
+  currentTab: 'overtime' | 'absents' | 'late' | 'leave' = 'overtime';
   records: any[] = [];
   overtimeRules: any[] = [];
   periods: any[] = [];
@@ -184,6 +186,10 @@ export class TimeTrackingComponent implements OnInit {
     this.filterPeriod  = '';
     this.page = 1;
     this.loadRecords();
+  }
+
+  setTab(tab: 'overtime' | 'absents' | 'late' | 'leave') {
+    this.currentTab = tab;
   }
 
   goToPage(p: number) {
