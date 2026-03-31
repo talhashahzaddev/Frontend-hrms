@@ -75,7 +75,7 @@
           </button>
           <div class="reply-send-actions">
             <button class="btn btn-reply-cancel" (click)="cancelReply()">Cancel</button>
-            <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText?.trim()">Send</button>
+            <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText.trim()">Send</button>
           </div>
         </div>
       </div>
@@ -162,11 +162,11 @@
             <div class="detail-field">
               <label class="field-label">Priority</label>
               <div *ngIf="!isEditMode" class="field-value priority-value">
-                <span class="priority-dot" [class]="'priority-' + (ticket.priority?.toLowerCase() || 'medium')"></span>
+                <span class="priority-dot" [class]="'priority-' + (ticket.priority.toLowerCase() || 'medium')"></span>
                 {{ ticket.priority || 'N/A' }}
               </div>
               <div *ngIf="isEditMode" class="priority-select-wrapper">
-                <span class="priority-dot" [class]="'priority-' + (ticket.priority?.toLowerCase() || 'medium')"></span>
+                <span class="priority-dot" [class]="'priority-' + (ticket.priority.toLowerCase() || 'medium')"></span>
                 <select class="field-input priority-select" [(ngModel)]="ticket.priority">
                   <option value="">Select Priority</option>
                   <option *ngFor="let priority of priorities" [value]="priority">{{ priority }}</option>
@@ -241,7 +241,7 @@
                   <input type="checkbox" class="employee-checkbox" [checked]="isEmployeeSelected(emp.id)"
                     (change)="toggleEmployee(emp)"/>
                   <div class="employee-info">
-                    <div class="employee-avatar">{{ emp.name?.charAt(0) || 'U' }}</div>
+                    <div class="employee-avatar">{{ emp.name.charAt(0) || 'U' }}</div>
                     <span class="employee-name">{{ emp.name }}</span>
                     <span *ngIf="emp.code" class="employee-code">({{ emp.code }})</span>
                   </div>
