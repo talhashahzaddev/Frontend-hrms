@@ -1,0 +1,160 @@
+<div class="absents-container">
+  <!-- Stat Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Absents</span>
+          <span class="value">{{ totalAbsents() }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>event_busy</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer"><span class="trend-up">↑ 2%</span> from last month</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Deduction</span>
+          <span class="value">{{ currencySymbol() }} {{ totalDeduction() | number:'1.0-0' }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Current pay cycle</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Employees Affected</span>
+          <span class="value">{{ employeesAffected() }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>group</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Unique staff records</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Grace Days Used</span>
+          <span class="value">{{ graceDaysUsed() }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>verified_user</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Across all employees</p>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="content-card">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee..." />
+        </div>
+        <select class="filter-select">
+          <option>All Types</option>
+          <option>Full Day</option>
+          <option>Half Day</option>
+        </select>
+      </div>
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="logAbsent()">
+          <mat-icon>add</mat-icon>
+          Log Absent
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="text-left">Employee</th>
+            <th class="text-center">Absent Days</th>
+            <th class="text-center">Half Days</th>
+            <th class="text-center">Effective Absents</th>
+            <th class="text-center">Grace Days</th>
+            <th class="text-center">Deductible</th>
+            <th class="text-right">Deduction ({{ currencySymbol() }})</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+          <tr>
+            <td colspan="8" class="text-center" style="padding: 3rem;">
+              <div class="spinner-container">
+                <mat-spinner diameter="30"></mat-spinner>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          @for (record of records(); track record.id) {
+          <tr class="table-row">
+            <td>
+              <div class="employee-info">
+                <div class="avatar" [ngClass]="'bg-' + record.avatarColor">{{ record.initials }}</div>
+                <div class="flex-col">
+                  <span class="font-semibold">{{ record.employeeName }}</span>
+                  <span class="subtitle">{{ record.positionName }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="text-center font-medium muted">{{ record.absentDays }}</td>
+            <td class="text-center font-medium muted">{{ record.halfDays }}</td>
+            <td class="text-center font-bold">{{ record.effectiveAbsents | number:'1.1-1' }}</td>
+            <td class="text-center font-medium muted">{{ record.graceDays }}</td>
+            <td class="text-center">
+              <span class="font-medium" [ngClass]="record.deductibleDays > 0 ? 'text-slate-600' : 'text-emerald-600'">
+                {{ record.deductibleDays | number:'1.1-1' }}
+              </span>
+            </td>
+            <td class="text-right font-bold" [ngClass]="record.deductionAmount > 0 ? 'text-red-600' : 'text-emerald-600'">
+              {{ record.deductionAmount | number:'1.0-0' }}
+            </td>
+            <td class="action-cell">
+              <button class="action-btn hover-primary" (click)="editRecord(record)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-btn hover-danger" (click)="deleteRecord(record)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer / Pagination -->
+    <div class="table-footer">
+      <div class="formula-hint">
+        <mat-icon>info</mat-icon>
+        <span>Formula hint: Effective absents = absent days + (half days × 0.5)</span>
+      </div>
+      <div class="pagination">
+        <button class="page-btn disabled" disabled>
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn disabled" disabled>
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
