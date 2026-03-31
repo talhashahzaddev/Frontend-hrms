@@ -494,6 +494,10 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     return leaveType?.color || '#2196F3';
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Leave Management', 'Team Leaves', actionKey);
+  }
+
   hasFiltersApplied(): boolean {
     if (!this.filterForm) return false;
     const values = this.filterForm.value;

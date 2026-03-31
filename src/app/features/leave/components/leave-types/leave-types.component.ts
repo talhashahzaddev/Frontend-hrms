@@ -27,6 +27,7 @@ import { LeaveService } from '../../services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LeaveType } from '../../../../core/models/leave.models';
 import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-leave-types',
@@ -56,6 +57,7 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
   constructor(
     private leaveService: LeaveService,
     private notificationService: NotificationService,
+    private authService: AuthService,
     private dialog: MatDialog
   ) { }
 
@@ -151,6 +153,10 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
     const colors = ['primary', 'success', 'warning', 'info', 'employee'];
     return colors[index % colors.length];
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Leave Management', 'Leave Types', actionKey);
+  }
 }
 
 /* ------------------------------------------------------------------
@@ -178,6 +184,7 @@ export class AddLeaveTypeDialogTemplate {
   isSubmitting = false;
 
   readonly colors: ColorOption[] = inject(LEAVE_COLOR_TOKEN);
+  readonly authService = inject(AuthService);
 
   // default to the first color in the shared palette
   private readonly defaultColor = this.colors?.[0]?.value ?? '#2196f3';
@@ -243,6 +250,10 @@ export class AddLeaveTypeDialogTemplate {
       this.dialogRef.close(formValue);
     }
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Leave Management', 'Leave Types', actionKey);
+  }
 }
 
 /* ------------------------------------------------------------------
@@ -270,6 +281,7 @@ export class EditLeaveTypeDialogTemplate {
   isSubmitting = false;
 
   readonly colors: ColorOption[] = inject(LEAVE_COLOR_TOKEN);
+  readonly authService = inject(AuthService);
   readonly data = inject<{ leaveType: LeaveType }>(MAT_DIALOG_DATA);
 
   readonly form = inject(FormBuilder).group({
@@ -332,5 +344,9 @@ export class EditLeaveTypeDialogTemplate {
 
       this.dialogRef.close(formValue);
     }
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Leave Management', 'Leave Types', actionKey);
   }
 }

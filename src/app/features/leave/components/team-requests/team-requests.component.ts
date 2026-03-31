@@ -81,8 +81,24 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.initializeActiveTab();
     this.loadInitialData();
     this.setupFilters();
+  }
+
+  private initializeActiveTab(): void {
+    const hasPendingAccess = this.hasPermission('team_request_pending_approvals');
+    const hasBalanceAccess = this.hasPermission('team_request_team_leave_balance');
+
+    if (hasPendingAccess) {
+      this.activeTab = 'pending';
+    } else if (hasBalanceAccess) {
+      this.activeTab = 'balance';
+    }
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Leave Management', 'Team Requests', actionKey);
   }
 
   ngOnDestroy(): void {

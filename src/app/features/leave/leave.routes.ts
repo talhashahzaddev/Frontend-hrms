@@ -17,8 +17,8 @@ export const leaveRoutes: Routes = [
   },
   {
     path: 'team',
-    canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
+    // canActivate: [AuthGuard],
+    // data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
     loadComponent: () => import('./components/team-leaves/team-leaves.component')
       .then(m => m.TeamLeavesComponent),
     title: 'Team Leaves - HRMS'
@@ -26,7 +26,7 @@ export const leaveRoutes: Routes = [
   {
     path: 'team-requests',
     //canActivate: [RoleGuard],
-    data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
+    // data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
     loadComponent: () => import('./components/team-requests/team-requests.component')
       .then(m => m.TeamRequestsComponent),
     title: 'Team Requests - HRMS'
@@ -39,8 +39,8 @@ export const leaveRoutes: Routes = [
   },
   {
     path: 'types',
-    canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
+    // canActivate: [AuthGuard],
+    // data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/leave-types/leave-types.component')
       .then(m => m.LeaveTypesComponent),
     title: 'Leave Types - HRMS'
