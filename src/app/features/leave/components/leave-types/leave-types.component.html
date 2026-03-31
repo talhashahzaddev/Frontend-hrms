@@ -8,7 +8,7 @@
             <p class="page-subtitle">Manage organization leave types and policies</p>
         </div>
         <div class="header-actions">
-            <button mat-raised-button class="add-button" (click)="addLeaveType()">
+            <button mat-raised-button class="add-button" (click)="addLeaveType()" *ngIf="hasPermission('leave_type_add_leave_type')">
                 <mat-icon>add</mat-icon>
                 Add Leave Type
             </button>
@@ -33,7 +33,7 @@
                             <mat-icon>more_vert</mat-icon>
                         </button>
                         <mat-menu #menu="matMenu">
-                            <button mat-menu-item (click)="editLeaveType(type)">
+                            <button mat-menu-item (click)="editLeaveType(type)" *ngIf="hasPermission('leave_type_edit')">
                                 <mat-icon>edit</mat-icon>
                                 Edit
                             </button>
@@ -78,7 +78,7 @@
         </div>
         <h3>No Leave Types Configured</h3>
         <p>Get started by creating your first leave type</p>
-        <button mat-raised-button color="primary" class="add-button" (click)="addLeaveType()">
+        <button mat-raised-button *ngIf="hasPermission('leave_type_add_leave_type')" color="primary" class="add-button" (click)="addLeaveType()">
             <mat-icon>add</mat-icon>
             Add Leave Type
         </button>

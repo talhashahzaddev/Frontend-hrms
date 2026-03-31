@@ -10,7 +10,7 @@
       <p class="page-subtitle">Manage your time off requests and balances</p>
     </div>
     <div class="header-actions">
-      <button mat-raised-button (click)="openLeaveRequestDialog()">
+      <button *ngIf="hasPermission('my_leave_request_leave')" mat-raised-button (click)="openLeaveRequestDialog()">
         <mat-icon>add</mat-icon>
         Request Leave
       </button>
@@ -141,20 +141,23 @@
                 <mat-icon>more_horiz</mat-icon>
               </button>
               <mat-menu #requestMenu="matMenu">
-                <button mat-menu-item
+                <button *ngIf="hasPermission('my_leave_edit_request')"
+                        mat-menu-item
                         (click)="editRequest(request)"
                         [disabled]="!isPending(request.status)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit Request</span>
                 </button>
-                <button mat-menu-item
+                <button *ngIf="hasPermission('my_leave_cancel_request')"
+                        mat-menu-item
                         (click)="cancelRequest(request)"
                         [disabled]="!isPending(request.status)"
                         class="danger-action">
                   <mat-icon>cancel</mat-icon>
                   <span>Cancel Request</span>
                 </button>
-                <button mat-menu-item (click)="openDetailsDialog(request)">
+                <button *ngIf="hasPermission('my_leave_request_details')"
+                        mat-menu-item (click)="openDetailsDialog(request)">
                   <mat-icon>info</mat-icon>
                   <span>Request Details</span>
                 </button>
@@ -174,7 +177,7 @@
           </div>
           <h3>No Leave Requests</h3>
           <p>You haven't submitted any leave requests yet.</p>
-          <button mat-raised-button (click)="openLeaveRequestDialog()" class="add-first-btn">
+          <button *ngIf="hasPermission('my_leave_request_leave')" mat-raised-button (click)="openLeaveRequestDialog()" class="add-first-btn">
             <mat-icon>add</mat-icon>
             Request Leave
           </button>

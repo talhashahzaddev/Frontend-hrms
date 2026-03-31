@@ -31,12 +31,12 @@
 
       <!-- Tab Headers -->
       <div class="tab-header-row">
-        <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="activeTab = 'pending'">
+        <button *ngIf="hasPermission('team_request_pending_approvals')" class="tab-btn" [class.active]="activeTab === 'pending'" (click)="activeTab = 'pending'">
           <mat-icon>pending_actions</mat-icon>
           Pending Approvals
           <span class="tab-badge" *ngIf="pendingApprovals.length > 0">{{ pendingApprovals.length }}</span>
         </button>
-        <button class="tab-btn" [class.active]="activeTab === 'balance'" (click)="activeTab = 'balance'">
+        <button *ngIf="hasPermission('team_request_team_leave_balance')" class="tab-btn" [class.active]="activeTab === 'balance'" (click)="activeTab = 'balance'">
           <mat-icon>people</mat-icon>
           Team Leave Balance
         </button>

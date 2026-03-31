@@ -193,21 +193,24 @@
             </button>
             <mat-menu #menu="matMenu">
 
-              <button mat-menu-item
+              <button *ngIf="hasPermission('team_leave_approve')"
+                      mat-menu-item
                       (click)="approveRequest(request)"
                       [disabled]="!isPending(request.status)">
                 <mat-icon>check_circle</mat-icon>
                 <span>Approve</span>
               </button>
 
-              <button mat-menu-item
+              <button *ngIf="hasPermission('team_leave_reject')"
+                      mat-menu-item
                       (click)="openRejectDialog(request)"
                       [disabled]="!isPending(request.status)"
                       class="danger-action">
                 <mat-icon>cancel</mat-icon>
                 <span>Reject</span>
               </button>
-              <button mat-menu-item (click)="openDetailsDialog(request)">
+              <button *ngIf="hasPermission('team_leave_view_details')"
+                      mat-menu-item (click)="openDetailsDialog(request)">
                 <mat-icon>info</mat-icon>
                 <span>View Details</span>
               </button>
