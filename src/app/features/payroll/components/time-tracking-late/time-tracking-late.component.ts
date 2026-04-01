@@ -15,53 +15,60 @@ import {
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { NotificationService } from '@core/services/notification.service';
 
-export interface AbsentRecordDto {
+export interface LateRecordDto {
   id: string;
   employeeId: string;
   employeeName: string;
-  positionName: string;
   initials: string;
   avatarColor: string;
-  absentDays: number;
-  halfDays: number;
-  effectiveAbsents: number;
-  deductibleDays: number;
-  deductionAmount: number;
-  // API fields
-  periodId?: string;
+  attendanceDate: string;
+  lateMinutes: number;
+  isGrace: boolean;
+  deduction: number;
+  periodId: string;
   ruleId?: string;
-  presentDays?: number;
-  absentDeduction?: number;
-  halfDayDeduction?: number;
-  totalDeduction?: number;
+  ruleName?: string;
 }
 
 @Component({
-  selector: 'app-time-tracking-absents',
+  selector: 'app-time-tracking-late',
   standalone: true,
   imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
-  templateUrl: './time-tracking-absents.component.html',
-  styleUrl: './time-tracking-absents.component.scss'
+  templateUrl: './time-tracking-late.component.html',
+  styleUrl: './time-tracking-late.component.scss'
 })
-export class TimeTrackingAbsentsComponent implements OnInit {
+export class TimeTrackingLateComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
   private readonly notification = inject(NotificationService);
 
-  readonly records = signal<AbsentRecordDto[]>([]);
+  readonly records = signal<LateRecordDto[]>([]);
   readonly isLoading = signal(true);
   readonly currencySymbol = signal('$');
 
   // Stats
-  readonly totalAbsents = signal(0);
-  readonly totalDeduction = signal(0);
-  readonly employeesAffected = signal(0);
+  readonly totalLateArrivals = signal(0);
+  readonly totalHalfDays = signal(0);
+  readonly totalDeductions = signal(0);
+  readonly employeesFlagged = signal(0);
 
   // Pagination
   readonly page = signal(1);
   readonly pageSize = signal(10);
   readonly totalCount = signal(0);
+
+  // Filter state
+  periods: any[] = [];
+  lateRules: any[] = [];
+  
+  pendingSearch = '';
+  pendingPeriod = '';
+  pendingRule = '';
+
+  filterSearch = '';
+  filterPeriod = '';
+  filterRule = '';
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalCount() / this.pageSize()));
@@ -87,17 +94,6 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     return Math.min(this.page() * this.pageSize(), this.totalCount());
   }
 
-  // Filter state
-  periods: any[] = [];
-  deductionRules: any[] = [];
-  pendingSearch = '';
-  pendingPeriod = '';
-  pendingRule = '';
-
-  filterSearch = '';
-  filterPeriod = '';
-  filterRule = '';
-
   get hasActiveFilters(): boolean {
     return !!(this.pendingSearch || this.pendingPeriod || this.pendingRule);
   }
@@ -120,7 +116,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
 
     this.loadPeriods();
     this.loadActiveRules();
-    this.fetchAbsents();
+    this.fetchLateRecords();
   }
 
   loadPeriods() {
@@ -135,14 +131,14 @@ export class TimeTrackingAbsentsComponent implements OnInit {
   }
 
   loadActiveRules() {
-    this.payrollService.getActiveAttendanceDeductionRules().subscribe({
+    this.payrollService.getActiveLateArrivalRules().subscribe({
       next: (res: any) => {
-        this.deductionRules = res || [];
+        this.lateRules = res || [];
       }
     });
   }
 
-  fetchAbsents(): void {
+  fetchLateRecords(): void {
     this.isLoading.set(true);
     const params: any = {
       page: this.page(),
@@ -153,13 +149,12 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     if (this.filterPeriod) params.periodId = this.filterPeriod;
     if (this.filterRule) params.ruleId = this.filterRule;
 
-    this.payrollService.getAttendanceSummaries(params).subscribe({
+    this.payrollService.getLateAttendances(params).subscribe({
       next: (res: any) => {
-        // Handle both PagedResult wrapper or plain array
         const items = res?.data || (Array.isArray(res) ? res : []);
         this.totalCount.set(res?.totalCount ?? items.length ?? 0);
 
-        const mapped: AbsentRecordDto[] = items.map((item: any) => {
+        const mapped: LateRecordDto[] = items.map((item: any) => {
           const name: string = item.employeeName || '';
           const initials = name ? name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'U';
           const colors = ['blue', 'pink', 'amber', 'purple', 'green', 'indigo'];
@@ -169,20 +164,15 @@ export class TimeTrackingAbsentsComponent implements OnInit {
             id: item.id,
             employeeId: item.employeeId,
             employeeName: item.employeeName ?? '',
-            positionName: item.shiftName ?? '',
             initials,
             avatarColor,
-            absentDays: item.absentDays ?? 0,
-            halfDays: item.halfDays ?? 0,
-            effectiveAbsents: item.effectiveAbsents ?? 0,
-            deductibleDays: item.effectiveAbsents ?? 0,
-            deductionAmount: item.totalDeduction ?? 0,
+            attendanceDate: item.attendanceDate,
+            lateMinutes: item.lateMinutes ?? 0,
+            isGrace: item.isGrace ?? false,
+            deduction: item.deduction ?? 0,
             periodId: item.periodId,
             ruleId: item.ruleId,
-            presentDays: item.presentDays ?? 0,
-            absentDeduction: item.absentDeduction ?? 0,
-            halfDayDeduction: item.halfDayDeduction ?? 0,
-            totalDeduction: item.totalDeduction ?? 0,
+            ruleName: item.ruleName
           };
         });
 
@@ -193,7 +183,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
       error: () => {
         this.records.set([]);
         this.isLoading.set(false);
-        this.notification.showError('Failed to load records.');
+        this.notification.showError('Failed to load late records.');
       }
     });
   }
@@ -203,7 +193,7 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     this.filterPeriod = this.pendingPeriod;
     this.filterRule = this.pendingRule;
     this.page.set(1);
-    this.fetchAbsents();
+    this.fetchLateRecords();
   }
 
   clearFilters() {
@@ -214,42 +204,44 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     this.filterPeriod = '';
     this.filterRule = '';
     this.page.set(1);
-    this.fetchAbsents();
+    this.fetchLateRecords();
   }
 
   goToPage(p: number) {
     if (p < 1 || p > this.totalPages || p === this.page()) return;
     this.page.set(p);
-    this.fetchAbsents();
+    this.fetchLateRecords();
   }
 
   prevPage() { this.goToPage(this.page() - 1); }
   nextPage() { this.goToPage(this.page() + 1); }
 
-  private updateStats(records: AbsentRecordDto[]): void {
-    const totalAbsents = records.reduce((sum, r) => sum + (r.absentDays ?? 0), 0);
-    const totalDeduction = records.reduce((sum, r) => sum + (r.deductionAmount ?? 0), 0);
+  private updateStats(records: LateRecordDto[]): void {
+    const totalLate = records.length;
+    const halfDays = records.filter(r => r.lateMinutes === 0 && r.deduction > 0).length; // Just a guess for now
+    const totalDeductions = records.reduce((sum, r) => sum + (r.deduction ?? 0), 0);
     const affected = new Set(records.map(r => r.employeeId)).size;
 
-    this.totalAbsents.set(totalAbsents);
-    this.totalDeduction.set(totalDeduction);
-    this.employeesAffected.set(affected);
+    this.totalLateArrivals.set(totalLate);
+    this.totalHalfDays.set(halfDays);
+    this.totalDeductions.set(totalDeductions);
+    this.employeesFlagged.set(affected);
   }
 
-  logAbsent(): void {
+  addRecord(): void {
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'attendance-dialog-panel',
-      data: { type: 'absent', mode: 'add' }
+      data: { type: 'late', mode: 'add' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && result.recordType === 'absent') {
+      if (result && result.recordType === 'late') {
         const { recordType, ...payload } = result;
-        this.payrollService.createAttendanceSummary(payload).subscribe({
+        this.payrollService.createLateAttendance(payload).subscribe({
           next: () => {
             this.notification.showSuccess('Record created successfully');
-            this.fetchAbsents();
+            this.fetchLateRecords();
           },
           error: (err) => this.notification.showError('Failed to create record')
         });
@@ -257,35 +249,33 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     });
   }
 
-  editRecord(record: AbsentRecordDto): void {
+  editRecord(record: LateRecordDto): void {
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'attendance-dialog-panel',
       data: {
-        type: 'absent',
+        type: 'late',
         mode: 'edit',
         record: {
+          id: record.id,
           employeeId: record.employeeId,
           periodId: record.periodId,
           ruleId: record.ruleId,
-          presentDays: record.presentDays ?? 0,
-          absentDays: record.absentDays,
-          halfDays: record.halfDays,
-          effectiveAbsents: record.effectiveAbsents,
-          absentDeduction: record.absentDeduction ?? 0,
-          halfDayDeduction: record.halfDayDeduction ?? 0,
-          totalDeduction: record.totalDeduction ?? record.deductionAmount,
+          lateMinutes: record.lateMinutes,
+          deduction: record.deduction,
+          isGrace: record.isGrace,
+          attendanceDate: record.attendanceDate
         }
       }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && result.recordType === 'absent') {
+      if (result && result.recordType === 'late') {
         const { recordType, ...payload } = result;
-        this.payrollService.updateAttendanceSummary(record.id, payload).subscribe({
+        this.payrollService.updateLateAttendance(record.id, payload).subscribe({
           next: () => {
             this.notification.showSuccess('Record updated successfully');
-            this.fetchAbsents();
+            this.fetchLateRecords();
           },
           error: (err) => this.notification.showError('Failed to update record')
         });
@@ -293,10 +283,10 @@ export class TimeTrackingAbsentsComponent implements OnInit {
     });
   }
 
-  deleteRecord(record: AbsentRecordDto): void {
+  deleteRecord(record: LateRecordDto): void {
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Record',
-      message: 'Are you sure you want to delete this absent record?',
+      message: 'Are you sure you want to delete this late record?',
       itemName: record.employeeName,
       confirmButtonText: 'Yes, Delete'
     };
@@ -309,10 +299,10 @@ export class TimeTrackingAbsentsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result === true) {
-        this.payrollService.deleteAttendanceSummary(record.id).subscribe({
+        this.payrollService.deleteLateAttendance(record.id).subscribe({
           next: () => {
             this.notification.showSuccess('Record deleted successfully');
-            this.fetchAbsents();
+            this.fetchLateRecords();
           },
           error: (err) => this.notification.showError('Failed to delete record')
         });

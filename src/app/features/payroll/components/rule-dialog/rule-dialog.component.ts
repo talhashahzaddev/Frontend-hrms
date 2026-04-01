@@ -26,6 +26,7 @@ export interface RuleDialogData {
     fixedAmount: number | null;
     percentage: number | null;
     halfDayMultiplier?: number;
+    graceMinutes?: number;
   };
 }
 
@@ -88,7 +89,8 @@ export class RuleDialogComponent implements OnInit {
     amountType: ['fixed'],
     fixedAmount: [null as number | null],
     percentage: [null as number | null],
-    halfDayMultiplier: [0.5, [Validators.required, Validators.min(0)]]
+    halfDayMultiplier: [0.5, [Validators.required, Validators.min(0)]],
+    graceMinutes: [0, [Validators.required, Validators.min(0)]]
   });
 
   ngOnInit(): void {
@@ -132,7 +134,8 @@ export class RuleDialogComponent implements OnInit {
         amountType: isFixedAmount ? 'fixed' : 'percentage',
         fixedAmount: isFixedAmount ? fixedVal : null,
         percentage: isFixedAmount ? null : percentVal,
-        halfDayMultiplier: rule.halfDayMultiplier ?? 0.5
+        halfDayMultiplier: rule.halfDayMultiplier ?? 0.5,
+        graceMinutes: rule.graceMinutes ?? 0
       });
     }
   }
@@ -167,10 +170,19 @@ export class RuleDialogComponent implements OnInit {
     }
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     halfDayControl?.updateValueAndValidity();
+
+    const graceControl = this.ruleForm.get('graceMinutes');
+    if (Number(policyId) === 3) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      graceControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      graceControl?.clearValidators();
+    }
+    graceControl?.updateValueAndValidity();
   }
 
   private updateAmountValidation() {
-    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2;
+    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2 || this.selectedPolicy === 3;
     const amountType = this.ruleForm.get('amountType')?.value;
 
     const fixedControl = this.ruleForm.get('fixedAmount');
@@ -262,6 +274,36 @@ export class RuleDialogComponent implements OnInit {
               this.isEditMode ? 'Attendance deduction rule updated successfully' : 'Attendance deduction rule created successfully'
             );
             this.dialogRef.close({ success: true, data: res, policyId: 2 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update rule' : 'Failed to create rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 3) { // 3 is Late Arrival Policy
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        fixedDeduction: formValue.amountType === 'fixed' ? formValue.fixedAmount : null,
+        percentageDeduction: formValue.amountType === 'percentage' ? formValue.percentage : null,
+        graceMinutes: formValue.graceMinutes,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updateLateArrivalRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createLateArrivalRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Late arrival rule updated successfully' : 'Late arrival rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 3 });
           },
           error: (err: any) => {
             console.error(err);

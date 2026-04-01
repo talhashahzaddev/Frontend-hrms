@@ -4,40 +4,53 @@
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Total Absents</span>
-          <span class="value">{{ totalAbsents() }}</span>
+          <span class="label">Late Arrivals</span>
+          <span class="value">{{ totalLateArrivals() }}</span>
         </div>
         <div class="icon-wrapper color-blue">
-          <mat-icon>event_busy</mat-icon>
+          <mat-icon>schedule</mat-icon>
         </div>
       </div>
-      <p class="card-footer">Current pay cycle</p>
+      <p class="card-footer">This period</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Total Deduction</span>
-          <span class="value">{{ currencySymbol() }} {{ totalDeduction() | number:'1.0-0' }}</span>
+          <span class="label">Half Days</span>
+          <span class="value">{{ totalHalfDays() }}</span>
         </div>
         <div class="icon-wrapper color-green">
+          <mat-icon>timer_10_alt_1</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">3 employees</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Late Deductions</span>
+          <span class="value">{{ currencySymbol() }} {{ totalDeductions() | number:'1.0-0' }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
           <mat-icon>payments</mat-icon>
         </div>
       </div>
-      <p class="card-footer">Deductions Applied</p>
+      <p class="card-footer">If rule applied</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Employees Affected</span>
-          <span class="value">{{ employeesAffected() }}</span>
+          <span class="label">Employees Flagged</span>
+          <span class="value">{{ employeesFlagged() }}</span>
         </div>
-        <div class="icon-wrapper color-amber">
-          <mat-icon>group</mat-icon>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>flag</mat-icon>
         </div>
       </div>
-      <p class="card-footer">Unique staff records</p>
+      <p class="card-footer">This period</p>
     </div>
   </div>
 
@@ -62,7 +75,7 @@
 
         <select class="filter-select" [(ngModel)]="pendingRule">
           <option value="">All rules</option>
-          @for (r of deductionRules; track r.ruleId) {
+          @for (r of lateRules; track r.ruleId) {
           <option [value]="r.ruleId">{{ r.ruleName }}</option>
           }
         </select>
@@ -81,9 +94,9 @@
       </div>
 
       <div class="add-btn-wrap">
-        <button class="add-btn" (click)="logAbsent()">
+        <button class="add-btn" (click)="addRecord()">
           <mat-icon>add</mat-icon>
-          Log Absent
+          Add Record
         </button>
       </div>
     </div>
@@ -94,10 +107,8 @@
         <thead>
           <tr>
             <th class="text-left">Employee</th>
-            <th class="text-center">Absent Days</th>
-            <th class="text-center">Half Days</th>
-            <th class="text-center">Effective Absents</th>
-            <th class="text-center">Deductible</th>
+            <th class="text-center">Late by (mins)</th>
+            <th class="text-center">Type</th>
             <th class="text-right">Deduction ({{ currencySymbol() }})</th>
             <th class="text-right">Actions</th>
           </tr>
@@ -105,7 +116,7 @@
         <tbody>
           @if (isLoading()) {
           <tr>
-            <td colspan="7" class="text-center" style="padding: 3rem;">
+            <td colspan="6" class="text-center" style="padding: 3rem;">
               <div class="spinner-container">
                 <mat-spinner diameter="30"></mat-spinner>
               </div>
@@ -119,20 +130,18 @@
                 <div class="avatar" [ngClass]="'bg-' + record.avatarColor">{{ record.initials }}</div>
                 <div class="flex-col">
                   <span class="font-semibold">{{ record.employeeName }}</span>
-                  <span class="subtitle">{{ record.positionName }}</span>
                 </div>
               </div>
             </td>
-            <td class="text-center font-medium muted">{{ record.absentDays }}</td>
-            <td class="text-center font-medium muted">{{ record.halfDays }}</td>
-            <td class="text-center font-bold">{{ record.effectiveAbsents | number:'1.1-1' }}</td>
+            <td class="text-center font-semibold">{{ record.lateMinutes > 0 ? (record.lateMinutes + ' min') : '—' }}</td>
             <td class="text-center">
-              <span class="font-medium" [ngClass]="record.deductibleDays > 0 ? 'text-slate-600' : 'text-emerald-600'">
-                {{ record.deductibleDays | number:'1.1-1' }}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                [ngClass]="record.lateMinutes > 0 ? (record.isGrace ? 'bg-slate-100 text-slate-800 border border-slate-200' : 'bg-amber-100 text-amber-800') : 'bg-blue-100 text-blue-800'">
+                {{ record.lateMinutes > 0 ? (record.isGrace ? 'Late (grace)' : 'Late') : 'Half-day' }}
               </span>
             </td>
-            <td class="text-right font-bold" [ngClass]="record.deductionAmount > 0 ? 'text-red-600' : 'text-emerald-600'">
-              {{ record.deductionAmount | number:'1.0-0' }}
+            <td class="text-right font-bold" [ngClass]="record.deduction > 0 ? 'text-slate-900' : 'text-emerald-600'">
+              {{ record.deduction | number:'1.0-0' }}
             </td>
             <td class="action-cell">
               <button class="action-btn hover-primary" (click)="editRecord(record)">
@@ -145,10 +154,10 @@
           </tr>
           } @empty {
           <tr>
-            <td colspan="7" class="text-center" style="padding: 3rem;">
+            <td colspan="6" class="text-center" style="padding: 3rem;">
               <div class="empty-state">
                 <mat-icon>inbox</mat-icon>
-                <p>No absent records found.</p>
+                <p>No late records found.</p>
               </div>
             </td>
           </tr>
@@ -161,10 +170,6 @@
     <!-- Footer / Pagination -->
     <div class="table-footer">
       <div class="info-group">
-        <div class="formula-hint">
-          <mat-icon>info</mat-icon>
-          <span>Effective absents = absent days + (half days × 0.5)</span>
-        </div>
         @if (totalCount() > 0) {
         <div class="page-entries">
           Showing <b>{{ fromRecord }}</b> to <b>{{ toRecord }}</b> of <b>{{ totalCount() }}</b> entries

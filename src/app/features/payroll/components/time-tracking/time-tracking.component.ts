@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AttendanceDialogComponent } from '../attendance-dialog/attendance-dialog.component';
 import { TimeTrackingAbsentsComponent } from '../time-tracking-absents/time-tracking-absents.component';
+import { TimeTrackingLateComponent } from '../time-tracking-late/time-tracking-late.component';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
 import {
@@ -17,7 +18,7 @@ import { PayrollService } from '../../services/payroll.service';
 @Component({
   selector: 'app-time-tracking',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule, TimeTrackingAbsentsComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule, TimeTrackingAbsentsComponent, TimeTrackingLateComponent],
   templateUrl: './time-tracking.component.html',
   styleUrl: './time-tracking.component.scss'
 })
