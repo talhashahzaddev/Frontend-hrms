@@ -121,39 +121,25 @@
             <td class="td-date">{{ ticket.createdat | date: 'MM/dd/yy' }}</td>
 
             <!-- Three-dot action menu -->
-        <td class="text-center">
-  <div class="action-wrapper">
-
-    <!-- 3 DOT BUTTON -->
-    <button
-      class="btn-dots"
-      (click)="toggleMenu(ticket, $event)"
-      title="Actions">
-
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-    </button>
-
-    <!-- DROPDOWN MENU -->
-    <div 
-      class="action-menu" 
-      *ngIf="ticket._menuOpen"
-      (click)="$event.stopPropagation()"
-    >
-      <button class="action-item"  (click)="viewTicket(ticket); $event.stopPropagation()">
-        👁 View
-      </button>
-
-      <button 
-        class="action-item action-item--delete" 
-        (click)="deleteTicket(ticket)">
-        🗑 Delete
-      </button>
-    </div>
-
-  </div>
-</td>
+            <td class="text-center">
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                class="btn-action"
+                title="Actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="viewTicket(ticket)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View</span>
+                </button>
+                <button mat-menu-item (click)="deleteTicket(ticket)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </td>
 
           </tr>
         </tbody>

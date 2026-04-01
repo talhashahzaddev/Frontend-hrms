@@ -13,8 +13,10 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Subject, combineLatest, debounceTime, distinctUntilChanged, startWith, takeUntil } from 'rxjs';
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
+import { NotificationService } from '@/app/core/services/notification.service';
 import { TicketGroup } from '../../../../core/models/helpdesk.models';
 import { CreateAgentGroupDialogComponent } from '../create-agent-group-dialog/create-agent-group-dialog.component';
+import { ViewGroupAgentDetailsComponent } from './view-Group-agent-details';
 
 interface Department {
   departmentId: string;
@@ -62,7 +64,8 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -155,17 +158,52 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
 
   // Actions
   viewGroup(group: TicketGroup): void {
-    console.log('View group', group);
-    // Implement view logic here
+    this.dialog.open(ViewGroupAgentDetailsComponent, {
+      width: '600px',
+      disableClose: false,
+      autoFocus: false,
+      data: { group }
+    });
   }
 
   editGroup(group: TicketGroup): void {
-    console.log('Edit group', group);
-    // Implement edit logic here
+    const dialogRef = this.dialog.open(CreateAgentGroupDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: { group }
+    });
+
+    dialogRef.afterClosed().subscribe((updated: boolean) => {
+      if (updated) {
+        // Refresh groups if the group was updated
+        const deptId = this.departmentControl.value || undefined;
+        this.getGroups(this.searchControl.value || '', deptId);
+      }
+    });
   }
 
   deleteGroup(group: TicketGroup): void {
-    console.log('Delete group', group);
-    // Implement delete logic here (with confirmation dialog)
+    const confirmDelete = confirm(`Are you sure you want to delete the group "${group.groupTitle}"? This action cannot be undone.`);
+    
+    if (!confirmDelete) return;
+    
+    this.helpDeskService.deleteGroup(group.groupId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (success: boolean) => {
+          if (success) {
+            this.notificationService.showSuccess(`Group "${group.groupTitle}" deleted successfully`);
+            // Refresh groups list
+            const deptId = this.departmentControl.value || undefined;
+            this.getGroups(this.searchControl.value || '', deptId);
+          } else {
+            this.notificationService.showError('Failed to delete the group');
+          }
+        },
+        error: (err) => {
+          console.error('Error deleting group', err);
+          this.notificationService.showError(err?.error?.message || 'An error occurred while deleting the group');
+        }
+      });
   }
 }

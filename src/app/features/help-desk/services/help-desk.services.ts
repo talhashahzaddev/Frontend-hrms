@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../../core/models/auth.models';
 import { Ticket ,TicketSearch,TicketGroup,UpdateTicketRequest,AssignTicketRequest,TicketMessageDto,
-TicketMessageRequest,CategoryDto,SearchCategory} from '@/app/core/models/helpdesk.models';
+TicketMessageRequest,CategoryDto,SearchCategory,UpdateTicketGroupRequest,UpdateCategoryRequest,CreateCategoryRequest} from '@/app/core/models/helpdesk.models';
 
 
 @Injectable({
@@ -58,6 +58,14 @@ export class HelpDeskService {
 
   createTicket(ticket: any): Observable<any> {
   return this.http.post(`${this.apiUrl}/create-ticket`, ticket);
+}
+
+deleteTicket(ticketId: string): Observable<boolean> {
+  return this.http.delete<ApiResponse<boolean>>(
+    `${this.apiUrl}/delete-ticket/${ticketId}`
+  ).pipe(
+    map(res => res?.data ?? false)
+  );
 }
 
 
@@ -143,7 +151,7 @@ getMessagesByTicket(ticketId: string): Observable<TicketMessageDto[]> {
     map(res => res.data?? []) // ✅ extract list
   );
 }
-createCategory(request: CategoryDto): Observable<boolean> {
+createCategory(request: CreateCategoryRequest): Observable<boolean> {
     return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/create-category`, request)
       .pipe(
         map(res => res.data ?? false)
@@ -162,7 +170,33 @@ createCategory(request: CategoryDto): Observable<boolean> {
       .pipe(map(res => res.data ?? []));
   }
 
-
+ updateGroup(request: UpdateTicketGroupRequest): Observable<boolean> {
+    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/update-group`, request)
+      .pipe(
+        map(res => res.data ?? false)
+      );
+  }
+  deleteGroup(groupId: string): Observable<boolean> {
+  return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/delete-group/${groupId}`)
+    .pipe(
+      map(res => res.data ?? false)
+    );
+}
+deleteCategory(categoryId: string): Observable<boolean> {
+  return this.http.delete<ApiResponse<boolean>>(
+    `${this.apiUrl}/delete-category/${categoryId}`
+  ).pipe(
+    map(res => res?.data ?? false)
+  );
+}
+updateCategory(request: UpdateCategoryRequest): Observable<boolean> {
+  return this.http.put<ApiResponse<boolean>>(
+    `${this.apiUrl}/update-category`,
+    request
+  ).pipe(
+    map(res => res?.data ?? false)
+  );
+}
 
 
 }

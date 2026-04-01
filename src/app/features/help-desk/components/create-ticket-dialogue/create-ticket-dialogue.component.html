@@ -88,9 +88,9 @@
       <div class="fg">
         <label class="lbl">Attachment</label>
 
-        <!-- Drop zone (only shown when more files can be added) -->
+        <!-- Drop zone (only shown when no files are attached) -->
         <div
-          *ngIf="canAddMore"
+          *ngIf="attachedFiles.length === 0"
           class="att-zone"
           [class.drag-over]="isDragOver"
           (dragover)="onDragOver($event)"
@@ -147,15 +147,14 @@
               </ng-container>
 
               <!-- Remove -->
-              <button type="button" class="att-remove" (click)="removeFile(i)">
-                <span class="material-symbols-outlined">close</span>
+              <button type="button" class="att-remove" (click)="removeFile(i)" title="Remove file">
               </button>
             </div>
           </div>
         </div>
 
         <!-- Limit reached message -->
-        <p class="att-hint att-limit" *ngIf="!canAddMore">
+        <p class="att-hint att-limit" *ngIf="!canAddMore && attachedFiles.length > 0">
           Maximum of {{ MAX_FILES }} files reached.
         </p>
       </div>

@@ -1,18 +1,20 @@
 import {
   Component, OnInit, OnDestroy, ChangeDetectionStrategy,
-  ChangeDetectorRef, HostListener, ElementRef
+  ChangeDetectorRef, HostListener, ElementRef, Inject, Optional
 } from '@angular/core';
 import {
   FormBuilder, FormGroup, Validators,
   ReactiveFormsModule, AbstractControl
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Subject, takeUntil } from 'rxjs';
 
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Department } from '@/app/core/models/employee.models';
+import { TicketGroup, CategoryDto } from '@/app/core/models/helpdesk.models';
+import { NotificationService } from '@/app/core/services/notification.service';
 
 @Component({
   selector: 'app-create-agent-group-dialog',
@@ -27,10 +29,12 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
   groupForm: FormGroup;
   departments: Department[] = [];
   employees: { id: string; name: string; code?: string }[] = [];
-  categories: { categoryId: string; categoryName: string; departmentId: string; departmentName: string }[] = [];
+  categories: CategoryDto[] = [];
 
   loading = false;
   submitted = false;
+  isEditMode = false;
+  editGroup: TicketGroup | null = null;
 
   employeeDropdownOpen = false;
   employeeFilter = '';
@@ -43,7 +47,9 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
     private dialogRef: MatDialogRef<CreateAgentGroupDialogComponent>,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data?: { group: TicketGroup }
   ) {
     this.groupForm = this.fb.group({
       groupTitle: ['', Validators.required],
@@ -58,6 +64,43 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
     this.loadEmployees();
     this.loadCategories();
     this.setupDepartmentFilter();
+
+    // If data is provided, we're in edit mode
+    if (this.data?.group) {
+      this.isEditMode = true;
+      this.editGroup = this.data.group;
+      this.populateFormForEdit();
+    }
+  }
+
+  private populateFormForEdit(): void {
+    if (!this.editGroup) return;
+
+    // Parse employee IDs from employeeNames or use existing employeeIds if available
+    let employeeIds: string[] = [];
+    if (this.editGroup.employeeIds && Array.isArray(this.editGroup.employeeIds)) {
+      employeeIds = this.editGroup.employeeIds;
+    } else if (this.editGroup.employeeNames) {
+      // If employeeNames is a string, try to parse it
+      const namesValue = this.editGroup.employeeNames as any;
+      const names: string[] = typeof namesValue === 'string'
+        ? namesValue.split(',').map((n: string) => n.trim())
+        : Array.isArray(namesValue) ? namesValue : [];
+      
+      // Match employee names to IDs
+      employeeIds = this.employees
+        .filter((emp: any) => names.some((name: string) => emp.name.includes(name) || name.includes(emp.name)))
+        .map((emp: any) => emp.id);
+    }
+
+    this.groupForm.patchValue({
+      groupTitle: this.editGroup.groupTitle || '',
+      departmentId: this.editGroup.departmentId || '',
+      categoryId: this.editGroup.categoryId || '',
+      employeeIds: employeeIds
+    });
+
+    this.cdr.markForCheck();
   }
 
   // ───────── Dropdown ─────────
@@ -173,6 +216,16 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
     return visible.length > 0 && visible.every(e => selected.includes(e.id));
   }
 
+  getSelectedEmployeeNames(): string {
+    const selectedIds = this.groupForm.get('employeeIds')?.value || [];
+    const selectedNames = this.employees
+      .filter(emp => selectedIds.includes(emp.id))
+      .map(emp => emp.name)
+      .join(', ');
+    const count = selectedIds.length;
+    return selectedNames ? `${selectedNames} (${count} selected)` : 'No employees selected';
+  }
+
   get filteredEmployees() {
     const q = this.employeeFilter.toLowerCase().trim();
     return !q
@@ -181,6 +234,10 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
           e.name.toLowerCase().includes(q) ||
           (e.code || '').toLowerCase().includes(q)
         );
+  }
+
+  get filteredCategories() {
+    return this.categories.filter(cat => cat.status === true);
   }
 
   // ───────── API ─────────
@@ -229,15 +286,41 @@ export class CreateAgentGroupDialogComponent implements OnInit, OnDestroy {
 
     this.loading = true;
 
-    this.helpDeskService.createGroup(this.groupForm.value)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => this.dialogRef.close(true),
-        error: () => {
-          this.loading = false;
-          this.cdr.markForCheck();
-        }
-      });
+    if (this.isEditMode && this.editGroup) {
+      // Call update endpoint
+      const updateRequest = {
+        groupId: this.editGroup.groupId,
+        ...this.groupForm.value
+      };
+      this.helpDeskService.updateGroup(updateRequest)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Group updated successfully');
+            this.dialogRef.close(true);
+          },
+          error: (err) => {
+            this.notification.showError(err?.message || 'Failed to update group');
+            this.loading = false;
+            this.cdr.markForCheck();
+          }
+        });
+    } else {
+      // Call create endpoint
+      this.helpDeskService.createGroup(this.groupForm.value)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Group created successfully');
+            this.dialogRef.close(true);
+          },
+          error: (err) => {
+            this.notification.showError(err?.message || 'Failed to create group');
+            this.loading = false;
+            this.cdr.markForCheck();
+          }
+        });
+    }
   }
 
   cancel(): void {

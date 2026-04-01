@@ -12,6 +12,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Subject, combineLatest, debounceTime, distinctUntilChanged, startWith, takeUntil } from 'rxjs';
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
+import { NotificationService } from '@/app/core/services/notification.service';
 import { CreateTicketCategoryDialogComponent } from '../create-ticket-category-dialog/create-ticket-category-dialog.component';
 import { MatMenuModule } from '@angular/material/menu'; 
 export interface Department {
@@ -70,7 +71,8 @@ export class TicketCategoryComponent implements OnInit, OnDestroy {
   constructor(
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -149,12 +151,47 @@ export class TicketCategoryComponent implements OnInit, OnDestroy {
   }
 
   editCategory(category: Category): void {
-    console.log('Edit category', category);
-    // TODO: Implement edit logic
+    const dialogRef = this.dialog.open(CreateTicketCategoryDialogComponent, {
+      width: '450px',
+      disableClose: true,
+      data: category
+    });
+
+    dialogRef.afterClosed().subscribe((updated: boolean) => {
+      if (updated) {
+        // Refresh categories after updating
+        this.getCategories(this.searchControl.value || '', this.departmentControl.value || undefined);
+      }
+    });
   }
 
   deleteCategory(category: Category): void {
-    console.log('Delete category', category);
-    // TODO: Implement delete logic with confirmation dialog
+    // Show confirmation dialog before deleting
+    const confirmDelete = confirm(`Are you sure you want to delete the category "${category.categoryName}"?`);
+    
+    if (!confirmDelete) {
+      return;
+    }
+
+    this.loading = true;
+    this.helpDeskService.deleteCategory(category.categoryId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (success) => {
+          if (success) {
+            this.notification.showSuccess('Category deleted successfully');
+            // Refresh the categories list
+            this.getCategories(this.searchControl.value || '', this.departmentControl.value || undefined);
+          } else {
+            this.notification.showError('Failed to delete category');
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error deleting category', err);
+          this.notification.showError(err?.message || 'Error deleting category');
+          this.loading = false;
+        }
+      });
   }
 }

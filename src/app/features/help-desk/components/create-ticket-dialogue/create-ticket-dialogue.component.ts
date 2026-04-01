@@ -11,7 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { TicketGroup } from '@/app/core/models/helpdesk.models';
-
+import { NotificationService } from '@/app/core/services/notification.service';
 interface Category {
   categoryId: string;
   departmentId: string;
@@ -65,6 +65,7 @@ export class CreateTicketDialogueComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
+    private notificationService: NotificationService,
     private dialogRef: MatDialogRef<CreateTicketDialogueComponent>
   ) {}
 
@@ -111,7 +112,7 @@ export class CreateTicketDialogueComponent implements OnInit, OnDestroy {
   loadCategories(): void {
     this.helpDeskService.getCategories({ searchTerm: '' }).subscribe({
       next:  (res: Category[]) => { 
-        this.categories = res || []; 
+        this.categories = (res || []).filter(cat => cat.status === true); 
         console.log('Categories loaded:', this.categories);
       },
       error: (err) => { console.error('Failed to load categories', err); }
@@ -248,10 +249,12 @@ export class CreateTicketDialogueComponent implements OnInit, OnDestroy {
   this.helpDeskService.createTicket(payload).subscribe({
     next: () => {
       this.loading = false;
+      this.notificationService.showSuccess('Ticket created successfully');
       this.dialogRef.close(true);
     },
     error: (err) => {
       this.loading = false;
+      this.notificationService.showError(err?.message || 'Failed to create ticket');
       console.error('Failed to create ticket', err);
     }
   });

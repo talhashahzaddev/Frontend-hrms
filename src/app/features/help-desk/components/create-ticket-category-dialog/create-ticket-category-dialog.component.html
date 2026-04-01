@@ -1,9 +1,19 @@
-<h2 mat-dialog-title>
-  Create Category
+<!-- <h2 mat-dialog-title>
+  {{ dialogTitle }}
   <button type="button" class="dialog-close-btn" (click)="cancel()" aria-label="Close">
     &times;
   </button>
-</h2>
+</h2> -->
+<div class="ticket-category-modal"> <h2 mat-dialog-title>
+    {{ dialogTitle }}
+    <button type="button" class="dialog-close-btn" (click)="cancel()" aria-label="Close">
+      &times;
+    </button>
+  </h2>
+
+  <form [formGroup]="categoryForm" (ngSubmit)="submit()">
+     </form>
+</div>
 
 <form class="ticket-category-modal" [formGroup]="categoryForm" (ngSubmit)="submit()">
 
@@ -64,7 +74,7 @@
   <div class="actions">
     <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
     <button type="submit" class="btn-submit" [disabled]="loading">
-      Create
+      {{ submitButtonLabel }}
       <span class="spinner" *ngIf="loading"></span>
     </button>
   </div>

@@ -33,51 +33,56 @@
         </div>
       </div>
 
-      <!-- Messages List -->
-      <div class="chat-body">
-        <div *ngFor="let msg of messages; let i = index"
-             class="chat-message-card"
-             [class.chat-message-reply]="i > 0">
+      <!-- Messages & Reply Wrapper (Scrollable Container) -->
+      <div class="chat-messages-reply-wrapper">
 
-          <!-- Message Header -->
-          <div class="msg-header">
-            <div class="msg-sender-info">
-              <!-- <div class="msg-avatar" [class.msg-avatar-primary]="i === 0" [class.msg-avatar-secondary]="i > 0">
-                {{ msg.senderFullName?.charAt(0) || 'U' }}{{ msg.senderFullName?.split(' ')[1]?.charAt(0) || '' }}
-              </div> -->
-              <div class="msg-sender-details">
-                <span class="msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
-                <span class="msg-separator">|</span>
-                <a class="msg-sender-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
+        <!-- Messages List -->
+        <div class="chat-body">
+          <div *ngFor="let msg of messages; let i = index"
+               class="chat-message-card"
+               [class.chat-message-reply]="msg.senderEmail === currentUserEmail">
+
+            <!-- Message Header -->
+            <div class="msg-header">
+              <div class="msg-sender-info">
+                <!-- <div class="msg-avatar" [class.msg-avatar-primary]="i === 0" [class.msg-avatar-secondary]="i > 0">
+                  {{ msg.senderFullName?.charAt(0) || 'U' }}{{ msg.senderFullName?.split(' ')[1]?.charAt(0) || '' }}
+                </div> -->
+                <div class="msg-sender-details">
+                  <span class="msg-sender-name">{{ msg.senderFullName || 'Unknown' }}</span>
+                  <span class="msg-separator">|</span>
+                  <a class="msg-sender-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
+                </div>
               </div>
+              <span class="msg-time">{{ msg.createdAt | date:'MMM d, y, h:mm a' }}</span>
+              <!-- <span class="message-type">{{ msg.messageType }}</span> -->
             </div>
-            <span class="msg-time">{{ msg.createdAt | date:'MMM d, y, h:mm a' }}</span>
-          </div>
+            <!-- Message Body -->
+            <div class="msg-body">
+              {{ msg.message }}
+            </div>
 
-          <!-- Message Body -->
-          <div class="msg-body">
-            {{ msg.message }}
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Reply Composer -->
-      <div class="reply-composer" id="reply-composer">
-        <textarea
-          class="reply-textarea"
-          placeholder="Type your reply here..."
-          [(ngModel)]="replyText">
-        </textarea>
-        <div class="reply-composer-footer">
-          <button class="reply-attach-btn">
-            <span class="attach-plus">+</span> Attach File
-          </button>
-          <div class="reply-send-actions">
-            <button class="btn btn-reply-cancel" (click)="cancelReply()">Cancel</button>
-            <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText.trim()">Send</button>
           </div>
         </div>
+
+        <!-- Reply Composer -->
+        <div class="reply-composer" id="reply-composer">
+          <textarea
+            class="reply-textarea"
+            placeholder="Type your reply here..."
+            [(ngModel)]="replyText">
+          </textarea>
+          <div class="reply-composer-footer">
+            <!-- <button class="reply-attach-btn">
+              <span class="attach-plus">+</span> Attach File
+            </button> -->
+            <div class="reply-send-actions">
+              <button class="btn btn-reply-cancel" (click)="cancelReply()">Cancel</button>
+              <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText?.trim()">Send</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -154,7 +159,7 @@
               <div *ngIf="!isEditMode" class="field-value">{{ getCategoryName(ticket.category) }}</div>
               <select *ngIf="isEditMode" class="field-input" [(ngModel)]="ticket.category" (change)="onCategoryChange(ticket.category)">
                 <option value="">Select Category</option>
-                <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.categoryName }}</option>
+                <option *ngFor="let cat of filteredCategories" [value]="cat.categoryId">{{ cat.categoryName }}</option>
               </select>
             </div>
 
@@ -225,21 +230,21 @@
             <label class="field-label">Assigned Employees</label>
             <div *ngIf="!isEditMode" class="field-value">{{ getSelectedEmployeeNames() }}</div>
             <div *ngIf="isEditMode" class="employee-dropdown-container">
-              <div class="employee-search-header">
+              <div class="employee-search-header" (click)="toggleEmployeeDropdown($event)">
                 <span class="material-icons search-icon">search</span>
                 <input type="text" class="employee-search-input" placeholder="Search employees..."
-                  [value]="employeeFilter" (input)="onEmployeeSearch($event)" (click)="$event.stopPropagation()"/>
+                  [value]="employeeFilter" (input)="onEmployeeSearch($event)" (click)="toggleEmployeeDropdown($event)"/>
               </div>
-              <div class="employee-list-container">
-                <label class="employee-checkbox-item select-all">
+              <div class="employee-list-container" *ngIf="employeeDropdownOpen">
+                <label class="employee-checkbox-item select-all" (click)="$event.stopPropagation()">
                   <input type="checkbox" class="employee-checkbox" [checked]="isAllVisibleSelected()"
                     (change)="toggleSelectAll()" (click)="$event.stopPropagation()"/>
                   <span class="select-all-label">Select All</span>
                 </label>
                 <div class="divider"></div>
-                <label *ngFor="let emp of filteredEmployees" class="employee-checkbox-item">
+                <label *ngFor="let emp of filteredEmployees" class="employee-checkbox-item" (click)="$event.stopPropagation()">
                   <input type="checkbox" class="employee-checkbox" [checked]="isEmployeeSelected(emp.id)"
-                    (change)="toggleEmployee(emp)"/>
+                    (change)="toggleEmployee(emp)" (click)="$event.stopPropagation()"/>
                   <div class="employee-info">
                     <div class="employee-avatar">{{ emp.name.charAt(0) || 'U' }}</div>
                     <span class="employee-name">{{ emp.name }}</span>
@@ -247,6 +252,15 @@
                   </div>
                 </label>
                 <div *ngIf="filteredEmployees.length === 0" class="no-results">No employees found</div>
+              </div>
+            </div>
+            <!-- Selected Employees Display (Outside Dropdown) -->
+            <div class="selected-employees-display" *ngIf="selectedEmployeeIds.length > 0 && employeeDropdownOpen">
+              <div class="selected-label">Selected:</div>
+              <div class="selected-chips">
+                <span class="employee-chip" *ngFor="let empId of selectedEmployeeIds">
+                  {{ getEmployeeNameById(empId) }}
+                </span>
               </div>
             </div>
           </div>
@@ -285,24 +299,104 @@
             <span class="material-icons">attach_file</span>
             <h3>Attachment</h3>
           </div>
-          <span class="attachment-count">1 File</span>
+          <span class="attachment-count" *ngIf="ticket.attachment && !isEditMode">1 File</span>
         </div>
         <div class="card-body">
-          <div *ngIf="ticket.attachment" class="attachment-item">
-            <div class="attachment-info">
-              <span class="material-icons file-icon">image</span>
-              <div class="file-details">
-                <span class="file-name">screenshot_error.png</span>
-                <span class="file-size">845 KB</span>
+          
+          <!-- VIEW MODE: Show existing attachment -->
+          <div *ngIf="!isEditMode">
+            <div *ngIf="ticket.attachment" class="attachment-item" (click)="showFilePrev(ticket.attachment)">
+              <div class="attachment-info">
+                <span class="material-icons file-icon">attach_file</span>
+                <div class="file-details">
+                  <span class="file-name">{{ ticket.attachment.split('/').pop() }}</span>
+                  <span class="file-size">View Attachment</span>
+                </div>
               </div>
             </div>
-            <button class="remove-btn"><span class="material-icons">close</span></button>
+            <p *ngIf="!ticket.attachment" class="no-attachment">No attachment</p>
           </div>
-          <div class="upload-area">
-            <span class="material-icons upload-icon">cloud_upload</span>
-            <p class="upload-text">Upload or drag</p>
+
+          <!-- EDIT MODE: Drag & Drop + File Upload -->
+          <div *ngIf="isEditMode">
+            
+            <!-- Drag & Drop Area -->
+            <div class="upload-area-edit"
+              [class.drag-over]="isDragOver"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+              (click)="fileInput.click()">
+              <span class="material-icons upload-icon">cloud_upload</span>
+              <p class="upload-text">Drag & drop file or <span class="upload-link">browse</span></p>
+              <p class="upload-hint">PDF, DOCX, JPG, PNG • Max 5MB</p>
+              <input type="file" class="file-input-hidden" 
+                accept=".pdf,.docx,.jpg,.jpeg,.png"
+                (change)="onFileInputChange($event)"
+                #fileInput
+                (click)="$event.stopPropagation()"/>
+            </div>
+
+            <!-- Uploading Files List -->
+            <div *ngIf="attachedFiles.length > 0" class="uploading-files">
+              <div *ngFor="let entry of attachedFiles; let i = index" class="upload-item">
+                <div class="upload-item-header">
+                  <span class="material-icons file-icon" [ngSwitch]="getFileIcon(entry.file)">
+                    <ng-container *ngSwitchCase="'picture_as_pdf'">picture_as_pdf</ng-container>
+                    <ng-container *ngSwitchCase="'image'">image</ng-container>
+                    <ng-container *ngSwitchDefault>description</ng-container>
+                  </span>
+                  <div class="upload-item-details">
+                    <span class="upload-file-name">{{ entry.file.name }}</span>
+                    <span class="upload-file-size">{{ formatFileSize(entry.file.size) }}</span>
+                  </div>
+                </div>
+
+                <!-- Uploading State -->
+                <div *ngIf="entry.uploading" class="upload-progress">
+                  <div class="progress-bar"></div>
+                  <span class="progress-text">Uploading...</span>
+                </div>
+
+                <!-- Success State -->
+                <div *ngIf="!entry.uploading && !entry.error" class="upload-success">
+                  <span class="material-icons success-icon">check_circle</span>
+                  <span class="success-text">Uploaded</span>
+                  <button class="remove-upload-btn" (click)="removeFile(i)" type="button">
+                    <span class="material-icons">close</span>
+                  </button>
+                </div>
+
+                <!-- Error State -->
+                <div *ngIf="entry.error" class="upload-error">
+                  <span class="material-icons error-icon">error</span>
+                  <span class="error-text">Upload failed</span>
+                  <button class="retry-upload-btn" (click)="retryUpload(i)" type="button">Retry</button>
+                  <button class="remove-upload-btn" (click)="removeFile(i)" type="button">
+                    <span class="material-icons">close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Current Attachment (if exists in edit mode) -->
+            <div *ngIf="ticket.attachment && attachedFiles.length === 0" class="current-attachment-edit">
+              <div class="attachment-item">
+                <div class="attachment-info">
+                  <span class="material-icons file-icon">attach_file</span>
+                  <div class="file-details">
+                    <span class="file-name">{{ ticket.attachment.split('/').pop() }}</span>
+                    <span class="file-size">(Current)</span>
+                  </div>
+                </div>
+                <button class="remove-btn" (click)="removeAttachment(); $event.stopPropagation()" type="button">
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
+            </div>
+
           </div>
-          <p *ngIf="!ticket.attachment" class="no-attachment">No attachment</p>
+
         </div>
       </div>
 
