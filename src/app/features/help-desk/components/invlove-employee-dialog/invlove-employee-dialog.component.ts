@@ -8,6 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Department } from '@/app/core/models/employee.models';
@@ -36,7 +37,8 @@ interface Employee {
     MatFormFieldModule,
     MatSelectModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './invlove-employee-dialog.component.html',
   styleUrls: ['./invlove-employee-dialog.component.scss'],
@@ -224,6 +226,16 @@ assignedGroupName: string | null = null;
 
   displayName(emp: Employee): string {
     return emp.fullName || 'Unknown';
+  }
+
+  getSelectedEmployeeNames(): string {
+    const selectedIds = this.selectedEmployeeIds;
+    const selectedNames = this.allEmployees
+      .filter(emp => selectedIds.includes(emp.employeeId))
+      .map(emp => emp.fullName)
+      .join(', ');
+    const count = selectedIds.length;
+    return selectedNames ? `${selectedNames} (${count} selected)` : 'No employees selected';
   }
 
   // -----------------------------

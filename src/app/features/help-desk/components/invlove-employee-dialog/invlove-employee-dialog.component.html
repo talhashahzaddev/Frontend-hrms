@@ -133,11 +133,10 @@
           </span>
         </div>
 
-        <!-- SELECTION SUMMARY -->
-        <div class="selection-summary" *ngIf="selectedEmployeeIds.length > 0">
-          <span class="summary-text">{{ selectedEmployeeIds.length }} employees selected</span>
-          <button type="button" class="clear-all-btn" (click)="clearAllEmployees()">CLEAR ALL</button>
-        </div>
+        <!-- SELECTED COUNT TEXT -->
+        <p class="selected-count-text">
+          {{ getSelectedEmployeeNames() }}
+        </p>
 
         <!-- REASON -->
         <div class="field-full custom-field">

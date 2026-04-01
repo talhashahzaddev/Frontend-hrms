@@ -7,11 +7,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { Subject, of, catchError, takeUntil } from 'rxjs';
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
-import { Ticket ,TicketMessageDto, TicketGroup} from '@/app/core/models/helpdesk.models';
+import { Ticket ,TicketMessageDto, TicketGroup, TicketMessageRequest} from '@/app/core/models/helpdesk.models';
 import { Department } from '@/app/core/models/employee.models';
 import { InvloveEmployeeDialogComponent } from '../invlove-employee-dialog/invlove-employee-dialog.component';
 import { ReplyChatDialogComponent } from '../reply-chat-dialog/reply-chat-dialog.component';
 import { AuthService } from '@/app/core/services/auth.service';
+import { NotificationService } from '@/app/core/services/notification.service';
 
 interface CategoryDto {
   categoryId: string;
@@ -43,6 +44,7 @@ export class ViewTicketDetailsComponent implements OnInit, OnDestroy {
   loading = false;
   isEditMode = false;
   updating = false;
+  currentUserEmail: string = '';
 messages: TicketMessageDto[] = [];
 newMessage: string = '';
 sendingMessage = false;
@@ -56,6 +58,14 @@ sendingMessage = false;
   selectedEmployeeIds: string[] = [];
   replyText: string = '';
 
+  // ── Attachment state (for edit mode) ──────────────────────────────────
+  attachedFiles: { file: File; url: string | null; uploading: boolean; error: boolean }[] = [];
+  isDragOver = false;
+  readonly MAX_FILES = 1;
+  readonly MAX_SIZE_MB = 5;
+  readonly ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png'];
+  readonly ALLOWED_EXT = ['.pdf', '.docx', '.jpg', '.jpeg', '.png'];
+
   ticketTypes = ['Request', 'Complaint', 'Issue'];
   priorities = ['Low', 'Medium', 'High', 'Critical'];
   statuses = ['Open', 'Pending', 'InProgress', 'Resolved', 'Closed'];
@@ -67,13 +77,17 @@ sendingMessage = false;
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
     this.ticketId = this.route.snapshot.paramMap.get('id')!;
+    const userInfo = this.getCurrentUserInfo();
+    if (userInfo) {
+      this.currentUserEmail = userInfo.email;
+    }
     this.loadInitialData();
-    // this.getCurrentUserInfo();
     this.loadMessages(); // Load messages when component initializes
   }
 
@@ -241,6 +255,7 @@ getCurrentUserInfo(): { userId: string; email: string } | null {
     this.ticket = { ...this.originalTicket };
     this.ticket.groupId = this.ticket.groupId == null ? '' : String(this.ticket.groupId);
     this.selectedEmployeeIds = [...(this.originalTicket.assignedEmployees || [])];
+    this.employeeDropdownOpen = false; // Ensure dropdown is closed when entering edit mode
     
     // Subscribe to category changes to reload groups
     // Note: You may need to add a FormControl for category in template
@@ -304,12 +319,24 @@ openReplyDialog(ticket: Ticket): void {
     return;
   }
 
+  // Combine assigned employees with group employees
+  let recipientIds = [...(ticket.assignedEmployees || [])];
+  
+  // Add group employees if group exists
+  if (ticket.groupId) {
+    const group = this.groups.find(g => g.groupId === ticket.groupId);
+    if (group && group.employeeIds) {
+      recipientIds = [...new Set([...recipientIds, ...group.employeeIds])];
+    }
+  }
+
   const dialogRef = this.dialog.open(ReplyChatDialogComponent, {
     width: '400px',
     data: {
       ticket: ticket,                       // full ticket
       senderId: currentUser.userId,
-      senderEmail: currentUser.email
+      senderEmail: currentUser.email,
+      recipientIds: recipientIds            // combined assigned + group employees
     }
   });
 
@@ -368,6 +395,10 @@ openReplyDialog(ticket: Ticket): void {
     );
   }
 
+  get filteredCategories() {
+    return this.categories.filter(cat => cat.status === true);
+  }
+
   getSelectedEmployeeNames(): string {
     if (!this.selectedEmployeeIds.length) return 'N/A';
     return this.selectedEmployeeIds
@@ -376,11 +407,15 @@ openReplyDialog(ticket: Ticket): void {
       .join(', ');
   }
 
+  getEmployeeNameById(empId: string): string {
+    return this.employees.find(e => e.id === empId)?.name || empId;
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.employeeDropdownOpen) return;
     const target = event.target as HTMLElement;
-    const inside = target.closest('.cg-search-row') || target.closest('.cg-checklist-box');
+    const inside = target.closest('.employee-dropdown-container') || target.closest('.employee-search-header');
     if (!inside) this.closeEmployeeDropdown();
   }
 
@@ -407,14 +442,14 @@ openReplyDialog(ticket: Ticket): void {
 
     this.helpDeskService.updateTicket(updateRequest).subscribe({
       next: () => {
-        alert('Ticket updated successfully!');
+        this.notification.showSuccess('Ticket updated successfully');
         this.updating = false;
         this.isEditMode = false;
         this.loadInitialData();
       },
       error: err => {
         console.error('Error updating ticket:', err);
-        alert('Failed to update ticket.');
+        this.notification.showError(err?.message || 'Failed to update ticket');
         this.updating = false;
       }
     });
@@ -434,23 +469,59 @@ cancelReply(): void {
 }
 
 sendReply(): void {
-  console.log('sendReply: soon implemented');
   if (!this.replyText?.trim()) return;
 
-  // stub: just push to messages for now
-  const newMsg: TicketMessageDto = {
-    messageId: 'temp-' + Date.now(),
+  const currentUser = this.getCurrentUserInfo();
+  if (!currentUser) {
+    this.notification.showError('User not authenticated');
+    return;
+  }
+
+  // Combine assigned employees with group employees
+  let recipientIds = [...(this.ticket?.assignedEmployees || [])];
+  
+  // Add group employees if group exists
+  if (this.ticket?.groupId) {
+    const group = this.groups.find(g => g.groupId === this.ticket?.groupId);
+    if (group && group.employeeIds) {
+      recipientIds = [...new Set([...recipientIds, ...group.employeeIds])];
+    }
+  }
+
+  // Exclude sender from recipients
+  recipientIds = recipientIds.filter(id => id !== currentUser.userId);
+
+  if (recipientIds.length === 0) {
+    this.notification.showWarning('No recipients found');
+    return;
+  }
+
+  this.sendingMessage = true;
+
+  const request: TicketMessageRequest = {
     ticketId: this.ticketId,
-    senderId: 'current-user', // replace with actual user id later
-    senderFullName: 'You',
-    senderEmail: 'you@example.com',
     message: this.replyText,
     messageType: 'chat',
-    subject: this.ticket?.ticketTitle || '',
-    createdAt: new Date().toISOString()
+    subject: this.ticket?.ticketTitle || undefined,
+    recipientIds: recipientIds,
+    senderId: currentUser.userId
   };
-  this.messages.push(newMsg);
-  this.replyText = '';
+
+  this.helpDeskService.createMessage(request).subscribe({
+    next: (msg: TicketMessageDto) => {
+      console.log('Message sent successfully:', msg);
+      this.sendingMessage = false;
+      this.messages.push(msg);
+      this.replyText = '';
+      this.notification.showSuccess('Message sent successfully');
+     this.loadMessages();
+    },
+    error: (err) => {
+      console.error('Failed to send message:', err);
+      this.sendingMessage = false;
+      this.notification.showError(err?.message || 'Failed to send message');
+    }
+  });
 }
 
   // Update groups when category selection changes in edit mode
@@ -469,6 +540,137 @@ sendReply(): void {
   // Get category name by id
   getCategoryName(id: string | null): string {
     return this.categories.find(c => c.categoryId === String(id))?.categoryName || 'N/A';
+  }
+
+  // Display file preview - open all files in new tab
+  showFilePrev(fileUrl?: string): void {
+    const url = fileUrl || this.ticket?.attachment || '';
+    
+    if (!url) {
+      console.warn('No file URL available');
+      return;
+    }
+
+    try {
+      console.log('Opening file in new tab:', url);
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Error opening file:', error);
+      alert('Unable to open file. Please try downloading it directly.');
+    }
+  }
+
+  // Remove attachment (edit mode only)
+  removeAttachment(): void {
+    if (!this.isEditMode) return;
+    this.ticket.attachment = '';
+  }
+
+  // ── Drag & Drop handlers ──────────────────────────────────────────────────
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+    const files = Array.from(event.dataTransfer?.files ?? []);
+    this.processFiles(files);
+  }
+
+  onFileInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    this.processFiles(files);
+    input.value = ''; // reset so same file can be re-selected
+  }
+
+  // ── File processing ───────────────────────────────────────────────────────
+  private processFiles(files: File[]): void {
+    for (const file of files) {
+      if (this.attachedFiles.length >= this.MAX_FILES) break;
+      if (!this.isValidFile(file)) continue;
+      const entry = { file, url: null, uploading: true, error: false };
+      this.attachedFiles.push(entry);
+      this.uploadFile(entry);
+    }
+  }
+
+  private isValidFile(file: File): boolean {
+    if (!this.ALLOWED_TYPES.includes(file.type)) {
+      alert('Invalid file type. Allowed: PDF, DOCX, JPG, PNG');
+      return false;
+    }
+    if (file.size > this.MAX_SIZE_MB * 1024 * 1024) {
+      alert(`File size exceeds ${this.MAX_SIZE_MB}MB limit`);
+      return false;
+    }
+    if (this.attachedFiles.some(f => f.file.name === file.name && f.file.size === file.size)) {
+      alert('This file is already attached');
+      return false;
+    }
+    return true;
+  }
+
+  private uploadFile(entry: { file: File; url: string | null; uploading: boolean; error: boolean }): void {
+    this.helpDeskService.uploadattachments(entry.file).subscribe({
+      next: (url: string) => {
+        entry.url = url;
+        entry.uploading = false;
+        // Update ticket attachment with new URL
+        this.ticket.attachment = url;
+        console.log('File uploaded successfully:', url);
+      },
+      error: (err) => {
+        entry.uploading = false;
+        entry.error = true;
+        console.error('File upload failed:', err);
+      }
+    });
+  }
+
+  removeFile(index: number): void {
+    this.attachedFiles.splice(index, 1);
+    // If all files removed, clear attachment
+    if (this.attachedFiles.length === 0) {
+      this.ticket.attachment = '';
+    }
+  }
+
+  retryUpload(index: number): void {
+    const entry = this.attachedFiles[index];
+    entry.error = false;
+    entry.uploading = true;
+    this.uploadFile(entry);
+  }
+
+  getFileIcon(file: File): string {
+    if (file.type === 'application/pdf') return 'picture_as_pdf';
+    if (file.type.startsWith('image/')) return 'image';
+    return 'description';
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  get canAddMore(): boolean {
+    return this.attachedFiles.length < this.MAX_FILES;
+  }
+
+  get hasUploading(): boolean {
+    return this.attachedFiles.some(f => f.uploading);
   }
 
 }

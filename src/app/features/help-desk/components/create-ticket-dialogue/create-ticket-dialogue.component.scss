@@ -1213,6 +1213,144 @@ form {
   text-align: center;
 }
 
+.att-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &::before {
+    content: '×';
+    font-size: 20px;
+    color: #cbd5e1;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  &:hover::before {
+    color: #94a3b8;
+  }
+
+  &:active::before {
+    color: #64748b;
+  }
+}
+
+.att-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.att-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+
+  &.att-uploading {
+    opacity: 0.7;
+  }
+
+  &.att-error {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+}
+
+.att-file-ico {
+  font-size: 16px;
+  color: #0066cc;
+  flex-shrink: 0;
+}
+
+.att-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.att-name {
+  font-size: 10px;
+  font-weight: 500;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.att-size {
+  font-size: 8px;
+  color: #94a3b8;
+}
+
+.att-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.att-spin {
+  font-size: 14px;
+  color: #0066cc;
+}
+
+.att-ok {
+  font-size: 16px;
+  color: #16a34a;
+}
+
+.att-err-txt {
+  font-size: 8px;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.att-retry {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: #0066cc;
+  transition: color 0.2s ease;
+
+  .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  &:hover {
+    color: #0052a3;
+  }
+}
+
+.att-limit {
+  margin-top: 6px !important;
+  color: #dc2626;
+  font-weight: 600;
+}
+
 /* ================================================================
    FOOTER
    ================================================================ */

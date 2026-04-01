@@ -737,34 +737,13 @@
   color: #ef4444;
 }
 
-// ── Selection Summary ─────────────────────────────────────────
-.selection-summary {
-  padding: 8px 12px;
-  background: #f5f3ff;
-  border: 1px solid #ddd6fe;
-  border-radius: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-
-  .summary-text {
-    color: #6C5CE7;
-    font-weight: 600;
-  }
-
-  .clear-all-btn {
-    background: none;
-    border: none;
-    color: #7c3aed;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:hover {
-      color: #ef4444;
-    }
-  }
+// ── Count text (selected employees display) ───────────────────
+.selected-count-text {
+  font-size: 11px;
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+  margin-top: -8px;
 }
 
 // ── Reason Textarea ───────────────────────────────────────────

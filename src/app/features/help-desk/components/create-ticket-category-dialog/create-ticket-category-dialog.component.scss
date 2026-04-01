@@ -1,300 +1,3 @@
-// /* ============================================================
-//    ticket-category-modal — component SCSS
-//    ============================================================ */
-
-// /* ===== Overlay ===== */
-// .ticket-category-overlay {
-//   position: fixed;
-//   inset: 0;
-//   background: rgba(0, 0, 0, 0.45);
-//   backdrop-filter: blur(3px);
-//   -webkit-backdrop-filter: blur(3px);
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   z-index: 1000;
-//   padding: 16px;
-// }
-
-// /* ===== Modal Box ===== */
-// .ticket-category-modal {
-//   background: #ffffff;
-//   width: 100%;
-//   max-width: 500px;
-//   border-radius: 8px;
-//   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
-//   display: flex;
-//   flex-direction: column;
-//   max-height: 90vh;
-//   overflow: hidden;
-// }
-
-// /* ===== Header ===== */
-// .ticket-category-modal h2[mat-dialog-title] {
-//   margin: 0;
-//   padding: 20px 24px 16px 24px;
-//   font-size: 20px;
-//   font-weight: 700;
-//   color: #191c1d;
-//   letter-spacing: -0.2px;
-//   line-height: 1.3;
-//   background: #ffffff;
-//   border: none;
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-// }
-
-// /* Close button */
-// .ticket-category-modal .dialog-close-btn {
-//   all: unset;
-//   width: 28px;
-//   height: 28px;
-//   border-radius: 50%;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   cursor: pointer;
-//   font-size: 18px;
-//   color: #727784;
-//   transition: background 0.15s, color 0.15s;
-//   flex-shrink: 0;
-// }
-// .ticket-category-modal .dialog-close-btn:hover {
-//   background: #edeeef;
-//   color: #191c1d;
-// }
-
-// /* ===== Form ===== */
-// .ticket-category-modal form {
-//   flex: 1;
-//   overflow-y: auto;
-//   padding: 8px 24px 0 24px;
-//   display: flex;
-//   flex-direction: column;
-// }
-
-// .ticket-category-modal form::-webkit-scrollbar { width: 5px; }
-// .ticket-category-modal form::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-// .ticket-category-modal form::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-// .ticket-category-modal form::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-// /* ===== Field Group ===== */
-// .ticket-category-modal .field-group {
-//   display: flex;
-//   flex-direction: column;
-//   width: 100%;
-//   margin-bottom: 20px;
-// }
-
-// /* ===== Label ===== */
-// .ticket-category-modal .field-label {
-//   font-size: 11px;
-//   font-weight: 700;
-//   color: #727784;
-//   text-transform: uppercase;
-//   letter-spacing: 0.08em;
-//   margin-bottom: 6px;
-//   display: block;
-// }
-
-// .ticket-category-modal .field-label .required {
-//   color: #ba1a1a;
-//   margin-left: 1px;
-// }
-
-// /* ===== Text Input ===== */
-// .ticket-category-modal .field-input {
-//   width: 100%;
-//   display: block;
-//   padding: 10px 12px;
-//   background: #edeeef;
-//   border: none;
-//   border-bottom: 2px solid transparent;
-//   border-radius: 0;
-//   font-size: 14px;
-//   color: #191c1d;
-//   outline: none;
-//   box-shadow: none;
-//   box-sizing: border-box;
-//   line-height: 1.5;
-//   transition: border-color 0.2s, background 0.2s;
-//   -webkit-appearance: none;
-//   appearance: none;
-// }
-
-// .ticket-category-modal .field-input::placeholder {
-//   color: #9ca3af;
-//   font-size: 14px;
-// }
-
-// .ticket-category-modal .field-input:focus {
-//   border-bottom-color: #004e9f;
-//   background: #f0f4fa;
-//   outline: none;
-// }
-
-// /* invalid + touched */
-// .ticket-category-modal .field-input.ng-invalid.ng-touched {
-//   border-bottom-color: #ba1a1a;
-//   background: #fff5f5;
-// }
-
-// /* ===== Select Wrapper ===== */
-// .ticket-category-modal .select-wrapper {
-//   position: relative;
-//   width: 100%;
-// }
-
-// /* ===== mat-select styled to match input ===== */
-// .ticket-category-modal .field-select {
-//   width: 100%;
-//   display: block;
-// }
-
-// /* The trigger is the visible part of mat-select */
-// ::ng-deep .ticket-category-modal .field-select .mat-select-trigger,
-// ::ng-deep .ticket-category-modal .field-select .mat-mdc-select-trigger {
-//   display: flex !important;
-//   align-items: center !important;
-//   width: 100% !important;
-//   padding: 10px 12px !important;
-//   background: #edeeef !important;
-//   border: none !important;
-//   border-bottom: 2px solid transparent !important;
-//   border-radius: 0 !important;
-//   font-size: 14px !important;
-//   color: #191c1d !important;
-//   cursor: pointer !important;
-//   box-sizing: border-box !important;
-//   height: auto !important;
-//   min-height: unset !important;
-//   transition: border-color 0.2s, background 0.2s !important;
-// }
-
-// ::ng-deep .ticket-category-modal .field-select.mat-focused .mat-select-trigger,
-// ::ng-deep .ticket-category-modal .field-select.mat-mdc-select.mat-focused .mat-mdc-select-trigger {
-//   border-bottom-color: #004e9f !important;
-//   background: #f0f4fa !important;
-// }
-
-// ::ng-deep .ticket-category-modal .field-select .mat-select-value,
-// ::ng-deep .ticket-category-modal .field-select .mat-mdc-select-value {
-//   color: #191c1d !important;
-//   font-size: 14px !important;
-// }
-
-// ::ng-deep .ticket-category-modal .field-select .mat-select-placeholder,
-// ::ng-deep .ticket-category-modal .field-select .mat-mdc-select-placeholder {
-//   color: #9ca3af !important;
-//   font-size: 14px !important;
-// }
-
-// ::ng-deep .ticket-category-modal .field-select .mat-select-arrow,
-// ::ng-deep .ticket-category-modal .field-select .mat-mdc-select-arrow {
-//   color: #727784 !important;
-// }
-
-// ::ng-deep .ticket-category-modal .field-select .mat-select-arrow-wrapper,
-// ::ng-deep .ticket-category-modal .field-select .mat-mdc-select-arrow-wrapper {
-//   transform: none !important;
-// }
-
-// /* Strip all default Material chrome from mat-select */
-// ::ng-deep .ticket-category-modal .field-select .mat-form-field-underline,
-// ::ng-deep .ticket-category-modal .field-select .mdc-line-ripple,
-// ::ng-deep .ticket-category-modal .field-select .mdc-notched-outline {
-//   display: none !important;
-// }
-
-// /* ===== Validation Error Text ===== */
-// .ticket-category-modal .field-error {
-//   display: block;
-//   font-size: 11px;
-//   font-weight: 500;
-//   color: #ba1a1a;
-//   margin-top: 4px;
-// }
-
-// /* ===== Actions / Footer ===== */
-// .ticket-category-modal .actions {
-//   display: flex;
-//   align-items: center;
-//   justify-content: flex-end;
-//   gap: 10px;
-//   padding: 16px 24px 24px 24px;
-//   margin-top: 4px;
-//   background: #ffffff;
-// }
-
-// /* Base button reset */
-// .ticket-category-modal .actions button {
-//   display: inline-flex;
-//   align-items: center;
-//   justify-content: center;
-//   font-size: 13px;
-//   font-weight: 600;
-//   padding: 9px 22px;
-//   border-radius: 6px;
-//   min-width: 88px;
-//   line-height: 1.4;
-//   border: none;
-//   cursor: pointer;
-//   letter-spacing: 0;
-//   text-transform: none;
-//   transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-//   outline: none;
-// }
-
-// /* Cancel */
-// .ticket-category-modal .actions .btn-cancel {
-//   background: #edeeef;
-//   color: #191c1d;
-// }
-// .ticket-category-modal .actions .btn-cancel:hover {
-//   background: #d9dadb;
-// }
-
-// /* Submit */
-// .ticket-category-modal .actions .btn-submit {
-//   background: #004e9f;
-//   color: #ffffff;
-//   box-shadow: 0 2px 8px rgba(0, 78, 159, 0.28);
-// }
-// .ticket-category-modal .actions .btn-submit:hover:not(:disabled) {
-//   background: #003d7d;
-//   box-shadow: 0 4px 12px rgba(0, 78, 159, 0.36);
-// }
-// .ticket-category-modal .actions .btn-submit:active:not(:disabled) {
-//   transform: scale(0.97);
-// }
-// .ticket-category-modal .actions .btn-submit:disabled {
-//   opacity: 0.55;
-//   cursor: not-allowed;
-//   box-shadow: none;
-// }
-
-// /* ===== Spinner ===== */
-// .ticket-category-modal .spinner {
-//   width: 13px;
-//   height: 13px;
-//   border: 2px solid rgba(255, 255, 255, 0.35);
-//   border-top-color: #ffffff;
-//   border-radius: 50%;
-//   animation: tcm-spin 0.75s linear infinite;
-//   margin-left: 8px;
-//   display: inline-block;
-//   vertical-align: middle;
-//   flex-shrink: 0;
-// }
-
-// @keyframes tcm-spin {
-//   from { transform: rotate(0deg); }
-//   to   { transform: rotate(360deg); }
-// }
-
-
-
 /* ============================================================
    ticket-category-modal — Professional SCSS
    ============================================================ */
@@ -350,7 +53,7 @@
 /* ===== Header ===== */
 .ticket-category-modal h2[mat-dialog-title] {
   margin: 0;
-  padding: 22px 24px 18px 24px;
+  padding: 22px 18px 18px 24px;
   font-size: 17px;
   font-weight: 700;
   color: #0f172a;
@@ -384,6 +87,7 @@
   border: none;
   padding: 0;
   margin: 0;
+  margin-left: auto;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
@@ -425,8 +129,8 @@
 .ticket-category-modal .field-group {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  margin-bottom: 18px;
+  width: calc(100% - 24px);
+  margin: 0 12px 18px 12px;
 }
 
 /* ===== Label ===== */
@@ -685,3 +389,5 @@
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
+

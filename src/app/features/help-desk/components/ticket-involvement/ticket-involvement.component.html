@@ -123,35 +123,23 @@
 
             <!-- ACTION MENU -->
             <td class="text-center">
-              <div class="action-wrapper">
-
-                <button
-                  class="btn-dots"
-                  (click)="toggleMenu(ticket, $event)"
-                  title="Actions">
-
-                  <span class="dot"></span>
-                  <span class="dot"></span>
-                  <span class="dot"></span>
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                class="btn-action"
+                title="Actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="viewTicket(ticket)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View</span>
                 </button>
-
-                <div
-                  class="action-menu"
-                  *ngIf="ticket._menuOpen"
-                  (click)="$event.stopPropagation()"
-                >
-                  <button class="action-item" (click)="viewTicket(ticket)">
-                    👁 View
-                  </button>
-
-                  <button
-                    class="action-item action-item--delete"
-                    (click)="deleteTicket(ticket)">
-                    🗑 Delete
-                  </button>
-                </div>
-
-              </div>
+                <!-- <button mat-menu-item (click)="deleteTicket(ticket)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button> -->
+              </mat-menu>
             </td>
 
           </tr>

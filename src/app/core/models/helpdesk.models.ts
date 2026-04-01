@@ -102,3 +102,23 @@ export interface SearchCategory {
   page?: number;          // optional, default 1
   pageSize?: number;      // optional, default 50
 }
+export interface UpdateTicketGroupRequest {
+  groupId: string;           // Guid as string
+  groupTitle: string;
+  departmentId: string;      // Guid as string
+  categoryId?: string | null; // optional Guid
+  employeeIds: string[];     // list of employee Guids
+}
+
+export interface UpdateCategoryRequest {
+  categoryId: string;
+  departmentId: string;
+  categoryName: string;
+  status: boolean;
+}
+
+export interface CreateCategoryRequest {
+  departmentId: string;
+  name: string;
+  status: boolean;
+}

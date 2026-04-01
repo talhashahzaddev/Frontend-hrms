@@ -15,6 +15,7 @@ export interface ReplyChatDialogData {
   ticket: Ticket; 
   senderId: string;       // Current user's ID
   senderEmail: string;
+  recipientIds?: string[]; // Combined assigned + group employee IDs
 }
 
 @Component({
@@ -52,8 +53,9 @@ employees: Employee[] = [];
     console.log('Sender ID:', data.senderId);
     console.log('Sender Email:', data.senderEmail);
 
-    // Exclude sender from recipients
-    this.recipientIds = (data.ticket.assignedEmployees || []).filter(
+    // Exclude sender from recipients - use combined list if provided, otherwise use assigned employees
+    const allRecipients = data.recipientIds || (data.ticket.assignedEmployees || []);
+    this.recipientIds = allRecipients.filter(
       id => id !== data.senderId
     );
 
@@ -80,7 +82,7 @@ employees: Employee[] = [];
     const request: TicketMessageRequest = {
       ticketId: this.data.ticket.ticketid,
       message: this.replyForm.get('message')?.value,
-      messageType: 'chat',
+      messageType: 'email',
       subject: this.replyForm.get('subject')?.value || undefined,
       recipientIds: this.recipientIds,
       senderId: this.data.senderId, // only send ID

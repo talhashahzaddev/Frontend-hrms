@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Subject, combineLatest, debounceTime, startWith, takeUntil } from 'rxjs';
@@ -13,10 +13,9 @@ import { Department } from '@/app/core/models/employee.models';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
-
-interface TicketWithMenu extends Ticket {
-  _menuOpen?: boolean;
-}
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-ticket-involvement',
@@ -27,7 +26,10 @@ interface TicketWithMenu extends Ticket {
     ReactiveFormsModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatInputModule
+    MatInputModule,
+    MatMenuModule,
+    MatButtonModule,
+    MatIconModule
   ],
   templateUrl: './ticket-involvement.component.html',
   styleUrl: './ticket-involvement.component.scss',
@@ -36,7 +38,7 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  tickets: TicketWithMenu[] = [];
+  tickets: Ticket[] = [];
   departments: Department[] = [];
   loading = false;
 
@@ -67,23 +69,6 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  // ✅ Close menu on outside click
-  @HostListener('document:click')
-  closeAllMenus(): void {
-    this.tickets.forEach(t => t._menuOpen = false);
-  }
-
-  // ✅ Toggle menu
-  toggleMenu(ticket: TicketWithMenu, event: Event): void {
-    event.stopPropagation();
-
-    this.tickets.forEach(t => {
-      if (t !== ticket) t._menuOpen = false;
-    });
-
-    ticket._menuOpen = !ticket._menuOpen;
   }
 
   // ✅ Reactive search
@@ -128,10 +113,7 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           const data = res?.data || [];
 
-          this.tickets = data.map((t: Ticket) => ({
-            ...t,
-            _menuOpen: false
-          }));
+          this.tickets = data;
 
           this.loading = false;
         },
@@ -143,16 +125,14 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
   }
 
   // ✅ Actions
-  viewTicket(ticket: TicketWithMenu): void {
+  viewTicket(ticket: Ticket): void {
     console.log('CLICK WORKING', ticket.ticketid);
-    ticket._menuOpen = false;
     this.router.navigate(['help-desk/tickets/view', ticket.ticketid]);
   }
 
-  deleteTicket(ticket: TicketWithMenu): void {
+  deleteTicket(ticket: Ticket): void {
     if (confirm(`Delete "${ticket.ticketTitle}"?`)) {
       console.log('Delete:', ticket);
-      ticket._menuOpen = false;
     }
   }
 }
