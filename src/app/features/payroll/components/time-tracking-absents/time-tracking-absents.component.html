@@ -11,7 +11,7 @@
           <mat-icon>event_busy</mat-icon>
         </div>
       </div>
-      <p class="card-footer"><span class="trend-up">↑ 2%</span> from last month</p>
+      <p class="card-footer">Current pay cycle</p>
     </div>
 
     <div class="card">
@@ -24,7 +24,7 @@
           <mat-icon>payments</mat-icon>
         </div>
       </div>
-      <p class="card-footer">Current pay cycle</p>
+      <p class="card-footer">Deductions Applied</p>
     </div>
 
     <div class="card">
@@ -39,19 +39,6 @@
       </div>
       <p class="card-footer">Unique staff records</p>
     </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Grace Days Used</span>
-          <span class="value">{{ graceDaysUsed() }}</span>
-        </div>
-        <div class="icon-wrapper color-purple">
-          <mat-icon>verified_user</mat-icon>
-        </div>
-      </div>
-      <p class="card-footer">Across all employees</p>
-    </div>
   </div>
 
   <!-- Table Section -->
@@ -59,16 +46,40 @@
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="filters-row">
+        <!-- Search -->
         <div class="search-box">
           <mat-icon>search</mat-icon>
-          <input type="text" placeholder="Search employee..." />
+          <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
         </div>
-        <select class="filter-select">
-          <option>All Types</option>
-          <option>Full Day</option>
-          <option>Half Day</option>
+
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriod">
+          <option value="">All periods</option>
+          @for (p of periods; track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+          }
         </select>
+
+        <select class="filter-select" [(ngModel)]="pendingRule">
+          <option value="">All rules</option>
+          @for (r of deductionRules; track r.ruleId) {
+          <option [value]="r.ruleId">{{ r.ruleName }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
       </div>
+
       <div class="add-btn-wrap">
         <button class="add-btn" (click)="logAbsent()">
           <mat-icon>add</mat-icon>
@@ -86,7 +97,6 @@
             <th class="text-center">Absent Days</th>
             <th class="text-center">Half Days</th>
             <th class="text-center">Effective Absents</th>
-            <th class="text-center">Grace Days</th>
             <th class="text-center">Deductible</th>
             <th class="text-right">Deduction ({{ currencySymbol() }})</th>
             <th class="text-right">Actions</th>
@@ -95,7 +105,7 @@
         <tbody>
           @if (isLoading()) {
           <tr>
-            <td colspan="8" class="text-center" style="padding: 3rem;">
+            <td colspan="7" class="text-center" style="padding: 3rem;">
               <div class="spinner-container">
                 <mat-spinner diameter="30"></mat-spinner>
               </div>
@@ -116,7 +126,6 @@
             <td class="text-center font-medium muted">{{ record.absentDays }}</td>
             <td class="text-center font-medium muted">{{ record.halfDays }}</td>
             <td class="text-center font-bold">{{ record.effectiveAbsents | number:'1.1-1' }}</td>
-            <td class="text-center font-medium muted">{{ record.graceDays }}</td>
             <td class="text-center">
               <span class="font-medium" [ngClass]="record.deductibleDays > 0 ? 'text-slate-600' : 'text-emerald-600'">
                 {{ record.deductibleDays | number:'1.1-1' }}
@@ -134,6 +143,15 @@
               </button>
             </td>
           </tr>
+          } @empty {
+          <tr>
+            <td colspan="7" class="text-center" style="padding: 3rem;">
+              <div class="empty-state">
+                <mat-icon>inbox</mat-icon>
+                <p>No absent records found.</p>
+              </div>
+            </td>
+          </tr>
           }
           }
         </tbody>
@@ -142,19 +160,36 @@
 
     <!-- Footer / Pagination -->
     <div class="table-footer">
-      <div class="formula-hint">
-        <mat-icon>info</mat-icon>
-        <span>Formula hint: Effective absents = absent days + (half days × 0.5)</span>
+      <div class="info-group">
+        <div class="formula-hint">
+          <mat-icon>info</mat-icon>
+          <span>Effective absents = absent days + (half days × 0.5)</span>
+        </div>
+        @if (totalCount() > 0) {
+        <div class="page-entries">
+          Showing <b>{{ fromRecord }}</b> to <b>{{ toRecord }}</b> of <b>{{ totalCount() }}</b> entries
+        </div>
+        }
       </div>
+
+      @if (totalPages > 1 || totalCount() > 0) {
       <div class="pagination">
-        <button class="page-btn disabled" disabled>
+        <button class="page-btn" [class.disabled]="page() === 1" [disabled]="page() === 1" (click)="prevPage()">
           <mat-icon>chevron_left</mat-icon>
         </button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn disabled" disabled>
+
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === page()" (click)="goToPage(p)">
+          {{ p }}
+        </button>
+        }
+
+        <button class="page-btn" [class.disabled]="page() === totalPages" [disabled]="page() === totalPages"
+          (click)="nextPage()">
           <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
+      }
     </div>
   </div>
 </div>

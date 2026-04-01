@@ -2,12 +2,18 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
+import { AttendanceDialogComponent } from '../attendance-dialog/attendance-dialog.component';
+import {
+  ConfirmDeleteDialogComponent,
+  ConfirmDeleteData
+} from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { NotificationService } from '@core/services/notification.service';
 
 export interface AbsentRecordDto {
   id: string;
@@ -19,9 +25,15 @@ export interface AbsentRecordDto {
   absentDays: number;
   halfDays: number;
   effectiveAbsents: number;
-  graceDays: number;
   deductibleDays: number;
   deductionAmount: number;
+  // API fields
+  periodId?: string;
+  ruleId?: string;
+  presentDays?: number;
+  absentDeduction?: number;
+  halfDayDeduction?: number;
+  totalDeduction?: number;
 }
 
 @Component({
@@ -34,16 +46,65 @@ export interface AbsentRecordDto {
 export class TimeTrackingAbsentsComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
+  private readonly dialog = inject(MatDialog);
+  private readonly notification = inject(NotificationService);
 
   readonly records = signal<AbsentRecordDto[]>([]);
   readonly isLoading = signal(true);
   readonly currencySymbol = signal('$');
 
   // Stats
-  readonly totalAbsents = signal(11);
-  readonly totalDeduction = signal(22400);
-  readonly employeesAffected = signal(4);
-  readonly graceDaysUsed = signal(3);
+  readonly totalAbsents = signal(0);
+  readonly totalDeduction = signal(0);
+  readonly employeesAffected = signal(0);
+
+  // Pagination
+  readonly page = signal(1);
+  readonly pageSize = signal(10);
+  readonly totalCount = signal(0);
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalCount() / this.pageSize()));
+  }
+
+  get pageRange(): number[] {
+    const delta = 2;
+    const current = this.page();
+    const total = this.totalPages;
+    const start = Math.max(1, current - delta);
+    const end   = Math.min(total, current + delta);
+    const range: number[] = [];
+    for (let i = start; i <= end; i++) range.push(i);
+    return range;
+  }
+
+  get fromRecord(): number {
+    const count = this.totalCount();
+    return count === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1;
+  }
+
+  get toRecord(): number {
+    return Math.min(this.page() * this.pageSize(), this.totalCount());
+  }
+
+  // Filter state
+  periods: any[] = [];
+  deductionRules: any[] = [];
+  pendingSearch = '';
+  pendingPeriod = '';
+  pendingRule = '';
+
+  filterSearch = '';
+  filterPeriod = '';
+  filterRule = '';
+
+  get hasActiveFilters(): boolean {
+    return !!(this.pendingSearch || this.pendingPeriod || this.pendingRule);
+  }
+
+  get hasAppliedFilters(): boolean {
+    return !!(this.filterSearch || this.filterPeriod || this.filterRule);
+  }
 
   ngOnInit(): void {
     this.settingsService.getOrganizationCurrency()
@@ -57,84 +118,205 @@ export class TimeTrackingAbsentsComponent implements OnInit {
         }
       });
 
+    this.loadPeriods();
+    this.loadActiveRules();
     this.fetchAbsents();
+  }
+
+  loadPeriods() {
+    this.payrollService.getPayrollPeriods({ pageSize: 100 }).subscribe({
+      next: (res: any) => {
+        this.periods = (res.data || []).map((p: any) => ({
+          id: p.periodId,
+          name: p.periodName
+        }));
+      }
+    });
+  }
+
+  loadActiveRules() {
+    this.payrollService.getActiveAttendanceDeductionRules().subscribe({
+      next: (res: any) => {
+        this.deductionRules = res || [];
+      }
+    });
   }
 
   fetchAbsents(): void {
     this.isLoading.set(true);
-    // For now, mock the data from the stitch screen
-    setTimeout(() => {
-      this.records.set([
-        {
-          id: '1',
-          employeeId: 'e1',
-          employeeName: 'Ali Hassan',
-          positionName: 'Software Engineer',
-          initials: 'AH',
-          avatarColor: 'blue',
-          absentDays: 3,
-          halfDays: 1,
-          effectiveAbsents: 3.5,
-          graceDays: 1,
-          deductibleDays: 2.5,
-          deductionAmount: 7200
-        },
-        {
-          id: '2',
-          employeeId: 'e2',
-          employeeName: 'Sara Ahmed',
-          positionName: 'HR Manager',
-          initials: 'SA',
-          avatarColor: 'pink',
-          absentDays: 2,
-          halfDays: 0,
-          effectiveAbsents: 2.0,
-          graceDays: 1,
-          deductibleDays: 1.0,
-          deductionAmount: 3100
-        },
-        {
-          id: '3',
-          employeeId: 'e3',
-          employeeName: 'Usman Khan',
-          positionName: 'Product Designer',
-          initials: 'UK',
-          avatarColor: 'amber',
-          absentDays: 1,
-          halfDays: 2,
-          effectiveAbsents: 2.0,
-          graceDays: 1,
-          deductibleDays: 1.0,
-          deductionAmount: 2800
-        },
-        {
-          id: '4',
-          employeeId: 'e4',
-          employeeName: 'Nadia Qureshi',
-          positionName: 'QA Lead',
-          initials: 'NQ',
-          avatarColor: 'purple',
-          absentDays: 1,
-          halfDays: 0,
-          effectiveAbsents: 1.0,
-          graceDays: 1,
-          deductibleDays: 0.0,
-          deductionAmount: 0
-        }
-      ]);
-      this.isLoading.set(false);
-    }, 600);
+    const params: any = {
+      page: this.page(),
+      pageSize: this.pageSize()
+    };
+
+    if (this.filterSearch) params.employeeName = this.filterSearch;
+    if (this.filterPeriod) params.periodId = this.filterPeriod;
+    if (this.filterRule) params.ruleId = this.filterRule;
+
+    this.payrollService.getAttendanceSummaries(params).subscribe({
+      next: (res: any) => {
+        // Handle both PagedResult wrapper or plain array
+        const items = res?.data || (Array.isArray(res) ? res : []);
+        this.totalCount.set(res?.totalCount ?? items.length ?? 0);
+
+        const mapped: AbsentRecordDto[] = items.map((item: any) => {
+          const name: string = item.employeeName || '';
+          const initials = name ? name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() : 'U';
+          const colors = ['blue', 'pink', 'amber', 'purple', 'green', 'indigo'];
+          const avatarColor = colors[Math.floor(Math.random() * colors.length)];
+
+          return {
+            id: item.id,
+            employeeId: item.employeeId,
+            employeeName: item.employeeName ?? '',
+            positionName: item.shiftName ?? '',
+            initials,
+            avatarColor,
+            absentDays: item.absentDays ?? 0,
+            halfDays: item.halfDays ?? 0,
+            effectiveAbsents: item.effectiveAbsents ?? 0,
+            deductibleDays: item.effectiveAbsents ?? 0,
+            deductionAmount: item.totalDeduction ?? 0,
+            periodId: item.periodId,
+            ruleId: item.ruleId,
+            presentDays: item.presentDays ?? 0,
+            absentDeduction: item.absentDeduction ?? 0,
+            halfDayDeduction: item.halfDayDeduction ?? 0,
+            totalDeduction: item.totalDeduction ?? 0,
+          };
+        });
+
+        this.records.set(mapped);
+        this.updateStats(mapped);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.records.set([]);
+        this.isLoading.set(false);
+        this.notification.showError('Failed to load records.');
+      }
+    });
+  }
+
+  applyFilters() {
+    this.filterSearch = this.pendingSearch;
+    this.filterPeriod = this.pendingPeriod;
+    this.filterRule = this.pendingRule;
+    this.page.set(1);
+    this.fetchAbsents();
+  }
+
+  clearFilters() {
+    this.pendingSearch = '';
+    this.pendingPeriod = '';
+    this.pendingRule = '';
+    this.filterSearch = '';
+    this.filterPeriod = '';
+    this.filterRule = '';
+    this.page.set(1);
+    this.fetchAbsents();
+  }
+
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages || p === this.page()) return;
+    this.page.set(p);
+    this.fetchAbsents();
+  }
+
+  prevPage() { this.goToPage(this.page() - 1); }
+  nextPage() { this.goToPage(this.page() + 1); }
+
+  private updateStats(records: AbsentRecordDto[]): void {
+    const totalAbsents = records.reduce((sum, r) => sum + (r.absentDays ?? 0), 0);
+    const totalDeduction = records.reduce((sum, r) => sum + (r.deductionAmount ?? 0), 0);
+    const affected = new Set(records.map(r => r.employeeId)).size;
+
+    this.totalAbsents.set(totalAbsents);
+    this.totalDeduction.set(totalDeduction);
+    this.employeesAffected.set(affected);
   }
 
   logAbsent(): void {
-    // To be implemented: Open dialog to log an absence
+    const dialogRef = this.dialog.open(AttendanceDialogComponent, {
+      width: '480px',
+      panelClass: 'attendance-dialog-panel',
+      data: { type: 'absent', mode: 'add' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.recordType === 'absent') {
+        const { recordType, ...payload } = result;
+        this.payrollService.createAttendanceSummary(payload).subscribe({
+          next: () => {
+            this.notification.showSuccess('Record created successfully');
+            this.fetchAbsents();
+          },
+          error: (err) => this.notification.showError('Failed to create record')
+        });
+      }
+    });
   }
 
   editRecord(record: AbsentRecordDto): void {
-    // To be implemented
+    const dialogRef = this.dialog.open(AttendanceDialogComponent, {
+      width: '480px',
+      panelClass: 'attendance-dialog-panel',
+      data: {
+        type: 'absent',
+        mode: 'edit',
+        record: {
+          employeeId: record.employeeId,
+          periodId: record.periodId,
+          ruleId: record.ruleId,
+          presentDays: record.presentDays ?? 0,
+          absentDays: record.absentDays,
+          halfDays: record.halfDays,
+          effectiveAbsents: record.effectiveAbsents,
+          absentDeduction: record.absentDeduction ?? 0,
+          halfDayDeduction: record.halfDayDeduction ?? 0,
+          totalDeduction: record.totalDeduction ?? record.deductionAmount,
+        }
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.recordType === 'absent') {
+        const { recordType, ...payload } = result;
+        this.payrollService.updateAttendanceSummary(record.id, payload).subscribe({
+          next: () => {
+            this.notification.showSuccess('Record updated successfully');
+            this.fetchAbsents();
+          },
+          error: (err) => this.notification.showError('Failed to update record')
+        });
+      }
+    });
   }
 
   deleteRecord(record: AbsentRecordDto): void {
-    // To be implemented
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Record',
+      message: 'Are you sure you want to delete this absent record?',
+      itemName: record.employeeName,
+      confirmButtonText: 'Yes, Delete'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.payrollService.deleteAttendanceSummary(record.id).subscribe({
+          next: () => {
+            this.notification.showSuccess('Record deleted successfully');
+            this.fetchAbsents();
+          },
+          error: (err) => this.notification.showError('Failed to delete record')
+        });
+      }
+    });
   }
 }

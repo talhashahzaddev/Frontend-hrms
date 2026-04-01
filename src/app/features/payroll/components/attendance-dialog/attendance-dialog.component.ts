@@ -26,7 +26,8 @@ export class AttendanceDialogComponent implements OnInit {
   title = '';
   currencySymbol = signal('$');
   employees: any[] = [];
-  rules: any[] = [];
+  rules: any[] = [];           // overtime rules
+  deductionRules: any[] = []; // attendance deduction rules
   periods: any[] = [];
 
   constructor(
@@ -55,23 +56,36 @@ export class AttendanceDialogComponent implements OnInit {
     this.initForm();
     this.loadData();
 
+    // Patch form when editing
     if (this.data.mode === 'edit' && this.data.record) {
       if (this.data.type === 'overtime') {
         this.form.patchValue({
           employee: this.data.record.employeeId,
           rule: this.data.record.ruleId,
           period: this.data.record.periodId,
-          hours: this.data.record.hours,
+          hours: this.data.record.hoursWorked,
           rate: this.data.record.rate,
-          amount: this.data.record.amount,
-          overtimeDate: new Date(this.data.record.overtimeDate).toISOString().split('T')[0]
+          amount: this.data.record.finalAmount,
+        });
+      } else if (this.data.type === 'absent') {
+        this.form.patchValue({
+          employee: this.data.record.employeeId,
+          rule: this.data.record.ruleId ?? '',
+          period: this.data.record.periodId,
+          presentDays: this.data.record.presentDays,
+          absentDays: this.data.record.absentDays,
+          halfDays: this.data.record.halfDays,
+          effectiveAbsents: this.data.record.effectiveAbsents,
+          absentDeduction: this.data.record.absentDeduction,
+          halfDayDeduction: this.data.record.halfDayDeduction,
+          totalDeduction: this.data.record.totalDeduction,
         });
       } else {
         this.form.patchValue(this.data.record);
       }
     }
 
-    // Auto-calculate amount if it's overtime
+    // Auto-calculate for overtime
     if (this.data.type === 'overtime') {
       this.form.valueChanges.subscribe(val => {
         if (val.hours && val.rate) {
@@ -86,51 +100,96 @@ export class AttendanceDialogComponent implements OnInit {
         }
       });
     }
+
+    // Auto-calculate for absent: effectiveAbsents & totalDeduction
+    if (this.data.type === 'absent') {
+      this.form.valueChanges.subscribe(val => {
+        const absentDays = Number(val.absentDays ?? 0);
+        const halfDays = Number(val.halfDays ?? 0);
+        const effectiveAbsents = absentDays + halfDays * 0.5;
+
+        if (this.form.get('effectiveAbsents')?.value !== effectiveAbsents) {
+          this.form.patchValue({ effectiveAbsents }, { emitEvent: false });
+        }
+
+        const absentDeduction = Number(val.absentDeduction ?? 0);
+        const halfDayDeduction = Number(val.halfDayDeduction ?? 0);
+        const totalDeduction = absentDeduction + halfDayDeduction;
+        if (this.form.get('totalDeduction')?.value !== totalDeduction) {
+          this.form.patchValue({ totalDeduction }, { emitEvent: false });
+        }
+      });
+    }
   }
 
   loadData() {
     this.employeeService.getEmployees({ page: 1, pageSize: 100 } as any).subscribe((res: any) => {
       this.employees = res.employees;
     });
-    this.payrollService.getOvertimeActiveRules().subscribe((res: any) => {
-      this.rules = res;
-    });
+
     this.payrollService.getPayrollPeriods({ pageSize: 100 }).subscribe((res: any) => {
       this.periods = (res.data || []).map((p: any) => ({
         id: p.periodId,
         name: p.periodName
       }));
     });
+
+    if (this.data.type === 'overtime') {
+      this.payrollService.getOvertimeActiveRules().subscribe((res: any) => {
+        this.rules = res;
+      });
+    }
+
+    if (this.data.type === 'absent') {
+      this.payrollService.getActiveAttendanceDeductionRules().subscribe((res: any) => {
+        this.deductionRules = res;
+      });
+    }
   }
 
   onRuleChange(event: any) {
     const selectedRule = this.rules.find(r => r.ruleId === event.target.value);
     if (selectedRule) {
-      // You can auto-fill rate if percentage/fixed amounts dictate it or clear rate
+      // Future: auto-fill rate from rule if needed
     }
   }
 
   setTitle() {
-    const action = this.data.mode === 'add' ? 'Add' : 'Edit';
+    const action = this.data.mode === 'add' ? 'Log' : 'Edit';
     const typeLabel = this.data.type.replace('-', ' ');
     this.title = `${action} ${typeLabel} record`;
   }
 
   initForm() {
-    this.form = this.fb.group({
-      employee: ['', Validators.required],
-      type: [this.data.type !== 'overtime' ? this.data.type : ''],
-      period: ['', Validators.required],
-
-      // Overtime specific fields
-      ...(this.data.type === 'overtime' ? {
+    if (this.data.type === 'overtime') {
+      this.form = this.fb.group({
+        employee: ['', Validators.required],
         rule: ['', Validators.required],
-        overtimeDate: [''],
+        period: ['', Validators.required],
         hours: ['', [Validators.required, Validators.min(0.5)]],
         rate: ['', [Validators.required, Validators.min(1)]],
         amount: [{ value: '', disabled: true }]
-      } : {})
-    });
+      });
+    } else if (this.data.type === 'absent') {
+      this.form = this.fb.group({
+        employee: ['', Validators.required],
+        rule: [''],
+        period: ['', Validators.required],
+        presentDays: [0, [Validators.required, Validators.min(0)]],
+        absentDays: [0, [Validators.required, Validators.min(0)]],
+        halfDays: [0, [Validators.required, Validators.min(0)]],
+        effectiveAbsents: [{ value: 0, disabled: true }],
+        absentDeduction: [0, [Validators.required, Validators.min(0)]],
+        halfDayDeduction: [0, [Validators.required, Validators.min(0)]],
+        totalDeduction: [{ value: 0, disabled: true }],
+      });
+    } else {
+      this.form = this.fb.group({
+        employee: ['', Validators.required],
+        type: [this.data.type],
+        period: ['', Validators.required],
+      });
+    }
   }
 
   close() {
@@ -140,17 +199,33 @@ export class AttendanceDialogComponent implements OnInit {
   save() {
     if (this.form.valid) {
       const rawValue = this.form.getRawValue();
-      let payload = rawValue;
+      let payload: any;
 
       if (this.data.type === 'overtime') {
         payload = {
           employeeId: rawValue.employee,
           periodId: rawValue.period,
-          ruleId: rawValue.rule,
+          ruleId: rawValue.rule || null,
           hoursWorked: rawValue.hours,
-          finalAmount: rawValue.amount
+          finalAmount: rawValue.amount,
         };
+      } else if (this.data.type === 'absent') {
+        payload = {
+          employeeId: rawValue.employee,
+          periodId: rawValue.period,
+          ruleId: rawValue.rule || null,
+          presentDays: rawValue.presentDays,
+          absentDays: rawValue.absentDays,
+          halfDays: rawValue.halfDays,
+          effectiveAbsents: rawValue.effectiveAbsents,
+          absentDeduction: rawValue.absentDeduction,
+          halfDayDeduction: rawValue.halfDayDeduction,
+          totalDeduction: rawValue.totalDeduction,
+        };
+      } else {
+        payload = rawValue;
       }
+
       this.dialogRef.close({ ...payload, recordType: this.data.type });
     } else {
       this.form.markAllAsTouched();

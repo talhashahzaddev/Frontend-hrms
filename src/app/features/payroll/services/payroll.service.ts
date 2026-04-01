@@ -241,6 +241,18 @@ export class PayrollService {
       );
   }
 
+  getActiveAttendanceDeductionRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/attendance-deduction-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
   createAttendanceDeductionRule(data: any): Observable<any> {
     return this.http.post<ApiResponse<any>>(`${this.apiUrl}/attendance-deduction-rules`, data)
       .pipe(
@@ -273,6 +285,116 @@ export class PayrollService {
             throw new Error(response.message);
           }
           return response.data || response.success;
+        })
+      );
+  }
+
+  // Late Arrival Rules
+  getLateArrivalRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/late-arrival-rules`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  getActiveLateArrivalRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/late-arrival-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  createLateArrivalRule(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/late-arrival-rules`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateLateArrivalRule(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/late-arrival-rules/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteLateArrivalRule(id: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/late-arrival-rules/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
+        })
+      );
+  }
+
+  // Attendance Summaries (Absents)
+  getAttendanceSummaries(params?: any): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/attendance-summaries`, { params })
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+       );
+  }
+
+  createAttendanceSummary(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/attendance-summaries`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateAttendanceSummary(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/attendance-summaries/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteAttendanceSummary(id: string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/attendance-summaries/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
         })
       );
   }

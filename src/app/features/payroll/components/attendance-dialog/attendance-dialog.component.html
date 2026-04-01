@@ -9,57 +9,138 @@
 
   <!-- Body -->
   <div class="dialog-body" [formGroup]="form">
-    <!-- Row 1: Employee & Rule -->
-    <div class="form-row">
-      <div class="form-group">
-        <label>Employee</label>
-        <select class="form-control" formControlName="employee">
-          <option disabled selected value="">Select employee</option>
-          <option *ngFor="let emp of employees" [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
-        </select>
-      </div>
-      <div class="form-group" *ngIf="data.type === 'overtime'">
-        <label>Overtime Rule</label>
-        <select class="form-control" formControlName="rule" (change)="onRuleChange($event)">
-          <option disabled selected value="">Select rule</option>
-          <option *ngFor="let rule of rules" [value]="rule.ruleId">{{ rule.ruleName }} ({{ rule.overtimeType }})</option>
-        </select>
-      </div>
+
+    <!-- ── Row 1: Employee (shared) ── -->
+    <div class="form-group">
+      <label>Employee</label>
+      <select class="form-control" formControlName="employee">
+        <option disabled selected value="">Select employee</option>
+        <option *ngFor="let emp of employees" [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
+      </select>
     </div>
 
-    <!-- Row 3: Hours & Rate -->
-    <div class="form-row" *ngIf="data.type === 'overtime'">
-      <div class="form-group">
-        <label>Hours</label>
-        <input type="number" class="form-control" formControlName="hours" placeholder="e.g. 3.5" step="0.5" />
-      </div>
-      <div class="form-group">
-        <label>Rate per hour ({{ currencySymbol() }})</label>
-        <input type="number" class="form-control" formControlName="rate" placeholder="e.g. 1200" />
-      </div>
-    </div>
+    <!-- ── OVERTIME FIELDS ── -->
+    <ng-container *ngIf="data.type === 'overtime'">
 
-    <!-- Row 4: Period -->
-    <div class="form-row" *ngIf="data.type === 'overtime'">
-      <div class="form-group">
-        <label>Period</label>
-        <select class="form-control" formControlName="period">
-          <option disabled selected value="">Select period</option>
-          <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Row 4: Amount -->
-    <div class="form-group" *ngIf="data.type === 'overtime'">
-      <label>Amount ({{ currencySymbol() }})</label>
-      <div class="relative">
-        <input type="text" class="form-control" formControlName="amount" placeholder="Auto-calculated from Hours × Rate" readonly />
-        <div class="suffix-icon">
-          <mat-icon>lock</mat-icon>
+      <!-- Rule + Period -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Overtime Rule</label>
+          <select class="form-control" formControlName="rule" (change)="onRuleChange($event)">
+            <option disabled selected value="">Select rule</option>
+            <option *ngFor="let rule of rules" [value]="rule.ruleId">{{ rule.ruleName }} ({{ rule.overtimeType }})</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Period</label>
+          <select class="form-control" formControlName="period">
+            <option disabled selected value="">Select period</option>
+            <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+          </select>
         </div>
       </div>
-    </div>
+
+      <!-- Hours + Rate -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Hours</label>
+          <input type="number" class="form-control" formControlName="hours" placeholder="e.g. 3.5" step="0.5" />
+        </div>
+        <div class="form-group">
+          <label>Rate per hour ({{ currencySymbol() }})</label>
+          <input type="number" class="form-control" formControlName="rate" placeholder="e.g. 1200" />
+        </div>
+      </div>
+
+      <!-- Amount (auto-calculated) -->
+      <div class="form-group">
+        <label>Amount ({{ currencySymbol() }})</label>
+        <div class="relative">
+          <input type="text" class="form-control" formControlName="amount" placeholder="Auto-calculated from Hours × Rate" readonly />
+          <div class="suffix-icon">
+            <mat-icon>lock</mat-icon>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ── ABSENT FIELDS ── -->
+    <ng-container *ngIf="data.type === 'absent'">
+
+      <!-- Rule + Period -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Deduction Rule</label>
+          <select class="form-control" formControlName="rule">
+            <option disabled selected value="">Select rule</option>
+            <option *ngFor="let r of deductionRules" [value]="r.ruleId">{{ r.ruleName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Period</label>
+          <select class="form-control" formControlName="period">
+            <option disabled selected value="">Select period</option>
+            <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Present + Absent + Half Days -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Present Days</label>
+          <input type="number" class="form-control" formControlName="presentDays" placeholder="e.g. 20" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Absent Days</label>
+          <input type="number" class="form-control" formControlName="absentDays" placeholder="e.g. 3" min="0" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Half Days</label>
+          <input type="number" class="form-control" formControlName="halfDays" placeholder="e.g. 1" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Effective Absents</label>
+          <div class="relative">
+            <input type="text" class="form-control" formControlName="effectiveAbsents"
+              placeholder="Auto-calculated" readonly />
+            <div class="suffix-icon">
+              <mat-icon>lock</mat-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deductions -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Absent Deduction ({{ currencySymbol() }})</label>
+          <input type="number" class="form-control" formControlName="absentDeduction" placeholder="0.00" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Half-Day Deduction ({{ currencySymbol() }})</label>
+          <input type="number" class="form-control" formControlName="halfDayDeduction" placeholder="0.00" min="0" />
+        </div>
+      </div>
+
+      <!-- Total Deduction (auto-calculated) -->
+      <div class="form-group">
+        <label>Total Deduction ({{ currencySymbol() }})</label>
+        <div class="relative">
+          <input type="text" class="form-control" formControlName="totalDeduction"
+            placeholder="Auto-calculated from absent + half-day deductions" readonly />
+          <div class="suffix-icon">
+            <mat-icon>lock</mat-icon>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
   </div>
 
   <!-- Footer -->
