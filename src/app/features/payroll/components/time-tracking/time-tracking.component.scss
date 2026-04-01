@@ -252,7 +252,8 @@
         .search-box {
           position: relative;
           min-width: 220px;
-          flex: 1 1 220px;
+          flex: 1;
+          max-width: 400px;
 
           mat-icon {
             position: absolute;

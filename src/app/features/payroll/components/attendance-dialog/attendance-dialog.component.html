@@ -123,7 +123,9 @@
         </div>
         <div class="form-group">
           <label>Half-Day Deduction ({{ currencySymbol() }})</label>
-          <input type="number" class="form-control" formControlName="halfDayDeduction" placeholder="0.00" min="0" />
+          <input type="number" class="form-control" formControlName="halfDayDeduction" placeholder="0.00" min="0" 
+            [readonly]="(form.get('halfDays')?.value ?? 0) <= 0" 
+            [style.background-color]="(form.get('halfDays')?.value ?? 0) <= 0 ? '#f8fafc' : 'white'" />
         </div>
       </div>
 
@@ -137,6 +139,49 @@
             <mat-icon>lock</mat-icon>
           </div>
         </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ── LATE ARRIVAL FIELDS ── -->
+    <ng-container *ngIf="data.type === 'late'">
+
+      <!-- Rule + Period -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Late Arrival Rule</label>
+          <select class="form-control" formControlName="rule">
+            <option disabled selected value="">Select rule</option>
+            <option *ngFor="let r of lateRules" [value]="r.ruleId">{{ r.ruleName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Period</label>
+          <select class="form-control" formControlName="period">
+            <option disabled selected value="">Select period</option>
+            <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Minutes + Deduction -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Late Minutes</label>
+          <input type="number" class="form-control" formControlName="lateMinutes" placeholder="e.g. 45" />
+        </div>
+        <div class="form-group">
+          <label>Deduction ({{ currencySymbol() }})</label>
+          <input type="number" class="form-control" formControlName="deduction" placeholder="e.g. 500" />
+        </div>
+      </div>
+
+      <!-- Is Grace -->
+      <div class="form-group"
+        style="display: flex; flex-direction: row; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+          <input type="checkbox" formControlName="isGrace" id="isGrace"
+            style="width: 1rem; height: 1rem; cursor: pointer;" />
+          <label for="isGrace" style="margin-bottom: 0; cursor: pointer;">Grace applied?</label>
       </div>
 
     </ng-container>

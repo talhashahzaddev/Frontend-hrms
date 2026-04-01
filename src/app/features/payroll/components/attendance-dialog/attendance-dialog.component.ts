@@ -28,6 +28,7 @@ export class AttendanceDialogComponent implements OnInit {
   employees: any[] = [];
   rules: any[] = [];           // overtime rules
   deductionRules: any[] = []; // attendance deduction rules
+  lateRules: any[] = [];      // late arrival rules
   periods: any[] = [];
 
   constructor(
@@ -80,6 +81,15 @@ export class AttendanceDialogComponent implements OnInit {
           halfDayDeduction: this.data.record.halfDayDeduction,
           totalDeduction: this.data.record.totalDeduction,
         });
+      } else if (this.data.type === 'late') {
+        this.form.patchValue({
+          employee: this.data.record.employeeId,
+          rule: this.data.record.ruleId ?? '',
+          period: this.data.record.periodId,
+          lateMinutes: this.data.record.lateMinutes,
+          deduction: this.data.record.deduction,
+          isGrace: this.data.record.isGrace,
+        });
       } else {
         this.form.patchValue(this.data.record);
       }
@@ -114,7 +124,12 @@ export class AttendanceDialogComponent implements OnInit {
 
         const absentDeduction = Number(val.absentDeduction ?? 0);
         const halfDayDeduction = Number(val.halfDayDeduction ?? 0);
-        const totalDeduction = absentDeduction + halfDayDeduction;
+        const totalDeduction = absentDeduction + (halfDays > 0 ? halfDayDeduction : 0);
+        
+        if (halfDays <= 0 && this.form.get('halfDayDeduction')?.value !== 0) {
+          this.form.patchValue({ halfDayDeduction: 0 }, { emitEvent: false });
+        }
+
         if (this.form.get('totalDeduction')?.value !== totalDeduction) {
           this.form.patchValue({ totalDeduction }, { emitEvent: false });
         }
@@ -143,6 +158,12 @@ export class AttendanceDialogComponent implements OnInit {
     if (this.data.type === 'absent') {
       this.payrollService.getActiveAttendanceDeductionRules().subscribe((res: any) => {
         this.deductionRules = res;
+      });
+    }
+
+    if (this.data.type === 'late') {
+      this.payrollService.getActiveLateArrivalRules().subscribe((res: any) => {
+        this.lateRules = res;
       });
     }
   }
@@ -183,6 +204,15 @@ export class AttendanceDialogComponent implements OnInit {
         halfDayDeduction: [0, [Validators.required, Validators.min(0)]],
         totalDeduction: [{ value: 0, disabled: true }],
       });
+    } else if (this.data.type === 'late') {
+      this.form = this.fb.group({
+        employee: ['', Validators.required],
+        rule: [''],
+        period: ['', Validators.required],
+        lateMinutes: [0, [Validators.required, Validators.min(0)]],
+        deduction: [0, [Validators.required, Validators.min(0)]],
+        isGrace: [false],
+      });
     } else {
       this.form = this.fb.group({
         employee: ['', Validators.required],
@@ -221,6 +251,15 @@ export class AttendanceDialogComponent implements OnInit {
           absentDeduction: rawValue.absentDeduction,
           halfDayDeduction: rawValue.halfDayDeduction,
           totalDeduction: rawValue.totalDeduction,
+        };
+      } else if (this.data.type === 'late') {
+        payload = {
+          employeeId: rawValue.employee,
+          periodId: rawValue.period,
+          ruleId: rawValue.rule || null,
+          lateMinutes: rawValue.lateMinutes,
+          deduction: rawValue.deduction,
+          isGrace: rawValue.isGrace,
         };
       } else {
         payload = rawValue;

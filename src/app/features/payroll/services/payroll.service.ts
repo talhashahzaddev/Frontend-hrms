@@ -398,4 +398,53 @@ export class PayrollService {
         })
       );
   }
+
+  // Late Attendance
+  getLateAttendances(params?: any): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/late-attendance`, { params })
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  createLateAttendance(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/late-attendance`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateLateAttendance(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/late-attendance/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteLateAttendance(id: string): Observable<any> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/late-attendance/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
 }
