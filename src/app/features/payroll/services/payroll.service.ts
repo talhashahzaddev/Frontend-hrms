@@ -33,6 +33,46 @@ export interface PayRollRulesGroupedDto {
   gratuityPolicy: PayRollPolicySectionDto;
 }
 
+export interface LeaveRuleDto {
+  ruleId: string;
+  organizationId: string;
+  ruleName: string;
+  description?: string;
+  unpaidMultiplier: number;
+  halfPaidMultiplier: number;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeaveSummary {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  periodId: string;
+  ruleId?: string;
+  ruleName?: string;
+  paidDays: number;
+  unpaidDays: number;
+  halfPaidDays: number;
+  unpaidDeduction: number;
+  halfPaidDeduction: number;
+  totalLeaveDays: number;
+  totalDeduction: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeaveSummaryFilter {
+  employeeName?: string;
+  ruleId?: string;
+  periodId?: string;
+  page: number;
+  pageSize: number;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -97,6 +137,42 @@ export class PayrollService {
   }
   getOvertimeActiveRules(): Observable<any[]> {
     return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/overtime-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  getAttendanceActiveRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/attendance-deduction-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  getLateArrivalActiveRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/late-arrival-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  getLeaveActiveRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/leave-rules/active`)
       .pipe(
         map((response: any) => {
           if (!response.success && response.message) {
@@ -444,6 +520,128 @@ export class PayrollService {
             throw new Error(response.message);
           }
           return response.data;
+        })
+      );
+  }
+
+  // Leave Rules
+  getLeaveRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/leave-rules`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  getActiveLeaveRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/leave-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  createLeaveRule(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/leave-rules`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateLeaveRule(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/leave-rules/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteLeaveRule(id: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/leave-rules/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
+        })
+      );
+  }
+
+  // Leave Summary
+  getLeaveSummaries(params?: any): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}/leave-summaries`, { params })
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  getLeaveSummaryById(id: string): Observable<LeaveSummary> {
+    return this.http.get<ApiResponse<LeaveSummary>>(`${this.apiUrl}/leave-summaries/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  createLeaveSummary(data: any): Observable<LeaveSummary> {
+    return this.http.post<ApiResponse<LeaveSummary>>(`${this.apiUrl}/leave-summaries`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updateLeaveSummary(id: string, data: any): Observable<LeaveSummary> {
+    return this.http.put<ApiResponse<LeaveSummary>>(`${this.apiUrl}/leave-summaries/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deleteLeaveSummary(id: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/leave-summaries/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
         })
       );
   }

@@ -186,6 +186,88 @@
 
     </ng-container>
 
+    <!-- ── LEAVE SUMMARY FIELDS ── -->
+    <ng-container *ngIf="data.type === 'leave'">
+      <div class="field-container leave-form-wrapper">
+
+        <!-- Rule + Period -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Leave Rule</label>
+            <select class="form-control" formControlName="rule">
+              <option disabled selected value="">Select rule</option>
+              <option *ngFor="let r of leaveRules" [value]="r.ruleId">{{ r.ruleName }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Period</label>
+            <select class="form-control" formControlName="period">
+              <option disabled selected value="">Select period</option>
+              <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Paid + Unpaid Days -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Paid Days</label>
+            <input type="number" class="form-control" formControlName="paidDays" placeholder="0" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Unpaid Days</label>
+            <input type="number" class="form-control" formControlName="unpaidDays" placeholder="0" min="0" />
+          </div>
+        </div>
+
+        <!-- Half Paid + Total Days -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Half-Paid Days</label>
+            <input type="number" class="form-control" formControlName="halfPaidDays" placeholder="0" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Total Leave Days</label>
+            <div class="relative">
+              <input type="text" class="form-control" 
+                     [value]="((form.get('paidDays')?.value || 0) + (form.get('unpaidDays')?.value || 0) + (form.get('halfPaidDays')?.value || 0))"
+                     placeholder="0" readonly />
+              <div class="suffix-icon">
+                <mat-icon>lock</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deductions -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Unpaid Deduction ({{ currencySymbol() }})</label>
+            <input type="number" class="form-control" formControlName="unpaidDeduction" placeholder="0.00" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Half-Paid Deduction ({{ currencySymbol() }})</label>
+            <input type="number" class="form-control" formControlName="halfPaidDeduction" placeholder="0.00" min="0" 
+                   [readonly]="(form.get('halfPaidDays')?.value ?? 0) <= 0" 
+                   [style.background-color]="(form.get('halfPaidDays')?.value ?? 0) <= 0 ? '#f1f5f9' : 'white'" />
+          </div>
+        </div>
+
+        <!-- Total Deduction summary -->
+        <div class="form-group">
+          <label>Total Deduction ({{ currencySymbol() }})</label>
+          <div class="relative">
+            <input type="text" class="form-control" formControlName="totalDeduction"
+                   placeholder="Auto-calculated" readonly />
+            <div class="suffix-icon">
+              <mat-icon>lock</mat-icon>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+
   </div>
 
   <!-- Footer -->

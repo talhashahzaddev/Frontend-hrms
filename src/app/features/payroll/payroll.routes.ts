@@ -43,6 +43,12 @@ export const payrollRoutes: Routes = [
     title: 'Late Arrival Rules - HRMS'
   },
   {
+    path: 'policies/leave-deduction-rules',
+    loadComponent: () =>
+      import('./components/leave-deduction-rules/leave-deduction-rules.component').then(m => m.LeaveDeductionRulesComponent),
+    title: 'Leave Deduction Rules - HRMS'
+  },
+  {
     path: 'time-tracking',
     loadComponent: () =>
       import('./components/time-tracking/time-tracking.component').then(m => m.TimeTrackingComponent),
