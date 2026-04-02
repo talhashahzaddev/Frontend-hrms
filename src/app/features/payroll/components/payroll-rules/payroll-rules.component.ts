@@ -156,6 +156,10 @@ export class PayrollRulesComponent implements OnInit {
       this.router.navigate(['/payroll/policies/attendance-deduction-rules']);
     } else if (policy.key === 'lateArrivalPolicy') {
       this.router.navigate(['/payroll/policies/late-arrival-rules']);
+    } else if (policy.key === 'leaveDeductionPolicy') {
+      this.router.navigate(['/payroll/policies/leave-deduction-rules']);
+    } else if (policy.key === 'performanceBonusPolicy') {
+      this.router.navigate(['/payroll/policies/performance-rules']);
     }
   }
 }

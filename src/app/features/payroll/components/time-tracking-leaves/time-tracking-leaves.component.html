@@ -1,0 +1,172 @@
+<div class="time-tracking-leaves-container">
+  <!-- Summary Cards Dashboard -->
+  <div class="stats-dashboard">
+    <div class="stat-card">
+      <p class="stat-label">Total leave days</p>
+      <div class="stat-value-group">
+        <p class="stat-main-value">{{ totalLeaveDays | number:'1.1-2' }}</p>
+        <p class="stat-sub-label">this period</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <p class="stat-label">Paid leaves</p>
+      <div class="stat-value-group">
+        <p class="stat-main-value">{{ totalPaidDays | number:'1.1-2' }}</p>
+        <p class="stat-badge text-emerald-500">no deduction</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <p class="stat-label">Unpaid deduction</p>
+      <div class="stat-value-group">
+        <p class="stat-main-value">{{ currencySymbol() }} {{ totalUnpaidDeduction | number:'1.0-0' }}</p>
+        <p class="stat-badge text-rose-500">{{ unpaidEmployeesCount }} employees</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <p class="stat-label">Half-paid deduction</p>
+      <div class="stat-value-group">
+        <p class="stat-main-value">{{ currencySymbol() }} {{ totalHalfPaidDeduction | number:'1.0-0' }}</p>
+        <p class="stat-badge text-rose-500">{{ halfPaidEmployeesCount }} employees</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar & Filters -->
+  <div class="toolbar">
+    <div class="filters-row">
+      <!-- Search -->
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          placeholder="Search employee by name or ID..." 
+          type="text" 
+          [(ngModel)]="pendingSearch" />
+      </div>
+
+      <!-- Filters -->
+      <select class="filter-select" [(ngModel)]="pendingRule">
+        <option value="">All rules</option>
+        <option *ngFor="let rule of leaveRules" [value]="rule.ruleId">
+          {{ rule.ruleName }}
+        </option>
+      </select>
+
+      <select class="filter-select" [(ngModel)]="pendingPeriod">
+        <option value="">All periods</option>
+        <option *ngFor="let p of periods" [value]="p.id">{{ p.name }}</option>
+      </select>
+
+      <!-- Filter Action Buttons -->
+      <div class="filter-actions">
+        <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+          <mat-icon>filter_list</mat-icon>
+          Apply
+        </button>
+        <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+          <mat-icon>close</mat-icon>
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="add-btn-wrap">
+      <button class="add-btn" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon>
+        Add Record
+      </button>
+    </div>
+  </div>
+
+  <!-- Content States -->
+  @if (isLoading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="loading-text">Gathering records...</p>
+  </div>
+  } @else if (records.length === 0) {
+  <div class="empty-state">
+    <div class="empty-icon">
+      <mat-icon>assignment</mat-icon>
+    </div>
+    <div class="empty-info">
+      <h3 class="empty-title">No leave records found</h3>
+      <p class="empty-subtitle">Configure leave records for tracked employees to see them here.</p>
+    </div>
+    <button class="add-record-btn" (click)="openAddDialog()">
+      <mat-icon>add</mat-icon>
+      Create first record
+    </button>
+  </div>
+  } @else {
+  <!-- Employee Grid -->
+  <div class="employee-grid">
+    @for (record of records; track record.id) {
+    <div class="employee-card">
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="employee-profile">
+            <div class="avatar">
+              {{ getInitials(record.employeeName) }}
+            </div>
+            <div class="employee-meta">
+              <h3 class="employee-name">{{ record.employeeName }}</h3>
+              <p class="employee-code">{{ record.employeeCode }}</p>
+            </div>
+          </div>
+          <div class="policy-badge-wrap" *ngIf="record.ruleName">
+            <span class="policy-badge">{{ record.ruleName }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="data-row">
+            <span class="data-label">Paid days</span>
+            <span class="data-value positive">{{ record.paidDays | number:'1.1-1' }}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Unpaid days</span>
+            <span class="data-value negative">{{ record.unpaidDays | number:'1.1-1' }}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Half-paid days</span>
+            <span class="data-value neutral">{{ record.halfPaidDays | number:'1.1-1' }}</span>
+          </div>
+          <div class="divider"></div>
+          <div class="data-row">
+            <span class="data-label italic">Unpaid deduction</span>
+            <span class="data-value negative">{{ currencySymbol() }} {{ record.unpaidDeduction | number:'1.0-0'
+              }}</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label italic">Half-paid deduction</span>
+            <span class="data-value" [ngClass]="record.halfPaidDeduction > 0 ? 'negative' : 'positive'">
+              {{ currencySymbol() }} {{ record.halfPaidDeduction | number:'1.0-0' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-edit" (click)="editRecord(record)">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        <button class="btn-delete" (click)="deleteRecord(record)">
+          <mat-icon>delete</mat-icon> Delete
+        </button>
+      </div>
+    </div>
+    }
+
+    <!-- Add New Quick Card -->
+    <div class="add-placeholder-card" (click)="openAddDialog()">
+      <div class="placeholder-icon">
+        <mat-icon>add</mat-icon>
+      </div>
+      <p class="placeholder-text">Add another record</p>
+    </div>
+  </div>
+  }
+</div>

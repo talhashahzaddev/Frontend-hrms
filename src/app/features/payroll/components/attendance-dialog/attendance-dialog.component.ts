@@ -29,6 +29,7 @@ export class AttendanceDialogComponent implements OnInit {
   rules: any[] = [];           // overtime rules
   deductionRules: any[] = []; // attendance deduction rules
   lateRules: any[] = [];      // late arrival rules
+  leaveRules: any[] = [];     // leave deduction rules
   periods: any[] = [];
 
   constructor(
@@ -90,6 +91,18 @@ export class AttendanceDialogComponent implements OnInit {
           deduction: this.data.record.deduction,
           isGrace: this.data.record.isGrace,
         });
+      } else if (this.data.type === 'leave') {
+        this.form.patchValue({
+          employee: this.data.record.employeeId,
+          rule: this.data.record.ruleId ?? '',
+          period: this.data.record.periodId,
+          paidDays: this.data.record.paidDays,
+          unpaidDays: this.data.record.unpaidDays,
+          halfPaidDays: this.data.record.halfPaidDays,
+          unpaidDeduction: this.data.record.unpaidDeduction,
+          halfPaidDeduction: this.data.record.halfPaidDeduction,
+          totalDeduction: this.data.record.totalDeduction,
+        });
       } else {
         this.form.patchValue(this.data.record);
       }
@@ -135,6 +148,24 @@ export class AttendanceDialogComponent implements OnInit {
         }
       });
     }
+
+    // Auto-calculate for leave: totalDeduction
+    if (this.data.type === 'leave') {
+      this.form.valueChanges.subscribe(val => {
+        const halfPaidDays = Number(val.halfPaidDays ?? 0);
+        if (halfPaidDays <= 0 && this.form.get('halfPaidDeduction')?.value !== 0) {
+          this.form.patchValue({ halfPaidDeduction: 0 }, { emitEvent: false });
+        }
+
+        const unpaidDeduction = Number(val.unpaidDeduction ?? 0);
+        const halfPaidDeduction = Number(val.halfPaidDeduction ?? 0);
+        const totalDeduction = unpaidDeduction + halfPaidDeduction;
+
+        if (this.form.get('totalDeduction')?.value !== totalDeduction) {
+          this.form.patchValue({ totalDeduction }, { emitEvent: false });
+        }
+      });
+    }
   }
 
   loadData() {
@@ -164,6 +195,12 @@ export class AttendanceDialogComponent implements OnInit {
     if (this.data.type === 'late') {
       this.payrollService.getActiveLateArrivalRules().subscribe((res: any) => {
         this.lateRules = res;
+      });
+    }
+
+    if (this.data.type === 'leave') {
+      this.payrollService.getLeaveActiveRules().subscribe((res: any) => {
+        this.leaveRules = res;
       });
     }
   }
@@ -213,6 +250,18 @@ export class AttendanceDialogComponent implements OnInit {
         deduction: [0, [Validators.required, Validators.min(0)]],
         isGrace: [false],
       });
+    } else if (this.data.type === 'leave') {
+      this.form = this.fb.group({
+        employee: ['', Validators.required],
+        rule: [''],
+        period: ['', Validators.required],
+        paidDays: [0, [Validators.required, Validators.min(0)]],
+        unpaidDays: [0, [Validators.required, Validators.min(0)]],
+        halfPaidDays: [0, [Validators.required, Validators.min(0)]],
+        unpaidDeduction: [0, [Validators.required, Validators.min(0)]],
+        halfPaidDeduction: [0, [Validators.required, Validators.min(0)]],
+        totalDeduction: [{ value: 0, disabled: true }],
+      });
     } else {
       this.form = this.fb.group({
         employee: ['', Validators.required],
@@ -260,6 +309,18 @@ export class AttendanceDialogComponent implements OnInit {
           lateMinutes: rawValue.lateMinutes,
           deduction: rawValue.deduction,
           isGrace: rawValue.isGrace,
+        };
+      } else if (this.data.type === 'leave') {
+        payload = {
+          employeeId: rawValue.employee,
+          periodId: rawValue.period,
+          ruleId: rawValue.rule || null,
+          paidDays: rawValue.paidDays,
+          unpaidDays: rawValue.unpaidDays,
+          halfPaidDays: rawValue.halfPaidDays,
+          unpaidDeduction: rawValue.unpaidDeduction,
+          halfPaidDeduction: rawValue.halfPaidDeduction,
+          totalDeduction: rawValue.totalDeduction,
         };
       } else {
         payload = rawValue;

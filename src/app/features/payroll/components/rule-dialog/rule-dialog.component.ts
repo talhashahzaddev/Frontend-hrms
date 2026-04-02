@@ -27,6 +27,8 @@ export interface RuleDialogData {
     percentage: number | null;
     halfDayMultiplier?: number;
     graceMinutes?: number;
+    minScore?: number;
+    maxScore?: number;
   };
 }
 
@@ -90,7 +92,11 @@ export class RuleDialogComponent implements OnInit {
     fixedAmount: [null as number | null],
     percentage: [null as number | null],
     halfDayMultiplier: [0.5, [Validators.required, Validators.min(0)]],
-    graceMinutes: [0, [Validators.required, Validators.min(0)]]
+    graceMinutes: [0, [Validators.required, Validators.min(0)]],
+    unpaidMultiplier: [1.00, [Validators.required, Validators.min(0)]],
+    halfPaidMultiplier: [0.50, [Validators.required, Validators.min(0)]],
+    minScore: [0, [Validators.required, Validators.min(0)]],
+    maxScore: [5, [Validators.required, Validators.min(0)]]
   });
 
   ngOnInit(): void {
@@ -135,7 +141,11 @@ export class RuleDialogComponent implements OnInit {
         fixedAmount: isFixedAmount ? fixedVal : null,
         percentage: isFixedAmount ? null : percentVal,
         halfDayMultiplier: rule.halfDayMultiplier ?? 0.5,
-        graceMinutes: rule.graceMinutes ?? 0
+        graceMinutes: rule.graceMinutes ?? 0,
+        unpaidMultiplier: rule.unpaidMultiplier ?? 1.00,
+        halfPaidMultiplier: rule.halfPaidMultiplier ?? 0.50,
+        minScore: rule.minScore ?? 0,
+        maxScore: rule.maxScore ?? 5
       });
     }
   }
@@ -179,10 +189,36 @@ export class RuleDialogComponent implements OnInit {
       graceControl?.clearValidators();
     }
     graceControl?.updateValueAndValidity();
+
+    const unpaidControl = this.ruleForm.get('unpaidMultiplier');
+    const halfPaidLeaveControl = this.ruleForm.get('halfPaidMultiplier');
+    if (Number(policyId) === 4) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      unpaidControl?.setValidators([Validators.required, Validators.min(0)]);
+      halfPaidLeaveControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      unpaidControl?.clearValidators();
+      halfPaidLeaveControl?.clearValidators();
+    }
+    unpaidControl?.updateValueAndValidity();
+    halfPaidLeaveControl?.updateValueAndValidity();
+
+    const minScoreControl = this.ruleForm.get('minScore');
+    const maxScoreControl = this.ruleForm.get('maxScore');
+    if (Number(policyId) === 5) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      minScoreControl?.setValidators([Validators.required, Validators.min(0)]);
+      maxScoreControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      minScoreControl?.clearValidators();
+      maxScoreControl?.clearValidators();
+    }
+    minScoreControl?.updateValueAndValidity();
+    maxScoreControl?.updateValueAndValidity();
   }
 
   private updateAmountValidation() {
-    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2 || this.selectedPolicy === 3;
+    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2 || this.selectedPolicy === 3 || this.selectedPolicy === 5;
     const amountType = this.ruleForm.get('amountType')?.value;
 
     const fixedControl = this.ruleForm.get('fixedAmount');
@@ -304,6 +340,66 @@ export class RuleDialogComponent implements OnInit {
               this.isEditMode ? 'Late arrival rule updated successfully' : 'Late arrival rule created successfully'
             );
             this.dialogRef.close({ success: true, data: res, policyId: 3 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update rule' : 'Failed to create rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 4) { // 4 is Leave Deduction Policy
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        unpaidMultiplier: formValue.unpaidMultiplier,
+        halfPaidMultiplier: formValue.halfPaidMultiplier,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updateLeaveRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createLeaveRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Leave deduction rule updated successfully' : 'Leave deduction rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 4 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update rule' : 'Failed to create rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 5) { // 5 is Performance Bonus Policy
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        minScore: formValue.minScore,
+        maxScore: formValue.maxScore,
+        fixedAmount: formValue.amountType === 'fixed' ? formValue.fixedAmount : null,
+        percentage: formValue.amountType === 'percentage' ? formValue.percentage : null,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updatePerformanceRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createPerformanceRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Performance bonus rule updated successfully' : 'Performance bonus rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 5 });
           },
           error: (err: any) => {
             console.error(err);

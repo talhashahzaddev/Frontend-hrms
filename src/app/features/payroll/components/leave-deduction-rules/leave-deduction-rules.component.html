@@ -1,4 +1,4 @@
-<div class="late-arrival-rules-container">
+<div class="leave-deduction-rules-container">
   <!-- Page Header -->
   <div class="page-header-wrapper">
     <div class="page-header">
@@ -7,8 +7,8 @@
           <mat-icon>arrow_back</mat-icon>
         </button>
         <div class="title-text-group">
-          <h1 class="title">Late Arrival Rule</h1>
-          <p class="subtitle">Configure grace periods and late arrival deduction rules</p>
+          <h1 class="title">Leave Deduction Rule</h1>
+          <p class="subtitle">Configure unpaid and half-paid leave deduction rules</p>
         </div>
       </div>
       <button class="create-rule-btn" (click)="openRuleDialog()">
@@ -25,9 +25,8 @@
         <thead>
           <tr>
             <th class="text-left">Rule name</th>
-            <th class="text-right">Fixed deduction</th>
-            <th class="text-right">% deduction</th>
-            <th class="text-right">Grace minutes</th>
+            <th class="text-right">Unpaid Multiplier</th>
+            <th class="text-right">Half Paid Multiplier</th>
             <th class="text-center">Status</th>
             <th class="text-right">Actions</th>
           </tr>
@@ -35,16 +34,16 @@
         <tbody>
           @if (isLoading()) {
           <tr>
-            <td colspan="6" class="text-center" style="padding: 3rem;">
+            <td colspan="5" class="text-center" style="padding: 3rem;">
               <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
             </td>
           </tr>
-          } @else if (lateArrivalRules().length === 0) {
+          } @else if (leaveRules().length === 0) {
           <tr>
-            <td colspan="6" class="text-center" style="padding: 4rem;">
+            <td colspan="5" class="text-center" style="padding: 4rem;">
               <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure rules for late arrival deductions.
-                </h3>
+                <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure rules for unpaid and half-paid leave
+                  deductions.</h3>
                 <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
                   <mat-icon>add</mat-icon>
                   <span>Create rule</span>
@@ -53,16 +52,11 @@
             </td>
           </tr>
           } @else {
-          @for (rule of lateArrivalRules(); track rule.ruleId) {
+          @for (rule of leaveRules(); track rule.ruleId) {
           <tr class="table-row" [class.inactive-row]="!rule.isActive">
             <td class="text-left font-semibold">{{ rule.ruleName }}</td>
-            <td class="text-right">{{ rule.fixedDeduction !== null && rule.fixedDeduction !== undefined ?
-              (currencySymbol() + ' ' + (rule.fixedDeduction | number)) : '—' }}</td>
-            <td class="text-right">
-              <span class="highlight-val">{{ rule.percentageDeduction !== null && rule.percentageDeduction !== undefined
-                ? rule.percentageDeduction + '%' : '—' }}</span>
-            </td>
-            <td class="text-right">{{ rule.graceMinutes || 0 }} mins</td>
+            <td class="text-right font-mono">{{ rule.unpaidMultiplier | number:'1.2-2' }}</td>
+            <td class="text-right font-mono">{{ rule.halfPaidMultiplier | number:'1.2-2' }}</td>
             <td class="text-center">
               <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
                 {{ rule.isActive ? 'Active' : 'Inactive' }}
@@ -91,9 +85,8 @@
 
     <!-- Footer Details -->
     <div class="table-footer">
-      <p>Showing {{ lateArrivalRules().length }} of {{ lateArrivalRules().length }} late arrival rules</p>
+      <p>Showing {{ leaveRules().length }} of {{ leaveRules().length }} leave deduction rules</p>
     </div>
   </div>
 
-  <!-- Info Section from Stitch Design -->
 </div>
