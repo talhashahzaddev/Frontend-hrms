@@ -645,4 +645,65 @@ export class PayrollService {
         })
       );
   }
+
+  // Performance Rules
+  getPerformanceRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/performance-rules`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  getActivePerformanceRules(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/performance-rules/active`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  createPerformanceRule(data: any): Observable<any> {
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/performance-rules`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  updatePerformanceRule(id: string, data: any): Observable<any> {
+    return this.http.put<ApiResponse<any>>(`${this.apiUrl}/performance-rules/${id}`, data)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+  }
+
+  deletePerformanceRule(id: string): Observable<boolean> {
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/performance-rules/${id}`)
+      .pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data || response.success;
+        })
+      );
+  }
 }

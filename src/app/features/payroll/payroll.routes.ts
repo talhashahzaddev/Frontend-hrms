@@ -55,6 +55,12 @@ export const payrollRoutes: Routes = [
     title: 'Time Tracking - HRMS'
   },
   {
+    path: 'policies/performance-rules',
+    loadComponent: () =>
+      import('./components/performance-rules/performance-rules.component').then(m => m.PerformanceRulesComponent),
+    title: 'Performance Bonus Policy - HRMS'
+  },
+  {
     path: 'periods',
     loadComponent: () =>
       import('./components/payroll-period/payroll-period.component').then(m => m.PayrollPeriodComponent),
