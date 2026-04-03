@@ -307,9 +307,11 @@ getCurrentUserInfo(): { userId: string; email: string } | null {
   openInvolveEmployeeDialog(): void {
   const dialogRef = this.dialog.open(InvloveEmployeeDialogComponent, {
     width: '600px',
+    autoFocus: false,
     data: {
       ticketId: this.ticketId,
-      groupId: this.ticket?.groupId || null
+      groupId: this.ticket?.groupId || null,
+      
     } // passing ticketId and optional groupId
     
   });
