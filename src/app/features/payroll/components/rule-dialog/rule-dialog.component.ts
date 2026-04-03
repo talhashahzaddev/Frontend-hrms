@@ -68,12 +68,13 @@ export class RuleDialogComponent implements OnInit {
     { id: 3, name: 'Late Arrival Policy' },
     { id: 4, name: 'Leave Deduction Policy' },
     { id: 5, name: 'Performance Bonus Policy' },
-    { id: 6, name: 'Employee Loan Policy' },
-    { id: 7, name: 'Salary Advance Policy' },
-    { id: 8, name: 'Provident Fund Policy' },
-    { id: 9, name: 'Income Tax Policy' },
-    { id: 10, name: 'Social Security Policy' },
-    { id: 11, name: 'Gratuity Policy' }
+    { id: 6, name: 'Bonus' },
+    { id: 7, name: 'Employee Loan Policy' },
+    { id: 8, name: 'Salary Advance Policy' },
+    { id: 9, name: 'Provident Fund Policy' },
+    { id: 10, name: 'Income Tax Policy' },
+    { id: 11, name: 'Social Security Policy' },
+    { id: 12, name: 'Gratuity Policy' }
   ];
 
   readonly overtimeTypes = ['regular', 'holiday', 'weekend'];
@@ -147,6 +148,18 @@ export class RuleDialogComponent implements OnInit {
         minScore: rule.minScore ?? 0,
         maxScore: rule.maxScore ?? 5
       });
+
+      if (this.data.policyId === 6) {
+        const bonusAmount = rule.bonusAmount;
+        const bonusPercent = rule.bonusPercentage;
+        const isFixedBonus = bonusAmount !== null && bonusAmount !== undefined;
+
+        this.ruleForm.patchValue({
+          amountType: isFixedBonus ? 'fixed' : 'percentage',
+          fixedAmount: isFixedBonus ? bonusAmount : null,
+          percentage: isFixedBonus ? null : bonusPercent
+        });
+      }
     }
   }
 
@@ -215,10 +228,17 @@ export class RuleDialogComponent implements OnInit {
     }
     minScoreControl?.updateValueAndValidity();
     maxScoreControl?.updateValueAndValidity();
+
+    if (Number(policyId) === 6) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      this.ruleForm.get('amountType')?.setValidators(Validators.required);
+    }
+    this.ruleForm.get('ruleName')?.updateValueAndValidity();
+    this.ruleForm.get('amountType')?.updateValueAndValidity();
   }
 
   private updateAmountValidation() {
-    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2 || this.selectedPolicy === 3 || this.selectedPolicy === 5;
+    const isSpecialPolicy = this.selectedPolicy === 1 || this.selectedPolicy === 2 || this.selectedPolicy === 3 || this.selectedPolicy === 5 || this.selectedPolicy === 6;
     const amountType = this.ruleForm.get('amountType')?.value;
 
     const fixedControl = this.ruleForm.get('fixedAmount');
@@ -400,6 +420,36 @@ export class RuleDialogComponent implements OnInit {
               this.isEditMode ? 'Performance bonus rule updated successfully' : 'Performance bonus rule created successfully'
             );
             this.dialogRef.close({ success: true, data: res, policyId: 5 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update rule' : 'Failed to create rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 6) { // 6 is Bonus
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        bonusType: formValue.amountType,
+        bonusAmount: formValue.amountType === 'fixed' ? formValue.fixedAmount : null,
+        bonusPercentage: formValue.amountType === 'percentage' ? formValue.percentage : null,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updateBonusRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createBonusRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Bonus rule updated successfully' : 'Bonus rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 6 });
           },
           error: (err: any) => {
             console.error(err);

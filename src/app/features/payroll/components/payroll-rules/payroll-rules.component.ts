@@ -85,7 +85,8 @@ export class PayrollRulesComponent implements OnInit {
       'Provident Fund Policy': 'savings',
       'Income Tax Policy': 'request_quote',
       'Social Security Policy': 'shield_person',
-      'Gratuity Policy': 'award_star'
+      'Gratuity Policy': 'award_star',
+      'Bonus Policy': 'redeem'
     };
     return config[policyTitle] || 'settings';
   }
@@ -102,7 +103,8 @@ export class PayrollRulesComponent implements OnInit {
       'Provident Fund Policy': 'color-indigo',
       'Income Tax Policy': 'color-teal',
       'Social Security Policy': 'color-red',
-      'Gratuity Policy': 'color-amber'
+      'Gratuity Policy': 'color-amber',
+      'Bonus Policy': 'color-primary'
     };
     return config[policyTitle] || 'color-default';
   }
@@ -121,7 +123,8 @@ export class PayrollRulesComponent implements OnInit {
       providentFundPolicy: 'Provident Fund Policy',
       incomeTaxPolicy: 'Income Tax Policy',
       socialSecurityPolicy: 'Social Security Policy',
-      gratuityPolicy: 'Gratuity Policy'
+      gratuityPolicy: 'Gratuity Policy',
+      bonusPolicy: 'Bonus Policy'
     };
 
     const entries = Object.entries(labels).map(([key, title]) => {
@@ -160,6 +163,8 @@ export class PayrollRulesComponent implements OnInit {
       this.router.navigate(['/payroll/policies/leave-deduction-rules']);
     } else if (policy.key === 'performanceBonusPolicy') {
       this.router.navigate(['/payroll/policies/performance-rules']);
+    } else if (policy.key === 'bonusPolicy') {
+      this.router.navigate(['/payroll/policies/bonus-rules']);
     }
   }
 }

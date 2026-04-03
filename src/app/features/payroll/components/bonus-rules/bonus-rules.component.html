@@ -1,0 +1,106 @@
+<div class="bonus-rules-container">
+  <!-- Page Header -->
+  <div class="page-header-wrapper">
+    <div class="page-header">
+      <div class="title-section">
+        <button class="icon-button back-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="title-text-group">
+          <h1 class="title">Bonus Policy</h1>
+          <p class="subtitle">Configure discretionary bonus templates for employees</p>
+        </div>
+      </div>
+      <button class="create-rule-btn" (click)="openRuleDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Create rule</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="text-left">Rule Name</th>
+            <th class="text-left">Bonus Type</th>
+            <th class="text-right">Bonus Amount</th>
+            <th class="text-right">Bonus Percentage</th>
+            <th class="text-center">Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+          <tr>
+            <td colspan="6" class="text-center" style="padding: 3rem;">
+              <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
+            </td>
+          </tr>
+          } @else if (bonusRules().length === 0) {
+          <tr>
+            <td colspan="6" class="text-center" style="padding: 4rem;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure discretionary bonus templates for employees.</h3>
+                <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+                  <mat-icon>add</mat-icon>
+                  <span>Create rule</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          @for (rule of bonusRules(); track rule.ruleId) {
+          <tr class="table-row" [class.inactive-row]="!rule.isActive">
+            <td class="text-left font-semibold">{{ rule.ruleName }}</td>
+            <td class="text-left">
+              <span class="badge" [ngClass]="rule.bonusType === 'fixed' ? 'status-active' : 'status-inactive'">
+                {{ rule.bonusType | uppercase }}
+              </span>
+            </td>
+            <td class="text-right">
+                <span class="highlight-val" *ngIf="rule.bonusAmount">
+                    {{ currencySymbol() }} {{ rule.bonusAmount | number:'1.2-2' }}
+                </span>
+                <span *ngIf="!rule.bonusAmount">—</span>
+            </td>
+            <td class="text-right">
+                <span class="highlight-val" *ngIf="rule.bonusPercentage">
+                    {{ rule.bonusPercentage | number:'1.2-2' }}%
+                </span>
+                <span *ngIf="!rule.bonusPercentage">—</span>
+            </td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
+                {{ rule.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="text-right action-cell">
+              <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
+                (click)="editRule(rule)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule)"
+                [title]="rule.isActive ? 'Deactivate' : 'Activate'">
+                <mat-icon>{{ rule.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn text-muted hover-danger"
+                (click)="onDelete(rule.ruleId, rule.ruleName)" title="Delete Rule">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer Details -->
+    <div class="table-footer">
+      <p>Showing {{ bonusRules().length }} of {{ bonusRules().length }} active policies</p>
+    </div>
+  </div>
+</div>
