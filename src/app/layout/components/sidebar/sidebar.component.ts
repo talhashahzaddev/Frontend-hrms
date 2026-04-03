@@ -215,11 +215,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       {
       label: 'Help Desk',
       icon: 'event_available',
+      menuName: 'Help Desk',
       children: [
-        { label: 'Tickets Dashbaord', icon: 'event', route: '/help-desk/tickets' },
-        { label: 'Agent Group', icon: 'event', route: '/help-desk/agent-group' },
-        { label: 'Ticket Invlovement', icon: 'event', route: '/help-desk/ticket-invlovement' },
-        { label: 'Ticket Category', icon: 'event', route: '/help-desk/ticket-category', exact: true }
+        { label: 'Tickets Dashbaord', icon: 'event',menuName: 'Help Desk',subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
+        { label: 'Agent Group', icon: 'event', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
+        { label: 'Ticket Involvement', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Involvement', route: '/help-desk/ticket-involvement' },
+        { label: 'Ticket Category', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Category', route: '/help-desk/ticket-category', exact: true }
       ]
     },
     {

@@ -133,10 +133,10 @@
             <!-- Status -->
             <div class="att-status">
               <!-- Uploading spinner -->
-              <span *ngIf="entry.uploading" class="material-symbols-outlined att-spin">progress_activity</span>
+              <!-- <span *ngIf="entry.uploading" class="material-symbols-outlined att-spin">progress_activity</span> -->
 
               <!-- Success check -->
-              <span *ngIf="!entry.uploading && !entry.error && entry.url" class="material-symbols-outlined att-ok">check_circle</span>
+              <!-- <span *ngIf="!entry.uploading && !entry.error && entry.url" class="material-symbols-outlined att-ok">check_circle</span> -->
 
               <!-- Error + retry -->
               <ng-container *ngIf="entry.error">

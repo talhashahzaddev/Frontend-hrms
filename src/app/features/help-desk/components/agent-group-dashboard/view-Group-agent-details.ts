@@ -21,16 +21,16 @@ import { TicketGroup } from '../../../../core/models/helpdesk.models';
       <div class="dialog-content">
         <div class="detail-section">
           <label class="detail-label">Group Name:</label>
-          <p class="detail-value">{{ group?.groupTitle }}</p>
+          <p class="detail-value">{{ group.groupTitle }}</p>
         </div>
         <div class="detail-section">
           <label class="detail-label">Department:</label>
-          <p class="detail-value">{{ group?.departmentName || 'N/A' }}</p>
+          <p class="detail-value">{{ group.departmentName || 'N/A' }}</p>
         </div>
 
         <div class="detail-section">
           <label class="detail-label">Category:</label>
-          <p class="detail-value">{{ group?.categoryName || 'N/A' }}</p>
+          <p class="detail-value">{{ group.categoryName || 'N/A' }}</p>
         </div>
 
         <div class="detail-section">
@@ -47,9 +47,9 @@ import { TicketGroup } from '../../../../core/models/helpdesk.models';
           </div>
         </div>
 
-        <div class="detail-section" *ngIf="group?.createdAt">
+        <div class="detail-section" *ngIf="group.createdAt">
           <label class="detail-label">Created Date:</label>
-          <p class="detail-value">{{ group?.createdAt | date: 'short' }}</p>
+          <p class="detail-value">{{ group.createdAt | date: 'short' }}</p>
         </div>
       </div>
 

@@ -94,8 +94,8 @@ export class CreateTicketDialogueComponent implements OnInit, OnDestroy {
       departmentId:  [null, Validators.required],
       ticketTitle:   ['',   Validators.required],
       ticketType:    ['',   Validators.required],
-      categoryId:    [null],
-      assignedGroup: [null],
+      categoryId:    [null, Validators.required],
+      assignedGroup: [null, Validators.required],
       priority:      ['',   Validators.required],
       description:   [''],
       attachment: [null]

@@ -17,6 +17,7 @@ import { NotificationService } from '@/app/core/services/notification.service';
 import { TicketGroup } from '../../../../core/models/helpdesk.models';
 import { CreateAgentGroupDialogComponent } from '../create-agent-group-dialog/create-agent-group-dialog.component';
 import { ViewGroupAgentDetailsComponent } from './view-Group-agent-details';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 interface Department {
   departmentId: string;
@@ -183,27 +184,41 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
   }
 
   deleteGroup(group: TicketGroup): void {
-    const confirmDelete = confirm(`Are you sure you want to delete the group "${group.groupTitle}"? This action cannot be undone.`);
-    
-    if (!confirmDelete) return;
-    
-    this.helpDeskService.deleteGroup(group.groupId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (success: boolean) => {
-          if (success) {
-            this.notificationService.showSuccess(`Group "${group.groupTitle}" deleted successfully`);
-            // Refresh groups list
-            const deptId = this.departmentControl.value || undefined;
-            this.getGroups(this.searchControl.value || '', deptId);
-          } else {
-            this.notificationService.showError('Failed to delete the group');
-          }
-        },
-        error: (err) => {
-          console.error('Error deleting group', err);
-          this.notificationService.showError(err?.error?.message || 'An error occurred while deleting the group');
-        }
-      });
+    const confirmButtonText = 'Yes, Delete';
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Group',
+      message: 'Are you sure you want to delete this group? This action cannot be undone.',
+      itemName: group.groupTitle,
+      confirmButtonText
+    };
+
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.helpDeskService.deleteGroup(group.groupId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (success: boolean) => {
+              if (success) {
+                this.notificationService.showSuccess(`Group "${group.groupTitle}" deleted successfully`);
+                // Refresh groups list
+                const deptId = this.departmentControl.value || undefined;
+                this.getGroups(this.searchControl.value || '', deptId);
+              } else {
+                this.notificationService.showError('Failed to delete the group');
+              }
+            },
+            error: (err) => {
+              console.error('Error deleting group', err);
+              this.notificationService.showError(err?.error?.message || 'An error occurred while deleting the group');
+            }
+          });
+      }
+    });
   }
 }
