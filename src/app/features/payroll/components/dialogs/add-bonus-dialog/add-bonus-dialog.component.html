@@ -9,19 +9,17 @@
 
   <!-- Body -->
   <div class="dialog-body" [formGroup]="form">
-    <!-- Employee -->
-    <div class="form-group">
-      <label>Employee</label>
-      <select class="form-control" formControlName="employeeId">
-        <option value="" disabled selected>Select employee</option>
-        @for (emp of employees; track emp.employeeId) {
-          <option [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
-        }
-      </select>
-    </div>
-
-    <!-- Period + Rule -->
+    <!-- Row 1: Employee + Period -->
     <div class="form-row">
+      <div class="form-group">
+        <label>Employee</label>
+        <select class="form-control" formControlName="employeeId">
+          <option value="" disabled selected>Select employee</option>
+          @for (emp of employees; track emp.employeeId) {
+            <option [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
+          }
+        </select>
+      </div>
       <div class="form-group">
         <label>Payroll Period</label>
         <select class="form-control" formControlName="periodId">
@@ -31,6 +29,10 @@
           }
         </select>
       </div>
+    </div>
+
+    <!-- Row 2: Rule + Amount -->
+    <div class="form-row">
       <div class="form-group">
         <label>Bonus Rule</label>
         <select class="form-control" formControlName="ruleId">
@@ -40,12 +42,10 @@
           }
         </select>
       </div>
-    </div>
-
-    <!-- Amount -->
-    <div class="form-group">
-      <label>Amount ({{ currencySymbol() }})</label>
-      <input type="number" class="form-control" formControlName="amount" placeholder="e.g. 5000" />
+      <div class="form-group">
+        <label>Amount ({{ currencySymbol() }})</label>
+        <input type="number" class="form-control" formControlName="amount" placeholder="e.g. 5000" />
+      </div>
     </div>
   </div>
 
