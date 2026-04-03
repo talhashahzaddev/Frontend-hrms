@@ -1,83 +1,122 @@
-<section class="payroll-ledger-page performance-pay-page">
-  <header class="page-header">
-    <div>
-      <h1>Bonus &amp; Performance Pay</h1>
-      <p>Manage bonus payouts and performance-based compensation for the current period</p>
+<div class="time-tracking-container performance-pay-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Bonus & Performance Pay</h1>
+      <p class="subtitle">Manage bonus payouts and performance-based compensation for the current period</p>
     </div>
-
     <div class="ledger-switch">
       <a routerLink="/payroll/bonus" routerLinkActive="active">Bonus</a>
       <a routerLink="/payroll/performance" routerLinkActive="active">Performance pay</a>
     </div>
-  </header>
+  </div>
 
-  <section class="stats-grid">
-    <article class="stat-card">
-      <div class="stat-top">
-        <span class="card-icon blue"><mat-icon>payments</mat-icon></span>
-        <small class="positive">+12%</small>
+  <!-- Summary Stat Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Payout</span>
+          <span class="value">{{ currencySymbol() }} {{ totalPayout | number }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>payments</mat-icon>
+        </div>
       </div>
-      <span class="stat-label">Total payout</span>
-      <h2 class="stat-value">PKR {{ totalPayout | number }}</h2>
-    </article>
-
-    <article class="stat-card">
-      <div class="stat-top">
-        <span class="card-icon indigo"><mat-icon>groups</mat-icon></span>
-        <small>Active</small>
-      </div>
-      <span class="stat-label">Employees</span>
-      <h2 class="stat-value">{{ rows.length }} evaluated</h2>
-    </article>
-
-    <article class="stat-card">
-      <div class="stat-top">
-        <span class="card-icon peach"><mat-icon>monitoring</mat-icon></span>
-        <small class="primary">Above avg</small>
-      </div>
-      <span class="stat-label">Avg score</span>
-      <h2 class="stat-value">{{ avgScore }}</h2>
-    </article>
-
-    <article class="stat-card">
-      <div class="stat-top">
-        <span class="card-icon deep"><mat-icon>workspace_premium</mat-icon></span>
-        <small>Q3 Period</small>
-      </div>
-      <span class="stat-label">Top rating</span>
-      <h2 class="stat-value">{{ topRating }}</h2>
-    </article>
-  </section>
-
-  <section class="ledger-table-shell">
-    <div class="toolbar">
-      <div class="toolbar-filters">
-        <label class="search-box" aria-label="Search employee">
-          <mat-icon>search</mat-icon>
-          <input type="text" [(ngModel)]="searchText" placeholder="Filter by name..." />
-        </label>
-
-        <mat-form-field appearance="outline" class="filter-select-field">
-          <mat-select
-            [(ngModel)]="selectedRating"
-            [panelClass]="'payroll-filter-panel'"
-            aria-label="Rating filter"
-          >
-            <mat-select-trigger>Rating: {{ selectedRating }}</mat-select-trigger>
-            @for (rating of ratingOptions; track rating) {
-              <mat-option [value]="rating">Rating: {{ rating }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <button type="button" class="btn-primary" (click)="openAddPerformanceDialog()">
-        + Add performance pay
-      </button>
+      <p class="card-footer">this period</p>
     </div>
 
-    <div class="table-scroll">
-      <table>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Employees</span>
+          <span class="value">{{ rows.length }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>groups</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">evaluated employees</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Avg Score</span>
+          <span class="value">{{ avgScore }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>monitoring</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">overall average</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Top Rating</span>
+          <span class="value">{{ topRating }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>workspace_premium</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">highest achievement</p>
+    </div>
+  </div>
+
+  <!-- Content Area (Table + Toolbar) -->
+  <div class="content-card">
+    <div class="toolbar">
+      <!-- Filter row -->
+      <div class="filters-row">
+        <!-- Search -->
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
+        </div>
+
+        <!-- Rule filter -->
+        <select class="filter-select" [(ngModel)]="pendingRule">
+          <option value="">All rules</option>
+          @for (rule of performanceRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriod">
+          <option value="">All periods</option>
+          @for (p of periods; track p.periodId) {
+            <option [value]="p.periodId">{{ p.periodName }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Add button -->
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openAddPerformanceDialog()">
+          <mat-icon>add</mat-icon>
+          Add Performance Pay
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table">
         <thead>
           <tr>
             <th>Employee</th>
@@ -90,40 +129,38 @@
           </tr>
         </thead>
         <tbody>
-          @if (filteredRows.length === 0) {
+          @if (rows.length === 0) {
             <tr>
               <td class="empty-row" colspan="7">No performance records found.</td>
             </tr>
           } @else {
-            @for (row of filteredRows; track trackById($index, row)) {
-              <tr>
+            @for (row of rows; track trackById($index, row)) {
+              <tr class="table-row">
                 <td>
-                  <div class="employee-cell">
-                    <div class="avatar" [class]="'avatar ' + row.avatarTone">{{ row.initials }}</div>
-                    <div>
-                      <p>{{ row.employeeName }}</p>
-                      <small>{{ row.designation }}</small>
+                  <div class="employee-info">
+                    <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
+                    <div class="employee-detail">
+                      <span class="font-semibold">{{ row.employeeName }}</span>
+                      <small class="designation">{{ row.designation }}</small>
                     </div>
                   </div>
                 </td>
                 <td>{{ row.period }}</td>
-                <td class="text-center score">{{ row.score }}</td>
+                <td class="text-center font-semibold highlight-val">{{ row.score }}</td>
                 <td>
-                  <span class="badge" [class]="'badge ' + row.rating.toLowerCase().replace(' ', '-')">
+                  <span class="badge" [class]="'badge-' + row.rating.toLowerCase().replace(' ', '-')">
                     {{ row.rating }}
                   </span>
                 </td>
-                <td class="text-right amount">PKR {{ row.amount | number }}</td>
-                <td class="calculated">{{ row.calculatedAt }}</td>
-                <td>
-                  <div class="row-actions">
-                    <button type="button" aria-label="Edit" (click)="openEditPerformanceDialog(row)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button type="button" aria-label="Delete" class="danger" (click)="requestDeleteRow(row)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
+                <td class="text-right font-semibold">{{ currencySymbol() }} {{ row.amount | number }}</td>
+                <td class="text-sm italic text-gray-500">{{ row.calculatedAt }}</td>
+                <td class="action-cell">
+                  <button class="action-btn hover-primary" aria-label="Edit" (click)="openEditPerformanceDialog(row)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="action-btn hover-danger" aria-label="Delete" (click)="requestDeleteRow(row)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
                 </td>
               </tr>
             }
@@ -132,16 +169,31 @@
       </table>
     </div>
 
-    <footer class="table-footer">
-      <span>Showing {{ filteredRows.length }} of {{ rows.length }} evaluated employees</span>
+    <div class="table-footer">
+      <p>
+        @if (totalRecords === 0) {
+          No records found
+        } @else {
+          Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalRecords }} records
+        }
+      </p>
       <div class="pagination">
-        <button type="button" disabled>
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="currentPage === 1" [disabled]="currentPage === 1" (click)="prevPage()">
           <mat-icon>chevron_left</mat-icon>
         </button>
-        <button type="button">
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+          <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Next -->
+        <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
           <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
-    </footer>
-  </section>
-</section>
+    </div>
+  </div>
+</div>

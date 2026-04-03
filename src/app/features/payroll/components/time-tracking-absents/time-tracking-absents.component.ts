@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
-import { AttendanceDialogComponent } from '../attendance-dialog/attendance-dialog.component';
+import { AttendanceDialogComponent } from '../dialogs/attendance-dialog/attendance-dialog.component';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData

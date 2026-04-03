@@ -8,7 +8,7 @@ import { PayrollService, LeaveSummary, LeaveRuleDto } from '../../services/payro
 import { SettingsService } from '../../../settings/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
 import { take } from 'rxjs';
-import { AttendanceDialogComponent } from '../attendance-dialog/attendance-dialog.component';
+import { AttendanceDialogComponent } from '../dialogs/attendance-dialog/attendance-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({

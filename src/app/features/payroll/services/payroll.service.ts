@@ -31,6 +31,7 @@ export interface PayRollRulesGroupedDto {
   incomeTaxPolicy: PayRollPolicySectionDto;
   socialSecurityPolicy: PayRollPolicySectionDto;
   gratuityPolicy: PayRollPolicySectionDto;
+  bonusPolicy: PayRollPolicySectionDto;
 }
 
 export interface LeaveRuleDto {
@@ -706,4 +707,175 @@ export class PayrollService {
         })
       );
   }
+
+    // Bonus Rules
+    getBonusRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/bonus-rules`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveBonusRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/bonus-rules/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createBonusRule(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/bonus-rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateBonusRule(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/bonus-rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteBonusRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/bonus-rules/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    // Performance Pay
+    getPerformancePays(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/performance-pay`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createPerformancePay(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/performance-pay`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updatePerformancePay(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/performance-pay/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deletePerformancePay(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/performance-pay/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    // Bonus Entries
+    getBonusEntries(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/bonus-entries`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getBonusEntryById(id: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/bonus-entries/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createBonusEntry(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/bonus-entries`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateBonusEntry(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/bonus-entries/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteBonusEntry(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/bonus-entries/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
 }

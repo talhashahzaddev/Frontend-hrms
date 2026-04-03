@@ -1,62 +1,74 @@
-<div class="payroll-modal">
-  <header class="modal-header">
+<div class="attendance-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
     <h2>{{ dialogTitle }}</h2>
-    <button type="button" aria-label="Close dialog" (click)="close()">
+    <button class="close-btn" (click)="close()">
       <mat-icon>close</mat-icon>
     </button>
-  </header>
+  </div>
 
-  <form class="modal-body" [formGroup]="form" (ngSubmit)="save()">
-    <div class="field full">
+  <!-- Body -->
+  <div class="dialog-body" [formGroup]="form">
+    <!-- Employee -->
+    <div class="form-group">
       <label>Employee</label>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select formControlName="employee" [panelClass]="'payroll-dialog-select-panel'" placeholder="Select an employee">
-          <mat-option value="" disabled>Select an employee</mat-option>
-          @for (employee of employees; track employee.name) {
-            <mat-option [value]="employee.name">{{ employee.name }}</mat-option>
+      <select class="form-control" formControlName="employeeId">
+        <option value="" disabled selected>Select an employee</option>
+        @for (employee of employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Period + Rule -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Payroll Period</label>
+        <select class="form-control" formControlName="periodId">
+          <option value="" disabled selected>Select a period</option>
+          @for (period of periods; track period.periodId) {
+            <option [value]="period.periodId">{{ period.periodName }}</option>
           }
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="field">
-      <label>Payroll period</label>
-      <input type="text" formControlName="payrollPeriod" />
-    </div>
-
-    <div class="field">
-      <label>Performance ID</label>
-      <input type="text" formControlName="performanceId" placeholder="REF-PR-001" />
-    </div>
-
-    <div class="field">
-      <label>Score 0-100</label>
-      <input type="number" min="0" max="100" formControlName="score" placeholder="85" />
-    </div>
-
-    <div class="field">
-      <label>Rating</label>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select formControlName="rating" [panelClass]="'payroll-dialog-select-panel'">
-          <mat-option value="Excellent">Excellent</mat-option>
-          <mat-option value="Good">Good</mat-option>
-          <mat-option value="Average">Average</mat-option>
-          <mat-option value="Below average">Below average</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="field full amount-field">
-      <label>Amount PKR</label>
-      <div class="amount-wrap">
-        <span>Rs.</span>
-        <input type="number" min="0" step="0.01" formControlName="amount" placeholder="0.00" />
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Performance Rule</label>
+        <select class="form-control" formControlName="ruleId" (change)="onRuleChange($any($event.target).value)">
+          <option [value]="null">None</option>
+          @for (rule of rules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
       </div>
     </div>
-  </form>
 
-  <footer class="modal-footer">
-    <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
-    <button type="button" class="btn-save" (click)="save()">{{ submitLabel }}</button>
-  </footer>
+    <!-- Score + Rating -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Score (0-100)</label>
+        <input type="number" class="form-control" min="0" max="100" formControlName="score" placeholder="e.g. 85" />
+      </div>
+      <div class="form-group">
+        <label>Rating</label>
+        <div class="relative">
+          <input type="text" class="form-control" formControlName="rating" placeholder="Auto-calculated" readonly />
+          <div class="suffix-icon">
+            <mat-icon>lock</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount -->
+    <div class="form-group">
+      <label>Amount ({{ currencySymbol() }})</label>
+      <input type="number" class="form-control" min="0" step="0.01" formControlName="amount" placeholder="0.00" />
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="close()">Cancel</button>
+    <button class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
 </div>

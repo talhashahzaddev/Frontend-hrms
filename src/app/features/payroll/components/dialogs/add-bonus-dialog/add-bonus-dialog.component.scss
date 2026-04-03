@@ -1,236 +1,178 @@
 .bonus-dialog-panel .mat-mdc-dialog-container {
   padding: 0;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 74, 198, 0.12);
 }
 
 .bonus-dialog-panel .mdc-dialog__surface {
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
+  border-radius: 0.75rem;
 }
 
-.payroll-modal {
-  color: #191c1e;
-  font-family: 'Inter', 'Public Sans', sans-serif;
+.attendance-dialog-container {
+  font-family: 'Public Sans', 'Inter', sans-serif;
+  background-color: #ffffff;
+  width: 100%;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
-  .modal-header {
+  .dialog-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 1.4rem;
-    background: rgba(242, 244, 246, 0.65);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
 
     h2 {
-      margin: 0;
-      font-family: 'Manrope', 'Inter', sans-serif;
-      font-size: 1.65rem;
+      color: #0f172a;
+      font-size: 1.125rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.025em;
+      margin: 0;
+      text-transform: capitalize;
     }
 
-    button {
-      border: 0;
+    .close-btn {
+      color: #94a3b8;
       background: transparent;
-      color: #434655;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.25rem;
       cursor: pointer;
-      border-radius: 0.4rem;
-      width: 2rem;
-      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
 
       &:hover {
-        background: #eceef0;
+        color: #2563eb;
+        background-color: rgba(37, 99, 235, 0.1);
+      }
+      
+      mat-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
       }
     }
   }
 
-  .modal-body {
-    padding: 1.2rem 1.4rem;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+  .dialog-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-
-      &.full {
-        grid-column: 1 / -1;
-      }
+    .form-group {
+      width: 100%;
 
       label {
-        color: #434655;
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 0.375rem;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        font-size: 0.68rem;
-        font-weight: 800;
+        letter-spacing: 0.05em;
       }
 
-      input,
-      textarea,
-      select {
+      .form-control {
         width: 100%;
-        background: #ffffff;
-        border: 1px solid rgba(195, 198, 215, 0.35);
-        border-radius: 0.55rem;
-        min-height: 2.5rem;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.92rem;
-        color: #191c1e;
-        outline: 0;
-        font-family: inherit;
+        height: 2.75rem;
+        padding: 0 0.75rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        color: #0f172a;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+        box-sizing: border-box;
 
         &:focus {
-          border-color: #004ac6;
-          box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.12);
+          border-color: #2563eb;
+          box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        &[readonly] {
+          background-color: #f1f5f9;
+          color: #64748b;
+          cursor: not-allowed;
+          font-style: italic;
+          border-color: #f1f5f9;
         }
       }
 
-      textarea {
+      textarea.form-control {
         resize: none;
-        min-height: 4.25rem;
+        min-height: 4.5rem;
       }
 
-      .select-wrap {
-        position: relative;
-
-        select {
-          appearance: none;
-          padding-right: 2.2rem;
-          cursor: pointer;
-          transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-
-          &:hover {
-            border-color: rgba(160, 171, 196, 0.85);
-          }
-
-          &:focus {
-            background-color: #ffffff;
-          }
-
-          option {
-            color: #191c1e;
-            background: #ffffff;
-          }
-        }
-
-        mat-icon {
-          position: absolute;
-          right: 0.55rem;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #434655;
-          font-size: 1rem;
-          width: 1rem;
-          height: 1rem;
-          pointer-events: none;
-        }
+      select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
       }
+    }
 
-      .select-field {
-        width: 100%;
-
-        .mat-mdc-form-field-subscript-wrapper {
-          display: none;
-        }
-
-        .mat-mdc-text-field-wrapper {
-          min-height: 2.5rem;
-          background: #ffffff;
-          border-radius: 0.55rem;
-        }
-
-        .mat-mdc-form-field-flex {
-          height: 100%;
-          align-items: center;
-        }
-
-        .mat-mdc-form-field-infix {
-          min-height: 2.5rem;
-          padding-top: 0;
-          padding-bottom: 0;
-          display: flex;
-          align-items: center;
-        }
-
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: rgba(195, 198, 215, 0.35);
-        }
-
-        .mat-mdc-select-trigger {
-          color: #191c1e;
-          font-size: 0.92rem;
-          height: 100%;
-          align-items: center;
-        }
-
-        .mat-mdc-select-arrow,
-        .mat-mdc-form-field-icon-suffix {
-          color: #434655;
-        }
-      }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
     }
   }
 
-  .modal-footer {
+  .dialog-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e2e8f0;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 0.6rem;
-    padding: 1rem 1.4rem 1.2rem;
-    border-top: 1px solid rgba(195, 198, 215, 0.2);
-    background: rgba(242, 244, 246, 0.5);
+    gap: 0.75rem;
+    background-color: rgba(248, 250, 252, 0.5);
 
-    button {
-      height: 2.4rem;
-      border-radius: 0.5rem;
-      border: 0;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
+    .cancel-btn {
       padding: 0 1.25rem;
-      font-family: inherit;
-    }
-
-    .btn-cancel {
+      height: 2.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #475569;
       background: transparent;
-      color: #004ac6;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
 
       &:hover {
-        background: rgba(37, 99, 235, 0.1);
+        color: #0f172a;
       }
     }
 
-    .btn-save {
-      color: #fff;
-      background: linear-gradient(135deg, #004ac6 0%, #2563eb 100%);
-      box-shadow: 0 6px 14px rgba(0, 74, 198, 0.2);
+    .save-btn {
+      padding: 0 1.5rem;
+      height: 2.5rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #ffffff;
+      background-color: #2563eb;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -1px rgba(37, 99, 235, 0.1);
+      transition: all 0.2s;
 
       &:hover {
-        opacity: 0.95;
+        background-color: rgba(37, 99, 235, 0.9);
       }
-    }
-  }
-}
 
-.payroll-dialog-select-panel {
-  border-radius: 0.65rem;
-  border: 1px solid rgba(195, 198, 215, 0.45);
-
-  .mat-mdc-option {
-    min-height: 2.3rem;
-    font-size: 0.92rem;
-    color: #191c1e;
-  }
-}
-
-@media (max-width: 600px) {
-  .payroll-modal {
-    .modal-body {
-      grid-template-columns: minmax(0, 1fr);
+      &:active {
+        transform: scale(0.98);
+      }
     }
   }
 }

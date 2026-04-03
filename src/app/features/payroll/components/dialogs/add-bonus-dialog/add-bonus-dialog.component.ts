@@ -1,24 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
-
-export interface BonusDialogResult {
-  employee: string;
-  payrollPeriod: string;
-  type: 'Fixed' | 'Performance' | 'Festival' | 'Referral';
-  amount: number;
-  status: 'Active' | 'Cancelled';
-  description: string;
-}
+import { PayrollService } from '../../../services/payroll.service';
+import { EmployeeService } from '../../../../employee/services/employee.service';
+import { SettingsService } from '../../../../settings/services/settings.service';
+import { take } from 'rxjs';
 
 interface BonusDialogData {
   mode?: 'create' | 'edit';
-  initialValue?: Partial<BonusDialogResult>;
-  employees?: string[];
+  initialValue?: any;
 }
 
 @Component({
@@ -29,43 +23,82 @@ interface BonusDialogData {
   templateUrl: './add-bonus-dialog.component.html',
   styleUrl: './add-bonus-dialog.component.scss'
 })
-export class AddBonusDialogComponent {
+export class AddBonusDialogComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly payrollService = inject(PayrollService);
+  private readonly employeeService = inject(EmployeeService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly dialogRef = inject(MatDialogRef<AddBonusDialogComponent>);
+
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
 
-  readonly employees = this.data?.employees ?? [
-    'Ali Hassan',
-    'Sara Ahmed',
-    'Usman Khan',
-    'Fatima Malik',
-    'Bilal Raza',
-    'Nadia Qureshi',
-    'Kamran Tariq'
-  ];
+  employees: any[] = [];
+  periods: any[] = [];
+  bonusRules: any[] = [];
+  isLoading = false;
+  readonly currencySymbol = signal('$');
 
   readonly form = this.fb.group({
-    employee: ['', Validators.required],
-    payrollPeriod: ['Oct 2023', Validators.required],
-    type: ['Fixed' as const, Validators.required],
-    amount: [null as number | null, [Validators.required, Validators.min(1)]],
-    status: ['Active' as const, Validators.required],
-    description: ['', [Validators.required, Validators.maxLength(250)]]
+    employeeId: ['', Validators.required],
+    periodId: ['', Validators.required],
+    ruleId: ['', Validators.required],
+    amount: [null as number | null, [Validators.required, Validators.min(1)]]
   });
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddBonusDialogComponent, BonusDialogResult | undefined>,
-    @Inject(MAT_DIALOG_DATA) public data: BonusDialogData
-  ) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: BonusDialogData) {
     if (this.data?.initialValue) {
       this.form.patchValue({
-        employee: this.data.initialValue.employee ?? '',
-        payrollPeriod: this.data.initialValue.payrollPeriod ?? 'Oct 2023',
-        type: (this.data.initialValue.type ?? 'Fixed') as 'Fixed',
-        amount: this.data.initialValue.amount ?? null,
-        status: (this.data.initialValue.status ?? 'Active') as 'Active',
-        description: this.data.initialValue.description ?? ''
+        employeeId: this.data.initialValue.employeeId ?? '',
+        periodId: this.data.initialValue.periodId ?? '',
+        ruleId: this.data.initialValue.ruleId ?? '',
+        amount: this.data.initialValue.amount ?? null
       });
     }
+  }
+
+  ngOnInit(): void {
+    this.loadInitialData();
+    
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: any) => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
+  }
+
+  private loadInitialData(): void {
+    this.isLoading = true;
+    
+    // Load Employees
+    this.employeeService.getEmployees({ page: 1, pageSize: 1000 }).subscribe({
+      next: (res: any) => this.employees = res.employees,
+      error: (err: any) => console.error('Error fetching employees:', err)
+    });
+
+    // Load Periods
+    this.payrollService.getPayrollPeriods().subscribe({
+      next: (data: any) => {
+        this.periods = Array.isArray(data) ? data : (data?.items || data?.data || []);
+      },
+      error: (err) => console.error('Error loading periods:', err)
+    });
+
+    // Load Active Bonus Rules
+    this.payrollService.getActiveBonusRules().subscribe({
+      next: (data: any) => {
+        this.bonusRules = Array.isArray(data) ? data : (data?.items || data?.data || []);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading bonus rules:', err);
+        this.isLoading = false;
+      }
+    });
   }
 
   get dialogTitle(): string {
@@ -86,14 +119,42 @@ export class AddBonusDialogComponent {
       return;
     }
 
+    this.isLoading = true;
     const value = this.form.getRawValue();
-    this.dialogRef.close({
-      employee: value.employee ?? '',
-      payrollPeriod: value.payrollPeriod ?? '',
-      type: (value.type ?? 'Fixed') as BonusDialogResult['type'],
-      amount: Number(value.amount ?? 0),
-      status: (value.status ?? 'Active') as BonusDialogResult['status'],
-      description: value.description ?? ''
-    });
+    const payload = {
+      employeeId: value.employeeId,
+      periodId: value.periodId,
+      ruleId: value.ruleId || null,
+      bonusAmount: Number(value.amount)
+    };
+
+    if (this.mode === 'edit') {
+      const bonusId = this.data.initialValue.bonusId;
+      const updatePayload = {
+        ruleId: value.ruleId || null,
+        bonusAmount: Number(value.amount)
+      };
+      this.payrollService.updateBonusEntry(bonusId, updatePayload).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.dialogRef.close(true);
+        },
+        error: (err: any) => {
+          console.error('Error updating bonus:', err);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.payrollService.createBonusEntry(payload).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.dialogRef.close(true);
+        },
+        error: (err: any) => {
+          console.error('Error creating bonus:', err);
+          this.isLoading = false;
+        }
+      });
+    }
   }
 }
