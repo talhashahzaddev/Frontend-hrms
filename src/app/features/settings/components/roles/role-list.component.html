@@ -108,7 +108,7 @@
                 <span>Edit Role</span>
               </button>
               <mat-divider></mat-divider>
-              <button mat-menu-item (click)="deleteRole(role)" [disabled]="role.isSystemRole" class="danger-action">
+              <button mat-menu-item (click)="deleteRole(role)" [disabled]="role.isSystemRole || role.roleName === 'Super Admin'" class="danger-action">
                 <mat-icon>delete</mat-icon>
                 <span>Delete</span>
               </button>
