@@ -12,7 +12,9 @@ import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/del
 import { AddPerformancePayDialogComponent } from '../dialogs/add-performance-pay-dialog/add-performance-pay-dialog.component';
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
-import { OnInit, inject } from '@angular/core';
+import { SettingsService } from '../../../settings/services/settings.service';
+import { take } from 'rxjs';
+import { OnInit, inject, signal } from '@angular/core';
 
 interface PerformanceLedgerRow {
   id: any;
@@ -40,6 +42,7 @@ interface PerformanceLedgerRow {
 export class PerformancePayComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly employeeService = inject(EmployeeService);
+  private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
 
   // Filter state
@@ -61,11 +64,23 @@ export class PerformancePayComponent implements OnInit {
   pageSize = 10;
   totalRecords = 0;
   employeesList: any[] = [];
+  readonly currencySymbol = signal('$');
 
   ngOnInit(): void {
     this.loadFilterData();
     this.loadPerformancePays();
     this.loadEmployees();
+    
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: any) => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
   }
 
   get totalPages(): number {

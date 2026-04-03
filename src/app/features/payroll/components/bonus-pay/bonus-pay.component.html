@@ -17,7 +17,7 @@
       <div class="card-content">
         <div class="info">
           <span class="label">Total Bonus</span>
-          <span class="value">PKR {{ totalPayout | number }}</span>
+          <span class="value">{{ currencySymbol() }} {{ totalPayout | number }}</span>
         </div>
         <div class="icon-wrapper color-blue">
           <mat-icon>payments</mat-icon>
@@ -42,21 +42,8 @@
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Status</span>
-          <span class="value">{{ activeCount }}</span>
-        </div>
-        <div class="icon-wrapper color-amber">
-          <mat-icon>check_circle</mat-icon>
-        </div>
-      </div>
-      <p class="card-footer">{{ cancelledCount }} cancelled</p>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
           <span class="label">Avg Bonus</span>
-          <span class="value">PKR {{ averageBonus | number }}</span>
+          <span class="value">{{ currencySymbol() }} {{ averageBonus | number }}</span>
         </div>
         <div class="icon-wrapper color-purple">
           <mat-icon>analytics</mat-icon>
@@ -95,7 +82,7 @@
 
         <!-- Action buttons -->
         <div class="filter-actions">
-          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+          <button class="apply-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="applyFilters()">
             <mat-icon>filter_list</mat-icon>
             Apply
           </button>
@@ -115,27 +102,33 @@
       </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive" [class.loading]="isLoading">
+      <!-- Loading Overlay -->
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p>Loading bonus records...</p>
+        </div>
+      }
+
       <table class="custom-table">
         <thead>
           <tr>
             <th>Employee</th>
             <th>Period</th>
             <th class="text-right">Amount</th>
-            <th class="text-center">Type</th>
-            <th class="text-center">Status</th>
             <th>Description</th>
             <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          @if (filteredRows.length === 0) {
+          @if (rows.length === 0) {
             <tr>
-              <td class="empty-row" colspan="7">No bonus records found.</td>
+              <td class="empty-row" colspan="5">No bonus records found.</td>
             </tr>
           } @else {
-            @for (row of filteredRows; track trackById($index, row)) {
-              <tr class="table-row" [class.cancelled]="row.status === 'Cancelled'">
+            @for (row of rows; track trackById($index, row)) {
+              <tr class="table-row">
                 <td>
                   <div class="employee-info">
                     <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
@@ -143,17 +136,7 @@
                   </div>
                 </td>
                 <td>{{ row.period }}</td>
-                <td class="text-right font-semibold highlight-val">PKR {{ row.amount | number }}</td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="'badge-' + row.type.toLowerCase()">
-                    {{ row.type }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  <span class="badge" [ngClass]="'status-' + row.status.toLowerCase()">
-                    {{ row.status }}
-                  </span>
-                </td>
+                <td class="text-right font-semibold highlight-val">{{ currencySymbol() }} {{ row.amount | number }}</td>
                 <td class="text-sm italic text-gray-500">{{ row.description }}</td>
                 <td class="action-cell">
                   <button class="action-btn hover-primary" aria-label="Edit" (click)="openEditBonusDialog(row)">

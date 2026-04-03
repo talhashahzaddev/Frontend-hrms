@@ -5,6 +5,9 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { SettingsService } from '../../../../settings/services/settings.service';
+import { take } from 'rxjs';
+import { OnInit, inject, signal } from '@angular/core';
 
 export interface PerformanceDialogResult {
   employee: string;
@@ -47,8 +50,13 @@ interface PerformanceDialogData {
   templateUrl: './add-performance-pay-dialog.component.html',
   styleUrl: './add-performance-pay-dialog.component.scss'
 })
-export class AddPerformancePayDialogComponent {
+export class AddPerformancePayDialogComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly settingsService = inject(SettingsService);
+  private readonly dialogRef = inject(MatDialogRef<AddPerformancePayDialogComponent, PerformanceDialogResultPayload | undefined>);
+  
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
+  readonly currencySymbol = signal('$');
 
   readonly employees = this.data?.employees ?? [];
   readonly periods = this.data?.periods ?? [];
@@ -64,11 +72,7 @@ export class AddPerformancePayDialogComponent {
   });
 
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddPerformancePayDialogComponent, PerformanceDialogResultPayload | undefined>,
-    @Inject(MAT_DIALOG_DATA) public data: PerformanceDialogData
-  ) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: PerformanceDialogData) {
     if (this.data?.initialValue) {
       this.form.patchValue({
         employeeId: this.data.initialValue.employeeId ?? '',
@@ -91,6 +95,19 @@ export class AddPerformancePayDialogComponent {
     this.form.get('score')?.valueChanges.subscribe(score => {
       this.updateRating(score ?? 0);
     });
+  }
+
+  ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: any) => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
   }
 
   updateRating(score: number): void {

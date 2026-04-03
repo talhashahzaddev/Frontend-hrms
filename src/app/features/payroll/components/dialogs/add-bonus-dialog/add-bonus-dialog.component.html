@@ -12,55 +12,40 @@
     <!-- Employee -->
     <div class="form-group">
       <label>Employee</label>
-      <select class="form-control" formControlName="employee">
+      <select class="form-control" formControlName="employeeId">
         <option value="" disabled selected>Select employee</option>
-        @for (employee of employees; track employee) {
-          <option [value]="employee">{{ employee }}</option>
+        @for (emp of employees; track emp.employeeId) {
+          <option [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
         }
       </select>
     </div>
 
-    <!-- Period + Type -->
+    <!-- Period + Rule -->
     <div class="form-row">
       <div class="form-group">
         <label>Payroll Period</label>
-        <select class="form-control" formControlName="payrollPeriod">
-          <option value="Oct 2023">Oct 2023</option>
-          <option value="Nov 2023">Nov 2023</option>
-          <option value="Dec 2023">Dec 2023</option>
-          <option value="Jan 2024">Jan 2024</option>
+        <select class="form-control" formControlName="periodId">
+          <option value="" disabled selected>Select period</option>
+          @for (period of periods; track period.periodId) {
+            <option [value]="period.periodId">{{ period.periodName }}</option>
+          }
         </select>
       </div>
       <div class="form-group">
-        <label>Type</label>
-        <select class="form-control" formControlName="type">
-          <option value="Fixed">Fixed</option>
-          <option value="Performance">Performance</option>
-          <option value="Festival">Festival</option>
-          <option value="Referral">Referral</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Amount + Status -->
-    <div class="form-row">
-      <div class="form-group">
-        <label>Amount (PKR)</label>
-        <input type="number" class="form-control" formControlName="amount" placeholder="e.g. 5000" />
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select class="form-control" formControlName="status">
-          <option value="Active">Active</option>
-          <option value="Cancelled">Cancelled</option>
+        <label>Bonus Rule</label>
+        <select class="form-control" formControlName="ruleId">
+          <option value="" disabled selected>Select rule</option>
+          @for (rule of bonusRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
         </select>
       </div>
     </div>
 
-    <!-- Description -->
+    <!-- Amount -->
     <div class="form-group">
-      <label>Description</label>
-      <textarea rows="3" class="form-control" formControlName="description" placeholder="Add reason or notes" style="height: auto; padding: 0.75rem;"></textarea>
+      <label>Amount ({{ currencySymbol() }})</label>
+      <input type="number" class="form-control" formControlName="amount" placeholder="e.g. 5000" />
     </div>
   </div>
 

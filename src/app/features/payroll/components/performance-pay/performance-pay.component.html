@@ -17,7 +17,7 @@
       <div class="card-content">
         <div class="info">
           <span class="label">Total Payout</span>
-          <span class="value">PKR {{ totalPayout | number }}</span>
+          <span class="value">{{ currencySymbol() }} {{ totalPayout | number }}</span>
         </div>
         <div class="icon-wrapper color-blue">
           <mat-icon>payments</mat-icon>
@@ -152,7 +152,7 @@
                     {{ row.rating }}
                   </span>
                 </td>
-                <td class="text-right font-semibold">PKR {{ row.amount | number }}</td>
+                <td class="text-right font-semibold">{{ currencySymbol() }} {{ row.amount | number }}</td>
                 <td class="text-sm italic text-gray-500">{{ row.calculatedAt }}</td>
                 <td class="action-cell">
                   <button class="action-btn hover-primary" aria-label="Edit" (click)="openEditPerformanceDialog(row)">
