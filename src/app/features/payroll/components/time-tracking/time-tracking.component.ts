@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AttendanceDialogComponent } from '../attendance-dialog/attendance-dialog.component';
+import { AttendanceDialogComponent } from '../dialogs/attendance-dialog/attendance-dialog.component';
 import { TimeTrackingAbsentsComponent } from '../time-tracking-absents/time-tracking-absents.component';
 import { TimeTrackingLateComponent } from '../time-tracking-late/time-tracking-late.component';
 import { TimeTrackingLeavesComponent } from '../time-tracking-leaves/time-tracking-leaves.component';

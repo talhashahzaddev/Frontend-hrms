@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { PayrollService, PayRollRulesGroupedDto } from '../../services/payroll.service';
-import { RuleDialogComponent } from '../rule-dialog/rule-dialog.component';
+import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
 @Component({
   selector: 'app-payroll-rules',

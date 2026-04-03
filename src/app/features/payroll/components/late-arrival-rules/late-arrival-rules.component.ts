@@ -12,7 +12,7 @@ import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
-import { RuleDialogComponent } from '../rule-dialog/rule-dialog.component';
+import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
 @Component({
   selector: 'app-late-arrival-rules',

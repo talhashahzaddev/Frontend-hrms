@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { SettingsService } from '../../../settings/services/settings.service';
+import { SettingsService } from '../../../../settings/services/settings.service';
 import { take } from 'rxjs';
-import { EmployeeService } from '../../../employee/services/employee.service';
-import { PayrollService } from '../../services/payroll.service';
+import { EmployeeService } from '../../../../employee/services/employee.service';
+import { PayrollService } from '../../../services/payroll.service';
 
 export interface AttendanceDialogData {
   type: 'leave' | 'absent' | 'late' | 'half-day' | 'overtime';

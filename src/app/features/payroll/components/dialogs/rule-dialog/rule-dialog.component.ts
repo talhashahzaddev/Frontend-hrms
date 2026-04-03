@@ -8,10 +8,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { PayrollService } from '../../services/payroll.service';
+import { PayrollService } from '../../../services/payroll.service';
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '@core/services/notification.service';
-import { SettingsService } from '../../../settings/services/settings.service';
+import { SettingsService } from '../../../../settings/services/settings.service';
 import { take } from 'rxjs';
 
 export interface RuleDialogData {
