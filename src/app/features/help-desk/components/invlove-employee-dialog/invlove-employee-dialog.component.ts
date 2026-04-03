@@ -72,6 +72,8 @@ assignedGroupName: string | null = null;
   ngOnInit(): void {
     this.initForm();
     this.assignedGroupId = this.data?.groupId ?? null;
+    // Pre-initialize assignedGroupName to trigger immediate loading UI
+    this.assignedGroupName = null;
     this.loadInitialData();
     this.setupDepartmentFilter();
   }

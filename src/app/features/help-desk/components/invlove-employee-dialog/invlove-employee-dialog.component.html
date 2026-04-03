@@ -30,10 +30,10 @@
         </div>
 
         <!-- Display assigned group name when a group is already assigned -->
-        <div class="field-full custom-field" *ngIf="assignedGroupId">
+        <div class="field-full custom-field" *ngIf="assignedGroupId && assignedGroupName">
           <label class="field-label">GROUP NAME</label>
           <mat-form-field appearance="outline" class="mat-field">
-            <input matInput [value]="assignedGroupName || assignedGroupId" disabled>
+            <input matInput [value]="assignedGroupName" disabled>
           </mat-form-field>
         </div>
 
