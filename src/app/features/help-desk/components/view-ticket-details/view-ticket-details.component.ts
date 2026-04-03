@@ -248,7 +248,6 @@ getCurrentUserInfo(): { userId: string; email: string } | null {
       createdByName: t.createdByName || t.created_by || t.createdBy || ''
     } as Ticket;
   }
-
   private normalizeTicketType(type: string): string {
     const val = (type || '').toLowerCase().trim();
     if (val.includes('request')) return 'Request';
@@ -366,12 +365,6 @@ openReplyDialog(ticket: Ticket): void {
   dialogRef.afterClosed().subscribe((result) => {
     // result is the TicketMessageDto if message was sent successfully
     if (result) {
-      console.log('Dialog closed with result:', result);
-      if (result.messageId) {
-        console.log('Message sent successfully:', result);
-        // Add the new message to the messages array
-        this.messages.push(result);
-      }
       // Always reload messages from server to ensure consistency
       this.loadMessages();
     }

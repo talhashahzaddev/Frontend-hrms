@@ -72,9 +72,6 @@ assignedGroupName: string | null = null;
   ngOnInit(): void {
     this.initForm();
     this.assignedGroupId = this.data?.groupId ?? null;
-    if (this.assignedGroupId) {
-      this.involveEmployeeForm.patchValue({ groupId: this.assignedGroupId });
-    }
     this.loadInitialData();
     this.setupDepartmentFilter();
   }
@@ -127,6 +124,7 @@ assignedGroupName: string | null = null;
       }));
       if (this.assignedGroupId) {
         this.assignedGroupName = this.groups.find(g => g.id === String(this.assignedGroupId))?.name || null;
+        this.involveEmployeeForm.patchValue({ groupId: this.assignedGroupId });
       }
     });
   }
