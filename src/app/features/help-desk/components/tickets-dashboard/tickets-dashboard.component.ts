@@ -18,7 +18,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from '@/app/core/services/notification.service';
 import { CreateTicketDialogueComponent } from '../create-ticket-dialogue/create-ticket-dialogue.component';
-
+import { AuthService } from '@/app/core/services/auth.service';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@/app/shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 @Component({
   selector: 'app-tickets-dashboard',
   standalone: true,
@@ -59,6 +60,7 @@ export class TicketsDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
+    private authService: AuthService,
     private router:Router,
     private dialog: MatDialog,
     private notification: NotificationService
@@ -140,26 +142,47 @@ export class TicketsDashboardComponent implements OnInit, OnDestroy {
 
 
   deleteTicket(ticket: Ticket): void {
-    if (confirm(`Delete "${ticket.ticketTitle}"?`)) {
-      this.loading = true;
+    const confirmButtonText = 'Yes, Delete';
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Ticket',
+      message: 'Are you sure you want to delete this ticket?',
+      itemName: ticket.ticketTitle,
+      confirmButtonText
+    };
 
-      this.helpDeskService.deleteTicket(ticket.ticketid)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (res) => {
-            if (res) {
-              // Remove ticket from list
-              this.tickets = this.tickets.filter(t => t.ticketid !== ticket.ticketid);
-              this.notification.showSuccess('Ticket deleted successfully');
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading = true;
+
+        this.helpDeskService.deleteTicket(ticket.ticketid)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (res) => {
+              if (res) {
+                // Remove ticket from list
+                this.tickets = this.tickets.filter(t => t.ticketid !== ticket.ticketid);
+                this.notification.showSuccess('Ticket deleted successfully');
+              }
+              this.loading = false;
+            },
+            error: (err) => {
+              console.error('Delete error:', err);
+              this.notification.showError(err?.message || 'Failed to delete ticket');
+              this.loading = false;
             }
-            this.loading = false;
-          },
-          error: (err) => {
-            console.error('Delete error:', err);
-            this.notification.showError(err?.message || 'Failed to delete ticket');
-            this.loading = false;
-          }
-        });
-    }
+          });
+      }
+    });
   }
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Tickets Dashboard', actionKey);
+  }
+
+
 }

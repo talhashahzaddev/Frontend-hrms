@@ -14,7 +14,8 @@ import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { NotificationService } from '@/app/core/services/notification.service';
 import { CreateTicketCategoryDialogComponent } from '../create-ticket-category-dialog/create-ticket-category-dialog.component';
-import { MatMenuModule } from '@angular/material/menu'; 
+import { MatMenuModule } from '@angular/material/menu';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component'; 
 export interface Department {
   departmentId: string;
   departmentName: string;
@@ -166,32 +167,43 @@ export class TicketCategoryComponent implements OnInit, OnDestroy {
   }
 
   deleteCategory(category: Category): void {
-    // Show confirmation dialog before deleting
-    const confirmDelete = confirm(`Are you sure you want to delete the category "${category.categoryName}"?`);
-    
-    if (!confirmDelete) {
-      return;
-    }
+    const confirmButtonText = 'Yes, Delete';
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this category?',
+      itemName: category.categoryName,
+      confirmButtonText
+    };
 
-    this.loading = true;
-    this.helpDeskService.deleteCategory(category.categoryId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (success) => {
-          if (success) {
-            this.notification.showSuccess('Category deleted successfully');
-            // Refresh the categories list
-            this.getCategories(this.searchControl.value || '', this.departmentControl.value || undefined);
-          } else {
-            this.notification.showError('Failed to delete category');
-          }
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Error deleting category', err);
-          this.notification.showError(err?.message || 'Error deleting category');
-          this.loading = false;
-        }
-      });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loading = true;
+        this.helpDeskService.deleteCategory(category.categoryId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (success) => {
+              if (success) {
+                this.notification.showSuccess('Category deleted successfully');
+                // Refresh the categories list
+                this.getCategories(this.searchControl.value || '', this.departmentControl.value || undefined);
+              } else {
+                this.notification.showError('Failed to delete category');
+              }
+              this.loading = false;
+            },
+            error: (err) => {
+              console.error('Error deleting category', err);
+              this.notification.showError(err?.message || 'Error deleting category');
+              this.loading = false;
+            }
+          });
+      }
+    });
   }
 }

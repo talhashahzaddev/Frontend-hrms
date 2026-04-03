@@ -13,7 +13,7 @@ export const helpdeskRoutes: Routes = [
       .then(m => m.AgentGroupDashboardComponent),
   },
   {
-    path: 'ticket-invlovement',
+    path: 'ticket-involvement',
     loadComponent: () => import('./components/ticket-involvement/ticket-involvement.component')
       .then(m => m.TicketInvolvementComponent),
   },

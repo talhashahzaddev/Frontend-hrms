@@ -85,7 +85,7 @@ sendingMessage = false;
     this.ticketId = this.route.snapshot.paramMap.get('id')!;
     const userInfo = this.getCurrentUserInfo();
     if (userInfo) {
-      this.currentUserEmail = userInfo.email;
+      this.currentUserEmail = userInfo.email.toLowerCase().trim();
     }
     this.loadInitialData();
     this.loadMessages(); // Load messages when component initializes
@@ -191,7 +191,21 @@ loadMessages(): void {
     }
   });
 }
-
+  reloadTicket(): void {
+    this.helpDeskService.getTicketById(this.ticketId).pipe(
+      catchError(err => {
+        console.error('Failed to reload ticket:', err);
+        return of(null);
+      })
+    ).subscribe(ticket => {
+      if (ticket) {
+        const normalized = this.normalizeTicket(ticket);
+        this.ticket = { ...normalized };
+        this.originalTicket = { ...normalized };
+        this.selectedEmployeeIds = [...(normalized.assignedEmployees || [])];
+      }
+    });
+  }
 //Get Current User Info for Message Sender 
 getCurrentUserInfo(): { userId: string; email: string } | null {
   const user = this.authService.getCurrentUserValue();
@@ -282,6 +296,15 @@ getCurrentUserInfo(): { userId: string; email: string } | null {
     if (!this.employeeDropdownOpen) this.employeeFilter = '';
   }
 
+  openEmployeeDropdown(): void {
+    this.employeeDropdownOpen = true;
+  }
+
+  closeEmployeeDropdown(): void {
+    this.employeeDropdownOpen = false;
+    this.employeeFilter = '';
+  }
+
   openInvolveEmployeeDialog(): void {
   const dialogRef = this.dialog.open(InvloveEmployeeDialogComponent, {
     width: '600px',
@@ -305,8 +328,8 @@ getCurrentUserInfo(): { userId: string; email: string } | null {
         this.ticket = this.ticket || {} as any;
         this.ticket.groupId = result.groupId;
       }
-      // call update to persist changes
-      // this.updateTicket();
+      // Reload ticket to get updated data
+      this.reloadTicket();
     }
   });
 }
@@ -355,20 +378,17 @@ openReplyDialog(ticket: Ticket): void {
   });
 }
 
-  closeEmployeeDropdown(): void {
-    this.employeeDropdownOpen = false;
-    this.employeeFilter = '';
-  }
-
-  onEmployeeSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.employeeFilter = input.value;
+  onEmployeeSearch(event: any): void {
+    // Filter is already updated via ngModel, no action needed
+    // This method can be kept for consistency or removed
   }
 
   toggleEmployee(emp: { id: string; name: string }): void {
-    const index = this.selectedEmployeeIds.indexOf(emp.id);
-    if (index > -1) this.selectedEmployeeIds.splice(index, 1);
-    else this.selectedEmployeeIds.push(emp.id);
+    const current = [...this.selectedEmployeeIds];
+    const updated = current.includes(emp.id)
+      ? current.filter(id => id !== emp.id)
+      : [...current, emp.id];
+    this.selectedEmployeeIds = updated;
   }
 
   isEmployeeSelected(id: string): boolean {
@@ -378,8 +398,10 @@ openReplyDialog(ticket: Ticket): void {
   toggleSelectAll(): void {
     const visible = this.filteredEmployees.map(e => e.id);
     const allSelected = visible.every(id => this.selectedEmployeeIds.includes(id));
-    if (allSelected) this.selectedEmployeeIds = this.selectedEmployeeIds.filter(id => !visible.includes(id));
-    else this.selectedEmployeeIds = [...new Set([...this.selectedEmployeeIds, ...visible])];
+    this.selectedEmployeeIds = 
+      allSelected
+        ? this.selectedEmployeeIds.filter(id => !visible.includes(id))
+        : [...new Set([...this.selectedEmployeeIds, ...visible])];
   }
 
   isAllVisibleSelected(): boolean {
@@ -413,10 +435,12 @@ openReplyDialog(ticket: Ticket): void {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.employeeDropdownOpen) return;
     const target = event.target as HTMLElement;
-    const inside = target.closest('.employee-dropdown-container') || target.closest('.employee-search-header');
-    if (!inside) this.closeEmployeeDropdown();
+    const insideEmployee = target.closest('[data-dropdown="employee"]');
+
+    if (!insideEmployee && this.employeeDropdownOpen) {
+      this.closeEmployeeDropdown();
+    }
   }
 
   // -----------------------------
@@ -671,6 +695,10 @@ sendReply(): void {
 
   get hasUploading(): boolean {
     return this.attachedFiles.some(f => f.uploading);
+  }
+   
+   hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Tickets Dashboard', actionKey);
   }
 
 }

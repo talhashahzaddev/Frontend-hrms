@@ -7,9 +7,11 @@
        =================================================== -->
   <section class="filter-section">
 
-    <div class="filter-header">
-      <h1 class="page-title">Ticket Request</h1>
-      <button class="btn-create" (click)="openCreateTicketDialog()">
+    <div class="filter-header" >
+     
+      <h1 class="page-title"
+      *ngIf="!loading">Ticket Request</h1>
+      <button class="btn-create" *ngIf="hasPermission('Create_Ticket_Button')" (click)="openCreateTicketDialog()">
         + Create Request Ticket
       </button>
     </div>

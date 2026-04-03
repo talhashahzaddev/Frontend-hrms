@@ -18,18 +18,22 @@
       <div class="chat-subheader">
         <a href="#" class="chat-inbox-link">Mail Inbox</a>
         <div class="chat-subheader-actions">
-          <button mat-raised-button class="btn btn-primary chat-action-btn" (click)="openInvolveEmployeeDialog()">
-            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-            Involve Employees
+          @if(hasPermission('Involve_Employee_Button')) {
+            <button mat-raised-button class="btn btn-primary chat-action-btn" (click)="openInvolveEmployeeDialog()">
+              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              </svg>
+              Involve Employees
           </button>
-          <button class="btn btn-primary chat-action-btn" (click)="openReplyDialog(ticket)">
+        }
+
+          <!-- <button class="btn btn-primary chat-action-btn" (click)="openReplyDialog(ticket)">
             <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
             </svg>
             Reply
-          </button>
+          </button> -->
+          
         </div>
       </div>
 
@@ -40,7 +44,7 @@
         <div class="chat-body">
           <div *ngFor="let msg of messages; let i = index"
                class="chat-message-card"
-               [class.chat-message-reply]="msg.senderEmail === currentUserEmail">
+               [class.chat-message-reply]="(msg.senderEmail | lowercase) === currentUserEmail">
 
             <!-- Message Header -->
             <div class="msg-header">
@@ -78,7 +82,7 @@
             </button> -->
             <div class="reply-send-actions">
               <button class="btn btn-reply-cancel" (click)="cancelReply()">Cancel</button>
-              <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText?.trim()">Send</button>
+              <button class="btn btn-reply-send" (click)="sendReply()" [disabled]="!replyText.trim()">Send</button>
             </div>
           </div>
         </div>
@@ -226,42 +230,47 @@
 
 
           <!-- Assigned Employees (Full Width) -->
-          <div class="detail-field full-width">
+          <div class="detail-field full-width" data-dropdown="employee">
             <label class="field-label">Assigned Employees</label>
             <div *ngIf="!isEditMode" class="field-value">{{ getSelectedEmployeeNames() }}</div>
-            <div *ngIf="isEditMode" class="employee-dropdown-container">
-              <div class="employee-search-header" (click)="toggleEmployeeDropdown($event)">
-                <span class="material-icons search-icon">search</span>
-                <input type="text" class="employee-search-input" placeholder="Search employees..."
-                  [value]="employeeFilter" (input)="onEmployeeSearch($event)" (click)="toggleEmployeeDropdown($event)"/>
+            <div *ngIf="isEditMode">
+              <div class="employee-search-row"
+                   (click)="toggleEmployeeDropdown($event)"
+                   [class.employee-search-row--open]="employeeDropdownOpen">
+                <input class="employee-search-input"
+                       [placeholder]="employeeDropdownOpen ? 'Search...' : 'Select employees'"
+                       [(ngModel)]="employeeFilter"
+                       (input)="onEmployeeSearch($event)" />
+                <input type="checkbox"
+                       *ngIf="employeeDropdownOpen"
+                       [checked]="isAllVisibleSelected()"
+                       (click)="$event.stopPropagation(); toggleSelectAll()" />
               </div>
-              <div class="employee-list-container" *ngIf="employeeDropdownOpen">
-                <label class="employee-checkbox-item select-all" (click)="$event.stopPropagation()">
-                  <input type="checkbox" class="employee-checkbox" [checked]="isAllVisibleSelected()"
-                    (change)="toggleSelectAll()" (click)="$event.stopPropagation()"/>
-                  <span class="select-all-label">Select All</span>
-                </label>
-                <div class="divider"></div>
-                <label *ngFor="let emp of filteredEmployees" class="employee-checkbox-item" (click)="$event.stopPropagation()">
-                  <input type="checkbox" class="employee-checkbox" [checked]="isEmployeeSelected(emp.id)"
-                    (change)="toggleEmployee(emp)" (click)="$event.stopPropagation()"/>
-                  <div class="employee-info">
-                    <div class="employee-avatar">{{ emp.name.charAt(0) || 'U' }}</div>
-                    <span class="employee-name">{{ emp.name }}</span>
-                    <span *ngIf="emp.code" class="employee-code">({{ emp.code }})</span>
+
+              <!-- DROPDOWN -->
+              <div class="employee-checklist-box" *ngIf="employeeDropdownOpen">
+                <div class="employee-checklist-scroll">
+                  <div *ngIf="filteredEmployees.length === 0" class="no-results">
+                    No employees found
                   </div>
-                </label>
-                <div *ngIf="filteredEmployees.length === 0" class="no-results">No employees found</div>
+
+                  <div *ngFor="let emp of filteredEmployees"
+                       class="employee-row"
+                       (click)="$event.stopPropagation(); toggleEmployee(emp)">
+                    <input type="checkbox"
+                           [checked]="isEmployeeSelected(emp.id)" />
+                    <div class="employee-data">
+                      <span class="employee-name">{{ emp.name }}</span>
+                      <span *ngIf="emp.code" class="employee-code">({{ emp.code }})</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <!-- Selected Employees Display (Outside Dropdown) -->
-            <div class="selected-employees-display" *ngIf="selectedEmployeeIds.length > 0 && employeeDropdownOpen">
-              <div class="selected-label">Selected:</div>
-              <div class="selected-chips">
-                <span class="employee-chip" *ngFor="let empId of selectedEmployeeIds">
-                  {{ getEmployeeNameById(empId) }}
-                </span>
-              </div>
+
+              <!-- Selected Employees Count -->
+              <p class="employee-count-text">
+                {{ getSelectedEmployeeNames() }}
+              </p>
             </div>
           </div>
 

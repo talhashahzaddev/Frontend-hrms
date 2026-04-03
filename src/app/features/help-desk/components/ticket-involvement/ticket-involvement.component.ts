@@ -135,4 +135,5 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
       console.log('Delete:', ticket);
     }
   }
+  
 }
