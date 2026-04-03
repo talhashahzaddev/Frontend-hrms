@@ -17,15 +17,26 @@ export interface PerformanceDialogResult {
   calculatedAt: string;
 }
 
+export interface PerformanceDialogResultPayload {
+  employeeId: string;
+  periodId: string;
+  ruleId: string | null;
+  score: number;
+  amount: number;
+}
+
 interface EmployeeOption {
+  id: string;
   name: string;
   designation: string;
 }
 
 interface PerformanceDialogData {
   mode?: 'create' | 'edit';
-  initialValue?: Partial<PerformanceDialogResult>;
+  initialValue?: any;
   employees?: EmployeeOption[];
+  periods?: any[];
+  rules?: any[];
 }
 
 @Component({
@@ -39,38 +50,61 @@ interface PerformanceDialogData {
 export class AddPerformancePayDialogComponent {
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
 
-  readonly employees = this.data?.employees ?? [
-    { name: 'Ali Hassan', designation: 'Senior Editor' },
-    { name: 'Sara Ahmed', designation: 'Content Strategist' },
-    { name: 'Usman Khan', designation: 'HR Associate' },
-    { name: 'Fatima Malik', designation: 'Graphic Designer' },
-    { name: 'Bilal Raza', designation: 'Copywriter' }
-  ];
+  readonly employees = this.data?.employees ?? [];
+  readonly periods = this.data?.periods ?? [];
+  readonly rules = this.data?.rules ?? [];
 
   readonly form = this.fb.group({
-    employee: ['', Validators.required],
-    payrollPeriod: ['October 2024', Validators.required],
-    performanceId: ['REF-PR-001', Validators.required],
-    score: [85, [Validators.required, Validators.min(0), Validators.max(100)]],
-    rating: ['Excellent' as const, Validators.required],
+    employeeId: ['', Validators.required],
+    periodId: ['', Validators.required],
+    ruleId: [null as string | null],
+    score: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+    rating: ['Average' as const],
     amount: [0, [Validators.required, Validators.min(0)]]
   });
 
+
   constructor(
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AddPerformancePayDialogComponent, PerformanceDialogResult | undefined>,
+    private dialogRef: MatDialogRef<AddPerformancePayDialogComponent, PerformanceDialogResultPayload | undefined>,
     @Inject(MAT_DIALOG_DATA) public data: PerformanceDialogData
   ) {
     if (this.data?.initialValue) {
       this.form.patchValue({
-        employee: this.data.initialValue.employee ?? '',
-        payrollPeriod: this.data.initialValue.payrollPeriod ?? 'October 2024',
-        performanceId: this.data.initialValue.performanceId ?? 'REF-PR-001',
-        score: this.data.initialValue.score ?? 85,
-        rating: (this.data.initialValue.rating ?? 'Excellent') as 'Excellent',
+        employeeId: this.data.initialValue.employeeId ?? '',
+        periodId: this.data.initialValue.periodId ?? '',
+        ruleId: this.data.initialValue.ruleId ?? null,
+        score: this.data.initialValue.score ?? 0,
         amount: this.data.initialValue.amount ?? 0
       });
+      this.updateRating(this.data.initialValue.score ?? 0);
+
+      // In edit mode, lock employee & period selects via FormControl (not [disabled] attr)
+      this.form.get('employeeId')?.disable();
+      this.form.get('periodId')?.disable();
+    } else if (this.periods.length > 0) {
+      // Default to first period
+      this.form.patchValue({ periodId: this.periods[0].periodId });
     }
+
+    // Subscribe to score changes to update rating
+    this.form.get('score')?.valueChanges.subscribe(score => {
+      this.updateRating(score ?? 0);
+    });
+  }
+
+  updateRating(score: number): void {
+    let rating = 'Average';
+    if (score >= 90) rating = 'Excellent';
+    else if (score >= 75) rating = 'Good';
+    else if (score < 50) rating = 'Below average';
+
+    this.form.patchValue({ rating: rating as any }, { emitEvent: false });
+  }
+
+  onRuleChange(ruleId: string | null): void {
+    // Ideally calculate amount based on rule logic if we have access to it, 
+    // or just leave amount blank for user input if rule doesn't dictate it fully on frontend.
   }
 
   get dialogTitle(): string {
@@ -92,17 +126,14 @@ export class AddPerformancePayDialogComponent {
     }
 
     const value = this.form.getRawValue();
-    const selectedEmployee = this.employees.find((employee) => employee.name === value.employee);
 
     this.dialogRef.close({
-      employee: value.employee ?? '',
-      designation: this.data?.initialValue?.designation ?? selectedEmployee?.designation ?? 'Employee',
-      payrollPeriod: value.payrollPeriod ?? '',
-      performanceId: value.performanceId ?? '',
+      employeeId: value.employeeId!,
+      periodId: value.periodId!,
+      ruleId: value.ruleId ?? null,
       score: Number(value.score ?? 0),
-      rating: (value.rating ?? 'Excellent') as PerformanceDialogResult['rating'],
-      amount: Number(value.amount ?? 0),
-      calculatedAt: this.data?.initialValue?.calculatedAt ?? '24 Oct, 2024'
+      amount: Number(value.amount ?? 0)
     });
   }
 }
+

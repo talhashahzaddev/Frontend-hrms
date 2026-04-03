@@ -7,14 +7,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
-import {
-  AddPerformancePayDialogComponent,
-  PerformanceDialogResult
-} from '../dialogs/add-performance-pay-dialog/add-performance-pay-dialog.component';
+import { PerformanceDialogResult } from '../dialogs/add-performance-pay-dialog/add-performance-pay-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
+import { AddPerformancePayDialogComponent } from '../dialogs/add-performance-pay-dialog/add-performance-pay-dialog.component';
+import { PayrollService } from '../../services/payroll.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
+import { OnInit, inject } from '@angular/core';
 
 interface PerformanceLedgerRow {
-  id: number;
+  id: any;
+  employeeId?: any;
+  periodId?: any;
+  ruleId?: any;
   employeeName: string;
   initials: string;
   designation: string;
@@ -23,7 +27,7 @@ interface PerformanceLedgerRow {
   rating: 'Excellent' | 'Good' | 'Average' | 'Below average';
   amount: number;
   calculatedAt: string;
-  avatarTone: 'blue' | 'lavender' | 'peach' | 'gray' | 'slate';
+  avatarTone: string;
 }
 
 @Component({
@@ -33,87 +37,184 @@ interface PerformanceLedgerRow {
   templateUrl: './performance-pay.component.html',
   styleUrl: './performance-pay.component.scss'
 })
-export class PerformancePayComponent {
-  searchText = '';
-  selectedRating: 'All' | PerformanceLedgerRow['rating'] = 'All';
+export class PerformancePayComponent implements OnInit {
+  private readonly payrollService = inject(PayrollService);
+  private readonly employeeService = inject(EmployeeService);
+  private readonly dialog = inject(MatDialog);
 
-  readonly ratingOptions: Array<'All' | PerformanceLedgerRow['rating']> = ['All', 'Excellent', 'Good', 'Average', 'Below average'];
+  // Filter state
+  pendingSearch = '';
+  pendingPeriod = '';
+  pendingRule = '';
 
-  rows: PerformanceLedgerRow[] = [
-    {
-      id: 1,
-      employeeName: 'Ali Hassan',
-      initials: 'AH',
-      designation: 'Senior Editor',
-      period: 'Oct 2024',
-      score: 94,
-      rating: 'Excellent',
-      amount: 38000,
-      calculatedAt: '24 Oct, 2024',
-      avatarTone: 'blue'
-    },
-    {
-      id: 2,
-      employeeName: 'Sara Ahmed',
-      initials: 'SA',
-      designation: 'Content Strategist',
-      period: 'Oct 2024',
-      score: 88.5,
-      rating: 'Excellent',
-      amount: 32000,
-      calculatedAt: '24 Oct, 2024',
-      avatarTone: 'lavender'
-    },
-    {
-      id: 3,
-      employeeName: 'Usman Khan',
-      initials: 'UK',
-      designation: 'HR Associate',
-      period: 'Oct 2024',
-      score: 79,
-      rating: 'Good',
-      amount: 28500,
-      calculatedAt: '23 Oct, 2024',
-      avatarTone: 'peach'
-    },
-    {
-      id: 4,
-      employeeName: 'Fatima Malik',
-      initials: 'FM',
-      designation: 'Graphic Designer',
-      period: 'Oct 2024',
-      score: 72.5,
-      rating: 'Average',
-      amount: 24000,
-      calculatedAt: '22 Oct, 2024',
-      avatarTone: 'gray'
-    },
-    {
-      id: 5,
-      employeeName: 'Bilal Raza',
-      initials: 'BR',
-      designation: 'Copywriter',
-      period: 'Oct 2024',
-      score: 58,
-      rating: 'Below average',
-      amount: 20000,
-      calculatedAt: '22 Oct, 2024',
-      avatarTone: 'slate'
-    }
-  ];
+  filterSearch = '';
+  filterPeriod = '';
+  filterRule = '';
 
-  constructor(private dialog: MatDialog) {}
+  periods: any[] = [];
+  performanceRules: any[] = [];
 
-  get filteredRows(): PerformanceLedgerRow[] {
-    const query = this.searchText.trim().toLowerCase();
+  rows: PerformanceLedgerRow[] = [];
 
-    return this.rows.filter((row) => {
-      const matchesSearch = !query
-        || row.employeeName.toLowerCase().includes(query)
-        || row.designation.toLowerCase().includes(query);
-      const matchesRating = this.selectedRating === 'All' || row.rating === this.selectedRating;
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  totalRecords = 0;
+  employeesList: any[] = [];
 
-      return matchesSearch && matchesRating;
+  ngOnInit(): void {
+    this.loadFilterData();
+    this.loadPerformancePays();
+    this.loadEmployees();
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+  }
+
+  get pageRange(): number[] {
+    const delta = 2;
+    const current = this.currentPage;
+    const total = this.totalPages;
+    const start = Math.max(1, current - delta);
+    const end   = Math.min(total, current + delta);
+    const range: number[] = [];
+    for (let i = start; i <= end; i++) range.push(i);
+    return range;
+  }
+
+  get fromRecord(): number {
+    return this.totalRecords === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get toRecord(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.pendingSearch || this.pendingPeriod || this.pendingRule);
+  }
+
+  get hasAppliedFilters(): boolean {
+    return !!(this.filterSearch || this.filterPeriod || this.filterRule);
+  }
+
+  loadEmployees(): void {
+    this.employeeService.getEmployees({ page: 1, pageSize: 100 } as any).subscribe({
+      next: (response: any) => {
+        this.employeesList = response.employees || [];
+      },
+      error: (err) => console.error('Error loading employees:', err)
+    });
+  }
+
+  loadPerformancePays(): void {
+    const params: any = {
+      page: this.currentPage,
+      pageSize: this.pageSize
+    };
+
+    if (this.filterSearch) params.employeeName = this.filterSearch;
+    if (this.filterPeriod) params.periodId = this.filterPeriod;
+    if (this.filterRule) params.ruleId = this.filterRule;
+
+    this.payrollService.getPerformancePays(params).subscribe({
+      next: (data: any) => {
+        let items: any[] = [];
+        if (Array.isArray(data)) {
+          items = data;
+        } else if (data && Array.isArray(data.items)) {
+          items = data.items;
+        } else if (data && Array.isArray(data.data)) {
+          items = data.data;
+        }
+        
+        this.rows = items.map((item: any) => {
+          let rating: PerformanceLedgerRow['rating'] = 'Average';
+          if (item.score >= 90) rating = 'Excellent';
+          else if (item.score >= 75) rating = 'Good';
+          else if (item.score < 50) rating = 'Below average';
+
+          return {
+            id: item.performancePayId,
+            employeeId: item.employeeId,
+            periodId: item.periodId,
+            ruleId: item.ruleId,
+            employeeName: item.employeeName || 'Unknown Employee',
+            initials: this.toInitials(item.employeeName || 'U E'),
+            designation: item.designation || 'Employee',
+            period: item.periodName || 'N/A',
+            score: item.score || 0,
+            rating: rating as PerformanceLedgerRow['rating'],
+            amount: item.finalAmount || 0,
+            calculatedAt: item.calculatedAt ? new Date(item.calculatedAt).toLocaleDateString() : 'N/A',
+            avatarTone: this.getRandomAvatarTone()
+          };
+        });
+        
+        this.totalRecords = data?.totalCount || this.rows.length;
+      },
+      error: (err: any) => {
+        console.error('Error loading performance pays:', err);
+      }
+    });
+  }
+
+  applyFilters() {
+    this.filterSearch = this.pendingSearch;
+    this.filterPeriod = this.pendingPeriod;
+    this.filterRule = this.pendingRule;
+    this.currentPage = 1;
+    this.loadPerformancePays();
+  }
+
+  clearFilters() {
+    this.pendingSearch = '';
+    this.pendingPeriod = '';
+    this.pendingRule = '';
+    this.filterSearch = '';
+    this.filterPeriod = '';
+    this.filterRule = '';
+    this.currentPage = 1;
+    this.loadPerformancePays();
+  }
+
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages || p === this.currentPage) return;
+    this.currentPage = p;
+    this.loadPerformancePays();
+  }
+
+  prevPage() { this.goToPage(this.currentPage - 1); }
+  nextPage() { this.goToPage(this.currentPage + 1); }
+
+  loadFilterData(): void {
+    this.payrollService.getPayrollPeriods().subscribe({
+      next: (data: any) => {
+        if (Array.isArray(data)) {
+          this.periods = data;
+        } else if (data && Array.isArray(data.items)) {
+          this.periods = data.items;
+        } else if (data && Array.isArray(data.data)) {
+          this.periods = data.data;
+        } else {
+          this.periods = [];
+        }
+      },
+      error: (err) => {
+        console.error('Error loading periods:', err);
+        this.periods = [];
+      }
+    });
+
+    this.payrollService.getActivePerformanceRules().subscribe({
+      next: (data: any) => {
+        this.performanceRules = Array.isArray(data) ? data : (data?.items || data?.data || []);
+      },
+      error: (err) => {
+        console.error('Error loading performance rules:', err);
+        this.performanceRules = [];
+      }
     });
   }
 
@@ -137,33 +238,40 @@ export class PerformancePayComponent {
       width: '480px',
       panelClass: 'performance-dialog-panel',
       autoFocus: false,
-      restoreFocus: false
+      restoreFocus: false,
+      data: {
+        mode: 'create',
+        employees: this.employeesList.map((e: any) => ({
+          id: e.employeeId || e.id,
+          name: `${e.firstName || ''} ${e.lastName || ''}`.trim() || e.name || 'Unknown',
+          designation: e.positionTitle || e.designation || ''
+        })),
+        periods: this.periods,
+        rules: this.performanceRules
+      }
     });
 
-    dialogRef.afterClosed().subscribe((result: PerformanceDialogResult | undefined) => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (!result) return;
 
-      const nextId = this.rows.length ? Math.max(...this.rows.map((row) => row.id)) + 1 : 1;
+      const payload = {
+        employeeId: result.employeeId,
+        periodId: result.periodId,
+        ruleId: result.ruleId ? result.ruleId : null,
+        score: result.score,
+        finalAmount: result.amount
+      };
 
-      this.rows = [
-        {
-          id: nextId,
-          employeeName: result.employee,
-          initials: this.toInitials(result.employee),
-          designation: result.designation,
-          period: result.payrollPeriod,
-          score: result.score,
-          rating: result.rating,
-          amount: result.amount,
-          calculatedAt: result.calculatedAt,
-          avatarTone: 'blue'
+      this.payrollService.createPerformancePay(payload).subscribe({
+        next: () => {
+          this.loadPerformancePays();
         },
-        ...this.rows
-      ];
+        error: (err) => console.error('Error creating performance pay:', err)
+      });
     });
   }
 
-  openEditPerformanceDialog(row: PerformanceLedgerRow): void {
+  openEditPerformanceDialog(row: any): void {
     const dialogRef = this.dialog.open(AddPerformancePayDialogComponent, {
       width: '480px',
       panelClass: 'performance-dialog-panel',
@@ -171,47 +279,51 @@ export class PerformancePayComponent {
       restoreFocus: false,
       data: {
         mode: 'edit',
+        employees: this.employeesList.map((e: any) => ({
+          id: e.employeeId || e.id,
+          name: `${e.firstName || ''} ${e.lastName || ''}`.trim() || e.name || 'Unknown',
+          designation: e.positionTitle || e.designation || ''
+        })),
+        periods: this.periods,
+        rules: this.performanceRules,
         initialValue: {
-          employee: row.employeeName,
-          designation: row.designation,
-          payrollPeriod: row.period,
-          performanceId: 'REF-PR-001',
+          employeeId: row.employeeId,
+          periodId: row.periodId,
+          ruleId: row.ruleId,
           score: row.score,
-          rating: row.rating,
-          amount: row.amount,
-          calculatedAt: row.calculatedAt
+          amount: row.amount
         }
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: PerformanceDialogResult | undefined) => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (!result) return;
 
-      this.rows = this.rows.map((existingRow) => {
-        if (existingRow.id !== row.id) {
-          return existingRow;
-        }
+      const payload = {
+        ruleId: result.ruleId ? result.ruleId : null,
+        score: result.score,
+        finalAmount: result.amount
+      };
 
-        return {
-          ...existingRow,
-          employeeName: result.employee,
-          initials: this.toInitials(result.employee),
-          designation: result.designation,
-          period: result.payrollPeriod,
-          score: result.score,
-          rating: result.rating,
-          amount: result.amount,
-          calculatedAt: result.calculatedAt
-        };
+      this.payrollService.updatePerformancePay(row.id, payload).subscribe({
+        next: () => {
+          this.loadPerformancePays();
+        },
+        error: (err) => console.error('Error updating performance pay:', err)
       });
     });
   }
 
-  deleteRow(id: number): void {
-    this.rows = this.rows.filter((row) => row.id !== id);
+  deleteRow(id: string): void {
+    this.payrollService.deletePerformancePay(id).subscribe({
+      next: () => {
+        this.loadPerformancePays();
+      },
+      error: (err) => console.error('Error deleting performance pay:', err)
+    });
   }
 
-  requestDeleteRow(row: PerformanceLedgerRow): void {
+  requestDeleteRow(row: any): void {
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',
@@ -231,7 +343,12 @@ export class PerformancePayComponent {
     });
   }
 
-  trackById(_: number, row: PerformanceLedgerRow): number {
+  getRandomAvatarTone(): string {
+    const tones = ['blue', 'lavender', 'peach', 'gray', 'slate'];
+    return tones[Math.floor(Math.random() * tones.length)];
+  }
+
+  trackById(_: number, row: any): any {
     return row.id;
   }
 

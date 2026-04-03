@@ -7,11 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
-import {
-  AddBonusDialogComponent,
-  BonusDialogResult
-} from '../dialogs/add-bonus-dialog/add-bonus-dialog.component';
+import { BonusDialogResult } from '../dialogs/add-bonus-dialog/add-bonus-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
+import { AddBonusDialogComponent } from '../dialogs/add-bonus-dialog/add-bonus-dialog.component';
+import { PayrollService } from '../../services/payroll.service';
+import { OnInit, inject } from '@angular/core';
 
 interface BonusLedgerRow {
   id: number;
@@ -32,13 +32,21 @@ interface BonusLedgerRow {
   templateUrl: './bonus-pay.component.html',
   styleUrl: './bonus-pay.component.scss'
 })
-export class BonusPayComponent {
-  searchText = '';
-  selectedType: 'All' | BonusLedgerRow['type'] = 'All';
-  selectedStatus: 'All' | BonusLedgerRow['status'] = 'All';
+export class BonusPayComponent implements OnInit {
+  private readonly payrollService = inject(PayrollService);
+  private readonly dialog = inject(MatDialog);
 
-  readonly typeOptions: Array<'All' | BonusLedgerRow['type']> = ['All', 'Fixed', 'Performance', 'Festival', 'Referral'];
-  readonly statusOptions: Array<'All' | BonusLedgerRow['status']> = ['All', 'Active', 'Cancelled'];
+  // Filter state
+  pendingSearch = '';
+  pendingPeriod = '';
+  pendingRule = '';
+
+  filterSearch = '';
+  filterPeriod = '';
+  filterRule = '';
+
+  periods: any[] = [];
+  bonusRules: any[] = [];
 
   rows: BonusLedgerRow[] = [
     {
@@ -120,23 +128,123 @@ export class BonusPayComponent {
     }
   ];
 
-  constructor(private dialog: MatDialog) {}
+  // Pagination (local for now as per current component state)
+  currentPage = 1;
+  pageSize = 10;
+  totalRecords = 7;
+
+  ngOnInit(): void {
+    this.loadFilterData();
+    // In a real scenario, we'd loadBonusPays() here
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRecords / this.pageSize));
+  }
+
+  get pageRange(): number[] {
+    const delta = 2;
+    const current = this.currentPage;
+    const total = this.totalPages;
+    const start = Math.max(1, current - delta);
+    const end   = Math.min(total, current + delta);
+    const range: number[] = [];
+    for (let i = start; i <= end; i++) range.push(i);
+    return range;
+  }
+
+  get fromRecord(): number {
+    return this.totalRecords === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get toRecord(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.pendingSearch || this.pendingPeriod || this.pendingRule);
+  }
+
+  get hasAppliedFilters(): boolean {
+    return !!(this.filterSearch || this.filterPeriod || this.filterRule);
+  }
+
+  applyFilters() {
+    this.filterSearch = this.pendingSearch;
+    this.filterPeriod = this.pendingPeriod;
+    this.filterRule = this.pendingRule;
+    this.currentPage = 1;
+    // this.loadBonusPays();
+  }
+
+  clearFilters() {
+    this.pendingSearch = '';
+    this.pendingPeriod = '';
+    this.pendingRule = '';
+    this.filterSearch = '';
+    this.filterPeriod = '';
+    this.filterRule = '';
+    this.currentPage = 1;
+    // this.loadBonusPays();
+  }
+
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages || p === this.currentPage) return;
+    this.currentPage = p;
+    // this.loadBonusPays();
+  }
+
+  prevPage() { this.goToPage(this.currentPage - 1); }
+  nextPage() { this.goToPage(this.currentPage + 1); }
+
+  loadFilterData(): void {
+    this.payrollService.getPayrollPeriods().subscribe({
+      next: (data: any) => {
+        if (Array.isArray(data)) {
+          this.periods = data;
+        } else if (data && Array.isArray(data.items)) {
+          this.periods = data.items;
+        } else if (data && Array.isArray(data.data)) {
+          this.periods = data.data;
+        } else {
+          this.periods = [];
+        }
+      },
+      error: (err: any) => {
+        console.error('Error loading periods:', err);
+        this.periods = [];
+      }
+    });
+
+    this.payrollService.getActiveBonusRules().subscribe({
+      next: (data: any) => {
+        this.bonusRules = Array.isArray(data) ? data : (data?.items || data?.data || []);
+      },
+      error: (err: any) => {
+        console.error('Error loading bonus rules:', err);
+        this.bonusRules = [];
+      }
+    });
+  }
 
   get filteredRows(): BonusLedgerRow[] {
-    const query = this.searchText.trim().toLowerCase();
+    const query = this.filterSearch.trim().toLowerCase();
 
     return this.rows.filter((row) => {
       const matchesSearch = !query
         || row.employeeName.toLowerCase().includes(query)
         || row.description.toLowerCase().includes(query);
-      const matchesType = this.selectedType === 'All' || row.type === this.selectedType;
-      const matchesStatus = this.selectedStatus === 'All' || row.status === this.selectedStatus;
+      
+      const matchesPeriod = !this.filterPeriod || row.period === this.filterPeriod;
+      // In a real app, you'd match the ruleId properly. 
+      // This is a placeholder for the mock structure.
+      const matchesRule = !this.filterRule || true; 
 
-      return matchesSearch && matchesType && matchesStatus;
+      return matchesSearch && matchesPeriod && matchesRule;
     });
   }
 
-  get totalBonuses(): number {
+  get totalPayout(): number {
     return this.rows.reduce((sum, row) => sum + row.amount, 0);
   }
 
@@ -150,7 +258,7 @@ export class BonusPayComponent {
 
   get averageBonus(): number {
     if (!this.rows.length) return 0;
-    return Math.round(this.totalBonuses / this.rows.length);
+    return Math.round(this.totalPayout / this.rows.length);
   }
 
   openAddBonusDialog(): void {
@@ -181,6 +289,7 @@ export class BonusPayComponent {
         },
         ...this.rows
       ];
+      this.totalRecords = this.rows.length;
     });
   }
 
@@ -227,6 +336,7 @@ export class BonusPayComponent {
 
   deleteRow(id: number): void {
     this.rows = this.rows.filter((row) => row.id !== id);
+    this.totalRecords = this.rows.length;
   }
 
   requestDeleteRow(row: BonusLedgerRow): void {

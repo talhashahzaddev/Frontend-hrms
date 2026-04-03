@@ -1,74 +1,72 @@
-<div class="payroll-modal">
-  <header class="modal-header">
+<div class="attendance-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
     <h2>{{ dialogTitle }}</h2>
-    <button type="button" aria-label="Close dialog" (click)="close()">
+    <button class="close-btn" (click)="close()">
       <mat-icon>close</mat-icon>
     </button>
-  </header>
+  </div>
 
-  <form class="modal-body" [formGroup]="form" (ngSubmit)="save()">
-    <div class="field full">
+  <!-- Body -->
+  <div class="dialog-body" [formGroup]="form">
+    <!-- Employee -->
+    <div class="form-group">
       <label>Employee</label>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select formControlName="employee" [panelClass]="'payroll-dialog-select-panel'" placeholder="Select employee">
-          <mat-option value="" disabled>Select employee</mat-option>
-          @for (employee of employees; track employee) {
-            <mat-option [value]="employee">{{ employee }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      <select class="form-control" formControlName="employee">
+        <option value="" disabled selected>Select employee</option>
+        @for (employee of employees; track employee) {
+          <option [value]="employee">{{ employee }}</option>
+        }
+      </select>
     </div>
 
-    <div class="field">
-      <label>Payroll period</label>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select formControlName="payrollPeriod" [panelClass]="'payroll-dialog-select-panel'">
-          <mat-option value="Oct 2023">Oct 2023</mat-option>
-          <mat-option value="Nov 2023">Nov 2023</mat-option>
-          <mat-option value="Dec 2023">Dec 2023</mat-option>
-          <mat-option value="Jan 2024">Jan 2024</mat-option>
-        </mat-select>
-        <mat-icon matSuffix>calendar_month</mat-icon>
-      </mat-form-field>
+    <!-- Period + Type -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Payroll Period</label>
+        <select class="form-control" formControlName="payrollPeriod">
+          <option value="Oct 2023">Oct 2023</option>
+          <option value="Nov 2023">Nov 2023</option>
+          <option value="Dec 2023">Dec 2023</option>
+          <option value="Jan 2024">Jan 2024</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <select class="form-control" formControlName="type">
+          <option value="Fixed">Fixed</option>
+          <option value="Performance">Performance</option>
+          <option value="Festival">Festival</option>
+          <option value="Referral">Referral</option>
+        </select>
+      </div>
     </div>
 
-    <div class="field">
-      <label>Type</label>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select formControlName="type" [panelClass]="'payroll-dialog-select-panel'">
-          <mat-option value="Fixed">Fixed</mat-option>
-          <mat-option value="Performance">Performance</mat-option>
-          <mat-option value="Festival">Festival</mat-option>
-          <mat-option value="Referral">Referral</mat-option>
-        </mat-select>
-        <mat-icon matSuffix>category</mat-icon>
-      </mat-form-field>
+    <!-- Amount + Status -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Amount (PKR)</label>
+        <input type="number" class="form-control" formControlName="amount" placeholder="e.g. 5000" />
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" formControlName="status">
+          <option value="Active">Active</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
     </div>
 
-    <div class="field">
-      <label>Amount PKR</label>
-      <input type="number" formControlName="amount" placeholder="e.g. 5000" />
-    </div>
-
-    <div class="field">
-      <label>Status</label>
-      <mat-form-field appearance="outline" class="select-field">
-        <mat-select formControlName="status" [panelClass]="'payroll-dialog-select-panel'">
-          <mat-option value="Active">Active</mat-option>
-          <mat-option value="Cancelled">Cancelled</mat-option>
-        </mat-select>
-        <mat-icon matSuffix>check_circle</mat-icon>
-      </mat-form-field>
-    </div>
-
-    <div class="field full">
+    <!-- Description -->
+    <div class="form-group">
       <label>Description</label>
-      <textarea rows="3" formControlName="description" placeholder="Add reason or notes"></textarea>
+      <textarea rows="3" class="form-control" formControlName="description" placeholder="Add reason or notes" style="height: auto; padding: 0.75rem;"></textarea>
     </div>
-  </form>
+  </div>
 
-  <footer class="modal-footer">
-    <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
-    <button type="button" class="btn-save" (click)="save()">{{ submitLabel }}</button>
-  </footer>
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="close()">Cancel</button>
+    <button class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
 </div>
