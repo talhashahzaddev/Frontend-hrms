@@ -52,6 +52,17 @@ export class AuthGuard implements CanActivate, CanActivateChild {
               return false;
             }
           }
+
+          // Check permission-based access if specified in route data
+          const requiredPermissions = route.data?.['permissions'] as string[];
+          if (requiredPermissions && requiredPermissions.length > 0) {
+            const hasRequiredPermission = this.authService.hasAnyActionPermission(requiredPermissions);
+            if (!hasRequiredPermission) {
+              this.notificationService.permissionDenied();
+              this.router.navigate(['/403']);
+              return false;
+            }
+          }
           return true;
         } else {
           // Store the attempted URL for redirecting after login

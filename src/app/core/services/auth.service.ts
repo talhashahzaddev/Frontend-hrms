@@ -661,6 +661,31 @@ export class AuthService {
   }
 
   /**
+   * Checks whether the user has at least one of the provided action keys
+   * across any menu/submenu.
+   */
+  hasAnyActionPermission(actionKeys: readonly string[]): boolean {
+    if (!actionKeys || actionKeys.length === 0) {
+      return false;
+    }
+
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) {
+      return false;
+    }
+
+    const normalized = new Set(actionKeys.map(key => key.toLowerCase()));
+
+    return permissions.menus.some(menu =>
+      menu.subMenus.some(subMenu =>
+        subMenu.actions.some(action =>
+          action.hasPermission && normalized.has(action.actionKey.toLowerCase())
+        )
+      )
+    );
+  }
+
+  /**
    * Checks if user has any permission under a specific submenu
    * @param menuName - Name of the menu
    * @param subMenuName - Name of the submenu

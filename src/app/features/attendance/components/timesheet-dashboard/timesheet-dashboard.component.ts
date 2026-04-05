@@ -19,6 +19,7 @@ import { MonthlyTimesheetSummary, MonthlyTimesheetCreateDto } from '../../../../
 import { TimesheetDetailDialogComponent } from '../timesheet-detail-dialog/timesheet-detail-dialog.component';
 import { CreateSnapshotDialogComponent } from '../create-snapshot-dialog/create-snapshot-dialog.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog_component';
+import { TIMESHEET_MENU, TIMESHEET_PERMISSIONS } from '../../constants/timesheet-permissions.constants';
 
 @Component({
   selector: 'app-timesheet-dashboard',
@@ -39,6 +40,8 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
   styleUrls: ['./timesheet-dashboard.component.scss']
 })
 export class TimesheetDashboardComponent implements OnInit, OnDestroy {
+  readonly permissions = TIMESHEET_PERMISSIONS;
+
   timesheets: MonthlyTimesheetSummary[] = [];
   isLoading = false;
   currentUserRole: string = '';
@@ -63,6 +66,36 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private toEpoch(dateValue?: string): number {
+    if (!dateValue) return 0;
+    const value = new Date(dateValue).getTime();
+    return isNaN(value) ? 0 : value;
+  }
+
+  private compareSnapshots(a: MonthlyTimesheetSummary, b: MonthlyTimesheetSummary): number {
+    const createdDiff = this.toEpoch(b.createdAt) - this.toEpoch(a.createdAt);
+    if (createdDiff !== 0) return createdDiff;
+    if (b.year !== a.year) return b.year - a.year;
+    if (b.month !== a.month) return b.month - a.month;
+    return (b.timesheetId || '').localeCompare(a.timesheetId || '');
+  }
+
+  private normalizeSnapshots(snapshots: MonthlyTimesheetSummary[]): MonthlyTimesheetSummary[] {
+    const sorted = [...(snapshots || [])]
+      .filter(snapshot => !!snapshot.timesheetId)
+      .sort((a, b) => this.compareSnapshots(a, b));
+    const latestByPeriod = new Map<string, MonthlyTimesheetSummary>();
+
+    sorted.forEach(snapshot => {
+      const periodKey = `${snapshot.year}-${String(snapshot.month).padStart(2, '0')}`;
+      if (!latestByPeriod.has(periodKey)) {
+        latestByPeriod.set(periodKey, snapshot);
+      }
+    });
+
+    return Array.from(latestByPeriod.values());
+  }
+
   getCurrentUserRole(): void {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
@@ -85,7 +118,7 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.timesheets = data;
+          this.timesheets = this.normalizeSnapshots(data);
           this.isLoading = false;
         },
         error: (error) => {
@@ -235,6 +268,6 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(actionKey: string): boolean {
-    return this.authService.hasMenuPermission('Attendance', 'Timesheet', actionKey);
+    return this.authService.hasMenuPermission(TIMESHEET_MENU.ATTENDANCE, TIMESHEET_MENU.TIMESHEET, actionKey);
   }
 }

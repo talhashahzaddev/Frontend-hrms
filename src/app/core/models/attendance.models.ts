@@ -11,6 +11,7 @@ export interface Attendance {
   checkOutLocation?: string;
   totalHours: number;
   overtimeHours: number;
+  lateHours?: number;
   status: string;
   sessionsCount: number;
   notes?: string;
@@ -131,11 +132,14 @@ export interface ManualAttendanceSearchDto {
 }
 
 export interface ManualAttendanceUpdateDto {
-  attendanceId: string;
+  attendanceId?: string | null;
   checkInTime?: string;
   checkOutTime?: string;
   status: string;
   notes?: string;
+  reason?: string;
+  timesheetId?: string;
+  workDate?: string;
   employeeId: string;
 }
 
@@ -386,6 +390,8 @@ export interface DailyAttendanceRecord {
   checkOutTime?: string;
   status: string;
   totalHours: number;
+  overtimeHours?: number;
+  lateHours?: number;
   notes?: string;
   is_finalized?: boolean;
   isFinalized?: boolean;
@@ -395,6 +401,8 @@ export interface DailyAttendanceRecord {
   hasDraftRequest?: boolean;
   hasApprovedRequest?: boolean;
   hasRejectedRequest?: boolean;
+  requestStatus?: 'pending' | 'approved' | 'rejected' | 'draft' | 'none' | string;
+  rejectionReason?: string | null;
   requestedCheckIn?: string | null;
   requestedCheckOut?: string | null;
   requestedStatus?: string | null;
@@ -472,6 +480,7 @@ export interface CorrectionRecord {
   requestedNotes?: string;
   requestedAt: string;
   status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
 }
 
 export interface EmployeeSubmissionPackage {
@@ -493,6 +502,8 @@ export interface FinalizedTimesheetRecordDto {
   finalCheckIn?: string;
   finalCheckOut?: string;
   finalTotalHours: number;
+  finalOvertimeHours?: number;
+  finalLateHours?: number;
   finalStatus: string;
   finalNotes?: string;
   createdAt?: string;
@@ -515,6 +526,36 @@ export interface FinalizedTimesheetDto {
   finalizedAt?: string;
 }
 
+export interface FinalizedPayrollStatusBreakdown {
+  status: string;
+  days: number;
+  hours: number;
+}
+
+export interface FinalizedPayrollCalculation {
+  timesheetId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  month: number;
+  year: number;
+  expectedWorkDays: number;
+  finalizedWorkDays: number;
+  pendingWorkDays: number;
+  pendingRequestDays: number;
+  payableDays: number;
+  unpaidDays: number;
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  lateHours: number;
+  attendancePercentage: number;
+  payrollReady: boolean;
+  blockedReason?: string;
+  generatedAt?: string;
+  statusBreakdown: FinalizedPayrollStatusBreakdown[];
+}
+
 export interface DailyReviewRecord {
   recordId: string;
   attendanceId: string | null;
@@ -523,14 +564,18 @@ export interface DailyReviewRecord {
   originalCheckOut?: string;
   originalStatus: string;
   originalTotalHours: number;
+  originalLateHours?: number;
+  originalOvertimeHours?: number;
   requestedCheckIn?: string;
   requestedCheckOut?: string;
   requestedStatus?: string;
   requestedNotes?: string;
   reasonForEdit?: string;
+  rejectionReason?: string;
   hasPendingRequest: boolean;
   hasDraftRequest: boolean;
   hasApprovedRequest?: boolean;
+  hasRejectedRequest?: boolean;
   isFinalized: boolean;
   isManagerOverride?: boolean;
   requestId?: string;

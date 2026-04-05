@@ -134,12 +134,95 @@
               <span class="mini-label">Attendance</span><span class="mini-value">{{ se.attendancePercentage | number:'1.0-0' }}%</span>
             </div>
 
+            <div class="payroll-summary" *ngIf="!isEmployee()">
+              <div class="ps-header">
+                <div class="ps-title-wrap">
+                  <span class="ps-title">Finalized Payroll Calculation</span>
+                  <span class="ps-subtitle" *ngIf="selectedPayrollCalculation?.generatedAt">
+                    Generated {{ selectedPayrollCalculation?.generatedAt | date:'medium' }}
+                  </span>
+                </div>
+
+                <span
+                  class="ps-ready-chip"
+                  [class.ready]="selectedPayrollCalculation?.payrollReady"
+                  [class.blocked]="selectedPayrollCalculation && !selectedPayrollCalculation.payrollReady"
+                  *ngIf="selectedPayrollCalculation">
+                  <mat-icon>{{ selectedPayrollCalculation.payrollReady ? 'verified' : 'warning' }}</mat-icon>
+                  {{ selectedPayrollCalculation.payrollReady ? 'Payroll Ready' : 'Blocked' }}
+                </span>
+              </div>
+
+              <div class="ps-loading" *ngIf="isPayrollCalculationLoading">
+                <mat-icon>hourglass_top</mat-icon>
+                <span>Calculating finalized payroll output...</span>
+              </div>
+
+              <div class="ps-error" *ngIf="!isPayrollCalculationLoading && payrollCalculationError">
+                <mat-icon>error_outline</mat-icon>
+                <span>{{ payrollCalculationError }}</span>
+              </div>
+
+              <ng-container *ngIf="!isPayrollCalculationLoading && selectedPayrollCalculation as calc">
+                <div class="ps-grid">
+                  <div class="ps-metric">
+                    <span class="label">Expected Workdays</span>
+                    <span class="value">{{ calc.expectedWorkDays }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Finalized Workdays</span>
+                    <span class="value">{{ calc.finalizedWorkDays }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Payable Days</span>
+                    <span class="value">{{ calc.payableDays }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Unpaid Days</span>
+                    <span class="value">{{ calc.unpaidDays }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Total Hours</span>
+                    <span class="value">{{ calc.totalHours | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Regular Hours</span>
+                    <span class="value">{{ calc.regularHours | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Overtime Hours</span>
+                    <span class="value">{{ calc.overtimeHours | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="ps-metric">
+                    <span class="label">Late Hours</span>
+                    <span class="value">{{ calc.lateHours | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+
+                <div class="ps-status-breakdown" *ngIf="calc.statusBreakdown.length > 0">
+                  <span
+                    class="status-pill"
+                    *ngFor="let item of calc.statusBreakdown"
+                    [ngClass]="getPayrollStatusClass(item.status)">
+                    {{ getPayrollStatusLabel(item.status) }}: {{ item.days }}d / {{ item.hours | number:'1.2-2' }}h
+                  </span>
+                </div>
+
+                <div class="ps-blocked-reason" *ngIf="!calc.payrollReady && calc.blockedReason">
+                  <mat-icon>info</mat-icon>
+                  <span>{{ calc.blockedReason }}</span>
+                </div>
+              </ng-container>
+            </div>
+
             <!-- Column Header -->
             <div class="records-thead">
               <div class="rc-date">Date</div>
               <div class="rc-checkin">Check-In</div>
               <div class="rc-checkout">Check-Out</div>
               <div class="rc-hours">Hours</div>
+              <div class="rc-late">Late</div>
+              <div class="rc-overtime">Overtime</div>
               <div class="rc-status">Status</div>
               <div class="rc-state">State</div>
               <div class="rc-notes">Notes</div>
@@ -153,8 +236,9 @@
                 [class.is-finalized]="(record.is_finalized || record.isFinalized) && !record.is_manager_override"
                 [class.is-manager-override]="record.is_manager_override"
                 [class.is-approved]="record.hasApprovedRequest && !(record.is_finalized || record.isFinalized || record.is_manager_override)"
-                [class.is-pending]="record.hasPendingRequest && !record.hasDraftRequest && !(record.is_finalized || record.isFinalized)"
-                [class.is-requested]="record.hasDraftRequest && !(record.is_finalized || record.isFinalized)">
+                [class.is-pending]="isPendingRequest(record) && !isDraftRequest(record) && !(record.is_finalized || record.isFinalized)"
+                [class.is-requested]="isDraftRequest(record) && !(record.is_finalized || record.isFinalized)"
+                [class.is-rejected]="isRejectedRequest(record) && !(record.is_finalized || record.isFinalized)">
 
                 <!-- Date -->
                 <div class="rc-date">
@@ -164,11 +248,11 @@
                 <!-- Check-In -->
                 <div class="rc-checkin">
                   <ng-container *ngIf="showTimes(record)">
-                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckIn" class="edited-info">
+                    <span *ngIf="hasOpenRequest(record) && record.requestedCheckIn" class="edited-info">
                       {{ formatTime(record.requestedCheckIn) }}
-                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                      <mat-icon class="requested-icon">{{ getRequestIcon(record) }}</mat-icon>
                     </span>
-                    <span *ngIf="!((record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckIn)" class="time-val">
+                    <span *ngIf="!(hasOpenRequest(record) && record.requestedCheckIn)" class="time-val">
                       {{ record.checkInTime ? formatTime(record.checkInTime) : '—' }}
                     </span>
                   </ng-container>
@@ -178,11 +262,11 @@
                 <!-- Check-Out -->
                 <div class="rc-checkout">
                   <ng-container *ngIf="showTimes(record)">
-                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckOut" class="edited-info">
+                    <span *ngIf="hasOpenRequest(record) && record.requestedCheckOut" class="edited-info">
                       {{ formatTime(record.requestedCheckOut) }}
-                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                      <mat-icon class="requested-icon">{{ getRequestIcon(record) }}</mat-icon>
                     </span>
-                    <span *ngIf="!((record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckOut)" class="time-val">
+                    <span *ngIf="!(hasOpenRequest(record) && record.requestedCheckOut)" class="time-val">
                       {{ record.checkOutTime ? formatTime(record.checkOutTime) : '—' }}
                     </span>
                   </ng-container>
@@ -193,6 +277,18 @@
                 <div class="rc-hours">
                   <span *ngIf="record.totalHours" class="hours-val">{{ record.totalHours }}</span>
                   <span *ngIf="!record.totalHours" class="time-dash">—</span>
+                </div>
+
+                <!-- Late -->
+                <div class="rc-late">
+                  <span *ngIf="record.lateHours" class="hours-val">{{ record.lateHours }}</span>
+                  <span *ngIf="!record.lateHours" class="time-dash">—</span>
+                </div>
+
+                <!-- Overtime -->
+                <div class="rc-overtime">
+                  <span *ngIf="record.overtimeHours" class="hours-val">{{ record.overtimeHours }}</span>
+                  <span *ngIf="!record.overtimeHours" class="time-dash">—</span>
                 </div>
 
                 <!-- Status -->
@@ -207,12 +303,12 @@
                     'half-day': getEffectiveStatus(record) === 'half day' || getEffectiveStatus(record) === 'half_day',
                     'norecord': getEffectiveStatus(record) === 'no record' || getEffectiveStatus(record) === 'no_record'
                   }">
-                    <ng-container *ngIf="record.hasDraftRequest || record.hasPendingRequest">
+                    <ng-container *ngIf="hasOpenRequest(record)">
                       {{ record.requestedStatus || record.status }}
-                      <mat-icon class="requested-icon" *ngIf="record.hasDraftRequest">history_edu</mat-icon>
-                      <mat-icon class="requested-icon" *ngIf="record.hasPendingRequest">pending</mat-icon>
+                      <mat-icon class="requested-icon" *ngIf="isDraftRequest(record)">history_edu</mat-icon>
+                      <mat-icon class="requested-icon" *ngIf="isPendingRequest(record)">pending</mat-icon>
                     </ng-container>
-                    <ng-container *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)">
+                    <ng-container *ngIf="!hasOpenRequest(record)">
                       {{ record.status }}
                     </ng-container>
                   </span>
@@ -229,21 +325,25 @@
                   <span *ngIf="record.hasApprovedRequest && !(record.is_finalized || record.isFinalized || record.is_manager_override)" class="approved-badge">
                     <mat-icon class="approved-icon">check_circle</mat-icon>Approved
                   </span>
-                  <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && !(record.is_finalized || record.isFinalized)" class="request-badge">
-                    <mat-icon class="requested-icon" *ngIf="record.hasDraftRequest">history_edu</mat-icon>
-                    <mat-icon class="requested-icon" *ngIf="record.hasPendingRequest">pending</mat-icon>
-                    <span *ngIf="record.hasDraftRequest">Draft</span>
-                    <span *ngIf="record.hasPendingRequest">Pending</span>
+                  <span *ngIf="isRejectedRequest(record) && !(record.is_finalized || record.isFinalized || record.is_manager_override)" class="rejected-badge">
+                    <mat-icon class="rejected-icon">cancel</mat-icon>Rejected
+                  </span>
+                  <span *ngIf="hasOpenRequest(record) && !(record.is_finalized || record.isFinalized)" class="request-badge">
+                    <mat-icon class="requested-icon" *ngIf="isDraftRequest(record)">history_edu</mat-icon>
+                    <mat-icon class="requested-icon" *ngIf="isPendingRequest(record)">pending</mat-icon>
+                    <span *ngIf="isDraftRequest(record)">Draft</span>
+                    <span *ngIf="isPendingRequest(record)">Pending</span>
                   </span>
                 </div>
 
                 <!-- Notes -->
                 <div class="rc-notes">
-                  <span *ngIf="record.notes || record.requestedNotes" class="notes-val"
-                    [title]="record.requestedNotes || record.notes">
-                    {{ (record.requestedNotes || record.notes) | slice:0:28 }}{{ ((record.requestedNotes || record.notes)?.length ?? 0) > 28 ? '…' : '' }}
+                  <span *ngIf="getDisplayNote(record) as noteText" class="notes-val"
+                    [class.rejected-note]="isRejectedRequest(record)"
+                    [title]="noteText">
+                    {{ noteText | slice:0:28 }}{{ noteText.length > 28 ? '…' : '' }}
                   </span>
-                  <span *ngIf="!(record.notes || record.requestedNotes)" class="time-dash">—</span>
+                  <span *ngIf="!getDisplayNote(record)" class="time-dash">—</span>
                 </div>
 
                 <!-- Actions -->
@@ -257,10 +357,10 @@
 
                   <!-- Manager override button -->
                   <button
-                    *ngIf="hasPermission('edit_or_override_attendace_recored') && !isOwnTimesheetSelected() && !isFutureDay(record) && canManagerOverride(record)"
+                    *ngIf="hasPermission(permissions.OVERRIDE_RECORD) && !isOwnTimesheetSelected() && !isFutureDay(record) && canManagerOverride(record)"
                     type="button"
                     (click)="openManagerOverride(se, record)"
-                    [title]="record.is_manager_override ? 'Re-override record' : record.hasPendingRequest ? 'Override (supersedes pending request)' : 'Manager override'"
+                    [title]="record.is_manager_override ? 'Re-override record' : isPendingRequest(record) ? 'Override (supersedes pending request)' : 'Manager override'"
                     class="row-action-btn override-btn">
                     <mat-icon>edit_note</mat-icon>
                   </button>
@@ -277,14 +377,12 @@
 
                   <!-- Employee correction button -->
                   <button
-                    *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(se) && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
+                    *ngIf="hasPermission(permissions.VIEW_DETAILS) && (isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(se) && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
                     type="button"
                     (click)="requestDailyCorrection(se, record)"
-                    [title]="record.hasDraftRequest ? 'Edit draft correction' : record.hasPendingRequest ? 'Re-edit pending request' : 'Request correction'"
+                    [title]="getCorrectionButtonTitle(record)"
                     class="row-action-btn edit-btn">
-                    <mat-icon *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)">edit</mat-icon>
-                    <mat-icon *ngIf="record.hasDraftRequest">published_with_changes</mat-icon>
-                    <mat-icon *ngIf="record.hasPendingRequest">sync</mat-icon>
+                    <mat-icon>{{ getCorrectionButtonIcon(record) }}</mat-icon>
                   </button>
                 </div>
 
@@ -309,7 +407,7 @@
       </div>
 
       <button
-        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
+        *ngIf="canSubmitTimesheetAction() && (isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
         mat-raised-button
         color="primary"
         (click)="submitAllEdits()"

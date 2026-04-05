@@ -36,6 +36,8 @@ import { RejectRequestDialogComponent } from '../reject-request-dialog/reject-re
 import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../manager-override-dialog/manager-override-dialog.component';
 import { EmployeeReviewDetailDialogComponent, EmployeeReviewDetailDialogData } from '../employee-review-detail-dialog/employee-review-detail-dialog.component';
 import { AuthService } from '@/app/core/services/auth.service';
+import { formatAttendanceTime } from '../../utils/attendance-time.util';
+import { TIMESHEET_FINALIZE_KEYS, TIMESHEET_MENU, TIMESHEET_PERMISSIONS } from '../../constants/timesheet-permissions.constants';
 
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 
@@ -70,6 +72,7 @@ const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
 })
 export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  readonly permissions = TIMESHEET_PERMISSIONS;
 
   employeePackages: EmployeeReviewPackage[] = [];
   filteredPackages: EmployeeReviewPackage[] = [];
@@ -110,6 +113,38 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private toEpoch(dateValue?: string): number {
+    if (!dateValue) return 0;
+    const value = new Date(dateValue).getTime();
+    return isNaN(value) ? 0 : value;
+  }
+
+  private compareSnapshots(a: MonthlyTimesheetSummary, b: MonthlyTimesheetSummary): number {
+    const createdDiff = this.toEpoch(b.createdAt) - this.toEpoch(a.createdAt);
+    if (createdDiff !== 0) return createdDiff;
+    if (b.year !== a.year) return b.year - a.year;
+    if (b.month !== a.month) return b.month - a.month;
+    return (b.timesheetId || '').localeCompare(a.timesheetId || '');
+  }
+
+  private normalizeSnapshots(snapshots: MonthlyTimesheetSummary[]): MonthlyTimesheetSummary[] {
+    const validSnapshots = (snapshots || []).filter(
+      s => !!s.timesheetId && s.timesheetId !== EMPTY_GUID
+    );
+
+    const sorted = [...validSnapshots].sort((a, b) => this.compareSnapshots(a, b));
+    const latestByPeriod = new Map<string, MonthlyTimesheetSummary>();
+
+    sorted.forEach(snapshot => {
+      const periodKey = `${snapshot.year}-${String(snapshot.month).padStart(2, '0')}`;
+      if (!latestByPeriod.has(periodKey)) {
+        latestByPeriod.set(periodKey, snapshot);
+      }
+    });
+
+    return Array.from(latestByPeriod.values());
   }
 
   applyPackageFilter(): void {
@@ -170,13 +205,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   private bootstrapDashboard(): void {
     this.isLoading = true;
 
-    this.attendanceService.getSnapshots()
+    this.attendanceService.getDashboardSnapshots()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (snapshots) => {
-          this.allSnapshots = [...snapshots].sort((a, b) =>
-            b.year !== a.year ? b.year - a.year : b.month - a.month
-          );
+          this.allSnapshots = this.normalizeSnapshots(snapshots);
 
           if (this.allSnapshots.length === 0) {
             this.loadFallbackWithPendingRequests();
@@ -268,13 +301,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   private loadAllSnapshots(): void {
     this.isLoadingSnapshots = true;
-    this.attendanceService.getSnapshots()
+    this.attendanceService.getDashboardSnapshots()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (snapshots) => {
-          this.allSnapshots = [...snapshots].sort((a, b) =>
-            b.year !== a.year ? b.year - a.year : b.month - a.month
-          );
+          this.allSnapshots = this.normalizeSnapshots(snapshots);
           this.isLoadingSnapshots = false;
         },
         error: (err) => {
@@ -396,6 +427,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   }
 
   openManagerOverride(pkg: EmployeeReviewPackage, record: DailyReviewRecord): void {
+    if (!this.authService.hasAnyActionPermission([this.permissions.OVERRIDE_RECORD])) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     const timesheetId = this.resolveTimesheetId(pkg);
     const dialogData: ManagerOverrideDialogData = {
       record,
@@ -439,6 +475,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   }
 
   approveAllForEmployee(pkg: EmployeeReviewPackage): void {
+    if (!this.hasPermission(this.permissions.APPROVE_REQUESTS)) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     const timesheetId = this.resolveTimesheetId(pkg);
     this.processingPackageIds.add(pkg.employeeId);
 
@@ -469,6 +510,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   }
 
   finalizeEmployeeApprovals(pkg: EmployeeReviewPackage): void {
+    if (!this.canFinalizeTimesheet()) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     if (pkg.isFinalized) {
       this.notificationService.showError(`${pkg.employeeName}'s records are already finalized.`);
       return;
@@ -505,6 +551,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   }
 
   viewEmployeeDetails(pkg: EmployeeReviewPackage): void {
+    if (!this.hasPermission(this.permissions.VIEW_DASHBOARD)) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     const timesheetId = this.resolveTimesheetId(pkg);
 
     const dialogData: EmployeeReviewDetailDialogData = {
@@ -578,6 +629,9 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
                       requestedStatus: undefined,
                       reasonForEdit: undefined,
                       hasPendingRequest: false,
+                      hasApprovedRequest: true,
+                      hasRejectedRequest: false,
+                      rejectionReason: undefined,
                       requestStatus: 'approved'
                     };
                   }
@@ -588,6 +642,9 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
                     requestedStatus: undefined,
                     reasonForEdit: undefined,
                     hasPendingRequest: false,
+                    hasApprovedRequest: false,
+                    hasRejectedRequest: true,
+                    rejectionReason: dto.rejectionReason,
                     requestStatus: 'rejected'
                   };
                 })
@@ -625,25 +682,38 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
         finalizedCount: 0,
         finalizedDays: 0,
         hasPendingRequest: false,
-        fullMonthRecords: corrections.map((c: any): DailyReviewRecord => ({
-          recordId: c.requestId || c.RequestId || '',
-          attendanceId: c.attendanceId || c.AttendanceId || '',
-          date: c.workDate || c.date || '',
-          originalCheckIn: c.originalCheckIn || c.checkInTime || undefined,
-          originalCheckOut: c.originalCheckOut || c.checkOutTime || undefined,
-          originalStatus: c.originalStatus || c.status || 'No Record',
-          originalTotalHours: c.originalTotalHours || c.totalHours || 0,
-          requestedCheckIn: c.requestedCheckIn || undefined,
-          requestedCheckOut: c.requestedCheckOut || undefined,
-          requestedStatus: c.requestedStatus || undefined,
-          requestedNotes: c.requestedNotes || undefined,
-          reasonForEdit: c.reasonForEdit || undefined,
-          hasDraftRequest: false,
-          hasPendingRequest: !c.status || c.status === 'pending',
-          isFinalized: false,
-          requestId: c.requestId || c.RequestId || '',
-          requestStatus: c.status || 'pending'
-        }))
+        fullMonthRecords: corrections.map((c: any): DailyReviewRecord => {
+          const requestStatus = String(c.status || 'pending').toLowerCase();
+          const normalizedStatus: 'pending' | 'approved' | 'rejected' =
+            requestStatus === 'approved' || requestStatus === 'rejected'
+              ? (requestStatus as 'approved' | 'rejected')
+              : 'pending';
+
+          return {
+            recordId: c.requestId || c.RequestId || '',
+            attendanceId: c.attendanceId || c.AttendanceId || '',
+            date: c.workDate || c.date || '',
+            originalCheckIn: c.originalCheckIn || c.checkInTime || undefined,
+            originalCheckOut: c.originalCheckOut || c.checkOutTime || undefined,
+            originalStatus: c.originalStatus || c.status || 'No Record',
+            originalTotalHours: c.originalTotalHours || c.totalHours || 0,
+            originalLateHours: c.originalLateHours ?? c.lateHours ?? c.LateHours ?? 0,
+            originalOvertimeHours: c.originalOvertimeHours ?? c.overtimeHours ?? c.OvertimeHours ?? 0,
+            requestedCheckIn: c.requestedCheckIn || undefined,
+            requestedCheckOut: c.requestedCheckOut || undefined,
+            requestedStatus: c.requestedStatus || undefined,
+            requestedNotes: c.requestedNotes || undefined,
+            rejectionReason: c.rejectionReason || c.RejectionReason || undefined,
+            reasonForEdit: c.reasonForEdit || undefined,
+            hasDraftRequest: false,
+            hasPendingRequest: normalizedStatus === 'pending',
+            hasApprovedRequest: normalizedStatus === 'approved',
+            hasRejectedRequest: normalizedStatus === 'rejected',
+            isFinalized: false,
+            requestId: c.requestId || c.RequestId || '',
+            requestStatus: normalizedStatus
+          };
+        })
       };
     });
   }
@@ -740,10 +810,12 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
   }
 
   shouldHighlightRow(record: DailyReviewRecord): boolean {
+    if ((record.requestStatus || '').toLowerCase() !== 'pending') return false;
     return !!(record.requestedCheckIn ?? record.requestedCheckOut ?? record.requestedStatus);
   }
 
   hasRequestedChanges(record: DailyReviewRecord): boolean {
+    if ((record.requestStatus || '').toLowerCase() !== 'pending') return false;
     return !!(record.requestedCheckIn || record.requestedCheckOut || record.requestedStatus);
   }
 
@@ -838,8 +910,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
 
   formatTime(dateTime?: string): string {
-    if (!dateTime) return 'Ã¢â‚¬â€';
-    return new Date(dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return formatAttendanceTime(dateTime, '-');
   }
 
   formatDate(date?: string): string {
@@ -851,7 +922,12 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     if (hours === null || hours === undefined) return '0h';
     return `${hours.toFixed(1)}h`;
   }
-     hasPermission(actionKey: string): boolean {
-    return this.authService.hasMenuPermission('Attendance', 'Timesheet Dashboard', actionKey);
+
+  canFinalizeTimesheet(): boolean {
+    return this.authService.hasAnyActionPermission(TIMESHEET_FINALIZE_KEYS);
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission(TIMESHEET_MENU.ATTENDANCE, TIMESHEET_MENU.TIMESHEET_DASHBOARD, actionKey);
   }
 }

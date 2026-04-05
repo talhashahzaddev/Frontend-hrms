@@ -44,12 +44,14 @@ import { NotificationService } from '../../../../core/services/notification.serv
 
 import { AuthService } from '../../../../core/services/auth.service';
 
-import { EmployeeTimesheetDto } from '../../../../core/models/attendance.models';
+import { EmployeeTimesheetDto, FinalizedPayrollCalculation } from '../../../../core/models/attendance.models';
 
 import { AttendanceRequestDialogComponent } from '../attendance-request-dialog/attendance-request-dialog.component';
 
 import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../manager-override-dialog/manager-override-dialog.component';
+import { formatAttendanceTime } from '../../utils/attendance-time.util';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog_component';
+import { TIMESHEET_MENU, TIMESHEET_PERMISSIONS } from '../../constants/timesheet-permissions.constants';
 
 
 
@@ -137,6 +139,8 @@ export interface TimesheetDialogData {
 
 export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
+  readonly permissions = TIMESHEET_PERMISSIONS;
+
   myIdentityClaims: string[] = [];
 
   sessionUserId: string = '';
@@ -154,6 +158,9 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   selectedEmployee: EmployeeTimesheetDto | null = null;
 
   isLoading = false;
+  isPayrollCalculationLoading = false;
+  payrollCalculationError: string | null = null;
+  selectedPayrollCalculation: FinalizedPayrollCalculation | null = null;
 
   searchText = '';
   statusFilter = 'all';
@@ -489,6 +496,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
             : this.filteredEmployees[0];
 
           this.selectedEmployee = reSelected || null;
+          this.loadSelectedPayrollCalculation();
 
         },
 
@@ -532,8 +540,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (this.filteredEmployees.length > 0) {
       this.selectedEmployee = this.filteredEmployees[0];
+      this.loadSelectedPayrollCalculation();
     } else {
       this.selectedEmployee = null;
+      this.selectedPayrollCalculation = null;
+      this.payrollCalculationError = null;
     }
 
   }
@@ -558,8 +569,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   getEmployeeTimesheetStatus(emp: EmployeeTimesheetDto): string {
     if (emp.is_finalized) return 'finalized';
     const records = (emp as any).dailyRecords || [];
-    const hasPending = records.some((r: any) => r.hasPendingRequest);
-    const hasDraft   = records.some((r: any) => r.hasDraftRequest);
+    const hasPending = records.some((r: any) => this.isPendingRequest(r));
+    const hasDraft   = records.some((r: any) => this.isDraftRequest(r));
     if (hasPending) return 'pending';
     if (hasDraft)   return 'in_progress';
     return 'untouched';
@@ -686,6 +697,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   requestDailyCorrection(employee: EmployeeTimesheetDto, record: any): void {
 
+    if (!this.hasPermission(this.permissions.VIEW_DETAILS)) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
 
     const resolvedAttendanceId = record.attendanceId
 
@@ -698,7 +714,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     const dialogMode = 'edit';
 
 
-    const hasEditableRequest = record.hasDraftRequest === true || record.hasPendingRequest === true;
+    const hasEditableRequest = this.hasOpenRequest(record);
 
     const prefillCheckIn = hasEditableRequest && record.requestedCheckIn
 
@@ -793,6 +809,10 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           const draftData: any = {
             hasDraftRequest:  true,
             hasPendingRequest: false,
+            hasApprovedRequest: false,
+            hasRejectedRequest: false,
+            requestStatus: 'draft',
+            rejectionReason: null,
             requestedCheckIn:  resolvedCheckIn,
             requestedCheckOut: resolvedCheckOut,
             requestedStatus:   resolvedStatus,
@@ -926,6 +946,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   submitAllEdits(): void {
 
+    if (!this.canSubmitTimesheetAction()) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     const draftCount = this.getDraftRequestCount();
 
     if (draftCount === 0) {
@@ -1009,7 +1034,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
   isTimesheetUnderReview(employee?: any): boolean {
     const emp = employee || this.selectedEmployee || this.expandedEmployee || (this.employees?.[0] ?? null);
     if (!emp?.dailyRecords?.length) return false;
-    return emp.dailyRecords.some((r: any) => r.hasPendingRequest === true);
+    return emp.dailyRecords.some((r: any) => this.isPendingRequest(r));
   }
 
 
@@ -1026,7 +1051,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       return false;
     }
 
-    if (record.hasPendingRequest) {
+    if (this.isPendingRequest(record)) {
       return false;
     }
 
@@ -1065,7 +1090,12 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
       this.notificationService.showInfo('This record has been finalized for payroll and cannot be modified');
     } else if (record.is_manager_override || record.isManagerOverride) {
       this.notificationService.showInfo('This record has been adjusted by your manager. If you believe this is incorrect, please speak with your manager directly.');
-    } else if (record.hasPendingRequest) {
+    } else if (this.isRejectedRequest(record)) {
+      const rejectionHint = record.rejectionReason
+        ? `Your last correction request was rejected: ${record.rejectionReason}`
+        : 'Your last correction request was rejected. You can submit a new correction request.';
+      this.notificationService.showInfo(rejectionHint);
+    } else if (this.isPendingRequest(record)) {
       this.notificationService.showInfo('A correction request is already pending - please wait for manager review');
     }
 
@@ -1114,6 +1144,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     this.selectedEmployee = employee;
 
     this.pageIndex = 0;
+    this.loadSelectedPayrollCalculation();
 
   }
 
@@ -1209,6 +1240,10 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
           totalHours: 0,
 
+          overtimeHours: 0,
+
+          lateHours: 0,
+
           notes: isWeekend ? 'Weekend' : 'No attendance record',
 
           is_finalized: false,
@@ -1216,6 +1251,14 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           hasPendingRequest: false,
 
           hasDraftRequest: false,
+
+          hasApprovedRequest: false,
+
+          hasRejectedRequest: false,
+
+          requestStatus: 'none',
+
+          rejectionReason: null,
 
           isPlaceholder: true,
 
@@ -1266,6 +1309,11 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
   openManagerOverride(employee: EmployeeTimesheetDto, record: any): void {
 
+    if (!this.hasPermission(this.permissions.OVERRIDE_RECORD)) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     const reviewRecord: any = {
       attendanceId:      record.attendanceId || record.AttendanceId || null,
       date:              record.date,
@@ -1300,7 +1348,12 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           status:             result.status ? this.titleCaseStatus(result.status) : record.status,
           is_manager_override: true,
           is_finalized:       false,
-          hasPendingRequest:  false
+          hasPendingRequest:  false,
+          hasDraftRequest:    false,
+          hasApprovedRequest: false,
+          hasRejectedRequest: false,
+          requestStatus:      'none',
+          rejectionReason:    null
         });
 
         this.dailyRecordsCache.delete(employee.employeeId);
@@ -1385,54 +1438,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
   formatTime(timeStr: string | null | undefined): string {
-
-    if (!timeStr) return '-';
-
-    if (typeof timeStr === 'string' && timeStr.includes('T')) {
-
-      const tIndex = timeStr.indexOf('T');
-      const afterT = timeStr.substring(tIndex + 1);
-
-      let hour: number;
-      let minute: string;
-
-      if (/[+-]\d{2}:\d{2}$/.test(afterT)) {
-        const hhmm = afterT.substring(0, 5);
-        hour   = parseInt(hhmm.split(':')[0], 10);
-        minute = hhmm.split(':')[1];
-      } else {
-        const d = new Date(timeStr);
-        hour   = d.getHours();
-        minute = String(d.getMinutes()).padStart(2, '0');
-      }
-
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-
-      hour = hour % 12;
-
-      if (hour === 0) hour = 12;
-
-      return `${hour}:${minute} ${ampm}`;
-
-    }
-
-    if (typeof timeStr === 'string' && /^\d{2}:\d{2}$/.test(timeStr)) {
-
-      let [hour, minute] = timeStr.split(':');
-
-      let hourNum = parseInt(hour, 10);
-
-      const ampm = hourNum >= 12 ? 'PM' : 'AM';
-
-      hourNum = hourNum % 12;
-
-      if (hourNum === 0) hourNum = 12;
-
-      return `${hourNum}:${minute} ${ampm}`;
-
-    }
-
-    return timeStr;
+    return formatAttendanceTime(timeStr, '-');
 
   }
 
@@ -1470,6 +1476,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
           checkOutTime: null,
           status: draftData.requestedStatus || 'Absent',
           totalHours: 0,
+          overtimeHours: 0,
+          lateHours: 0,
           notes: null,
           is_finalized: false,
           isPlaceholder: true,
@@ -1499,6 +1507,38 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
       const status = this.titleCaseStatus(statusRaw);
 
+      const statusKey = String(raw.requestStatus ?? raw.RequestStatus ?? raw.request_status ?? '').toLowerCase();
+
+      const normalizedRequestStatus =
+        statusKey === 'pending' ||
+        statusKey === 'approved' ||
+        statusKey === 'rejected' ||
+        statusKey === 'draft' ||
+        statusKey === 'none'
+          ? statusKey
+          : undefined;
+
+      const hasDraftFlag = !!(raw.hasDraftRequest || raw.HasDraftRequest || raw.has_draft_request);
+      const hasPendingFlag = !!(raw.hasPendingRequest || raw.HasPendingRequest || raw.has_pending_request);
+      const hasApprovedFlag = !!(raw.hasApprovedRequest || raw.HasApprovedRequest || raw.has_approved_request);
+      const hasRejectedFlag = !!(raw.hasRejectedRequest || raw.HasRejectedRequest || raw.has_rejected_request);
+
+      const hasDraftRequest = normalizedRequestStatus
+        ? normalizedRequestStatus === 'draft'
+        : hasDraftFlag;
+
+      const hasPendingRequest = normalizedRequestStatus
+        ? normalizedRequestStatus === 'pending'
+        : hasPendingFlag;
+
+      const hasApprovedRequest = normalizedRequestStatus
+        ? normalizedRequestStatus === 'approved'
+        : hasApprovedFlag;
+
+      const hasRejectedRequest = normalizedRequestStatus
+        ? normalizedRequestStatus === 'rejected'
+        : hasRejectedFlag;
+
       const rec: any = {
 
         ...raw,
@@ -1513,19 +1553,27 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
         totalHours: raw.totalHours || raw.TotalHours || 0,
 
+        overtimeHours: raw.overtimeHours ?? raw.OvertimeHours ?? 0,
+
+        lateHours: raw.lateHours ?? raw.LateHours ?? 0,
+
         notes: raw.notes || raw.Notes || null,
 
         is_finalized: raw.is_finalized || raw.isFinalized || raw.IsFinalized || false,
 
         is_manager_override: raw.is_manager_override || raw.isManagerOverride || raw.IsManagerOverride || false,
 
-        hasApprovedRequest: raw.hasApprovedRequest || raw.HasApprovedRequest || raw.has_approved_request || false,
+        hasApprovedRequest,
 
-        hasPendingRequest: raw.hasPendingRequest || raw.HasPendingRequest || raw.has_pending_request || false,
+        hasPendingRequest,
 
-        hasDraftRequest: raw.hasDraftRequest || raw.HasDraftRequest || raw.has_draft_request || false,
+        hasDraftRequest,
 
-        hasRejectedRequest: raw.hasRejectedRequest || raw.HasRejectedRequest || raw.has_rejected_request || false,
+        hasRejectedRequest,
+
+        requestStatus: normalizedRequestStatus,
+
+        rejectionReason: raw.rejectionReason || raw.RejectionReason || raw.rejection_reason || null,
 
         requestedCheckIn:  raw.requestedCheckIn  || raw.RequestedCheckIn  || raw.requested_checkin  || null,
 
@@ -1631,13 +1679,13 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (this.expandedEmployee) {
 
-      return this.expandedEmployee.dailyRecords?.filter(r => r.hasPendingRequest)?.length || 0;
+      return this.expandedEmployee.dailyRecords?.filter(r => this.isPendingRequest(r))?.length || 0;
 
     }
 
     return this.employees.reduce((count, emp) => {
 
-      const empPendingCount = emp.dailyRecords?.filter(r => r.hasPendingRequest)?.length || 0;
+      const empPendingCount = emp.dailyRecords?.filter(r => this.isPendingRequest(r))?.length || 0;
 
       return count + empPendingCount;
 
@@ -1756,11 +1804,125 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
 
+  private getRequestStatus(record: any): string {
+    return String(record?.requestStatus || '').toLowerCase();
+  }
+
+  isDraftRequest(record: any): boolean {
+    const status = this.getRequestStatus(record);
+    return status ? status === 'draft' : record?.hasDraftRequest === true;
+  }
+
+  isPendingRequest(record: any): boolean {
+    const status = this.getRequestStatus(record);
+    return status ? status === 'pending' : record?.hasPendingRequest === true;
+  }
+
+  isRejectedRequest(record: any): boolean {
+    const status = this.getRequestStatus(record);
+    return status ? status === 'rejected' : record?.hasRejectedRequest === true;
+  }
+
+  hasOpenRequest(record: any): boolean {
+    return this.isDraftRequest(record) || this.isPendingRequest(record);
+  }
+
+  getRequestIcon(record: any): string {
+    return this.isDraftRequest(record) ? 'history_edu' : 'pending';
+  }
+
+  getDisplayNote(record: any): string | null {
+    if (this.isRejectedRequest(record) && record?.rejectionReason) {
+      return `Rejected: ${record.rejectionReason}`;
+    }
+    return record?.requestedNotes || record?.notes || null;
+  }
+
+  getCorrectionButtonTitle(record: any): string {
+    if (this.isDraftRequest(record)) {
+      return 'Edit draft correction';
+    }
+    if (this.isPendingRequest(record)) {
+      return 'Re-edit pending request';
+    }
+    if (this.isRejectedRequest(record)) {
+      return 'Resubmit correction request';
+    }
+    return 'Request correction';
+  }
+
+  getCorrectionButtonIcon(record: any): string {
+    if (this.isDraftRequest(record)) {
+      return 'published_with_changes';
+    }
+    if (this.isPendingRequest(record)) {
+      return 'sync';
+    }
+    if (this.isRejectedRequest(record)) {
+      return 'refresh';
+    }
+    return 'edit';
+  }
+
   getEffectiveStatus(record: any): string {
-    if ((record.hasDraftRequest || record.hasPendingRequest) && record.requestedStatus) {
+    if (this.hasOpenRequest(record) && record.requestedStatus) {
       return record.requestedStatus.toLowerCase();
     }
     return (record.status || '').toLowerCase();
+  }
+
+  getPayrollStatusLabel(status: string): string {
+    const key = (status || '').toLowerCase().replace(/[_ ]/g, '');
+
+    if (key === 'present') return 'Present';
+    if (key === 'absent') return 'Absent';
+    if (key === 'late') return 'Late';
+    if (key === 'halfday') return 'Half Day';
+    if (key === 'onleave' || key === 'leave') return 'On Leave';
+    if (key === 'norecord') return 'No Record';
+
+    return status
+      ? status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : 'Unknown';
+  }
+
+  getPayrollStatusClass(status: string): string {
+    const key = (status || '').toLowerCase().replace(/[_ ]/g, '');
+
+    if (key === 'present') return 'present';
+    if (key === 'late') return 'late';
+    if (key === 'halfday') return 'half-day';
+    if (key === 'onleave' || key === 'leave') return 'leave';
+    if (key === 'absent') return 'absent';
+    if (key === 'norecord') return 'norecord';
+
+    return 'neutral';
+  }
+
+  private loadSelectedPayrollCalculation(): void {
+    if (!this.selectedEmployee || !this.currentTimesheetId || this.isEmployee()) {
+      this.selectedPayrollCalculation = null;
+      this.payrollCalculationError = null;
+      return;
+    }
+
+    this.isPayrollCalculationLoading = true;
+    this.payrollCalculationError = null;
+
+    this.attendanceService
+      .getFinalizedPayrollCalculation(this.currentTimesheetId, this.selectedEmployee.employeeId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (calculation) => {
+          this.selectedPayrollCalculation = calculation;
+          this.isPayrollCalculationLoading = false;
+        },
+        error: (error) => {
+          this.selectedPayrollCalculation = null;
+          this.payrollCalculationError = error?.message || 'Failed to load finalized payroll calculation';
+          this.isPayrollCalculationLoading = false;
+        }
+      });
   }
 
 
@@ -1771,7 +1933,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (['norecord', 'weekend', 'leave', 'onleave', 'holiday'].includes(status)) return false;
 
-    if (record.hasDraftRequest || record.hasPendingRequest) return true;
+    if (this.hasOpenRequest(record)) return true;
 
     if (record.checkInTime || record.checkOutTime) return true;
 
@@ -1788,8 +1950,13 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
     return recordDate > today;
 
   }
-    hasPermission(actionKey: string): boolean {
-    return this.authService.hasMenuPermission('Attendance', 'Timesheet', actionKey);
+
+  canSubmitTimesheetAction(): boolean {
+    return this.hasPermission(this.permissions.VIEW_DETAILS);
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission(TIMESHEET_MENU.ATTENDANCE, TIMESHEET_MENU.TIMESHEET, actionKey);
   }
 
 }

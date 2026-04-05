@@ -96,7 +96,7 @@ export class AttendanceDialogComponent implements OnInit {
       this.rules = res;
     });
     this.payrollService.getPayrollPeriods({ pageSize: 100 }).subscribe((res: any) => {
-      this.periods = (res.data || []).map((p: any) => ({
+      this.periods = ((res?.data ?? res) || []).map((p: any) => ({
         id: p.periodId,
         name: p.periodName
       }));
@@ -125,7 +125,7 @@ export class AttendanceDialogComponent implements OnInit {
       // Overtime specific fields
       ...(this.data.type === 'overtime' ? {
         rule: ['', Validators.required],
-        overtimeDate: [''],
+        overtimeDate: ['', Validators.required],
         hours: ['', [Validators.required, Validators.min(0.5)]],
         rate: ['', [Validators.required, Validators.min(1)]],
         amount: [{ value: '', disabled: true }]
@@ -148,7 +148,9 @@ export class AttendanceDialogComponent implements OnInit {
           periodId: rawValue.period,
           ruleId: rawValue.rule,
           hoursWorked: rawValue.hours,
-          finalAmount: rawValue.amount
+          finalAmount: rawValue.amount,
+          overtimeDate: rawValue.overtimeDate,
+          entryStatus: 'pending'
         };
       }
       this.dialogRef.close({ ...payload, recordType: this.data.type });

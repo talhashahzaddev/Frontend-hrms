@@ -579,8 +579,8 @@
 
       .records-thead {
         display: grid;
-        grid-template-columns: 128px 82px 82px 68px 104px 118px minmax(80px, 1fr) 84px;
-        min-width: 740px;
+        grid-template-columns: 122px 78px 78px 62px 62px 74px 98px 112px minmax(80px, 1fr) 82px;
+        min-width: 830px;
         align-items: center;
         padding: 0 16px;
         height: 36px;
@@ -598,8 +598,8 @@
 
       .record-row {
         display: grid;
-        grid-template-columns: 128px 82px 82px 68px 104px 118px minmax(80px, 1fr) 84px;
-        min-width: 740px;
+        grid-template-columns: 122px 78px 78px 62px 62px 74px 98px 112px minmax(80px, 1fr) 82px;
+        min-width: 830px;
         align-items: center;
         padding: 0 16px;
         min-height: 46px;
@@ -616,10 +616,11 @@
         &.is-approved         { border-left-color: #16a34a; background: #f0fdf5; &:hover { background: #dcfce7; } }
         &.is-pending          { border-left-color: #ea580c; background: #fff8f4; &:hover { background: #ffedd5; } }
         &.is-requested        { border-left-color: #6366f1; background: #faf9ff; &:hover { background: #ede9fe; } }
+        &.is-rejected         { border-left-color: #dc2626; background: #fff5f5; &:hover { background: #fee2e2; } }
         &.weekend             { border-left-color: #cbd5e1; background: #f8fafc; opacity: 0.82; }
       }
 
-      .rc-date, .rc-checkin, .rc-checkout, .rc-hours,
+      .rc-date, .rc-checkin, .rc-checkout, .rc-hours, .rc-late, .rc-overtime,
       .rc-status, .rc-state, .rc-notes, .rc-actions {
         display: flex;
         align-items: center;
@@ -629,6 +630,9 @@
       }
 
       .rc-actions { justify-content: flex-end; gap: 4px; padding: 0 10px 0 6px; overflow: visible; }
+      .rc-late, .rc-overtime {
+        justify-content: flex-end;
+      }
 
       .row-date-full { font-size: 12.5px; font-weight: 600; color: #111827; white-space: nowrap; }
       .time-val      { font-size: 12.5px; color: #1f2937; font-weight: 500; }
@@ -641,6 +645,11 @@
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 100%;
+
+        &.rejected-note {
+          color: #b91c1c;
+          font-weight: 600;
+        }
       }
 
       .row-action-btn {
@@ -724,6 +733,29 @@
         width: fit-content;
         white-space: nowrap;
         .approved-icon {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          line-height: 13px;
+        }
+      }
+
+      .rejected-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #fff1f2;
+        border: 1.5px solid #fda4af;
+        border-radius: 999px;
+        padding: 2px 8px 2px 5px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #b91c1c;
+        letter-spacing: 0.02em;
+        width: fit-content;
+        white-space: nowrap;
+
+        .rejected-icon {
           font-size: 13px;
           width: 13px;
           height: 13px;
@@ -873,6 +905,13 @@
 
         letter-spacing: 0.01em;
 
+        .requested-icon {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          line-height: 13px;
+        }
+
       }
 
       .status-badge.present { background: #16a34a; color: #fff; }
@@ -955,6 +994,185 @@
       color: #d1d5db;
       font-size: 12px;
       margin: 0 4px;
+    }
+  }
+
+  .payroll-summary {
+    margin: 8px 12px 10px;
+    border: 1px solid #dbeafe;
+    background: linear-gradient(180deg, #f8fbff 0%, #f1f6ff 100%);
+    border-radius: 10px;
+    padding: 10px 12px;
+
+    .ps-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .ps-title-wrap {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .ps-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #1e3a8a;
+      letter-spacing: 0.01em;
+    }
+
+    .ps-subtitle {
+      margin-top: 1px;
+      font-size: 10.5px;
+      color: #64748b;
+    }
+
+    .ps-ready-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border: 1px solid transparent;
+
+      mat-icon {
+        font-size: 13px;
+        width: 13px;
+        height: 13px;
+        line-height: 13px;
+      }
+
+      &.ready {
+        color: #166534;
+        background: #dcfce7;
+        border-color: #86efac;
+      }
+
+      &.blocked {
+        color: #92400e;
+        background: #fef3c7;
+        border-color: #fcd34d;
+      }
+    }
+
+    .ps-loading,
+    .ps-error,
+    .ps-blocked-reason {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
+      }
+    }
+
+    .ps-loading { color: #475569; }
+    .ps-error { color: #b91c1c; }
+    .ps-blocked-reason {
+      color: #9a3412;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      padding: 6px 8px;
+      margin-top: 8px;
+      margin-bottom: 0;
+    }
+
+    .ps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .ps-metric {
+      background: #fff;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+
+      .label {
+        font-size: 9.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+      }
+
+      .value {
+        font-size: 13px;
+        font-weight: 800;
+        color: #1f2937;
+      }
+    }
+
+    .ps-status-breakdown {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 10.5px;
+      font-weight: 700;
+      border: 1px solid transparent;
+
+      &.present {
+        color: #166534;
+        background: #dcfce7;
+        border-color: #86efac;
+      }
+
+      &.late {
+        color: #854d0e;
+        background: #fef9c3;
+        border-color: #fde047;
+      }
+
+      &.leave {
+        color: #92400e;
+        background: #ffedd5;
+        border-color: #fdba74;
+      }
+
+      &.half-day {
+        color: #9a3412;
+        background: #ffedd5;
+        border-color: #fb923c;
+      }
+
+      &.absent {
+        color: #991b1b;
+        background: #fee2e2;
+        border-color: #fca5a5;
+      }
+
+      &.norecord,
+      &.neutral {
+        color: #475569;
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+      }
     }
   }
 
@@ -1175,6 +1393,14 @@
     .detail-panel {
       flex: 1 1 auto;
       overflow: auto;
+
+      .payroll-summary {
+        margin: 8px 8px 10px;
+
+        .ps-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
     }
   }
 }
@@ -1189,18 +1415,47 @@
     .detail-panel {
       padding: 8px;
 
-      // Simplify table grid — hide Hours & Notes columns
-      .records-thead {
-        grid-template-columns: 100px 68px 68px 90px 110px 60px !important;
+      .payroll-summary {
+        margin: 6px 0 10px;
+        padding: 8px;
 
-        .rc-hours,
-        .rc-notes { display: none !important; }
+        .ps-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+
+        .ps-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 5px;
+        }
+
+        .ps-metric {
+          padding: 5px 7px;
+        }
+
+        .status-pill {
+          font-size: 10px;
+        }
       }
+
+      // Simplify table grid — hide Hours, Late, Overtime, and Notes columns
 
       .record-row {
         grid-template-columns: 100px 68px 68px 90px 110px 60px !important;
 
         .rc-hours,
+        .rc-late,
+        .rc-overtime,
+        .rc-notes { display: none !important; }
+      }
+
+      .records-thead {
+        grid-template-columns: 100px 68px 68px 90px 110px 60px !important;
+
+        .rc-hours,
+        .rc-late,
+        .rc-overtime,
         .rc-notes { display: none !important; }
       }
     }

@@ -97,7 +97,7 @@ export class TimeTrackingComponent implements OnInit {
 
     this.payrollService.getPayrollPeriods({ pageSize: 100 }).subscribe({
       next: (res: any) => {
-        this.periods = (res.data || []).map((p: any) => ({
+        this.periods = ((res?.data ?? res) || []).map((p: any) => ({
           id: p.periodId,
           name: p.periodName
         }));

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '../../core/guards/auth.guard';
+import { TIMESHEET_PERMISSIONS } from './constants/timesheet-permissions.constants';
 
 export const attendanceRoutes: Routes = [
   {
@@ -46,10 +47,14 @@ export const attendanceRoutes: Routes = [
   },
   {
     path: 'timesheet',
+    canActivate: [AuthGuard],
+    data: { permissions: [TIMESHEET_PERMISSIONS.VIEW_DETAILS] },
     loadComponent: () => import('./components/timesheet-dashboard/timesheet-dashboard.component').then(m => m.TimesheetDashboardComponent)
   },
   {
     path: 'approvals',
+    canActivate: [AuthGuard],
+    data: { permissions: [TIMESHEET_PERMISSIONS.VIEW_DASHBOARD] },
     loadComponent: () => import('./components/attendance-approvals/attendance-approvals.component').then(m => m.AttendanceApprovalsComponent)
   }
 

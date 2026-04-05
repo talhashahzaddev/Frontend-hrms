@@ -25,6 +25,8 @@ import { RejectRequestDialogComponent } from '../reject-request-dialog/reject-re
 import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../manager-override-dialog/manager-override-dialog.component';
 import { AttendanceRequestDialogComponent } from '../attendance-request-dialog/attendance-request-dialog.component';
 import { AuthService } from '../../../../core/services/auth.service';
+import { formatAttendanceTime } from '../../utils/attendance-time.util';
+import { TIMESHEET_FINALIZE_KEYS, TIMESHEET_MENU, TIMESHEET_PERMISSIONS } from '../../constants/timesheet-permissions.constants';
 
 export interface EmployeeReviewDetailDialogData {
   package: EmployeeReviewPackage;
@@ -58,6 +60,7 @@ interface MonthlyDayRecord extends DailyReviewRecord {
 })
 export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  readonly permissions = TIMESHEET_PERMISSIONS;
 
   pkg: EmployeeReviewPackage;
   monthlyRecords: MonthlyDayRecord[] = [];
@@ -77,6 +80,9 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
     'day',
     'original',
+    'totalHours',
+    'lateHours',
+    'overtimeHours',
     'requested',
     'reason',
     'status',
@@ -178,6 +184,9 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
               const corr = corrByDate.get(dateKey);
               if (!corr) return r;
               if (r.isFinalized) return r;
+
+              const corrStatus = String(corr.status || '').toLowerCase();
+
               return {
                 ...r,
                 requestId:         corr.requestId         || r.requestId,
@@ -186,8 +195,11 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
                 requestedStatus:   corr.requestedStatus   || r.requestedStatus,
                 reasonForEdit:     corr.reasonForEdit     || r.reasonForEdit,
                 requestedNotes:    corr.requestedNotes    || r.requestedNotes,
-                requestStatus:     (corr.status as 'pending' | 'approved' | 'rejected') || r.requestStatus,
-                hasPendingRequest: corr.status === 'pending' ? true : r.hasPendingRequest
+                rejectionReason:   corr.rejectionReason   || r.rejectionReason,
+                requestStatus:     (corrStatus as 'pending' | 'approved' | 'rejected') || r.requestStatus,
+                hasPendingRequest: corrStatus ? corrStatus === 'pending' : r.hasPendingRequest,
+                hasApprovedRequest: corrStatus ? corrStatus === 'approved' : r.hasApprovedRequest,
+                hasRejectedRequest: corrStatus ? corrStatus === 'rejected' : r.hasRejectedRequest
               };
             });
           }
@@ -282,8 +294,13 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
           originalCheckOut: undefined,
           originalStatus: 'No Record',
           originalTotalHours: 0,
+          originalLateHours: 0,
+          originalOvertimeHours: 0,
           hasPendingRequest: false,
           hasDraftRequest: false,
+          hasApprovedRequest: false,
+          hasRejectedRequest: false,
+          requestStatus: 'none',
           isFinalized: false,
           dayOfMonth: day,
           dayName: dayName,
@@ -358,16 +375,31 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
 
   shouldHighlightRow(record: MonthlyDayRecord): boolean {
     if (record.isFinalized) return false;
-    return this.isPendingRequest(record) || this.hasRequestedChanges(record) || !!record.isManagerOverride;
+    return this.isPendingRequest(record) || !!record.isManagerOverride;
   }
 
   hasRequestedChanges(record: MonthlyDayRecord): boolean {
+    if (!this.isPendingRequest(record)) return false;
     return !!(record.requestedCheckIn || record.requestedCheckOut || record.requestedStatus);
   }
 
   isPendingRequest(record: MonthlyDayRecord): boolean {
     if (record.isFinalized) return false;
-    return record.requestStatus === 'pending' || record.hasPendingRequest;
+    const status = (record.requestStatus || '').toLowerCase();
+    return status ? status === 'pending' : record.hasPendingRequest;
+  }
+
+  isRejectedRequest(record: MonthlyDayRecord): boolean {
+    if (record.isFinalized) return false;
+    const status = (record.requestStatus || '').toLowerCase();
+    return status ? status === 'rejected' : !!record.hasRejectedRequest;
+  }
+
+  getReasonText(record: MonthlyDayRecord): string | null {
+    if (this.isRejectedRequest(record) && record.rejectionReason) {
+      return `Rejected: ${record.rejectionReason}`;
+    }
+    return record.reasonForEdit || null;
   }
 
   isUntouchedRecord(record: MonthlyDayRecord): boolean {
@@ -391,6 +423,11 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   approveRequest(record: MonthlyDayRecord): void {
+    if (!this.canApproveOrRejectRequests()) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     if (!record.requestId) return;
 
     const dto: ProcessAttendanceRequestDto = {
@@ -402,6 +439,11 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   rejectRequest(record: MonthlyDayRecord): void {
+    if (!this.canApproveOrRejectRequests()) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     if (!record.requestId) return;
 
     const dialogRef = this.dialog.open(RejectRequestDialogComponent, {
@@ -478,6 +520,11 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
         }
       });
     } else {
+      if (!this.canOverrideRecord()) {
+        this.notificationService.permissionDenied();
+        return;
+      }
+
       const resolvedRecord = { ...record, attendanceId: hasAttendanceId ? id : null };
       const emptyGuid = '00000000-0000-0000-0000-000000000000';
       const timesheetId = (this.data.timesheetId && this.data.timesheetId !== emptyGuid)
@@ -555,6 +602,9 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
 
             record.hasPendingRequest = false;
             record.requestStatus = action === 'approved' ? 'approved' : 'rejected';
+            record.hasApprovedRequest = action === 'approved';
+            record.hasRejectedRequest = action === 'rejected';
+            record.rejectionReason = action === 'rejected' ? (dto.rejectionReason || record.rejectionReason) : undefined;
 
             if (action === 'approved') {
               record.originalCheckIn = record.requestedCheckIn || record.originalCheckIn;
@@ -592,12 +642,7 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   formatTime(dateTime?: string): string {
-    if (!dateTime) return '--';
-    const date = new Date(dateTime);
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatAttendanceTime(dateTime, '--');
   }
 
   formatDisplayDate(date?: string): string {
@@ -649,8 +694,29 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
     return user?.role?.toLowerCase() === 'employee';
   }
 
+  hasDashboardPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission(TIMESHEET_MENU.ATTENDANCE, TIMESHEET_MENU.TIMESHEET_DASHBOARD, actionKey);
+  }
+
+  canApproveOrRejectRequests(): boolean {
+    return this.hasDashboardPermission(this.permissions.APPROVE_REQUESTS);
+  }
+
+  canOverrideRecord(): boolean {
+    return this.authService.hasAnyActionPermission([this.permissions.OVERRIDE_RECORD]);
+  }
+
+  canFinalizeEmployee(): boolean {
+    return this.authService.hasAnyActionPermission(TIMESHEET_FINALIZE_KEYS);
+  }
+
 
   finalizeEmployee(): void {
+    if (!this.canFinalizeEmployee()) {
+      this.notificationService.permissionDenied();
+      return;
+    }
+
     if (this.pkg.isFinalized) return;
     if ((this.pkg.pendingRequestCount || 0) > 0) {
       this.notificationService.showError('Resolve all pending requests before finalizing.');

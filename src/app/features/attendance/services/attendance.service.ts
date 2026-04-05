@@ -35,6 +35,7 @@ import {
   AttendanceUpdateRequestDto,
   FinalizedTimesheetRecordDto,
   FinalizedTimesheetDto,
+  FinalizedPayrollCalculation,
   ProcessAttendanceRequestDto,
   PendingAttendanceRequest,
   EmployeeSubmissionPackage,
@@ -675,6 +676,29 @@ getAllTimeZones() {
     return this.getMonthlyTimesheets();
   }
 
+  getDashboardSnapshots(startDate?: string, endDate?: string): Observable<MonthlyTimesheetSummary[]> {
+    let params = new HttpParams();
+
+    if (startDate && startDate.trim() !== '') {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate && endDate.trim() !== '') {
+      params = params.set('endDate', endDate);
+    }
+
+    return this.http.get<ApiResponse<MonthlyTimesheetSummary[]>>(
+      `${this.apiUrl}/timesheet/dashboard-snapshots`,
+      { params }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch dashboard snapshots');
+        }
+        return response.data || [];
+      })
+    );
+  }
+
   getTimesheetDetails(timesheetId: string): Observable<EmployeeTimesheetDto[]> {
     if (!timesheetId || timesheetId.trim() === '') {
       throw new Error('Timesheet ID is required');
@@ -701,6 +725,40 @@ getAllTimeZones() {
           }
           if (emp.dailyRecords?.length) {
             emp.dailyRecords = emp.dailyRecords.map((r: any) => {
+              const statusKey = String(
+                r.requestStatus ?? r.RequestStatus ?? r.request_status ?? ''
+              ).toLowerCase();
+
+              const hasDraftFlag = !!(r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest);
+              const hasPendingFlag = !!(r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest);
+              const hasApprovedFlag = !!(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest);
+              const hasRejectedFlag = !!(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest);
+
+              const normalizedRequestStatus =
+                statusKey === 'pending' ||
+                statusKey === 'approved' ||
+                statusKey === 'rejected' ||
+                statusKey === 'draft' ||
+                statusKey === 'none'
+                  ? statusKey
+                  : undefined;
+
+              const hasDraftRequest = normalizedRequestStatus
+                ? normalizedRequestStatus === 'draft'
+                : hasDraftFlag;
+
+              const hasPendingRequest = normalizedRequestStatus
+                ? normalizedRequestStatus === 'pending'
+                : hasPendingFlag;
+
+              const hasApprovedRequest = normalizedRequestStatus
+                ? normalizedRequestStatus === 'approved'
+                : hasApprovedFlag;
+
+              const hasRejectedRequest = normalizedRequestStatus
+                ? normalizedRequestStatus === 'rejected'
+                : hasRejectedFlag;
+
               return {
                 ...r,
                 attendanceId: r.attendanceId || r.AttendanceId || undefined,
@@ -709,13 +767,21 @@ getAllTimeZones() {
                 checkOutTime: r.checkOutTime || r.CheckOutTime || undefined,
                 status: r.status || r.Status || 'No Record',
                 totalHours: r.totalHours ?? r.TotalHours ?? 0,
+                overtimeHours: r.overtimeHours ?? r.OvertimeHours ?? 0,
+                lateHours: r.lateHours ?? r.LateHours ?? 0,
                 notes: r.notes || r.Notes || undefined,
                 is_finalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
                 is_manager_override: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
-                hasApprovedRequest: r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest || false,
-                hasRejectedRequest: r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest || false,
-                hasDraftRequest: r.has_draft_request || r.hasDraftRequest || r.HasDraftRequest || false,
-                hasPendingRequest: !!(r.has_pending_request || r.hasPendingRequest || r.HasPendingRequest),
+                hasApprovedRequest,
+                hasRejectedRequest,
+                hasDraftRequest,
+                hasPendingRequest,
+                requestStatus: normalizedRequestStatus,
+                rejectionReason: r.rejectionReason || r.RejectionReason || r.rejection_reason || undefined,
+                requestedCheckIn: r.requestedCheckIn || r.RequestedCheckIn || r.requested_checkin || undefined,
+                requestedCheckOut: r.requestedCheckOut || r.RequestedCheckOut || r.requested_checkout || undefined,
+                requestedStatus: r.requestedStatus || r.RequestedStatus || r.requested_status || undefined,
+                requestedNotes: r.requestedNotes || r.RequestedNotes || r.requested_notes || undefined,
               };
             });
           }
@@ -723,6 +789,64 @@ getAllTimeZones() {
         return employees;
       })
     );
+  }
+
+  getFinalizedPayrollCalculation(timesheetId: string, employeeId?: string): Observable<FinalizedPayrollCalculation> {
+    if (!timesheetId || timesheetId.trim() === '') {
+      throw new Error('Timesheet ID is required');
+    }
+
+    let params = new HttpParams();
+    if (employeeId && employeeId.trim() !== '') {
+      params = params.set('employeeId', employeeId);
+    }
+
+    return this.http.get<ApiResponse<FinalizedPayrollCalculation>>(
+      `${this.apiUrl}/timesheet/finalized-calculation/${timesheetId}`,
+      { params }
+    ).pipe(
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error(response.message || 'Failed to fetch finalized payroll calculation');
+        }
+
+        return this.normalizeFinalizedPayrollCalculation(response.data as any);
+      })
+    );
+  }
+
+  private normalizeFinalizedPayrollCalculation(raw: any): FinalizedPayrollCalculation {
+    const breakdown = raw?.statusBreakdown || raw?.StatusBreakdown || [];
+
+    return {
+      timesheetId: raw?.timesheetId || raw?.TimesheetId || '',
+      employeeId: raw?.employeeId || raw?.EmployeeId || '',
+      employeeName: raw?.employeeName || raw?.EmployeeName || '',
+      employeeCode: raw?.employeeCode || raw?.EmployeeCode || '',
+      month: Number(raw?.month ?? raw?.Month ?? 0),
+      year: Number(raw?.year ?? raw?.Year ?? 0),
+      expectedWorkDays: Number(raw?.expectedWorkDays ?? raw?.ExpectedWorkDays ?? 0),
+      finalizedWorkDays: Number(raw?.finalizedWorkDays ?? raw?.FinalizedWorkDays ?? 0),
+      pendingWorkDays: Number(raw?.pendingWorkDays ?? raw?.PendingWorkDays ?? 0),
+      pendingRequestDays: Number(raw?.pendingRequestDays ?? raw?.PendingRequestDays ?? 0),
+      payableDays: Number(raw?.payableDays ?? raw?.PayableDays ?? 0),
+      unpaidDays: Number(raw?.unpaidDays ?? raw?.UnpaidDays ?? 0),
+      totalHours: Number(raw?.totalHours ?? raw?.TotalHours ?? 0),
+      regularHours: Number(raw?.regularHours ?? raw?.RegularHours ?? 0),
+      overtimeHours: Number(raw?.overtimeHours ?? raw?.OvertimeHours ?? 0),
+      lateHours: Number(raw?.lateHours ?? raw?.LateHours ?? 0),
+      attendancePercentage: Number(raw?.attendancePercentage ?? raw?.AttendancePercentage ?? 0),
+      payrollReady: raw?.payrollReady ?? raw?.PayrollReady ?? false,
+      blockedReason: raw?.blockedReason || raw?.BlockedReason || undefined,
+      generatedAt: raw?.generatedAt || raw?.GeneratedAt || undefined,
+      statusBreakdown: Array.isArray(breakdown)
+        ? breakdown.map((item: any) => ({
+            status: item?.status || item?.Status || 'unknown',
+            days: Number(item?.days ?? item?.Days ?? 0),
+            hours: Number(item?.hours ?? item?.Hours ?? 0)
+          }))
+        : []
+    };
   }
 
   createSnapshot(dto: MonthlyTimesheetCreateDto): Observable<FinalizedTimesheetDto> {
@@ -756,30 +880,45 @@ getAllTimeZones() {
     );
   }
 
+  private extractCount(data: unknown, key: 'submittedCount' | 'finalizedCount'): number {
+    if (typeof data === 'number') {
+      return data;
+    }
 
-  submitTimesheetApprovals(timesheetId: string, _employeeId: string): Observable<boolean> {
-    return this.http.post<ApiResponse<boolean>>(
+    if (typeof data === 'object' && data !== null && key in data) {
+      const value = Number((data as Record<string, unknown>)[key]);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    return 0;
+  }
+
+  private submitApprovalsRequest(timesheetId: string, employeeId?: string): Observable<number> {
+    const body: FinalizeBatchRequestDto = { timesheetId };
+    if (employeeId) {
+      body.employeeId = employeeId;
+    }
+
+    return this.http.post<ApiResponse<number | { submittedCount: number }>>(
       `${this.apiUrl}/timesheet/submit-approvals`,
-      { timesheetId }
+      body
     ).pipe(
       map(response => {
         if (!response.success) {
           throw new Error(response.message || 'Failed to submit timesheet approvals');
         }
-        return response.data || true;
+        return this.extractCount(response.data, 'submittedCount');
       })
     );
   }
 
-  finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {
-    console.log('ðŸ”’ Finalizing batch for timesheetId:', timesheetId, employeeId ? `employeeId: ${employeeId}` : '(all employees)');
-
-    const body: { timesheetId: string; employeeId?: string } = { timesheetId };
+  private finalizeBatchRequest(timesheetId: string, employeeId?: string): Observable<number> {
+    const body: FinalizeBatchRequestDto = { timesheetId };
     if (employeeId) {
       body.employeeId = employeeId;
     }
 
-    return this.http.post<ApiResponse<boolean>>(
+    return this.http.post<ApiResponse<number | { finalizedCount: number }>>(
       `${this.apiUrl}/timesheet/finalize-batch`,
       body
     ).pipe(
@@ -787,8 +926,24 @@ getAllTimeZones() {
         if (!response.success) {
           throw new Error(response.message || 'Failed to finalize timesheet batch');
         }
+        return this.extractCount(response.data, 'finalizedCount');
+      })
+    );
+  }
+
+
+  submitTimesheetApprovals(timesheetId: string, _employeeId: string): Observable<boolean> {
+    return this.submitApprovalsRequest(timesheetId, _employeeId)
+      .pipe(map(() => true));
+  }
+
+  finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {
+    console.log('ðŸ”’ Finalizing batch for timesheetId:', timesheetId, employeeId ? `employeeId: ${employeeId}` : '(all employees)');
+
+    return this.finalizeBatchRequest(timesheetId, employeeId).pipe(
+      map(() => {
         console.log('âœ… Batch finalized successfully');
-        return response.data || true;
+        return true;
       })
     );
   }
@@ -947,13 +1102,20 @@ getAllTimeZones() {
     const isApproved = !!(r.has_approved_request || r.hasApprovedRequest || r.HasApprovedRequest);
     const isRejected = !!(r.has_rejected_request || r.hasRejectedRequest || r.HasRejectedRequest);
 
+    const statusKey = String(r.requestStatus ?? r.RequestStatus ?? r.request_status ?? '').toLowerCase();
+
     const derivedStatus: 'pending' | 'approved' | 'rejected' | undefined =
-      r.requestStatus  ? (r.requestStatus  as 'pending' | 'approved' | 'rejected') :
-      r.RequestStatus  ? (r.RequestStatus  as 'pending' | 'approved' | 'rejected') :
+      statusKey === 'pending' || statusKey === 'approved' || statusKey === 'rejected'
+        ? (statusKey as 'pending' | 'approved' | 'rejected')
+        :
       (isPending && !isDraft && !isApproved && !isRejected) ? 'pending'  :
       isApproved                                            ? 'approved' :
       isRejected                                            ? 'rejected' :
       undefined;
+
+    const hasPendingRequest = derivedStatus ? derivedStatus === 'pending' : (isPending && !isDraft && !isApproved && !isRejected);
+    const hasApprovedRequest = derivedStatus ? derivedStatus === 'approved' : isApproved;
+    const hasRejectedRequest = derivedStatus ? derivedStatus === 'rejected' : isRejected;
 
     return {
       recordId: r.recordId || r.RecordId || r.requestId || r.RequestId || '',
@@ -963,14 +1125,18 @@ getAllTimeZones() {
       originalCheckOut: r.originalCheckOut || r.checkOutTime || r.CheckOutTime || undefined,
       originalStatus: r.originalStatus || r.status || r.Status || 'No Record',
       originalTotalHours: r.originalTotalHours || r.totalHours || r.TotalHours || 0,
+      originalLateHours: r.originalLateHours ?? r.lateHours ?? r.LateHours ?? 0,
+      originalOvertimeHours: r.originalOvertimeHours ?? r.overtimeHours ?? r.OvertimeHours ?? 0,
       requestedCheckIn: r.requestedCheckIn || r.RequestedCheckIn || undefined,
       requestedCheckOut: r.requestedCheckOut || r.RequestedCheckOut || undefined,
       requestedStatus: r.requestedStatus || r.RequestedStatus || undefined,
       requestedNotes: r.requestedNotes || r.RequestedNotes || undefined,
       reasonForEdit: r.reasonForEdit || r.ReasonForEdit || undefined,
+      rejectionReason: r.rejectionReason || r.RejectionReason || r.rejection_reason || undefined,
       hasDraftRequest:    isDraft,
-      hasPendingRequest:  isPending && !isDraft && !isApproved && !isRejected,
-      hasApprovedRequest: isApproved,
+      hasPendingRequest,
+      hasApprovedRequest,
+      hasRejectedRequest,
       isFinalized: r.is_finalized ?? r.isFinalized ?? r.IsFinalized ?? false,
       isManagerOverride: r.is_manager_override ?? r.isManagerOverride ?? r.IsManagerOverride ?? false,
       requestId: r.requestId || r.RequestId || undefined,
@@ -1016,35 +1182,24 @@ getAllTimeZones() {
   }
 
   finalizeEmployeeApprovals(timesheetId: string, employeeId: string): Observable<{ finalizedCount: number }> {
-    return this.http.post<ApiResponse<{ finalizedCount: number } | boolean>>(
-      `${this.apiUrl}/timesheet/finalize-batch`,
-      { timesheetId, employeeId }
-    ).pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to finalize employee approvals');
-        }
-        const data = response.data;
-        if (typeof data === 'object' && data !== null && 'finalizedCount' in data) {
-          return data as { finalizedCount: number };
-        }
-        return { finalizedCount: 0 };
-      })
-    );
+    return this.finalizeBatchRequest(timesheetId, employeeId)
+      .pipe(map(finalizedCount => ({ finalizedCount })));
   }
 
   applyManagerOverride(dto: ManagerOverrideDto): Observable<boolean> {
-    return this.http.post<ApiResponse<boolean>>(
-      `${this.apiUrl}/admin-override`,
-      dto
-    ).pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to apply admin override');
-        }
-        return response.data || true;
-      })
-    );
+    const payload: ManualAttendanceUpdateDto = {
+      attendanceId: dto.attendanceId ?? undefined,
+      employeeId: dto.employeeId,
+      timesheetId: dto.timesheetId,
+      workDate: dto.workDate,
+      checkInTime: dto.checkInTime,
+      checkOutTime: dto.checkOutTime,
+      status: dto.status || 'Absent',
+      notes: dto.notes,
+      reason: dto.reason
+    };
+
+    return this.adminOverride(payload);
   }
 
   adminOverride(dto: ManualAttendanceUpdateDto): Observable<boolean> {
@@ -1060,31 +1215,14 @@ getAllTimeZones() {
       })
     );
   }
-submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }> {
-    return this.http.post<ApiResponse<number>>(
-      `${this.apiUrl}/timesheet/submit-approvals`,
-      { timesheetId } as FinalizeBatchRequestDto
-    ).pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to submit timesheet batch');
-        }
-        return { submittedCount: (response.data as any) || 0 };
-      })
-    );
+
+  submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }> {
+    return this.submitApprovalsRequest(timesheetId)
+      .pipe(map(submittedCount => ({ submittedCount })));
   }
 
   finalizeTimesheetBatch(timesheetId: string): Observable<{ finalizedCount: number }> {
-    return this.http.post<ApiResponse<{ finalizedCount: number }>>(
-      `${this.apiUrl}/timesheet/finalize-batch`,
-      { timesheetId }
-    ).pipe(
-      map(response => {
-        if (!response.success) {
-          throw new Error(response.message || 'Failed to finalize timesheet batch');
-        }
-        return response.data || { finalizedCount: 0 };
-      })
-    );
+    return this.finalizeBatchRequest(timesheetId)
+      .pipe(map(finalizedCount => ({ finalizedCount })));
   }
 }
