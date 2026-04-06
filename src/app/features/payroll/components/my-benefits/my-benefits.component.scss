@@ -1,0 +1,200 @@
+.my-benefits-container {
+  color: #191c1e;
+  background-color: #f7f9fb;
+  padding: 2.5rem;
+  font-family: 'Inter', 'Public Sans', sans-serif;
+  min-height: 100vh;
+  position: relative;
+
+  .loading-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(247, 249, 251, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    gap: 1rem;
+    p { font-size: 0.875rem; font-weight: 500; color: #434655; }
+  }
+
+  .page-header {
+    margin-bottom: 2.5rem;
+    .title {
+      font-family: 'Manrope', 'Public Sans', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #191c1e;
+
+      mat-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: #004ac6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      h1 {
+        margin: 0;
+        font-weight: 800;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+      }
+    }
+    .subtitle { color: #434655; font-size: 1.125rem; font-family: 'Inter', sans-serif; }
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+
+    @media (min-width: 768px) { grid-template-columns: repeat(4, 1fr); }
+
+    .card {
+      background-color: #ffffff;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 20px rgba(0, 74, 198, 0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+      transition: all 0.3s ease;
+
+      &:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0, 74, 198, 0.06); }
+
+      .label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #434655;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      .value {
+        font-family: 'Manrope', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #191c1e;
+      }
+
+      .progress-footer {
+        margin-top: 1rem;
+        .progress-bar {
+          height: 0.25rem;
+          background: #eceef0;
+          border-radius: 9999px;
+          margin-bottom: 0.25rem;
+          overflow: hidden;
+          .progress-fill { height: 100%; background: #004ac6; }
+        }
+      }
+
+      .footer-row {
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
+      }
+
+      .footer-text { font-size: 0.75rem; font-weight: 600; color: #434655; }
+      
+      .text-tertiary { color: #943700; }
+      .text-secondary { color: #495c95; }
+      .text-primary-fixed-dim { color: #0053db; }
+    }
+  }
+
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+
+    .benefit-card {
+      background-color: #ffffff;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 20px 40px rgba(0, 74, 198, 0.04);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+      &:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0, 74, 198, 0.08); }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+
+        .icon-wrapper {
+          width: 3.5rem;
+          height: 3.5rem;
+          border-radius: 0.75rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s ease;
+          mat-icon { font-size: 2rem; }
+          &.color-primary { background: #dbe1ff; color: #004ac6; }
+          &.color-amber { background: #ffdbcd; color: #943700; }
+          &.color-secondary { background: #acbfff; color: #495c95; }
+          &.color-teal { background: rgba(32, 201, 151, 0.1); color: #20c997; }
+          &.color-purple { background: #ffdbcd; color: #943700; } // Assuming similar to amber/tertiary colors
+        }
+      }
+
+      .benefit-title { font-family: 'Manrope', sans-serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: #191c1e; }
+      .benefit-desc { font-family: 'Inter', sans-serif; color: #434655; font-size: 0.875rem; line-height: 1.6; margin-bottom: 2rem; flex-grow: 1; }
+
+      .card-actions {
+        display: flex;
+        gap: 1rem;
+        .btn-details { flex: 1; color: #004ac6; font-weight: 700; background: #eceef0; border-radius: 0.5rem; padding: 0.625rem; &:hover { background: #e0e3e5; } }
+        .btn-request { flex: 1; font-weight: 700; background: linear-gradient(135deg, #004ac6, #2563eb); border-radius: 0.5rem; padding: 0.625rem; box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2); }
+      }
+    }
+
+    .banner-card {
+      background: #004ac6;
+      color: #ffffff;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 74, 198, 0.15);
+
+      .banner-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        .banner-icon { margin-bottom: 1.5rem; mat-icon { font-size: 3rem; width: 3rem; height: 3rem; } }
+        .banner-title { font-family: 'Manrope', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .banner-desc { font-family: 'Inter', sans-serif; font-size: 0.9375rem; opacity: 0.9; margin-bottom: 2rem; line-height: 1.6; flex-grow: 1; }
+        .btn-enroll { background: #ffffff; color: #004ac6; font-weight: 700; padding: 0.75rem; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); &:hover { background: #f7f9fb; } }
+      }
+
+      .banner-blob { position: absolute; -right: 3rem; -top: 3rem; width: 12rem; height: 12rem; background: rgba(255, 255, 255, 0.1); border-radius: 50%; filter: blur(48px); }
+    }
+  }
+}

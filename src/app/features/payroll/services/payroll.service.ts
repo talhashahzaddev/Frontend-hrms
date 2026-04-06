@@ -878,4 +878,65 @@ export class PayrollService {
           })
         );
     }
+
+    // Loan Rules
+    getLoanRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/loan-rules`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createLoanRule(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/loan-rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateLoanRule(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/loan-rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteLoanRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/loan-rules/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getPayrollOverview(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/overview`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
 }

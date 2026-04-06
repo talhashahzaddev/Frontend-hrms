@@ -67,9 +67,21 @@ export const payrollRoutes: Routes = [
     title: 'Bonus Policy - HRMS'
   },
   {
+    path: 'policies/loan-rules',
+    loadComponent: () =>
+      import('./components/loan-rules/loan-rules.component').then(m => m.LoanRulesComponent),
+    title: 'Loan Policy - HRMS'
+  },
+  {
     path: 'periods',
     loadComponent: () =>
       import('./components/payroll-period/payroll-period.component').then(m => m.PayrollPeriodComponent),
     title: 'Payroll Periods - HRMS'
+  },
+  {
+    path: 'my-benefits',
+    loadComponent: () =>
+      import('./components/my-benefits/my-benefits.component').then(m => m.MyBenefitsComponent),
+    title: 'My Benefits - HRMS'
   }
 ];

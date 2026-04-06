@@ -6,15 +6,16 @@
         <mat-icon>rule</mat-icon>
       </div>
       <div>
-        <h2>{{ data.policyId === 1 ? (isEditMode ? 'Edit Overtime Rule' : 'Create Overtime Rule') : 
-                data.policyId === 2 ? (isEditMode ? 'Edit Attendance Rule' : 'Create Attendance Rule') :
-                data.policyId === 3 ? (isEditMode ? 'Edit Late Arrival Rule' : 'Create Late Arrival Rule') :
-                data.policyId === 4 ? (isEditMode ? 'Edit Leave Rule' : 'Create Leave Rule') :
-                data.policyId === 5 ? (isEditMode ? 'Edit Performance Rule' : 'Create Performance Rule') :
-                data.policyId === 6 ? (isEditMode ? 'Edit Bonus Rule' : 'Create Bonus Rule') :
-                (isEditMode ? 'Edit Policy' : 'Create Policy') }}
-         </h2>
-         <p class="rd-header-sub">{{ data.policyId ? 'Configure a new rule' : 'Configure a new Policy' }}</p>
+        <h2>{{ data.policyId === 1 ? (isEditMode ? 'Edit Overtime Rule' : 'Create Overtime Rule') :
+          data.policyId === 2 ? (isEditMode ? 'Edit Attendance Rule' : 'Create Attendance Rule') :
+          data.policyId === 3 ? (isEditMode ? 'Edit Late Arrival Rule' : 'Create Late Arrival Rule') :
+          data.policyId === 4 ? (isEditMode ? 'Edit Leave Rule' : 'Create Leave Rule') :
+          data.policyId === 5 ? (isEditMode ? 'Edit Performance Rule' : 'Create Performance Rule') :
+          data.policyId === 6 ? (isEditMode ? 'Edit Bonus Rule' : 'Create Bonus Rule') :
+          data.policyId === 7 ? (isEditMode ? 'Edit Loan Rule' : 'Create Loan Rule') :
+          (isEditMode ? 'Edit Policy' : 'Create Policy') }}
+        </h2>
+        <p class="rd-header-sub">{{ data.policyId ? 'Configure a new rule' : 'Configure a new Policy' }}</p>
       </div>
     </div>
     <button mat-icon-button mat-dialog-close class="rd-close-btn" aria-label="Close">
@@ -254,7 +255,7 @@
           </mat-form-field>
         </div>
       </section>
-      
+
       <!-- Section: Leave Deduction Policy Configuration -->
       <section class="rd-section" *ngIf="selectedPolicy === 4">
         <div class="rd-section-title">
@@ -438,8 +439,68 @@
         </div>
       </section>
 
+      <!-- Section: Loan Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 7">
+        <div class="rd-section-title">
+          <h3>Loan Rule Details</h3>
+        </div>
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Employee Housing Loan" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain the eligibility or terms for this loan..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Max Loan Amount -->
+          <div class="rd-field">
+            <label>Max Loan Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="maxLoanAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('maxLoanAmount')?.hasError('required')">Max loan amount is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Max Installments -->
+          <div class="rd-field">
+            <label>Max Installments *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="maxInstallments" placeholder="12">
+              <mat-hint>Maximum number of monthly repayments.</mat-hint>
+              <mat-error *ngIf="ruleForm.get('maxInstallments')?.hasError('required')">Max installments is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Interest Rate -->
+        <div class="rd-field">
+          <label>Interest Rate (%) *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput type="number" formControlName="interestRate" step="0.1" placeholder="5.0">
+            <mat-hint>Annual interest rate for the loan.</mat-hint>
+            <mat-error *ngIf="ruleForm.get('interestRate')?.hasError('required')">Interest rate is required</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
       <!-- Alert when feature is not yet implemented for other policies -->
-      <section class="rd-section" *ngIf="selectedPolicy && selectedPolicy !== 1 && selectedPolicy !== 2 && selectedPolicy !== 3 && selectedPolicy !== 4 && selectedPolicy !== 5 && selectedPolicy !== 6">
+      <section class="rd-section"
+        *ngIf="selectedPolicy && selectedPolicy !== 1 && selectedPolicy !== 2 && selectedPolicy !== 3 && selectedPolicy !== 4 && selectedPolicy !== 5 && selectedPolicy !== 6 && selectedPolicy !== 7">
         <div style="padding: 16px; background: #fffbeb; color: #b45309; border-radius: 8px; border: 1px solid #fde68a;">
           <mat-icon style="vertical-align: middle; margin-right: 8px;">construction</mat-icon>
           Configuration for this policy will be implemented later.
