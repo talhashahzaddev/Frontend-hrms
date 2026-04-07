@@ -19,6 +19,30 @@ export const payrollRoutes: Routes = [
     title: 'Performance Pay - HRMS'
   },
   {
+    path: 'loans',
+    loadComponent: () =>
+      import('./components/loans-advances/loans-advances.component').then(m => m.LoansAdvancesComponent),
+    title: 'Loans & Salary Advances - HRMS'
+  },
+  {
+    path: 'loans/requests',
+    loadComponent: () =>
+      import('./components/loan-requests/loan-requests.component').then(m => m.LoanRequestsComponent),
+    title: 'My Loan & Advance Requests - HRMS'
+  },
+  {
+    path: 'loans/requests/compliance',
+    loadComponent: () =>
+      import('./components/loan-request-compliance/loan-request-compliance.component').then(m => m.LoanRequestComplianceComponent),
+    title: 'Payroll Compliance - HRMS'
+  },
+  {
+    path: 'loans/requests/compliance/payslips',
+    loadComponent: () =>
+      import('./components/compliance-payslips/compliance-payslips.component').then(m => m.CompliancePayslipsComponent),
+    title: 'Payslip Management - HRMS'
+  },
+  {
     path: 'policies',
     loadComponent: () =>
       import('./components/payroll-rules/payroll-rules.component').then(m => m.PayrollRulesComponent),

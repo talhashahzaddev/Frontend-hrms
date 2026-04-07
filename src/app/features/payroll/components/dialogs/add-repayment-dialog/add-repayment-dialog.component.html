@@ -1,0 +1,77 @@
+<div class="repayment-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="grid two-column">
+      <label>
+        <span>Employee</span>
+        <select formControlName="employeeId">
+          <option value="" disabled>Select employee</option>
+          <option *ngFor="let employee of employees" [value]="employee.id">{{ employee.name }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Repayment type</span>
+        <select formControlName="type">
+          <option value="loan">Loan repayment</option>
+          <option value="advance">Salary advance repayment</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Reference</span>
+        <select formControlName="referenceId">
+          <option value="" disabled>Select reference</option>
+          <option *ngFor="let reference of filteredReferences" [value]="reference.id">{{ reference.label }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Payroll period</span>
+        <select formControlName="periodId">
+          <option value="" disabled>Select period</option>
+          <option *ngFor="let period of periods" [value]="period.id">{{ period.name }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Payment amount</span>
+        <input type="number" formControlName="amount" min="1" placeholder="0.00" />
+      </label>
+
+      <label>
+        <span>Remaining after payment</span>
+        <input type="number" formControlName="remainingAfter" readonly />
+      </label>
+
+      <label>
+        <span>Paid date</span>
+        <input type="date" formControlName="paidDate" />
+      </label>
+
+      <label>
+        <span>Status</span>
+        <select formControlName="status">
+          <option value="deducted">Deducted</option>
+          <option value="pending">Pending</option>
+          <option value="skipped">Skipped</option>
+        </select>
+      </label>
+    </div>
+
+    <p class="error" *ngIf="showAmountError">
+      Enter a valid amount. Amount cannot exceed the selected reference outstanding balance.
+    </p>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

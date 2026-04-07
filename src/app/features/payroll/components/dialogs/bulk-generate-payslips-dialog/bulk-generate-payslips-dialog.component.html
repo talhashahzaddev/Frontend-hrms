@@ -1,0 +1,86 @@
+<div class="bulk-generate-dialog">
+  <header>
+    <h2>Bulk generate payslips</h2>
+    <button type="button" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="content" [formGroup]="form">
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <p>
+        Payslips will be generated for all selected employees for the chosen period.
+        Existing payslips will be skipped unless you enable overwrite.
+      </p>
+    </div>
+
+    <div class="field-grid">
+      <div class="field-wrap">
+        <label for="bulkGeneratePeriod">Payroll period</label>
+        <select id="bulkGeneratePeriod" formControlName="payrollPeriodId">
+          @for (period of data.periods; track period.id) {
+            <option [value]="period.id">{{ period.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label for="bulkGenerateDepartment">Department filter</label>
+        <select id="bulkGenerateDepartment" formControlName="departmentId">
+          <option value="">All departments</option>
+          @for (department of data.departments; track department.id) {
+            <option [value]="department.id">{{ department.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="employee-ledger">
+      <div class="ledger-head">
+        <label>
+          <input type="checkbox" [checked]="allVisibleSelected" (change)="toggleSelectAll($any($event.target).checked)" />
+          Select employees ({{ selectedCount }})
+        </label>
+        <span>Status</span>
+      </div>
+
+      <div class="ledger-list">
+        @if (visibleEmployees.length === 0) {
+          <div class="empty-state">No employees available for the selected department.</div>
+        } @else {
+          @for (employee of visibleEmployees; track employee.id) {
+            <div class="ledger-row">
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="isSelected(employee.id)"
+                  (change)="toggleEmployee(employee.id, $any($event.target).checked)"
+                />
+                <span>{{ employee.name }}</span>
+              </label>
+
+              <span class="status-pill" [ngClass]="statusClass(employee.currentStatus)">
+                {{ statusLabel(employee.currentStatus) }}
+              </span>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    @if (selectionError) {
+      <p class="selection-error">Select at least one employee to continue.</p>
+    }
+
+    <label class="checkbox-wrap">
+      <input type="checkbox" formControlName="overwriteExisting" />
+      <span>Overwrite already generated payslips</span>
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="primary-btn" (click)="save()">Generate all</button>
+  </footer>
+</div>

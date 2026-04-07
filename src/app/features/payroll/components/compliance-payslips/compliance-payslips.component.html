@@ -1,0 +1,194 @@
+<div class="payslip-page">
+  <div class="headline-block">
+    <div>
+      <h1>Payslips</h1>
+      <p>Generate, manage and distribute employee payslips for each payroll period.</p>
+    </div>
+  </div>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <div class="top"><span>Total payslips</span><mat-icon>account_balance_wallet</mat-icon></div>
+      <h3>{{ totalPayslips }}</h3>
+      <small>{{ activePeriodLabel }}</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="top"><span>Generated</span><mat-icon>check_circle</mat-icon></div>
+      <h3>{{ generatedCount }}</h3>
+      <small>{{ pendingCount }} pending</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="top"><span>Sent to employees</span><mat-icon>send</mat-icon></div>
+      <h3>{{ sentCount }}</h3>
+      <small>via email</small>
+    </article>
+
+    <article class="stat-card">
+      <div class="top"><span>Reissued</span><mat-icon>history</mat-icon></div>
+      <h3>{{ reissuedCount }}</h3>
+      <small>this period</small>
+    </article>
+  </section>
+
+  <section class="toolbar-panel">
+    <div class="filters-wrap">
+      <select [(ngModel)]="selectedPeriodId" (ngModelChange)="onFiltersChanged()">
+        <option value="">All periods</option>
+        @for (period of periods; track period.id) {
+          <option [value]="period.id">{{ period.label }}</option>
+        }
+      </select>
+
+      <select [(ngModel)]="selectedStatus" (ngModelChange)="onFiltersChanged()">
+        <option value="">All status</option>
+        <option value="draft">Draft</option>
+        <option value="generated">Generated</option>
+        <option value="sent">Sent</option>
+        <option value="viewed">Viewed</option>
+      </select>
+
+      <select [(ngModel)]="selectedDepartmentId" (ngModelChange)="onFiltersChanged()">
+        <option value="">All departments</option>
+        @for (department of departments; track department.id) {
+          <option [value]="department.id">{{ department.label }}</option>
+        }
+      </select>
+
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          type="text"
+          placeholder="Search employees or ID..."
+          [(ngModel)]="searchKeyword"
+          (ngModelChange)="onFiltersChanged()"
+        />
+      </div>
+    </div>
+
+    <div class="action-wrap">
+      <button class="ghost-btn" (click)="openBulkGenerateDialog()">Bulk generate</button>
+      <button class="green-btn" (click)="openBulkEmailDialog()">
+        <mat-icon>mail</mat-icon>
+        Bulk email
+      </button>
+      <button class="primary-btn" (click)="openBulkGenerateDialog()">
+        <mat-icon>add</mat-icon>
+        Generate payslip
+      </button>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkbox-col">
+              <input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAllVisible($any($event.target).checked)" />
+            </th>
+            <th>Employee</th>
+            <th>Period</th>
+            <th class="text-right">Gross salary</th>
+            <th class="text-right">Deductions</th>
+            <th class="text-right">Net salary</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Version</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (pagedPayslips.length === 0) {
+            <tr>
+              <td class="empty-row" colspan="9">No payslip records found.</td>
+            </tr>
+          } @else {
+            @for (row of pagedPayslips; track row.id) {
+              <tr>
+                <td class="checkbox-col">
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(row.id)"
+                    (change)="toggleRowSelection(row.id, $any($event.target).checked)"
+                  />
+                </td>
+                <td>
+                  <div class="employee-cell">
+                    <div class="avatar">{{ row.employeeName.charAt(0) }}{{ row.employeeName.split(' ').length > 1 ? row.employeeName.split(' ')[1].charAt(0) : '' }}</div>
+                    <div>
+                      <strong>{{ row.employeeName }}</strong>
+                      <small>ID: {{ row.employeeCode }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ row.periodLabel }}</td>
+                <td class="text-right">{{ row.grossSalaryPkr | number }}</td>
+                <td class="text-right danger">{{ row.deductionsPkr | number }}</td>
+                <td class="text-right success">{{ row.netSalaryPkr | number }}</td>
+                <td class="text-center">
+                  <span class="status-pill" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="version-chip">v{{ row.versionNo }}</span>
+                </td>
+                <td class="text-right">
+                  @if (row.status === 'draft') {
+                    <button class="generate-btn" (click)="generateSinglePayslip(row)">Generate</button>
+                  } @else {
+                    <div class="action-icons">
+                      <button type="button" (click)="openViewPayslip(row)" aria-label="View payslip">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                      <button type="button" (click)="sendSinglePayslip(row)" aria-label="Email payslip">
+                        <mat-icon>alternate_email</mat-icon>
+                      </button>
+                      <button type="button" (click)="openReissueDialog(row)" aria-label="Reissue payslip">
+                        <mat-icon>refresh</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (totalRecords === 0) {
+          Showing 0 records
+        } @else {
+          Showing {{ fromRecord }} - {{ toRecord }} of {{ totalRecords }} records
+        }
+      </p>
+
+      <div class="pagination-wrap">
+        <button [disabled]="currentPage <= 1" (click)="prevPage()"><mat-icon>chevron_left</mat-icon></button>
+        <span>Page {{ currentPage }} / {{ totalPages }}</span>
+        <button [disabled]="currentPage >= totalPages" (click)="nextPage()"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+  </section>
+
+  <div class="insight-card">
+    <h4>
+      <span class="pulse"></span>
+      Quick insights
+    </h4>
+    <div class="line">
+      <span>Pending emails</span>
+      <strong>{{ pendingEmailsCount }} employees</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="distributionPercent"></div>
+    </div>
+    <div class="line tiny">
+      <span>{{ sentCount }}/{{ totalPayslips }} distributed</span>
+      <span>{{ distributionPercent }}% complete</span>
+    </div>
+    <button type="button">View distribution report</button>
+  </div>
+</div>
