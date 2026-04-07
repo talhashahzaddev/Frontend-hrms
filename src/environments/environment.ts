@@ -2,6 +2,7 @@ export const environment = {
   production: false,
   // apiUrl: 'https://localhost:60485/api',
   // apiUrl: 'https://localhost:44306/api', //IIS Express
+
   apiUrl: 'https://hrmsapplicationcodifiedlabs-production.up.railway.app/api',
   apiKey: '',
   appName: 'HRMS Frontend',
