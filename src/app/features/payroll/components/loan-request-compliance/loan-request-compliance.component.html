@@ -1,0 +1,433 @@
+<div class="compliance-page">
+  <div class="page-header">
+    <div>
+      <h1>Compliance</h1>
+      <p>Manage tax slabs, social security contributions, and gratuity rules.</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="ghost-btn">
+        <mat-icon>file_download</mat-icon>
+        Export audit
+      </button>
+      <button class="primary-btn" (click)="activeTab === 'tax-slabs' ? openAddTaxSlabDialog() : activeTab === 'social-security' ? openAddSocialConfigDialog() : openAddGratuityConfigDialog()">
+        <mat-icon>add</mat-icon>
+        New rule
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-strip">
+    <button [class.active]="activeTab === 'tax-slabs'" (click)="setTab('tax-slabs')">
+      Tax slabs <span>{{ taxSlabCount }}</span>
+    </button>
+    <button [class.active]="activeTab === 'social-security'" (click)="setTab('social-security')">
+      Social security <span>{{ socialSecurityConfigCount }}</span>
+    </button>
+    <button [class.active]="activeTab === 'gratuity'" (click)="setTab('gratuity')">
+      Gratuity <span>{{ gratuityConfigCount }}</span>
+    </button>
+  </div>
+
+  @if (hasFallbackNotice) {
+    <div class="fallback-note">
+      <mat-icon>info</mat-icon>
+      <span>Preview records are shown because compliance endpoints are not fully available yet.</span>
+    </div>
+  }
+
+  @if (activeTab === 'tax-slabs') {
+    <section class="stats-grid">
+      <article class="stat-card">
+        <p>Active fiscal year</p>
+        <h3>{{ activeFiscalYear }}</h3>
+        <small>current slabs</small>
+      </article>
+      <article class="stat-card">
+        <p>Total slabs</p>
+        <h3>{{ taxSlabCount }}</h3>
+        <small>this year</small>
+      </article>
+      <article class="stat-card">
+        <p>Employees taxed</p>
+        <h3>{{ employeesTaxedCount }}</h3>
+        <small>this period</small>
+      </article>
+      <article class="stat-card">
+        <p>Total tax collected</p>
+        <h3>{{ formatMoney(totalTaxCollected) }}</h3>
+        <small>this period</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Tax slab configuration</h2>
+        <div class="panel-tools">
+          <select [(ngModel)]="selectedFiscalYear" (ngModelChange)="onFiscalYearChange()">
+            @for (year of fiscalYears; track year) {
+              <option [value]="year">FY {{ year }}</option>
+            }
+          </select>
+          <button class="soft-btn" (click)="openAddTaxSlabDialog()">
+            <mat-icon>add</mat-icon>
+            Add slab
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Slab name</th>
+              <th>Min income (PKR)</th>
+              <th>Max income (PKR)</th>
+              <th>Fixed amount</th>
+              <th>Percentage</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (visibleTaxSlabs.length === 0) {
+              <tr>
+                <td colspan="7" class="empty-row">No tax slabs found for this fiscal year.</td>
+              </tr>
+            } @else {
+              @for (slab of visibleTaxSlabs; track slab.id) {
+                <tr>
+                  <td>{{ slab.slabName }}</td>
+                  <td>{{ slab.minIncomePkr | number }}</td>
+                  <td>{{ slab.maxIncomePkr == null ? 'Above' : (slab.maxIncomePkr | number) }}</td>
+                  <td>{{ slab.fixedAmountPkr | number }}</td>
+                  <td>{{ slab.percentage }}%</td>
+                  <td>
+                    <span class="status-pill" [ngClass]="getSlabStatusClass(slab.status)">{{ slab.status }}</span>
+                  </td>
+                  <td class="text-right actions">
+                    <button (click)="openAddTaxSlabDialog(slab)" aria-label="Edit slab"><mat-icon>edit</mat-icon></button>
+                    <button (click)="confirmDeleteTaxSlab(slab)" aria-label="Delete slab"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Tax transactions (read-only)</h2>
+        <div class="panel-tools">
+          <select [(ngModel)]="selectedTaxPeriod">
+            @for (period of taxPeriods; track period) {
+              <option [value]="period">{{ period }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Annual salary</th>
+              <th>Taxable income</th>
+              <th>Slab applied</th>
+              <th>Tax %</th>
+              <th>Tax amount</th>
+              <th class="text-right">Period</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (visibleTaxTransactions.length === 0) {
+              <tr>
+                <td colspan="7" class="empty-row">No tax transactions found.</td>
+              </tr>
+            } @else {
+              @for (tx of visibleTaxTransactions; track tx.id) {
+                <tr>
+                  <td>{{ tx.employeeName }}</td>
+                  <td>{{ tx.annualSalary | number }}</td>
+                  <td>{{ tx.taxableIncome | number }}</td>
+                  <td><span class="chip">{{ tx.slabApplied }}</span></td>
+                  <td>{{ tx.taxPercent }}%</td>
+                  <td class="danger-text">{{ formatMoney(tx.taxAmount) }}</td>
+                  <td class="text-right">{{ tx.periodLabel }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (activeTab === 'social-security') {
+    <section class="stats-grid">
+      <article class="stat-card">
+        <p>Active config</p>
+        <h3>{{ activeSocialConfig?.configName || 'N/A' }}</h3>
+        <small>currently applied</small>
+      </article>
+      <article class="stat-card">
+        <p>Employee rate</p>
+        <h3>{{ activeSocialConfig?.employeeContributionPct ?? 0 }}%</h3>
+        <small>of capped salary</small>
+      </article>
+      <article class="stat-card">
+        <p>Employer rate</p>
+        <h3>{{ activeSocialConfig?.employerContributionPct ?? 0 }}%</h3>
+        <small>of capped salary</small>
+      </article>
+      <article class="stat-card">
+        <p>Total contribution</p>
+        <h3>{{ formatMoney(totalSocialContribution) }}</h3>
+        <small>this period</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Social security configuration</h2>
+          <p>Manage contribution rules and caps</p>
+        </div>
+        <button class="primary-btn" (click)="openAddSocialConfigDialog()">
+          <mat-icon>add</mat-icon>
+          Add config
+        </button>
+      </div>
+
+      <div class="config-grid">
+        @if (socialSecurityConfigs.length === 0) {
+          <div class="empty-card">No social security configurations found.</div>
+        } @else {
+          @for (cfg of socialSecurityConfigs; track cfg.id) {
+            <article class="config-card">
+              <div class="config-head">
+                <div>
+                  <h3>{{ cfg.configName }}</h3>
+                  <p>{{ formatDateLabel(cfg.effectiveFrom) }} - {{ formatDateLabel(cfg.effectiveTo) }}</p>
+                </div>
+                <span class="status-pill" [ngClass]="getConfigStatusClass(cfg.status)">{{ cfg.status }}</span>
+              </div>
+
+              <div class="metrics-row">
+                <div>
+                  <small>Employee</small>
+                  <strong>{{ cfg.employeeContributionPct }}%</strong>
+                </div>
+                <div>
+                  <small>Employer</small>
+                  <strong>{{ cfg.employerContributionPct }}%</strong>
+                </div>
+                <div>
+                  <small>Cap</small>
+                  <strong>{{ formatMoney(cfg.maxSalaryCapPkr) }}</strong>
+                </div>
+              </div>
+
+              <div class="config-actions">
+                <button (click)="openAddSocialConfigDialog(cfg)"><mat-icon>edit</mat-icon></button>
+                <button (click)="confirmDeleteSocialConfig(cfg)"><mat-icon>delete</mat-icon></button>
+              </div>
+            </article>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Contribution transactions</h2>
+        <div class="panel-tools">
+          <select [(ngModel)]="selectedSocialPeriod">
+            @for (period of socialPeriods; track period) {
+              <option [value]="period">Period: {{ period }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Actual salary</th>
+              <th>Capped salary</th>
+              <th>Employee share</th>
+              <th>Employer share</th>
+              <th class="text-right">Total contribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (visibleSocialTransactions.length === 0) {
+              <tr>
+                <td colspan="6" class="empty-row">No social security transactions found.</td>
+              </tr>
+            } @else {
+              @for (tx of visibleSocialTransactions; track tx.id) {
+                <tr>
+                  <td>{{ tx.employeeName }}</td>
+                  <td>{{ formatMoney(tx.actualSalary) }}</td>
+                  <td>{{ formatMoney(tx.cappedSalary) }}</td>
+                  <td class="danger-text">{{ formatMoney(tx.employeeShare) }}</td>
+                  <td>{{ formatMoney(tx.employerShare) }}</td>
+                  <td class="text-right strong">{{ formatMoney(tx.totalContribution) }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (activeTab === 'gratuity') {
+    <div class="sub-tab-strip">
+      <button [class.active]="gratuityView === 'dashboard'" (click)="setGratuityView('dashboard')">Dashboard</button>
+      <button [class.active]="gratuityView === 'configurations'" (click)="setGratuityView('configurations')">Configurations</button>
+    </div>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <p>Active config</p>
+        <h3>{{ gratuityActiveConfig?.calculationType || 'N/A' }}</h3>
+        <small>{{ gratuityActiveConfig?.configName || 'No active policy' }}</small>
+      </article>
+      <article class="stat-card">
+        <p>Min service</p>
+        <h3>{{ gratuityActiveConfig?.minYearsRequired ?? 0 }} years</h3>
+        <small>eligibility threshold</small>
+      </article>
+      <article class="stat-card">
+        <p>Calculated</p>
+        <h3>{{ gratuityTransactions.length }}</h3>
+        <small>employees</small>
+      </article>
+      <article class="stat-card">
+        <p>Total liability</p>
+        <h3>{{ formatMoney(gratuityLiability) }}</h3>
+        <small>estimated payout</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Gratuity configuration</h2>
+          <p>Manage global calculation rules and eligibility periods.</p>
+        </div>
+        <button class="primary-btn" (click)="openAddGratuityConfigDialog()">
+          <mat-icon>add</mat-icon>
+          Add config
+        </button>
+      </div>
+
+      <div class="gratuity-config-list" [class.compact]="gratuityView === 'dashboard'">
+        @if (gratuityConfigs.length === 0) {
+          <div class="empty-card">No gratuity configurations found.</div>
+        } @else {
+          @for (cfg of gratuityConfigs; track cfg.id) {
+            <article class="gratuity-config-card">
+              <div class="config-head">
+                <div>
+                  <h3>{{ cfg.configName }}</h3>
+                  <p>Effective since {{ formatDateLabel(cfg.effectiveSince) }}</p>
+                </div>
+                <span class="status-pill" [ngClass]="getConfigStatusClass(cfg.status)">{{ cfg.status }}</span>
+              </div>
+
+              <div class="metrics-row">
+                <div>
+                  <small>Calculation type</small>
+                  <strong>{{ cfg.calculationType }}</strong>
+                </div>
+                <div>
+                  <small>Value</small>
+                  <strong>{{ cfg.value }}</strong>
+                </div>
+                <div>
+                  <small>Years required</small>
+                  <strong>{{ cfg.minYearsRequired }} years</strong>
+                </div>
+              </div>
+
+              <div class="config-actions">
+                <button (click)="openAddGratuityConfigDialog(cfg)"><mat-icon>edit</mat-icon></button>
+                <button (click)="confirmDeleteGratuityConfig(cfg)"><mat-icon>delete</mat-icon></button>
+              </div>
+            </article>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Gratuity transactions</h2>
+        <div class="panel-tools">
+          <select [(ngModel)]="gratuityStatusFilter">
+            <option value="">Status: All</option>
+            <option value="calculated">Calculated</option>
+            <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
+          </select>
+
+          <button class="soft-btn" (click)="openAddGratuityRecordDialog()">
+            <mat-icon>add</mat-icon>
+            Add record
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Years worked</th>
+              <th>Last salary</th>
+              <th>Gratuity amount</th>
+              <th>Status</th>
+              <th>Paid date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (visibleGratuityTransactions.length === 0) {
+              <tr>
+                <td colspan="7" class="empty-row">No gratuity transactions found.</td>
+              </tr>
+            } @else {
+              @for (tx of visibleGratuityTransactions; track tx.id) {
+                <tr>
+                  <td>
+                    <div class="employee-block">
+                      <strong>{{ tx.employeeName }}</strong>
+                      <small>{{ tx.designation }}</small>
+                    </div>
+                  </td>
+                  <td>{{ tx.yearsWorked }} yrs</td>
+                  <td>{{ tx.lastSalary | number }}</td>
+                  <td class="success-text">{{ formatMoney(tx.gratuityAmount) }}</td>
+                  <td><span class="status-pill" [ngClass]="getGratuityStatusClass(tx.status)">{{ tx.status }}</span></td>
+                  <td>{{ formatDateLabel(tx.paidDate) }}</td>
+                  <td class="text-right actions">
+                    <button (click)="openAddGratuityRecordDialog(tx)"><mat-icon>edit</mat-icon></button>
+                    <button (click)="confirmDeleteGratuityRecord(tx)"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

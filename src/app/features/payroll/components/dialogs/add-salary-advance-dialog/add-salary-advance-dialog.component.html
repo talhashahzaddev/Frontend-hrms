@@ -1,0 +1,77 @@
+<div class="salary-advance-dialog-container">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="close-btn" (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body" [formGroup]="form">
+    <div class="form-group full-width">
+      <label>Employee</label>
+      <select class="form-control" formControlName="employeeId">
+        <option value="" disabled selected>Select an employee</option>
+        @for (employee of employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        }
+      </select>
+      @if (form.get('employeeId')?.touched && form.get('employeeId')?.hasError('required')) {
+        <p class="field-error">Employee is required.</p>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Payroll period</label>
+        <select class="form-control" formControlName="periodId">
+          <option value="" disabled selected>Select period</option>
+          @for (period of periods; track period.id) {
+            <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" formControlName="status">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Amount PKR</label>
+        <div class="currency-input">
+          <span>Rs.</span>
+          <input type="number" class="form-control align-right" formControlName="totalAmount" min="1" placeholder="0.00" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Monthly deduction PKR</label>
+        <div class="currency-input">
+          <span>Rs.</span>
+          <input type="number" class="form-control align-right" formControlName="monthlyDeduction" min="0" placeholder="0.00" />
+        </div>
+        @if (showDeductionError) {
+          <p class="field-error">Monthly deduction must be 0 or higher and not exceed amount.</p>
+        }
+      </div>
+    </div>
+
+    <div class="form-group full-width">
+      <label>Reason</label>
+      <textarea class="form-control text-area" rows="3" formControlName="reason" placeholder="Explain the reason for this advance..."></textarea>
+      @if (form.get('reason')?.touched && form.get('reason')?.invalid) {
+        <p class="field-error">Reason is required (max 500 characters).</p>
+      }
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
+</div>

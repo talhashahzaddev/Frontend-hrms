@@ -1,0 +1,76 @@
+<div class="reissue-dialog">
+  <header>
+    <h2>Reissue payslip</h2>
+    <button type="button" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="content" [formGroup]="form">
+    <div class="warning-box">
+      <mat-icon>warning</mat-icon>
+      <p>
+        Reissuing will create a new version of this payslip. The previous version is preserved for audit.
+        Version number will increment to v{{ data.nextVersionNo }}.
+      </p>
+    </div>
+
+    <section class="history">
+      <h3>Version history</h3>
+      <div class="history-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Status</th>
+              <th class="text-right">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (data.history.length === 0) {
+              <tr>
+                <td colspan="3" class="empty-row">No version history available.</td>
+              </tr>
+            } @else {
+              @for (item of data.history; track item.versionNo) {
+                <tr>
+                  <td>v{{ item.versionNo }}</td>
+                  <td>
+                    <span class="status-pill" [ngClass]="statusClass(item.status)">{{ item.status | titlecase }}</span>
+                  </td>
+                  <td class="text-right">{{ item.issuedAt }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="field-wrap">
+      <label for="reissueReason">Reason for reissue</label>
+      <input id="reissueReason" type="text" formControlName="reason" placeholder="e.g. Tax correction, bonus added..." />
+      @if (form.get('reason')?.touched && form.get('reason')?.invalid) {
+        <small class="field-error">Reason is required (max 200 characters).</small>
+      }
+    </div>
+
+    <div class="field-wrap">
+      <label for="reissueNotes">Notes</label>
+      <textarea id="reissueNotes" rows="3" formControlName="notes" placeholder="Additional internal notes regarding this change..."></textarea>
+      @if (form.get('notes')?.touched && form.get('notes')?.invalid) {
+        <small class="field-error">Notes cannot exceed 600 characters.</small>
+      }
+    </div>
+
+    <label class="checkbox-wrap">
+      <input type="checkbox" formControlName="sendEmail" />
+      <span>Automatically email new version to employee</span>
+    </label>
+  </div>
+
+  <footer>
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="primary-btn" (click)="save()">Reissue as v{{ data.nextVersionNo }}</button>
+  </footer>
+</div>

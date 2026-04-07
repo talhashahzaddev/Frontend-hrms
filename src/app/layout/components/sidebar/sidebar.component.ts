@@ -243,6 +243,30 @@ export class SidebarComponent implements OnInit, OnDestroy {
           route: '/payroll/bonus',
           activeRoutes: ['/payroll/performance']
         },
+        {
+          label: 'Loans & Advances',
+          icon: 'account_balance',
+          route: '/payroll/loans',
+          exact: true
+        },
+        {
+          label: 'Loan & Advance Requests',
+          icon: 'person_search',
+          route: '/payroll/loans/requests',
+          exact: true
+        },
+        {
+          label: 'Compliance Center',
+          icon: 'verified_user',
+          route: '/payroll/loans/requests/compliance',
+          exact: true
+        },
+        {
+          label: 'Payslip Management',
+          icon: 'receipt_long',
+          route: '/payroll/loans/requests/compliance/payslips',
+          exact: true
+        },
         { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
         { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
         { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
