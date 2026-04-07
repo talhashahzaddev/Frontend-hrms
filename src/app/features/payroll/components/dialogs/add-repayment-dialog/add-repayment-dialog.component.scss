@@ -1,0 +1,137 @@
+.repayment-dialog-panel .mat-mdc-dialog-container {
+  padding: 0;
+  border-radius: 0.95rem;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 20, 60, 0.16);
+}
+
+.repayment-dialog-panel .mdc-dialog__surface {
+  border-radius: 0.95rem;
+  overflow: hidden;
+}
+
+.repayment-dialog {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 650px;
+  max-height: 88vh;
+  overflow: auto;
+  color: #1f2937;
+
+  .dialog-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .icon-btn {
+      border: none;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+
+      &:hover {
+        background: #f1f5f9;
+      }
+    }
+  }
+
+  .dialog-form {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  .grid {
+    display: grid;
+    gap: 0.9rem;
+
+    &.two-column {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      color: #334155;
+
+      span {
+        font-weight: 600;
+      }
+
+      input,
+      select {
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 0.86rem;
+        color: #0f172a;
+        background: #ffffff;
+        padding: 0.56rem 0.7rem;
+        min-height: 2.2rem;
+
+        &:focus {
+          outline: none;
+          border-color: #2563eb;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+      }
+
+      input[readonly] {
+        background: #f8fafc;
+      }
+    }
+  }
+
+  .error {
+    margin: 0.75rem 0 0;
+    color: #b91c1c;
+    font-size: 0.76rem;
+    font-weight: 500;
+  }
+
+  .dialog-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 0.56rem 0.95rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 100px;
+
+      &.ghost {
+        background: #f1f5f9;
+        color: #334155;
+      }
+
+      &.primary {
+        background: #1d4ed8;
+        color: #ffffff;
+      }
+    }
+  }
+}

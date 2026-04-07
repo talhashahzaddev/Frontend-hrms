@@ -1,0 +1,58 @@
+<div class="gratuity-config-dialog">
+  <div class="dialog-header">
+    <div>
+      <h2>{{ dialogTitle }}</h2>
+      <p>Set calculation parameters for this rule.</p>
+    </div>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field field-span-2">
+        <span>Config name</span>
+        <input type="text" formControlName="configName" placeholder="e.g. Standard Corporate Gratuity" />
+      </label>
+
+      <label class="field">
+        <span>Calculation type</span>
+        <select formControlName="calculationType">
+          <option value="perYear">Per year</option>
+          <option value="fixed">Fixed</option>
+          <option value="percentage">Percentage</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Value</span>
+        <input type="number" min="0" formControlName="value" />
+      </label>
+
+      <label class="field">
+        <span>Min years required</span>
+        <input type="number" min="0" formControlName="minYearsRequired" />
+      </label>
+
+      <div class="field">
+        <span>Status</span>
+        <div class="status-toggle">
+          <label>
+            <input type="radio" value="active" formControlName="status" />
+            <span>Active</span>
+          </label>
+          <label>
+            <input type="radio" value="inactive" formControlName="status" />
+            <span>Inactive</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

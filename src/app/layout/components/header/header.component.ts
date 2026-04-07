@@ -262,6 +262,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager', 'Manager']
     },
     {
+      name: 'Loans & Salary Advances',
+      route: '/payroll/loans',
+      keywords: ['payroll', 'loan', 'loans', 'salary advance', 'salary advances', 'loan payments'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
       name: 'Payroll Policies',
       route: '/payroll/policies',
       keywords: ['payroll policies', 'policy', 'rules', 'salary policy'],

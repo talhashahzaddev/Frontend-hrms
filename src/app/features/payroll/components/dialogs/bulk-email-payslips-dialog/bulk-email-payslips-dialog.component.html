@@ -1,0 +1,94 @@
+<div class="bulk-email-dialog">
+  <header>
+    <h2>Bulk email payslips</h2>
+    <button type="button" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="content" [formGroup]="form">
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <p>
+        Only employees with a generated payslip will receive an email.
+        Employees without a payslip will be skipped automatically.
+      </p>
+    </div>
+
+    <div class="field-grid">
+      <div class="field-wrap">
+        <label for="bulkEmailPeriod">Payroll period</label>
+        <select id="bulkEmailPeriod" formControlName="payrollPeriodId">
+          @for (period of data.periods; track period.id) {
+            <option [value]="period.id">{{ period.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <label for="bulkEmailSendMode">Send to</label>
+        <select id="bulkEmailSendMode" formControlName="sendToMode">
+          <option value="all-generated">All generated</option>
+          <option value="not-sent">Not yet sent</option>
+          <option value="custom">Custom selection</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-wrap">
+      <label for="bulkEmailSubject">Email subject</label>
+      <input id="bulkEmailSubject" type="text" formControlName="subject" />
+    </div>
+
+    <div class="field-wrap">
+      <label for="bulkEmailMessage">Message</label>
+      <textarea id="bulkEmailMessage" rows="5" formControlName="message"></textarea>
+    </div>
+
+    @if (showCustomSelection) {
+      <div class="recipient-ledger">
+        <div class="ledger-head">
+          <label>
+            <input type="checkbox" [checked]="allCustomSelected" (change)="toggleSelectAllCustom($any($event.target).checked)" />
+            Select recipients
+          </label>
+          <span>{{ customRecipients.length }} employees</span>
+        </div>
+
+        <div class="ledger-list">
+          @if (customRecipients.length === 0) {
+            <div class="empty-state">No generated payslips found for this period.</div>
+          } @else {
+            @for (recipient of customRecipients; track recipient.id) {
+              <div class="ledger-row">
+                <label>
+                  <input
+                    type="checkbox"
+                    [checked]="isRecipientSelected(recipient.id)"
+                    (change)="toggleRecipient(recipient.id, $any($event.target).checked)"
+                  />
+                  <span>{{ recipient.employeeName }}</span>
+                </label>
+                <small>{{ recipient.employeeEmail }}</small>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    }
+
+    @if (selectionError) {
+      <p class="selection-error">No sendable recipients are available for the current selection.</p>
+    }
+
+    <div class="summary-row">
+      <mat-icon>groups</mat-icon>
+      <span>Will send to: <strong>{{ sendCount }} employees</strong> · {{ alreadySentCount }} already sent (will resend)</span>
+    </div>
+  </div>
+
+  <footer>
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="primary-btn" (click)="save()">Send to all</button>
+  </footer>
+</div>

@@ -1,0 +1,73 @@
+<div class="request-loan-dialog">
+  <div class="dialog-header">
+    <h2>Request a loan</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <label class="field">
+        <span>Loan amount {{ currencySymbol }}</span>
+        <div class="prefix-input">
+          <strong>Rs.</strong>
+          <input type="number" formControlName="totalAmount" min="1" placeholder="0.00" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Repayment type</span>
+        <select formControlName="repaymentType">
+          <option value="installment">Installment</option>
+          <option value="full">Full repayment</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Monthly installment {{ currencySymbol }}</span>
+        <div class="prefix-input">
+          <strong>Rs.</strong>
+          <input type="number" formControlName="monthlyInstallment" min="1" placeholder="0.00" />
+        </div>
+        @if (showInstallmentError) {
+          <small class="error-text">Installment should be valid and cannot exceed total amount.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Total installments</span>
+        <input type="number" formControlName="totalInstallments" min="1" placeholder="12" />
+      </label>
+
+      <label class="field full-span">
+        <span>Start date</span>
+        <input type="date" formControlName="startDate" />
+      </label>
+
+      <label class="field full-span">
+        <span>Expected end date (optional)</span>
+        <input type="date" formControlName="endDate" />
+      </label>
+
+      @if (showDateRangeError) {
+        <p class="error-text full-span">End date cannot be earlier than start date.</p>
+      }
+
+      <label class="field full-span">
+        <span>Description / reason</span>
+        <textarea formControlName="reason" rows="3" placeholder="Explain the purpose of the loan..."></textarea>
+      </label>
+    </div>
+
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <p>Your loan request will be reviewed by HR before approval.</p>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn">Submit request</button>
+    </div>
+  </form>
+</div>

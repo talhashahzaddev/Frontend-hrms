@@ -1,0 +1,78 @@
+<div class="loan-payment-dialog-container">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="close-btn" (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body" [formGroup]="form">
+    <div class="form-group full-width">
+      <label>Employee</label>
+      <select class="form-control" formControlName="employeeId">
+        <option value="" disabled selected>Select employee</option>
+        @for (employee of employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        }
+      </select>
+      @if (form.get('employeeId')?.touched && form.get('employeeId')?.hasError('required')) {
+        <p class="field-error">Employee is required.</p>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Loan</label>
+        <select class="form-control" formControlName="loanId">
+          <option value="" disabled selected>Select loan</option>
+          @for (loan of filteredLoans; track loan.id) {
+            <option [value]="loan.id">{{ loan.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Payroll period</label>
+        <select class="form-control" formControlName="periodId">
+          <option value="" disabled selected>Select period</option>
+          @for (period of periods; track period.id) {
+            <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Installment amount PKR</label>
+        <input type="number" class="form-control align-right" formControlName="installmentAmount" min="1" placeholder="0.00" />
+        @if (showInstallmentError) {
+          <p class="field-error">Installment must be valid and not exceed remaining amount.</p>
+        }
+      </div>
+      <div class="form-group">
+        <label>Remaining amount PKR</label>
+        <input type="text" class="form-control readonly align-right" formControlName="remainingAmount" readonly />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Paid date</label>
+        <input type="date" class="form-control" formControlName="paidDate" />
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select class="form-control" formControlName="status">
+          <option value="pending">Pending</option>
+          <option value="deducted">Deducted</option>
+          <option value="skipped">Skipped</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
+</div>

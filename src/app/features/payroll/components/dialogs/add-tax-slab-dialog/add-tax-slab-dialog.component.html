@@ -1,0 +1,76 @@
+<div class="tax-slab-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field field-span-2">
+        <span>Slab name</span>
+        <input type="text" formControlName="slabName" placeholder="e.g. Tax Bracket A" />
+      </label>
+
+      <label class="field">
+        <span>Fiscal year</span>
+        <select formControlName="fiscalYear">
+          @for (year of fiscalYears; track year) {
+            <option [value]="year">{{ year }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Status</span>
+        <select formControlName="status">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Min income PKR</span>
+        <div class="prefix-wrap">
+          <strong>Rs.</strong>
+          <input type="number" min="0" formControlName="minIncomePkr" placeholder="0" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Max income PKR</span>
+        <div class="prefix-wrap">
+          <strong>Rs.</strong>
+          <input type="number" min="0" formControlName="maxIncomePkr" placeholder="Unlimited" />
+        </div>
+        <small class="hint">Leave blank for unlimited.</small>
+      </label>
+
+      @if (showRangeError) {
+        <p class="error field-span-2">Max income cannot be less than min income.</p>
+      }
+
+      <label class="field">
+        <span>Fixed amount PKR</span>
+        <div class="prefix-wrap">
+          <strong>Rs.</strong>
+          <input type="number" min="0" formControlName="fixedAmountPkr" placeholder="0" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Percentage %</span>
+        <div class="suffix-wrap">
+          <input type="number" min="0" max="100" step="0.1" formControlName="percentage" placeholder="0.0" />
+          <strong>%</strong>
+        </div>
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

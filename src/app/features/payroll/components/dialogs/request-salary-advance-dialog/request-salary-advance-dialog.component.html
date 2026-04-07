@@ -1,0 +1,46 @@
+<div class="request-advance-dialog">
+  <div class="dialog-header">
+    <h2>Request salary advance</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="save()">
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <p>Advance requests are subject to HR approval. Deductions will begin from your next salary.</p>
+    </div>
+
+    <div class="field-stack">
+      <label class="field">
+        <span>Amount {{ currencySymbol }}</span>
+        <div class="prefix-input">
+          <strong>Rs.</strong>
+          <input type="number" formControlName="totalAmount" min="1" placeholder="0.00" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Monthly deduction amount {{ currencySymbol }}</span>
+        <div class="prefix-input">
+          <strong>Rs.</strong>
+          <input type="number" formControlName="monthlyDeduction" min="1" placeholder="0.00" />
+        </div>
+        @if (showDeductionError) {
+          <small class="error-text">Monthly deduction should be valid and cannot exceed amount.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Reason</span>
+        <textarea formControlName="reason" rows="3" placeholder="Explain the purpose of the advance..."></textarea>
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn">Submit request</button>
+    </div>
+  </form>
+</div>
