@@ -97,7 +97,11 @@ export class RuleDialogComponent implements OnInit {
     unpaidMultiplier: [1.00, [Validators.required, Validators.min(0)]],
     halfPaidMultiplier: [0.50, [Validators.required, Validators.min(0)]],
     minScore: [0, [Validators.required, Validators.min(0)]],
-    maxScore: [5, [Validators.required, Validators.min(0)]]
+    maxScore: [5, [Validators.required, Validators.min(0)]],
+    // Loan Policy fields
+    maxLoanAmount: [null as number | null],
+    maxInstallments: [null as number | null],
+    interestRate: [null as number | null]
   });
 
   ngOnInit(): void {
@@ -130,7 +134,7 @@ export class RuleDialogComponent implements OnInit {
       const rule = this.data.rule as any;
       const fixedVal = rule.fixedAmount !== undefined ? rule.fixedAmount : rule.fixedDeduction;
       const percentVal = rule.percentage !== undefined ? rule.percentage : rule.percentageDeduction;
-      
+
       const isFixedAmount = fixedVal !== null && fixedVal !== undefined;
 
       this.ruleForm.patchValue({
@@ -158,6 +162,14 @@ export class RuleDialogComponent implements OnInit {
           amountType: isFixedBonus ? 'fixed' : 'percentage',
           fixedAmount: isFixedBonus ? bonusAmount : null,
           percentage: isFixedBonus ? null : bonusPercent
+        });
+      }
+
+      if (this.data.policyId === 7) {
+        this.ruleForm.patchValue({
+          maxLoanAmount: rule.maxLoanAmount ?? null,
+          maxInstallments: rule.maxInstallments ?? null,
+          interestRate: rule.interestRate ?? null
         });
       }
     }
@@ -233,6 +245,25 @@ export class RuleDialogComponent implements OnInit {
       this.ruleForm.get('ruleName')?.setValidators(Validators.required);
       this.ruleForm.get('amountType')?.setValidators(Validators.required);
     }
+
+    const loanAmountControl = this.ruleForm.get('maxLoanAmount');
+    const loanInstallmentsControl = this.ruleForm.get('maxInstallments');
+    const loanInterestControl = this.ruleForm.get('interestRate');
+
+    if (Number(policyId) === 7) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      loanAmountControl?.setValidators([Validators.required, Validators.min(0)]);
+      loanInstallmentsControl?.setValidators([Validators.required, Validators.min(1)]);
+      loanInterestControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      loanAmountControl?.clearValidators();
+      loanInstallmentsControl?.clearValidators();
+      loanInterestControl?.clearValidators();
+    }
+    loanAmountControl?.updateValueAndValidity();
+    loanInstallmentsControl?.updateValueAndValidity();
+    loanInterestControl?.updateValueAndValidity();
+
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     this.ruleForm.get('amountType')?.updateValueAndValidity();
   }
@@ -455,6 +486,36 @@ export class RuleDialogComponent implements OnInit {
             console.error(err);
             this.notification.showError(
               err?.message || (this.isEditMode ? 'Failed to update rule' : 'Failed to create rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 7) { // 7 is Employee Loan Policy
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        maxLoanAmount: formValue.maxLoanAmount,
+        maxInstallments: formValue.maxInstallments,
+        interestRate: formValue.interestRate,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updateLoanRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createLoanRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Loan rule updated successfully' : 'Loan rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 7 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update loan rule' : 'Failed to create loan rule')
             );
           }
         });

@@ -879,6 +879,9 @@ export class PayrollService {
         );
     }
 
+    // Loan Rules
+    getLoanRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/loan-rules`)
     // Tax Slabs
     getTaxSlabs(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, { params })
@@ -887,6 +890,13 @@ export class PayrollService {
             if (!response.success && response.message) {
               throw new Error(response.message);
             }
+            return response.data || [];
+          })
+        );
+    }
+
+    createLoanRule(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/loan-rules`, data)
             return response.data;
           })
         );
@@ -1074,6 +1084,8 @@ export class PayrollService {
         );
     }
 
+    updateLoanRule(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/loan-rules/${id}`, data)
     updateGratuityTransaction(id: string, data: any): Observable<any> {
       return this.http.put<ApiResponse<any>>(`${this.apiUrl}/gratuity-transactions/${id}`, data)
         .pipe(
@@ -1086,6 +1098,8 @@ export class PayrollService {
         );
     }
 
+    deleteLoanRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/loan-rules/${id}`)
     deleteGratuityTransaction(id: string): Observable<boolean> {
       return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/gratuity-transactions/${id}`)
         .pipe(
@@ -1098,6 +1112,8 @@ export class PayrollService {
         );
     }
 
+    getPayrollOverview(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/overview`)
     // Loans
     getLoans(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans`, { params })
