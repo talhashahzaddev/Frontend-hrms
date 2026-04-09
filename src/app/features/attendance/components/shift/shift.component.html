@@ -151,6 +151,10 @@
           <mat-header-cell *matHeaderCellDef>Break</mat-header-cell>
           <mat-cell *matCellDef="let shift">{{ shift.breakDuration }}</mat-cell>
         </ng-container>
+        <ng-container matColumnDef="geoFence">
+          <mat-header-cell *matHeaderCellDef>Geo-Fence</mat-header-cell>
+          <mat-cell *matCellDef="let shift">{{ shiftFenceSummary[shift.shiftId] || 'Not linked' }}</mat-cell>
+        </ng-container>
 
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef class="actions-col">Actions</mat-header-cell>
@@ -171,8 +175,8 @@
           </mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="['shiftName','startTime','endTime','marginHours','breakDuration','actions']"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: ['shiftName','startTime','endTime','marginHours','breakDuration','actions'];"></mat-row>
+        <mat-header-row *matHeaderRowDef="['shiftName','startTime','endTime','marginHours','breakDuration','geoFence','actions']"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: ['shiftName','startTime','endTime','marginHours','breakDuration','geoFence','actions'];"></mat-row>
       </mat-table>
 
       <div *ngIf="shifts.length === 0" class="empty-state">

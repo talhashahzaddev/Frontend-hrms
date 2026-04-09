@@ -21,6 +21,7 @@ interface MenuItem {
   children?: MenuItem[];
   menuName?: string;
   subMenuName?: string;
+  permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
   exact?: boolean;
@@ -80,12 +81,35 @@ export class SidebarComponent implements OnInit, OnDestroy {
       menuName: 'Attendance',
       children: [
         { label: 'My Attendance', icon: 'access_time', route: '/attendance/dashboard', menuName: 'Attendance', subMenuName: 'My Attendance' },
-        { label: 'Time Tracker', icon: 'timer', route: '/attendance/time-tracker', menuName: 'Attendance', subMenuName: 'TimeTracker' },
+        {
+          label: 'Time Tracker',
+          icon: 'timer',
+          route: '/attendance/time-tracker',
+          menuName: 'Attendance',
+          subMenuName: 'Time Tracker',
+          permissionAliases: ['TimeTracker']
+        },
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', menuName: 'Attendance', subMenuName: 'Team Attendance' },
         { label: 'Timesheet', icon: 'date_range', route: '/attendance/timesheet', menuName: 'Attendance', subMenuName: 'Timesheet' },
         { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', menuName: 'Attendance', subMenuName: 'Timesheet Dashboard' },
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts' },
+        {
+          label: 'Geo-Fences',
+          icon: 'fence',
+          route: '/attendance/geo-fences',
+          menuName: 'Attendance',
+          subMenuName: 'Geo-Fences',
+          permissionAliases: ['Geo Fences', 'GeoFence', 'Geo Fence', 'Geofence']
+        },
+        {
+          label: 'Geo Violations',
+          icon: 'warning',
+          route: '/attendance/geo-violations',
+          menuName: 'Attendance',
+          subMenuName: 'Geo Violations',
+          permissionAliases: ['Geo-Fence Violations', 'GeoFence Violations', 'Geofence Violations']
+        },
       ]
     },
     {
@@ -340,7 +364,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     // For child menu items, check if the specific submenu has permissions
     if (item.subMenuName) {
-      return this.authService.hasSubMenuPermission(item.menuName, item.subMenuName);
+      const candidateNames = [item.subMenuName, ...(item.permissionAliases ?? [])];
+      const hasAnySubMenuPermission = candidateNames.some(name =>
+        this.authService.hasSubMenuPermission(item.menuName!, name)
+      );
+
+      if (hasAnySubMenuPermission) {
+        return true;
+      }
+
+      const route = item.route?.toLowerCase() ?? '';
+      const isGeoRoute = route.startsWith('/attendance/geo-') || route === '/attendance/monitoring';
+      if (item.menuName === 'Attendance' && isGeoRoute) {
+        return this.authService.hasMenuParentPermission('Attendance');
+      }
+
+      return false;
     }
 
     // Fallback: allow if we can't determine permissions

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject, HostListener, ElementRef ,ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject, HostListener, ElementRef ,ChangeDetectorRef, AfterViewInit, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, AbstractControl, FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +18,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { Employee, Department } from '@/app/core/models/employee.models';
 import { DepartmentEmployee } from '../../../../core/models/attendance.models';
 import { PerformanceService } from '@/app/features/performance/services/performance.service';
+import { GeoFenceService, GeoFenceDto, ShiftGeoFenceDto } from '../../services/geofence.service';
+declare const L: any;
 
 export interface ShiftDto {
   shiftId: string;
@@ -51,7 +53,9 @@ export interface ShiftDto {
   styleUrls: ['./assign-shift.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AssignShiftComponent implements OnInit, OnDestroy {
+export class AssignShiftComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('assignShiftFenceMap') assignShiftFenceMap!: ElementRef;
+
   assignShiftForm: FormGroup;
   employees: Employee[] = [];
   shifts: ShiftDto[] = [];
@@ -65,6 +69,11 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   // ── Currency-style dropdown state ──────────────────────────
   employeeDropdownOpen = false;
   submitted = false;
+
+  selectedShiftFences: ShiftGeoFenceDto[] = [];
+  isFencesLoading = false;
+  private shiftFenceMap: any;
+  private shiftFenceLayers: any[] = [];
   // ───────────────────────────────────────────────────────────
 
   private destroy$ = new Subject<void>();
@@ -74,6 +83,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private attendanceService: AttendanceService,
     private notification: NotificationService,
+    private geoFenceService: GeoFenceService,
     private cdr: ChangeDetectorRef,
     private dialogRef: MatDialogRef<AssignShiftComponent>,
     private performanceService: PerformanceService,
@@ -89,6 +99,12 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadShifts();
+
+    this.assignShiftForm.get('shiftId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((shiftId: string) => {
+        this.loadShiftFences(shiftId);
+      });
 
     if (this.isManager) {
       this.loadManagerTeamEmployees();
@@ -108,15 +124,120 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit(): void {
+    setTimeout(() => this.initShiftFenceMap(), 0);
+  }
+
+  private initShiftFenceMap(): void {
+    if (!this.assignShiftFenceMap?.nativeElement) return;
+    if (typeof L === 'undefined') {
+      setTimeout(() => this.initShiftFenceMap(), 200);
+      return;
+    }
+
+    if (this.shiftFenceMap) {
+      this.shiftFenceMap.remove();
+      this.shiftFenceMap = null;
+    }
+
+    this.shiftFenceMap = L.map(this.assignShiftFenceMap.nativeElement, {
+      center: [31.5204, 74.3587],
+      zoom: 12,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(this.shiftFenceMap);
+  }
+
+  private loadShiftFences(shiftId: string): void {
+    if (!shiftId) {
+      this.selectedShiftFences = [];
+      this.renderShiftFencesOnMap();
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.isFencesLoading = true;
+    this.geoFenceService.getByShift(shiftId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (linkedFences: ShiftGeoFenceDto[]) => {
+          this.selectedShiftFences = linkedFences.filter(f => f.isActive);
+          this.isFencesLoading = false;
+          this.renderShiftFencesOnMapFromLinked();
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.selectedShiftFences = [];
+          this.isFencesLoading = false;
+          this.renderShiftFencesOnMapFromLinked();
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  
+  private renderShiftFencesOnMapFromLinked(): void {
+    if (!this.shiftFenceMap) return;
+
+    this.shiftFenceLayers.forEach(layer => this.shiftFenceMap.removeLayer(layer));
+    this.shiftFenceLayers = [];
+
+    if (!this.selectedShiftFences.length) {
+      this.shiftFenceMap.setView([31.5204, 74.3587], 12);
+      return;
+    }
+
+    const fenceIds = this.selectedShiftFences.map(f => f.geoFenceId);
+    this.geoFenceService.getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (allFences) => {
+          const idSet = new Set(fenceIds);
+          const matchedFences = (allFences || []).filter(f => idSet.has(f.geoFenceId));
+          const points: [number, number][] = [];
+
+          matchedFences.forEach((fence) => {
+            if (!fence.centerLatitude || !fence.centerLongitude) return;
+            points.push([fence.centerLatitude, fence.centerLongitude]);
+            const circle = L.circle([fence.centerLatitude, fence.centerLongitude], {
+              radius: fence.radiusMeters || 200,
+              color: '#6C5CE7',
+              fillColor: '#6C5CE7',
+              fillOpacity: 0.2,
+              weight: 2
+            }).addTo(this.shiftFenceMap);
+            circle.bindPopup(`<b>${fence.name}</b><br>Radius: ${fence.radiusMeters || 0}m`);
+            this.shiftFenceLayers.push(circle);
+          });
+
+          if (points.length) {
+            this.shiftFenceMap.fitBounds(points as any, { padding: [30, 30] });
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => { /* map stays at default view */ }
+      });
+  }
+
+  // Legacy kept for compatibility but no longer called
+  private renderShiftFencesOnMap(): void {
+    if (!this.shiftFenceMap) return;
+    this.shiftFenceLayers.forEach(layer => this.shiftFenceMap.removeLayer(layer));
+    this.shiftFenceLayers = [];
+    this.shiftFenceMap.setView([31.5204, 74.3587], 12);
+  }
+
   // ── Currency-style dropdown methods ────────────────────────
 
-  /** Opens the dropdown and clears the search so the user types fresh */
   openEmployeeDropdown(): void {
     this.employeeFilter = '';
     this.employeeDropdownOpen = true;
   }
 
-  /** Toggles open/close — used by the chevron icon click */
   toggleEmployeeDropdown(): void {
     if (this.employeeDropdownOpen) {
       this.closeEmployeeDropdown();
@@ -125,19 +246,16 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Closes the dropdown and resets the search filter */
   closeEmployeeDropdown(): void {
     this.employeeDropdownOpen = false;
     this.employeeFilter = '';
     this.cdr.markForCheck();
   }
 
-  /** Fires on every keystroke inside the search input */
   onEmployeeSearch(value: string): void {
     this.employeeFilter = value;
   }
 
-  /** Toggles a single employee in/out of the selected list */
   toggleEmployee(emp: any): void {
     const control = this.assignShiftForm.get('SelectedEmployees');
     if (!control) return;
@@ -148,30 +266,21 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     } else {
       control.setValue([...current, id]);
     }
-     this.cdr.markForCheck(); 
+    this.cdr.markForCheck();
   }
 
-  /** Returns true if a given employeeId is in the current selection */
   isEmployeeSelected(employeeId: string): boolean {
     const selected: string[] = this.assignShiftForm.get('SelectedEmployees')?.value || [];
     return selected.includes(employeeId);
   }
 
-  /** Closes dropdown when user clicks outside the component */
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.employeeDropdownOpen) return;
-
     const target = event.target as HTMLElement | null;
-    if (!target) {
-      this.closeEmployeeDropdown();
-      return;
-    }
-
-    // If the click happened inside the input/container/panel, keep it open
+    if (!target) { this.closeEmployeeDropdown(); return; }
     const insideContainer = !!target.closest('.employee-dropdown-container');
     const insidePanel = !!target.closest('.employee-dropdown-panel');
-
     if (!insideContainer && !insidePanel) {
       this.closeEmployeeDropdown();
     }
@@ -269,8 +378,6 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Returns selected employees that are NOT currently visible in the filtered list
-  // so we can render them as hidden options to prevent mat-select from deselecting them
   get selectedButHidden(): any[] {
     const selected: string[] = this.assignShiftForm.get('SelectedEmployees')?.value || [];
     if (!selected.length || !this.employeeFilter) return [];
@@ -286,19 +393,13 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   getInitials(emp: any): string {
     const name = emp?.fullName || `${emp?.firstName || ''} ${emp?.lastName || ''}`.trim();
     if (!name) return '';
-    return name
-      .split(' ')
-      .filter(Boolean)
-      .map((n: string) => (n && n.length ? n[0] : ''))
-      .join('')
-      .toUpperCase();
+    return name.split(' ').filter(Boolean).map((n: string) => (n && n.length ? n[0] : '')).join('').toUpperCase();
   }
 
   clearAllEmployees(): void {
     this.assignShiftForm.get('SelectedEmployees')?.setValue([]);
   }
 
-  // Deterministic background color for avatar based on employee id/email
   getAvatarBg(emp: any): string {
     const colors = ['#F44336','#E91E63','#9C27B0','#3F51B5','#2196F3','#03A9F4','#009688','#4CAF50','#8BC34A','#FF9800','#795548','#607D8B'];
     const key = (emp?.employeeId || emp?.email || emp?.fullName || emp?.employeeCode || '').toString();
@@ -311,13 +412,11 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
     return colors[Math.abs(hash) % colors.length];
   }
 
-  // Choose a readable text color (black/white) based on bg luminance
   getAvatarColor(emp: any): string {
     const bg = this.getAvatarBg(emp).replace('#','');
     const r = parseInt(bg.substring(0,2),16);
     const g = parseInt(bg.substring(2,4),16);
     const b = parseInt(bg.substring(4,6),16);
-    // Perceived luminance
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b)/255;
     return luminance > 0.6 ? '#000000' : '#FFFFFF';
   }
@@ -333,44 +432,33 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   toggleSelectAll(): void {
     const control = this.assignShiftForm.get('SelectedEmployees');
     if (!control) return;
-
     const visible = this.filteredEmployees || [];
-    // Fallback to department/employees if filter returns nothing
     const fallbackList: any[] = (!this.isManager && this.departmentControl.value) ? this.departmentEmployees : this.employees;
     const listToUse = visible.length ? visible : (fallbackList || []);
     const ids = (listToUse || []).map(e => e.employeeId).filter(Boolean);
-
     const current: string[] = control.value || [];
     const allSelected = ids.length > 0 && ids.every(id => current.includes(id));
-
     if (allSelected) {
-      // Deselect visible ids
-      const remaining = current.filter((id: string) => !ids.includes(id));
-      control.setValue(remaining);
+      control.setValue(current.filter((id: string) => !ids.includes(id)));
     } else {
-      // Add visible ids to selection (avoid duplicates)
-      const next = Array.from(new Set([...(current || []), ...ids]));
-      control.setValue(next);
+      control.setValue(Array.from(new Set([...(current || []), ...ids])));
     }
-     this.cdr.markForCheck(); 
+    this.cdr.markForCheck();
   }
 
   onSubmit(): void {
     this.submitted = true;
-
     if (this.assignShiftForm.invalid) {
       this.markFormGroupTouched(this.assignShiftForm);
       this.notification.showError('Please correct the highlighted fields');
       return;
     }
-
     this.isSubmitting = true;
     const formValue = this.assignShiftForm.value;
     const payload: any = {
       shiftId: formValue.shiftId,
       SelectedEmployees: formValue.SelectedEmployees || []
     };
-
     this.attendanceService.assignShift(payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -393,6 +481,10 @@ export class AssignShiftComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.shiftFenceMap) {
+      this.shiftFenceMap.remove();
+      this.shiftFenceMap = null;
+    }
   }
 
   private atLeastOneSelected(control: AbstractControl) {

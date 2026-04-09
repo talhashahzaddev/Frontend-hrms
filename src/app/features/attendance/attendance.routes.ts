@@ -17,26 +17,21 @@ export const attendanceRoutes: Routes = [
   },
   {
     path: 'team-attendance',
-    // canActivate: [AuthGuard],
-    // data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/team-attandence/team-attandence.component').then(m => m.TeamAttandenceComponent)
   },
   {
     path: 'reports',
-    // canActivate: [AuthGuard],
-    // data: { roles: ['Super Admin', 'HR Manager','Manager'] },
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
   {
     path: 'calendar',
     loadComponent: () => import('./components/attendancce-calendar/attendance-calendar').then(m => m.AttendanceCalendarComponent)
-  }
-  ,
- {
+  },
+  {
     path: 'shift',
     loadComponent: () => import('./components/shift/shift.component').then(m => m.ShiftComponent)
   },
-    {
+  {
     path: 'createshift',
     loadComponent: () => import('./components/create-shift/create-shift.component').then(m => m.CreateShiftComponent)
   },
@@ -51,6 +46,24 @@ export const attendanceRoutes: Routes = [
   {
     path: 'approvals',
     loadComponent: () => import('./components/attendance-approvals/attendance-approvals.component').then(m => m.AttendanceApprovalsComponent)
-  }
-
+  },
+  // ── Geo-Fence routes 
+  {
+    path: 'geo-fences',
+    loadComponent: () =>
+      import('./components/geofence/geofence-management.component')
+        .then(m => m.GeoFenceManagementComponent)
+  },
+  {
+    path: 'geo-violations',
+    loadComponent: () =>
+      import('./components/geofence-violations/geofence-violations.component')
+        .then(m => m.GeoFenceViolationsComponent)
+  },
+  {
+    path: 'monitoring',
+    loadComponent: () =>
+      import('./components/team-monitoring/team-monitoring.component')
+        .then(m => m.TeamMonitoringComponent)
+  },
 ];

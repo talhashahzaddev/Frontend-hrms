@@ -86,6 +86,30 @@
         </div>
       </div>
 
+      <div class="form-row" *ngIf="!isEditMode">
+        <label class="field-label">Geo-Fence (Optional)</label>
+        <mat-form-field appearance="outline" class="mat-field">
+          <mat-select formControlName="geoFenceId" placeholder="Select geo-fence for this shift">
+            <mat-option value="">No geo-fence</mat-option>
+            <mat-option *ngFor="let fence of fences" [value]="fence.geoFenceId">
+              {{ fence.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row" *ngIf="!isEditMode">
+        <label class="field-label">Selected Fence Area</label>
+        <div class="fence-preview-wrap">
+          <div id="createShiftFencePreviewMap" class="fence-preview-map"></div>
+          <p class="fence-preview-meta" *ngIf="selectedFence">
+            {{ selectedFence.name }}
+            <span *ngIf="selectedFence.radiusMeters"> • {{ selectedFence.radiusMeters }}m radius</span>
+          </p>
+          <p class="fence-preview-meta" *ngIf="!selectedFence">Select a fence to preview its area on map.</p>
+        </div>
+      </div>
+
     </form>
   </mat-dialog-content>
 

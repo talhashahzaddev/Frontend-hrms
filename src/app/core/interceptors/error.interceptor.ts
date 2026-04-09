@@ -17,13 +17,16 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       retry(this.shouldRetry(request) ? 1 : 0),
       catchError((error: HttpErrorResponse) => {
-        this.handleHttpError(error);
+        this.handleHttpError(error, request);
         return throwError(() => error);
       })
     );
   }
 
-  private handleHttpError(error: HttpErrorResponse): void {
+  private handleHttpError(error: HttpErrorResponse, request?: HttpRequest<any>): void {
+    if (this.shouldSkipGlobalError(request)) {
+      return;
+    }
     let errorMessage = 'An unexpected error occurred';
 
     switch (error.status) {
@@ -130,6 +133,13 @@ export class ErrorInterceptor implements HttpInterceptor {
   private shouldRetry(request: HttpRequest<any>): boolean {
     // Only retry GET requests
     return request.method === 'GET';
+  }
+  private shouldSkipGlobalError(request?: HttpRequest<any>): boolean {
+    if (!request) {
+      return false;
+    }
+
+    return request.headers.get('X-Skip-Global-Error') === 'true';
   }
 
   private isApiCall(url: string | null): boolean {

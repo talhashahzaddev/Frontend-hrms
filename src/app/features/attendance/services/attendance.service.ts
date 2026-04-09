@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
@@ -212,15 +212,20 @@ export class AttendanceService {
 
 getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   return this.http
-    .get<ApiResponse<{ shiftId: string }>>(
-      `${this.apiUrl}/CurrentShift/${employeeId}`
-    )
+    .get<any>(`${this.apiUrl}/CurrentShift/${employeeId}`)
     .pipe(
-      map(res => {
-        if (!res.success) {
-          throw new Error(res.message || 'Failed to load shift');
+      map((res: any) => {
+        // ApiResponse wrapper
+        if (res && typeof res === 'object' && 'success' in res) {
+          if (!res.success) {
+            throw new Error(res.message || 'Failed to load shift');
+          }
+          if (typeof res.data === 'string') return res.data;
+          return res.data?.shiftId ?? null;
         }
-        return res.data?.shiftId ?? null;
+        // Raw payload variants
+        if (typeof res === 'string') return res;
+        return res?.shiftId ?? null;
       })
     );
 }
@@ -237,15 +242,37 @@ getAllTimeZones() {
     const params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate);
+    const options = {
+      params,
+      headers: { 'X-Skip-Global-Error': 'true' }
+    };
 
-    return this.http.get<ApiResponse<AttendanceSummary>>(`${this.apiUrl}/my-summary`, { params })
+    return this.http.get<ApiResponse<AttendanceSummary>>(`${this.apiUrl}/summary`, options)
       .pipe(
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch attendance summary');
           }
           return response.data!;
-        })
+        }),
+        // Backward compatibility: some backend builds expose /my-summary only.
+        catchError(() => this.http.get<ApiResponse<AttendanceSummary>>(`${this.apiUrl}/my-summary`, options).pipe(
+          map(response => {
+            if (!response.success) {
+              throw new Error(response.message || 'Failed to fetch attendance summary');
+            }
+            return response.data!;
+          }),
+          catchError(() => of({
+            totalWorkDays: 0,
+            presentDays: 0,
+            absentDays: 0,
+            lateDays: 0,
+            totalHours: 0,
+            overtimeHours: 0,
+            averageHoursPerDay: 0
+          } as AttendanceSummary))
+        ))
       );
   }
 
