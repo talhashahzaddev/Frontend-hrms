@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -29,6 +29,7 @@ import { EmployeeSearchRequest, Employee } from '@/app/core/models/employee.mode
 import { PendingShiftSwap, ShiftDto, UpdateShiftDto,ShiftSummary } from '@/app/core/models/attendance.models';
 import { PerformanceService } from '@/app/features/performance/services/performance.service';
 import {ShiftRejectDialogComponent} from './shiftReject';
+import { GeoFenceService } from '../../services/geofence.service';
 
 @Component({
   selector: 'app-shift',
@@ -50,7 +51,7 @@ import {ShiftRejectDialogComponent} from './shiftReject';
   templateUrl: './shift.component.html',
   styleUrls: ['./shift.component.scss']
 })
-export class ShiftComponent implements OnInit {
+export class ShiftComponent implements OnInit, OnDestroy {
   shifts: any[] = [];
   selectedShiftId: string = '';
   employeesByShift: EmployeeShift[] = [];
@@ -61,6 +62,7 @@ export class ShiftComponent implements OnInit {
   isLoading = false;
   allEmployees: Employee[] = [];
   shiftSummary: ShiftSummary | null = null;
+  shiftFenceSummary: Record<string, string> = {};
   // Pagination for shift details
   currentPage = 1;
   pageSize = 8;
@@ -74,6 +76,7 @@ export class ShiftComponent implements OnInit {
     private authService: AuthService,
     private performanceService: PerformanceService,
     private employeeService: EmployeeService,
+    private geoFenceService: GeoFenceService,
     private notification: NotificationService,
     private route: ActivatedRoute
   ) { }
@@ -143,12 +146,48 @@ export class ShiftComponent implements OnInit {
 
   loadAllShifts(): void {
     this.attendanceService.getShifts().subscribe({
-      next: (data: any[]) => (this.shifts = data),
+      next: (data: any[]) => {
+        this.shifts = data;
+        this.loadShiftFenceSummary();
+      },
       error: (error: any) => {
         const errorMessage = error?.error?.message || error?.message || 'Failed to load shifts';
         this.notification.showError(errorMessage);
       }
     });
+  }
+
+  private loadShiftFenceSummary(): void {
+    this.shiftFenceSummary = {};
+
+    this.geoFenceService.getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (allFences) => {
+          const fenceNameMap = new Map((allFences || []).map(f => [f.geoFenceId, f.name]));
+
+          (this.shifts || []).forEach((shift: any) => {
+            this.geoFenceService.getByShift(shift.shiftId)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: (linked) => {
+                  const names = Array.from(new Set((linked || [])
+                    .map(item => item.geoFenceName || fenceNameMap.get(item.geoFenceId) || '')
+                    .filter(Boolean) as string[]));
+                  this.shiftFenceSummary[shift.shiftId] = names.length ? names.join(', ') : 'Not linked';
+                },
+                error: () => {
+                  this.shiftFenceSummary[shift.shiftId] = 'Not linked';
+                }
+              });
+          });
+        },
+        error: () => {
+          (this.shifts || []).forEach((shift: any) => {
+            this.shiftFenceSummary[shift.shiftId] = 'Not linked';
+          });
+        }
+      });
   }
 
 
@@ -514,6 +553,11 @@ rejectRequest(swap: PendingShiftSwap): void {
 
   hasPermission(actionKey: string): boolean {
     return this.authService.hasMenuPermission('Attendance', 'Shifts', actionKey);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
 

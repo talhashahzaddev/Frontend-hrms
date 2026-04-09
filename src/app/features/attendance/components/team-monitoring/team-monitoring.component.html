@@ -1,0 +1,191 @@
+<div class="monitoring-root">
+
+  <!-- Header -->
+  <div class="mon-header">
+    <div class="mon-title-wrap">
+      <mat-icon class="mon-title-icon">monitor_heart</mat-icon>
+      <div>
+        <h2 class="mon-title">Team Live Stream</h2>
+        <p class="mon-subtitle">Real-time employee location monitoring</p>
+      </div>
+    </div>
+    <div class="mon-header-right">
+      <span class="last-updated" *ngIf="lastUpdated">
+        Updated {{ lastUpdated | date:'HH:mm:ss' }}
+      </span>
+      <button class="btn-refresh" (click)="refresh()" [disabled]="isRefreshing">
+        <mat-icon [class.spinning]="isRefreshing">refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Health Stats -->
+  <div class="health-grid" *ngIf="systemHealth">
+    <div class="health-card">
+      <div class="health-icon green"><mat-icon>groups</mat-icon></div>
+      <div class="health-info">
+        <span class="health-value">{{ systemHealth.presentToday }}</span>
+        <span class="health-label">Present Today</span>
+      </div>
+    </div>
+    <div class="health-card">
+      <div class="health-icon teal"><mat-icon>location_on</mat-icon></div>
+      <div class="health-info">
+        <span class="health-value">{{ systemHealth.employeesInZone }}</span>
+        <span class="health-label">In Zone</span>
+      </div>
+    </div>
+    <div class="health-card">
+      <div class="health-icon red"><mat-icon>gps_off</mat-icon></div>
+      <div class="health-info">
+        <span class="health-value">{{ systemHealth.geoFenceViolationsToday }}</span>
+        <span class="health-label">Violations Today</span>
+      </div>
+    </div>
+    <div class="health-card">
+      <div class="health-icon purple"><mat-icon>health_and_safety</mat-icon></div>
+      <div class="health-info">
+        <span class="health-value">{{ systemHealth.attendanceHealthPct | number:'1.0-0' }}%</span>
+        <span class="health-label">Attendance Health</span>
+      </div>
+      <div class="health-bar">
+        <div class="health-bar-fill" [style.width.%]="systemHealth.attendanceHealthPct"
+          [style.background]="getComplianceColor(systemHealth.attendanceHealthPct)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-row">
+    <div class="search-wrap">
+      <mat-icon>search</mat-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search employee..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+    <div class="status-filters">
+      <button
+        class="filter-chip"
+        *ngFor="let opt of statusOptions"
+        [class.active]="filterStatus === opt.value"
+        (click)="filterStatus = opt.value; applyFilters()"
+      >
+        {{ opt.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading team data...</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!isLoading">
+    <table class="mon-table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Shift</th>
+          <th>Location Status</th>
+          <th>Distance</th>
+          <th>Clock-In</th>
+          <th>Hours Worked</th>
+          <th>Compliance</th>
+          <th>Device</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let emp of filteredEmployees">
+          <!-- Employee -->
+          <td>
+            <div class="emp-cell">
+              <img *ngIf="emp.profilePhotoUrl" [src]="emp.profilePhotoUrl" class="emp-avatar" [alt]="emp.employeeName" />
+              <div class="emp-avatar-placeholder" *ngIf="!emp.profilePhotoUrl">
+                {{ emp.employeeName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="emp-info">
+                <span class="emp-name">{{ emp.employeeName }}</span>
+                <span class="emp-code">{{ emp.employeeCode }}</span>
+              </div>
+            </div>
+          </td>
+
+          <!-- Shift -->
+          <td>
+            <span class="table-text">{{ emp.shiftName || '—' }}</span>
+          </td>
+
+          <!-- Status chip -->
+          <td>
+            <div class="status-chip-wrap">
+              <mat-icon class="status-icon" [style.color]="getStatusColor(emp.locationStatus)">
+                {{ getStatusIcon(emp.locationStatus) }}
+              </mat-icon>
+              <span class="status-label" [style.color]="getStatusColor(emp.locationStatus)">
+                {{ getStatusLabel(emp.locationStatus) }}
+              </span>
+            </div>
+            <span class="fence-name-small" *ngIf="emp.geoFenceName">{{ emp.geoFenceName }}</span>
+          </td>
+
+          <!-- Distance -->
+          <td>
+            <span class="table-text" *ngIf="emp.distanceFromFenceM !== null && emp.distanceFromFenceM !== undefined">
+              {{ emp.distanceFromFenceM | number:'1.0-0' }}m
+            </span>
+            <span class="table-text muted" *ngIf="emp.distanceFromFenceM === null || emp.distanceFromFenceM === undefined">—</span>
+          </td>
+
+          <!-- Clock-in -->
+          <td>
+            <span class="table-text">
+              {{ emp.lastCheckIn ? (emp.lastCheckIn | date:'HH:mm') : '—' }}
+            </span>
+          </td>
+
+          <!-- Hours -->
+          <td>
+            <span class="table-text">
+              {{ emp.totalHours ? (emp.totalHours | number:'1.1-1') + 'h' : '—' }}
+            </span>
+          </td>
+
+          <!-- Compliance bar -->
+          <td>
+            <div class="compliance-wrap" *ngIf="emp.compliancePct !== null && emp.compliancePct !== undefined">
+              <div class="compliance-bar">
+                <div
+                  class="compliance-fill"
+                  [style.width.%]="emp.compliancePct"
+                  [style.background]="getComplianceColor(emp.compliancePct || 0)"
+                ></div>
+              </div>
+              <span class="compliance-pct" [style.color]="getComplianceColor(emp.compliancePct || 0)">
+                {{ emp.compliancePct | number:'1.0-0' }}%
+              </span>
+            </div>
+            <span class="table-text muted" *ngIf="emp.compliancePct === null || emp.compliancePct === undefined">—</span>
+          </td>
+
+          <!-- Device IP -->
+          <td>
+            <span class="device-ip">{{ emp.deviceIp || '—' }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredEmployees.length === 0">
+      <mat-icon>people_outline</mat-icon>
+      <p>No employees match your filters</p>
+    </div>
+  </div>
+
+</div>

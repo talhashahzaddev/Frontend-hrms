@@ -21,8 +21,9 @@
 ::ng-deep .mat-mdc-dialog-content {
   padding: 0 !important;
   margin: 0 !important;
-  overflow: visible !important; // Disable internal scroll to mimic Figma layout
-  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: calc(95vh - 140px) !important;
 }
 
 .dialog-container {
@@ -58,6 +59,9 @@
 // ══════════════════════════════════════════════════════════════
 .dialog-body {
   padding: 20px !important;
+  max-height: calc(95vh - 140px);
+  overflow-y: auto;
+  overflow-x: hidden;
   form { display: flex; flex-direction: column; gap: 14px; } // Slightly tighter gap
 }
 
@@ -152,6 +156,26 @@
     cursor: pointer; transition: 0.2s; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b;
     &.active { background: #6C5CE7; border-color: #6C5CE7; color: #ffffff; }
   }
+}
+.fence-preview-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px;
+  background: #f8fafc;
+}
+
+.fence-preview-map {
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.fence-preview-meta {
+  margin: 8px 4px 2px;
+  font-size: 12px;
+  color: #64748b;
 }
 
 // ══════════════════════════════════════════════════════════════

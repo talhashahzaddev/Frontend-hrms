@@ -21,6 +21,10 @@ import { MatTimepickerModule } from '@dhutaryan/ngx-mat-timepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { SettingsService } from '@/app/features/settings/services/settings.service';
 import { Subject } from 'rxjs';
+import { GeoFenceService, GeoFenceDto } from '../../services/geofence.service';
+import { ShiftDto } from '@/app/core/models/attendance.models';
+
+declare const L: any;
 
 @Component({
   selector: 'app-create-shift',
@@ -55,6 +59,10 @@ export class CreateShiftComponent  implements OnInit,OnDestroy {
   timeSlots: string[] = []; 
   organizationTimeZone: string = 'UTC';
 private destroy$ = new Subject<void>();
+  fences: GeoFenceDto[] = [];
+  selectedFence: GeoFenceDto | null = null;
+  private fencePreviewMap: any;
+  private fencePreviewCircle: any;
   days = [
     { value: 1, label: 'Monday' },
     { value: 2, label: 'Tuesday' },
@@ -70,6 +78,7 @@ private destroy$ = new Subject<void>();
     private attendanceService: AttendanceService,
     private overlayContainer: OverlayContainer,
     private  settingsService: SettingsService,
+    private geoFenceService: GeoFenceService,
     private cdr: ChangeDetectorRef,
     private notification: NotificationService,
     @Inject(MAT_DIALOG_DATA) public data?: any,
@@ -82,7 +91,8 @@ private destroy$ = new Subject<void>();
       daysofWeek: [[], Validators.required],
       timezone: [''],
       marginHours: [0, [Validators.min(0), Validators.max(5)]],
-      applyMarginhours: []
+      applyMarginhours: [],
+      geoFenceId: ['']
     });
 
     if (data) {
@@ -93,11 +103,23 @@ private destroy$ = new Subject<void>();
   }
 ngOnInit(): void {
    this.loadInitialData();
+   this.loadGeoFences();
+
+   this.shiftForm.get('geoFenceId')?.valueChanges
+     .pipe(takeUntil(this.destroy$))
+     .subscribe((geoFenceId: string) => {
+       this.selectedFence = this.fences.find(f => f.geoFenceId === geoFenceId) || null;
+       this.renderFencePreview();
+     });
 }
 
 ngOnDestroy(): void {
   this.destroy$.next();
   this.destroy$.complete();
+  if (this.fencePreviewMap) {
+    this.fencePreviewMap.remove();
+    this.fencePreviewMap = null;
+  }
 }
 
   private patchForm(data: any): void {
@@ -112,6 +134,101 @@ ngOnDestroy(): void {
       applyMarginhours: data.applyMarginhours ?? true
 
 
+    });
+  }
+
+  private loadGeoFences(): void {
+    this.geoFenceService.getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (fences) => {
+          this.fences = (fences || []).filter(f => f.isActive);
+          this.cdr.markForCheck();
+          setTimeout(() => this.initFencePreviewMap(), 0);
+        },
+        error: () => {
+          this.fences = [];
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  private initFencePreviewMap(): void {
+    const mapContainer = document.getElementById('createShiftFencePreviewMap');
+    if (!mapContainer) return;
+    if (typeof L === 'undefined') {
+      setTimeout(() => this.initFencePreviewMap(), 200);
+      return;
+    }
+
+    if (this.fencePreviewMap) {
+      this.fencePreviewMap.remove();
+      this.fencePreviewMap = null;
+    }
+
+    this.fencePreviewMap = L.map(mapContainer, {
+      center: [31.5204, 74.3587],
+      zoom: 12,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(this.fencePreviewMap);
+
+    this.renderFencePreview();
+  }
+
+  private renderFencePreview(): void {
+    if (!this.fencePreviewMap) return;
+
+    if (this.fencePreviewCircle) {
+      this.fencePreviewMap.removeLayer(this.fencePreviewCircle);
+      this.fencePreviewCircle = null;
+    }
+
+    if (!this.selectedFence?.centerLatitude || !this.selectedFence?.centerLongitude) {
+      this.fencePreviewMap.setView([31.5204, 74.3587], 12);
+      return;
+    }
+
+    this.fencePreviewCircle = L.circle([
+      this.selectedFence.centerLatitude,
+      this.selectedFence.centerLongitude
+    ], {
+      radius: this.selectedFence.radiusMeters || 200,
+      color: '#6C5CE7',
+      fillColor: '#6C5CE7',
+      fillOpacity: 0.2,
+      weight: 2
+    }).addTo(this.fencePreviewMap);
+
+    this.fencePreviewMap.setView([
+      this.selectedFence.centerLatitude,
+      this.selectedFence.centerLongitude
+    ], 15);
+  }
+
+  private resolveShiftIdFromCreateResponse(response: any, formValue: any): Promise<string | null> {
+    const direct = response?.data?.shiftId || response?.data || response?.shiftId || response?.id;
+    if (typeof direct === 'string' && direct.trim()) {
+      return Promise.resolve(direct);
+    }
+
+    return new Promise((resolve) => {
+      this.attendanceService.getShifts().subscribe({
+        next: (shifts: ShiftDto[]) => {
+          const candidates = (shifts || []).filter(s =>
+            (s.shiftName || '').trim().toLowerCase() === (formValue.shiftName || '').trim().toLowerCase() &&
+            (s.startTime || '').startsWith(formValue.startTime || '') &&
+            (s.endTime || '').startsWith(formValue.endTime || '')
+          );
+
+          resolve(candidates.length ? candidates[candidates.length - 1].shiftId : null);
+        },
+        error: () => resolve(null)
+      });
     });
   }
 
@@ -198,7 +315,27 @@ private loadInitialData(): void {
       };
 
       this.attendanceService.createShift(request).subscribe({
-        next: (response: any) => {
+        next: async (response: any) => {
+          const selectedFenceId = formValue.geoFenceId as string;
+          const createdShiftId = await this.resolveShiftIdFromCreateResponse(response, formValue);
+
+          if (selectedFenceId && createdShiftId) {
+            this.geoFenceService.linkToShift(createdShiftId, selectedFenceId).subscribe({
+              next: () => {
+                this.isSubmitting = false;
+                this.notification.showSuccess('Shift created successfully');
+                this.shiftForm.reset();
+                this.dialogRef.close('created');
+              },
+              error: () => {
+                this.isSubmitting = false;
+                this.notification.showError('Shift created but failed to link geo-fence');
+                this.dialogRef.close('created');
+              }
+            });
+            return;
+          }
+
           this.isSubmitting = false;
           this.notification.showSuccess('Shift created successfully');
           this.shiftForm.reset();

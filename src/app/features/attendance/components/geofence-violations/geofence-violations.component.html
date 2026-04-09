@@ -1,0 +1,224 @@
+<div class="violations-root">
+
+  <!-- Header -->
+  <div class="v-header">
+    <div class="v-title-wrap">
+      <mat-icon class="v-title-icon">gps_off</mat-icon>
+      <div>
+        <h2 class="v-title">Geo-Fence Violations</h2>
+        <p class="v-subtitle">Employees who clocked in outside approved zones</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="summary-card red">
+      <mat-icon>warning</mat-icon>
+      <div class="summary-info">
+        <span class="summary-val">{{ totalViolations }}</span>
+        <span class="summary-label">Total Violations</span>
+      </div>
+    </div>
+    <div class="summary-card orange">
+      <mat-icon>block</mat-icon>
+      <div class="summary-info">
+        <span class="summary-val">{{ blockedCount }}</span>
+        <span class="summary-label">Blocked</span>
+      </div>
+    </div>
+    <div class="summary-card green">
+      <mat-icon>check_circle</mat-icon>
+      <div class="summary-info">
+        <span class="summary-val">{{ resolvedCount }}</span>
+        <span class="summary-label">Resolved</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="date-filters">
+      <div class="date-field">
+        <label>From</label>
+        <input type="date" [(ngModel)]="startDate" class="date-input" />
+      </div>
+      <div class="date-field">
+        <label>To</label>
+        <input type="date" [(ngModel)]="endDate" class="date-input" />
+      </div>
+      <button class="btn-apply" (click)="loadViolations()">Apply</button>
+    </div>
+    <div class="search-wrap">
+      <mat-icon>search</mat-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Search employee or fence..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="applySearch()"
+      />
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Table -->
+  <div class="v-table-wrap" *ngIf="!isLoading">
+    <table class="v-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Employee</th>
+          <th>Geo-Fence</th>
+          <th>Violated At</th>
+          <th>Distance Over</th>
+          <th>Action</th>
+          <th>Face Match</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let v of filteredViolations">
+          <!-- Main row -->
+          <tr class="v-row" (click)="toggleRow(v.violationId)" [class.expanded]="expandedRowId === v.violationId">
+            <td class="expand-col">
+              <mat-icon class="expand-icon" [class.open]="expandedRowId === v.violationId">
+                keyboard_arrow_right
+              </mat-icon>
+            </td>
+
+            <!-- Employee -->
+            <td>
+              <div class="emp-cell">
+                <img *ngIf="v.profilePhotoUrl" [src]="v.profilePhotoUrl" class="emp-avatar" />
+                <div class="emp-avatar-placeholder" *ngIf="!v.profilePhotoUrl">
+                  {{ v.employeeName.charAt(0) }}
+                </div>
+                <div class="emp-info">
+                  <span class="emp-name">{{ v.employeeName }}</span>
+                  <span class="emp-code">{{ v.employeeCode }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Fence -->
+            <td>
+              <span class="fence-label">{{ v.geoFenceName || 'Unknown' }}</span>
+              <span *ngIf="v.radiusMeters" class="fence-radius">{{ v.radiusMeters }}m radius</span>
+            </td>
+
+            <!-- Time -->
+            <td>
+              <span class="v-time">{{ v.violatedAt | date:'dd MMM yyyy' }}</span>
+              <span class="v-time-small">{{ v.violatedAt | date:'HH:mm' }}</span>
+            </td>
+
+            <!-- Distance -->
+            <td>
+              <span class="distance-badge">+{{ v.distanceOverMeters | number:'1.0-0' }}m</span>
+            </td>
+
+            <!-- Action -->
+            <td>
+              <span class="action-badge" [class]="getActionClass(v.actionTaken)">
+                {{ getActionLabel(v.actionTaken) }}
+              </span>
+            </td>
+
+            <!-- Face match -->
+            <td>
+              <div class="face-cell">
+                <mat-icon [style.color]="getFaceMatchColor(v.faceMatchResult)">
+                  {{ getFaceMatchIcon(v.faceMatchResult) }}
+                </mat-icon>
+                <span class="face-label" [style.color]="getFaceMatchColor(v.faceMatchResult)">
+                  {{ v.faceMatchResult ? (v.faceMatchResult | titlecase) : '—' }}
+                </span>
+                <span class="face-confidence" *ngIf="v.faceConfidenceScore">
+                  {{ (v.faceConfidenceScore * 100) | number:'1.0-0' }}%
+                </span>
+              </div>
+            </td>
+
+            <!-- Resolved -->
+            <td>
+              <span class="resolved-chip" [class.resolved]="v.resolved" [class.open]="!v.resolved">
+                {{ v.resolved ? 'Resolved' : 'Open' }}
+              </span>
+            </td>
+          </tr>
+
+          <!-- Expanded detail row -->
+          <tr class="detail-row" *ngIf="expandedRowId === v.violationId">
+            <td colspan="8">
+              <div class="detail-panel">
+                <div class="detail-grid">
+                  <!-- Coordinates -->
+                  <div class="detail-section">
+                    <h4 class="detail-section-title">
+                      <mat-icon>location_on</mat-icon> Location Details
+                    </h4>
+                    <div class="detail-item">
+                      <span class="detail-label">Employee Location</span>
+                      <span class="detail-value">{{ v.actualLatitude }}, {{ v.actualLongitude }}</span>
+                    </div>
+                    <div class="detail-item" *ngIf="v.centerLatitude && v.centerLongitude">
+                      <span class="detail-label">Fence Center</span>
+                      <span class="detail-value">{{ v.centerLatitude }}, {{ v.centerLongitude }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Distance Outside</span>
+                      <span class="detail-value red">{{ v.distanceOverMeters | number:'1.0-0' }}m over limit</span>
+                    </div>
+                  </div>
+
+                  <!-- Shift -->
+                  <div class="detail-section" *ngIf="v.shiftName">
+                    <h4 class="detail-section-title">
+                      <mat-icon>schedule</mat-icon> Shift
+                    </h4>
+                    <div class="detail-item">
+                      <span class="detail-label">Shift Name</span>
+                      <span class="detail-value">{{ v.shiftName }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Face Recognition -->
+                  <div class="detail-section" *ngIf="v.faceMatchResult">
+                    <h4 class="detail-section-title">
+                      <mat-icon>face</mat-icon> Face Recognition
+                    </h4>
+                    <div class="detail-item">
+                      <span class="detail-label">Result</span>
+                      <span class="detail-value" [style.color]="getFaceMatchColor(v.faceMatchResult)">
+                        {{ v.faceMatchResult | titlecase }}
+                      </span>
+                    </div>
+                    <div class="detail-item" *ngIf="v.faceConfidenceScore">
+                      <span class="detail-label">Confidence</span>
+                      <span class="detail-value">{{ (v.faceConfidenceScore * 100) | number:'1.1-1' }}%</span>
+                    </div>
+                    <div class="detail-face-photo" *ngIf="v.faceReferencePhotoUrl">
+                      <img [src]="v.faceReferencePhotoUrl" alt="Reference" />
+                      <span>Reference Photo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredViolations.length === 0">
+      <mat-icon>verified</mat-icon>
+      <p>No violations found for the selected period</p>
+    </div>
+  </div>
+
+</div>

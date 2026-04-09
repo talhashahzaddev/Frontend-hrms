@@ -1,6 +1,120 @@
 <!-- Time Tracker Container -->
 <div class="time-tracker-container">
 
+  <div class="geo-gate-overlay" *ngIf="showCameraPanel">
+    <div class="geo-gate-card">
+
+      <!-- Header -->
+      <div class="geo-gate-header">
+        <mat-icon class="geo-gate-icon">security</mat-icon>
+        <div>
+          <h2>Secure Clock {{ pendingClockAction === 'in' ? 'In' : 'Out' }}</h2>
+          <p class="geo-gate-sub">GPS &amp; Face verification required for your shift</p>
+        </div>
+        <button mat-icon-button class="geo-close-btn" (click)="cancelGeoFlow()" matTooltip="Cancel">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Step 1 — GPS -->
+      <div class="gate-step" [class.step-success]="gpsState === 'success'"
+           [class.step-error]="gpsState === 'error'" [class.step-loading]="gpsState === 'loading'">
+        <div class="step-indicator">
+          <mat-spinner *ngIf="gpsState === 'loading'" diameter="24"></mat-spinner>
+          <mat-icon *ngIf="gpsState === 'success'" class="step-icon-ok">check_circle</mat-icon>
+          <mat-icon *ngIf="gpsState === 'error'" class="step-icon-err">cancel</mat-icon>
+          <mat-icon *ngIf="gpsState === 'idle'" class="step-icon-idle">location_on</mat-icon>
+        </div>
+        <div class="step-body">
+          <span class="step-label">GPS Location</span>
+          <span class="step-msg">{{ gpsMessage || 'Waiting…' }}</span>
+        </div>
+      </div>
+
+      <!-- Step 2 — Camera -->
+      <div class="gate-step" [class.step-success]="cameraState === 'success'"
+           [class.step-error]="cameraState === 'error'" [class.step-loading]="cameraState === 'loading'">
+        <div class="step-indicator">
+          <mat-spinner *ngIf="cameraState === 'loading'" diameter="24"></mat-spinner>
+          <mat-icon *ngIf="cameraState === 'success'" class="step-icon-ok">check_circle</mat-icon>
+          <mat-icon *ngIf="cameraState === 'error'" class="step-icon-err">cancel</mat-icon>
+          <mat-icon *ngIf="cameraState === 'idle'" class="step-icon-idle">videocam</mat-icon>
+        </div>
+        <div class="step-body">
+          <span class="step-label">Camera</span>
+          <span class="step-msg">{{ cameraState === 'idle' ? 'Waiting for GPS…' : (cameraState === 'loading' ? 'Opening camera…' : (cameraState === 'success' ? 'Camera ready' : 'Camera permission denied')) }}</span>
+        </div>
+      </div>
+
+      <!-- Live video feed (shown once camera is open) -->
+      <div class="webcam-wrapper" *ngIf="cameraState === 'success'">
+        <video #videoEl autoplay muted playsinline class="webcam-feed"></video>
+        <canvas #canvasEl class="webcam-canvas" style="display:none;"></canvas>
+        <div class="webcam-overlay-ring"></div>
+      </div>
+
+      <!-- Step 3 — Face Recognition -->
+      <div class="gate-step" [class.step-success]="faceState === 'success'"
+           [class.step-error]="faceState === 'error'" [class.step-loading]="faceState === 'loading'">
+        <div class="step-indicator">
+          <mat-spinner *ngIf="faceState === 'loading'" diameter="24"></mat-spinner>
+          <mat-icon *ngIf="faceState === 'success'" class="step-icon-ok">check_circle</mat-icon>
+          <mat-icon *ngIf="faceState === 'error'" class="step-icon-err">cancel</mat-icon>
+          <mat-icon *ngIf="faceState === 'idle'" class="step-icon-idle">face</mat-icon>
+        </div>
+        <div class="step-body">
+          <span class="step-label">Face Recognition</span>
+          <span class="step-msg">{{ faceMessage || 'Waiting for camera…' }}</span>
+        </div>
+      </div>
+
+      <!-- Confidence Ring (shown after face scan completes) -->
+      <div class="confidence-ring-wrapper" *ngIf="faceConfidence > 0">
+        <svg class="confidence-ring" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="28" fill="none" stroke="#e0e0e0" stroke-width="6"/>
+          <circle cx="36" cy="36" r="28" fill="none"
+                  [attr.stroke]="confidenceRingColor"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="confidenceRingDashArray"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 36 36)"
+                  class="ring-progress"/>
+          <text x="36" y="40" text-anchor="middle" class="ring-text">{{ faceConfidence }}%</text>
+        </svg>
+        <span class="confidence-label" [style.color]="confidenceRingColor">
+          {{ faceState === 'success' ? 'Verified' : 'Mismatch' }}
+        </span>
+      </div>
+
+      <!-- Retry button on face error -->
+      <button mat-raised-button color="primary" class="retry-btn"
+              *ngIf="cameraState === 'success' && faceState === 'idle'"
+          (click)="startFaceScan()">
+        <mat-icon>face_retouching_natural</mat-icon> Scan Face
+      </button>
+
+      <button mat-stroked-button color="accent" class="retry-btn"
+              *ngIf="faceState === 'error' && cameraState === 'success'"
+              (click)="retryFaceScan()">
+        <mat-icon>refresh</mat-icon> Retry Face Scan
+      </button>
+
+      <!-- Action Buttons -->
+      <div class="geo-gate-actions">
+        <button mat-stroked-button (click)="cancelGeoFlow()">Cancel</button>
+        <button mat-raised-button color="primary"
+                [disabled]="!geoFaceGateOpen || isClockActionLoading"
+                (click)="confirmGeoClock()">
+          <mat-spinner *ngIf="isClockActionLoading" diameter="18" class="btn-spinner"></mat-spinner>
+          <mat-icon *ngIf="!isClockActionLoading">{{ pendingClockAction === 'in' ? 'login' : 'logout' }}</mat-icon>
+          Confirm Clock {{ pendingClockAction === 'in' ? 'In' : 'Out' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- 1. Top Header Bar -->
   <header class="tracker-header">
     <div class="header-brand">
@@ -33,6 +147,12 @@
     </div>
 
     <div class="header-right">
+      <!-- Geo-fence badge indicator -->
+      <div class="geofence-badge" *ngIf="shiftHasGeoFence" matTooltip="This shift requires GPS + Face verification">
+        <mat-icon>location_on</mat-icon>
+        <span>Geo-Secured</span>
+      </div>
+
       <div class="time-block">
         <div class="time-row">
           <span class="live-time">{{ currentTime | date:'HH:mm:ss' }}</span>
@@ -89,18 +209,15 @@
     </div>
   </section>
 
-  <!-- 3. Quick Actions -->
-  
-  <!-- 4. Main Content Grid: Recent Attendance + Today's Sessions -->
+  <!-- 4. Main Content Grid -->
   <div class="main-grid">
 
-    <!-- Recent Attendance (left) -->
+    <!-- Recent Attendance -->
     <div class="panel">
       <div class="panel-header">
         <h3 class="panel-title">Recent Attendance ({{ recentAttendance.length }})</h3>
       </div>
 
-      <!-- Filters inside panel -->
       <div class="panel-filters">
         <div class="filter-group">
           <label class="filter-label">From</label>
@@ -121,7 +238,6 @@
         <button class="btn-apply" (click)="applyDateFilter()">Apply</button>
       </div>
 
-      <!-- Table -->
       <div class="table-wrap">
         <div *ngIf="isLoading" class="panel-loading">
           <mat-spinner diameter="32"></mat-spinner>
@@ -129,38 +245,28 @@
 
         <table *ngIf="!isLoading && recentAttendance.length > 0"
                mat-table [dataSource]="recentAttendance" class="compact-table">
-
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Date</th>
             <td mat-cell *matCellDef="let r">{{ r.workDate | date:'dd-MM-yyyy' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="checkIn">
             <th mat-header-cell *matHeaderCellDef>Check-In</th>
-            <td mat-cell *matCellDef="let r">
-              {{ r.checkInTime ? (r.checkInTime | date:'hh:mm a') : '--:--' }}
-            </td>
+            <td mat-cell *matCellDef="let r">{{ r.checkInTime ? (r.checkInTime | date:'hh:mm a') : '--:--' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="checkOut">
             <th mat-header-cell *matHeaderCellDef>Check-Out</th>
-            <td mat-cell *matCellDef="let r">
-              {{ r.checkOutTime ? (r.checkOutTime | date:'hh:mm a') : '--:--' }}
-            </td>
+            <td mat-cell *matCellDef="let r">{{ r.checkOutTime ? (r.checkOutTime | date:'hh:mm a') : '--:--' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="hours">
             <th mat-header-cell *matHeaderCellDef>Hours</th>
             <td mat-cell *matCellDef="let r">{{ formatHours(r.totalHours) }}</td>
           </ng-container>
-
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
             <td mat-cell *matCellDef="let r" class="col-right">
               <span class="table-badge" [class]="'badge-' + r.status">{{ r.status | titlecase }}</span>
             </td>
           </ng-container>
-
           <tr mat-header-row *matHeaderRowDef="['date','checkIn','checkOut','hours','status']"></tr>
           <tr mat-row *matRowDef="let row; columns: ['date','checkIn','checkOut','hours','status'];"></tr>
         </table>
@@ -173,7 +279,7 @@
       </div>
     </div>
 
-    <!-- Today's Sessions (right) -->
+    <!-- Today's Sessions -->
     <div class="panel sessions-panel">
       <div class="panel-header">
         <mat-icon class="panel-icon">event_available</mat-icon>

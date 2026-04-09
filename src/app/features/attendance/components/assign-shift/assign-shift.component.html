@@ -24,6 +24,26 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
+          <div class="selected-fence-wrap" *ngIf="assignShiftForm.get('shiftId')?.value">
+            <p class="selected-fence-title">
+              Linked Fence Area
+              <mat-spinner *ngIf="isFencesLoading" diameter="14" style="display:inline-block;margin-left:8px;"></mat-spinner>
+            </p>
+
+            <ng-container *ngIf="!isFencesLoading">
+              <div class="selected-fence-chips" *ngIf="selectedShiftFences.length > 0; else noLinkedFence">
+                <span class="selected-fence-chip" *ngFor="let fence of selectedShiftFences">
+                  {{ fence.geoFenceName || 'Unnamed Fence' }}
+                  <span class="fence-radius-tag" *ngIf="fence.radiusMeters">{{ fence.radiusMeters }}m</span>
+                </span>
+              </div>
+              <ng-template #noLinkedFence>
+                <span class="selected-fence-empty">No geo-fence linked with selected shift.</span>
+              </ng-template>
+            </ng-container>
+
+            <div class="selected-fence-map" #assignShiftFenceMap></div>
+          </div>
         </div>
 
         <div class="field-full custom-field" *ngIf="!isManager">
@@ -85,26 +105,23 @@
                      class="employee-item"
                      [class.is-selected]="isEmployeeSelected(emp.employeeId)"
                      (mousedown)="$event.preventDefault(); toggleEmployee(emp)">
-                  
+
                   <input type="checkbox"
                          class="employee-checkbox"
                          [checked]="isEmployeeSelected(emp.employeeId)"
                          (mousedown)="$event.stopPropagation()"
                          readonly>
-                  
+
                   <div class="employee-avatar"
                        [style.background-color]="getAvatarBg(emp)"
                        [style.color]="getAvatarColor(emp)">
                     {{ getInitials(emp) }}
                   </div>
-                  
+
                   <div class="employee-info">
                     <div class="employee-name">{{ displayName(emp) }}</div>
                     <div class="employee-metadata">
-                      {{ emp.departmentName || 'No Department' }} • 
-                      <!-- <span [class.current-shift]="emp.currentShift">
-                        {{ emp.currentShift || 'No Shift' }}
-                      </span> -->
+                      {{ emp.departmentName || 'No Department' }}
                     </div>
                   </div>
                 </div>
