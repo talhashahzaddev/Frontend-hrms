@@ -168,14 +168,14 @@
               </div>
 
               <div class="card-footer">
-                @if (loan.status === 'pending') {
-                  <div class="request-actions">
-                    <button class="link-btn" (click)="openEditLoanRequestDialog(loan)">Edit request</button>
-                    <button class="danger-link" (click)="cancelLoanRequest(loan)">Cancel request</button>
-                  </div>
-                } @else {
-                  <button class="link-btn" (click)="goToLoanHistory()">View payment history</button>
-                }
+                <div class="request-actions">
+                  @if (loan.status === 'active' || loan.status === 'completed') {
+                    <button class="link-btn" (click)="goToLoanHistory()">View payment history</button>
+                  } @else {
+                    <button class="link-btn" [disabled]="loan.status !== 'pending' && loan.status !== 'approved'" (click)="openEditLoanRequestDialog(loan)">Edit request</button>
+                    <button class="danger-link" [disabled]="loan.status !== 'pending' && loan.status !== 'approved'" (click)="cancelLoanRequest(loan)">Cancel request</button>
+                  }
+                </div>
               </div>
             </article>
           }
@@ -413,11 +413,13 @@
               </div>
 
               <div class="card-footer">
-                @if (advance.status === 'pending') {
-                  <button class="danger-link" (click)="cancelAdvanceRequest(advance)">Cancel request</button>
-                } @else {
-                  <button class="link-btn" (click)="goToAdvanceHistory()">View deductions</button>
-                }
+                <div class="request-actions">
+                  @if (advance.status === 'approved' || advance.status === 'completed') {
+                    <button class="link-btn" (click)="goToAdvanceHistory()">View deductions</button>
+                  } @else {
+                    <button class="danger-link" [disabled]="advance.status !== 'pending'" (click)="cancelAdvanceRequest(advance)">Cancel request</button>
+                  }
+                </div>
               </div>
             </article>
           }

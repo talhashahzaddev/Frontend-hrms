@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -1196,6 +1196,18 @@ export class PayrollService {
         );
     }
 
+    requestLoan(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/loans/request`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     updateLoan(id: string, data: any): Observable<any> {
       return this.http.put<ApiResponse<any>>(`${this.apiUrl}/loans/${id}`, data)
         .pipe(
@@ -1430,6 +1442,121 @@ export class PayrollService {
 
     bulkEmailPayslips(data: any): Observable<any> {
       return this.http.post<ApiResponse<any>>(`${this.apiUrl}/payslips/bulk-email`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyLoans(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/my-requests`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyActiveLoans(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/my-active-loans`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteLoanRequest(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/loans/my-requests/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getMyPendingLoans(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/my-pending-loans`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateLoanRequest(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/loans/my-requests/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getAllLoans(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach(key => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/all`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
+    updateLoanStatus(data: { loanId: string, requestStatus: string, rejectionReason?: string }): Observable<any> {
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/loans/status`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    approveSalaryAdvance(id: string): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance/${id}/approve`, {})
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    rejectSalaryAdvance(id: string, data: { rejectionReason: string }): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance/${id}/reject`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {

@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs';
+import { take, forkJoin } from 'rxjs';
+import { PayrollService } from '../../services/payroll.service';
 
 import { AuthService } from '@core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
@@ -13,6 +14,10 @@ import {
   RequestLoanDialogComponent,
   RequestLoanDialogPayload
 } from '../dialogs/request-loan-dialog/request-loan-dialog.component';
+import {
+  ConfirmDeleteDialogComponent,
+  ConfirmDeleteData
+} from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
   RequestSalaryAdvanceDialogComponent,
   RequestSalaryAdvanceDialogPayload
@@ -44,6 +49,7 @@ interface EmployeeLoanRecord {
   endDate: string | null;
   approvedBy: string;
   requestedOn: string;
+  ruleId: string;
 }
 
 interface LoanPaymentHistoryRecord {
@@ -97,6 +103,7 @@ export class LoanRequestsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly settingsService = inject(SettingsService);
+  private readonly payrollService = inject(PayrollService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
@@ -476,17 +483,16 @@ export class LoanRequestsComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: RequestLoanDialogPayload | undefined) => {
-      if (!result) {
-        return;
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // Since the dialog itself calls the API, we just refresh the list
+        this.loadLoans();
       }
-
-      this.submitLoanRequest(result);
     });
   }
 
   openEditLoanRequestDialog(row: EmployeeLoanRecord): void {
-    if (row.status !== 'pending') {
+    if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
 
@@ -497,24 +503,24 @@ export class LoanRequestsComponent implements OnInit {
       restoreFocus: false,
       data: {
         currencySymbol: this.currencySymbol(),
+        loanId: row.id,
         initialValue: {
           totalAmount: row.totalAmount,
           repaymentType: row.repaymentType,
           monthlyInstallment: row.monthlyInstallment,
           totalInstallments: row.totalInstallments,
-          startDate: row.startDate,
-          endDate: row.endDate,
-          reason: row.reason
-        }
+          reason: row.reason,
+          loanRuleId: row.ruleId,
+          returnDate: row.endDate // endDate is used for returnDate in full repayment
+        } as any 
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: RequestLoanDialogPayload | undefined) => {
-      if (!result) {
-        return;
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // Refresh the list if edit was successful
+        this.loadLoans();
       }
-
-      this.updateLocalLoanRequest(row, result);
     });
   }
 
@@ -539,20 +545,35 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   cancelLoanRequest(row: EmployeeLoanRecord): void {
-    if (row.status !== 'pending') {
+    if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
 
-    this.activateLocalLoanFallback();
-    this.localLoanSeed = this.localLoanSeed.map((item) => {
-      if (item.id !== row.id) {
-        return item;
-      }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Cancel Loan Request',
+      message: 'Are you sure you want to cancel this loan request?',
+      itemName: row.referenceNo,
+      confirmButtonText: 'Yes, Cancel'
+    };
 
-      return { ...item, status: 'cancelled' };
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
     });
 
-    this.loans = this.filterForCurrentEmployee([...this.localLoanSeed]);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.payrollService.deleteLoanRequest(row.id).subscribe({
+          next: () => {
+            this.loadLoans();
+          },
+          error: (err: any) => {
+            console.error('Error cancelling loan request:', err);
+          }
+        });
+      }
+    });
   }
 
   cancelAdvanceRequest(row: SalaryAdvanceRecord): void {
@@ -669,8 +690,29 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoans(): void {
-    this.activateLocalLoanFallback();
-    this.loans = this.filterForCurrentEmployee([...this.localLoanSeed]);
+    // We combine pending requests and active loans into a single list
+    forkJoin({
+      pending: this.payrollService.getMyPendingLoans().pipe(take(1)),
+      active: this.payrollService.getMyActiveLoans().pipe(take(1))
+    }).subscribe({
+      next: (res: any) => {
+        const pendingLoans = (res.pending || []).map((item: any, i: number) => this.mapLoan(item, i));
+        const activeLoans = (res.active || []).map((item: any, i: number) => this.mapLoan(item, pendingLoans.length + i));
+        
+        // Combine and dedup by ID if necessary (though they should be distinct)
+        const combined = [...pendingLoans, ...activeLoans];
+        const unique = Array.from(new Map(combined.map(l => [l.id, l])).values());
+        
+        this.loans = unique;
+        this.usingLocalLoanData = false;
+      },
+      error: (err) => {
+        console.error('Error loading loans:', err);
+        // Fallback to local data only if API fails
+        this.activateLocalLoanFallback();
+        this.loans = this.filterForCurrentEmployee([...this.localLoanSeed]);
+      }
+    });
   }
 
   private loadLoanPayments(): void {
@@ -721,10 +763,11 @@ export class LoanRequestsComponent implements OnInit {
       status: 'pending',
       repaymentType: payload.repaymentType,
       reason: payload.reason,
-      startDate: payload.startDate,
-      endDate: payload.endDate,
+      startDate: this.getTodayIsoDate(), // Default to today since field was removed
+      endDate: null,
       approvedBy: 'Pending HR approval',
-      requestedOn: this.getTodayIsoDate()
+      requestedOn: this.getTodayIsoDate(),
+      ruleId: payload.loanRuleId || ''
     };
 
     this.localLoanSeed = [nextItem, ...this.localLoanSeed];
@@ -759,9 +802,8 @@ export class LoanRequestsComponent implements OnInit {
         progressPercent: 0,
         repaymentType: payload.repaymentType,
         reason: payload.reason,
-        startDate: payload.startDate,
-        endDate: payload.endDate,
-        status: 'pending'
+        status: 'pending',
+        ruleId: payload.loanRuleId || ''
       };
     });
 
@@ -827,7 +869,8 @@ export class LoanRequestsComponent implements OnInit {
       startDate: this.normalizeDate(item.startDate ?? item.createdAt),
       endDate: this.normalizeDateNullable(item.endDate),
       approvedBy: String(item.approvedBy ?? 'HR Manager'),
-      requestedOn: this.normalizeDate(item.requestedOn ?? item.createdAt ?? item.startDate)
+      requestedOn: this.normalizeDate(item.requestedOn ?? item.createdAt ?? item.startDate),
+      ruleId: String(item.ruleId ?? item.loanRuleId ?? '')
     };
   }
 
@@ -898,7 +941,8 @@ export class LoanRequestsComponent implements OnInit {
         startDate: '2025-01-01',
         endDate: '2026-12-31',
         approvedBy: 'HR Manager',
-        requestedOn: '2025-01-01'
+        requestedOn: '2025-01-01',
+        ruleId: 'local-rule-1'
       },
       {
         id: 'local-loan-2025-1029',
@@ -917,7 +961,8 @@ export class LoanRequestsComponent implements OnInit {
         startDate: '2025-10-12',
         endDate: '2026-09-12',
         approvedBy: 'Pending HR approval',
-        requestedOn: '2025-10-12'
+        requestedOn: '2025-10-12',
+        ruleId: 'local-rule-2'
       }
     ];
   }
@@ -1124,12 +1169,14 @@ export class LoanRequestsComponent implements OnInit {
   private normalizeLoanStatus(rawStatus: unknown): LoanStatus {
     const status = String(rawStatus ?? '').trim().toLowerCase();
 
-    if (status === 'approved') return 'approved';
+    if (status === 'active') return 'active';
     if (status === 'pending') return 'pending';
+    if (status === 'approved') return 'approved';
     if (status === 'completed' || status === 'closed') return 'completed';
     if (status === 'cancelled' || status === 'canceled' || status === 'rejected') return 'cancelled';
+    if (status === 'inactive') return 'pending'; // Inactive loans are typically awaiting approval or disbursement
 
-    return 'active';
+    return 'pending'; // Default to pending for safety
   }
 
   private normalizeAdvanceStatus(rawStatus: unknown): SalaryAdvanceStatus {
