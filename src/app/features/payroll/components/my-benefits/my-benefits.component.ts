@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
@@ -12,7 +11,7 @@ import { take } from 'rxjs';
 @Component({
   selector: 'app-my-benefits',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './my-benefits.component.html',
   styleUrl: './my-benefits.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,7 +25,7 @@ export class MyBenefitsComponent implements OnInit {
   readonly activeModules = signal<string[]>([]);
   readonly activeModulesSet = computed(() => new Set(this.activeModules()));
   readonly isLoading = signal(true);
-  readonly currencySymbol = signal('PKR');
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   ngOnInit(): void {
     this.fetchOverview();
@@ -38,7 +37,10 @@ export class MyBenefitsComponent implements OnInit {
       .pipe(take(1))
       .subscribe({
         next: (currencyCode) => {
-          this.currencySymbol.set(currencyCode || 'PKR');
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
   }
@@ -62,17 +64,23 @@ export class MyBenefitsComponent implements OnInit {
     return this.activeModulesSet().has(moduleName);
   }
 
-  onViewDetails(module: string): void {
-    // Navigate based on module
-    console.log('Viewing details for:', module);
+  openBenefit(module: string): void {
+    if (module === 'Loan') {
+      this.router.navigate(['/payroll/loans/requests'], { queryParams: { module: 'loans' } });
+      return;
+    }
+
+    if (module === 'Advance Salary') {
+      this.router.navigate(['/payroll/loans/requests'], { queryParams: { module: 'salary-advance' } });
+    }
   }
 
-  onRequestNew(module: string): void {
-      // Logic for requesting new benefit
-      console.log('Requesting new:', module);
-  }
+  onBenefitCardKeydown(event: KeyboardEvent, module: string): void {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
 
-  completeEnrollment(): void {
-      console.log('Navigating to enrollment');
+    event.preventDefault();
+    this.openBenefit(module);
   }
 }
