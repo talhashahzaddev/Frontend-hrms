@@ -33,6 +33,8 @@ import {
   RepaymentReferenceOption
 } from '../dialogs/add-repayment-dialog/add-repayment-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
+import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
+import { DisburseLoanDialogComponent } from '../dialogs/disburse-loan-dialog/disburse-loan-dialog.component';
 
 type LoanStatus = 'active' | 'pending' | 'completed' | 'cancelled' | 'rejected' | 'approved' | 'accepted';
 type LoanTab = 'loans' | 'salary-advances' | 'loan-payments' | 'repayments';
@@ -78,6 +80,19 @@ interface LoanPaymentRow {
   remainingAmount: number;
   paidDate: string | null;
   status: LoanPaymentStatus;
+}
+
+interface DisbursedLoanRow {
+  id: string;
+  employeeName: string;
+  disbursementDate: string | null;
+  endDate: string | null;
+  remainingInstallments: number;
+  totalInstallments: number;
+  disbursementStatus: string;
+  totalAmount: number;
+  paidAmount: number;
+  completionPercent: number;
 }
 
 interface SalaryAdvanceRow {
@@ -146,9 +161,13 @@ export class LoansAdvancesComponent implements OnInit {
   filterStatus: LoanStatus | '' = '';
 
   pendingLoanPaymentSearch = '';
-  pendingLoanPaymentStatus: LoanPaymentStatus | '' = '';
+  pendingLoanPaymentStatus: string = '';
+  pendingLoanPaymentMinAmount: number | null = null;
+  pendingLoanPaymentMaxAmount: number | null = null;
   loanPaymentSearch = '';
-  loanPaymentStatus: LoanPaymentStatus | '' = '';
+  loanPaymentStatus: string = '';
+  loanPaymentMinAmount: number | null = null;
+  loanPaymentMaxAmount: number | null = null;
 
   pendingSalaryAdvanceSearch = '';
   pendingSalaryAdvanceStatusFilter: SalaryAdvanceStatus | '' = '';
@@ -167,6 +186,8 @@ export class LoansAdvancesComponent implements OnInit {
 
   loans: LoanLedgerRow[] = [];
   loanPayments: LoanPaymentRow[] = [];
+  disbursedLoans: DisbursedLoanRow[] = [];
+  disbursedLoansTotalRecords = 0;
   salaryAdvances: SalaryAdvanceRow[] = [];
   advancePayments: AdvancePaymentRow[] = [];
 
@@ -241,11 +262,21 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   get hasActiveLoanPaymentFilters(): boolean {
-    return !!(this.pendingLoanPaymentSearch || this.pendingLoanPaymentStatus);
+    return !!(
+      this.pendingLoanPaymentSearch
+      || this.pendingLoanPaymentStatus
+      || this.pendingLoanPaymentMinAmount !== null
+      || this.pendingLoanPaymentMaxAmount !== null
+    );
   }
 
   get hasAppliedLoanPaymentFilters(): boolean {
-    return !!(this.loanPaymentSearch || this.loanPaymentStatus);
+    return !!(
+      this.loanPaymentSearch
+      || this.loanPaymentStatus
+      || this.loanPaymentMinAmount !== null
+      || this.loanPaymentMaxAmount !== null
+    );
   }
 
   get hasActiveSalaryAdvanceFilters(): boolean {
@@ -321,18 +352,44 @@ export class LoansAdvancesComponent implements OnInit {
       .reduce((sum, loan) => sum + loan.monthlyInstallment, 0);
   }
 
+  get totalLoanRequestsCount(): number {
+    return this.loans.length;
+  }
+
+  get pendingLoanRequestsCount(): number {
+    return this.loans.filter((loan) => loan.status === 'pending').length;
+  }
+
+  get approvedLoanRequestsCount(): number {
+    return this.loans.filter((loan) => loan.status === 'approved' || loan.status === 'accepted').length;
+  }
+
+  get rejectedLoanRequestsCount(): number {
+    return this.loans.filter((loan) => loan.status === 'rejected').length;
+  }
+
   get totalLoanPaymentsDeducted(): number {
-    return this.loanPayments
-      .filter((payment) => payment.status === 'deducted')
-      .reduce((sum, payment) => sum + payment.amount, 0);
+    return this.disbursedLoans.reduce((sum, loan) => sum + loan.paidAmount, 0);
   }
 
   get pendingLoanPaymentsCount(): number {
-    return this.loanPayments.filter((payment) => payment.status === 'pending').length;
+    return this.disbursedLoans.filter((loan) => String(loan.disbursementStatus).toLowerCase() === 'pending').length;
   }
 
   get skippedLoanPaymentsCount(): number {
-    return this.loanPayments.filter((payment) => payment.status === 'skipped').length;
+    return this.disbursedLoans.filter((loan) => String(loan.disbursementStatus).toLowerCase() === 'failed').length;
+  }
+
+  get disbursedTotalAmount(): number {
+    return this.disbursedLoans.reduce((sum, loan) => sum + loan.totalAmount, 0);
+  }
+
+  get disbursedAverageCompletion(): number {
+    if (!this.disbursedLoans.length) {
+      return 0;
+    }
+    const total = this.disbursedLoans.reduce((sum, loan) => sum + loan.completionPercent, 0);
+    return Math.round(total / this.disbursedLoans.length);
   }
 
   get totalSalaryAdvancesIssued(): number {
@@ -367,22 +424,12 @@ export class LoansAdvancesComponent implements OnInit {
     return this.repaymentRows.filter((row) => row.type === 'advance').length;
   }
 
-  get filteredLoanPayments(): LoanPaymentRow[] {
-    const search = this.loanPaymentSearch.trim().toLowerCase();
-
-    return this.loanPayments.filter((payment) => {
-      const matchesSearch = !search
-        || payment.employeeName.toLowerCase().includes(search)
-        || payment.loanLabel.toLowerCase().includes(search)
-        || payment.periodName.toLowerCase().includes(search);
-
-      const matchesStatus = !this.loanPaymentStatus || payment.status === this.loanPaymentStatus;
-      return matchesSearch && matchesStatus;
-    });
+  get filteredLoanPayments(): DisbursedLoanRow[] {
+    return this.disbursedLoans;
   }
 
   get loanPaymentsTotalRecords(): number {
-    return this.filteredLoanPayments.length;
+    return this.disbursedLoansTotalRecords;
   }
 
   get loanPaymentsTotalPages(): number {
@@ -407,8 +454,8 @@ export class LoansAdvancesComponent implements OnInit {
     return Math.min(this.loanPaymentsPage * this.loanPaymentsPageSize, this.loanPaymentsTotalRecords);
   }
 
-  get loanPaymentsView(): LoanPaymentRow[] {
-    return this.paginateData(this.filteredLoanPayments, this.loanPaymentsPage, this.loanPaymentsPageSize);
+  get loanPaymentsView(): DisbursedLoanRow[] {
+    return this.filteredLoanPayments;
   }
 
   get filteredSalaryAdvances(): SalaryAdvanceRow[] {
@@ -597,15 +644,23 @@ export class LoansAdvancesComponent implements OnInit {
   applyLoanPaymentFilters(): void {
     this.loanPaymentSearch = this.pendingLoanPaymentSearch.trim();
     this.loanPaymentStatus = this.pendingLoanPaymentStatus;
+    this.loanPaymentMinAmount = this.pendingLoanPaymentMinAmount;
+    this.loanPaymentMaxAmount = this.pendingLoanPaymentMaxAmount;
     this.loanPaymentsCurrentPage = 1;
+    this.loadLoanPayments();
   }
 
   clearLoanPaymentFilters(): void {
     this.pendingLoanPaymentSearch = '';
     this.pendingLoanPaymentStatus = '';
+    this.pendingLoanPaymentMinAmount = null;
+    this.pendingLoanPaymentMaxAmount = null;
     this.loanPaymentSearch = '';
     this.loanPaymentStatus = '';
+    this.loanPaymentMinAmount = null;
+    this.loanPaymentMaxAmount = null;
     this.loanPaymentsCurrentPage = 1;
+    this.loadLoanPayments();
   }
 
   goToLoanPaymentPage(page: number): void {
@@ -614,6 +669,7 @@ export class LoansAdvancesComponent implements OnInit {
     }
 
     this.loanPaymentsCurrentPage = page;
+    this.loadLoanPayments();
   }
 
   prevLoanPaymentPage(): void {
@@ -737,6 +793,25 @@ export class LoansAdvancesComponent implements OnInit {
     });
   }
 
+  disburseLoan(row: LoanLedgerRow): void {
+    const dialogRef = this.dialog.open(DisburseLoanDialogComponent, {
+      width: '500px',
+      panelClass: 'disburse-loan-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        loanId: row.id,
+        employeeName: row.employeeName
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((res: boolean) => {
+      if (res) {
+        this.loadLoans();
+      }
+    });
+  }
+
   requestDeleteLoan(row: LoanLedgerRow): void {
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
@@ -758,38 +833,73 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   approveLoan(row: LoanLedgerRow): void {
-    const data = {
-      loanId: row.id,
-      requestStatus: 'accepted'
-    };
-
-    this.payrollService.updateLoanStatus(data).subscribe({
-      next: () => {
-        this.loadLoans();
-      },
-      error: (err) => {
-        console.error('Error approving loan:', err);
+    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
+      width: '420px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Approve loan request',
+        message: `Are you sure you want to approve ${row.employeeName}'s loan request?`,
+        confirmText: 'Approve request',
+        cancelText: 'Cancel',
+        confirmTheme: 'success'
       }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+
+      const data = {
+        loanId: row.id,
+        requestStatus: 'accepted'
+      };
+
+      this.payrollService.updateLoanStatus(data).subscribe({
+        next: () => {
+          this.loadLoans();
+        },
+        error: (err) => {
+          console.error('Error approving loan:', err);
+        }
+      });
     });
   }
 
   requestRejectLoan(row: LoanLedgerRow): void {
-    const reason = prompt('Please provide a reason for rejection:');
-    if (reason === null) return; // Cancelled
-
-    const data = {
-      loanId: row.id,
-      requestStatus: 'rejected',
-      rejectionReason: reason || 'Not meeting policy requirements'
-    };
-
-    this.payrollService.updateLoanStatus(data).subscribe({
-      next: () => {
-        this.loadLoans();
-      },
-      error: (err) => {
-        console.error('Error rejecting loan:', err);
+    const dialogRef = this.dialog.open(LoanRejectionDialogComponent, {
+      width: '460px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Reject loan request',
+        message: `Provide the rejection reason for ${row.employeeName}'s loan request.`,
+        submitText: 'Reject request'
       }
+    });
+
+    dialogRef.afterClosed().subscribe((reason: string | undefined) => {
+      if (!reason) {
+        return;
+      }
+
+      const data = {
+        loanId: row.id,
+        requestStatus: 'rejected',
+        rejectionReason: reason
+      };
+
+      this.payrollService.updateLoanStatus(data).subscribe({
+        next: () => {
+          this.loadLoans();
+        },
+        error: (err) => {
+          console.error('Error rejecting loan:', err);
+        }
+      });
     });
   }
 
@@ -1092,6 +1202,22 @@ export class LoansAdvancesComponent implements OnInit {
     return 'Skipped';
   }
 
+  getDisbursementStatusClass(status: string): string {
+    const normalized = String(status || '').toLowerCase();
+    if (normalized === 'paid') return 'status-approved';
+    if (normalized === 'pending') return 'status-pending';
+    if (normalized === 'failed' || normalized === 'rejected' || normalized === 'cancelled') return 'status-cancelled';
+    return 'status-inactive';
+  }
+
+  getDisbursementStatusLabel(status: string): string {
+    const normalized = String(status || '').toLowerCase();
+    if (normalized === 'paid') return 'Paid';
+    if (normalized === 'pending') return 'Pending';
+    if (normalized === 'failed') return 'Failed';
+    return normalized ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : 'N/A';
+  }
+
   getAdvanceStatusClass(status: SalaryAdvanceStatus): string {
     const s = String(status || '').toLowerCase();
     if (s === 'approved' || s === 'accepted') return 'status-approved';
@@ -1177,8 +1303,27 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   private loadLoanPayments(): void {
-    this.activateLocalLoanPaymentsFallback();
-    this.applyLocalLoanPayments();
+    const filter = {
+      SearchTerm: this.loanPaymentSearch || undefined,
+      LoanStatus: this.loanPaymentStatus || undefined,
+      MinTotalAmount: this.loanPaymentMinAmount ?? undefined,
+      MaxTotalAmount: this.loanPaymentMaxAmount ?? undefined,
+      Page: this.loanPaymentsCurrentPage,
+      PageSize: this.loanPaymentsPageSize
+    };
+
+    this.payrollService.getDisbursedLoans(filter).subscribe({
+      next: (response: any) => {
+        const items = response.data || [];
+        this.disbursedLoans = items.map((item: any, index: number) => this.mapDisbursedLoan(item, index));
+        this.disbursedLoansTotalRecords = response.totalCount || 0;
+      },
+      error: (err) => {
+        this.disbursedLoans = [];
+        this.disbursedLoansTotalRecords = 0;
+        console.error('Error loading disbursed loans', err);
+      }
+    });
   }
 
   private loadSalaryAdvances(): void {
@@ -1680,6 +1825,21 @@ export class LoansAdvancesComponent implements OnInit {
       paidInstallments: this.toNumber(item.paidInstallments ?? item.paidMonths ?? item.installmentsPaid),
       description: item.description || ''
     });
+  }
+
+  private mapDisbursedLoan(item: any, index: number): DisbursedLoanRow {
+    return {
+      id: String(item.loanId ?? item.id ?? `disbursed-loan-${index + 1}`),
+      employeeName: String(item.employeeName ?? 'Unknown Employee'),
+      disbursementDate: this.normalizeDateString(item.disbursementDate ?? item.startDate ?? item.createdAt) || null,
+      endDate: this.normalizeDateString(item.endDate) || null,
+      remainingInstallments: this.toNumber(item.remainingInstallments ?? 0),
+      totalInstallments: this.toNumber(item.totalInstallments ?? 0),
+      disbursementStatus: String(item.disbursementStatus ?? 'paid'),
+      totalAmount: this.toNumber(item.totalAmount ?? item.principalAmount ?? 0),
+      paidAmount: this.toNumber(item.paidAmount ?? 0),
+      completionPercent: this.toNumber(item.completedPercentage ?? 0)
+    };
   }
 
   private mapLoanPayment(item: any, index: number): LoanPaymentRow {
@@ -2313,11 +2473,23 @@ export class LoansAdvancesComponent implements OnInit {
   private normalizeLoanStatus(rawStatus: unknown): LoanStatus {
     const normalized = String(rawStatus ?? '').trim().toLowerCase();
 
+    if (normalized === 'accepted') {
+      return 'accepted';
+    }
+
+    if (normalized === 'approved') {
+      return 'approved';
+    }
+
     if (normalized === 'completed' || normalized === 'closed') {
       return 'completed';
     }
 
-    if (normalized === 'cancelled' || normalized === 'canceled' || normalized === 'rejected') {
+    if (normalized === 'rejected') {
+      return 'rejected';
+    }
+
+    if (normalized === 'cancelled' || normalized === 'canceled') {
       return 'cancelled';
     }
 

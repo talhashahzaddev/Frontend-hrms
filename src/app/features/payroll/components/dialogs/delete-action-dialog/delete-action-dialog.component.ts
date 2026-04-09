@@ -8,6 +8,7 @@ export interface DeleteActionDialogData {
   message?: string;
   confirmText?: string;
   cancelText?: string;
+  confirmTheme?: 'danger' | 'success';
 }
 
 @Component({

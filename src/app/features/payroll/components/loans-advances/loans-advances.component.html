@@ -4,12 +4,6 @@
       <h1 class="title">Loans &amp; Salary Advances</h1>
       <p class="subtitle">Manage employee loans, salary advances, and repayment records from one place.</p>
     </div>
-    <div class="header-actions">
-      <button class="add-btn" (click)="openPrimaryDialog()">
-        <mat-icon>add</mat-icon>
-        {{ primaryActionLabel }}
-      </button>
-    </div>
   </div>
 
   <div class="tab-navigation">
@@ -21,69 +15,69 @@
       advances</button>
   </div>
 
-  @if (hasFallbackNotice) {
+  <!-- @if (hasFallbackNotice) {
   <div class="fallback-banner">
     <mat-icon>info</mat-icon>
     <span>Preview data is shown for modules where backend endpoints are not yet available.</span>
   </div>
-  }
+  } -->
 
   @if (currentTab === 'loans') {
   <div class="summary-cards">
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Total loans issued</span>
-          <span class="value">{{ currencySymbol() }} {{ totalLoansIssued | number }}</span>
+          <span class="label">Total requests</span>
+          <span class="value">{{ totalLoanRequestsCount }}</span>
         </div>
         <div class="icon-wrapper color-blue">
           <mat-icon>payments</mat-icon>
         </div>
       </div>
-      <p class="card-footer">{{ loans.length }} employees</p>
+      <p class="card-footer">all loan requests</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Outstanding</span>
-          <span class="value">{{ currencySymbol() }} {{ totalRemaining | number }}</span>
+          <span class="label">Pending requests</span>
+          <span class="value">{{ pendingLoanRequestsCount }}</span>
         </div>
         <div class="icon-wrapper color-amber">
           <mat-icon>account_balance_wallet</mat-icon>
         </div>
       </div>
-      <p class="card-footer">remaining balance</p>
+      <p class="card-footer">awaiting decision</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Active loans</span>
-          <span class="value">{{ activeLoansCount }}</span>
+          <span class="label">Approved requests</span>
+          <span class="value">{{ approvedLoanRequestsCount }}</span>
         </div>
         <div class="icon-wrapper color-green">
           <mat-icon>check_circle</mat-icon>
         </div>
       </div>
-      <p class="card-footer">{{ loans.length - activeLoansCount }} closed</p>
+      <p class="card-footer">approved and accepted</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Monthly deductions</span>
-          <span class="value">{{ currencySymbol() }} {{ monthlyDeductions | number }}</span>
+          <span class="label">Rejected requests</span>
+          <span class="value">{{ rejectedLoanRequestsCount }}</span>
         </div>
         <div class="icon-wrapper color-purple">
           <mat-icon>calendar_today</mat-icon>
         </div>
       </div>
-      <p class="card-footer">active loan deductions</p>
+      <p class="card-footer">declined requests</p>
     </div>
   </div>
 
-  <div class="content-card">
+  <div class="content-card requests-section-card">
     <div class="toolbar">
       <div class="filters-row">
         <div class="search-box">
@@ -109,6 +103,7 @@
           </button>
         </div>
       </div>
+
     </div>
 
     <div class="table-responsive" [class.loading]="isLoadingLoans">
@@ -130,11 +125,11 @@
               <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
               <div class="employee-detail">
                 <span class="name">{{ row.employeeName }}</span>
-                <span class="designation">{{ row.designation }}</span>
+                <!-- <span class="designation">{{ row.designation }}</span> -->
               </div>
             </div>
             <span class="status-pill" [ngClass]="getLoanStatusClass(row.status)">
-              {{ row.status | titlecase }}
+              {{ getLoanStatusLabel(row.status) }}
             </span>
           </div>
 
@@ -157,7 +152,7 @@
             @if (row.description) {
             <div class="card-note">
               <mat-icon>notes</mat-icon>
-              <p>{{ row.description }}</p>
+              <p [title]="row.description">{{ row.description }}</p>
             </div>
             }
           </div>
@@ -172,6 +167,11 @@
               <button class="reject-btn" (click)="requestRejectLoan(row)">
                 <mat-icon>cancel</mat-icon>
                 Reject
+              </button>
+              } @else if (row.status === 'approved' || row.status === 'accepted') {
+              <button class="disburse-btn" (click)="disburseLoan(row)">
+                <mat-icon>payment</mat-icon>
+                Disburse
               </button>
               }
             </div>
@@ -401,53 +401,53 @@
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Deducted amount</span>
-          <span class="value">{{ currencySymbol() }} {{ totalLoanPaymentsDeducted | number }}</span>
+          <span class="label">Total disbursed</span>
+          <span class="value">{{ currencySymbol() }} {{ disbursedTotalAmount | number }}</span>
         </div>
         <div class="icon-wrapper color-blue">
           <mat-icon>payments</mat-icon>
         </div>
       </div>
-      <p class="card-footer">loan deductions processed</p>
+      <p class="card-footer">disbursed loans value</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Pending installments</span>
-          <span class="value">{{ pendingLoanPaymentsCount }}</span>
+          <span class="label">Total paid amount</span>
+          <span class="value">{{ currencySymbol() }} {{ totalLoanPaymentsDeducted | number }}</span>
         </div>
         <div class="icon-wrapper color-amber">
           <mat-icon>hourglass_empty</mat-icon>
         </div>
       </div>
-      <p class="card-footer">awaiting payroll run</p>
+      <p class="card-footer">recovered so far</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Payment records</span>
-          <span class="value">{{ loanPayments.length }}</span>
+          <span class="label">Disbursed loans</span>
+          <span class="value">{{ disbursedLoansTotalRecords }}</span>
         </div>
         <div class="icon-wrapper color-green">
           <mat-icon>receipt_long</mat-icon>
         </div>
       </div>
-      <p class="card-footer">loan payment ledger</p>
+      <p class="card-footer">current page records</p>
     </div>
 
     <div class="card">
       <div class="card-content">
         <div class="info">
-          <span class="label">Skipped</span>
-          <span class="value">{{ skippedLoanPaymentsCount }}</span>
+          <span class="label">Avg completion</span>
+          <span class="value">{{ disbursedAverageCompletion }}%</span>
         </div>
         <div class="icon-wrapper color-purple">
           <mat-icon>block</mat-icon>
         </div>
       </div>
-      <p class="card-footer">marked as skipped/pending</p>
+      <p class="card-footer">loan recovery progress</p>
     </div>
   </div>
 
@@ -460,11 +460,26 @@
         </div>
 
         <select class="filter-select" [(ngModel)]="pendingLoanPaymentStatus">
-          <option value="">All status</option>
-          <option value="deducted">Deducted</option>
-          <option value="pending">Pending</option>
-          <option value="skipped">Skipped</option>
+          <option value="">All loan status</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
         </select>
+
+        <input
+          type="number"
+          class="filter-amount"
+          placeholder="Min amount"
+          [(ngModel)]="pendingLoanPaymentMinAmount"
+          min="0"
+        />
+
+        <input
+          type="number"
+          class="filter-amount"
+          placeholder="Max amount"
+          [(ngModel)]="pendingLoanPaymentMaxAmount"
+          min="0"
+        />
 
         <div class="filter-actions">
           <button class="apply-btn" [disabled]="!hasActiveLoanPaymentFilters && !hasAppliedLoanPaymentFilters"
@@ -489,48 +504,54 @@
     </div>
 
     <div class="table-responsive">
-      <table class="compact-table">
+      <table class="compact-table loan-payments-table">
+        <colgroup>
+          <col class="col-employee" />
+          <col class="col-end-date" />
+          <col class="col-remaining" />
+          <col class="col-status" />
+          <col class="col-total" />
+          <col class="col-paid" />
+          <col class="col-completion" />
+          <col class="col-action" />
+        </colgroup>
         <thead>
           <tr>
-            <th>Employee</th>
-            <th>Loan</th>
-            <th>Payroll period</th>
-            <th class="text-right">Installment #</th>
-            <th class="text-right">Amount</th>
-            <th class="text-right">Remaining</th>
-            <th>Paid date</th>
-            <th>Status</th>
-            <th class="text-right">Actions</th>
+            <th class="col-employee">Employee</th>
+            <th class="col-end-date">End date</th>
+            <th class="col-remaining">Remaining installments</th>
+            <th class="col-status">Total installments</th>
+            <th class="col-total">Total amount</th>
+            <th class="col-paid">Paid amount</th>
+            <th class="col-completion">Completion %</th>
+            <th class="col-action">Action</th>
           </tr>
         </thead>
         <tbody>
           @if (loanPaymentsView.length === 0) {
           <tr>
-            <td class="empty-row" colspan="9">No loan payment records available.</td>
+            <td class="empty-row" colspan="8">No disbursed loan records available.</td>
           </tr>
           } @else {
-          @for (payment of loanPaymentsView; track trackById($index, payment)) {
+          @for (payment of loanPaymentsView; track payment.id) {
           <tr>
             <td>{{ payment.employeeName }}</td>
-            <td>{{ payment.loanLabel }}</td>
-            <td>{{ payment.periodName }}</td>
-            <td class="text-right">{{ payment.installmentNumber }}</td>
-            <td class="text-right">{{ currencySymbol() }} {{ payment.amount | number }}</td>
-            <td class="text-right">{{ currencySymbol() }} {{ payment.remainingAmount | number }}</td>
-            <td>{{ formatDateLabel(payment.paidDate) }}</td>
+            <td>{{ formatDateLabel(payment.endDate) }}</td>
+            <td>{{ payment.remainingInstallments }}</td>
+            <td>{{ payment.totalInstallments }}</td>
+            <td>{{ currencySymbol() }} {{ payment.totalAmount | number }}</td>
+            <td>{{ currencySymbol() }} {{ payment.paidAmount | number }}</td>
             <td>
-              <span class="status-pill" [ngClass]="getLoanPaymentStatusClass(payment.status)">
-                {{ getLoanPaymentStatusLabel(payment.status) }}
-              </span>
+              <div class="mini-progress">
+                <div class="mini-progress-track">
+                  <div class="mini-progress-fill" [style.width.%]="payment.completionPercent"></div>
+                </div>
+                <span class="mini-progress-label">{{ payment.completionPercent | number:'1.0-2' }}%</span>
+              </div>
             </td>
-            <td class="action-cell text-right">
-              <button class="action-btn hover-primary" aria-label="Edit loan payment"
-                (click)="openEditLoanPaymentDialog(payment)">
+            <td class="action-cell">
+              <button class="action-btn hover-primary" type="button" aria-label="Edit loan payment">
                 <mat-icon>edit</mat-icon>
-              </button>
-              <button class="action-btn hover-danger" aria-label="Delete loan payment"
-                (click)="requestDeleteLoanPayment(payment)">
-                <mat-icon>delete</mat-icon>
               </button>
             </td>
           </tr>
@@ -666,7 +687,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="compact-table">
+      <table class="compact-table repayments-table">
         <thead>
           <tr>
             <th>Employee</th>

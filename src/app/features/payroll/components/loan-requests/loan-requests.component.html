@@ -96,13 +96,23 @@
                     <h2>{{ formatMoney(loan.totalAmount) }}</h2>
                     <p>Ref ID: {{ loan.referenceNo }}</p>
                   </div>
-                  <span class="status-pill" [ngClass]="getLoanStatusClass(loan.status)">{{ loan.status | titlecase }}</span>
+                  <span class="status-pill" [ngClass]="getLoanStatusClass(loan)">
+                    {{ (loanSectionTab === 'requested' ? loan.requestStatus : loan.status) | titlecase }}
+                  </span>
                 </div>
 
-                @if (loan.status === 'pending') {
+                @if (loan.status !== 'active' && loan.status !== 'completed') {
                   <div class="awaiting-box">
-                    <mat-icon>info</mat-icon>
-                    <span>Awaiting HR approval</span>
+                    <mat-icon>{{ loan.status === 'rejected' ? 'cancel' : 'info' }}</mat-icon>
+                    <span>
+                      @if (loan.status === 'accepted' || loan.status === 'approved') {
+                        Approved & Awaiting Disbursement
+                      } @else if (loan.status === 'rejected') {
+                        Request Rejected
+                      } @else {
+                        Awaiting HR approval
+                      }
+                    </span>
                   </div>
 
                   <div class="meta-grid compact">
@@ -170,10 +180,16 @@
               <div class="card-footer">
                 <div class="request-actions">
                   @if (loan.status === 'active' || loan.status === 'completed') {
-                    <button class="link-btn" (click)="goToLoanHistory()">View payment history</button>
+                    <!-- No actions for active loans here -->
                   } @else {
-                    <button class="link-btn" [disabled]="loan.status !== 'pending' && loan.status !== 'approved'" (click)="openEditLoanRequestDialog(loan)">Edit request</button>
-                    <button class="danger-link" [disabled]="loan.status !== 'pending' && loan.status !== 'approved'" (click)="cancelLoanRequest(loan)">Cancel request</button>
+                    <button class="action-btn secondary" [disabled]="loan.status !== 'pending'" (click)="openEditLoanRequestDialog(loan)">
+                      <mat-icon>edit</mat-icon>
+                      Edit request
+                    </button>
+                    <button class="action-btn danger" [disabled]="loan.status !== 'pending'" (click)="cancelLoanRequest(loan)">
+                      <mat-icon>cancel</mat-icon>
+                      Cancel request
+                    </button>
                   }
                 </div>
               </div>

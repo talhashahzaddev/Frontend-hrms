@@ -17,6 +17,12 @@
 
   <footer class="modal-footer">
     <button type="button" class="btn-cancel" (click)="close()">{{ data.cancelText || 'Cancel' }}</button>
-    <button type="button" class="btn-danger" (click)="confirm()">{{ data.confirmText || 'Delete' }}</button>
+    <button
+      type="button"
+      [class]="data.confirmTheme === 'success' ? 'btn-success' : 'btn-danger'"
+      (click)="confirm()"
+    >
+      {{ data.confirmText || 'Delete' }}
+    </button>
   </footer>
 </div>

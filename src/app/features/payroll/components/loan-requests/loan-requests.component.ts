@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { take, forkJoin } from 'rxjs';
 import { PayrollService } from '../../services/payroll.service';
 
@@ -27,7 +27,7 @@ type ModuleTab = 'loans' | 'salary-advance';
 type LoanSectionTab = 'requested' | 'active' | 'history';
 type SalarySectionTab = 'advances' | 'history';
 
-type LoanStatus = 'active' | 'pending' | 'approved' | 'completed' | 'cancelled';
+type LoanStatus = 'active' | 'pending' | 'approved' | 'completed' | 'cancelled' | 'accepted' | 'rejected';
 type SalaryAdvanceStatus = 'pending' | 'approved' | 'completed' | 'cancelled';
 type PaymentStatus = 'deducted' | 'pending' | 'skipped';
 
@@ -43,6 +43,7 @@ interface EmployeeLoanRecord {
   paidAmount: number;
   progressPercent: number;
   status: LoanStatus;
+  requestStatus: string;
   repaymentType: LoanRepaymentType;
   reason: string;
   startDate: string;
@@ -93,7 +94,7 @@ interface SalaryAdvancePaymentHistoryRecord {
 @Component({
   selector: 'app-loan-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './loan-requests.component.html',
   styleUrl: './loan-requests.component.scss'
 })
@@ -624,8 +625,9 @@ export class LoanRequestsComponent implements OnInit {
     });
   }
 
-  getLoanStatusClass(status: LoanStatus): string {
-    return `status-${status}`;
+  getLoanStatusClass(loan: EmployeeLoanRecord): string {
+    if (loan.status === 'active') return 'status-active';
+    return `status-${this.normalizeLoanStatus(loan.requestStatus)}`;
   }
 
   getAdvanceStatusClass(status: SalaryAdvanceStatus): string {
@@ -761,6 +763,7 @@ export class LoanRequestsComponent implements OnInit {
       paidAmount: 0,
       progressPercent: 0,
       status: 'pending',
+      requestStatus: 'pending',
       repaymentType: payload.repaymentType,
       reason: payload.reason,
       startDate: this.getTodayIsoDate(), // Default to today since field was removed
@@ -803,6 +806,7 @@ export class LoanRequestsComponent implements OnInit {
         repaymentType: payload.repaymentType,
         reason: payload.reason,
         status: 'pending',
+        requestStatus: 'pending',
         ruleId: payload.loanRuleId || ''
       };
     });
@@ -863,7 +867,10 @@ export class LoanRequestsComponent implements OnInit {
       remainingAmount,
       paidAmount,
       progressPercent: this.toProgress(paidAmount, totalAmount),
-      status: this.normalizeLoanStatus(item.loanStatus ?? item.status ?? item.requestStatus),
+      status: (this.normalizeLoanStatus(item.loanStatus ?? item.status) === 'active') 
+        ? 'active' 
+        : this.normalizeLoanStatus(item.requestStatus ?? item.loanStatus ?? item.status),
+      requestStatus: String(item.requestStatus ?? item.loanStatus ?? item.status ?? 'pending'),
       repaymentType: this.normalizeRepaymentType(item.repaymentType ?? item.loanType),
       reason: String(item.reason ?? item.description ?? item.notes ?? 'Loan support'),
       startDate: this.normalizeDate(item.startDate ?? item.createdAt),
@@ -936,6 +943,7 @@ export class LoanRequestsComponent implements OnInit {
         paidAmount: 60000,
         progressPercent: 30,
         status: 'active',
+        requestStatus: 'active',
         repaymentType: 'installment',
         reason: 'Medical expenses',
         startDate: '2025-01-01',
@@ -956,6 +964,7 @@ export class LoanRequestsComponent implements OnInit {
         paidAmount: 0,
         progressPercent: 0,
         status: 'pending',
+        requestStatus: 'pending',
         repaymentType: 'installment',
         reason: 'Home renovation',
         startDate: '2025-10-12',
@@ -1172,8 +1181,10 @@ export class LoanRequestsComponent implements OnInit {
     if (status === 'active') return 'active';
     if (status === 'pending') return 'pending';
     if (status === 'approved') return 'approved';
+    if (status === 'accepted') return 'accepted';
     if (status === 'completed' || status === 'closed') return 'completed';
-    if (status === 'cancelled' || status === 'canceled' || status === 'rejected') return 'cancelled';
+    if (status === 'rejected') return 'rejected';
+    if (status === 'cancelled' || status === 'canceled') return 'cancelled';
     if (status === 'inactive') return 'pending'; // Inactive loans are typically awaiting approval or disbursement
 
     return 'pending'; // Default to pending for safety

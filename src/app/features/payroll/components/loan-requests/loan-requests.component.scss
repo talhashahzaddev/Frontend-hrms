@@ -478,24 +478,66 @@
       .request-actions {
         display: inline-flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.75rem;
       }
 
-      .link-btn,
-      .danger-link {
+      .action-btn {
+        border: none;
+        border-radius: 0.5rem;
+        height: 2.1rem;
+        padding: 0 0.85rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        mat-icon {
+          font-size: 0.95rem;
+          width: 0.95rem;
+          height: 0.95rem;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          filter: grayscale(0.5);
+        }
+
+        &.secondary {
+          background: #eff6ff;
+          color: #1d4ed8;
+
+          &:not(:disabled):hover {
+            background: #dbeafe;
+            transform: translateY(-1px);
+          }
+        }
+
+        &.danger {
+          background: #fef2f2;
+          color: #dc2626;
+
+          &:not(:disabled):hover {
+            background: #fee2e2;
+            transform: translateY(-1px);
+          }
+        }
+      }
+
+      .link-btn {
         border: none;
         background: transparent;
         font-size: 0.84rem;
         font-weight: 700;
         cursor: pointer;
-      }
-
-      .link-btn {
         color: #1d4ed8;
-      }
 
-      .danger-link {
-        color: #dc2626;
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }
@@ -512,6 +554,7 @@
 
     &.status-active,
     &.status-approved,
+    &.status-accepted,
     &.status-deducted {
       background: #dcfce7;
       color: #166534;
@@ -528,6 +571,7 @@
     }
 
     &.status-cancelled,
+    &.status-rejected,
     &.status-skipped {
       background: #fee2e2;
       color: #991b1b;

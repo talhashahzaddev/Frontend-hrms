@@ -1531,6 +1531,25 @@ export class PayrollService {
       );
     }
 
+    getDisbursedLoans(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach(key => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/disbursed-loans`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
     updateLoanStatus(data: { loanId: string, requestStatus: string, rejectionReason?: string }): Observable<any> {
       return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/loans/status`, data)
         .pipe(
@@ -1557,6 +1576,18 @@ export class PayrollService {
 
     rejectSalaryAdvance(id: string, data: { rejectionReason: string }): Observable<any> {
       return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance/${id}/reject`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    disburseLoan(data: { loanId: string, startDate: string, endDate: string }): Observable<any> {
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/loans/disburse`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
