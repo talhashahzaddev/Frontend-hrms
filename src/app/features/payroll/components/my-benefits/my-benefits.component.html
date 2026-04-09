@@ -87,7 +87,7 @@
   <section class="benefits-grid">
     <!-- Card 1 (Loan) -->
     @if (isModuleActive('Loan')) {
-    <div class="benefit-card">
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Loan')" (keydown)="onBenefitCardKeydown($event, 'Loan')">
       <div class="card-header">
         <div class="icon-wrapper color-primary">
           <mat-icon>payments</mat-icon>
@@ -99,16 +99,13 @@
       </div>
       <h3 class="benefit-title">Loan</h3>
       <p class="benefit-desc">Request a salary loan with monthly installments</p>
-      <div class="card-actions">
-        <button mat-button class="btn-details" (click)="onViewDetails('Loan')">View details</button>
-        <button mat-flat-button color="primary" class="btn-request" (click)="onRequestNew('Loan')">Request new</button>
-      </div>
+      <p class="card-link">Open loan requests <mat-icon>arrow_forward</mat-icon></p>
     </div>
     }
 
     <!-- Card 2 (Salary Advance) -->
     @if (isModuleActive('Advance Salary')) {
-    <div class="benefit-card">
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Advance Salary')" (keydown)="onBenefitCardKeydown($event, 'Advance Salary')">
       <div class="card-header">
         <div class="icon-wrapper color-amber">
           <mat-icon>fast_forward</mat-icon>
@@ -120,9 +117,7 @@
       </div>
       <h3 class="benefit-title">Salary Advance</h3>
       <p class="benefit-desc">Request an advance on your upcoming salary</p>
-      <div class="card-actions">
-        <button mat-button class="btn-details w-full" (click)="onViewDetails('Advance Salary')">View details</button>
-      </div>
+      <p class="card-link">Open salary advance requests <mat-icon>arrow_forward</mat-icon></p>
     </div>
     }
 
@@ -140,9 +135,7 @@
       </div>
       <h3 class="benefit-title">Provident Fund</h3>
       <p class="benefit-desc">Track your PF contributions and employer matching</p>
-      <div class="card-actions">
-        <button mat-button class="btn-details w-full" (click)="onViewDetails('Provident Fund')">View details</button>
-      </div>
+      <p class="card-link is-muted">Details available soon</p>
     </div>
     }
 
@@ -160,9 +153,7 @@
       </div>
       <h3 class="benefit-title">Social Security</h3>
       <p class="benefit-desc">EOBI / ESSI enrollment and contribution history</p>
-      <div class="card-actions">
-        <button mat-button class="btn-details w-full" (click)="onViewDetails('Social Security')">View details</button>
-      </div>
+      <p class="card-link is-muted">Details available soon</p>
     </div>
     }
 
@@ -180,9 +171,7 @@
       </div>
       <h3 class="benefit-title">Gratuity</h3>
       <p class="benefit-desc">View your gratuity entitlement based on service years</p>
-      <div class="card-actions">
-        <button mat-button class="btn-details w-full" (click)="onViewDetails('Gratuity')">View details</button>
-      </div>
+      <p class="card-link is-muted">Details available soon</p>
     </div>
     }
 

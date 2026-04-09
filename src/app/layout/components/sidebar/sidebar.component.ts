@@ -250,12 +250,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         {
-          label: 'Loan & Advance Requests',
-          icon: 'person_search',
-          route: '/payroll/loans/requests',
-          exact: true
-        },
-        {
           label: 'Compliance Center',
           icon: 'verified_user',
           route: '/payroll/loans/requests/compliance',

@@ -137,6 +137,19 @@
 
       &:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0, 74, 198, 0.08); }
 
+      &.benefit-card-link {
+        cursor: pointer;
+
+        &:focus-visible {
+          outline: 2px solid #004ac6;
+          outline-offset: 3px;
+        }
+
+        &:hover .card-link {
+          color: #003ba3;
+        }
+      }
+
       .card-header {
         display: flex;
         justify-content: space-between;
@@ -163,11 +176,26 @@
       .benefit-title { font-family: 'Manrope', sans-serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: #191c1e; }
       .benefit-desc { font-family: 'Inter', sans-serif; color: #434655; font-size: 0.875rem; line-height: 1.6; margin-bottom: 2rem; flex-grow: 1; }
 
-      .card-actions {
-        display: flex;
-        gap: 1rem;
-        .btn-details { flex: 1; color: #004ac6; font-weight: 700; background: #eceef0; border-radius: 0.5rem; padding: 0.625rem; &:hover { background: #e0e3e5; } }
-        .btn-request { flex: 1; font-weight: 700; background: linear-gradient(135deg, #004ac6, #2563eb); border-radius: 0.5rem; padding: 0.625rem; box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2); }
+      .card-link {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #004ac6;
+        font-size: 0.875rem;
+        font-weight: 700;
+        transition: color 0.2s ease;
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+
+        &.is-muted {
+          color: #8b8f99;
+          font-weight: 600;
+        }
       }
     }
 

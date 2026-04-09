@@ -1,13 +1,17 @@
 <div class="loan-requests-page">
   <div class="requests-headline">
-    <div>
-      <p class="breadcrumb">My Payroll <span>›</span> Loans &amp; Advances</p>
-      <h1>{{ moduleTab === 'loans' ? 'My Loans' : 'Salary Advance' }}</h1>
-      <p class="subtitle">
-        {{ moduleTab === 'loans'
-          ? 'Manage and track your active loan requests and repayment schedules.'
-          : 'Manage your salary advance requests and repayment schedule.' }}
-      </p>
+    <div class="title-section">
+      <button class="icon-button back-btn" type="button" aria-label="Back to My Benefits" (click)="goBackToBenefits()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-text-group">
+        <h1 class="title">{{ moduleTab === 'loans' ? 'My Loans' : 'Salary Advance' }}</h1>
+        <p class="subtitle">
+          {{ moduleTab === 'loans'
+            ? 'Manage and track your active loan requests and repayment schedules.'
+            : 'Manage your salary advance requests and repayment schedule.' }}
+        </p>
+      </div>
     </div>
 
     <button class="primary-action" (click)="moduleTab === 'loans' ? openLoanRequestDialog() : openSalaryAdvanceDialog()">
@@ -16,49 +20,75 @@
     </button>
   </div>
 
-  <div class="module-switch">
-    <button [class.active]="moduleTab === 'loans'" (click)="setModuleTab('loans')">My loans</button>
-    <button [class.active]="moduleTab === 'salary-advance'" (click)="setModuleTab('salary-advance')">Salary advance</button>
-  </div>
-
-  @if (hasFallbackNotice) {
-    <div class="fallback-note">
-      <mat-icon>info</mat-icon>
-      <span>Preview records are shown because loan/advance endpoints are not fully available yet.</span>
-    </div>
-  }
-
   @if (moduleTab === 'loans') {
-    <div class="summary-grid">
-      <article class="summary-card">
-        <p>Total borrowed</p>
-        <h3>{{ formatMoney(totalBorrowed) }}</h3>
-      </article>
-      <article class="summary-card">
-        <p>Amount paid</p>
-        <h3>{{ formatMoney(amountPaid) }}</h3>
-      </article>
-      <article class="summary-card emphasis-remaining">
-        <p>Remaining</p>
-        <h3>{{ formatMoney(remainingLoanAmount) }}</h3>
-      </article>
-      <article class="summary-card">
-        <p>Monthly installment</p>
-        <h3>{{ formatMoney(monthlyInstallmentTotal) }}</h3>
-      </article>
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total borrowed</span>
+            <span class="value">{{ formatMoney(totalBorrowed) }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>payments</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">approved loans</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Amount paid</span>
+            <span class="value">{{ formatMoney(amountPaid) }}</span>
+          </div>
+          <div class="icon-wrapper color-green">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">recovered amount</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Remaining</span>
+            <span class="value">{{ formatMoney(remainingLoanAmount) }}</span>
+          </div>
+          <div class="icon-wrapper color-amber">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">outstanding balance</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Monthly installment</span>
+            <span class="value">{{ formatMoney(monthlyInstallmentTotal) }}</span>
+          </div>
+          <div class="icon-wrapper color-purple">
+            <mat-icon>calendar_today</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">active deductions</p>
+      </div>
     </div>
 
     <div class="section-tabs">
+      <button [class.active]="loanSectionTab === 'requested'" (click)="setLoanSectionTab('requested')">Requested loans</button>
       <button [class.active]="loanSectionTab === 'active'" (click)="setLoanSectionTab('active')">Active loans</button>
       <button [class.active]="loanSectionTab === 'history'" (click)="setLoanSectionTab('history')">Loan history</button>
     </div>
 
-    @if (loanSectionTab === 'active') {
+    @if (loanSectionTab !== 'history') {
       <div class="cards-stack">
-        @if (activeLoanRecords.length === 0) {
-          <div class="empty-state">No active or pending loan requests found.</div>
+        @if (loanSectionRecords.length === 0) {
+          <div class="empty-state">
+            {{ loanSectionTab === 'requested' ? 'No requested loan records found.' : 'No active loan records found.' }}
+          </div>
         } @else {
-          @for (loan of activeLoanRecords; track loan.id) {
+          @for (loan of loanSectionRecords; track loan.id) {
             <article class="record-card">
               <div class="card-body">
                 <div class="card-top">
@@ -139,7 +169,10 @@
 
               <div class="card-footer">
                 @if (loan.status === 'pending') {
-                  <button class="danger-link" (click)="cancelLoanRequest(loan)">Cancel request</button>
+                  <div class="request-actions">
+                    <button class="link-btn" (click)="openEditLoanRequestDialog(loan)">Edit request</button>
+                    <button class="danger-link" (click)="cancelLoanRequest(loan)">Cancel request</button>
+                  </div>
                 } @else {
                   <button class="link-btn" (click)="goToLoanHistory()">View payment history</button>
                 }
@@ -150,98 +183,157 @@
       </div>
     } @else {
       <div class="history-card">
-        <table>
-          <thead>
-            <tr>
-              <th>Amount</th>
-              <th>Period</th>
-              <th class="numeric">Installment</th>
-              <th class="numeric">Remaining</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (loanHistoryRows.length === 0) {
-              <tr>
-                <td colspan="6" class="empty-row">No loan payment records found.</td>
-              </tr>
-            } @else {
-              @for (payment of loanHistoryRows; track payment.id) {
-                <tr>
-                  <td>{{ formatMoney(totalBorrowed) }}</td>
-                  <td>{{ payment.periodLabel }}</td>
-                  <td class="numeric">{{ payment.installmentAmount | number }}</td>
-                  <td class="numeric">{{ payment.remainingAmount | number }}</td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
-                      {{ payment.status | titlecase }}
-                    </span>
-                  </td>
-                  <td>
-                    <button class="icon-action" aria-label="More actions">
-                      <mat-icon>more_vert</mat-icon>
-                    </button>
-                  </td>
-                </tr>
+        <div class="toolbar">
+          <div class="filters-row">
+            <div class="search-box">
+              <mat-icon>search</mat-icon>
+              <input type="text" placeholder="Search period..." [(ngModel)]="pendingLoanHistorySearch" />
+            </div>
+
+            <select class="filter-select" [(ngModel)]="pendingLoanHistoryStatus">
+              <option value="">All status</option>
+              <option value="deducted">Deducted</option>
+              <option value="pending">Pending</option>
+              <option value="skipped">Skipped</option>
+            </select>
+
+            <select class="filter-select" [(ngModel)]="pendingLoanHistoryPeriod">
+              <option value="">All periods</option>
+              @for (period of loanHistoryPeriods; track period) {
+                <option [value]="period">{{ period }}</option>
               }
-            }
-          </tbody>
-        </table>
+            </select>
+
+            <div class="filter-actions">
+              <button class="apply-btn" [disabled]="!hasActiveLoanHistoryFilters && !hasAppliedLoanHistoryFilters" (click)="applyLoanHistoryFilters()">
+                <mat-icon>filter_list</mat-icon>
+                Apply
+              </button>
+              <button class="clear-btn" [disabled]="!hasActiveLoanHistoryFilters && !hasAppliedLoanHistoryFilters" (click)="clearLoanHistoryFilters()">
+                <mat-icon>close</mat-icon>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Amount</th>
+                <th>Period</th>
+                <th class="numeric">Installment</th>
+                <th class="numeric remaining-column">Remaining</th>
+                <th class="status-column">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (loanHistoryView.length === 0) {
+                <tr>
+                  <td colspan="5" class="empty-row">No loan payment records found.</td>
+                </tr>
+              } @else {
+                @for (payment of loanHistoryView; track payment.id) {
+                  <tr>
+                    <td>{{ formatMoney(totalBorrowed) }}</td>
+                    <td>{{ payment.periodLabel }}</td>
+                    <td class="numeric">{{ payment.installmentAmount | number }}</td>
+                    <td class="numeric remaining-column">{{ payment.remainingAmount | number }}</td>
+                    <td class="status-column">
+                      <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
+                        {{ payment.status | titlecase }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
 
         <div class="table-footer">
-          <p>{{ getLoanHistoryCountLabel() }}</p>
-          <div class="pager-actions">
-            <button>Previous</button>
-            <button class="active">Next</button>
+          <p>
+            @if (loanHistoryTotalRecords === 0) {
+              No records found
+            } @else {
+              Showing {{ loanHistoryFromRecord }}&ndash;{{ loanHistoryToRecord }} of {{ loanHistoryTotalRecords }} records
+            }
+          </p>
+          <div class="pagination">
+            <button class="page-btn" [class.disabled]="loanHistoryPage === 1" [disabled]="loanHistoryPage === 1" (click)="prevLoanHistoryPage()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            @for (p of loanHistoryPageRange; track p) {
+              <button class="page-btn" [class.active]="p === loanHistoryPage" (click)="goToLoanHistoryPage(p)">{{ p }}</button>
+            }
+
+            <button class="page-btn" [class.disabled]="loanHistoryPage === loanHistoryTotalPages" [disabled]="loanHistoryPage === loanHistoryTotalPages" (click)="nextLoanHistoryPage()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
           </div>
         </div>
       </div>
     }
   } @else {
-    <div class="summary-grid advance-summary">
-      <article class="summary-card accent-rise">
-        <div class="card-head">
-          <mat-icon>account_balance_wallet</mat-icon>
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Available limit</span>
+            <span class="value">{{ formatMoney(availableAdvanceLimit) }}</span>
+          </div>
+          <div class="icon-wrapper color-green">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
         </div>
-        <p>Available limit</p>
-        <h3>{{ formatMoney(availableAdvanceLimit) }}</h3>
-      </article>
-      <article class="summary-card">
-        <div class="card-head">
-          <mat-icon>pending_actions</mat-icon>
-        </div>
-        <p>Active advance</p>
-        <h3>{{ formatMoney(outstandingAdvanceAmount) }}</h3>
-      </article>
-      <article class="summary-card">
-        <div class="card-head">
-          <mat-icon>event_repeat</mat-icon>
-        </div>
-        <p>Monthly deduction</p>
-        <h3>{{ formatMoney(salaryMonthlyDeduction) }}</h3>
-      </article>
-      <article class="summary-card">
-        <div class="card-head">
-          <mat-icon>check_circle</mat-icon>
-        </div>
-        <p>Total paid</p>
-        <h3>{{ formatMoney(recoveredAdvanceAmount) }}</h3>
-      </article>
-    </div>
-
-    <div class="section-tabs with-tools">
-      <div>
-        <button [class.active]="salarySectionTab === 'advances'" (click)="setSalarySectionTab('advances')">My advances</button>
-        <button [class.active]="salarySectionTab === 'history'" (click)="setSalarySectionTab('history')">Payment history</button>
+        <p class="card-footer">for new requests</p>
       </div>
 
-      @if (salarySectionTab === 'history') {
-        <div class="tab-tools">
-          <button aria-label="Filter history"><mat-icon>filter_list</mat-icon></button>
-          <button aria-label="Export history"><mat-icon>download</mat-icon></button>
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Active advance</span>
+            <span class="value">{{ formatMoney(outstandingAdvanceAmount) }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>pending_actions</mat-icon>
+          </div>
         </div>
-      }
+        <p class="card-footer">current outstanding</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Monthly deduction</span>
+            <span class="value">{{ formatMoney(salaryMonthlyDeduction) }}</span>
+          </div>
+          <div class="icon-wrapper color-amber">
+            <mat-icon>event_repeat</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">scheduled deductions</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total paid</span>
+            <span class="value">{{ formatMoney(recoveredAdvanceAmount) }}</span>
+          </div>
+          <div class="icon-wrapper color-purple">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">recovered so far</p>
+      </div>
+    </div>
+
+    <div class="section-tabs">
+      <button [class.active]="salarySectionTab === 'advances'" (click)="setSalarySectionTab('advances')">My advances</button>
+      <button [class.active]="salarySectionTab === 'history'" (click)="setSalarySectionTab('history')">Payment history</button>
     </div>
 
     @if (salarySectionTab === 'advances') {
@@ -333,53 +425,98 @@
       </div>
     } @else {
       <div class="history-card">
-        <table>
-          <thead>
-            <tr>
-              <th>Period</th>
-              <th class="numeric">Deduction amount</th>
-              <th class="numeric">Remaining</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (salaryPaymentHistoryRows.length === 0) {
-              <tr>
-                <td colspan="5" class="empty-row">No salary advance payment history found.</td>
-              </tr>
-            } @else {
-              @for (payment of salaryPaymentHistoryRows; track payment.id) {
-                <tr>
-                  <td>
-                    <div class="period-cell">
-                      <div class="icon-box"><mat-icon>calendar_month</mat-icon></div>
-                      <span>{{ payment.periodLabel }}</span>
-                    </div>
-                  </td>
-                  <td class="numeric">{{ payment.deductionAmount | number }}</td>
-                  <td class="numeric">{{ payment.remainingAmount | number }}</td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
-                      {{ payment.status | titlecase }}
-                    </span>
-                  </td>
-                  <td>
-                    <button class="icon-action" aria-label="More actions">
-                      <mat-icon>more_vert</mat-icon>
-                    </button>
-                  </td>
-                </tr>
+        <div class="toolbar">
+          <div class="filters-row">
+            <div class="search-box">
+              <mat-icon>search</mat-icon>
+              <input type="text" placeholder="Search period..." [(ngModel)]="pendingAdvanceHistorySearch" />
+            </div>
+
+            <select class="filter-select" [(ngModel)]="pendingAdvanceHistoryStatus">
+              <option value="">All status</option>
+              <option value="deducted">Deducted</option>
+              <option value="pending">Pending</option>
+              <option value="skipped">Skipped</option>
+            </select>
+
+            <select class="filter-select" [(ngModel)]="pendingAdvanceHistoryPeriod">
+              <option value="">All periods</option>
+              @for (period of advanceHistoryPeriods; track period) {
+                <option [value]="period">{{ period }}</option>
               }
-            }
-          </tbody>
-        </table>
+            </select>
+
+            <div class="filter-actions">
+              <button class="apply-btn" [disabled]="!hasActiveAdvanceHistoryFilters && !hasAppliedAdvanceHistoryFilters" (click)="applyAdvanceHistoryFilters()">
+                <mat-icon>filter_list</mat-icon>
+                Apply
+              </button>
+              <button class="clear-btn" [disabled]="!hasActiveAdvanceHistoryFilters && !hasAppliedAdvanceHistoryFilters" (click)="clearAdvanceHistoryFilters()">
+                <mat-icon>close</mat-icon>
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th class="numeric">Deduction amount</th>
+                <th class="numeric remaining-column">Remaining</th>
+                <th class="status-column">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (advanceHistoryView.length === 0) {
+                <tr>
+                  <td colspan="4" class="empty-row">No salary advance payment history found.</td>
+                </tr>
+              } @else {
+                @for (payment of advanceHistoryView; track payment.id) {
+                  <tr>
+                    <td>
+                      <div class="period-cell">
+                        <div class="icon-box"><mat-icon>calendar_month</mat-icon></div>
+                        <span>{{ payment.periodLabel }}</span>
+                      </div>
+                    </td>
+                    <td class="numeric">{{ payment.deductionAmount | number }}</td>
+                    <td class="numeric remaining-column">{{ payment.remainingAmount | number }}</td>
+                    <td class="status-column">
+                      <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
+                        {{ payment.status | titlecase }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
 
         <div class="table-footer">
-          <p>{{ getAdvanceHistoryCountLabel() }}</p>
-          <div class="pager-actions">
-            <button>Previous</button>
-            <button class="active">Next</button>
+          <p>
+            @if (advanceHistoryTotalRecords === 0) {
+              No records found
+            } @else {
+              Showing {{ advanceHistoryFromRecord }}&ndash;{{ advanceHistoryToRecord }} of {{ advanceHistoryTotalRecords }} records
+            }
+          </p>
+          <div class="pagination">
+            <button class="page-btn" [class.disabled]="advanceHistoryPage === 1" [disabled]="advanceHistoryPage === 1" (click)="prevAdvanceHistoryPage()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            @for (p of advanceHistoryPageRange; track p) {
+              <button class="page-btn" [class.active]="p === advanceHistoryPage" (click)="goToAdvanceHistoryPage(p)">{{ p }}</button>
+            }
+
+            <button class="page-btn" [class.disabled]="advanceHistoryPage === advanceHistoryTotalPages" [disabled]="advanceHistoryPage === advanceHistoryTotalPages" (click)="nextAdvanceHistoryPage()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
           </div>
         </div>
       </div>
