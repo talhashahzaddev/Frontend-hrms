@@ -201,22 +201,24 @@
       <div class="history-card">
         <div class="toolbar">
           <div class="filters-row">
-            <div class="search-box">
-              <mat-icon>search</mat-icon>
-              <input type="text" placeholder="Search period..." [(ngModel)]="pendingLoanHistorySearch" />
-            </div>
+            <select class="filter-select" [(ngModel)]="pendingLoanHistoryReference">
+              <option value="">All loans</option>
+              @for (ref of loanReferences; track ref.loanId) {
+                <option [value]="ref.loanId">{{ ref.referenceId }}</option>
+              }
+            </select>
 
-            <select class="filter-select" [(ngModel)]="pendingLoanHistoryStatus">
-              <option value="">All status</option>
-              <option value="deducted">Deducted</option>
-              <option value="pending">Pending</option>
-              <option value="skipped">Skipped</option>
+            <select class="filter-select" [(ngModel)]="pendingLoanHistoryMethod">
+              <option value="">All methods</option>
+              <option value="cash">Cash</option>
+              <option value="payroll_deduction">Payroll Deduction</option>
+              <option value="bank_transfer">Bank Transfer</option>
             </select>
 
             <select class="filter-select" [(ngModel)]="pendingLoanHistoryPeriod">
               <option value="">All periods</option>
-              @for (period of loanHistoryPeriods; track period) {
-                <option [value]="period">{{ period }}</option>
+              @for (period of loanHistoryPeriods; track period.periodId) {
+                <option [value]="period.periodId">{{ period.periodName }}</option>
               }
             </select>
 
@@ -237,11 +239,12 @@
           <table>
             <thead>
               <tr>
-                <th>Amount</th>
+                <th>Inst. No.</th>
                 <th>Period</th>
+                <th>Paid Date</th>
                 <th class="numeric">Installment</th>
                 <th class="numeric remaining-column">Remaining</th>
-                <th class="status-column">Status</th>
+                <th class="status-column">Payment Method</th>
               </tr>
             </thead>
             <tbody>
@@ -252,14 +255,13 @@
               } @else {
                 @for (payment of loanHistoryView; track payment.id) {
                   <tr>
-                    <td>{{ formatMoney(totalBorrowed) }}</td>
+                    <td>{{ payment.installmentNumber || 'N/A' }}</td>
                     <td>{{ payment.periodLabel }}</td>
+                    <td>{{ payment.paidDate | date:'mediumDate' }}</td>
                     <td class="numeric">{{ payment.installmentAmount | number }}</td>
                     <td class="numeric remaining-column">{{ payment.remainingAmount | number }}</td>
                     <td class="status-column">
-                      <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
-                        {{ payment.status | titlecase }}
-                      </span>
+                      {{ (payment.paymentMethod || 'N/A').replace('_', ' ') | titlecase }}
                     </td>
                   </tr>
                 }

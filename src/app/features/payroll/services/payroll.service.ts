@@ -1597,4 +1597,34 @@ export class PayrollService {
           })
         );
     }
+
+    getMyLoanHistory(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach(key => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/my-loan-history`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
+    getMyLoanReferences(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/my-references`).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
 }
