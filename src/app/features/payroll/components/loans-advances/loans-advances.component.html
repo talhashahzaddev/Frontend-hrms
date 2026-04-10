@@ -4,693 +4,764 @@
       <h1 class="title">Loans &amp; Salary Advances</h1>
       <p class="subtitle">Manage employee loans, salary advances, and repayment records from one place.</p>
     </div>
-    <div class="header-actions">
-      <button class="add-btn" (click)="openPrimaryDialog()">
-        <mat-icon>add</mat-icon>
-        {{ primaryActionLabel }}
-      </button>
-    </div>
   </div>
 
   <div class="tab-navigation">
     <button class="tab" [class.active]="currentTab === 'loans'" (click)="setTab('loans')">Loans</button>
-    <button class="tab" [class.active]="currentTab === 'loan-payments'" (click)="setTab('loan-payments')">Loan payments</button>
+    <button class="tab" [class.active]="currentTab === 'loan-payments'" (click)="setTab('loan-payments')">Loan
+      payments</button>
     <button class="tab" [class.active]="currentTab === 'repayments'" (click)="setTab('repayments')">Repayments</button>
-    <button class="tab" [class.active]="currentTab === 'salary-advances'" (click)="setTab('salary-advances')">Salary advances</button>
+    <button class="tab" [class.active]="currentTab === 'salary-advances'" (click)="setTab('salary-advances')">Salary
+      advances</button>
   </div>
 
-  @if (hasFallbackNotice) {
-    <div class="fallback-banner">
-      <mat-icon>info</mat-icon>
-      <span>Preview data is shown for modules where backend endpoints are not yet available.</span>
-    </div>
-  }
+  <!-- @if (hasFallbackNotice) {
+  <div class="fallback-banner">
+    <mat-icon>info</mat-icon>
+    <span>Preview data is shown for modules where backend endpoints are not yet available.</span>
+  </div>
+  } -->
 
   @if (currentTab === 'loans') {
-    <div class="summary-cards">
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Total loans issued</span>
-            <span class="value">{{ currencySymbol() }} {{ totalLoansIssued | number }}</span>
-          </div>
-          <div class="icon-wrapper color-blue">
-            <mat-icon>payments</mat-icon>
-          </div>
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total requests</span>
+          <span class="value">{{ totalLoanRequestsCount }}</span>
         </div>
-        <p class="card-footer">{{ loans.length }} employees</p>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">all loan requests</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Pending requests</span>
+          <span class="value">{{ pendingLoanRequestsCount }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">awaiting decision</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Approved requests</span>
+          <span class="value">{{ approvedLoanRequestsCount }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">approved and accepted</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Rejected requests</span>
+          <span class="value">{{ rejectedLoanRequestsCount }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>calendar_today</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">declined requests</p>
+    </div>
+  </div>
+
+  <div class="content-card requests-section-card">
+    <div class="toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Filter by employee name..." [(ngModel)]="pendingSearch" />
+        </div>
+
+        <select class="filter-select" [(ngModel)]="pendingStatus">
+          <option value="">All status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Outstanding</span>
-            <span class="value">{{ currencySymbol() }} {{ totalRemaining | number }}</span>
-          </div>
-          <div class="icon-wrapper color-amber">
-            <mat-icon>account_balance_wallet</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">remaining balance</p>
-      </div>
+    </div>
 
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Active loans</span>
-            <span class="value">{{ activeLoansCount }}</span>
-          </div>
-          <div class="icon-wrapper color-green">
-            <mat-icon>check_circle</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">{{ loans.length - activeLoansCount }} closed</p>
+    <div class="table-responsive" [class.loading]="isLoadingLoans">
+      @if (isLoadingLoans) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading loans...</p>
       </div>
+      }
 
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Monthly deductions</span>
-            <span class="value">{{ currencySymbol() }} {{ monthlyDeductions | number }}</span>
+      <div class="admin-requests-list">
+        @if (loans.length === 0) {
+        <div class="empty-state">No loan requests found.</div>
+        } @else {
+        @for (row of loans; track row.id) {
+        <article class="request-row-card">
+          <div class="card-left">
+            <div class="employee-info">
+              <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
+              <div class="employee-detail">
+                <span class="name">{{ row.employeeName }}</span>
+                <!-- <span class="designation">{{ row.designation }}</span> -->
+              </div>
+            </div>
+            <span class="status-pill" [ngClass]="getLoanStatusClass(row.status)">
+              {{ getLoanStatusLabel(row.status) }}
+            </span>
           </div>
-          <div class="icon-wrapper color-purple">
-            <mat-icon>calendar_today</mat-icon>
+
+          <div class="card-middle">
+            <div class="main-stats">
+              <div class="stat-item">
+                <label>Total amount</label>
+                <strong>{{ currencySymbol() }} {{ row.totalAmount | number }}</strong>
+              </div>
+              <div class="stat-item">
+                <label>Installments</label>
+                <strong>{{ row.totalInstallments | number }}</strong>
+              </div>
+              <div class="stat-item">
+                <label>End date</label>
+                <strong>{{ row.endDate ? (row.endDate | date:'mediumDate') : 'N/A' }}</strong>
+              </div>
+            </div>
+
+            @if (row.description) {
+            <div class="card-note">
+              <mat-icon>notes</mat-icon>
+              <p [title]="row.description">{{ row.description }}</p>
+            </div>
+            }
           </div>
-        </div>
-        <p class="card-footer">active loan deductions</p>
+
+          <div class="card-right">
+            <div class="request-actions">
+              @if (row.status === 'pending') {
+              <button class="approve-btn" (click)="approveLoan(row)">
+                <mat-icon>check_circle</mat-icon>
+                Approve
+              </button>
+              <button class="reject-btn" (click)="requestRejectLoan(row)">
+                <mat-icon>cancel</mat-icon>
+                Reject
+              </button>
+              } @else if (row.status === 'approved' || row.status === 'accepted') {
+              <button class="disburse-btn" (click)="disburseLoan(row)">
+                <mat-icon>payment</mat-icon>
+                Disburse
+              </button>
+              }
+            </div>
+          </div>
+        </article>
+        }
+        }
       </div>
     </div>
 
-    <div class="content-card">
-      <div class="toolbar">
-        <div class="filters-row">
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Filter by employee name..." [(ngModel)]="pendingSearch" />
-          </div>
+    <div class="table-footer">
+      <p>
+        @if (totalRecords === 0) {
+        No records found
+        } @else {
+        Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalRecords }} records
+        }
+      </p>
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="currentPage === 1" [disabled]="currentPage === 1"
+          (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
 
-          <select class="filter-select" [(ngModel)]="pendingStatus">
-            <option value="">All status</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-
-          <div class="filter-actions">
-            <button class="apply-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="applyFilters()">
-              <mat-icon>filter_list</mat-icon>
-              Apply
-            </button>
-            <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
-              <mat-icon>close</mat-icon>
-              Clear
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="table-responsive" [class.loading]="isLoadingLoans">
-        @if (isLoadingLoans) {
-          <div class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Loading loans...</p>
-          </div>
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
         }
 
-        <table class="custom-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th class="text-right">Total amount</th>
-              <th class="text-right">Installment</th>
-              <th class="text-right">Remaining</th>
-              <th>Recovery</th>
-              <th>Status</th>
-              <th>Start date</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (loans.length === 0) {
-              <tr>
-                <td class="empty-row" colspan="8">No loan records found.</td>
-              </tr>
-            } @else {
-              @for (row of loans; track trackById($index, row)) {
-                <tr class="table-row">
-                  <td>
-                    <div class="employee-info">
-                      <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
-                      <div class="employee-detail">
-                        <span class="font-semibold">{{ row.employeeName }}</span>
-                        <small class="designation">{{ row.designation }}</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="text-right font-semibold">{{ currencySymbol() }} {{ row.totalAmount | number }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ row.monthlyInstallment | number }}</td>
-                  <td class="text-right highlight-val">{{ currencySymbol() }} {{ row.remainingAmount | number }}</td>
-                  <td>
-                    <div class="recovery-wrap">
-                      <div class="recovery-track">
-                        <div class="recovery-fill" [style.width.%]="row.recoveryPercent"></div>
-                      </div>
-                      <span>{{ row.recoveryPercent }}% paid</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getLoanStatusClass(row.status)">
-                      {{ getLoanStatusLabel(row.status) }}
-                    </span>
-                  </td>
-                  <td>{{ row.startDateLabel }}</td>
-                  <td class="action-cell">
-                    <button class="action-btn hover-primary" aria-label="Edit loan" (click)="openEditLoanDialog(row)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" aria-label="Delete loan" (click)="requestDeleteLoan(row)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <div class="table-footer">
-        <p>
-          @if (totalRecords === 0) {
-            No records found
-          } @else {
-            Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalRecords }} records
-          }
-        </p>
-        <div class="pagination">
-          <button class="page-btn" [class.disabled]="currentPage === 1" [disabled]="currentPage === 1" (click)="prevPage()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-
-          @for (p of pageRange; track p) {
-            <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
-          }
-
-          <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages" (click)="nextPage()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
+        <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
     </div>
+  </div>
   } @else if (currentTab === 'salary-advances') {
-    <div class="summary-cards">
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Advances issued</span>
-            <span class="value">{{ currencySymbol() }} {{ totalSalaryAdvancesIssued | number }}</span>
-          </div>
-          <div class="icon-wrapper color-blue">
-            <mat-icon>savings</mat-icon>
-          </div>
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Advances issued</span>
+          <span class="value">{{ currencySymbol() }} {{ totalSalaryAdvancesIssued | number }}</span>
         </div>
-        <p class="card-footer">{{ salaryAdvances.length }} records</p>
-      </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Outstanding</span>
-            <span class="value">{{ currencySymbol() }} {{ totalSalaryAdvancesRemaining | number }}</span>
-          </div>
-          <div class="icon-wrapper color-amber">
-            <mat-icon>pending_actions</mat-icon>
-          </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>savings</mat-icon>
         </div>
-        <p class="card-footer">remaining to recover</p>
       </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Active advances</span>
-            <span class="value">{{ activeSalaryAdvancesCount }}</span>
-          </div>
-          <div class="icon-wrapper color-green">
-            <mat-icon>trending_up</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">pending + approved</p>
-      </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Completed advances</span>
-            <span class="value">{{ salaryAdvances.length - activeSalaryAdvancesCount }}</span>
-          </div>
-          <div class="icon-wrapper color-purple">
-            <mat-icon>done_all</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">fully repaid</p>
-      </div>
+      <p class="card-footer">{{ salaryAdvances.length }} records</p>
     </div>
 
-    <div class="content-card">
-      <div class="toolbar supporting-toolbar">
-        <div class="filters-row">
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search employee or reason..." [(ngModel)]="pendingSalaryAdvanceSearch" />
-          </div>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Outstanding</span>
+          <span class="value">{{ currencySymbol() }} {{ totalSalaryAdvancesRemaining | number }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">remaining to recover</p>
+    </div>
 
-          <select class="filter-select" [(ngModel)]="pendingSalaryAdvanceStatusFilter">
-            <option value="">All status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Active advances</span>
+          <span class="value">{{ activeSalaryAdvancesCount }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">pending + approved</p>
+    </div>
 
-          <div class="filter-actions">
-            <button class="apply-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters" (click)="applySalaryAdvanceFilters()">
-              <mat-icon>filter_list</mat-icon>
-              Apply
-            </button>
-            <button class="clear-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters" (click)="clearSalaryAdvanceFilters()">
-              <mat-icon>close</mat-icon>
-              Clear
-            </button>
-          </div>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Completed advances</span>
+          <span class="value">{{ salaryAdvances.length - activeSalaryAdvancesCount }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>done_all</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">fully repaid</p>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="toolbar supporting-toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee or reason..." [(ngModel)]="pendingSalaryAdvanceSearch" />
         </div>
 
-        <div class="add-btn-wrap">
-          <button class="add-btn" (click)="openAddSalaryAdvanceDialog()">
-            <mat-icon>add</mat-icon>
-            Add salary advance
+        <select class="filter-select" [(ngModel)]="pendingSalaryAdvanceStatusFilter">
+          <option value="">All status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters"
+            (click)="applySalaryAdvanceFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters"
+            (click)="clearSalaryAdvanceFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
           </button>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Payroll period</th>
-              <th class="text-right">Amount</th>
-              <th class="text-right">Monthly deduction</th>
-              <th class="text-right">Remaining</th>
-              <th>Status</th>
-              <th>Reason</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (salaryAdvancesView.length === 0) {
-              <tr>
-                <td class="empty-row" colspan="8">No salary advance records available.</td>
-              </tr>
-            } @else {
-              @for (advance of salaryAdvancesView; track trackById($index, advance)) {
-                <tr>
-                  <td>{{ advance.employeeName }}</td>
-                  <td>{{ advance.periodName }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ advance.totalAmount | number }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ advance.monthlyDeduction | number }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ advance.remainingAmount | number }}</td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getAdvanceStatusClass(advance.status)">
-                      {{ getAdvanceStatusLabel(advance.status) }}
-                    </span>
-                  </td>
-                  <td class="reason-cell">{{ advance.reason }}</td>
-                  <td class="action-cell text-right">
-                    <button class="action-btn hover-primary" aria-label="Edit salary advance" (click)="openEditSalaryAdvanceDialog(advance)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" aria-label="Delete salary advance" (click)="requestDeleteSalaryAdvance(advance)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openAddSalaryAdvanceDialog()">
+          <mat-icon>add</mat-icon>
+          Add salary advance
+        </button>
+      </div>
+    </div>
+
+    <div class="cards-stack admin-cards-view">
+      @if (salaryAdvancesView.length === 0) {
+      <div class="empty-state">No salary advance records available.</div>
+      } @else {
+      @for (advance of salaryAdvancesView; track advance.id) {
+      <article class="record-card">
+        <div class="card-body">
+          <div class="card-top">
+            <div class="employee-info">
+              <div class="avatar" [ngClass]="'bg-' + ((advance.employeeName.charCodeAt(0) % 5) + 1)">{{
+                advance.employeeName.substring(0, 1) }}</div>
+              <div class="employee-detail">
+                <span class="name">{{ advance.employeeName }}</span>
+                <span class="designation">{{ advance.periodName }}</span>
+              </div>
+            </div>
+            <span class="status-pill" [ngClass]="getAdvanceStatusClass(advance.status)">
+              {{ getAdvanceStatusLabel(advance.status) }}
+            </span>
+          </div>
+
+          <div class="main-stats">
+            <div class="stat-item">
+              <label>Advance amount</label>
+              <strong>{{ currencySymbol() }} {{ advance.totalAmount | number }}</strong>
+            </div>
+            <div class="stat-item">
+              <label>Monthly deduction</label>
+              <strong>{{ currencySymbol() }} {{ advance.monthlyDeduction | number }}</strong>
+            </div>
+            <div class="stat-item">
+              <label>Remaining</label>
+              <strong>{{ currencySymbol() }} {{ advance.remainingAmount | number }}</strong>
+            </div>
+          </div>
+
+          @if (advance.reason) {
+          <div class="card-note">
+            <mat-icon>notes</mat-icon>
+            <p>{{ advance.reason }}</p>
+          </div>
+          }
+        </div>
+
+        <div class="card-footer">
+          <div class="request-actions">
+            @if (advance.status === 'pending') {
+            <button class="approve-btn" (click)="approveSalaryAdvance(advance)">
+              <mat-icon>check_circle</mat-icon>
+              Approve
+            </button>
+            <button class="reject-btn" (click)="requestRejectSalaryAdvance(advance)">
+              <mat-icon>cancel</mat-icon>
+              Reject
+            </button>
             }
-          </tbody>
-        </table>
-      </div>
-
-      <div class="table-footer">
-        <p>
-          @if (salaryAdvancesTotalRecords === 0) {
-            No records found
-          } @else {
-            Showing {{ salaryAdvancesFromRecord }}&ndash;{{ salaryAdvancesToRecord }} of {{ salaryAdvancesTotalRecords }} records
-          }
-        </p>
-        <div class="pagination">
-          <button class="page-btn" [class.disabled]="salaryAdvancesPage === 1" [disabled]="salaryAdvancesPage === 1" (click)="prevSalaryAdvancePage()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-
-          @for (p of salaryAdvancesPageRange; track p) {
-            <button class="page-btn" [class.active]="p === salaryAdvancesPage" (click)="goToSalaryAdvancePage(p)">{{ p }}</button>
-          }
-
-          <button class="page-btn" [class.disabled]="salaryAdvancesPage === salaryAdvancesTotalPages" [disabled]="salaryAdvancesPage === salaryAdvancesTotalPages" (click)="nextSalaryAdvancePage()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
+            <button class="action-icon-btn" (click)="openEditSalaryAdvanceDialog(advance)" title="Edit Advance">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="action-icon-btn danger" (click)="requestDeleteSalaryAdvance(advance)" title="Delete Advance">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
+      </article>
+      }
+      }
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (salaryAdvancesTotalRecords === 0) {
+        No records found
+        } @else {
+        Showing {{ salaryAdvancesFromRecord }}&ndash;{{ salaryAdvancesToRecord }} of {{ salaryAdvancesTotalRecords }}
+        records
+        }
+      </p>
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="salaryAdvancesPage === 1" [disabled]="salaryAdvancesPage === 1"
+          (click)="prevSalaryAdvancePage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (p of salaryAdvancesPageRange; track p) {
+        <button class="page-btn" [class.active]="p === salaryAdvancesPage" (click)="goToSalaryAdvancePage(p)">{{ p
+          }}</button>
+        }
+
+        <button class="page-btn" [class.disabled]="salaryAdvancesPage === salaryAdvancesTotalPages"
+          [disabled]="salaryAdvancesPage === salaryAdvancesTotalPages" (click)="nextSalaryAdvancePage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
     </div>
+  </div>
   } @else if (currentTab === 'loan-payments') {
-    <div class="summary-cards">
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Deducted amount</span>
-            <span class="value">{{ currencySymbol() }} {{ totalLoanPaymentsDeducted | number }}</span>
-          </div>
-          <div class="icon-wrapper color-blue">
-            <mat-icon>payments</mat-icon>
-          </div>
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total disbursed</span>
+          <span class="value">{{ currencySymbol() }} {{ disbursedTotalAmount | number }}</span>
         </div>
-        <p class="card-footer">loan deductions processed</p>
-      </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Pending installments</span>
-            <span class="value">{{ pendingLoanPaymentsCount }}</span>
-          </div>
-          <div class="icon-wrapper color-amber">
-            <mat-icon>hourglass_empty</mat-icon>
-          </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>payments</mat-icon>
         </div>
-        <p class="card-footer">awaiting payroll run</p>
       </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Payment records</span>
-            <span class="value">{{ loanPayments.length }}</span>
-          </div>
-          <div class="icon-wrapper color-green">
-            <mat-icon>receipt_long</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">loan payment ledger</p>
-      </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Skipped</span>
-            <span class="value">{{ skippedLoanPaymentsCount }}</span>
-          </div>
-          <div class="icon-wrapper color-purple">
-            <mat-icon>block</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">marked as skipped/pending</p>
-      </div>
+      <p class="card-footer">disbursed loans value</p>
     </div>
 
-    <div class="content-card">
-      <div class="toolbar supporting-toolbar">
-        <div class="filters-row">
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search employee, loan, or period..." [(ngModel)]="pendingLoanPaymentSearch" />
-          </div>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total paid amount</span>
+          <span class="value">{{ currencySymbol() }} {{ totalLoanPaymentsDeducted | number }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>hourglass_empty</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">recovered so far</p>
+    </div>
 
-          <select class="filter-select" [(ngModel)]="pendingLoanPaymentStatus">
-            <option value="">All status</option>
-            <option value="deducted">Deducted</option>
-            <option value="pending">Pending</option>
-            <option value="skipped">Skipped</option>
-          </select>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Disbursed loans</span>
+          <span class="value">{{ disbursedLoansTotalRecords }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">current page records</p>
+    </div>
 
-          <div class="filter-actions">
-            <button class="apply-btn" [disabled]="!hasActiveLoanPaymentFilters && !hasAppliedLoanPaymentFilters" (click)="applyLoanPaymentFilters()">
-              <mat-icon>filter_list</mat-icon>
-              Apply
-            </button>
-            <button class="clear-btn" [disabled]="!hasActiveLoanPaymentFilters && !hasAppliedLoanPaymentFilters" (click)="clearLoanPaymentFilters()">
-              <mat-icon>close</mat-icon>
-              Clear
-            </button>
-          </div>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Avg completion</span>
+          <span class="value">{{ disbursedAverageCompletion }}%</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>block</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">loan recovery progress</p>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="toolbar supporting-toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee, loan, or period..." [(ngModel)]="pendingLoanPaymentSearch" />
         </div>
 
-        <div class="add-btn-wrap">
-          <button class="add-btn" (click)="openAddLoanPaymentDialog()">
-            <mat-icon>add</mat-icon>
-            Add loan payment
+        <select class="filter-select" [(ngModel)]="pendingLoanPaymentStatus">
+          <option value="">All loan status</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+        </select>
+
+        <input
+          type="number"
+          class="filter-amount"
+          placeholder="Min amount"
+          [(ngModel)]="pendingLoanPaymentMinAmount"
+          min="0"
+        />
+
+        <input
+          type="number"
+          class="filter-amount"
+          placeholder="Max amount"
+          [(ngModel)]="pendingLoanPaymentMaxAmount"
+          min="0"
+        />
+
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveLoanPaymentFilters && !hasAppliedLoanPaymentFilters"
+            (click)="applyLoanPaymentFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveLoanPaymentFilters && !hasAppliedLoanPaymentFilters"
+            (click)="clearLoanPaymentFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
           </button>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Loan</th>
-              <th>Payroll period</th>
-              <th class="text-right">Installment #</th>
-              <th class="text-right">Amount</th>
-              <th class="text-right">Remaining</th>
-              <th>Paid date</th>
-              <th>Status</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (loanPaymentsView.length === 0) {
-              <tr>
-                <td class="empty-row" colspan="9">No loan payment records available.</td>
-              </tr>
-            } @else {
-              @for (payment of loanPaymentsView; track trackById($index, payment)) {
-                <tr>
-                  <td>{{ payment.employeeName }}</td>
-                  <td>{{ payment.loanLabel }}</td>
-                  <td>{{ payment.periodName }}</td>
-                  <td class="text-right">{{ payment.installmentNumber }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ payment.amount | number }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ payment.remainingAmount | number }}</td>
-                  <td>{{ formatDateLabel(payment.paidDate) }}</td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getLoanPaymentStatusClass(payment.status)">
-                      {{ getLoanPaymentStatusLabel(payment.status) }}
-                    </span>
-                  </td>
-                  <td class="action-cell text-right">
-                    <button class="action-btn hover-primary" aria-label="Edit loan payment" (click)="openEditLoanPaymentDialog(payment)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" aria-label="Delete loan payment" (click)="requestDeleteLoanPayment(payment)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openAddLoanPaymentDialog()">
+          <mat-icon>add</mat-icon>
+          Add loan payment
+        </button>
       </div>
+    </div>
 
-      <div class="table-footer">
-        <p>
-          @if (loanPaymentsTotalRecords === 0) {
-            No records found
+    <div class="table-responsive">
+      <table class="compact-table loan-payments-table">
+        <colgroup>
+          <col class="col-employee" />
+          <col class="col-end-date" />
+          <col class="col-remaining" />
+          <col class="col-status" />
+          <col class="col-total" />
+          <col class="col-paid" />
+          <col class="col-completion" />
+          <col class="col-action" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="col-employee">Employee</th>
+            <th class="col-end-date">End date</th>
+            <th class="col-remaining">Remaining installments</th>
+            <th class="col-status">Total installments</th>
+            <th class="col-total">Total amount</th>
+            <th class="col-paid">Paid amount</th>
+            <th class="col-completion">Completion %</th>
+            <!-- <th class="col-action">Action</th> -->
+          </tr>
+        </thead>
+        <tbody>
+          @if (loanPaymentsView.length === 0) {
+          <tr>
+            <td class="empty-row" colspan="8">No disbursed loan records available.</td>
+          </tr>
           } @else {
-            Showing {{ loanPaymentsFromRecord }}&ndash;{{ loanPaymentsToRecord }} of {{ loanPaymentsTotalRecords }} records
+          @for (payment of loanPaymentsView; track payment.id) {
+          <tr>
+            <td>{{ payment.employeeName }}</td>
+            <td>{{ formatDateLabel(payment.endDate) }}</td>
+            <td>{{ payment.remainingInstallments }}</td>
+            <td>{{ payment.totalInstallments }}</td>
+            <td>{{ currencySymbol() }} {{ payment.totalAmount | number }}</td>
+            <td>{{ currencySymbol() }} {{ payment.paidAmount | number }}</td>
+            <td>
+              <div class="mini-progress">
+                <div class="mini-progress-track">
+                  <div class="mini-progress-fill" [style.width.%]="payment.completionPercent"></div>
+                </div>
+                <span class="mini-progress-label">{{ payment.completionPercent | number:'1.0-2' }}%</span>
+              </div>
+            </td>
+            <!--
+            <td class="action-cell">
+              <button class="action-btn hover-primary" type="button" aria-label="Edit loan payment"
+                (click)="openAddLoanPaymentDialogForRow(payment)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+            -->
+          </tr>
           }
-        </p>
-        <div class="pagination">
-          <button class="page-btn" [class.disabled]="loanPaymentsPage === 1" [disabled]="loanPaymentsPage === 1" (click)="prevLoanPaymentPage()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-
-          @for (p of loanPaymentsPageRange; track p) {
-            <button class="page-btn" [class.active]="p === loanPaymentsPage" (click)="goToLoanPaymentPage(p)">{{ p }}</button>
           }
+        </tbody>
+      </table>
+    </div>
 
-          <button class="page-btn" [class.disabled]="loanPaymentsPage === loanPaymentsTotalPages" [disabled]="loanPaymentsPage === loanPaymentsTotalPages" (click)="nextLoanPaymentPage()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
+    <div class="table-footer">
+      <p>
+        @if (loanPaymentsTotalRecords === 0) {
+        No records found
+        } @else {
+        Showing {{ loanPaymentsFromRecord }}&ndash;{{ loanPaymentsToRecord }} of {{ loanPaymentsTotalRecords }} records
+        }
+      </p>
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="loanPaymentsPage === 1" [disabled]="loanPaymentsPage === 1"
+          (click)="prevLoanPaymentPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (p of loanPaymentsPageRange; track p) {
+        <button class="page-btn" [class.active]="p === loanPaymentsPage" (click)="goToLoanPaymentPage(p)">{{ p
+          }}</button>
+        }
+
+        <button class="page-btn" [class.disabled]="loanPaymentsPage === loanPaymentsTotalPages"
+          [disabled]="loanPaymentsPage === loanPaymentsTotalPages" (click)="nextLoanPaymentPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
     </div>
+  </div>
   } @else {
-    <div class="summary-cards">
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Collected repayments</span>
-            <span class="value">{{ currencySymbol() }} {{ totalRepaymentCollected | number }}</span>
-          </div>
-          <div class="icon-wrapper color-blue">
-            <mat-icon>request_quote</mat-icon>
-          </div>
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Collected repayments</span>
+          <span class="value">{{ currencySymbol() }} {{ totalRepaymentCollected | number }}</span>
         </div>
-        <p class="card-footer">deducted records only</p>
-      </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Pending amount</span>
-            <span class="value">{{ currencySymbol() }} {{ pendingRepaymentAmount | number }}</span>
-          </div>
-          <div class="icon-wrapper color-amber">
-            <mat-icon>schedule</mat-icon>
-          </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>request_quote</mat-icon>
         </div>
-        <p class="card-footer">to be deducted</p>
       </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Loan repayments</span>
-            <span class="value">{{ loanRepaymentCount }}</span>
-          </div>
-          <div class="icon-wrapper color-green">
-            <mat-icon>account_balance</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">mapped from loan payments</p>
-      </div>
-
-      <div class="card">
-        <div class="card-content">
-          <div class="info">
-            <span class="label">Advance repayments</span>
-            <span class="value">{{ advanceRepaymentCount }}</span>
-          </div>
-          <div class="icon-wrapper color-purple">
-            <mat-icon>savings</mat-icon>
-          </div>
-        </div>
-        <p class="card-footer">mapped from advance payments</p>
-      </div>
+      <p class="card-footer">deducted records only</p>
     </div>
 
-    <div class="content-card">
-      <div class="toolbar supporting-toolbar">
-        <div class="filters-row">
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search employee, reference, or period..." [(ngModel)]="pendingRepaymentSearch" />
-          </div>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Pending amount</span>
+          <span class="value">{{ currencySymbol() }} {{ pendingRepaymentAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>schedule</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">to be deducted</p>
+    </div>
 
-          <select class="filter-select" [(ngModel)]="pendingRepaymentTypeFilter">
-            <option value="">All types</option>
-            <option value="loan">Loan</option>
-            <option value="advance">Salary advance</option>
-          </select>
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Loan repayments</span>
+          <span class="value">{{ loanRepaymentCount }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>account_balance</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">mapped from loan payments</p>
+    </div>
 
-          <select class="filter-select" [(ngModel)]="pendingRepaymentStatusFilter">
-            <option value="">All status</option>
-            <option value="deducted">Deducted</option>
-            <option value="pending">Pending</option>
-            <option value="skipped">Skipped</option>
-          </select>
+    <!--
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Advance repayments</span>
+          <span class="value">{{ advanceRepaymentCount }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>savings</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">mapped from advance payments</p>
+    </div>
+    -->
+  </div>
 
-          <div class="filter-actions">
-            <button class="apply-btn" [disabled]="!hasActiveRepaymentFilters && !hasAppliedRepaymentFilters" (click)="applyRepaymentFilters()">
-              <mat-icon>filter_list</mat-icon>
-              Apply
-            </button>
-            <button class="clear-btn" [disabled]="!hasActiveRepaymentFilters && !hasAppliedRepaymentFilters" (click)="clearRepaymentFilters()">
-              <mat-icon>close</mat-icon>
-              Clear
-            </button>
-          </div>
+  <div class="content-card">
+    <div class="toolbar supporting-toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee, reference, or period..."
+            [(ngModel)]="pendingRepaymentSearch" />
         </div>
 
-        <div class="add-btn-wrap">
-          <button class="add-btn" (click)="openAddRepaymentDialog()">
-            <mat-icon>add</mat-icon>
-            Add repayment
+        <select class="filter-select" [(ngModel)]="pendingRepaymentTypeFilter">
+          <option value="">All repayment types</option>
+          <option value="installment">Installments</option>
+          <option value="full">Full</option>
+        </select>
+
+        <select class="filter-select" [(ngModel)]="pendingRepaymentPaymentMethodFilter">
+          <option value="">All payment methods</option>
+          <option value="cash">Cash</option>
+          <option value="bank transfer">Bank transfer</option>
+          <option value="payroll deduction">Payroll deduction</option>
+        </select>
+
+        <select class="filter-select" [(ngModel)]="pendingRepaymentLoanStatusFilter">
+          <option value="">All loan status</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+        </select>
+
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveRepaymentFilters && !hasAppliedRepaymentFilters"
+            (click)="applyRepaymentFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveRepaymentFilters && !hasAppliedRepaymentFilters"
+            (click)="clearRepaymentFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
           </button>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Type</th>
-              <th>Reference</th>
-              <th>Payroll period</th>
-              <th class="text-right">Amount</th>
-              <th class="text-right">Remaining</th>
-              <th>Paid date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (repaymentsView.length === 0) {
-              <tr>
-                <td class="empty-row" colspan="8">No repayment records available.</td>
-              </tr>
-            } @else {
-              @for (row of repaymentsView; track trackById($index, row)) {
-                <tr>
-                  <td>{{ row.employeeName }}</td>
-                  <td>
-                    <span class="type-pill" [ngClass]="getRepaymentTypeClass(row.type)">
-                      {{ getRepaymentTypeLabel(row.type) }}
-                    </span>
-                  </td>
-                  <td>{{ row.referenceLabel }}</td>
-                  <td>{{ row.periodName }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ row.amount | number }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ row.remainingAmount | number }}</td>
-                  <td>{{ formatDateLabel(row.paidDate) }}</td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getLoanPaymentStatusClass(row.status)">
-                      {{ getLoanPaymentStatusLabel(row.status) }}
-                    </span>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
+      <div class="add-btn-wrap">
       </div>
+    </div>
 
-      <div class="table-footer">
-        <p>
-          @if (repaymentsTotalRecords === 0) {
-            No records found
+    <div class="table-responsive">
+      <table class="compact-table repayments-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Repayment type</th>
+            <th>Loan reference ID</th>
+            <th>Payroll period</th>
+            <th class="text-right">Amount</th>
+            <th class="text-right">Remaining</th>
+            <th>Paid date</th>
+            <th>Loan status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (repaymentsView.length === 0) {
+          <tr>
+            <td class="empty-row" colspan="8">No repayment records available.</td>
+          </tr>
           } @else {
-            Showing {{ repaymentsFromRecord }}&ndash;{{ repaymentsToRecord }} of {{ repaymentsTotalRecords }} records
+          @for (row of repaymentsView; track trackById($index, row)) {
+          <tr>
+            <td>{{ row.employeeName }}</td>
+            <td>
+              <span class="type-pill" [ngClass]="getRepaymentTypeClass(row.type)">
+                {{ row.repaymentType === 'full' ? 'Full' : 'Installments' }}
+              </span>
+            </td>
+            <td>{{ row.referenceLabel }}</td>
+            <td>{{ row.periodName }}</td>
+            <td class="text-right">{{ currencySymbol() }} {{ row.amount | number }}</td>
+            <td class="text-right">{{ currencySymbol() }} {{ row.remainingAmount | number }}</td>
+            <td>{{ formatDateLabel(row.paidDate) }}</td>
+            <td>
+              <span class="status-pill" [ngClass]="getLoanStatusClass(row.loanStatus)">
+                {{ getLoanStatusLabel(row.loanStatus) }}
+              </span>
+            </td>
+          </tr>
           }
-        </p>
-        <div class="pagination">
-          <button class="page-btn" [class.disabled]="repaymentsPage === 1" [disabled]="repaymentsPage === 1" (click)="prevRepaymentPage()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-
-          @for (p of repaymentsPageRange; track p) {
-            <button class="page-btn" [class.active]="p === repaymentsPage" (click)="goToRepaymentPage(p)">{{ p }}</button>
           }
+        </tbody>
+      </table>
+    </div>
 
-          <button class="page-btn" [class.disabled]="repaymentsPage === repaymentsTotalPages" [disabled]="repaymentsPage === repaymentsTotalPages" (click)="nextRepaymentPage()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
+    <div class="table-footer">
+      <p>
+        @if (repaymentsTotalRecords === 0) {
+        No records found
+        } @else {
+        Showing {{ repaymentsFromRecord }}&ndash;{{ repaymentsToRecord }} of {{ repaymentsTotalRecords }} records
+        }
+      </p>
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="repaymentsPage === 1" [disabled]="repaymentsPage === 1"
+          (click)="prevRepaymentPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (p of repaymentsPageRange; track p) {
+        <button class="page-btn" [class.active]="p === repaymentsPage" (click)="goToRepaymentPage(p)">{{ p }}</button>
+        }
+
+        <button class="page-btn" [class.disabled]="repaymentsPage === repaymentsTotalPages"
+          [disabled]="repaymentsPage === repaymentsTotalPages" (click)="nextRepaymentPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
       </div>
     </div>
+  </div>
   }
 </div>

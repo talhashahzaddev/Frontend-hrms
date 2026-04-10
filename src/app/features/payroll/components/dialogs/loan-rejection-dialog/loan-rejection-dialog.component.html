@@ -1,0 +1,34 @@
+<div class="delete-modal loan-rejection-modal">
+  <header class="modal-header">
+    <div class="title-wrap">
+      <span class="warn-icon">
+        <mat-icon>warning</mat-icon>
+      </span>
+      <h2>{{ data.title || 'Reject loan request' }}</h2>
+    </div>
+    <button type="button" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <section class="modal-body">
+    <p>{{ data.message || 'Please provide the reason for rejecting this loan request.' }}</p>
+
+    <div class="reason-field">
+      <label for="loan-rejection-reason">Rejection reason</label>
+      <textarea
+        id="loan-rejection-reason"
+        rows="4"
+        [(ngModel)]="reason"
+        [placeholder]="data.placeholder || 'Enter rejection reason'"
+      ></textarea>
+    </div>
+  </section>
+
+  <footer class="modal-footer">
+    <button type="button" class="btn-cancel" (click)="close()">{{ data.cancelText || 'Cancel' }}</button>
+    <button type="button" class="btn-danger" [disabled]="!reason.trim()" (click)="submit()">
+      {{ data.submitText || 'Reject request' }}
+    </button>
+  </footer>
+</div>

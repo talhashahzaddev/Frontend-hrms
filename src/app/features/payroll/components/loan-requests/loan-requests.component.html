@@ -96,13 +96,23 @@
                     <h2>{{ formatMoney(loan.totalAmount) }}</h2>
                     <p>Ref ID: {{ loan.referenceNo }}</p>
                   </div>
-                  <span class="status-pill" [ngClass]="getLoanStatusClass(loan.status)">{{ loan.status | titlecase }}</span>
+                  <span class="status-pill" [ngClass]="getLoanStatusClass(loan)">
+                    {{ (loanSectionTab === 'requested' ? loan.requestStatus : loan.status) | titlecase }}
+                  </span>
                 </div>
 
-                @if (loan.status === 'pending') {
+                @if (loan.status !== 'active' && loan.status !== 'completed') {
                   <div class="awaiting-box">
-                    <mat-icon>info</mat-icon>
-                    <span>Awaiting HR approval</span>
+                    <mat-icon>{{ loan.status === 'rejected' ? 'cancel' : 'info' }}</mat-icon>
+                    <span>
+                      @if (loan.status === 'accepted' || loan.status === 'approved') {
+                        Approved & Awaiting Disbursement
+                      } @else if (loan.status === 'rejected') {
+                        Request Rejected
+                      } @else {
+                        Awaiting HR approval
+                      }
+                    </span>
                   </div>
 
                   <div class="meta-grid compact">
@@ -168,14 +178,20 @@
               </div>
 
               <div class="card-footer">
-                @if (loan.status === 'pending') {
-                  <div class="request-actions">
-                    <button class="link-btn" (click)="openEditLoanRequestDialog(loan)">Edit request</button>
-                    <button class="danger-link" (click)="cancelLoanRequest(loan)">Cancel request</button>
-                  </div>
-                } @else {
-                  <button class="link-btn" (click)="goToLoanHistory()">View payment history</button>
-                }
+                <div class="request-actions">
+                  @if (loan.status === 'active' || loan.status === 'completed') {
+                    <!-- No actions for active loans here -->
+                  } @else {
+                    <button class="action-btn secondary" [disabled]="loan.status !== 'pending'" (click)="openEditLoanRequestDialog(loan)">
+                      <mat-icon>edit</mat-icon>
+                      Edit request
+                    </button>
+                    <button class="action-btn danger" [disabled]="loan.status !== 'pending'" (click)="cancelLoanRequest(loan)">
+                      <mat-icon>cancel</mat-icon>
+                      Cancel request
+                    </button>
+                  }
+                </div>
               </div>
             </article>
           }
@@ -185,22 +201,26 @@
       <div class="history-card">
         <div class="toolbar">
           <div class="filters-row">
-            <div class="search-box">
-              <mat-icon>search</mat-icon>
-              <input type="text" placeholder="Search period..." [(ngModel)]="pendingLoanHistorySearch" />
-            </div>
-
-            <select class="filter-select" [(ngModel)]="pendingLoanHistoryStatus">
-              <option value="">All status</option>
-              <option value="deducted">Deducted</option>
-              <option value="pending">Pending</option>
-              <option value="skipped">Skipped</option>
+            <select class="filter-select" [(ngModel)]="pendingLoanHistoryReference">
+              <option value="">All loans</option>
+              @for (ref of loanReferences; track ref.loanId) {
+                <option [value]="ref.loanId">{{ ref.referenceId }}</option>
+              }
             </select>
+
+            <!--
+            <select class="filter-select" [(ngModel)]="pendingLoanHistoryMethod">
+              <option value="">All methods</option>
+              <option value="cash">Cash</option>
+              <option value="payroll_deduction">Payroll Deduction</option>
+              <option value="bank_transfer">Bank Transfer</option>
+            </select>
+            -->
 
             <select class="filter-select" [(ngModel)]="pendingLoanHistoryPeriod">
               <option value="">All periods</option>
-              @for (period of loanHistoryPeriods; track period) {
-                <option [value]="period">{{ period }}</option>
+              @for (period of loanHistoryPeriods; track period.periodId) {
+                <option [value]="period.periodId">{{ period.periodName }}</option>
               }
             </select>
 
@@ -221,11 +241,12 @@
           <table>
             <thead>
               <tr>
-                <th>Amount</th>
+                <th>Inst. No.</th>
                 <th>Period</th>
+                <th>Paid Date</th>
                 <th class="numeric">Installment</th>
                 <th class="numeric remaining-column">Remaining</th>
-                <th class="status-column">Status</th>
+                <th class="status-column">Payment Method</th>
               </tr>
             </thead>
             <tbody>
@@ -236,14 +257,13 @@
               } @else {
                 @for (payment of loanHistoryView; track payment.id) {
                   <tr>
-                    <td>{{ formatMoney(totalBorrowed) }}</td>
+                    <td>{{ payment.installmentNumber || 'N/A' }}</td>
                     <td>{{ payment.periodLabel }}</td>
+                    <td>{{ payment.paidDate | date:'mediumDate' }}</td>
                     <td class="numeric">{{ payment.installmentAmount | number }}</td>
                     <td class="numeric remaining-column">{{ payment.remainingAmount | number }}</td>
                     <td class="status-column">
-                      <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
-                        {{ payment.status | titlecase }}
-                      </span>
+                      {{ (payment.paymentMethod || 'N/A').replace('_', ' ') | titlecase }}
                     </td>
                   </tr>
                 }
@@ -413,11 +433,13 @@
               </div>
 
               <div class="card-footer">
-                @if (advance.status === 'pending') {
-                  <button class="danger-link" (click)="cancelAdvanceRequest(advance)">Cancel request</button>
-                } @else {
-                  <button class="link-btn" (click)="goToAdvanceHistory()">View deductions</button>
-                }
+                <div class="request-actions">
+                  @if (advance.status === 'approved' || advance.status === 'completed') {
+                    <button class="link-btn" (click)="goToAdvanceHistory()">View deductions</button>
+                  } @else {
+                    <button class="danger-link" [disabled]="advance.status !== 'pending'" (click)="cancelAdvanceRequest(advance)">Cancel request</button>
+                  }
+                </div>
               </div>
             </article>
           }

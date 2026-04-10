@@ -3,8 +3,10 @@ import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { PayrollService } from '../../../services/payroll.service';
 
-export type LoanPaymentDialogStatus = 'pending' | 'deducted' | 'skipped';
+export type LoanPaymentRepaymentMethod = 'cash' | 'bank transfer';
+export type LoanPaymentRepaymentType = 'installment' | 'full';
 
 export interface LoanPaymentEmployeeOption {
   id: string;
@@ -28,9 +30,10 @@ export interface LoanPaymentDialogPayload {
   loanId: string;
   periodId: string;
   installmentAmount: number;
-  remainingAmount: number;
+  installmentNumber: number;
   paidDate: string | null;
-  status: LoanPaymentDialogStatus;
+  repaymentMethod: LoanPaymentRepaymentMethod;
+  repaymentType: LoanPaymentRepaymentType;
 }
 
 interface LoanPaymentDialogData {
@@ -39,6 +42,7 @@ interface LoanPaymentDialogData {
   periods?: LoanPaymentPeriodOption[];
   loans?: LoanPaymentLoanOption[];
   initialValue?: Partial<LoanPaymentDialogPayload>;
+  currencySymbol?: string;
 }
 
 @Component({
@@ -51,27 +55,34 @@ interface LoanPaymentDialogData {
 })
 export class AddLoanPaymentDialogComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly payrollService = inject(PayrollService);
   private readonly dialogRef = inject(MatDialogRef<AddLoanPaymentDialogComponent, LoanPaymentDialogPayload | undefined>);
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
-  readonly employees = this.data?.employees ?? [];
+  employees = this.data?.employees ?? [];
   readonly periods = this.data?.periods ?? [];
-  readonly loans = this.data?.loans ?? [];
+  loans = this.data?.loans ?? [];
+  readonly currencySymbol = this.data?.currencySymbol ?? 'PKR';
 
   readonly form = this.fb.group(
     {
       employeeId: ['', Validators.required],
       loanId: ['', Validators.required],
-      periodId: ['', Validators.required],
+      periodId: [''],
       installmentAmount: [null as number | null, [Validators.required, Validators.min(1)]],
-      remainingAmount: [{ value: 0, disabled: true }],
+      installmentNumber: [1, [Validators.required, Validators.min(1)]],
       paidDate: [''],
-      status: ['pending' as LoanPaymentDialogStatus, Validators.required]
+      repaymentMethod: ['cash' as LoanPaymentRepaymentMethod, Validators.required],
+      repaymentType: ['installment' as LoanPaymentRepaymentType, Validators.required]
     },
     { validators: [this.installmentValidator()] }
   );
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: LoanPaymentDialogData) {
+    if (this.mode === 'create') {
+      this.loadActiveDisbursedLoans();
+    }
+
     if (this.data?.initialValue) {
       this.form.patchValue({
         employeeId: this.data.initialValue.employeeId ?? '',
@@ -79,7 +90,9 @@ export class AddLoanPaymentDialogComponent {
         periodId: this.data.initialValue.periodId ?? '',
         installmentAmount: this.data.initialValue.installmentAmount ?? null,
         paidDate: this.data.initialValue.paidDate ?? '',
-        status: this.data.initialValue.status ?? 'pending'
+        installmentNumber: this.data.initialValue.installmentNumber ?? 1,
+        repaymentMethod: this.data.initialValue.repaymentMethod ?? 'cash',
+        repaymentType: this.data.initialValue.repaymentType ?? 'installment'
       });
     }
 
@@ -94,13 +107,61 @@ export class AddLoanPaymentDialogComponent {
       if (activeLoanId && !stillValid) {
         this.form.patchValue({ loanId: '' });
       }
-      this.updateRemainingAmount();
+      this.form.updateValueAndValidity({ emitEvent: false });
     });
 
-    this.form.get('loanId')?.valueChanges.subscribe(() => this.updateRemainingAmount());
-    this.form.get('installmentAmount')?.valueChanges.subscribe(() => this.updateRemainingAmount());
+    this.form.get('loanId')?.valueChanges.subscribe(() => this.form.updateValueAndValidity({ emitEvent: false }));
+    this.form.get('installmentAmount')?.valueChanges.subscribe(() => this.form.updateValueAndValidity({ emitEvent: false }));
 
-    this.updateRemainingAmount();
+    this.form.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private loadActiveDisbursedLoans(): void {
+    this.payrollService.getDisbursedActiveLoans({ Page: 1, PageSize: 500 }).subscribe({
+      next: (response: any) => {
+        const rows = Array.isArray(response?.data) ? response.data : [];
+
+        const employeesMap = new Map<string, LoanPaymentEmployeeOption>();
+        const loans: LoanPaymentLoanOption[] = [];
+
+        rows.forEach((item: any) => {
+          const employeeId = String(item.employeeId ?? '').trim();
+          const employeeName = String(item.employeeName ?? '').trim();
+          const referenceId = String(item.referenceId ?? '').trim();
+          const remainingAmount = Number(item.remainingAmount ?? 0);
+
+          if (employeeId && employeeName && !employeesMap.has(employeeId)) {
+            employeesMap.set(employeeId, { id: employeeId, name: employeeName });
+          }
+
+          if (employeeId && referenceId) {
+            loans.push({
+              id: referenceId,
+              employeeId,
+              label: referenceId,
+              remainingAmount
+            });
+          }
+        });
+
+        this.employees = Array.from(employeesMap.values());
+        this.loans = loans;
+
+        // Clear stale selections if they are no longer valid after refresh.
+        const selectedEmployee = String(this.form.get('employeeId')?.value ?? '').trim();
+        const selectedLoan = String(this.form.get('loanId')?.value ?? '').trim();
+        if (selectedEmployee && !this.employees.some((item) => item.id === selectedEmployee)) {
+          this.form.patchValue({ employeeId: '', loanId: '' }, { emitEvent: false });
+        } else if (selectedLoan && !this.loans.some((item) => item.id === selectedLoan)) {
+          this.form.patchValue({ loanId: '' }, { emitEvent: false });
+        }
+
+        this.form.updateValueAndValidity({ emitEvent: false });
+      },
+      error: (err) => {
+        console.error('Error loading active disbursed loans for payment dialog:', err);
+      }
+    });
   }
 
   get filteredLoans(): LoanPaymentLoanOption[] {
@@ -145,22 +206,11 @@ export class AddLoanPaymentDialogComponent {
       loanId: String(raw.loanId ?? ''),
       periodId: String(raw.periodId ?? ''),
       installmentAmount: Number(raw.installmentAmount ?? 0),
-      remainingAmount: Number(raw.remainingAmount ?? 0),
+      installmentNumber: Number(raw.installmentNumber ?? 1),
       paidDate: raw.paidDate ? String(raw.paidDate) : null,
-      status: (raw.status ?? 'pending') as LoanPaymentDialogStatus
+      repaymentMethod: (raw.repaymentMethod ?? 'cash') as LoanPaymentRepaymentMethod,
+      repaymentType: (raw.repaymentType ?? 'installment') as LoanPaymentRepaymentType
     });
-  }
-
-  private updateRemainingAmount(): void {
-    const selectedLoanId = String(this.form.getRawValue().loanId ?? '').trim();
-    const installment = Number(this.form.get('installmentAmount')?.value ?? 0);
-
-    const selectedLoan = this.loans.find((loan) => loan.id === selectedLoanId);
-    const baseRemaining = Number(selectedLoan?.remainingAmount ?? 0);
-    const remainingAfter = Math.max(0, baseRemaining - Math.max(0, installment));
-
-    this.form.get('remainingAmount')?.setValue(remainingAfter, { emitEvent: false });
-    this.form.updateValueAndValidity({ emitEvent: false });
   }
 
   private installmentValidator(): ValidatorFn {

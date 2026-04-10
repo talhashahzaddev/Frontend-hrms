@@ -3,8 +3,9 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { take, forkJoin } from 'rxjs';
+import { PayrollService } from '../../services/payroll.service';
 
 import { AuthService } from '@core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
@@ -14,6 +15,10 @@ import {
   RequestLoanDialogPayload
 } from '../dialogs/request-loan-dialog/request-loan-dialog.component';
 import {
+  ConfirmDeleteDialogComponent,
+  ConfirmDeleteData
+} from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import {
   RequestSalaryAdvanceDialogComponent,
   RequestSalaryAdvanceDialogPayload
 } from '../dialogs/request-salary-advance-dialog/request-salary-advance-dialog.component';
@@ -22,9 +27,10 @@ type ModuleTab = 'loans' | 'salary-advance';
 type LoanSectionTab = 'requested' | 'active' | 'history';
 type SalarySectionTab = 'advances' | 'history';
 
-type LoanStatus = 'active' | 'pending' | 'approved' | 'completed' | 'cancelled';
+type LoanStatus = 'active' | 'pending' | 'approved' | 'completed' | 'cancelled' | 'accepted' | 'rejected';
 type SalaryAdvanceStatus = 'pending' | 'approved' | 'completed' | 'cancelled';
 type PaymentStatus = 'deducted' | 'pending' | 'skipped';
+type PaymentMethod = 'cash' | 'payroll_deduction' | 'bank_transfer';
 
 interface EmployeeLoanRecord {
   id: string;
@@ -38,23 +44,30 @@ interface EmployeeLoanRecord {
   paidAmount: number;
   progressPercent: number;
   status: LoanStatus;
+  requestStatus: string;
   repaymentType: LoanRepaymentType;
   reason: string;
   startDate: string;
   endDate: string | null;
   approvedBy: string;
   requestedOn: string;
+  ruleId: string;
 }
 
 interface LoanPaymentHistoryRecord {
   id: string;
   loanId: string;
   employeeId: string;
+  periodId: string;
   periodLabel: string;
   installmentAmount: number;
   remainingAmount: number;
   status: PaymentStatus;
   paidDate: string | null;
+  paymentMethod?: string;
+  installmentNumber?: number;
+  loanAmount?: number;
+  loanReference?: string;
 }
 
 interface SalaryAdvanceRecord {
@@ -87,7 +100,7 @@ interface SalaryAdvancePaymentHistoryRecord {
 @Component({
   selector: 'app-loan-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './loan-requests.component.html',
   styleUrl: './loan-requests.component.scss'
 })
@@ -97,6 +110,7 @@ export class LoanRequestsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly settingsService = inject(SettingsService);
+  private readonly payrollService = inject(PayrollService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
@@ -125,11 +139,19 @@ export class LoanRequestsComponent implements OnInit {
 
   pendingLoanHistorySearch = '';
   pendingLoanHistoryStatus: PaymentStatus | '' = '';
-  pendingLoanHistoryPeriod = '';
+  pendingLoanHistoryMethod: PaymentMethod | '' = '';
+  pendingLoanHistoryPeriod = ''; // Will store periodId
+  pendingLoanHistoryReference = ''; // Will store loanId
+  payrollPeriods: any[] = [];
 
   loanHistorySearch = '';
   loanHistoryStatus: PaymentStatus | '' = '';
+  loanHistoryMethod: PaymentMethod | '' = '';
   loanHistoryPeriod = '';
+  loanHistoryReference = ''; // Will store loanId
+  loanHistoryTotalRecordsCount = 0;
+  
+  loanReferences: any[] = [];
 
   pendingAdvanceHistorySearch = '';
   pendingAdvanceHistoryStatus: PaymentStatus | '' = '';
@@ -156,6 +178,8 @@ export class LoanRequestsComponent implements OnInit {
     this.loadLoanPayments();
     this.loadSalaryAdvances();
     this.loadAdvancePayments();
+    this.loadPayrollPeriods();
+    this.loadLoanReferences();
 
     this.loadCurrencySymbol();
   }
@@ -167,8 +191,39 @@ export class LoanRequestsComponent implements OnInit {
         next: (currencyCode: any) => {
           this.currencySymbol.set(this.settingsService.getCurrencySymbol(currencyCode));
         },
-        error: () => {
-          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        error: (err) => {
+          console.error('Error loading organization currency', err);
+        }
+      });
+  }
+
+  private loadPayrollPeriods(): void {
+    this.payrollService.getPayrollPeriods()
+      .pipe(take(1))
+      .subscribe({
+        next: (res: any) => {
+          // res is response.data which is a PagedResult (contains .data array)
+          const rawPeriods = res?.data || [];
+          this.payrollPeriods = rawPeriods.map((p: any) => ({
+            periodId: p.periodId || p.id,
+            periodName: p.periodName || p.name || p.periodLabel
+          }));
+        },
+        error: (err) => {
+          console.error('Error loading payroll periods', err);
+        }
+      });
+  }
+
+  private loadLoanReferences(): void {
+    this.payrollService.getMyLoanReferences()
+      .pipe(take(1))
+      .subscribe({
+        next: (refs) => {
+          this.loanReferences = refs || [];
+        },
+        error: (err) => {
+          console.error('Error loading loan references', err);
         }
       });
   }
@@ -226,30 +281,19 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   get hasActiveLoanHistoryFilters(): boolean {
-    return !!(this.pendingLoanHistorySearch || this.pendingLoanHistoryStatus || this.pendingLoanHistoryPeriod);
+    return !!(this.pendingLoanHistorySearch || this.pendingLoanHistoryReference || this.pendingLoanHistoryMethod || this.pendingLoanHistoryPeriod);
   }
 
   get hasAppliedLoanHistoryFilters(): boolean {
-    return !!(this.loanHistorySearch || this.loanHistoryStatus || this.loanHistoryPeriod);
+    return !!(this.loanHistorySearch || this.loanHistoryReference || this.loanHistoryMethod || this.loanHistoryPeriod);
   }
 
-  get loanHistoryPeriods(): string[] {
-    return this.uniquePeriods(this.loanHistoryRows.map((row) => row.periodLabel));
-  }
-
-  get filteredLoanHistoryRows(): LoanPaymentHistoryRecord[] {
-    const search = this.loanHistorySearch.trim().toLowerCase();
-
-    return this.loanHistoryRows.filter((row) => {
-      const matchesSearch = !search || row.periodLabel.toLowerCase().includes(search);
-      const matchesStatus = !this.loanHistoryStatus || row.status === this.loanHistoryStatus;
-      const matchesPeriod = !this.loanHistoryPeriod || row.periodLabel === this.loanHistoryPeriod;
-      return matchesSearch && matchesStatus && matchesPeriod;
-    });
+  get loanHistoryPeriods(): any[] {
+    return this.payrollPeriods;
   }
 
   get loanHistoryTotalRecords(): number {
-    return this.filteredLoanHistoryRows.length;
+    return this.loanHistoryTotalRecordsCount;
   }
 
   get loanHistoryTotalPages(): number {
@@ -275,7 +319,7 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   get loanHistoryView(): LoanPaymentHistoryRecord[] {
-    return this.paginateData(this.filteredLoanHistoryRows, this.loanHistoryPage, this.historyPageSize);
+    return this.loanPayments;
   }
 
   get hasActiveAdvanceHistoryFilters(): boolean {
@@ -333,25 +377,25 @@ export class LoanRequestsComponent implements OnInit {
 
   get totalBorrowed(): number {
     return this.loans
-      .filter((row) => row.status !== 'pending' && row.status !== 'cancelled')
+      .filter((row) => row.status === 'active')
       .reduce((sum, row) => sum + row.totalAmount, 0);
   }
 
   get amountPaid(): number {
     return this.loans
-      .filter((row) => row.status !== 'pending' && row.status !== 'cancelled')
+      .filter((row) => row.status === 'active')
       .reduce((sum, row) => sum + row.paidAmount, 0);
   }
 
   get remainingLoanAmount(): number {
     return this.loans
-      .filter((row) => row.status === 'active' || row.status === 'approved')
+      .filter((row) => row.status === 'active')
       .reduce((sum, row) => sum + row.remainingAmount, 0);
   }
 
   get monthlyInstallmentTotal(): number {
     return this.loans
-      .filter((row) => row.status === 'active' || row.status === 'approved')
+      .filter((row) => row.status === 'active')
       .reduce((sum, row) => sum + row.monthlyInstallment, 0);
   }
 
@@ -402,26 +446,35 @@ export class LoanRequestsComponent implements OnInit {
   applyLoanHistoryFilters(): void {
     this.loanHistorySearch = this.pendingLoanHistorySearch.trim();
     this.loanHistoryStatus = this.pendingLoanHistoryStatus;
+    this.loanHistoryMethod = this.pendingLoanHistoryMethod;
     this.loanHistoryPeriod = this.pendingLoanHistoryPeriod;
+    this.loanHistoryReference = this.pendingLoanHistoryReference;
     this.loanHistoryCurrentPage = 1;
+    this.loadLoanPayments();
   }
 
   clearLoanHistoryFilters(): void {
     this.pendingLoanHistorySearch = '';
     this.pendingLoanHistoryStatus = '';
+    this.pendingLoanHistoryMethod = '';
     this.pendingLoanHistoryPeriod = '';
+    this.pendingLoanHistoryReference = '';
     this.loanHistorySearch = '';
     this.loanHistoryStatus = '';
+    this.loanHistoryMethod = '';
     this.loanHistoryPeriod = '';
+    this.loanHistoryReference = '';
     this.loanHistoryCurrentPage = 1;
+    this.loadLoanPayments();
   }
 
   goToLoanHistoryPage(page: number): void {
-    if (page < 1 || page > this.loanHistoryTotalPages || page === this.loanHistoryPage) {
+    if (page < 1 || page > this.loanHistoryTotalPages || page === this.loanHistoryCurrentPage) {
       return;
     }
 
     this.loanHistoryCurrentPage = page;
+    this.loadLoanPayments();
   }
 
   prevLoanHistoryPage(): void {
@@ -476,17 +529,16 @@ export class LoanRequestsComponent implements OnInit {
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: RequestLoanDialogPayload | undefined) => {
-      if (!result) {
-        return;
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // Since the dialog itself calls the API, we just refresh the list
+        this.loadLoans();
       }
-
-      this.submitLoanRequest(result);
     });
   }
 
   openEditLoanRequestDialog(row: EmployeeLoanRecord): void {
-    if (row.status !== 'pending') {
+    if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
 
@@ -497,24 +549,24 @@ export class LoanRequestsComponent implements OnInit {
       restoreFocus: false,
       data: {
         currencySymbol: this.currencySymbol(),
+        loanId: row.id,
         initialValue: {
           totalAmount: row.totalAmount,
           repaymentType: row.repaymentType,
           monthlyInstallment: row.monthlyInstallment,
           totalInstallments: row.totalInstallments,
-          startDate: row.startDate,
-          endDate: row.endDate,
-          reason: row.reason
-        }
+          reason: row.reason,
+          loanRuleId: row.ruleId,
+          returnDate: row.endDate // endDate is used for returnDate in full repayment
+        } as any 
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: RequestLoanDialogPayload | undefined) => {
-      if (!result) {
-        return;
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        // Refresh the list if edit was successful
+        this.loadLoans();
       }
-
-      this.updateLocalLoanRequest(row, result);
     });
   }
 
@@ -539,20 +591,35 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   cancelLoanRequest(row: EmployeeLoanRecord): void {
-    if (row.status !== 'pending') {
+    if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
 
-    this.activateLocalLoanFallback();
-    this.localLoanSeed = this.localLoanSeed.map((item) => {
-      if (item.id !== row.id) {
-        return item;
-      }
+    const dialogData: ConfirmDeleteData = {
+      title: 'Cancel Loan Request',
+      message: 'Are you sure you want to cancel this loan request?',
+      itemName: row.referenceNo,
+      confirmButtonText: 'Yes, Cancel'
+    };
 
-      return { ...item, status: 'cancelled' };
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
     });
 
-    this.loans = this.filterForCurrentEmployee([...this.localLoanSeed]);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === true) {
+        this.payrollService.deleteLoanRequest(row.id).subscribe({
+          next: () => {
+            this.loadLoans();
+          },
+          error: (err: any) => {
+            console.error('Error cancelling loan request:', err);
+          }
+        });
+      }
+    });
   }
 
   cancelAdvanceRequest(row: SalaryAdvanceRecord): void {
@@ -603,8 +670,9 @@ export class LoanRequestsComponent implements OnInit {
     });
   }
 
-  getLoanStatusClass(status: LoanStatus): string {
-    return `status-${status}`;
+  getLoanStatusClass(loan: EmployeeLoanRecord): string {
+    if (loan.status === 'active') return 'status-active';
+    return `status-${this.normalizeLoanStatus(loan.requestStatus)}`;
   }
 
   getAdvanceStatusClass(status: SalaryAdvanceStatus): string {
@@ -669,13 +737,73 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoans(): void {
-    this.activateLocalLoanFallback();
-    this.loans = this.filterForCurrentEmployee([...this.localLoanSeed]);
+    // We combine pending requests and active loans into a single list
+    forkJoin({
+      pending: this.payrollService.getMyPendingLoans().pipe(take(1)),
+      active: this.payrollService.getMyActiveLoans().pipe(take(1))
+    }).subscribe({
+      next: (res: any) => {
+        const pendingLoans = (res.pending || []).map((item: any, i: number) => this.mapLoan(item, i));
+        const activeLoans = (res.active || []).map((item: any, i: number) => this.mapLoan(item, pendingLoans.length + i));
+        
+        // Combine and dedup by ID if necessary (though they should be distinct)
+        const combined = [...pendingLoans, ...activeLoans];
+        const unique = Array.from(new Map(combined.map(l => [l.id, l])).values());
+        
+        this.loans = unique;
+        this.usingLocalLoanData = false;
+      },
+      error: (err) => {
+        console.error('Error loading loans:', err);
+        // Fallback to local data only if API fails
+        this.activateLocalLoanFallback();
+        this.loans = this.filterForCurrentEmployee([...this.localLoanSeed]);
+      }
+    });
   }
 
   private loadLoanPayments(): void {
-    this.activateLocalLoanPaymentFallback();
-    this.loanPayments = this.filterForCurrentEmployee([...this.localLoanPaymentSeed]);
+    const filter = {
+      page: this.loanHistoryCurrentPage,
+      pageSize: this.historyPageSize,
+      status: this.loanHistoryStatus,
+      paymentMethod: this.loanHistoryMethod,
+      periodId: this.loanHistoryPeriod,
+      loanId: this.loanHistoryReference
+    };
+
+    this.payrollService.getMyLoanHistory(filter).subscribe({
+      next: (response) => {
+        if (response && response.data) {
+          this.loanPayments = response.data.map((item: any) => ({
+            id: item.id,
+            loanId: item.loanId,
+            employeeId: item.employeeId,
+            periodId: item.periodId,
+            periodLabel: item.periodLabel || 'N/A', 
+            installmentAmount: item.installmentAmount,
+            remainingAmount: item.remainingAmount,
+            status: item.paymentStatus?.toLowerCase() || 'pending',
+            paidDate: item.paymentDate,
+            paymentMethod: item.paymentMethod,
+            installmentNumber: item.installmentNumber,
+            loanAmount: item.loanTotalAmount,
+            loanReference: item.loanReferenceId
+          }));
+          this.loanHistoryTotalRecordsCount = response.totalCount;
+        } else {
+          this.loanPayments = [];
+          this.loanHistoryTotalRecordsCount = 0;
+        }
+        this.usingLocalLoanPaymentData = false;
+      },
+      error: (err) => {
+        console.error('Error loading loan payments', err);
+        // Fallback to local data if needed, but for now just clear
+        this.loanPayments = [];
+        this.loanHistoryTotalRecordsCount = 0;
+      }
+    });
   }
 
   private loadSalaryAdvances(): void {
@@ -719,12 +847,14 @@ export class LoanRequestsComponent implements OnInit {
       paidAmount: 0,
       progressPercent: 0,
       status: 'pending',
+      requestStatus: 'pending',
       repaymentType: payload.repaymentType,
       reason: payload.reason,
-      startDate: payload.startDate,
-      endDate: payload.endDate,
+      startDate: this.getTodayIsoDate(), // Default to today since field was removed
+      endDate: null,
       approvedBy: 'Pending HR approval',
-      requestedOn: this.getTodayIsoDate()
+      requestedOn: this.getTodayIsoDate(),
+      ruleId: payload.loanRuleId || ''
     };
 
     this.localLoanSeed = [nextItem, ...this.localLoanSeed];
@@ -759,9 +889,9 @@ export class LoanRequestsComponent implements OnInit {
         progressPercent: 0,
         repaymentType: payload.repaymentType,
         reason: payload.reason,
-        startDate: payload.startDate,
-        endDate: payload.endDate,
-        status: 'pending'
+        status: 'pending',
+        requestStatus: 'pending',
+        ruleId: payload.loanRuleId || ''
       };
     });
 
@@ -813,7 +943,7 @@ export class LoanRequestsComponent implements OnInit {
     return {
       id,
       employeeId,
-      referenceNo: String(item.referenceNo ?? item.loanNumber ?? this.generateReference('LOAN', index + 1)),
+      referenceNo: String(item.referenceId ?? item.referenceNo ?? item.loanNumber ?? this.generateReference('LOAN', index + 1)),
       totalAmount,
       monthlyInstallment,
       totalInstallments,
@@ -821,13 +951,17 @@ export class LoanRequestsComponent implements OnInit {
       remainingAmount,
       paidAmount,
       progressPercent: this.toProgress(paidAmount, totalAmount),
-      status: this.normalizeLoanStatus(item.loanStatus ?? item.status ?? item.requestStatus),
+      status: (this.normalizeLoanStatus(item.loanStatus ?? item.status) === 'active') 
+        ? 'active' 
+        : this.normalizeLoanStatus(item.requestStatus ?? item.loanStatus ?? item.status),
+      requestStatus: String(item.requestStatus ?? item.loanStatus ?? item.status ?? 'pending'),
       repaymentType: this.normalizeRepaymentType(item.repaymentType ?? item.loanType),
       reason: String(item.reason ?? item.description ?? item.notes ?? 'Loan support'),
       startDate: this.normalizeDate(item.startDate ?? item.createdAt),
       endDate: this.normalizeDateNullable(item.endDate),
       approvedBy: String(item.approvedBy ?? 'HR Manager'),
-      requestedOn: this.normalizeDate(item.requestedOn ?? item.createdAt ?? item.startDate)
+      requestedOn: this.normalizeDate(item.requestedOn ?? item.createdAt ?? item.startDate),
+      ruleId: String(item.ruleId ?? item.loanRuleId ?? '')
     };
   }
 
@@ -836,10 +970,13 @@ export class LoanRequestsComponent implements OnInit {
       id: String(item.id ?? item.paymentId ?? `loan-payment-${index + 1}`),
       loanId: String(item.loanId ?? item.loan?.id ?? item.loan?.loanId ?? ''),
       employeeId: String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? this.currentEmployeeId ?? ''),
+      periodId: String(item.periodId ?? item.payrollPeriodId ?? ''),
       periodLabel: String(item.periodName ?? item.period ?? item.payrollPeriodName ?? this.getCurrentMonthYear()),
       installmentAmount: this.toNumber(item.installmentAmount ?? item.paymentAmount ?? item.amount),
       remainingAmount: this.toNumber(item.remainingAmount ?? item.balanceAmount),
       status: this.normalizePaymentStatus(item.paymentStatus ?? item.status),
+      paymentMethod: item.paymentMethod,
+      installmentNumber: item.installmentNumber,
       paidDate: this.normalizeDateNullable(item.paidDate ?? item.paymentDate ?? item.createdAt)
     };
   }
@@ -893,12 +1030,14 @@ export class LoanRequestsComponent implements OnInit {
         paidAmount: 60000,
         progressPercent: 30,
         status: 'active',
+        requestStatus: 'active',
         repaymentType: 'installment',
         reason: 'Medical expenses',
         startDate: '2025-01-01',
         endDate: '2026-12-31',
         approvedBy: 'HR Manager',
-        requestedOn: '2025-01-01'
+        requestedOn: '2025-01-01',
+        ruleId: 'local-rule-1'
       },
       {
         id: 'local-loan-2025-1029',
@@ -912,12 +1051,14 @@ export class LoanRequestsComponent implements OnInit {
         paidAmount: 0,
         progressPercent: 0,
         status: 'pending',
+        requestStatus: 'pending',
         repaymentType: 'installment',
         reason: 'Home renovation',
         startDate: '2025-10-12',
         endDate: '2026-09-12',
         approvedBy: 'Pending HR approval',
-        requestedOn: '2025-10-12'
+        requestedOn: '2025-10-12',
+        ruleId: 'local-rule-2'
       }
     ];
   }
@@ -928,6 +1069,7 @@ export class LoanRequestsComponent implements OnInit {
         id: 'local-loan-payment-1',
         loanId: 'local-loan-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
+        periodId: 'local-period-1',
         periodLabel: 'Jan 2025',
         installmentAmount: 10000,
         remainingAmount: 190000,
@@ -938,6 +1080,7 @@ export class LoanRequestsComponent implements OnInit {
         id: 'local-loan-payment-2',
         loanId: 'local-loan-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
+        periodId: 'local-period-2',
         periodLabel: 'Feb 2025',
         installmentAmount: 10000,
         remainingAmount: 180000,
@@ -948,41 +1091,53 @@ export class LoanRequestsComponent implements OnInit {
         id: 'local-loan-payment-3',
         loanId: 'local-loan-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
+        periodId: 'local-period-3',
         periodLabel: 'Mar 2025',
         installmentAmount: 10000,
         remainingAmount: 170000,
         status: 'deducted',
-        paidDate: '2025-03-31'
+        paidDate: '2025-03-31',
+        installmentNumber: 3,
+        paymentMethod: 'payroll_deduction'
       },
       {
         id: 'local-loan-payment-4',
         loanId: 'local-loan-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
+        periodId: 'local-period-4',
         periodLabel: 'Apr 2025',
         installmentAmount: 10000,
         remainingAmount: 160000,
         status: 'deducted',
-        paidDate: '2025-04-30'
+        paidDate: '2025-04-30',
+        installmentNumber: 4,
+        paymentMethod: 'payroll_deduction'
       },
       {
         id: 'local-loan-payment-5',
         loanId: 'local-loan-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
+        periodId: 'local-period-5',
         periodLabel: 'May 2025',
         installmentAmount: 10000,
         remainingAmount: 150000,
         status: 'deducted',
-        paidDate: '2025-05-30'
+        paidDate: '2025-05-30',
+        installmentNumber: 5,
+        paymentMethod: 'payroll_deduction'
       },
       {
         id: 'local-loan-payment-6',
         loanId: 'local-loan-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
+        periodId: 'local-period-6',
         periodLabel: 'Jun 2025',
         installmentAmount: 10000,
         remainingAmount: 140000,
         status: 'deducted',
-        paidDate: '2025-06-30'
+        paidDate: '2025-06-30',
+        installmentNumber: 6,
+        paymentMethod: 'payroll_deduction'
       }
     ];
   }
@@ -1124,12 +1279,16 @@ export class LoanRequestsComponent implements OnInit {
   private normalizeLoanStatus(rawStatus: unknown): LoanStatus {
     const status = String(rawStatus ?? '').trim().toLowerCase();
 
-    if (status === 'approved') return 'approved';
+    if (status === 'active') return 'active';
     if (status === 'pending') return 'pending';
+    if (status === 'approved') return 'approved';
+    if (status === 'accepted') return 'accepted';
     if (status === 'completed' || status === 'closed') return 'completed';
-    if (status === 'cancelled' || status === 'canceled' || status === 'rejected') return 'cancelled';
+    if (status === 'rejected') return 'rejected';
+    if (status === 'cancelled' || status === 'canceled') return 'cancelled';
+    if (status === 'inactive') return 'pending'; // Inactive loans are typically awaiting approval or disbursement
 
-    return 'active';
+    return 'pending'; // Default to pending for safety
   }
 
   private normalizeAdvanceStatus(rawStatus: unknown): SalaryAdvanceStatus {

@@ -101,7 +101,8 @@ export class RuleDialogComponent implements OnInit {
     // Loan Policy fields
     maxLoanAmount: [null as number | null],
     maxInstallments: [null as number | null],
-    interestRate: [null as number | null]
+    repaymentType: ['installment'],
+    interestRate: [0]
   });
 
   ngOnInit(): void {
@@ -128,6 +129,10 @@ export class RuleDialogComponent implements OnInit {
     // When amount type changes, update validation logic
     this.ruleForm.get('amountType')?.valueChanges.subscribe(() => {
       this.updateAmountValidation();
+    });
+
+    this.ruleForm.get('repaymentType')?.valueChanges.subscribe(() => {
+      this.updateValidation(this.selectedPolicy);
     });
 
     if (this.isEditMode && this.data?.rule) {
@@ -169,7 +174,8 @@ export class RuleDialogComponent implements OnInit {
         this.ruleForm.patchValue({
           maxLoanAmount: rule.maxLoanAmount ?? null,
           maxInstallments: rule.maxInstallments ?? null,
-          interestRate: rule.interestRate ?? null
+          repaymentType: rule.maxInstallments === 1 ? 'full' : 'installment',
+          interestRate: 0
         });
       }
     }
@@ -248,21 +254,26 @@ export class RuleDialogComponent implements OnInit {
 
     const loanAmountControl = this.ruleForm.get('maxLoanAmount');
     const loanInstallmentsControl = this.ruleForm.get('maxInstallments');
-    const loanInterestControl = this.ruleForm.get('interestRate');
+    const repaymentTypeControl = this.ruleForm.get('repaymentType');
 
     if (Number(policyId) === 7) {
       this.ruleForm.get('ruleName')?.setValidators(Validators.required);
       loanAmountControl?.setValidators([Validators.required, Validators.min(0)]);
-      loanInstallmentsControl?.setValidators([Validators.required, Validators.min(1)]);
-      loanInterestControl?.setValidators([Validators.required, Validators.min(0)]);
+      repaymentTypeControl?.setValidators([Validators.required]);
+      
+      if (repaymentTypeControl?.value === 'installment') {
+        loanInstallmentsControl?.setValidators([Validators.required, Validators.min(1)]);
+      } else {
+        loanInstallmentsControl?.clearValidators();
+      }
     } else {
       loanAmountControl?.clearValidators();
       loanInstallmentsControl?.clearValidators();
-      loanInterestControl?.clearValidators();
+      repaymentTypeControl?.clearValidators();
     }
     loanAmountControl?.updateValueAndValidity();
     loanInstallmentsControl?.updateValueAndValidity();
-    loanInterestControl?.updateValueAndValidity();
+    repaymentTypeControl?.updateValueAndValidity();
 
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     this.ruleForm.get('amountType')?.updateValueAndValidity();
@@ -494,8 +505,8 @@ export class RuleDialogComponent implements OnInit {
         ruleName: formValue.ruleName,
         description: formValue.description,
         maxLoanAmount: formValue.maxLoanAmount,
-        maxInstallments: formValue.maxInstallments,
-        interestRate: formValue.interestRate,
+        maxInstallments: formValue.repaymentType === 'full' ? 1 : formValue.maxInstallments,
+        interestRate: 0,
         isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
       };
 
