@@ -7,22 +7,31 @@
   </div>
 
   <div class="dialog-body" [formGroup]="form">
-    <div class="form-group full-width">
-      <label>Employee</label>
-      <select class="form-control" formControlName="employeeId">
-        <option value="" disabled selected>Select employee</option>
-        @for (employee of employees; track employee.id) {
-          <option [value]="employee.id">{{ employee.name }}</option>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Employee</label>
+        <select class="form-control" formControlName="employeeId">
+          <option value="" disabled selected>Select employee</option>
+          @for (employee of employees; track employee.id) {
+            <option [value]="employee.id">{{ employee.name }}</option>
+          }
+        </select>
+        @if (form.get('employeeId')?.touched && form.get('employeeId')?.hasError('required')) {
+          <p class="field-error">Employee is required.</p>
         }
-      </select>
-      @if (form.get('employeeId')?.touched && form.get('employeeId')?.hasError('required')) {
-        <p class="field-error">Employee is required.</p>
-      }
+      </div>
+      <div class="form-group">
+        <label>Repayment type</label>
+        <select class="form-control" formControlName="repaymentType">
+          <option value="installment">installments</option>
+          <option value="full">full</option>
+        </select>
+      </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label>Loan</label>
+        <label>Reference ID</label>
         <select class="form-control" formControlName="loanId">
           <option value="" disabled selected>Select loan</option>
           @for (loan of filteredLoans; track loan.id) {
@@ -75,15 +84,6 @@
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group full-width">
-        <label>Repayment type</label>
-        <select class="form-control" formControlName="repaymentType">
-          <option value="installment">installments</option>
-          <option value="full">full</option>
-        </select>
-      </div>
-    </div>
   </div>
 
   <div class="dialog-footer">
