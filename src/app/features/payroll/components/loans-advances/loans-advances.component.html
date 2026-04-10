@@ -524,7 +524,7 @@
             <th class="col-total">Total amount</th>
             <th class="col-paid">Paid amount</th>
             <th class="col-completion">Completion %</th>
-            <th class="col-action">Action</th>
+            <!-- <th class="col-action">Action</th> -->
           </tr>
         </thead>
         <tbody>
@@ -549,11 +549,14 @@
                 <span class="mini-progress-label">{{ payment.completionPercent | number:'1.0-2' }}%</span>
               </div>
             </td>
+            <!--
             <td class="action-cell">
-              <button class="action-btn hover-primary" type="button" aria-label="Edit loan payment">
+              <button class="action-btn hover-primary" type="button" aria-label="Edit loan payment"
+                (click)="openAddLoanPaymentDialogForRow(payment)">
                 <mat-icon>edit</mat-icon>
               </button>
             </td>
+            -->
           </tr>
           }
           }
@@ -628,6 +631,7 @@
       <p class="card-footer">mapped from loan payments</p>
     </div>
 
+    <!--
     <div class="card">
       <div class="card-content">
         <div class="info">
@@ -640,6 +644,7 @@
       </div>
       <p class="card-footer">mapped from advance payments</p>
     </div>
+    -->
   </div>
 
   <div class="content-card">
@@ -652,16 +657,22 @@
         </div>
 
         <select class="filter-select" [(ngModel)]="pendingRepaymentTypeFilter">
-          <option value="">All types</option>
-          <option value="loan">Loan</option>
-          <option value="advance">Salary advance</option>
+          <option value="">All repayment types</option>
+          <option value="installment">Installments</option>
+          <option value="full">Full</option>
         </select>
 
-        <select class="filter-select" [(ngModel)]="pendingRepaymentStatusFilter">
-          <option value="">All status</option>
-          <option value="deducted">Deducted</option>
-          <option value="pending">Pending</option>
-          <option value="skipped">Skipped</option>
+        <select class="filter-select" [(ngModel)]="pendingRepaymentPaymentMethodFilter">
+          <option value="">All payment methods</option>
+          <option value="cash">Cash</option>
+          <option value="bank transfer">Bank transfer</option>
+          <option value="payroll deduction">Payroll deduction</option>
+        </select>
+
+        <select class="filter-select" [(ngModel)]="pendingRepaymentLoanStatusFilter">
+          <option value="">All loan status</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
         </select>
 
         <div class="filter-actions">
@@ -679,10 +690,6 @@
       </div>
 
       <div class="add-btn-wrap">
-        <button class="add-btn" (click)="openAddRepaymentDialog()">
-          <mat-icon>add</mat-icon>
-          Add repayment
-        </button>
       </div>
     </div>
 
@@ -691,13 +698,13 @@
         <thead>
           <tr>
             <th>Employee</th>
-            <th>Type</th>
-            <th>Reference</th>
+            <th>Repayment type</th>
+            <th>Loan reference ID</th>
             <th>Payroll period</th>
             <th class="text-right">Amount</th>
             <th class="text-right">Remaining</th>
             <th>Paid date</th>
-            <th>Status</th>
+            <th>Loan status</th>
           </tr>
         </thead>
         <tbody>
@@ -711,7 +718,7 @@
             <td>{{ row.employeeName }}</td>
             <td>
               <span class="type-pill" [ngClass]="getRepaymentTypeClass(row.type)">
-                {{ getRepaymentTypeLabel(row.type) }}
+                {{ row.repaymentType === 'full' ? 'Full' : 'Installments' }}
               </span>
             </td>
             <td>{{ row.referenceLabel }}</td>
@@ -720,8 +727,8 @@
             <td class="text-right">{{ currencySymbol() }} {{ row.remainingAmount | number }}</td>
             <td>{{ formatDateLabel(row.paidDate) }}</td>
             <td>
-              <span class="status-pill" [ngClass]="getLoanPaymentStatusClass(row.status)">
-                {{ getLoanPaymentStatusLabel(row.status) }}
+              <span class="status-pill" [ngClass]="getLoanStatusClass(row.loanStatus)">
+                {{ getLoanStatusLabel(row.loanStatus) }}
               </span>
             </td>
           </tr>

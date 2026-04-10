@@ -17,8 +17,8 @@ import {
 } from '../dialogs/add-loan-dialog/add-loan-dialog.component';
 import {
   AddLoanPaymentDialogComponent,
+  LoanPaymentEmployeeOption,
   LoanPaymentDialogPayload,
-  LoanPaymentDialogStatus,
   LoanPaymentLoanOption
 } from '../dialogs/add-loan-payment-dialog/add-loan-payment-dialog.component';
 import {
@@ -38,8 +38,11 @@ import { DisburseLoanDialogComponent } from '../dialogs/disburse-loan-dialog/dis
 
 type LoanStatus = 'active' | 'pending' | 'completed' | 'cancelled' | 'rejected' | 'approved' | 'accepted';
 type LoanTab = 'loans' | 'salary-advances' | 'loan-payments' | 'repayments';
-type LoanPaymentStatus = LoanPaymentDialogStatus;
+type LoanPaymentStatus = 'pending' | 'deducted' | 'skipped';
 type SalaryAdvanceStatus = 'pending' | 'approved' | 'completed' | 'cancelled' | 'rejected' | 'accepted';
+type RepaymentTypeFilter = 'installment' | 'full' | '';
+type PaymentMethodFilter = 'cash' | 'bank transfer' | 'payroll deduction' | '';
+type RepaymentLoanStatusFilter = 'active' | 'completed' | '';
 
 interface PeriodOption {
   id: string;
@@ -80,10 +83,21 @@ interface LoanPaymentRow {
   remainingAmount: number;
   paidDate: string | null;
   status: LoanPaymentStatus;
+  repaymentType?: 'installment' | 'full';
+  paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
+}
+
+interface ActiveDisbursedLoanOption {
+  loanId: string;
+  referenceId: string;
+  employeeId: string;
+  employeeName: string;
+  remainingAmount: number;
 }
 
 interface DisbursedLoanRow {
   id: string;
+  employeeId: string;
   employeeName: string;
   disbursementDate: string | null;
   endDate: string | null;
@@ -120,6 +134,8 @@ interface AdvancePaymentRow {
   remainingAmount: number;
   paidDate: string | null;
   status: LoanPaymentStatus;
+  repaymentType?: 'installment' | 'full';
+  paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
 }
 
 interface RepaymentLedgerRow {
@@ -136,6 +152,9 @@ interface RepaymentLedgerRow {
   remainingAmount: number;
   paidDate: string | null;
   status: LoanPaymentStatus;
+  repaymentType: 'installment' | 'full';
+  paymentMethod: 'cash' | 'bank transfer' | 'payroll deduction';
+  loanStatus: LoanStatus | 'active' | 'completed';
 }
 
 @Component({
@@ -175,21 +194,26 @@ export class LoansAdvancesComponent implements OnInit {
   salaryAdvanceStatusFilter: SalaryAdvanceStatus | '' = '';
 
   pendingRepaymentSearch = '';
-  pendingRepaymentTypeFilter: RepaymentDialogType | '' = '';
-  pendingRepaymentStatusFilter: LoanPaymentStatus | '' = '';
+  pendingRepaymentTypeFilter: RepaymentTypeFilter = '';
+  pendingRepaymentPaymentMethodFilter: PaymentMethodFilter = '';
+  pendingRepaymentLoanStatusFilter: RepaymentLoanStatusFilter = '';
   repaymentSearch = '';
-  repaymentTypeFilter: RepaymentDialogType | '' = '';
-  repaymentStatusFilter: LoanPaymentStatus | '' = '';
+  repaymentTypeFilter: RepaymentTypeFilter = '';
+  repaymentPaymentMethodFilter: PaymentMethodFilter = '';
+  repaymentLoanStatusFilter: RepaymentLoanStatusFilter = '';
 
   employees: LoanEmployeeOption[] = [];
   periods: PeriodOption[] = [];
 
   loans: LoanLedgerRow[] = [];
   loanPayments: LoanPaymentRow[] = [];
+  activeDisbursedLoanOptions: ActiveDisbursedLoanOption[] = [];
   disbursedLoans: DisbursedLoanRow[] = [];
   disbursedLoansTotalRecords = 0;
   salaryAdvances: SalaryAdvanceRow[] = [];
   advancePayments: AdvancePaymentRow[] = [];
+  repaymentApiRows: RepaymentLedgerRow[] = [];
+  repaymentsTotalCount = 0;
 
   private localPeriodsSeed: PeriodOption[] = [];
   private localLoansSeed: LoanLedgerRow[] = [];
@@ -236,6 +260,7 @@ export class LoansAdvancesComponent implements OnInit {
     this.loadLoanPayments();
     this.loadSalaryAdvances();
     this.loadAdvancePayments();
+    this.loadRepayments();
 
     this.loadCurrencySymbol();
   }
@@ -288,11 +313,21 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   get hasActiveRepaymentFilters(): boolean {
-    return !!(this.pendingRepaymentSearch || this.pendingRepaymentTypeFilter || this.pendingRepaymentStatusFilter);
+    return !!(
+      this.pendingRepaymentSearch
+      || this.pendingRepaymentTypeFilter
+      || this.pendingRepaymentPaymentMethodFilter
+      || this.pendingRepaymentLoanStatusFilter
+    );
   }
 
   get hasAppliedRepaymentFilters(): boolean {
-    return !!(this.repaymentSearch || this.repaymentTypeFilter || this.repaymentStatusFilter);
+    return !!(
+      this.repaymentSearch
+      || this.repaymentTypeFilter
+      || this.repaymentPaymentMethodFilter
+      || this.repaymentLoanStatusFilter
+    );
   }
 
   get hasFallbackNotice(): boolean {
@@ -503,60 +538,15 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   get repaymentRows(): RepaymentLedgerRow[] {
-    const loanPaymentRows: RepaymentLedgerRow[] = this.loanPayments.map((payment) => ({
-      id: `loan-${payment.id}`,
-      sourceId: payment.id,
-      type: 'loan',
-      employeeId: payment.employeeId,
-      employeeName: payment.employeeName,
-      referenceId: payment.loanId,
-      referenceLabel: payment.loanLabel,
-      periodId: payment.periodId,
-      periodName: payment.periodName,
-      amount: payment.amount,
-      remainingAmount: payment.remainingAmount,
-      paidDate: payment.paidDate,
-      status: payment.status
-    }));
-
-    const advancePaymentRows: RepaymentLedgerRow[] = this.advancePayments.map((payment) => ({
-      id: `advance-${payment.id}`,
-      sourceId: payment.id,
-      type: 'advance',
-      employeeId: payment.employeeId,
-      employeeName: payment.employeeName,
-      referenceId: payment.advanceId,
-      referenceLabel: payment.advanceLabel,
-      periodId: payment.periodId,
-      periodName: payment.periodName,
-      amount: payment.amount,
-      remainingAmount: payment.remainingAmount,
-      paidDate: payment.paidDate,
-      status: payment.status
-    }));
-
-    return [...loanPaymentRows, ...advancePaymentRows]
-      .sort((a, b) => this.compareDatesDesc(a.paidDate, b.paidDate));
+    return this.repaymentApiRows;
   }
 
   get filteredRepayments(): RepaymentLedgerRow[] {
-    const search = this.repaymentSearch.trim().toLowerCase();
-
-    return this.repaymentRows.filter((row) => {
-      const matchesSearch = !search
-        || row.employeeName.toLowerCase().includes(search)
-        || row.referenceLabel.toLowerCase().includes(search)
-        || row.periodName.toLowerCase().includes(search);
-
-      const matchesType = !this.repaymentTypeFilter || row.type === this.repaymentTypeFilter;
-      const matchesStatus = !this.repaymentStatusFilter || row.status === this.repaymentStatusFilter;
-
-      return matchesSearch && matchesType && matchesStatus;
-    });
+    return this.repaymentRows;
   }
 
   get repaymentsTotalRecords(): number {
-    return this.filteredRepayments.length;
+    return this.repaymentsTotalCount;
   }
 
   get repaymentsTotalPages(): number {
@@ -582,7 +572,7 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   get repaymentsView(): RepaymentLedgerRow[] {
-    return this.paginateData(this.filteredRepayments, this.repaymentsPage, this.repaymentsPageSize);
+    return this.repaymentRows;
   }
 
   setTab(tab: LoanTab): void {
@@ -713,18 +703,23 @@ export class LoansAdvancesComponent implements OnInit {
   applyRepaymentFilters(): void {
     this.repaymentSearch = this.pendingRepaymentSearch.trim();
     this.repaymentTypeFilter = this.pendingRepaymentTypeFilter;
-    this.repaymentStatusFilter = this.pendingRepaymentStatusFilter;
+    this.repaymentPaymentMethodFilter = this.pendingRepaymentPaymentMethodFilter;
+    this.repaymentLoanStatusFilter = this.pendingRepaymentLoanStatusFilter;
     this.repaymentsCurrentPage = 1;
+    this.loadRepayments();
   }
 
   clearRepaymentFilters(): void {
     this.pendingRepaymentSearch = '';
     this.pendingRepaymentTypeFilter = '';
-    this.pendingRepaymentStatusFilter = '';
+    this.pendingRepaymentPaymentMethodFilter = '';
+    this.pendingRepaymentLoanStatusFilter = '';
     this.repaymentSearch = '';
     this.repaymentTypeFilter = '';
-    this.repaymentStatusFilter = '';
+    this.repaymentPaymentMethodFilter = '';
+    this.repaymentLoanStatusFilter = '';
     this.repaymentsCurrentPage = 1;
+    this.loadRepayments();
   }
 
   goToRepaymentPage(page: number): void {
@@ -733,6 +728,7 @@ export class LoansAdvancesComponent implements OnInit {
     }
 
     this.repaymentsCurrentPage = page;
+    this.loadRepayments();
   }
 
   prevRepaymentPage(): void {
@@ -741,6 +737,34 @@ export class LoansAdvancesComponent implements OnInit {
 
   nextRepaymentPage(): void {
     this.goToRepaymentPage(this.repaymentsPage + 1);
+  }
+
+  private loadRepayments(): void {
+    const filter = {
+      SearchTerm: this.repaymentSearch || undefined,
+      RepaymentType: this.repaymentTypeFilter || undefined,
+      PaymentMethod: this.repaymentPaymentMethodFilter
+        ? (this.repaymentPaymentMethodFilter === 'bank transfer' ? 'bank_transfer'
+          : this.repaymentPaymentMethodFilter === 'payroll deduction' ? 'payroll_deduction'
+          : this.repaymentPaymentMethodFilter)
+        : undefined,
+      LoanStatus: this.repaymentLoanStatusFilter || undefined,
+      Page: this.repaymentsCurrentPage,
+      PageSize: this.repaymentsPageSize
+    };
+
+    this.payrollService.getAllRepayments(filter).subscribe({
+      next: (response: any) => {
+        const items = response.data || [];
+        this.repaymentApiRows = items.map((item: any, index: number) => this.mapRepaymentHistoryRow(item, index));
+        this.repaymentsTotalCount = response.totalCount || 0;
+      },
+      error: (err) => {
+        console.error('Error loading repayments', err);
+        this.repaymentApiRows = [];
+        this.repaymentsTotalCount = 0;
+      }
+    });
   }
 
   openAddLoanDialog(): void {
@@ -1009,6 +1033,18 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   openAddLoanPaymentDialog(): void {
+    this.loadActiveDisbursedLoansForDialog();
+  }
+
+  openAddLoanPaymentDialogForRow(row: DisbursedLoanRow): void {
+    this.loadActiveDisbursedLoansForDialog(row);
+  }
+
+  private openAddLoanPaymentDialogWithOptions(targetRow?: DisbursedLoanRow): void {
+    const prefillOption = targetRow
+      ? this.activeDisbursedLoanOptions.find((item) => item.loanId === targetRow.id)
+      : undefined;
+
     const dialogRef = this.dialog.open(AddLoanPaymentDialogComponent, {
       width: '650px',
       panelClass: 'loan-payment-dialog-panel',
@@ -1016,9 +1052,14 @@ export class LoansAdvancesComponent implements OnInit {
       restoreFocus: false,
       data: {
         mode: 'create',
-        employees: this.employees.map((employee) => ({ id: employee.id, name: employee.name })),
+        employees: this.buildLoanPaymentDialogEmployees(),
         periods: this.getAvailablePeriods(),
-        loans: this.buildLoanPaymentOptions(false)
+        loans: this.buildLoanPaymentDialogReferences(),
+        currencySymbol: this.currencySymbol(),
+        initialValue: prefillOption ? {
+          employeeId: prefillOption.employeeId,
+          loanId: prefillOption.referenceId
+        } : undefined
       }
     });
 
@@ -1044,14 +1085,16 @@ export class LoansAdvancesComponent implements OnInit {
         employees: this.employees.map((employee) => ({ id: employee.id, name: employee.name })),
         periods: this.getAvailablePeriods(),
         loans: loanOptions,
+        currencySymbol: this.currencySymbol(),
         initialValue: {
           employeeId: row.employeeId,
           loanId: row.loanId,
           periodId: row.periodId,
           installmentAmount: row.amount,
-          remainingAmount: row.remainingAmount,
+          installmentNumber: row.installmentNumber,
           paidDate: row.paidDate,
-          status: row.status
+          repaymentMethod: 'cash',
+          repaymentType: 'installment'
         }
       }
     });
@@ -1274,7 +1317,20 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   private loadPayrollPeriods(): void {
-    this.periods = [...this.localPeriodsSeed];
+    this.payrollService.getPayrollPeriods().subscribe({
+      next: (response: any) => {
+        const items = this.extractItems(response);
+        const mapped = items
+          .map((item: any, index: number) => this.mapPeriodOption(item, index))
+          .filter((period) => !!period.id && !!period.name);
+
+        this.periods = mapped.length ? mapped : [...this.localPeriodsSeed];
+      },
+      error: (err) => {
+        this.periods = [...this.localPeriodsSeed];
+        console.error('Error loading payroll periods', err);
+      }
+    });
   }
 
   private loadLoans(): void {
@@ -1347,9 +1403,50 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   private saveLoanPayment(payload: LoanPaymentDialogPayload, editingRow?: LoanPaymentRow): void {
-    this.activateLocalLoanPaymentsFallback();
-    this.activateLocalLoanFallback();
-    this.saveLocalLoanPayment(payload, editingRow);
+    if (!editingRow) {
+      this.payrollService.addLoanPayment({
+        referenceId: payload.loanId,
+        employeeId: payload.employeeId,
+        periodId: payload.periodId || null,
+        installmentNumber: payload.installmentNumber,
+        installmentAmount: payload.installmentAmount,
+        repaymentType: payload.repaymentType,
+        paymentDate: payload.paidDate || new Date().toISOString(),
+        paymentMethod: payload.repaymentMethod === 'bank transfer' ? 'bank_transfer' : payload.repaymentMethod
+      }).subscribe({
+        next: () => {
+          this.loadLoans();
+          this.loadLoanPayments();
+        },
+        error: (err) => {
+          console.error('Error saving loan payment:', err);
+          alert('Unable to save loan payment. Please check input and try again.');
+        }
+      });
+      return;
+    }
+
+    this.payrollService.updateLoanPayment({
+      id: editingRow.id,
+      loanId: editingRow.loanId,
+      employeeId: payload.employeeId,
+      periodId: payload.periodId || null,
+      installmentNumber: payload.installmentNumber,
+      installmentAmount: payload.installmentAmount,
+      repaymentType: payload.repaymentType,
+      paymentDate: payload.paidDate || new Date().toISOString(),
+      paymentMethod: payload.repaymentMethod === 'bank transfer' ? 'bank_transfer' : payload.repaymentMethod,
+      paymentStatus: 'settled'
+    }).subscribe({
+      next: () => {
+        this.loadLoans();
+        this.loadLoanPayments();
+      },
+      error: (err) => {
+        console.error('Error updating loan payment:', err);
+        alert('Unable to update loan payment. Please check input and try again.');
+      }
+    });
   }
 
   private saveAdvancePayment(payload: RepaymentDialogPayload, editingRow?: AdvancePaymentRow): void {
@@ -1369,9 +1466,10 @@ export class LoansAdvancesComponent implements OnInit {
         loanId: payload.referenceId,
         periodId: payload.periodId,
         installmentAmount: payload.amount,
-        remainingAmount: payload.remainingAfter,
+        installmentNumber: existingLoanPayment?.installmentNumber ?? 1,
         paidDate: payload.paidDate,
-        status: payload.status
+        repaymentMethod: 'cash',
+        repaymentType: 'installment'
       }, existingLoanPayment);
       return;
     }
@@ -1493,7 +1591,7 @@ export class LoansAdvancesComponent implements OnInit {
 
     const previousDeductedAmount = editingRow?.status === 'deducted' ? editingRow.amount : 0;
     const baseRemaining = Math.max(0, this.toNumber(baseLoan?.remainingAmount ?? 0) + previousDeductedAmount);
-    const shouldDeduct = payload.status === 'deducted';
+    const shouldDeduct = true;
     const appliedAmount = shouldDeduct ? Math.min(this.toNumber(payload.installmentAmount), baseRemaining) : 0;
     const newRemaining = Math.max(0, baseRemaining - appliedAmount);
     const rowRemaining = shouldDeduct ? newRemaining : baseRemaining;
@@ -1551,11 +1649,11 @@ export class LoansAdvancesComponent implements OnInit {
       loanLabel,
       periodId: payload.periodId,
       periodName: this.getPeriodNameById(payload.periodId),
-      installmentNumber: editingRow?.installmentNumber ?? nextInstallmentNumber,
+      installmentNumber: payload.installmentNumber || editingRow?.installmentNumber || nextInstallmentNumber,
       amount: shouldDeduct ? appliedAmount : payload.installmentAmount,
       remainingAmount: rowRemaining,
       paidDate: shouldDeduct ? (payload.paidDate ?? this.getTodayString()) : payload.paidDate,
-      status: payload.status
+      status: 'deducted'
     });
 
     if (editingRow) {
@@ -1827,9 +1925,30 @@ export class LoansAdvancesComponent implements OnInit {
     });
   }
 
+  private mapPeriodOption(item: any, index: number): PeriodOption {
+    const id = String(
+      item?.id
+      ?? item?.periodId
+      ?? item?.payrollPeriodId
+      ?? item?.payrollId
+      ?? `period-${index + 1}`
+    );
+
+    const name = String(
+      item?.name
+      ?? item?.periodName
+      ?? item?.title
+      ?? item?.displayName
+      ?? this.getPeriodFallbackName(index)
+    );
+
+    return { id, name };
+  }
+
   private mapDisbursedLoan(item: any, index: number): DisbursedLoanRow {
     return {
       id: String(item.loanId ?? item.id ?? `disbursed-loan-${index + 1}`),
+      employeeId: String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? ''),
       employeeName: String(item.employeeName ?? 'Unknown Employee'),
       disbursementDate: this.normalizeDateString(item.disbursementDate ?? item.startDate ?? item.createdAt) || null,
       endDate: this.normalizeDateString(item.endDate) || null,
@@ -1859,7 +1978,9 @@ export class LoansAdvancesComponent implements OnInit {
       amount: this.toNumber(item.installmentAmount ?? item.paymentAmount ?? item.amount),
       remainingAmount: this.toNumber(item.remainingAmount ?? item.balanceAmount ?? 0),
       paidDate: this.normalizeDateString(item.paidDate ?? item.paymentDate ?? item.createdAt),
-      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status)
+      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
+      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
+      paymentMethod: this.normalizePaymentMethod(item.paymentMethod)
     });
   }
 
@@ -1897,8 +2018,37 @@ export class LoansAdvancesComponent implements OnInit {
       amount: this.toNumber(item.paymentAmount ?? item.installmentAmount ?? item.amount),
       remainingAmount: this.toNumber(item.remainingAmount ?? item.balanceAmount ?? 0),
       paidDate: this.normalizeDateString(item.paidDate ?? item.paymentDate ?? item.createdAt),
-      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status)
+      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
+      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
+      paymentMethod: this.normalizePaymentMethod(item.paymentMethod)
     });
+  }
+
+  private mapRepaymentHistoryRow(item: any, index: number): RepaymentLedgerRow {
+    const employeeId = String(item.employeeId ?? '');
+    const periodId = String(item.periodId ?? '');
+    const normalizedLoanStatus = this.normalizeLoanStatus(item.loanStatus ?? 'active');
+    const rawReferenceId = String(item.referenceId ?? '').trim();
+    const fallbackReferenceId = String(item.loanId ?? '').trim();
+    const resolvedReferenceId = rawReferenceId || fallbackReferenceId;
+    return {
+      id: String(item.id ?? `repayment-${index + 1}`),
+      sourceId: String(item.id ?? `repayment-${index + 1}`),
+      type: 'loan',
+      employeeId,
+      employeeName: this.resolveEmployeeName(employeeId, String(item.employeeName ?? 'Unknown Employee')),
+      referenceId: resolvedReferenceId,
+      referenceLabel: resolvedReferenceId,
+      periodId,
+      periodName: this.getPeriodNameById(periodId),
+      amount: this.toNumber(item.installmentAmount ?? item.amount ?? 0),
+      remainingAmount: this.toNumber(item.remainingAmount ?? 0),
+      paidDate: this.normalizeDateString(item.paymentDate ?? item.paidDate ?? item.createdAt),
+      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
+      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
+      paymentMethod: this.normalizePaymentMethod(item.paymentMethod),
+      loanStatus: normalizedLoanStatus
+    };
   }
 
   private buildLoanRow(source: {
@@ -1988,6 +2138,8 @@ export class LoansAdvancesComponent implements OnInit {
     remainingAmount: number;
     paidDate: string | null;
     status: LoanPaymentStatus;
+    repaymentType?: 'installment' | 'full';
+    paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
   }): LoanPaymentRow {
     return {
       id: source.id,
@@ -2001,7 +2153,9 @@ export class LoansAdvancesComponent implements OnInit {
       amount: Math.max(0, this.toNumber(source.amount)),
       remainingAmount: Math.max(0, this.toNumber(source.remainingAmount)),
       paidDate: source.paidDate ? this.normalizeDateString(source.paidDate) : null,
-      status: source.status
+      status: source.status,
+      repaymentType: source.repaymentType ?? 'installment',
+      paymentMethod: source.paymentMethod ?? 'cash'
     };
   }
 
@@ -2017,6 +2171,8 @@ export class LoansAdvancesComponent implements OnInit {
     remainingAmount: number;
     paidDate: string | null;
     status: LoanPaymentStatus;
+    repaymentType?: 'installment' | 'full';
+    paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
   }): AdvancePaymentRow {
     return {
       id: source.id,
@@ -2029,8 +2185,21 @@ export class LoansAdvancesComponent implements OnInit {
       amount: Math.max(0, this.toNumber(source.amount)),
       remainingAmount: Math.max(0, this.toNumber(source.remainingAmount)),
       paidDate: source.paidDate ? this.normalizeDateString(source.paidDate) : null,
-      status: source.status
+      status: source.status,
+      repaymentType: source.repaymentType ?? 'installment',
+      paymentMethod: source.paymentMethod ?? 'payroll deduction'
     };
+  }
+
+  private normalizePaymentMethod(rawValue: unknown): 'cash' | 'bank transfer' | 'payroll deduction' {
+    const value = String(rawValue ?? '').trim().toLowerCase();
+    if (value === 'bank transfer' || value === 'bank_transfer') {
+      return 'bank transfer';
+    }
+    if (value === 'payroll deduction' || value === 'payroll_deduction') {
+      return 'payroll deduction';
+    }
+    return 'cash';
   }
 
   private buildLocalEmployees(): LoanEmployeeOption[] {
@@ -2288,6 +2457,58 @@ export class LoansAdvancesComponent implements OnInit {
         label: `${loan.employeeName} - ${this.currencySymbol()} ${loan.remainingAmount.toLocaleString()} due`,
         remainingAmount: loan.remainingAmount
       }));
+  }
+
+  private loadActiveDisbursedLoansForDialog(targetRow?: DisbursedLoanRow): void {
+    this.payrollService.getDisbursedActiveLoans({ Page: 1, PageSize: 500 }).subscribe({
+      next: (response: any) => {
+        const items = response.data || [];
+        this.activeDisbursedLoanOptions = items
+          .map((item: any) => ({
+            loanId: String(item.loanId ?? item.id ?? ''),
+            referenceId: String(item.referenceId ?? ''),
+            employeeId: String(item.employeeId ?? ''),
+            employeeName: String(item.employeeName ?? 'Unknown Employee'),
+            remainingAmount: this.toNumber(item.remainingAmount ?? 0)
+          }))
+          .filter((row: ActiveDisbursedLoanOption) => !!row.referenceId && !!row.employeeId);
+
+        this.openAddLoanPaymentDialogWithOptions(targetRow);
+      },
+      error: (err) => {
+        console.error('Error loading active disbursed loans for dialog', err);
+        this.activeDisbursedLoanOptions = [];
+        this.openAddLoanPaymentDialogWithOptions(targetRow);
+      }
+    });
+  }
+
+  private buildLoanPaymentDialogEmployees(): LoanPaymentEmployeeOption[] {
+    if (!this.activeDisbursedLoanOptions.length) {
+      return this.employees.map((employee) => ({ id: employee.id, name: employee.name }));
+    }
+
+    const mapByEmployeeId = new Map<string, LoanPaymentEmployeeOption>();
+    for (const row of this.activeDisbursedLoanOptions) {
+      if (!mapByEmployeeId.has(row.employeeId)) {
+        mapByEmployeeId.set(row.employeeId, { id: row.employeeId, name: row.employeeName });
+      }
+    }
+
+    return Array.from(mapByEmployeeId.values());
+  }
+
+  private buildLoanPaymentDialogReferences(): LoanPaymentLoanOption[] {
+    if (!this.activeDisbursedLoanOptions.length) {
+      return this.buildLoanPaymentOptions(false);
+    }
+
+    return this.activeDisbursedLoanOptions.map((row) => ({
+      id: row.referenceId,
+      employeeId: row.employeeId,
+      label: `${row.referenceId} - ${row.employeeName}`,
+      remainingAmount: row.remainingAmount
+    }));
   }
 
   private ensureLoanPaymentOption(options: LoanPaymentLoanOption[], row: LoanPaymentRow): LoanPaymentLoanOption[] {

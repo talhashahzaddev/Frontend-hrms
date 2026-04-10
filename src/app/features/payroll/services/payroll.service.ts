@@ -1257,14 +1257,14 @@ export class PayrollService {
         );
     }
 
-    updateLoanPayment(id: string, data: any): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/loan-payments/${id}`, data)
+    updateLoanPayment(data: any): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/loans/payment`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
               throw new Error(response.message);
             }
-            return response.data;
+            return response.data || response.success;
           })
         );
     }
@@ -1541,6 +1541,56 @@ export class PayrollService {
         });
       }
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/disbursed-loans`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
+    getDisbursedActiveLoans(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach(key => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/disbursed-active-loans`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
+    addLoanPayment(data: any): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/loans/payment`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getAllRepayments(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach(key => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/repayments/all`, { params }).pipe(
         map((response: any) => {
           if (!response.success && response.message) {
             throw new Error(response.message);

@@ -29,6 +29,9 @@
             <option [value]="loan.id">{{ loan.label }}</option>
           }
         </select>
+        @if (form.get('loanId')?.touched && form.get('loanId')?.hasError('required')) {
+          <p class="field-error">Reference ID is required.</p>
+        }
       </div>
       <div class="form-group">
         <label>Payroll period</label>
@@ -43,15 +46,18 @@
 
     <div class="form-row">
       <div class="form-group">
-        <label>Installment amount PKR</label>
+        <label>Installment amount {{ currencySymbol }}</label>
         <input type="number" class="form-control align-right" formControlName="installmentAmount" min="1" placeholder="0.00" />
         @if (showInstallmentError) {
           <p class="field-error">Installment must be valid and not exceed remaining amount.</p>
         }
       </div>
       <div class="form-group">
-        <label>Remaining amount PKR</label>
-        <input type="text" class="form-control readonly align-right" formControlName="remainingAmount" readonly />
+        <label>Installment number</label>
+        <input type="number" class="form-control" formControlName="installmentNumber" min="1" placeholder="1" />
+        @if (form.get('installmentNumber')?.touched && (form.get('installmentNumber')?.hasError('required') || form.get('installmentNumber')?.hasError('min'))) {
+          <p class="field-error">Installment number must be at least 1.</p>
+        }
       </div>
     </div>
 
@@ -61,11 +67,20 @@
         <input type="date" class="form-control" formControlName="paidDate" />
       </div>
       <div class="form-group">
-        <label>Status</label>
-        <select class="form-control" formControlName="status">
-          <option value="pending">Pending</option>
-          <option value="deducted">Deducted</option>
-          <option value="skipped">Skipped</option>
+        <label>Repayment method</label>
+        <select class="form-control" formControlName="repaymentMethod">
+          <option value="cash">Cash</option>
+          <option value="bank transfer">Bank transfer</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full-width">
+        <label>Repayment type</label>
+        <select class="form-control" formControlName="repaymentType">
+          <option value="installment">installments</option>
+          <option value="full">full</option>
         </select>
       </div>
     </div>
