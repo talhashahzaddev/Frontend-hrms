@@ -121,7 +121,7 @@ export class RuleDialogComponent implements OnInit {
     employerPercentage: [null as number | null],
     minContribution: [null as number | null],
     maxContribution: [null as number | null],
-    vestingMonths: [0]
+    vestingMonths: [0],
     // Salary Advance Policy fields
     maxPercentage: [null as number | null]
   });
@@ -623,6 +623,23 @@ export class RuleDialogComponent implements OnInit {
       const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
         ? this.payrollService.updateProvidentFundRule((this.data.rule as any).ruleId, payload)
         : this.payrollService.createProvidentFundRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Provident fund rule updated successfully' : 'Provident fund rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 9 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update provident fund rule' : 'Failed to create provident fund rule')
+            );
+          }
+        });
     } else if (formValue.selectedPolicy === 8) { // 8 is Salary Advance Policy
       const payload = {
         ruleName: formValue.ruleName,
@@ -641,9 +658,6 @@ export class RuleDialogComponent implements OnInit {
         .subscribe({
           next: (res) => {
             this.notification.showSuccess(
-              this.isEditMode ? 'Provident fund rule updated successfully' : 'Provident fund rule created successfully'
-            );
-            this.dialogRef.close({ success: true, data: res, policyId: 9 });
               this.isEditMode
                 ? 'Salary advance rule updated successfully'
                 : 'Salary advance rule created successfully'
@@ -653,7 +667,6 @@ export class RuleDialogComponent implements OnInit {
           error: (err: any) => {
             console.error(err);
             this.notification.showError(
-              err?.message || (this.isEditMode ? 'Failed to update provident fund rule' : 'Failed to create provident fund rule')
               err?.message || (this.isEditMode ? 'Failed to update salary advance rule' : 'Failed to create salary advance rule')
             );
           }

@@ -907,8 +907,6 @@ export class PayrollService {
     // Provident Fund Rules
     getProvidentFundRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/provident-fund-rules`)
-    getSalaryAdvanceRules(): Observable<any[]> {
-      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -921,6 +919,29 @@ export class PayrollService {
 
     getActiveProvidentFundRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/provident-fund-rules/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    // Salary Advance Rules
+    getSalaryAdvanceRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
     getActiveSalaryAdvanceRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules/active`)
         .pipe(
