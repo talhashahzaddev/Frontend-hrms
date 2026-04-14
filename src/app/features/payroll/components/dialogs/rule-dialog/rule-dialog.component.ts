@@ -35,6 +35,12 @@ export interface RuleDialogData {
     minContribution?: number;
     maxContribution?: number | null;
     vestingMonths?: number;
+    maxLoanAmount?: number;
+    maxAdvanceAmount?: number;
+    maxPercentage?: number;
+    maxInstallments?: number;
+    interestRate?: number;
+    isActive?: boolean;
   };
 }
 
@@ -116,6 +122,8 @@ export class RuleDialogComponent implements OnInit {
     minContribution: [null as number | null],
     maxContribution: [null as number | null],
     vestingMonths: [0]
+    // Salary Advance Policy fields
+    maxPercentage: [null as number | null]
   });
 
   ngOnInit(): void {
@@ -187,8 +195,13 @@ export class RuleDialogComponent implements OnInit {
         this.ruleForm.patchValue({
           maxLoanAmount: rule.maxLoanAmount ?? null,
           maxInstallments: rule.maxInstallments ?? null,
-          repaymentType: rule.maxInstallments === 1 ? 'full' : 'installment',
-          interestRate: 0
+          interestRate: rule.interestRate ?? null
+        });
+      }
+
+      if (this.data.policyId === 8) {
+        this.ruleForm.patchValue({
+          maxPercentage: rule.maxPercentage ?? null
         });
       }
 
@@ -279,6 +292,7 @@ export class RuleDialogComponent implements OnInit {
     const loanAmountControl = this.ruleForm.get('maxLoanAmount');
     const loanInstallmentsControl = this.ruleForm.get('maxInstallments');
     const repaymentTypeControl = this.ruleForm.get('repaymentType');
+    const maxPercentageControl = this.ruleForm.get('maxPercentage');
 
     if (Number(policyId) === 7) {
       this.ruleForm.get('ruleName')?.setValidators(Validators.required);
@@ -329,6 +343,13 @@ export class RuleDialogComponent implements OnInit {
     minContributionControl?.updateValueAndValidity();
     maxContributionControl?.updateValueAndValidity();
     vestingMonthsControl?.updateValueAndValidity();
+    if (Number(policyId) === 8) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      maxPercentageControl?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+    } else {
+      maxPercentageControl?.clearValidators();
+    }
+    maxPercentageControl?.updateValueAndValidity();
 
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     this.ruleForm.get('amountType')?.updateValueAndValidity();
@@ -602,6 +623,18 @@ export class RuleDialogComponent implements OnInit {
       const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
         ? this.payrollService.updateProvidentFundRule((this.data.rule as any).ruleId, payload)
         : this.payrollService.createProvidentFundRule(payload);
+    } else if (formValue.selectedPolicy === 8) { // 8 is Salary Advance Policy
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        maxPercentage: formValue.maxPercentage,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const editRuleId = String((this.data?.rule as any)?.ruleId ?? (this.data?.rule as any)?.id ?? '');
+      const request$ = this.isEditMode && editRuleId
+        ? this.payrollService.updateSalaryAdvanceRule(editRuleId, payload)
+        : this.payrollService.createSalaryAdvanceRule(payload);
 
       request$
         .pipe(finalize(() => this.isSubmitting.set(false)))
@@ -611,11 +644,17 @@ export class RuleDialogComponent implements OnInit {
               this.isEditMode ? 'Provident fund rule updated successfully' : 'Provident fund rule created successfully'
             );
             this.dialogRef.close({ success: true, data: res, policyId: 9 });
+              this.isEditMode
+                ? 'Salary advance rule updated successfully'
+                : 'Salary advance rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 8 });
           },
           error: (err: any) => {
             console.error(err);
             this.notification.showError(
               err?.message || (this.isEditMode ? 'Failed to update provident fund rule' : 'Failed to create provident fund rule')
+              err?.message || (this.isEditMode ? 'Failed to update salary advance rule' : 'Failed to create salary advance rule')
             );
           }
         });

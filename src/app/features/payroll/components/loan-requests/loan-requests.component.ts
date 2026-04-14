@@ -5,9 +5,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { take, forkJoin } from 'rxjs';
-import { PayrollService } from '../../services/payroll.service';
 
 import { AuthService } from '@core/services/auth.service';
+import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import {
   LoanRepaymentType,
@@ -20,15 +20,16 @@ import {
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import {
   RequestSalaryAdvanceDialogComponent,
-  RequestSalaryAdvanceDialogPayload
+  RequestSalaryAdvanceDialogPayload,
+  SalaryAdvanceRuleOption
 } from '../dialogs/request-salary-advance-dialog/request-salary-advance-dialog.component';
 
 type ModuleTab = 'loans' | 'salary-advance';
 type LoanSectionTab = 'requested' | 'active' | 'history';
-type SalarySectionTab = 'advances' | 'history';
+type SalarySectionTab = 'requested' | 'active' | 'history';
 
 type LoanStatus = 'active' | 'pending' | 'approved' | 'completed' | 'cancelled' | 'accepted' | 'rejected';
-type SalaryAdvanceStatus = 'pending' | 'approved' | 'completed' | 'cancelled';
+type SalaryAdvanceStatus = 'pending' | 'approved' | 'disbursed' | 'rejected' | 'deducted' | 'cancelled';
 type PaymentStatus = 'deducted' | 'pending' | 'skipped';
 type PaymentMethod = 'cash' | 'payroll_deduction' | 'bank_transfer';
 
@@ -74,27 +75,23 @@ interface SalaryAdvanceRecord {
   id: string;
   employeeId: string;
   referenceNo: string;
-  totalAmount: number;
-  monthlyDeduction: number;
-  remainingAmount: number;
-  recoveredAmount: number;
+  amount: number;
   status: SalaryAdvanceStatus;
   reason: string;
-  periodApplied: string;
-  approvedBy: string;
-  requestedOn: string;
-  progressPercent: number;
-}
-
-interface SalaryAdvancePaymentHistoryRecord {
-  id: string;
-  advanceId: string;
-  employeeId: string;
-  periodLabel: string;
-  deductionAmount: number;
-  remainingAmount: number;
-  status: PaymentStatus;
-  paidDate: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  rejectedBy: string | null;
+  rejectedAt: string | null;
+  rejectionReason: string | null;
+  disbursedBy: string | null;
+  disbursedAt: string | null;
+  disbursementNote: string | null;
+  deductedPeriodId: string | null;
+  deductedPeriodLabel: string | null;
+  deductedAt: string | null;
 }
 
 @Component({
@@ -109,14 +106,14 @@ export class LoanRequestsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
-  private readonly settingsService = inject(SettingsService);
   private readonly payrollService = inject(PayrollService);
+  private readonly settingsService = inject(SettingsService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   moduleTab: ModuleTab = 'loans';
   loanSectionTab: LoanSectionTab = 'active';
-  salarySectionTab: SalarySectionTab = 'advances';
+  salarySectionTab: SalarySectionTab = 'requested';
 
   currentEmployeeId = '';
   currentEmployeeName = 'Employee';
@@ -125,17 +122,14 @@ export class LoanRequestsComponent implements OnInit {
   loanPayments: LoanPaymentHistoryRecord[] = [];
 
   salaryAdvances: SalaryAdvanceRecord[] = [];
-  advancePayments: SalaryAdvancePaymentHistoryRecord[] = [];
 
   private localLoanSeed: EmployeeLoanRecord[] = [];
   private localLoanPaymentSeed: LoanPaymentHistoryRecord[] = [];
   private localAdvanceSeed: SalaryAdvanceRecord[] = [];
-  private localAdvancePaymentSeed: SalaryAdvancePaymentHistoryRecord[] = [];
 
   usingLocalLoanData = false;
   usingLocalLoanPaymentData = false;
   usingLocalAdvanceData = false;
-  usingLocalAdvancePaymentData = false;
 
   pendingLoanHistorySearch = '';
   pendingLoanHistoryStatus: PaymentStatus | '' = '';
@@ -154,12 +148,10 @@ export class LoanRequestsComponent implements OnInit {
   loanReferences: any[] = [];
 
   pendingAdvanceHistorySearch = '';
-  pendingAdvanceHistoryStatus: PaymentStatus | '' = '';
-  pendingAdvanceHistoryPeriod = '';
+  pendingAdvanceHistoryStatus: SalaryAdvanceStatus | '' = '';
 
   advanceHistorySearch = '';
-  advanceHistoryStatus: PaymentStatus | '' = '';
-  advanceHistoryPeriod = '';
+  advanceHistoryStatus: SalaryAdvanceStatus | '' = '';
 
   loanHistoryCurrentPage = 1;
   advanceHistoryCurrentPage = 1;
@@ -172,12 +164,10 @@ export class LoanRequestsComponent implements OnInit {
     this.localLoanSeed = this.buildLocalLoanSeed();
     this.localLoanPaymentSeed = this.buildLocalLoanPaymentSeed();
     this.localAdvanceSeed = this.buildLocalAdvanceSeed();
-    this.localAdvancePaymentSeed = this.buildLocalAdvancePaymentSeed();
 
     this.loadLoans();
     this.loadLoanPayments();
     this.loadSalaryAdvances();
-    this.loadAdvancePayments();
     this.loadPayrollPeriods();
     this.loadLoanReferences();
 
@@ -233,7 +223,7 @@ export class LoanRequestsComponent implements OnInit {
 
     if (moduleParam === 'salary-advance' || moduleParam === 'advance-salary' || moduleParam === 'salary') {
       this.moduleTab = 'salary-advance';
-      this.salarySectionTab = 'advances';
+      this.salarySectionTab = 'requested';
       return;
     }
 
@@ -246,8 +236,27 @@ export class LoanRequestsComponent implements OnInit {
   get hasFallbackNotice(): boolean {
     return this.usingLocalLoanData
       || this.usingLocalLoanPaymentData
-      || this.usingLocalAdvanceData
-      || this.usingLocalAdvancePaymentData;
+      || this.usingLocalAdvanceData;
+  }
+
+  get hasActiveLoanHistoryFilters(): boolean {
+    return !!(
+      this.pendingLoanHistorySearch
+      || this.pendingLoanHistoryStatus
+      || this.pendingLoanHistoryMethod
+      || this.pendingLoanHistoryPeriod
+      || this.pendingLoanHistoryReference
+    );
+  }
+
+  get hasAppliedLoanHistoryFilters(): boolean {
+    return !!(
+      this.loanHistorySearch
+      || this.loanHistoryStatus
+      || this.loanHistoryMethod
+      || this.loanHistoryPeriod
+      || this.loanHistoryReference
+    );
   }
 
   get activeLoanRecords(): EmployeeLoanRecord[] {
@@ -270,22 +279,28 @@ export class LoanRequestsComponent implements OnInit {
     return [...this.loanPayments].sort((a, b) => this.compareDateDesc(a.paidDate, b.paidDate));
   }
 
-  get visibleSalaryAdvances(): SalaryAdvanceRecord[] {
+  get requestedSalaryAdvances(): SalaryAdvanceRecord[] {
     return this.salaryAdvances
-      .filter((row) => row.status === 'approved' || row.status === 'pending' || row.status === 'cancelled')
-      .sort((a, b) => this.compareDateDesc(a.requestedOn, b.requestedOn));
+      .filter((row) => row.status === 'pending' || row.status === 'approved')
+      .sort((a, b) => this.compareDateDesc(a.updatedAt, b.updatedAt));
   }
 
-  get salaryPaymentHistoryRows(): SalaryAdvancePaymentHistoryRecord[] {
-    return [...this.advancePayments].sort((a, b) => this.compareDateDesc(a.paidDate, b.paidDate));
+  get activeSalaryAdvances(): SalaryAdvanceRecord[] {
+    return this.salaryAdvances
+      .filter((row) => row.status === 'disbursed')
+      .sort((a, b) => this.compareDateDesc(a.updatedAt, b.updatedAt));
   }
 
-  get hasActiveLoanHistoryFilters(): boolean {
-    return !!(this.pendingLoanHistorySearch || this.pendingLoanHistoryReference || this.pendingLoanHistoryMethod || this.pendingLoanHistoryPeriod);
+  get salarySectionRecords(): SalaryAdvanceRecord[] {
+    return this.salarySectionTab === 'requested'
+      ? this.requestedSalaryAdvances
+      : this.activeSalaryAdvances;
   }
 
-  get hasAppliedLoanHistoryFilters(): boolean {
-    return !!(this.loanHistorySearch || this.loanHistoryReference || this.loanHistoryMethod || this.loanHistoryPeriod);
+  get advanceHistoryRows(): SalaryAdvanceRecord[] {
+    return this.salaryAdvances
+      .filter((row) => row.status === 'deducted' || row.status === 'rejected' || row.status === 'cancelled')
+      .sort((a, b) => this.compareDateDesc(a.updatedAt, b.updatedAt));
   }
 
   get loanHistoryPeriods(): any[] {
@@ -323,25 +338,23 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   get hasActiveAdvanceHistoryFilters(): boolean {
-    return !!(this.pendingAdvanceHistorySearch || this.pendingAdvanceHistoryStatus || this.pendingAdvanceHistoryPeriod);
+    return !!(this.pendingAdvanceHistorySearch || this.pendingAdvanceHistoryStatus);
   }
 
   get hasAppliedAdvanceHistoryFilters(): boolean {
-    return !!(this.advanceHistorySearch || this.advanceHistoryStatus || this.advanceHistoryPeriod);
+    return !!(this.advanceHistorySearch || this.advanceHistoryStatus);
   }
 
-  get advanceHistoryPeriods(): string[] {
-    return this.uniquePeriods(this.salaryPaymentHistoryRows.map((row) => row.periodLabel));
-  }
-
-  get filteredAdvanceHistoryRows(): SalaryAdvancePaymentHistoryRecord[] {
+  get filteredAdvanceHistoryRows(): SalaryAdvanceRecord[] {
     const search = this.advanceHistorySearch.trim().toLowerCase();
 
-    return this.salaryPaymentHistoryRows.filter((row) => {
-      const matchesSearch = !search || row.periodLabel.toLowerCase().includes(search);
+    return this.advanceHistoryRows.filter((row) => {
+      const matchesSearch = !search
+        || row.referenceNo.toLowerCase().includes(search)
+        || row.reason.toLowerCase().includes(search)
+        || this.getAdvanceHistoryDetail(row).toLowerCase().includes(search);
       const matchesStatus = !this.advanceHistoryStatus || row.status === this.advanceHistoryStatus;
-      const matchesPeriod = !this.advanceHistoryPeriod || row.periodLabel === this.advanceHistoryPeriod;
-      return matchesSearch && matchesStatus && matchesPeriod;
+      return matchesSearch && matchesStatus;
     });
   }
 
@@ -371,7 +384,7 @@ export class LoanRequestsComponent implements OnInit {
     return Math.min(this.advanceHistoryPage * this.historyPageSize, this.advanceHistoryTotalRecords);
   }
 
-  get advanceHistoryView(): SalaryAdvancePaymentHistoryRecord[] {
+  get advanceHistoryView(): SalaryAdvanceRecord[] {
     return this.paginateData(this.filteredAdvanceHistoryRows, this.advanceHistoryPage, this.historyPageSize);
   }
 
@@ -401,26 +414,32 @@ export class LoanRequestsComponent implements OnInit {
 
   get totalAdvanced(): number {
     return this.salaryAdvances
-      .filter((row) => row.status !== 'pending' && row.status !== 'cancelled')
-      .reduce((sum, row) => sum + row.totalAmount, 0);
+      .filter((row) => row.status === 'approved' || row.status === 'disbursed' || row.status === 'deducted')
+      .reduce((sum, row) => sum + row.amount, 0);
   }
 
   get recoveredAdvanceAmount(): number {
     return this.salaryAdvances
-      .filter((row) => row.status !== 'pending' && row.status !== 'cancelled')
-      .reduce((sum, row) => sum + row.recoveredAmount, 0);
+      .filter((row) => row.status === 'deducted')
+      .reduce((sum, row) => sum + row.amount, 0);
   }
 
   get outstandingAdvanceAmount(): number {
     return this.salaryAdvances
-      .filter((row) => row.status === 'approved')
-      .reduce((sum, row) => sum + row.remainingAmount, 0);
+      .filter((row) => row.status === 'disbursed')
+      .reduce((sum, row) => sum + row.amount, 0);
   }
 
-  get salaryMonthlyDeduction(): number {
+  get disbursedAdvanceAmount(): number {
     return this.salaryAdvances
-      .filter((row) => row.status === 'approved')
-      .reduce((sum, row) => sum + row.monthlyDeduction, 0);
+      .filter((row) => row.status === 'disbursed')
+      .reduce((sum, row) => sum + row.amount, 0);
+  }
+
+  get activeAdvanceCount(): number {
+    return this.salaryAdvances
+      .filter((row) => row.status === 'disbursed')
+      .length;
   }
 
   get availableAdvanceLimit(): number {
@@ -488,17 +507,14 @@ export class LoanRequestsComponent implements OnInit {
   applyAdvanceHistoryFilters(): void {
     this.advanceHistorySearch = this.pendingAdvanceHistorySearch.trim();
     this.advanceHistoryStatus = this.pendingAdvanceHistoryStatus;
-    this.advanceHistoryPeriod = this.pendingAdvanceHistoryPeriod;
     this.advanceHistoryCurrentPage = 1;
   }
 
   clearAdvanceHistoryFilters(): void {
     this.pendingAdvanceHistorySearch = '';
     this.pendingAdvanceHistoryStatus = '';
-    this.pendingAdvanceHistoryPeriod = '';
     this.advanceHistorySearch = '';
     this.advanceHistoryStatus = '';
-    this.advanceHistoryPeriod = '';
     this.advanceHistoryCurrentPage = 1;
   }
 
@@ -571,23 +587,22 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openSalaryAdvanceDialog(): void {
-    const dialogRef = this.dialog.open(RequestSalaryAdvanceDialogComponent, {
-      width: '500px',
-      panelClass: 'request-salary-advance-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        currencySymbol: this.currencySymbol()
-      }
-    });
+    this.payrollService.getActiveSalaryAdvanceRules()
+      .pipe(take(1))
+      .subscribe({
+        next: (rules: any[]) => {
+          const mappedRules = this.mapActiveSalaryAdvanceRules(rules);
+          if (mappedRules.length > 0) {
+            this.openSalaryAdvanceRequestDialog(mappedRules);
+            return;
+          }
 
-    dialogRef.afterClosed().subscribe((result: RequestSalaryAdvanceDialogPayload | undefined) => {
-      if (!result) {
-        return;
-      }
-
-      this.submitSalaryAdvanceRequest(result);
-    });
+          this.loadSalaryAdvanceRulesFallbackAndOpenDialog();
+        },
+        error: () => {
+          this.loadSalaryAdvanceRulesFallbackAndOpenDialog();
+        }
+      });
   }
 
   cancelLoanRequest(row: EmployeeLoanRecord): void {
@@ -627,13 +642,33 @@ export class LoanRequestsComponent implements OnInit {
       return;
     }
 
+    if (!this.usingLocalAdvanceData) {
+      this.payrollService.cancelMySalaryAdvance(row.id)
+        .pipe(take(1))
+        .subscribe({
+          next: () => this.loadSalaryAdvances(),
+          error: (error) => {
+            if (this.isUnsupportedEndpointError(error)) {
+              this.applyLocalAdvanceCancellation(row);
+            }
+          }
+        });
+      return;
+    }
+
+    this.applyLocalAdvanceCancellation(row);
+  }
+
+  private applyLocalAdvanceCancellation(row: SalaryAdvanceRecord): void {
+    const now = this.getTodayIsoDate();
+
     this.activateLocalAdvanceFallback();
     this.localAdvanceSeed = this.localAdvanceSeed.map((item) => {
       if (item.id !== row.id) {
         return item;
       }
 
-      return { ...item, status: 'cancelled' };
+      return { ...item, status: 'cancelled', updatedAt: now };
     });
 
     this.salaryAdvances = this.filterForCurrentEmployee([...this.localAdvanceSeed]);
@@ -683,6 +718,77 @@ export class LoanRequestsComponent implements OnInit {
     return `status-${status}`;
   }
 
+  getAdvanceEventDate(row: SalaryAdvanceRecord): string | null {
+    if (row.status === 'deducted') {
+      return row.deductedAt;
+    }
+
+    if (row.status === 'rejected') {
+      return row.rejectedAt;
+    }
+
+    if (row.status === 'disbursed') {
+      return row.disbursedAt;
+    }
+
+    if (row.status === 'approved') {
+      return row.approvedAt;
+    }
+
+    return row.updatedAt || row.createdAt;
+  }
+
+  getAdvanceLifecycleNote(row: SalaryAdvanceRecord): string {
+    const deductionPeriod = this.getAdvanceDeductionPeriodLabel(row);
+
+    if (row.status === 'pending') {
+      return `Requested on ${this.formatDateLabel(row.createdAt)} (planned deduction: ${deductionPeriod})`;
+    }
+
+    if (row.status === 'approved') {
+      return `Approved by ${row.approvedBy ?? 'Payroll'} on ${this.formatDateLabel(row.approvedAt)} (planned deduction: ${deductionPeriod})`;
+    }
+
+    if (row.status === 'disbursed') {
+      const note = row.disbursementNote ? ` (${row.disbursementNote})` : '';
+      return `Disbursed by ${row.disbursedBy ?? 'Payroll'} on ${this.formatDateLabel(row.disbursedAt)}${note} (planned deduction: ${deductionPeriod})`;
+    }
+
+    if (row.status === 'rejected') {
+      const reason = row.rejectionReason ? ` (${row.rejectionReason})` : '';
+      return `Rejected by ${row.rejectedBy ?? 'Payroll'} on ${this.formatDateLabel(row.rejectedAt)}${reason}`;
+    }
+
+    if (row.status === 'deducted') {
+      const period = row.deductedPeriodLabel ? ` in ${row.deductedPeriodLabel}` : '';
+      return `Deducted${period} on ${this.formatDateLabel(row.deductedAt)}`;
+    }
+
+    return `Cancelled on ${this.formatDateLabel(row.updatedAt)}`;
+  }
+
+  getAdvanceDeductionPeriodLabel(row: SalaryAdvanceRecord): string {
+    return row.deductedPeriodLabel || 'Not scheduled';
+  }
+
+  getAdvanceHistoryDetail(row: SalaryAdvanceRecord): string {
+    if (row.status === 'deducted') {
+      return row.deductedPeriodLabel
+        ? `Deducted in ${row.deductedPeriodLabel}`
+        : 'Deducted in payroll';
+    }
+
+    if (row.status === 'rejected') {
+      return row.rejectionReason || 'Rejected by payroll';
+    }
+
+    if (row.status === 'cancelled') {
+      return 'Cancelled request';
+    }
+
+    return this.getAdvanceLifecycleNote(row);
+  }
+
   getLoanHistoryCountLabel(): string {
     if (this.loanHistoryTotalRecords === 0) {
       return 'No records found';
@@ -696,7 +802,7 @@ export class LoanRequestsComponent implements OnInit {
       return 'No records found';
     }
 
-    return `Showing ${this.advanceHistoryFromRecord} to ${this.advanceHistoryToRecord} of ${this.advanceHistoryTotalRecords} payment records`;
+    return `Showing ${this.advanceHistoryFromRecord} to ${this.advanceHistoryToRecord} of ${this.advanceHistoryTotalRecords} advance records`;
   }
 
   private buildPageRange(currentPage: number, totalPages: number): number[] {
@@ -715,10 +821,6 @@ export class LoanRequestsComponent implements OnInit {
   private paginateData<T>(rows: T[], currentPage: number, pageSize: number): T[] {
     const start = (currentPage - 1) * pageSize;
     return rows.slice(start, start + pageSize);
-  }
-
-  private uniquePeriods(periods: string[]): string[] {
-    return [...new Set(periods.filter((period) => !!String(period ?? '').trim()))];
   }
 
   private resolveCurrentUserContext(): void {
@@ -807,13 +909,26 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadSalaryAdvances(): void {
-    this.activateLocalAdvanceFallback();
-    this.salaryAdvances = this.filterForCurrentEmployee([...this.localAdvanceSeed]);
-  }
+    this.payrollService.getMySalaryAdvances({ page: 1, pageSize: 200 })
+      .pipe(take(1))
+      .subscribe({
+        next: (result: any) => {
+          const rows = this.extractItems(result)
+            .map((item, index) => this.mapAdvance(item, index));
+          const uniqueRows = this.dedupeSalaryAdvances(rows);
 
-  private loadAdvancePayments(): void {
-    this.activateLocalAdvancePaymentFallback();
-    this.advancePayments = this.filterForCurrentEmployee([...this.localAdvancePaymentSeed]);
+          this.usingLocalAdvanceData = false;
+          this.salaryAdvances = this.filterForCurrentEmployee(uniqueRows);
+        },
+        error: (error) => {
+          if (!this.isUnsupportedEndpointError(error)) {
+            console.error('Failed to load salary advances', error);
+          }
+
+          this.activateLocalAdvanceFallback();
+          this.salaryAdvances = this.filterForCurrentEmployee([...this.localAdvanceSeed]);
+        }
+      });
   }
 
   private submitLoanRequest(payload: RequestLoanDialogPayload): void {
@@ -822,8 +937,29 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private submitSalaryAdvanceRequest(payload: RequestSalaryAdvanceDialogPayload): void {
-    this.activateLocalAdvanceFallback();
-    this.createLocalAdvanceRequest(payload);
+    if (this.usingLocalAdvanceData) {
+      this.activateLocalAdvanceFallback();
+      this.createLocalAdvanceRequest(payload);
+      return;
+    }
+
+    const requestBody = {
+      ruleId: payload.selectedRuleId || null,
+      amount: Number(payload.totalAmount ?? 0),
+      reason: String(payload.reason ?? '').trim() || null
+    };
+
+    this.payrollService.createSalaryAdvanceRequest(requestBody)
+      .pipe(take(1))
+      .subscribe({
+        next: () => this.loadSalaryAdvances(),
+        error: (error) => {
+          if (this.isUnsupportedEndpointError(error)) {
+            this.activateLocalAdvanceFallback();
+            this.createLocalAdvanceRequest(payload);
+          }
+        }
+      });
   }
 
   private createLocalLoanRequest(payload: RequestLoanDialogPayload): void {
@@ -899,22 +1035,30 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private createLocalAdvanceRequest(payload: RequestSalaryAdvanceDialogPayload): void {
-    const totalAmount = Number(payload.totalAmount);
+    const amount = Number(payload.totalAmount);
+    const now = this.getTodayIsoDate();
 
     const nextItem: SalaryAdvanceRecord = {
       id: `local-advance-req-${Date.now()}`,
       employeeId: this.getEffectiveEmployeeId() || 'self-local',
       referenceNo: this.generateReference('ADV'),
-      totalAmount,
-      monthlyDeduction: Number(payload.monthlyDeduction),
-      remainingAmount: totalAmount,
-      recoveredAmount: 0,
+      amount,
       status: 'pending',
       reason: payload.reason,
-      periodApplied: this.getCurrentMonthYear(),
-      approvedBy: 'Pending HR approval',
-      requestedOn: this.getTodayIsoDate(),
-      progressPercent: 0
+      createdBy: this.currentEmployeeName,
+      createdAt: now,
+      updatedAt: now,
+      approvedBy: null,
+      approvedAt: null,
+      rejectedBy: null,
+      rejectedAt: null,
+      rejectionReason: null,
+      disbursedBy: null,
+      disbursedAt: null,
+      disbursementNote: null,
+      deductedPeriodId: null,
+      deductedPeriodLabel: null,
+      deductedAt: null
     };
 
     this.localAdvanceSeed = [nextItem, ...this.localAdvanceSeed];
@@ -982,38 +1126,127 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private mapAdvance(item: any, index: number): SalaryAdvanceRecord {
-    const totalAmount = this.toNumber(item.totalAmount ?? item.advanceAmount ?? item.amount);
-    const remainingAmount = this.toNumber(item.remainingAmount ?? item.balanceAmount ?? totalAmount);
-    const recoveredAmount = Math.max(0, totalAmount - remainingAmount);
+    const amount = this.toNumber(item.amount ?? item.totalAmount ?? item.advanceAmount);
+    const deductedPeriodId = String(item.deductedPeriodId ?? item.deductionPeriodId ?? '').trim() || null;
+    const deductedPeriodLabel = String(
+      item.deductedPeriodName
+      ?? item.deductionPeriodName
+      ?? item.deductedPeriod?.periodName
+      ?? item.plannedDeductionPeriodName
+      ?? item.periodName
+      ?? item.period
+      ?? deductedPeriodId
+      ?? ''
+    ).trim() || null;
 
     return {
       id: String(item.advanceId ?? item.id ?? `advance-${index + 1}`),
       employeeId: String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? this.currentEmployeeId ?? ''),
       referenceNo: String(item.referenceNo ?? item.advanceNumber ?? this.generateReference('ADV', index + 1)),
-      totalAmount,
-      monthlyDeduction: this.toNumber(item.monthlyDeduction ?? item.installmentAmount),
-      remainingAmount,
-      recoveredAmount,
+      amount,
       status: this.normalizeAdvanceStatus(item.advanceStatus ?? item.status ?? item.requestStatus),
       reason: String(item.reason ?? item.description ?? item.notes ?? 'Salary advance request'),
-      periodApplied: String(item.periodName ?? item.period ?? item.payrollPeriodName ?? this.getCurrentMonthYear()),
-      approvedBy: String(item.approvedBy ?? 'HR Manager'),
-      requestedOn: this.normalizeDate(item.requestedOn ?? item.createdAt),
-      progressPercent: this.toProgress(recoveredAmount, totalAmount)
+      createdBy: String(item.createdByName ?? item.createdBy ?? 'Employee Self-Service'),
+      createdAt: this.normalizeDate(item.createdAt ?? item.requestedOn),
+      updatedAt: this.normalizeDate(item.updatedAt ?? item.createdAt ?? item.requestedOn),
+      approvedBy: item.approvedBy ? String(item.approvedBy) : null,
+      approvedAt: this.normalizeDateNullable(item.approvedAt),
+      rejectedBy: item.rejectedBy ? String(item.rejectedBy) : null,
+      rejectedAt: this.normalizeDateNullable(item.rejectedAt),
+      rejectionReason: item.rejectionReason ? String(item.rejectionReason) : null,
+      disbursedBy: item.disbursedBy ? String(item.disbursedBy) : null,
+      disbursedAt: this.normalizeDateNullable(item.disbursedAt),
+      disbursementNote: item.disbursementNote ? String(item.disbursementNote) : null,
+      deductedPeriodId,
+      deductedPeriodLabel,
+      deductedAt: this.normalizeDateNullable(item.deductedAt)
     };
   }
 
-  private mapAdvancePayment(item: any, index: number): SalaryAdvancePaymentHistoryRecord {
-    return {
-      id: String(item.id ?? item.paymentId ?? `advance-payment-${index + 1}`),
-      advanceId: String(item.advanceId ?? item.salaryAdvanceId ?? item.advance?.id ?? ''),
-      employeeId: String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? this.currentEmployeeId ?? ''),
-      periodLabel: String(item.periodName ?? item.period ?? item.payrollPeriodName ?? this.getCurrentMonthYear()),
-      deductionAmount: this.toNumber(item.paymentAmount ?? item.installmentAmount ?? item.amount),
-      remainingAmount: this.toNumber(item.remainingAmount ?? item.balanceAmount),
-      status: this.normalizePaymentStatus(item.paymentStatus ?? item.status),
-      paidDate: this.normalizeDateNullable(item.paidDate ?? item.paymentDate ?? item.createdAt)
-    };
+  private loadSalaryAdvanceRulesFallbackAndOpenDialog(): void {
+    this.payrollService.getSalaryAdvanceRules()
+      .pipe(take(1))
+      .subscribe({
+        next: (rules: any[]) => {
+          const mappedRules = this.mapActiveSalaryAdvanceRules(
+            (rules ?? []).filter((rule: any) => rule?.isActive !== false)
+          );
+          this.openSalaryAdvanceRequestDialog(mappedRules);
+        },
+        error: () => {
+          this.openSalaryAdvanceRequestDialog([]);
+        }
+      });
+  }
+
+  private openSalaryAdvanceRequestDialog(activeRules: SalaryAdvanceRuleOption[]): void {
+    const dialogRef = this.dialog.open(RequestSalaryAdvanceDialogComponent, {
+      width: '500px',
+      panelClass: 'request-salary-advance-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        currencySymbol: this.currencySymbol(),
+        availableLimit: this.availableAdvanceLimit,
+        activeRules
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: RequestSalaryAdvanceDialogPayload | undefined) => {
+      if (!result) {
+        return;
+      }
+
+      this.submitSalaryAdvanceRequest(result);
+    });
+  }
+
+  private mapActiveSalaryAdvanceRules(rules: any[]): SalaryAdvanceRuleOption[] {
+    const mapped = (rules ?? [])
+      .map((rule: any) => ({
+        ruleId: String(rule?.ruleId ?? rule?.id ?? '').trim(),
+        ruleName: String(rule?.ruleName ?? rule?.name ?? 'Salary Advance Rule').trim(),
+        maxPercentage: this.toNumber(rule?.maxPercentage)
+      }))
+      .filter((rule: SalaryAdvanceRuleOption) => !!rule.ruleId && rule.maxPercentage > 0)
+      .sort((left: SalaryAdvanceRuleOption, right: SalaryAdvanceRuleOption) => right.maxPercentage - left.maxPercentage);
+
+    const uniqueRules: SalaryAdvanceRuleOption[] = [];
+    const seenRuleIds = new Set<string>();
+
+    for (const rule of mapped) {
+      if (seenRuleIds.has(rule.ruleId)) {
+        continue;
+      }
+
+      seenRuleIds.add(rule.ruleId);
+      uniqueRules.push(rule);
+    }
+
+    return uniqueRules;
+  }
+
+  private dedupeSalaryAdvances(rows: SalaryAdvanceRecord[]): SalaryAdvanceRecord[] {
+    const uniqueRows: SalaryAdvanceRecord[] = [];
+    const seenIds = new Set<string>();
+
+    for (const row of rows) {
+      const key = String(row.id ?? '').trim();
+
+      if (!key) {
+        uniqueRows.push(row);
+        continue;
+      }
+
+      if (seenIds.has(key)) {
+        continue;
+      }
+
+      seenIds.add(key);
+      uniqueRows.push(row);
+    }
+
+    return uniqueRows;
   }
 
   private buildLocalLoanSeed(): EmployeeLoanRecord[] {
@@ -1148,81 +1381,111 @@ export class LoanRequestsComponent implements OnInit {
         id: 'local-advance-2025-0842',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
         referenceNo: 'ADV-2025-0842',
-        totalAmount: 50000,
-        monthlyDeduction: 15000,
-        remainingAmount: 35000,
-        recoveredAmount: 15000,
-        status: 'approved',
+        amount: 50000,
+        status: 'disbursed',
         reason: 'Medical emergency',
-        periodApplied: 'March 2025',
+        createdBy: this.currentEmployeeName,
+        createdAt: '2025-03-10',
+        updatedAt: '2025-03-12',
         approvedBy: 'HR Manager',
-        requestedOn: '2025-03-10',
-        progressPercent: 30
+        approvedAt: '2025-03-11',
+        rejectedBy: null,
+        rejectedAt: null,
+        rejectionReason: null,
+        disbursedBy: 'Finance Officer',
+        disbursedAt: '2025-03-12',
+        disbursementNote: 'Transferred with payroll run',
+        deductedPeriodId: 'local-period-2025-04',
+        deductedPeriodLabel: 'Apr 2025',
+        deductedAt: null
       },
       {
         id: 'local-advance-2025-0679',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
         referenceNo: 'ADV-2025-0679',
-        totalAmount: 30000,
-        monthlyDeduction: 0,
-        remainingAmount: 0,
-        recoveredAmount: 30000,
-        status: 'completed',
+        amount: 30000,
+        status: 'deducted',
         reason: 'Family support',
-        periodApplied: 'January 2025',
+        createdBy: this.currentEmployeeName,
+        createdAt: '2025-01-03',
+        updatedAt: '2025-02-28',
         approvedBy: 'HR Manager',
-        requestedOn: '2025-01-03',
-        progressPercent: 100
+        approvedAt: '2025-01-04',
+        rejectedBy: null,
+        rejectedAt: null,
+        rejectionReason: null,
+        disbursedBy: 'Finance Officer',
+        disbursedAt: '2025-01-05',
+        disbursementNote: 'Disbursed same week',
+        deductedPeriodId: 'local-period-2025-02',
+        deductedPeriodLabel: 'Feb 2025',
+        deductedAt: '2025-02-28'
       },
       {
         id: 'local-advance-2025-1029',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
         referenceNo: 'ADV-2025-1029',
-        totalAmount: 30000,
-        monthlyDeduction: 10000,
-        remainingAmount: 30000,
-        recoveredAmount: 0,
+        amount: 30000,
         status: 'pending',
         reason: 'Home renovation',
-        periodApplied: 'October 2025',
-        approvedBy: 'Pending HR approval',
-        requestedOn: '2025-10-12',
-        progressPercent: 0
-      }
-    ];
-  }
-
-  private buildLocalAdvancePaymentSeed(): SalaryAdvancePaymentHistoryRecord[] {
-    return [
-      {
-        id: 'local-advance-payment-1',
-        advanceId: 'local-advance-2025-0842',
-        employeeId: this.getEffectiveEmployeeId() || 'self-local',
-        periodLabel: 'Jan 2025',
-        deductionAmount: 15000,
-        remainingAmount: 65000,
-        status: 'deducted',
-        paidDate: '2025-01-30'
+        createdBy: this.currentEmployeeName,
+        createdAt: '2025-10-12',
+        updatedAt: '2025-10-12',
+        approvedBy: null,
+        approvedAt: null,
+        rejectedBy: null,
+        rejectedAt: null,
+        rejectionReason: null,
+        disbursedBy: null,
+        disbursedAt: null,
+        disbursementNote: null,
+        deductedPeriodId: 'local-period-2025-11',
+        deductedPeriodLabel: 'Nov 2025',
+        deductedAt: null
       },
       {
-        id: 'local-advance-payment-2',
-        advanceId: 'local-advance-2025-0842',
+        id: 'local-advance-2025-0331',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
-        periodLabel: 'Feb 2025',
-        deductionAmount: 15000,
-        remainingAmount: 50000,
-        status: 'deducted',
-        paidDate: '2025-02-28'
+        referenceNo: 'ADV-2025-0331',
+        amount: 22000,
+        status: 'rejected',
+        reason: 'Travel request',
+        createdBy: this.currentEmployeeName,
+        createdAt: '2025-04-02',
+        updatedAt: '2025-04-03',
+        approvedBy: null,
+        approvedAt: null,
+        rejectedBy: 'HR Manager',
+        rejectedAt: '2025-04-03',
+        rejectionReason: 'Outstanding advance already exists',
+        disbursedBy: null,
+        disbursedAt: null,
+        disbursementNote: null,
+        deductedPeriodId: 'local-period-2025-05',
+        deductedPeriodLabel: 'May 2025',
+        deductedAt: null
       },
       {
-        id: 'local-advance-payment-3',
-        advanceId: 'local-advance-2025-0842',
+        id: 'local-advance-2025-0220',
         employeeId: this.getEffectiveEmployeeId() || 'self-local',
-        periodLabel: 'Mar 2025',
-        deductionAmount: 15000,
-        remainingAmount: 35000,
-        status: 'deducted',
-        paidDate: '2025-03-31'
+        referenceNo: 'ADV-2025-0220',
+        amount: 18000,
+        status: 'approved',
+        reason: 'Utility adjustment',
+        createdBy: this.currentEmployeeName,
+        createdAt: '2025-02-20',
+        updatedAt: '2025-02-21',
+        approvedBy: 'HR Manager',
+        approvedAt: '2025-02-21',
+        rejectedBy: null,
+        rejectedAt: null,
+        rejectionReason: null,
+        disbursedBy: null,
+        disbursedAt: null,
+        disbursementNote: null,
+        deductedPeriodId: 'local-period-2025-03',
+        deductedPeriodLabel: 'Mar 2025',
+        deductedAt: null
       }
     ];
   }
@@ -1249,14 +1512,6 @@ export class LoanRequestsComponent implements OnInit {
     }
 
     this.usingLocalAdvanceData = true;
-  }
-
-  private activateLocalAdvancePaymentFallback(): void {
-    if (!this.usingLocalAdvancePaymentData && this.advancePayments.length) {
-      this.localAdvancePaymentSeed = [...this.advancePayments];
-    }
-
-    this.usingLocalAdvancePaymentData = true;
   }
 
   private filterForCurrentEmployee<T extends { employeeId: string }>(rows: T[]): T[] {
@@ -1295,8 +1550,10 @@ export class LoanRequestsComponent implements OnInit {
     const status = String(rawStatus ?? '').trim().toLowerCase();
 
     if (status === 'approved') return 'approved';
-    if (status === 'completed' || status === 'closed') return 'completed';
-    if (status === 'cancelled' || status === 'canceled' || status === 'rejected') return 'cancelled';
+    if (status === 'disbursed') return 'disbursed';
+    if (status === 'deducted' || status === 'completed' || status === 'closed') return 'deducted';
+    if (status === 'rejected') return 'rejected';
+    if (status === 'cancelled' || status === 'canceled') return 'cancelled';
 
     return 'pending';
   }

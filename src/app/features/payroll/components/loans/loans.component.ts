@@ -7,8 +7,8 @@ import { RouterModule } from '@angular/router';
 import { take } from 'rxjs';
 
 import { SettingsService } from '../../../settings/services/settings.service';
-
 import { PayrollService } from '../../services/payroll.service';
+
 import {
   AddLoanDialogComponent,
   LoanDialogPayload,
@@ -17,7 +17,6 @@ import {
 } from '../dialogs/add-loan-dialog/add-loan-dialog.component';
 import {
   AddLoanPaymentDialogComponent,
-  LoanPaymentEmployeeOption,
   LoanPaymentDialogPayload,
   LoanPaymentLoanOption
 } from '../dialogs/add-loan-payment-dialog/add-loan-payment-dialog.component';
@@ -36,10 +35,10 @@ import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/del
 import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
 import { DisburseLoanDialogComponent } from '../dialogs/disburse-loan-dialog/disburse-loan-dialog.component';
 
-type LoanStatus = 'active' | 'pending' | 'completed' | 'cancelled' | 'rejected' | 'approved' | 'accepted';
-type LoanTab = 'loans' | 'salary-advances' | 'loan-payments' | 'repayments';
+type LoanStatus = LoanDialogStatus | 'approved' | 'accepted' | 'rejected';
+type LoanTab = 'loans' | 'loan-payments' | 'repayments';
 type LoanPaymentStatus = 'pending' | 'deducted' | 'skipped';
-type SalaryAdvanceStatus = 'pending' | 'approved' | 'disbursed' | 'deducted' | 'completed' | 'cancelled' | 'rejected' | 'accepted';
+type SalaryAdvanceStatus = SalaryAdvanceDialogStatus;
 type RepaymentTypeFilter = 'installment' | 'full' | '';
 type PaymentMethodFilter = 'cash' | 'bank transfer' | 'payroll deduction' | '';
 type RepaymentLoanStatusFilter = 'active' | 'completed' | '';
@@ -83,16 +82,6 @@ interface LoanPaymentRow {
   remainingAmount: number;
   paidDate: string | null;
   status: LoanPaymentStatus;
-  repaymentType?: 'installment' | 'full';
-  paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
-}
-
-interface ActiveDisbursedLoanOption {
-  loanId: string;
-  referenceId: string;
-  employeeId: string;
-  employeeName: string;
-  remainingAmount: number;
 }
 
 interface DisbursedLoanRow {
@@ -134,8 +123,6 @@ interface AdvancePaymentRow {
   remainingAmount: number;
   paidDate: string | null;
   status: LoanPaymentStatus;
-  repaymentType?: 'installment' | 'full';
-  paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
 }
 
 interface RepaymentLedgerRow {
@@ -158,13 +145,13 @@ interface RepaymentLedgerRow {
 }
 
 @Component({
-  selector: 'app-loans-advances',
+  selector: 'app-loans',
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
-  templateUrl: './loans-advances.component.html',
-  styleUrl: './loans-advances.component.scss'
+  templateUrl: './loans.component.html',
+  styleUrl: './loans.component.scss'
 })
-export class LoansAdvancesComponent implements OnInit {
+export class LoansComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly settingsService = inject(SettingsService);
   private readonly payrollService = inject(PayrollService);
@@ -207,7 +194,6 @@ export class LoansAdvancesComponent implements OnInit {
 
   loans: LoanLedgerRow[] = [];
   loanPayments: LoanPaymentRow[] = [];
-  activeDisbursedLoanOptions: ActiveDisbursedLoanOption[] = [];
   disbursedLoans: DisbursedLoanRow[] = [];
   disbursedLoansTotalRecords = 0;
   salaryAdvances: SalaryAdvanceRow[] = [];
@@ -251,15 +237,8 @@ export class LoansAdvancesComponent implements OnInit {
     this.loadEmployees();
     this.loadPayrollPeriods();
 
-    this.activateLocalLoanFallback();
-    this.activateLocalLoanPaymentsFallback();
-    this.activateLocalSalaryAdvanceFallback();
-    this.activateLocalAdvancePaymentsFallback();
-
     this.loadLoans();
     this.loadLoanPayments();
-    this.loadSalaryAdvances();
-    this.loadAdvancePayments();
     this.loadRepayments();
 
     this.loadCurrencySymbol();
@@ -331,10 +310,7 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   get hasFallbackNotice(): boolean {
-    return this.usingLocalLoanData
-      || this.usingLocalLoanPaymentsData
-      || this.usingLocalSalaryAdvanceData
-      || this.usingLocalAdvancePaymentsData;
+    return this.usingLocalLoanData;
   }
 
   get primaryActionLabel(): string {
@@ -372,22 +348,8 @@ export class LoansAdvancesComponent implements OnInit {
     return this.loans.reduce((sum, loan) => sum + loan.totalAmount, 0);
   }
 
-  get totalRemaining(): number {
-    return this.loans.reduce((sum, loan) => sum + loan.remainingAmount, 0);
-  }
-
-  get activeLoansCount(): number {
-    return this.loans.filter((loan) => loan.status === 'active').length;
-  }
-
-  get monthlyDeductions(): number {
-    return this.loans
-      .filter((loan) => loan.status === 'active')
-      .reduce((sum, loan) => sum + loan.monthlyInstallment, 0);
-  }
-
   get totalLoanRequestsCount(): number {
-    return this.loans.length;
+    return this.totalRecords || this.loans.length;
   }
 
   get pendingLoanRequestsCount(): number {
@@ -400,6 +362,20 @@ export class LoansAdvancesComponent implements OnInit {
 
   get rejectedLoanRequestsCount(): number {
     return this.loans.filter((loan) => loan.status === 'rejected').length;
+  }
+
+  get totalRemaining(): number {
+    return this.loans.reduce((sum, loan) => sum + loan.remainingAmount, 0);
+  }
+
+  get activeLoansCount(): number {
+    return this.loans.filter((loan) => loan.status === 'active').length;
+  }
+
+  get monthlyDeductions(): number {
+    return this.loans
+      .filter((loan) => loan.status === 'active')
+      .reduce((sum, loan) => sum + loan.monthlyInstallment, 0);
   }
 
   get totalLoanPaymentsDeducted(): number {
@@ -733,34 +709,6 @@ export class LoansAdvancesComponent implements OnInit {
     this.goToRepaymentPage(this.repaymentsPage + 1);
   }
 
-  private loadRepayments(): void {
-    const filter = {
-      SearchTerm: this.repaymentSearch || undefined,
-      RepaymentType: this.repaymentTypeFilter || undefined,
-      PaymentMethod: this.repaymentPaymentMethodFilter
-        ? (this.repaymentPaymentMethodFilter === 'bank transfer' ? 'bank_transfer'
-          : this.repaymentPaymentMethodFilter === 'payroll deduction' ? 'payroll_deduction'
-          : this.repaymentPaymentMethodFilter)
-        : undefined,
-      LoanStatus: this.repaymentLoanStatusFilter || undefined,
-      Page: this.repaymentsCurrentPage,
-      PageSize: this.repaymentsPageSize
-    };
-
-    this.payrollService.getAllRepayments(filter).subscribe({
-      next: (response: any) => {
-        const items = response.data || [];
-        this.repaymentApiRows = items.map((item: any, index: number) => this.mapRepaymentHistoryRow(item, index));
-        this.repaymentsTotalCount = response.totalCount || 0;
-      },
-      error: (err) => {
-        console.error('Error loading repayments', err);
-        this.repaymentApiRows = [];
-        this.repaymentsTotalCount = 0;
-      }
-    });
-  }
-
   openAddLoanDialog(): void {
     const dialogRef = this.dialog.open(AddLoanDialogComponent, {
       width: '520px',
@@ -811,25 +759,6 @@ export class LoansAdvancesComponent implements OnInit {
     });
   }
 
-  disburseLoan(row: LoanLedgerRow): void {
-    const dialogRef = this.dialog.open(DisburseLoanDialogComponent, {
-      width: '500px',
-      panelClass: 'disburse-loan-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        loanId: row.id,
-        employeeName: row.employeeName
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((res: boolean) => {
-      if (res) {
-        this.loadLoans();
-      }
-    });
-  }
-
   requestDeleteLoan(row: LoanLedgerRow): void {
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
@@ -846,6 +775,25 @@ export class LoansAdvancesComponent implements OnInit {
     dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
       if (confirmed) {
         this.deleteLoan(row);
+      }
+    });
+  }
+
+  disburseLoan(row: LoanLedgerRow): void {
+    const dialogRef = this.dialog.open(DisburseLoanDialogComponent, {
+      width: '500px',
+      panelClass: 'disburse-loan-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        loanId: row.id,
+        employeeName: row.employeeName
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((res: boolean | undefined) => {
+      if (res) {
+        this.loadLoans();
       }
     });
   }
@@ -989,8 +937,8 @@ export class LoansAdvancesComponent implements OnInit {
       restoreFocus: false,
       data: {
         title: 'Delete salary advance',
-        message: `Delete salary advance record for ${row.employeeName}? This action cannot be undone.`,
-        confirmText: 'Delete record'
+        message: `Delete salary advance for ${row.employeeName}? Linked repayments will also be removed.`,
+        confirmText: 'Delete advance'
       }
     });
 
@@ -1001,44 +949,7 @@ export class LoansAdvancesComponent implements OnInit {
     });
   }
 
-  approveSalaryAdvance(row: SalaryAdvanceRow): void {
-    this.payrollService.approveSalaryAdvance(row.id).subscribe({
-      next: () => {
-        this.loadSalaryAdvances();
-      },
-      error: (err) => {
-        console.error('Error approving salary advance:', err);
-      }
-    });
-  }
-
-  requestRejectSalaryAdvance(row: SalaryAdvanceRow): void {
-    const reason = prompt('Please provide a reason for rejection:');
-    if (reason === null) return;
-
-    this.payrollService.rejectSalaryAdvance(row.id, { rejectionReason: reason || 'Policy mismatch' }).subscribe({
-      next: () => {
-        this.loadSalaryAdvances();
-      },
-      error: (err) => {
-        console.error('Error rejecting salary advance:', err);
-      }
-    });
-  }
-
   openAddLoanPaymentDialog(): void {
-    this.loadActiveDisbursedLoansForDialog();
-  }
-
-  openAddLoanPaymentDialogForRow(row: DisbursedLoanRow): void {
-    this.loadActiveDisbursedLoansForDialog(row);
-  }
-
-  private openAddLoanPaymentDialogWithOptions(targetRow?: DisbursedLoanRow): void {
-    const prefillOption = targetRow
-      ? this.activeDisbursedLoanOptions.find((item) => item.loanId === targetRow.id)
-      : undefined;
-
     const dialogRef = this.dialog.open(AddLoanPaymentDialogComponent, {
       width: '650px',
       panelClass: 'loan-payment-dialog-panel',
@@ -1046,14 +957,9 @@ export class LoansAdvancesComponent implements OnInit {
       restoreFocus: false,
       data: {
         mode: 'create',
-        employees: this.buildLoanPaymentDialogEmployees(),
+        employees: this.employees.map((employee) => ({ id: employee.id, name: employee.name })),
         periods: this.getAvailablePeriods(),
-        loans: this.buildLoanPaymentDialogReferences(),
-        currencySymbol: this.currencySymbol(),
-        initialValue: prefillOption ? {
-          employeeId: prefillOption.employeeId,
-          loanId: prefillOption.referenceId
-        } : undefined
+        loans: this.buildLoanPaymentOptions(false)
       }
     });
 
@@ -1079,16 +985,14 @@ export class LoansAdvancesComponent implements OnInit {
         employees: this.employees.map((employee) => ({ id: employee.id, name: employee.name })),
         periods: this.getAvailablePeriods(),
         loans: loanOptions,
-        currencySymbol: this.currencySymbol(),
         initialValue: {
           employeeId: row.employeeId,
           loanId: row.loanId,
           periodId: row.periodId,
           installmentAmount: row.amount,
-          installmentNumber: row.installmentNumber,
+          remainingAmount: row.remainingAmount,
           paidDate: row.paidDate,
-          repaymentMethod: 'cash',
-          repaymentType: 'installment'
+          status: row.status
         }
       }
     });
@@ -1212,20 +1116,21 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   getLoanStatusLabel(status: LoanStatus): string {
+    if (status === 'approved' || status === 'accepted') return 'Approved';
+    if (status === 'rejected') return 'Rejected';
     if (status === 'completed') return 'Completed';
     if (status === 'cancelled') return 'Cancelled';
     if (status === 'pending') return 'Pending';
-    if (status === 'rejected') return 'Rejected';
-    return 'Approved';
+    return 'Active';
   }
 
   getLoanStatusClass(status: LoanStatus): string {
-    const s = String(status || '').toLowerCase();
-    if (s === 'active') return 'status-active';
-    if (s === 'pending') return 'status-pending';
-    if (s === 'approved' || s === 'accepted') return 'status-approved';
-    if (s === 'completed' || s === 'closed') return 'status-completed';
-    if (s === 'rejected' || s === 'cancelled' || s === 'canceled') return 'status-cancelled';
+    const normalized = String(status || '').toLowerCase();
+    if (normalized === 'active') return 'status-active';
+    if (normalized === 'pending') return 'status-pending';
+    if (normalized === 'approved' || normalized === 'accepted') return 'status-approved';
+    if (normalized === 'completed' || normalized === 'closed') return 'status-completed';
+    if (normalized === 'rejected' || normalized === 'cancelled' || normalized === 'canceled') return 'status-cancelled';
     return 'status-inactive';
   }
 
@@ -1239,36 +1144,14 @@ export class LoansAdvancesComponent implements OnInit {
     return 'Skipped';
   }
 
-  getDisbursementStatusClass(status: string): string {
-    const normalized = String(status || '').toLowerCase();
-    if (normalized === 'paid') return 'status-approved';
-    if (normalized === 'pending') return 'status-pending';
-    if (normalized === 'failed' || normalized === 'rejected' || normalized === 'cancelled') return 'status-cancelled';
-    return 'status-inactive';
-  }
-
-  getDisbursementStatusLabel(status: string): string {
-    const normalized = String(status || '').toLowerCase();
-    if (normalized === 'paid') return 'Paid';
-    if (normalized === 'pending') return 'Pending';
-    if (normalized === 'failed') return 'Failed';
-    return normalized ? normalized.charAt(0).toUpperCase() + normalized.slice(1) : 'N/A';
-  }
-
   getAdvanceStatusClass(status: SalaryAdvanceStatus): string {
-    const s = String(status || '').toLowerCase();
-    if (s === 'approved' || s === 'accepted') return 'status-approved';
-    if (s === 'pending') return 'status-pending';
-    if (s === 'completed') return 'status-completed';
-    if (s === 'rejected' || s === 'cancelled') return 'status-cancelled';
-    return 'status-inactive';
+    return `status-${status}`;
   }
 
   getAdvanceStatusLabel(status: SalaryAdvanceStatus): string {
-    if (status === 'approved' || status === 'accepted') return 'Approved';
+    if (status === 'approved') return 'Approved';
     if (status === 'completed') return 'Completed';
     if (status === 'cancelled') return 'Cancelled';
-    if (status === 'rejected') return 'Rejected';
     return 'Pending';
   }
 
@@ -1318,7 +1201,8 @@ export class LoansAdvancesComponent implements OnInit {
           .map((item: any, index: number) => this.mapPeriodOption(item, index))
           .filter((period) => !!period.id && !!period.name);
 
-        this.periods = mapped.length ? mapped : [...this.localPeriodsSeed];
+        const uniquePeriods = this.deduplicatePeriods(mapped);
+        this.periods = uniquePeriods.length ? uniquePeriods : [...this.localPeriodsSeed];
       },
       error: (err) => {
         this.periods = [...this.localPeriodsSeed];
@@ -1329,7 +1213,7 @@ export class LoansAdvancesComponent implements OnInit {
 
   private loadLoans(): void {
     this.isLoadingLoans = true;
-    
+
     const filter = {
       SearchTerm: this.filterSearch || undefined,
       RequestStatus: this.filterStatus || undefined,
@@ -1340,13 +1224,19 @@ export class LoansAdvancesComponent implements OnInit {
     this.payrollService.getAllLoans(filter).subscribe({
       next: (response: any) => {
         this.isLoadingLoans = false;
-        const items = response.data || [];
-        this.loans = items.map((item: any, index: number) => this.mapLoan(item, index));
-        
-        this.totalRecords = response.totalCount || 0;
+        this.usingLocalLoanData = false;
+
+        const items = this.extractItems(response);
+        const uniqueItems = this.deduplicateLoanItems(items);
+        this.loans = uniqueItems.map((item: any, index: number) => this.mapLoan(item, index));
+
+        const serverTotal = this.extractTotal(response, this.loans.length);
+        this.totalRecords = serverTotal === items.length ? this.loans.length : serverTotal;
       },
       error: (err) => {
         this.isLoadingLoans = false;
+        this.loans = [];
+        this.totalRecords = 0;
         console.error('Error loading loans', err);
       }
     });
@@ -1364,14 +1254,50 @@ export class LoansAdvancesComponent implements OnInit {
 
     this.payrollService.getDisbursedLoans(filter).subscribe({
       next: (response: any) => {
-        const items = response.data || [];
-        this.disbursedLoans = items.map((item: any, index: number) => this.mapDisbursedLoan(item, index));
-        this.disbursedLoansTotalRecords = response.totalCount || 0;
+        this.usingLocalLoanPaymentsData = false;
+
+        const items = this.extractItems(response);
+        const uniqueItems = this.deduplicateDisbursedLoanItems(items);
+        this.disbursedLoans = uniqueItems.map((item: any, index: number) => this.mapDisbursedLoan(item, index));
+
+        const serverTotal = this.extractTotal(response, this.disbursedLoans.length);
+        this.disbursedLoansTotalRecords = serverTotal === items.length ? this.disbursedLoans.length : serverTotal;
       },
       error: (err) => {
         this.disbursedLoans = [];
         this.disbursedLoansTotalRecords = 0;
         console.error('Error loading disbursed loans', err);
+      }
+    });
+  }
+
+  private loadRepayments(): void {
+    const filter = {
+      SearchTerm: this.repaymentSearch || undefined,
+      RepaymentType: this.repaymentTypeFilter || undefined,
+      PaymentMethod: this.repaymentPaymentMethodFilter
+        ? (this.repaymentPaymentMethodFilter === 'bank transfer' ? 'bank_transfer'
+          : this.repaymentPaymentMethodFilter === 'payroll deduction' ? 'payroll_deduction'
+          : this.repaymentPaymentMethodFilter)
+        : undefined,
+      LoanStatus: this.repaymentLoanStatusFilter || undefined,
+      Page: this.repaymentsCurrentPage,
+      PageSize: this.repaymentsPageSize
+    };
+
+    this.payrollService.getAllRepayments(filter).subscribe({
+      next: (response: any) => {
+        const items = this.extractItems(response);
+        const uniqueItems = this.deduplicateRepaymentItems(items);
+        this.repaymentApiRows = uniqueItems.map((item: any, index: number) => this.mapRepaymentHistoryRow(item, index));
+
+        const serverTotal = this.extractTotal(response, this.repaymentApiRows.length);
+        this.repaymentsTotalCount = serverTotal === items.length ? this.repaymentApiRows.length : serverTotal;
+      },
+      error: (err) => {
+        console.error('Error loading repayments', err);
+        this.repaymentApiRows = [];
+        this.repaymentsTotalCount = 0;
       }
     });
   }
@@ -1397,48 +1323,43 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   private saveLoanPayment(payload: LoanPaymentDialogPayload, editingRow?: LoanPaymentRow): void {
-    if (!editingRow) {
-      this.payrollService.addLoanPayment({
-        referenceId: payload.loanId,
-        employeeId: payload.employeeId,
-        periodId: payload.periodId || null,
-        installmentNumber: payload.installmentNumber,
-        installmentAmount: payload.installmentAmount,
-        repaymentType: payload.repaymentType,
-        paymentDate: payload.paidDate || new Date().toISOString(),
-        paymentMethod: payload.repaymentMethod === 'bank transfer' ? 'bank_transfer' : payload.repaymentMethod
-      }).subscribe({
-        next: () => {
-          this.loadLoans();
-          this.loadLoanPayments();
-        },
-        error: (err) => {
-          console.error('Error saving loan payment:', err);
-          alert('Unable to save loan payment. Please check input and try again.');
-        }
-      });
-      return;
-    }
+    const paymentDate = payload.paidDate ? this.toIsoDateTime(payload.paidDate) : new Date().toISOString();
 
-    this.payrollService.updateLoanPayment({
-      id: editingRow.id,
-      loanId: editingRow.loanId,
+    const apiPayload = {
+      referenceId: payload.loanId,
       employeeId: payload.employeeId,
       periodId: payload.periodId || null,
       installmentNumber: payload.installmentNumber,
       installmentAmount: payload.installmentAmount,
       repaymentType: payload.repaymentType,
-      paymentDate: payload.paidDate || new Date().toISOString(),
+      paymentDate,
       paymentMethod: payload.repaymentMethod === 'bank transfer' ? 'bank_transfer' : payload.repaymentMethod,
-      paymentStatus: 'settled'
-    }).subscribe({
+      paymentStatus: this.resolveLoanPaymentStatusForApi(payload)
+    };
+
+    const request$ = editingRow
+      ? this.payrollService.updateLoanPayment({
+        id: editingRow.id,
+        loanId: editingRow.loanId,
+        ...apiPayload
+      })
+      : this.payrollService.addLoanPayment(apiPayload);
+
+    request$.pipe(take(1)).subscribe({
       next: () => {
         this.loadLoans();
         this.loadLoanPayments();
+        this.loadRepayments();
       },
       error: (err) => {
-        console.error('Error updating loan payment:', err);
-        alert('Unable to update loan payment. Please check input and try again.');
+        if (this.isUnsupportedEndpointError(err)) {
+          this.activateLocalLoanPaymentsFallback();
+          this.activateLocalLoanFallback();
+          this.saveLocalLoanPayment(payload, editingRow);
+          return;
+        }
+
+        console.error(editingRow ? 'Error updating loan payment' : 'Error saving loan payment', err);
       }
     });
   }
@@ -1643,7 +1564,7 @@ export class LoansAdvancesComponent implements OnInit {
       loanLabel,
       periodId: payload.periodId,
       periodName: this.getPeriodNameById(payload.periodId),
-      installmentNumber: payload.installmentNumber || editingRow?.installmentNumber || nextInstallmentNumber,
+      installmentNumber: editingRow?.installmentNumber ?? nextInstallmentNumber,
       amount: shouldDeduct ? appliedAmount : payload.installmentAmount,
       remainingAmount: rowRemaining,
       paidDate: shouldDeduct ? (payload.paidDate ?? this.getTodayString()) : payload.paidDate,
@@ -1898,9 +1819,12 @@ export class LoansAdvancesComponent implements OnInit {
   private mapLoan(item: any, index: number): LoanLedgerRow {
     const totalAmount = this.toNumber(item.totalAmount ?? item.loanAmount ?? item.amount ?? item.principalAmount);
     const remainingAmount = this.toNumber(item.remainingAmount ?? item.balanceAmount);
+    const startDate = this.normalizeDateString(item.startDate ?? item.createdAt);
+    const totalInstallments = this.toNumber(item.totalInstallments ?? item.totalMonths ?? item.installments);
 
     const employeeId = String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? '');
     const employeeName = this.resolveEmployeeName(employeeId, String(item.employeeName ?? item.employee?.name ?? 'Unknown Employee'));
+    const endDate = this.resolveLoanEndDate(item, startDate, totalInstallments);
 
     return this.buildLoanRow({
       id: String(item.loanId ?? item.id ?? `loan-${index + 1}`),
@@ -1908,15 +1832,296 @@ export class LoansAdvancesComponent implements OnInit {
       employeeName,
       designation: String(item.designation ?? item.positionTitle ?? this.resolveEmployeeDesignation(employeeId, 'Employee')),
       totalAmount,
-      monthlyInstallment: this.toNumber(item.monthlyInstallment ?? item.installmentAmount),
+      monthlyInstallment: this.toNumber(item.monthlyInstallment ?? item.installmentAmount ?? item.monthlyDeduction),
       remainingAmount,
       status: this.normalizeLoanStatus(item.requestStatus ?? item.loanStatus ?? item.status),
-      startDate: this.normalizeDateString(item.startDate ?? item.createdAt),
-      endDate: this.normalizeDateString(item.endDate),
-      totalInstallments: this.toNumber(item.totalInstallments ?? item.totalMonths ?? item.installments),
+      startDate,
+      endDate: endDate || null,
+      totalInstallments,
       paidInstallments: this.toNumber(item.paidInstallments ?? item.paidMonths ?? item.installmentsPaid),
-      description: item.description || ''
+      description: String(item.description ?? item.notes ?? '')
     });
+  }
+
+  private deduplicateLoanItems(items: any[]): any[] {
+    if (!items.length) {
+      return items;
+    }
+
+    const unique = new Map<string, any>();
+
+    items.forEach((item, index) => {
+      const key = this.getLoanIdentityKey(item, index);
+      const existing = unique.get(key);
+
+      if (!existing) {
+        unique.set(key, item);
+        return;
+      }
+
+      unique.set(key, this.pickRicherLoanItem(existing, item));
+    });
+
+    return [...unique.values()];
+  }
+
+  private getLoanIdentityKey(item: any, index: number): string {
+    const loanId = String(item?.loanId ?? item?.id ?? '').trim();
+    if (loanId) {
+      return `loan:${loanId}`;
+    }
+
+    const employeeId = String(item?.employeeId ?? item?.employee?.employeeId ?? item?.employee?.id ?? '').trim();
+    const employeeName = String(item?.employeeName ?? item?.employee?.name ?? '').trim().toLowerCase();
+    const totalAmount = this.toNumber(item?.totalAmount ?? item?.loanAmount ?? item?.amount ?? item?.principalAmount);
+    const status = String(item?.requestStatus ?? item?.loanStatus ?? item?.status ?? '').trim().toLowerCase();
+    const startDate = this.normalizeDateString(item?.startDate ?? item?.createdAt);
+    const endDate = this.normalizeDateString(
+      item?.endDate
+      ?? item?.loanEndDate
+      ?? item?.expectedEndDate
+      ?? item?.repaymentEndDate
+      ?? item?.dueDate
+    );
+
+    if ((employeeId || employeeName) && totalAmount > 0) {
+      return `sig:${employeeId || employeeName}|amt:${totalAmount}|status:${status}|start:${startDate}|end:${endDate}`;
+    }
+
+    return `fallback:${index}`;
+  }
+
+  private pickRicherLoanItem(primary: any, secondary: any): any {
+    const primaryScore = this.scoreLoanItemCompleteness(primary);
+    const secondaryScore = this.scoreLoanItemCompleteness(secondary);
+    return secondaryScore > primaryScore ? secondary : primary;
+  }
+
+  private scoreLoanItemCompleteness(item: any): number {
+    let score = 0;
+
+    if (item?.endDate || item?.loanEndDate || item?.expectedEndDate || item?.repaymentEndDate || item?.dueDate) {
+      score += 2;
+    }
+
+    if (item?.description || item?.notes) {
+      score += 1;
+    }
+
+    if (item?.totalInstallments || item?.totalMonths || item?.installments) {
+      score += 1;
+    }
+
+    if (item?.employeeName || item?.employee?.name) {
+      score += 1;
+    }
+
+    return score;
+  }
+
+  private resolveLoanEndDate(item: any, startDate: string, totalInstallments: number): string {
+    const explicitEndDate = this.normalizeDateString(
+      item?.endDate
+      ?? item?.loanEndDate
+      ?? item?.expectedEndDate
+      ?? item?.repaymentEndDate
+      ?? item?.dueDate
+      ?? item?.closingDate
+      ?? item?.lastInstallmentDate
+    );
+
+    if (explicitEndDate) {
+      return explicitEndDate;
+    }
+
+    if (startDate && totalInstallments > 0) {
+      return this.calculateLoanEndDate(startDate, totalInstallments);
+    }
+
+    return '';
+  }
+
+  private calculateLoanEndDate(startDate: string, totalInstallments: number): string {
+    const [year, month, day] = startDate.split('-').map((part) => Number(part));
+
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+      return '';
+    }
+
+    const endDate = new Date(year, month - 1, day);
+    if (Number.isNaN(endDate.getTime())) {
+      return '';
+    }
+
+    const monthsToAdd = Math.max(0, Math.floor(totalInstallments) - 1);
+    endDate.setMonth(endDate.getMonth() + monthsToAdd);
+
+    const normalizedYear = endDate.getFullYear();
+    const normalizedMonth = String(endDate.getMonth() + 1).padStart(2, '0');
+    const normalizedDay = String(endDate.getDate()).padStart(2, '0');
+
+    return `${normalizedYear}-${normalizedMonth}-${normalizedDay}`;
+  }
+
+  private deduplicateDisbursedLoanItems(items: any[]): any[] {
+    if (!items.length) {
+      return items;
+    }
+
+    const unique = new Map<string, any>();
+
+    items.forEach((item, index) => {
+      const key = this.getDisbursedLoanIdentityKey(item, index);
+      const existing = unique.get(key);
+
+      if (!existing) {
+        unique.set(key, item);
+        return;
+      }
+
+      unique.set(key, this.pickRicherDisbursedLoanItem(existing, item));
+    });
+
+    return [...unique.values()];
+  }
+
+  private deduplicateRepaymentItems(items: any[]): any[] {
+    if (!items.length) {
+      return items;
+    }
+
+    const unique = new Map<string, any>();
+
+    items.forEach((item, index) => {
+      const key = this.getRepaymentIdentityKey(item, index);
+      const existing = unique.get(key);
+
+      if (!existing) {
+        unique.set(key, item);
+        return;
+      }
+
+      unique.set(key, this.pickRicherRepaymentItem(existing, item));
+    });
+
+    return [...unique.values()];
+  }
+
+  private getRepaymentIdentityKey(item: any, index: number): string {
+    const repaymentId = String(item?.id ?? item?.repaymentId ?? item?.paymentId ?? '').trim();
+    if (repaymentId) {
+      return `repayment:${repaymentId}`;
+    }
+
+    const referenceId = String(item?.referenceId ?? item?.loanId ?? item?.advanceId ?? item?.salaryAdvanceId ?? '').trim();
+    const employeeId = String(item?.employeeId ?? item?.employee?.employeeId ?? item?.employee?.id ?? '').trim();
+    const employeeName = String(item?.employeeName ?? item?.employee?.name ?? '').trim().toLowerCase();
+    const periodId = String(item?.periodId ?? item?.payrollPeriodId ?? item?.period?.id ?? '').trim();
+    const periodName = String(item?.periodName ?? item?.period ?? '').trim().toLowerCase();
+    const amount = this.toNumber(item?.installmentAmount ?? item?.paymentAmount ?? item?.amount ?? 0);
+    const paymentDate = this.normalizeDateString(item?.paymentDate ?? item?.paidDate ?? item?.createdAt);
+    const repaymentType = String(item?.repaymentType ?? item?.loanType ?? '').trim().toLowerCase();
+
+    if (referenceId || (employeeId || employeeName)) {
+      return `repayment-sig:${referenceId}|emp:${employeeId || employeeName}|period:${periodId || periodName}|amt:${amount}|date:${paymentDate}|type:${repaymentType}`;
+    }
+
+    return `repayment-fallback:${index}`;
+  }
+
+  private pickRicherRepaymentItem(primary: any, secondary: any): any {
+    const primaryScore = this.scoreRepaymentItemCompleteness(primary);
+    const secondaryScore = this.scoreRepaymentItemCompleteness(secondary);
+    return secondaryScore > primaryScore ? secondary : primary;
+  }
+
+  private scoreRepaymentItemCompleteness(item: any): number {
+    let score = 0;
+
+    if (item?.id || item?.repaymentId || item?.paymentId) {
+      score += 2;
+    }
+
+    if (item?.referenceId || item?.loanId || item?.advanceId || item?.salaryAdvanceId) {
+      score += 1;
+    }
+
+    if (item?.periodId || item?.payrollPeriodId || item?.period?.id || item?.periodName || item?.period) {
+      score += 1;
+    }
+
+    if (item?.paymentDate || item?.paidDate || item?.createdAt) {
+      score += 1;
+    }
+
+    if (item?.paymentStatus || item?.status) {
+      score += 1;
+    }
+
+    if (item?.paymentMethod) {
+      score += 1;
+    }
+
+    if (item?.employeeName || item?.employee?.name) {
+      score += 1;
+    }
+
+    return score;
+  }
+
+  private getDisbursedLoanIdentityKey(item: any, index: number): string {
+    const loanId = String(item?.loanId ?? item?.id ?? '').trim();
+    if (loanId) {
+      return `disbursed-loan:${loanId}`;
+    }
+
+    const employeeId = String(item?.employeeId ?? item?.employee?.employeeId ?? item?.employee?.id ?? '').trim();
+    const employeeName = String(item?.employeeName ?? item?.employee?.name ?? '').trim().toLowerCase();
+    const totalAmount = this.toNumber(item?.totalAmount ?? item?.principalAmount ?? item?.amount);
+    const disbursementDate = this.normalizeDateString(item?.disbursementDate ?? item?.startDate ?? item?.createdAt);
+    const endDate = this.normalizeDateString(
+      item?.endDate
+      ?? item?.loanEndDate
+      ?? item?.expectedEndDate
+      ?? item?.repaymentEndDate
+      ?? item?.dueDate
+    );
+    const remainingInstallments = this.toNumber(item?.remainingInstallments ?? item?.remainingInstallment ?? 0);
+    const totalInstallments = this.toNumber(item?.totalInstallments ?? item?.installments ?? 0);
+
+    if ((employeeId || employeeName) && totalAmount > 0) {
+      return `disbursed-sig:${employeeId || employeeName}|amt:${totalAmount}|disbursed:${disbursementDate}|end:${endDate}|ri:${remainingInstallments}|ti:${totalInstallments}`;
+    }
+
+    return `disbursed-fallback:${index}`;
+  }
+
+  private pickRicherDisbursedLoanItem(primary: any, secondary: any): any {
+    const primaryScore = this.scoreDisbursedLoanCompleteness(primary);
+    const secondaryScore = this.scoreDisbursedLoanCompleteness(secondary);
+    return secondaryScore > primaryScore ? secondary : primary;
+  }
+
+  private scoreDisbursedLoanCompleteness(item: any): number {
+    let score = 0;
+
+    if (item?.endDate || item?.loanEndDate || item?.expectedEndDate || item?.repaymentEndDate || item?.dueDate) {
+      score += 2;
+    }
+
+    if (item?.disbursementDate || item?.startDate || item?.createdAt) {
+      score += 1;
+    }
+
+    if (item?.paidAmount !== undefined || item?.completedPercentage !== undefined) {
+      score += 1;
+    }
+
+    if (item?.employeeName || item?.employee?.name) {
+      score += 1;
+    }
+
+    return score;
   }
 
   private mapPeriodOption(item: any, index: number): PeriodOption {
@@ -1940,18 +2145,50 @@ export class LoansAdvancesComponent implements OnInit {
   }
 
   private mapDisbursedLoan(item: any, index: number): DisbursedLoanRow {
+    const totalInstallments = this.toNumber(item.totalInstallments ?? item.installments ?? 0);
+    const disbursementDate = this.normalizeDateString(item.disbursementDate ?? item.startDate ?? item.createdAt);
+    const endDate = this.resolveLoanEndDate(item, disbursementDate, totalInstallments);
+
     return {
       id: String(item.loanId ?? item.id ?? `disbursed-loan-${index + 1}`),
       employeeId: String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? ''),
       employeeName: String(item.employeeName ?? 'Unknown Employee'),
-      disbursementDate: this.normalizeDateString(item.disbursementDate ?? item.startDate ?? item.createdAt) || null,
-      endDate: this.normalizeDateString(item.endDate) || null,
+      disbursementDate: disbursementDate || null,
+      endDate: endDate || null,
       remainingInstallments: this.toNumber(item.remainingInstallments ?? 0),
-      totalInstallments: this.toNumber(item.totalInstallments ?? 0),
+      totalInstallments,
       disbursementStatus: String(item.disbursementStatus ?? 'paid'),
       totalAmount: this.toNumber(item.totalAmount ?? item.principalAmount ?? 0),
       paidAmount: this.toNumber(item.paidAmount ?? 0),
       completionPercent: this.toNumber(item.completedPercentage ?? 0)
+    };
+  }
+
+  private mapRepaymentHistoryRow(item: any, index: number): RepaymentLedgerRow {
+    const employeeId = String(item.employeeId ?? '');
+    const periodId = String(item.periodId ?? '');
+    const normalizedLoanStatus = this.normalizeLoanStatus(item.loanStatus ?? 'active');
+    const rawReferenceId = String(item.referenceId ?? '').trim();
+    const fallbackReferenceId = String(item.loanId ?? '').trim();
+    const resolvedReferenceId = rawReferenceId || fallbackReferenceId;
+
+    return {
+      id: String(item.id ?? `repayment-${index + 1}`),
+      sourceId: String(item.id ?? `repayment-${index + 1}`),
+      type: 'loan',
+      employeeId,
+      employeeName: this.resolveEmployeeName(employeeId, String(item.employeeName ?? 'Unknown Employee')),
+      referenceId: resolvedReferenceId,
+      referenceLabel: resolvedReferenceId,
+      periodId,
+      periodName: String(item.periodName ?? this.getPeriodNameById(periodId)),
+      amount: this.toNumber(item.installmentAmount ?? item.amount ?? 0),
+      remainingAmount: this.toNumber(item.remainingAmount ?? 0),
+      paidDate: this.normalizeDateString(item.paymentDate ?? item.paidDate ?? item.createdAt),
+      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
+      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
+      paymentMethod: this.normalizePaymentMethod(item.paymentMethod),
+      loanStatus: normalizedLoanStatus
     };
   }
 
@@ -1972,9 +2209,7 @@ export class LoansAdvancesComponent implements OnInit {
       amount: this.toNumber(item.installmentAmount ?? item.paymentAmount ?? item.amount),
       remainingAmount: this.toNumber(item.remainingAmount ?? item.balanceAmount ?? 0),
       paidDate: this.normalizeDateString(item.paidDate ?? item.paymentDate ?? item.createdAt),
-      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
-      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
-      paymentMethod: this.normalizePaymentMethod(item.paymentMethod)
+      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status)
     });
   }
 
@@ -2012,37 +2247,8 @@ export class LoansAdvancesComponent implements OnInit {
       amount: this.toNumber(item.paymentAmount ?? item.installmentAmount ?? item.amount),
       remainingAmount: this.toNumber(item.remainingAmount ?? item.balanceAmount ?? 0),
       paidDate: this.normalizeDateString(item.paidDate ?? item.paymentDate ?? item.createdAt),
-      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
-      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
-      paymentMethod: this.normalizePaymentMethod(item.paymentMethod)
+      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status)
     });
-  }
-
-  private mapRepaymentHistoryRow(item: any, index: number): RepaymentLedgerRow {
-    const employeeId = String(item.employeeId ?? '');
-    const periodId = String(item.periodId ?? '');
-    const normalizedLoanStatus = this.normalizeLoanStatus(item.loanStatus ?? 'active');
-    const rawReferenceId = String(item.referenceId ?? '').trim();
-    const fallbackReferenceId = String(item.loanId ?? '').trim();
-    const resolvedReferenceId = rawReferenceId || fallbackReferenceId;
-    return {
-      id: String(item.id ?? `repayment-${index + 1}`),
-      sourceId: String(item.id ?? `repayment-${index + 1}`),
-      type: 'loan',
-      employeeId,
-      employeeName: this.resolveEmployeeName(employeeId, String(item.employeeName ?? 'Unknown Employee')),
-      referenceId: resolvedReferenceId,
-      referenceLabel: resolvedReferenceId,
-      periodId,
-      periodName: this.getPeriodNameById(periodId),
-      amount: this.toNumber(item.installmentAmount ?? item.amount ?? 0),
-      remainingAmount: this.toNumber(item.remainingAmount ?? 0),
-      paidDate: this.normalizeDateString(item.paymentDate ?? item.paidDate ?? item.createdAt),
-      status: this.normalizeLoanPaymentStatus(item.paymentStatus ?? item.status),
-      repaymentType: String(item.repaymentType ?? 'installment').toLowerCase() === 'full' ? 'full' : 'installment',
-      paymentMethod: this.normalizePaymentMethod(item.paymentMethod),
-      loanStatus: normalizedLoanStatus
-    };
   }
 
   private buildLoanRow(source: {
@@ -2084,7 +2290,7 @@ export class LoansAdvancesComponent implements OnInit {
       status: source.status,
       startDate: normalizedStartDate,
       endDate: source.endDate,
-      startDateLabel: this.formatDateLabel(normalizedStartDate),
+      startDateLabel: this.formatDate(normalizedStartDate),
       totalInstallments: Math.max(0, Math.floor(this.toNumber(source.totalInstallments))),
       paidInstallments: Math.max(0, Math.floor(this.toNumber(source.paidInstallments))),
       description: source.description || ''
@@ -2132,8 +2338,6 @@ export class LoansAdvancesComponent implements OnInit {
     remainingAmount: number;
     paidDate: string | null;
     status: LoanPaymentStatus;
-    repaymentType?: 'installment' | 'full';
-    paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
   }): LoanPaymentRow {
     return {
       id: source.id,
@@ -2147,9 +2351,7 @@ export class LoansAdvancesComponent implements OnInit {
       amount: Math.max(0, this.toNumber(source.amount)),
       remainingAmount: Math.max(0, this.toNumber(source.remainingAmount)),
       paidDate: source.paidDate ? this.normalizeDateString(source.paidDate) : null,
-      status: source.status,
-      repaymentType: source.repaymentType ?? 'installment',
-      paymentMethod: source.paymentMethod ?? 'cash'
+      status: source.status
     };
   }
 
@@ -2165,8 +2367,6 @@ export class LoansAdvancesComponent implements OnInit {
     remainingAmount: number;
     paidDate: string | null;
     status: LoanPaymentStatus;
-    repaymentType?: 'installment' | 'full';
-    paymentMethod?: 'cash' | 'bank transfer' | 'payroll deduction';
   }): AdvancePaymentRow {
     return {
       id: source.id,
@@ -2179,21 +2379,8 @@ export class LoansAdvancesComponent implements OnInit {
       amount: Math.max(0, this.toNumber(source.amount)),
       remainingAmount: Math.max(0, this.toNumber(source.remainingAmount)),
       paidDate: source.paidDate ? this.normalizeDateString(source.paidDate) : null,
-      status: source.status,
-      repaymentType: source.repaymentType ?? 'installment',
-      paymentMethod: source.paymentMethod ?? 'payroll deduction'
+      status: source.status
     };
-  }
-
-  private normalizePaymentMethod(rawValue: unknown): 'cash' | 'bank transfer' | 'payroll deduction' {
-    const value = String(rawValue ?? '').trim().toLowerCase();
-    if (value === 'bank transfer' || value === 'bank_transfer') {
-      return 'bank transfer';
-    }
-    if (value === 'payroll deduction' || value === 'payroll_deduction') {
-      return 'payroll deduction';
-    }
-    return 'cash';
   }
 
   private buildLocalEmployees(): LoanEmployeeOption[] {
@@ -2443,7 +2630,7 @@ export class LoansAdvancesComponent implements OnInit {
   private buildLoanPaymentOptions(includeSettled: boolean): LoanPaymentLoanOption[] {
     const source = this.usingLocalLoanData ? this.localLoansSeed : this.loans;
 
-    return source
+    const options = source
       .filter((loan) => includeSettled || loan.remainingAmount > 0)
       .map((loan) => ({
         id: loan.id,
@@ -2451,58 +2638,64 @@ export class LoansAdvancesComponent implements OnInit {
         label: `${loan.employeeName} - ${this.currencySymbol()} ${loan.remainingAmount.toLocaleString()} due`,
         remainingAmount: loan.remainingAmount
       }));
-  }
 
-  private loadActiveDisbursedLoansForDialog(targetRow?: DisbursedLoanRow): void {
-    this.payrollService.getDisbursedActiveLoans({ Page: 1, PageSize: 500 }).subscribe({
-      next: (response: any) => {
-        const items = response.data || [];
-        this.activeDisbursedLoanOptions = items
-          .map((item: any) => ({
-            loanId: String(item.loanId ?? item.id ?? ''),
-            referenceId: String(item.referenceId ?? ''),
-            employeeId: String(item.employeeId ?? ''),
-            employeeName: String(item.employeeName ?? 'Unknown Employee'),
-            remainingAmount: this.toNumber(item.remainingAmount ?? 0)
-          }))
-          .filter((row: ActiveDisbursedLoanOption) => !!row.referenceId && !!row.employeeId);
-
-        this.openAddLoanPaymentDialogWithOptions(targetRow);
-      },
-      error: (err) => {
-        console.error('Error loading active disbursed loans for dialog', err);
-        this.activeDisbursedLoanOptions = [];
-        this.openAddLoanPaymentDialogWithOptions(targetRow);
+    const unique = new Map<string, LoanPaymentLoanOption>();
+    options.forEach((option) => {
+      if (!unique.has(option.id)) {
+        unique.set(option.id, option);
       }
     });
+
+    return [...unique.values()];
   }
 
-  private buildLoanPaymentDialogEmployees(): LoanPaymentEmployeeOption[] {
-    if (!this.activeDisbursedLoanOptions.length) {
-      return this.employees.map((employee) => ({ id: employee.id, name: employee.name }));
+  private deduplicatePeriods(periods: PeriodOption[]): PeriodOption[] {
+    if (!periods.length) {
+      return periods;
     }
 
-    const mapByEmployeeId = new Map<string, LoanPaymentEmployeeOption>();
-    for (const row of this.activeDisbursedLoanOptions) {
-      if (!mapByEmployeeId.has(row.employeeId)) {
-        mapByEmployeeId.set(row.employeeId, { id: row.employeeId, name: row.employeeName });
+    const unique: PeriodOption[] = [];
+    const seenIds = new Set<string>();
+    const seenNames = new Set<string>();
+
+    periods.forEach((period) => {
+      const id = String(period.id ?? '').trim();
+      const name = String(period.name ?? '').trim();
+      const normalizedName = name.toLowerCase();
+
+      if (!id && !name) {
+        return;
       }
-    }
 
-    return Array.from(mapByEmployeeId.values());
+      if ((id && seenIds.has(id)) || (normalizedName && seenNames.has(normalizedName))) {
+        return;
+      }
+
+      if (id) {
+        seenIds.add(id);
+      }
+
+      if (normalizedName) {
+        seenNames.add(normalizedName);
+      }
+
+      unique.push({ id, name });
+    });
+
+    return unique;
   }
 
-  private buildLoanPaymentDialogReferences(): LoanPaymentLoanOption[] {
-    if (!this.activeDisbursedLoanOptions.length) {
-      return this.buildLoanPaymentOptions(false);
+  private resolveLoanPaymentStatusForApi(payload: LoanPaymentDialogPayload): string {
+    return payload.repaymentType === 'full' ? 'settled' : 'deducted';
+  }
+
+  private toIsoDateTime(dateValue: string): string {
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) {
+      return new Date().toISOString();
     }
 
-    return this.activeDisbursedLoanOptions.map((row) => ({
-      id: row.referenceId,
-      employeeId: row.employeeId,
-      label: `${row.referenceId} - ${row.employeeName}`,
-      remainingAmount: row.remainingAmount
-    }));
+    return parsed.toISOString();
   }
 
   private ensureLoanPaymentOption(options: LoanPaymentLoanOption[], row: LoanPaymentRow): LoanPaymentLoanOption[] {
@@ -2688,20 +2881,20 @@ export class LoansAdvancesComponent implements OnInit {
   private normalizeLoanStatus(rawStatus: unknown): LoanStatus {
     const normalized = String(rawStatus ?? '').trim().toLowerCase();
 
-    if (normalized === 'accepted') {
-      return 'accepted';
-    }
-
     if (normalized === 'approved') {
       return 'approved';
     }
 
-    if (normalized === 'completed' || normalized === 'closed') {
-      return 'completed';
+    if (normalized === 'accepted') {
+      return 'accepted';
     }
 
     if (normalized === 'rejected') {
       return 'rejected';
+    }
+
+    if (normalized === 'completed' || normalized === 'closed') {
+      return 'completed';
     }
 
     if (normalized === 'cancelled' || normalized === 'canceled') {
@@ -2727,6 +2920,17 @@ export class LoansAdvancesComponent implements OnInit {
     }
 
     return 'deducted';
+  }
+
+  private normalizePaymentMethod(rawValue: unknown): 'cash' | 'bank transfer' | 'payroll deduction' {
+    const value = String(rawValue ?? '').trim().toLowerCase();
+    if (value === 'bank transfer' || value === 'bank_transfer') {
+      return 'bank transfer';
+    }
+    if (value === 'payroll deduction' || value === 'payroll_deduction') {
+      return 'payroll deduction';
+    }
+    return 'cash';
   }
 
   private normalizeSalaryAdvanceStatus(rawStatus: unknown): SalaryAdvanceStatus {

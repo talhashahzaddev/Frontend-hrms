@@ -907,6 +907,8 @@ export class PayrollService {
     // Provident Fund Rules
     getProvidentFundRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/provident-fund-rules`)
+    getSalaryAdvanceRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -919,6 +921,8 @@ export class PayrollService {
 
     getActiveProvidentFundRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/provident-fund-rules/active`)
+    getActiveSalaryAdvanceRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules/active`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -980,6 +984,18 @@ export class PayrollService {
 
     createLoanRule(data: any): Observable<any> {
       return this.http.post<ApiResponse<any>>(`${this.apiUrl}/loan-rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createSalaryAdvanceRule(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/salary-advance-rules`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1184,6 +1200,18 @@ export class PayrollService {
         );
     }
 
+    updateSalaryAdvanceRule(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance-rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     updateGratuityTransaction(id: string, data: any): Observable<any> {
       return this.http.put<ApiResponse<any>>(`${this.apiUrl}/gratuity-transactions/${id}`, data)
         .pipe(
@@ -1198,6 +1226,18 @@ export class PayrollService {
 
     deleteLoanRule(id: string): Observable<boolean> {
       return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/loan-rules/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    deleteSalaryAdvanceRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/salary-advance-rules/${id}`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1342,9 +1382,9 @@ export class PayrollService {
         );
     }
 
-    // Salary Advances
-    getSalaryAdvances(params?: any): Observable<any> {
-      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advances`, { params })
+    // Salary Advances (mapped to existing backend endpoints)
+    getMySalaryAdvances(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/my-requests`, { params })
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1355,8 +1395,8 @@ export class PayrollService {
         );
     }
 
-    createSalaryAdvance(data: any): Observable<any> {
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/salary-advances`, data)
+    getMySalaryAdvanceById(id: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/my-requests/${id}`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1367,8 +1407,8 @@ export class PayrollService {
         );
     }
 
-    updateSalaryAdvance(id: string, data: any): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advances/${id}`, data)
+    createSalaryAdvanceRequest(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/salary-advance/request`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1379,8 +1419,20 @@ export class PayrollService {
         );
     }
 
-    deleteSalaryAdvance(id: string): Observable<boolean> {
-      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/salary-advances/${id}`)
+    updateMySalaryAdvance(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance/my-requests/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    cancelMySalaryAdvance(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/salary-advance/my-requests/${id}`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1389,6 +1441,83 @@ export class PayrollService {
             return response.data || response.success;
           })
         );
+    }
+
+    getAllSalaryAdvanceRequests(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/all`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getSalaryAdvanceRequestById(id: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/all/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    approveSalaryAdvance(id: string): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/salary-advance/${id}/approve`, {})
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    rejectSalaryAdvance(id: string, data: { rejectionReason: string }): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/salary-advance/${id}/reject`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    disburseSalaryAdvance(id: string, data: { disbursementNote?: string | null }): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/salary-advance/${id}/disburse`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    // Backward compatible aliases for older screens.
+    getSalaryAdvances(params?: any): Observable<any> {
+      return this.getAllSalaryAdvanceRequests(params);
+    }
+
+    createSalaryAdvance(data: any): Observable<any> {
+      return this.createSalaryAdvanceRequest(data);
+    }
+
+    updateSalaryAdvance(id: string, data: any): Observable<any> {
+      return this.createSalaryAdvanceRequest(data);
+    }
+
+    deleteSalaryAdvance(id: string): Observable<boolean> {
+      return this.cancelMySalaryAdvance(id);
     }
 
     // Advance Payments
@@ -1663,30 +1792,6 @@ export class PayrollService {
 
     updateLoanStatus(data: { loanId: string, requestStatus: string, rejectionReason?: string }): Observable<any> {
       return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/loans/status`, data)
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data;
-          })
-        );
-    }
-
-    approveSalaryAdvance(id: string): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance/${id}/approve`, {})
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data;
-          })
-        );
-    }
-
-    rejectSalaryAdvance(id: string, data: { rejectionReason: string }): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/salary-advance/${id}/reject`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {

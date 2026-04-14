@@ -1,0 +1,223 @@
+<div class="time-tracking-container loans-advances-page">
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Salary Advances</h1>
+      <p class="subtitle">Manage salary advance requests from creation through approval, disbursement, and deduction.</p>
+    </div>
+  </div>
+
+  @if (hasFallbackNotice) {
+    <div class="fallback-banner">
+      <mat-icon>info</mat-icon>
+      <span>Preview data is shown for modules where backend endpoints are not yet available.</span>
+    </div>
+  }
+
+  <div class="tab-navigation">
+    <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
+    <button class="tab" [class.active]="currentTab === 'active'" (click)="setTab('active')">Active advances</button>
+    <button class="tab" [class.active]="currentTab === 'history'" (click)="setTab('history')">History</button>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Request queue</span>
+          <span class="value">{{ requestsCount }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>mark_email_unread</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">pending + approved</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Active advances</span>
+          <span class="value">{{ activeCount }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">disbursed requests</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Disbursed amount</span>
+          <span class="value">{{ currencySymbol() }} {{ totalDisbursedAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">released to employees</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Deducted amount</span>
+          <span class="value">{{ currencySymbol() }} {{ totalDeductedAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">recovered in payroll</p>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="toolbar supporting-toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee or reason..." [(ngModel)]="pendingSalaryAdvanceSearch" />
+        </div>
+
+        <select class="filter-select" [(ngModel)]="pendingSalaryAdvanceStatusFilter">
+          <option value="">All status</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="disbursed">Disbursed</option>
+          <option value="rejected">Rejected</option>
+          <option value="deducted">Deducted</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters" (click)="applySalaryAdvanceFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters" (click)="clearSalaryAdvanceFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="admin-cards-view">
+      @if (salaryAdvancesView.length === 0) {
+        <div class="empty-state">{{ getTabEmptyMessage() }}</div>
+      } @else {
+        @for (advance of salaryAdvancesView; track trackById($index, advance)) {
+          <article class="record-card">
+            <div class="card-body">
+              <div class="card-top">
+                <div class="employee-info">
+                  <div class="avatar" [ngClass]="'bg-' + (((advance.employeeName || 'A').charCodeAt(0) % 5) + 1)">
+                    {{ (advance.employeeName || 'A').substring(0, 1) }}
+                  </div>
+                  <div class="employee-detail">
+                    <span class="name">{{ advance.employeeName }}</span>
+                    <span class="designation">{{ advance.createdAt | date:'MMM yyyy' }}</span>
+                  </div>
+                </div>
+
+                <span class="status-pill" [ngClass]="getAdvanceStatusClass(advance.status)">
+                  {{ getAdvanceStatusLabel(advance.status) }}
+                </span>
+              </div>
+
+              <div class="main-stats">
+                <div class="stat-item">
+                  <label>Advance amount</label>
+                  <strong>{{ currencySymbol() }} {{ advance.amount | number }}</strong>
+                </div>
+                <div class="stat-item">
+                  <label>Planned deduction</label>
+                  <strong>{{ getDeductionPeriodLabel(advance) }}</strong>
+                </div>
+                <div class="stat-item">
+                  <label>Updated</label>
+                  <strong>{{ advance.updatedAt | date:'dd MMM yyyy' }}</strong>
+                </div>
+                <div class="stat-item">
+                  <label>Reference</label>
+                  <strong>{{ advance.advanceId }}</strong>
+                </div>
+              </div>
+
+              <div class="card-note">
+                <mat-icon>notes</mat-icon>
+                <p>{{ advance.reason }}</p>
+              </div>
+
+              <div class="card-note lifecycle-note">
+                <mat-icon>timeline</mat-icon>
+                <p>{{ getAdvanceFlowLabel(advance) }}</p>
+              </div>
+            </div>
+
+            @if (currentTab !== 'history') {
+              <div class="card-footer">
+                <div class="request-actions">
+                  @if (advance.status === 'pending') {
+                    <button class="approve-btn" (click)="approveRequest(advance)">
+                      <mat-icon>check_circle</mat-icon>
+                      Approve
+                    </button>
+                    <button class="reject-btn" (click)="rejectRequest(advance)">
+                      <mat-icon>cancel</mat-icon>
+                      Reject
+                    </button>
+                  } @else if (advance.status === 'approved') {
+                    <button class="approve-btn" (click)="disburseAdvance(advance)">
+                      <mat-icon>payments</mat-icon>
+                      Disburse
+                    </button>
+                    <button class="reject-btn" (click)="cancelAdvance(advance)">
+                      <mat-icon>block</mat-icon>
+                      Cancel
+                    </button>
+                  } @else if (advance.status === 'disbursed') {
+                    <button class="approve-btn" (click)="markAsDeducted(advance)">
+                      <mat-icon>task_alt</mat-icon>
+                      Mark deducted
+                    </button>
+                  }
+
+                  <button class="action-icon-btn danger" (click)="requestDeleteSalaryAdvance(advance)" title="Delete advance">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </article>
+        }
+      }
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (salaryAdvancesTotalRecords === 0) {
+          No records found
+        } @else {
+          Showing {{ salaryAdvancesFromRecord }}&ndash;{{ salaryAdvancesToRecord }} of {{ salaryAdvancesTotalRecords }} records
+        }
+      </p>
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="salaryAdvancesPage === 1" [disabled]="salaryAdvancesPage === 1" (click)="prevSalaryAdvancePage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (p of salaryAdvancesPageRange; track p) {
+          <button class="page-btn" [class.active]="p === salaryAdvancesPage" (click)="goToSalaryAdvancePage(p)">{{ p }}</button>
+        }
+
+        <button class="page-btn" [class.disabled]="salaryAdvancesPage === salaryAdvancesTotalPages" [disabled]="salaryAdvancesPage === salaryAdvancesTotalPages" (click)="nextSalaryAdvancePage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
