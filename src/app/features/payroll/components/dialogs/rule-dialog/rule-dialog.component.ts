@@ -29,6 +29,12 @@ export interface RuleDialogData {
     graceMinutes?: number;
     minScore?: number;
     maxScore?: number;
+    basis?: string;
+    employeePercentage?: number;
+    employerPercentage?: number;
+    minContribution?: number;
+    maxContribution?: number | null;
+    vestingMonths?: number;
   };
 }
 
@@ -102,7 +108,14 @@ export class RuleDialogComponent implements OnInit {
     maxLoanAmount: [null as number | null],
     maxInstallments: [null as number | null],
     repaymentType: ['installment'],
-    interestRate: [0]
+    interestRate: [0],
+    // Provident Fund fields
+    basis: ['basic'],
+    employeePercentage: [null as number | null],
+    employerPercentage: [null as number | null],
+    minContribution: [null as number | null],
+    maxContribution: [null as number | null],
+    vestingMonths: [0]
   });
 
   ngOnInit(): void {
@@ -176,6 +189,17 @@ export class RuleDialogComponent implements OnInit {
           maxInstallments: rule.maxInstallments ?? null,
           repaymentType: rule.maxInstallments === 1 ? 'full' : 'installment',
           interestRate: 0
+        });
+      }
+
+      if (this.data.policyId === 9) {
+        this.ruleForm.patchValue({
+          basis: (rule.basis || rule.contributionBasis || 'basic').toLowerCase(),
+          employeePercentage: rule.employeePercentage ?? rule.defaultEmployeePct ?? null,
+          employerPercentage: rule.employerPercentage ?? rule.defaultEmployerPct ?? null,
+          minContribution: rule.minContribution ?? null,
+          maxContribution: rule.maxContribution ?? null,
+          vestingMonths: rule.vestingMonths ?? 0
         });
       }
     }
@@ -274,6 +298,37 @@ export class RuleDialogComponent implements OnInit {
     loanAmountControl?.updateValueAndValidity();
     loanInstallmentsControl?.updateValueAndValidity();
     repaymentTypeControl?.updateValueAndValidity();
+
+    const basisControl = this.ruleForm.get('basis');
+    const employeePercentageControl = this.ruleForm.get('employeePercentage');
+    const employerPercentageControl = this.ruleForm.get('employerPercentage');
+    const minContributionControl = this.ruleForm.get('minContribution');
+    const maxContributionControl = this.ruleForm.get('maxContribution');
+    const vestingMonthsControl = this.ruleForm.get('vestingMonths');
+
+    if (Number(policyId) === 9) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      basisControl?.setValidators([Validators.required]);
+      employeePercentageControl?.setValidators([Validators.required, Validators.min(0)]);
+      employerPercentageControl?.setValidators([Validators.required, Validators.min(0)]);
+      minContributionControl?.setValidators([Validators.required, Validators.min(0)]);
+      maxContributionControl?.setValidators([Validators.min(0)]);
+      vestingMonthsControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      basisControl?.clearValidators();
+      employeePercentageControl?.clearValidators();
+      employerPercentageControl?.clearValidators();
+      minContributionControl?.clearValidators();
+      maxContributionControl?.clearValidators();
+      vestingMonthsControl?.clearValidators();
+    }
+
+    basisControl?.updateValueAndValidity();
+    employeePercentageControl?.updateValueAndValidity();
+    employerPercentageControl?.updateValueAndValidity();
+    minContributionControl?.updateValueAndValidity();
+    maxContributionControl?.updateValueAndValidity();
+    vestingMonthsControl?.updateValueAndValidity();
 
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     this.ruleForm.get('amountType')?.updateValueAndValidity();
@@ -527,6 +582,40 @@ export class RuleDialogComponent implements OnInit {
             console.error(err);
             this.notification.showError(
               err?.message || (this.isEditMode ? 'Failed to update loan rule' : 'Failed to create loan rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 9) { // 9 is Provident Fund Policy
+      const payload = {
+        ruleName: formValue.ruleName,
+        description: formValue.description,
+        defaultEmployeePct: formValue.employeePercentage,
+        defaultEmployerPct: formValue.employerPercentage,
+        contributionBasis: formValue.basis,
+        minContribution: formValue.minContribution,
+        maxContribution: formValue.maxContribution,
+        vestingMonths: formValue.vestingMonths,
+        allowPartialWithdraw: false,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const request$ = this.isEditMode && (this.data?.rule as any)?.ruleId
+        ? this.payrollService.updateProvidentFundRule((this.data.rule as any).ruleId, payload)
+        : this.payrollService.createProvidentFundRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Provident fund rule updated successfully' : 'Provident fund rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 9 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update provident fund rule' : 'Failed to create provident fund rule')
             );
           }
         });
