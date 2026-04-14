@@ -21,8 +21,14 @@ export const payrollRoutes: Routes = [
   {
     path: 'loans',
     loadComponent: () =>
-      import('./components/loans-advances/loans-advances.component').then(m => m.LoansAdvancesComponent),
-    title: 'Loans & Salary Advances - HRMS'
+      import('./components/loans/loans.component').then(m => m.LoansComponent),
+    title: 'Loans - HRMS'
+  },
+  {
+    path: 'salary-advances',
+    loadComponent: () =>
+      import('./components/salary-advances/salary-advances.component').then(m => m.SalaryAdvancesComponent),
+    title: 'Salary Advances - HRMS'
   },
   {
     path: 'loans/requests',
@@ -95,6 +101,12 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/loan-rules/loan-rules.component').then(m => m.LoanRulesComponent),
     title: 'Loan Policy - HRMS'
+  },
+  {
+    path: 'policies/salary-advance-rules',
+    loadComponent: () =>
+      import('./components/salary-advance-rules/salary-advance-rules.component').then(m => m.SalaryAdvanceRulesComponent),
+    title: 'Salary Advance Policy - HRMS'
   },
   {
     path: 'periods',

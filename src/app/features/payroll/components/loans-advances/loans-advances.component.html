@@ -4,6 +4,12 @@
       <h1 class="title">Loans &amp; Salary Advances</h1>
       <p class="subtitle">Manage employee loans, salary advances, and repayment records from one place.</p>
     </div>
+    <div class="header-actions">
+      <button class="add-btn" (click)="openPrimaryDialog()">
+        <mat-icon>add</mat-icon>
+        {{ primaryActionLabel }}
+      </button>
+    </div>
   </div>
 
   <div class="tab-navigation">
@@ -11,8 +17,6 @@
     <button class="tab" [class.active]="currentTab === 'loan-payments'" (click)="setTab('loan-payments')">Loan
       payments</button>
     <button class="tab" [class.active]="currentTab === 'repayments'" (click)="setTab('repayments')">Repayments</button>
-    <button class="tab" [class.active]="currentTab === 'salary-advances'" (click)="setTab('salary-advances')">Salary
-      advances</button>
   </div>
 
   <!-- @if (hasFallbackNotice) {
@@ -200,202 +204,12 @@
         <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
         }
 
-        <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages"
-          (click)="nextPage()">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
-  } @else if (currentTab === 'salary-advances') {
-  <div class="summary-cards">
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Advances issued</span>
-          <span class="value">{{ currencySymbol() }} {{ totalSalaryAdvancesIssued | number }}</span>
-        </div>
-        <div class="icon-wrapper color-blue">
-          <mat-icon>savings</mat-icon>
-        </div>
-      </div>
-      <p class="card-footer">{{ salaryAdvances.length }} records</p>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Outstanding</span>
-          <span class="value">{{ currencySymbol() }} {{ totalSalaryAdvancesRemaining | number }}</span>
-        </div>
-        <div class="icon-wrapper color-amber">
-          <mat-icon>pending_actions</mat-icon>
-        </div>
-      </div>
-      <p class="card-footer">remaining to recover</p>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Active advances</span>
-          <span class="value">{{ activeSalaryAdvancesCount }}</span>
-        </div>
-        <div class="icon-wrapper color-green">
-          <mat-icon>trending_up</mat-icon>
-        </div>
-      </div>
-      <p class="card-footer">pending + approved</p>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Completed advances</span>
-          <span class="value">{{ salaryAdvances.length - activeSalaryAdvancesCount }}</span>
-        </div>
-        <div class="icon-wrapper color-purple">
-          <mat-icon>done_all</mat-icon>
-        </div>
-      </div>
-      <p class="card-footer">fully repaid</p>
-    </div>
-  </div>
-
-  <div class="content-card">
-    <div class="toolbar supporting-toolbar">
-      <div class="filters-row">
-        <div class="search-box">
-          <mat-icon>search</mat-icon>
-          <input type="text" placeholder="Search employee or reason..." [(ngModel)]="pendingSalaryAdvanceSearch" />
-        </div>
-
-        <select class="filter-select" [(ngModel)]="pendingSalaryAdvanceStatusFilter">
-          <option value="">All status</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-
-        <div class="filter-actions">
-          <button class="apply-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters"
-            (click)="applySalaryAdvanceFilters()">
-            <mat-icon>filter_list</mat-icon>
-            Apply
-          </button>
-          <button class="clear-btn" [disabled]="!hasActiveSalaryAdvanceFilters && !hasAppliedSalaryAdvanceFilters"
-            (click)="clearSalaryAdvanceFilters()">
-            <mat-icon>close</mat-icon>
-            Clear
+          <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
       </div>
-
-      <div class="add-btn-wrap">
-        <button class="add-btn" (click)="openAddSalaryAdvanceDialog()">
-          <mat-icon>add</mat-icon>
-          Add salary advance
-        </button>
-      </div>
     </div>
-
-    <div class="cards-stack admin-cards-view">
-      @if (salaryAdvancesView.length === 0) {
-      <div class="empty-state">No salary advance records available.</div>
-      } @else {
-      @for (advance of salaryAdvancesView; track advance.id) {
-      <article class="record-card">
-        <div class="card-body">
-          <div class="card-top">
-            <div class="employee-info">
-              <div class="avatar" [ngClass]="'bg-' + ((advance.employeeName.charCodeAt(0) % 5) + 1)">{{
-                advance.employeeName.substring(0, 1) }}</div>
-              <div class="employee-detail">
-                <span class="name">{{ advance.employeeName }}</span>
-                <span class="designation">{{ advance.periodName }}</span>
-              </div>
-            </div>
-            <span class="status-pill" [ngClass]="getAdvanceStatusClass(advance.status)">
-              {{ getAdvanceStatusLabel(advance.status) }}
-            </span>
-          </div>
-
-          <div class="main-stats">
-            <div class="stat-item">
-              <label>Advance amount</label>
-              <strong>{{ currencySymbol() }} {{ advance.totalAmount | number }}</strong>
-            </div>
-            <div class="stat-item">
-              <label>Monthly deduction</label>
-              <strong>{{ currencySymbol() }} {{ advance.monthlyDeduction | number }}</strong>
-            </div>
-            <div class="stat-item">
-              <label>Remaining</label>
-              <strong>{{ currencySymbol() }} {{ advance.remainingAmount | number }}</strong>
-            </div>
-          </div>
-
-          @if (advance.reason) {
-          <div class="card-note">
-            <mat-icon>notes</mat-icon>
-            <p>{{ advance.reason }}</p>
-          </div>
-          }
-        </div>
-
-        <div class="card-footer">
-          <div class="request-actions">
-            @if (advance.status === 'pending') {
-            <button class="approve-btn" (click)="approveSalaryAdvance(advance)">
-              <mat-icon>check_circle</mat-icon>
-              Approve
-            </button>
-            <button class="reject-btn" (click)="requestRejectSalaryAdvance(advance)">
-              <mat-icon>cancel</mat-icon>
-              Reject
-            </button>
-            }
-            <button class="action-icon-btn" (click)="openEditSalaryAdvanceDialog(advance)" title="Edit Advance">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button class="action-icon-btn danger" (click)="requestDeleteSalaryAdvance(advance)" title="Delete Advance">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        </div>
-      </article>
-      }
-      }
-    </div>
-
-    <div class="table-footer">
-      <p>
-        @if (salaryAdvancesTotalRecords === 0) {
-        No records found
-        } @else {
-        Showing {{ salaryAdvancesFromRecord }}&ndash;{{ salaryAdvancesToRecord }} of {{ salaryAdvancesTotalRecords }}
-        records
-        }
-      </p>
-      <div class="pagination">
-        <button class="page-btn" [class.disabled]="salaryAdvancesPage === 1" [disabled]="salaryAdvancesPage === 1"
-          (click)="prevSalaryAdvancePage()">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-
-        @for (p of salaryAdvancesPageRange; track p) {
-        <button class="page-btn" [class.active]="p === salaryAdvancesPage" (click)="goToSalaryAdvancePage(p)">{{ p
-          }}</button>
-        }
-
-        <button class="page-btn" [class.disabled]="salaryAdvancesPage === salaryAdvancesTotalPages"
-          [disabled]="salaryAdvancesPage === salaryAdvancesTotalPages" (click)="nextSalaryAdvancePage()">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
   } @else if (currentTab === 'loan-payments') {
   <div class="summary-cards">
     <div class="card">

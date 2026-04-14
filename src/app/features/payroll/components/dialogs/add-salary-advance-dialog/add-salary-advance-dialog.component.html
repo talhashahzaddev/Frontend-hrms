@@ -20,44 +20,41 @@
       }
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label>Payroll period</label>
-        <select class="form-control" formControlName="periodId">
-          <option value="" disabled selected>Select period</option>
-          @for (period of periods; track period.id) {
-            <option [value]="period.id">{{ period.name }}</option>
+    @if (isEditMode) {
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" formControlName="status">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="disbursed">Disbursed</option>
+            <option value="rejected">Rejected</option>
+            <option value="deducted">Deducted</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deduction payroll period</label>
+          <select class="form-control" formControlName="deductedPeriodId">
+            <option value="" disabled selected>Select period</option>
+            @for (period of periods; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+          @if (showDeductedPeriodError) {
+            <p class="field-error">Deduction payroll period is required for deducted status.</p>
           }
-        </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select class="form-control" formControlName="status">
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-    </div>
+    }
 
     <div class="form-row">
       <div class="form-group">
         <label>Amount PKR</label>
         <div class="currency-input">
           <span>Rs.</span>
-          <input type="number" class="form-control align-right" formControlName="totalAmount" min="1" placeholder="0.00" />
+          <input type="number" class="form-control align-right" formControlName="amount" min="1" placeholder="0.00" />
         </div>
-      </div>
-      <div class="form-group">
-        <label>Monthly deduction PKR</label>
-        <div class="currency-input">
-          <span>Rs.</span>
-          <input type="number" class="form-control align-right" formControlName="monthlyDeduction" min="0" placeholder="0.00" />
-        </div>
-        @if (showDeductionError) {
-          <p class="field-error">Monthly deduction must be 0 or higher and not exceed amount.</p>
-        }
       </div>
     </div>
 
@@ -68,6 +65,23 @@
         <p class="field-error">Reason is required (max 500 characters).</p>
       }
     </div>
+
+    @if (showRejectedReasonField) {
+      <div class="form-group full-width">
+        <label>Rejection reason</label>
+        <textarea class="form-control text-area" rows="2" formControlName="rejectionReason" placeholder="Why is this request rejected?"></textarea>
+        @if (showRejectedReasonError) {
+          <p class="field-error">Rejection reason is required for rejected status.</p>
+        }
+      </div>
+    }
+
+    @if (showDisbursementNoteField) {
+      <div class="form-group full-width">
+        <label>Disbursement note</label>
+        <textarea class="form-control text-area" rows="2" formControlName="disbursementNote" placeholder="Optional disbursement notes..."></textarea>
+      </div>
+    }
   </div>
 
   <div class="dialog-footer">

@@ -60,8 +60,8 @@ export class AddLoanPaymentDialogComponent {
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   employees = this.data?.employees ?? [];
-  readonly periods = this.data?.periods ?? [];
-  loans = this.data?.loans ?? [];
+  readonly periods = this.deduplicatePeriodOptions(this.data?.periods ?? []);
+  loans = this.deduplicateLoanOptions(this.data?.loans ?? []);
   readonly currencySymbol = this.data?.currencySymbol ?? 'PKR';
 
   readonly form = this.fb.group(
@@ -119,33 +119,38 @@ export class AddLoanPaymentDialogComponent {
   private loadActiveDisbursedLoans(): void {
     this.payrollService.getDisbursedActiveLoans({ Page: 1, PageSize: 500 }).subscribe({
       next: (response: any) => {
-        const rows = Array.isArray(response?.data) ? response.data : [];
+        const rows = this.extractItems(response);
 
         const employeesMap = new Map<string, LoanPaymentEmployeeOption>();
-        const loans: LoanPaymentLoanOption[] = [];
+        const loansMap = new Map<string, LoanPaymentLoanOption>();
 
         rows.forEach((item: any) => {
           const employeeId = String(item.employeeId ?? '').trim();
           const employeeName = String(item.employeeName ?? '').trim();
           const referenceId = String(item.referenceId ?? '').trim();
-          const remainingAmount = Number(item.remainingAmount ?? 0);
+          const remainingAmount = Number(item.remainingAmount ?? item.balanceAmount ?? 0);
 
           if (employeeId && employeeName && !employeesMap.has(employeeId)) {
             employeesMap.set(employeeId, { id: employeeId, name: employeeName });
           }
 
           if (employeeId && referenceId) {
-            loans.push({
+            const existingLoan = loansMap.get(referenceId);
+            const nextOption: LoanPaymentLoanOption = {
               id: referenceId,
               employeeId,
               label: referenceId,
-              remainingAmount
-            });
+              remainingAmount: Number.isFinite(remainingAmount) ? remainingAmount : 0
+            };
+
+            if (!existingLoan || nextOption.remainingAmount > existingLoan.remainingAmount) {
+              loansMap.set(referenceId, nextOption);
+            }
           }
         });
 
         this.employees = Array.from(employeesMap.values());
-        this.loans = loans;
+        this.loans = this.deduplicateLoanOptions(Array.from(loansMap.values()));
 
         // Clear stale selections if they are no longer valid after refresh.
         const selectedEmployee = String(this.form.get('employeeId')?.value ?? '').trim();
@@ -162,6 +167,89 @@ export class AddLoanPaymentDialogComponent {
         console.error('Error loading active disbursed loans for payment dialog:', err);
       }
     });
+  }
+
+  private deduplicatePeriodOptions(periods: LoanPaymentPeriodOption[]): LoanPaymentPeriodOption[] {
+    if (!periods.length) {
+      return periods;
+    }
+
+    const unique: LoanPaymentPeriodOption[] = [];
+    const seenIds = new Set<string>();
+    const seenNames = new Set<string>();
+
+    periods.forEach((period) => {
+      const id = String(period?.id ?? '').trim();
+      const name = String(period?.name ?? '').trim();
+      const normalizedName = name.toLowerCase();
+
+      if (!id && !name) {
+        return;
+      }
+
+      if ((id && seenIds.has(id)) || (normalizedName && seenNames.has(normalizedName))) {
+        return;
+      }
+
+      if (id) {
+        seenIds.add(id);
+      }
+
+      if (normalizedName) {
+        seenNames.add(normalizedName);
+      }
+
+      unique.push({ id, name });
+    });
+
+    return unique;
+  }
+
+  private deduplicateLoanOptions(loans: LoanPaymentLoanOption[]): LoanPaymentLoanOption[] {
+    if (!loans.length) {
+      return loans;
+    }
+
+    const unique = new Map<string, LoanPaymentLoanOption>();
+
+    loans.forEach((loan) => {
+      const id = String(loan?.id ?? '').trim();
+      if (!id) {
+        return;
+      }
+
+      const existing = unique.get(id);
+      if (!existing || (loan.remainingAmount ?? 0) > (existing.remainingAmount ?? 0)) {
+        unique.set(id, {
+          id,
+          employeeId: String(loan.employeeId ?? '').trim(),
+          label: String(loan.label ?? id).trim() || id,
+          remainingAmount: Number.isFinite(Number(loan.remainingAmount)) ? Number(loan.remainingAmount) : 0
+        });
+      }
+    });
+
+    return Array.from(unique.values());
+  }
+
+  private extractItems(payload: any): any[] {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    if (Array.isArray(payload?.data)) {
+      return payload.data;
+    }
+
+    if (Array.isArray(payload?.items)) {
+      return payload.items;
+    }
+
+    if (Array.isArray(payload?.records)) {
+      return payload.records;
+    }
+
+    return [];
   }
 
   get filteredLoans(): LoanPaymentLoanOption[] {
