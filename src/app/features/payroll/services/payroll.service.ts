@@ -904,6 +904,9 @@ export class PayrollService {
         );
     }
 
+    // Provident Fund Rules
+    getProvidentFundRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/provident-fund-rules`)
     getSalaryAdvanceRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules`)
         .pipe(
@@ -916,6 +919,8 @@ export class PayrollService {
         );
     }
 
+    getActiveProvidentFundRules(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/provident-fund-rules/active`)
     getActiveSalaryAdvanceRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules/active`)
         .pipe(
@@ -924,6 +929,42 @@ export class PayrollService {
               throw new Error(response.message);
             }
             return response.data || [];
+          })
+        );
+    }
+
+    createProvidentFundRule(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/provident-fund-rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateProvidentFundRule(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/provident-fund-rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteProvidentFundRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/provident-fund-rules/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
           })
         );
     }

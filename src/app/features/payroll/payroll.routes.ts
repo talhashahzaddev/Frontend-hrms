@@ -103,6 +103,10 @@ export const payrollRoutes: Routes = [
     title: 'Loan Policy - HRMS'
   },
   {
+    path: 'policies/provident-fund-rule',
+    loadComponent: () =>
+      import('./components/provident-fund-rule/provident-fund-rule.component').then(m => m.ProvidentFundRuleComponent),
+    title: 'Provident Fund Policy - HRMS'
     path: 'policies/salary-advance-rules',
     loadComponent: () =>
       import('./components/salary-advance-rules/salary-advance-rules.component').then(m => m.SalaryAdvanceRulesComponent),
