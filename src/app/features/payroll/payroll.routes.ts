@@ -37,6 +37,12 @@ export const payrollRoutes: Routes = [
     title: 'My Loan & Advance Requests - HRMS'
   },
   {
+    path: 'provident-fund-benefilts',
+    loadComponent: () =>
+      import('./components/provident-fund-benefilts/provident-fund-benefilts.component').then(m => m.ProvidentFundBenefiltsComponent),
+    title: 'Provident Fund Benefits - HRMS'
+  },
+  {
     path: 'loans/requests/compliance',
     loadComponent: () =>
       import('./components/loan-request-compliance/loan-request-compliance.component').then(m => m.LoanRequestComplianceComponent),

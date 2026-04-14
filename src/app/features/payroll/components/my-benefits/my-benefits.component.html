@@ -123,7 +123,7 @@
 
     <!-- Card 3 (Provident Fund) -->
     @if (isModuleActive('Provident Fund')) {
-    <div class="benefit-card">
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Provident Fund')" (keydown)="onBenefitCardKeydown($event, 'Provident Fund')">
       <div class="card-header">
         <div class="icon-wrapper color-secondary">
           <mat-icon>savings</mat-icon>
@@ -134,8 +134,8 @@
         </span>
       </div>
       <h3 class="benefit-title">Provident Fund</h3>
-      <p class="benefit-desc">Track your PF contributions and employer matching</p>
-      <p class="card-link is-muted">Details available soon</p>
+      <p class="benefit-desc">Track and request your provident fund benefits and settlement history</p>
+      <p class="card-link">Open provident fund benefits <mat-icon>arrow_forward</mat-icon></p>
     </div>
     }
 

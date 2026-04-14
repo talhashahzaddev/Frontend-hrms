@@ -929,6 +929,123 @@ export class PayrollService {
         );
     }
 
+    createProvidentFundEnrollmentRequest(data: {
+      ruleId: string;
+      employeePct: number;
+      effectiveFrom: string;
+    }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/provident-fund/enroll`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateProvidentFundEnrollmentRequest(pfId: string, data: {
+      ruleId: string;
+      employeePct: number;
+      effectiveFrom: string;
+    }): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/enroll/${pfId}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateProvidentFundPercentage(data: { employeePct: number }): Observable<any> {
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/provident-fund/update-percentage`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createProvidentFundWithdrawalRequest(data: { amount: number; reason?: string | null }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/withdraw`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createProvidentFundSettlementRequest(data: { effectiveFrom: string; remarks?: string | null }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/settlement-request`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteProvidentFundRequest(pfId: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${environment.apiUrl}/employee/provident-fund/request/${pfId}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getMyPendingProvidentFundRequest(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-pending-request`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyProvidentFundTransactions(filter?: { year?: number | null; page?: number; pageSize?: number }): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        if (filter.year !== null && filter.year !== undefined) {
+          params = params.set('year', String(filter.year));
+        }
+        if (filter.page !== null && filter.page !== undefined) {
+          params = params.set('page', String(filter.page));
+        }
+        if (filter.pageSize !== null && filter.pageSize !== undefined) {
+          params = params.set('pageSize', String(filter.pageSize));
+        }
+      }
+
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-transactions`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     // Salary Advance Rules
     getSalaryAdvanceRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules`)

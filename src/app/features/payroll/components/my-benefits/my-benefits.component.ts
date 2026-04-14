@@ -72,6 +72,11 @@ export class MyBenefitsComponent implements OnInit {
 
     if (module === 'Advance Salary') {
       this.router.navigate(['/payroll/loans/requests'], { queryParams: { module: 'salary-advance' } });
+      return;
+    }
+
+    if (module === 'Provident Fund') {
+      this.router.navigate(['/payroll/provident-fund-benefilts']);
     }
   }
 
