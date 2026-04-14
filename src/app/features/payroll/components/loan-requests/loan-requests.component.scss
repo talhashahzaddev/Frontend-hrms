@@ -560,6 +560,11 @@
       color: #166534;
     }
 
+    &.status-disbursed {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
     &.status-pending {
       background: #fef3c7;
       color: #92400e;
@@ -571,8 +576,8 @@
     }
 
     &.status-cancelled,
-    &.status-rejected,
-    &.status-skipped {
+    &.status-skipped,
+    &.status-rejected {
       background: #fee2e2;
       color: #991b1b;
     }

@@ -4,7 +4,14 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
-export type SalaryAdvanceDialogStatus = 'pending' | 'approved' | 'completed' | 'cancelled';
+export type SalaryAdvanceDialogStatus =
+  | 'pending'
+  | 'approved'
+  | 'disbursed'
+  | 'rejected'
+  | 'deducted'
+  | 'cancelled'
+  | 'completed';
 
 export interface SalaryAdvanceEmployeeOption {
   id: string;
@@ -19,11 +26,17 @@ export interface SalaryAdvancePeriodOption {
 
 export interface SalaryAdvanceDialogPayload {
   employeeId: string;
-  periodId: string;
   status: SalaryAdvanceDialogStatus;
+  amount: number;
+  reason: string;
+  rejectionReason?: string;
+  deductedPeriodId?: string | null;
+  disbursementNote?: string;
+
+  // Legacy compatibility fields used by older payroll screens.
+  periodId: string;
   totalAmount: number;
   monthlyDeduction: number;
-  reason: string;
 }
 
 interface SalaryAdvanceDialogData {
@@ -52,24 +65,26 @@ export class AddSalaryAdvanceDialogComponent {
   readonly form = this.fb.group(
     {
       employeeId: ['', Validators.required],
-      periodId: ['', Validators.required],
       status: ['pending' as SalaryAdvanceDialogStatus, Validators.required],
-      totalAmount: [null as number | null, [Validators.required, Validators.min(1)]],
-      monthlyDeduction: [null as number | null, [Validators.required, Validators.min(0)]],
-      reason: ['', [Validators.required, Validators.maxLength(500)]]
+      amount: [null as number | null, [Validators.required, Validators.min(1)]],
+      reason: ['', [Validators.required, Validators.maxLength(500)]],
+      rejectionReason: [''],
+      deductedPeriodId: [''],
+      disbursementNote: ['']
     },
-    { validators: [this.amountValidator()] }
+    { validators: [this.schemaFlowValidator()] }
   );
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SalaryAdvanceDialogData) {
     if (this.data?.initialValue) {
       this.form.patchValue({
         employeeId: this.data.initialValue.employeeId ?? '',
-        periodId: this.data.initialValue.periodId ?? '',
         status: this.data.initialValue.status ?? 'pending',
-        totalAmount: this.data.initialValue.totalAmount ?? null,
-        monthlyDeduction: this.data.initialValue.monthlyDeduction ?? null,
-        reason: this.data.initialValue.reason ?? ''
+        amount: this.data.initialValue.amount ?? this.data.initialValue.totalAmount ?? null,
+        reason: this.data.initialValue.reason ?? '',
+        rejectionReason: this.data.initialValue.rejectionReason ?? '',
+        deductedPeriodId: this.data.initialValue.deductedPeriodId ?? this.data.initialValue.periodId ?? '',
+        disbursementNote: this.data.initialValue.disbursementNote ?? ''
       });
     }
 
@@ -86,12 +101,34 @@ export class AddSalaryAdvanceDialogComponent {
     return this.mode === 'edit' ? 'Update record' : 'Save record';
   }
 
-  get showDeductionError(): boolean {
-    const deductionControl = this.form.get('monthlyDeduction');
-    return !!deductionControl && (
-      (deductionControl.touched && (deductionControl.hasError('required') || deductionControl.hasError('min')))
-      || (deductionControl.touched && this.form.hasError('deductionGreaterThanAmount'))
-    );
+  get showRejectedReasonField(): boolean {
+    const status = this.form.get('status')?.value;
+    return status === 'rejected';
+  }
+
+  get showDisbursementNoteField(): boolean {
+    const status = this.form.get('status')?.value;
+    return status === 'disbursed';
+  }
+
+  get isEditMode(): boolean {
+    return this.mode === 'edit';
+  }
+
+  get showRejectedReasonError(): boolean {
+    const status = this.form.get('status')?.value;
+    const control = this.form.get('rejectionReason');
+    return status === 'rejected' && !!control && (control.touched || control.dirty) && this.form.hasError('rejectionReasonRequired');
+  }
+
+  get showDeductedPeriodError(): boolean {
+    const status = this.form.get('status')?.value;
+    const control = this.form.get('deductedPeriodId');
+    return this.isEditMode
+      && this.isDeductionPeriodRequired(String(status ?? ''))
+      && !!control
+      && (control.touched || control.dirty)
+      && this.form.hasError('deductedPeriodRequired');
   }
 
   close(): void {
@@ -108,24 +145,43 @@ export class AddSalaryAdvanceDialogComponent {
 
     this.dialogRef.close({
       employeeId: raw.employeeId ?? '',
-      periodId: raw.periodId ?? '',
       status: (raw.status ?? 'pending') as SalaryAdvanceDialogStatus,
-      totalAmount: Number(raw.totalAmount ?? 0),
-      monthlyDeduction: Number(raw.monthlyDeduction ?? 0),
-      reason: String(raw.reason ?? '').trim()
+      amount: Number(raw.amount ?? 0),
+      reason: String(raw.reason ?? '').trim(),
+      rejectionReason: String(raw.rejectionReason ?? '').trim() || undefined,
+      deductedPeriodId: String(raw.deductedPeriodId ?? '').trim() || null,
+      disbursementNote: String(raw.disbursementNote ?? '').trim() || undefined,
+
+      // Legacy compatibility values for screens that still expect old names.
+      periodId: String(raw.deductedPeriodId ?? '').trim(),
+      totalAmount: Number(raw.amount ?? 0),
+      monthlyDeduction: 0
     });
   }
 
-  private amountValidator(): ValidatorFn {
+  private schemaFlowValidator(): ValidatorFn {
     return (group): ValidationErrors | null => {
-      const amount = Number(group.get('totalAmount')?.value ?? 0);
-      const deduction = Number(group.get('monthlyDeduction')?.value ?? 0);
+      if (!this.isEditMode) {
+        return null;
+      }
 
-      if (amount > 0 && deduction > amount) {
-        return { deductionGreaterThanAmount: true };
+      const status = String(group.get('status')?.value ?? '').trim().toLowerCase();
+      const rejectionReason = String(group.get('rejectionReason')?.value ?? '').trim();
+      const deductedPeriodId = String(group.get('deductedPeriodId')?.value ?? '').trim();
+
+      if (status === 'rejected' && !rejectionReason) {
+        return { rejectionReasonRequired: true };
+      }
+
+      if (this.isDeductionPeriodRequired(status) && !deductedPeriodId) {
+        return { deductedPeriodRequired: true };
       }
 
       return null;
     };
+  }
+
+  private isDeductionPeriodRequired(status: string): boolean {
+    return status === 'deducted';
   }
 }

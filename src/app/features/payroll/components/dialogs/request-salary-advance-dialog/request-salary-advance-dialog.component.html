@@ -9,28 +9,43 @@
   <form class="dialog-content" [formGroup]="form" (ngSubmit)="save()">
     <div class="info-box">
       <mat-icon>info</mat-icon>
-      <p>Advance requests are subject to HR approval. Deductions will begin from your next salary.</p>
+      <p>Advance requests are subject to HR approval. Status and deduction period are assigned by payroll workflow on the backend.</p>
     </div>
 
-    <div class="field-stack">
-      <label class="field">
-        <span>Amount {{ currencySymbol }}</span>
-        <div class="prefix-input">
-          <strong>Rs.</strong>
-          <input type="number" formControlName="totalAmount" min="1" placeholder="0.00" />
-        </div>
-      </label>
+    @if (!hasActiveRules) {
+      <p class="error-text">No active salary advance rule is available right now. Please contact payroll admin.</p>
+    }
 
-      <label class="field">
-        <span>Monthly deduction amount {{ currencySymbol }}</span>
-        <div class="prefix-input">
-          <strong>Rs.</strong>
-          <input type="number" formControlName="monthlyDeduction" min="1" placeholder="0.00" />
-        </div>
-        @if (showDeductionError) {
-          <small class="error-text">Monthly deduction should be valid and cannot exceed amount.</small>
-        }
-      </label>
+    <div class="field-stack">
+      <div class="field-row">
+        <label class="field amount-field">
+          <span>Amount {{ currencySymbol }}</span>
+          <div class="prefix-input">
+            <strong>Rs.</strong>
+            <input type="number" formControlName="totalAmount" min="1" placeholder="0.00" />
+          </div>
+        </label>
+
+        <label class="field rule-field">
+          <span>Rule</span>
+          <select formControlName="selectedRuleId">
+            @for (rule of activeRules; track rule.ruleId) {
+              <option [value]="rule.ruleId">{{ rule.maxPercentage }}% - {{ rule.ruleName }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      @if (hasActiveRules && selectedRule) {
+        <p class="rule-hint">
+          Selected rule: <strong>{{ selectedRule.maxPercentage }}%</strong> of available limit.
+          Max request amount: <strong>Rs. {{ selectedRuleMaxAmount | number:'1.0-2' }}</strong>.
+        </p>
+      }
+
+      @if (showAmountLimitError) {
+        <p class="error-text">Amount exceeds the selected rule limit.</p>
+      }
 
       <label class="field">
         <span>Reason</span>
@@ -40,7 +55,7 @@
 
     <div class="dialog-actions">
       <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
-      <button type="submit" class="submit-btn">Submit request</button>
+      <button type="submit" class="submit-btn" [disabled]="!hasActiveRules || form.invalid">Submit request</button>
     </div>
   </form>
 </div>

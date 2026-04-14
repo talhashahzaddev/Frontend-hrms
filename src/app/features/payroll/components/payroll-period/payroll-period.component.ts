@@ -84,28 +84,170 @@ export class PayrollPeriodComponent implements OnInit {
 
     this.payrollService.getPayrollPeriods(params).subscribe({
       next: (res: any) => {
-        this.totalCount = res.totalCount || 0;
-        
-        const rawData = res.data || [];
-        this.records = rawData.map((r: any) => ({
-          ...r,
-          id: r.periodId,
-          name: r.periodName,
-          startDate: this.formatDate(r.startDate),
-          endDate: this.formatDate(r.endDate),
-          paymentDate: this.formatDate(r.paymentDate),
-          statusClass: `type-${r.status.toLowerCase()}`
-        }));
+        const rawData = this.extractPeriodItems(res);
+        const uniqueData = this.deduplicatePeriods(rawData);
+
+        const serverTotal = Number(res?.totalCount ?? res?.totalRecords ?? res?.count ?? uniqueData.length);
+        this.totalCount = serverTotal === rawData.length ? uniqueData.length : serverTotal;
+
+        this.records = uniqueData.map((r: any, index: number) => {
+          const status = this.normalizePeriodStatus(r.status);
+
+          return {
+            ...r,
+            id: String(r.periodId ?? r.id ?? `period-${index + 1}`),
+            name: String(r.periodName ?? r.name ?? 'N/A'),
+            startDate: this.formatDate(r.startDate),
+            endDate: this.formatDate(r.endDate),
+            paymentDate: this.formatDate(r.paymentDate),
+            status,
+            statusClass: `type-${status.toLowerCase()}`
+          };
+        });
 
         // Summary counts (Calculated on frontend as requested)
-        this.totalCount = res.totalCount || 0;
-        this.totalPeriods = this.totalCount; 
-        this.openCount = rawData.filter((r: any) => r.status === 'Open').length;
-        this.processedCount = rawData.filter((r: any) => r.status === 'Processed').length;
-        this.lockedCount = rawData.filter((r: any) => r.status === 'Locked' || r.status === 'Closed').length;
+        this.totalPeriods = this.totalCount;
+        this.openCount = uniqueData.filter((r: any) => this.normalizePeriodStatus(r.status) === 'Open').length;
+        this.processedCount = uniqueData.filter((r: any) => this.normalizePeriodStatus(r.status) === 'Processed').length;
+        this.lockedCount = uniqueData.filter((r: any) => {
+          const status = this.normalizePeriodStatus(r.status);
+          return status === 'Locked' || status === 'Closed';
+        }).length;
       },
       error: () => this.notification.showError('Failed to load payroll periods')
     });
+  }
+
+  private extractPeriodItems(payload: any): any[] {
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    if (Array.isArray(payload?.items)) {
+      return payload.items;
+    }
+
+    if (Array.isArray(payload?.data)) {
+      return payload.data;
+    }
+
+    if (Array.isArray(payload?.records)) {
+      return payload.records;
+    }
+
+    return [];
+  }
+
+  private deduplicatePeriods(rows: any[]): any[] {
+    if (!rows.length) {
+      return rows;
+    }
+
+    const unique = new Map<string, any>();
+
+    rows.forEach((row, index) => {
+      const key = this.getPeriodIdentityKey(row, index);
+      const existing = unique.get(key);
+
+      if (!existing) {
+        unique.set(key, row);
+        return;
+      }
+
+      unique.set(key, this.pickRicherPeriodRow(existing, row));
+    });
+
+    return [...unique.values()];
+  }
+
+  private getPeriodIdentityKey(row: any, index: number): string {
+    const periodId = String(row?.periodId ?? row?.id ?? '').trim();
+    if (periodId) {
+      return `period:${periodId}`;
+    }
+
+    const name = String(row?.periodName ?? row?.name ?? '').trim().toLowerCase();
+    const startDate = this.normalizeDateValue(row?.startDate);
+    const endDate = this.normalizeDateValue(row?.endDate);
+    const paymentDate = this.normalizeDateValue(row?.paymentDate);
+    const status = this.normalizePeriodStatus(row?.status).toLowerCase();
+
+    if (name || startDate || endDate || paymentDate) {
+      return `period-sig:${name}|start:${startDate}|end:${endDate}|pay:${paymentDate}|status:${status}`;
+    }
+
+    return `period-fallback:${index}`;
+  }
+
+  private pickRicherPeriodRow(primary: any, secondary: any): any {
+    const primaryScore = this.scorePeriodRow(primary);
+    const secondaryScore = this.scorePeriodRow(secondary);
+    return secondaryScore > primaryScore ? secondary : primary;
+  }
+
+  private scorePeriodRow(row: any): number {
+    let score = 0;
+
+    if (row?.periodId || row?.id) {
+      score += 2;
+    }
+
+    if (row?.startDate && row?.endDate && row?.paymentDate) {
+      score += 1;
+    }
+
+    if (row?.status) {
+      score += 1;
+    }
+
+    if (row?.description) {
+      score += 1;
+    }
+
+    return score;
+  }
+
+  private normalizeDateValue(value: unknown): string {
+    const raw = String(value ?? '').trim();
+    if (!raw) {
+      return '';
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      return raw;
+    }
+
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) {
+      return '';
+    }
+
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private normalizePeriodStatus(status: unknown): string {
+    const value = String(status ?? '').trim().toLowerCase();
+
+    if (!value) {
+      return 'Open';
+    }
+
+    if (value === 'processed') {
+      return 'Processed';
+    }
+
+    if (value === 'locked') {
+      return 'Locked';
+    }
+
+    if (value === 'closed') {
+      return 'Closed';
+    }
+
+    return 'Open';
   }
 
   formatDate(dateStr: string): string {

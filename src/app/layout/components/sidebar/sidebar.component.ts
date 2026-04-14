@@ -268,9 +268,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
           activeRoutes: ['/payroll/performance']
         },
         {
-          label: 'Loans & Advances',
+          label: 'Loans',
           icon: 'account_balance',
           route: '/payroll/loans',
+          exact: true
+        },
+        {
+          label: 'Salary Advances',
+          icon: 'savings',
+          route: '/payroll/salary-advances',
           exact: true
         },
         {

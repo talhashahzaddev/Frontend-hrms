@@ -167,6 +167,8 @@ export class PayrollRulesComponent implements OnInit {
       this.router.navigate(['/payroll/policies/bonus-rules']);
     } else if (policy.key === 'employeeLoanPolicy') {
       this.router.navigate(['/payroll/policies/loan-rules']);
+    } else if (policy.key === 'salaryAdvancePolicy') {
+      this.router.navigate(['/payroll/policies/salary-advance-rules']);
     }
   }
 }

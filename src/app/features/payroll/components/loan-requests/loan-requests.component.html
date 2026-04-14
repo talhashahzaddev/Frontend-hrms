@@ -5,11 +5,11 @@
         <mat-icon>arrow_back</mat-icon>
       </button>
       <div class="title-text-group">
-        <h1 class="title">{{ moduleTab === 'loans' ? 'My Loans' : 'Salary Advance' }}</h1>
+        <h1 class="title">{{ moduleTab === 'loans' ? 'My Loans' : 'Salary Advances' }}</h1>
         <p class="subtitle">
           {{ moduleTab === 'loans'
             ? 'Manage and track your active loan requests and repayment schedules.'
-            : 'Manage your salary advance requests and repayment schedule.' }}
+            : 'Request salary advances and track approval, disbursement, and deduction status.' }}
         </p>
       </div>
     </div>
@@ -327,46 +327,51 @@
       <div class="card">
         <div class="card-content">
           <div class="info">
-            <span class="label">Monthly deduction</span>
-            <span class="value">{{ formatMoney(salaryMonthlyDeduction) }}</span>
+            <span class="label">Disbursed amount</span>
+            <span class="value">{{ formatMoney(disbursedAdvanceAmount) }}</span>
           </div>
           <div class="icon-wrapper color-amber">
-            <mat-icon>event_repeat</mat-icon>
+            <mat-icon>payments</mat-icon>
           </div>
         </div>
-        <p class="card-footer">scheduled deductions</p>
+        <p class="card-footer">released by payroll</p>
       </div>
 
       <div class="card">
         <div class="card-content">
           <div class="info">
-            <span class="label">Total paid</span>
+            <span class="label">Deducted amount</span>
             <span class="value">{{ formatMoney(recoveredAdvanceAmount) }}</span>
           </div>
           <div class="icon-wrapper color-purple">
-            <mat-icon>check_circle</mat-icon>
+            <mat-icon>task_alt</mat-icon>
           </div>
         </div>
-        <p class="card-footer">recovered so far</p>
+        <p class="card-footer">closed in payroll</p>
       </div>
     </div>
 
     <div class="section-tabs">
-      <button [class.active]="salarySectionTab === 'advances'" (click)="setSalarySectionTab('advances')">My advances</button>
-      <button [class.active]="salarySectionTab === 'history'" (click)="setSalarySectionTab('history')">Payment history</button>
+      <button [class.active]="salarySectionTab === 'requested'" (click)="setSalarySectionTab('requested')">Requested</button>
+      <button [class.active]="salarySectionTab === 'active'" (click)="setSalarySectionTab('active')">Active</button>
+      <button [class.active]="salarySectionTab === 'history'" (click)="setSalarySectionTab('history')">History</button>
     </div>
 
-    @if (salarySectionTab === 'advances') {
+    @if (salarySectionTab !== 'history') {
       <div class="cards-stack">
-        @if (visibleSalaryAdvances.length === 0) {
-          <div class="empty-state">No salary advance records found.</div>
+        @if (salarySectionRecords.length === 0) {
+          <div class="empty-state">
+            {{ salarySectionTab === 'requested'
+              ? 'No salary advance requests found.'
+              : 'No active salary advances found.' }}
+          </div>
         } @else {
-          @for (advance of visibleSalaryAdvances; track advance.id) {
+          @for (advance of salarySectionRecords; track advance.id) {
             <article class="record-card">
               <div class="card-body">
                 <div class="card-top">
                   <div>
-                    <h2>{{ formatMoney(advance.totalAmount) }}</h2>
+                    <h2>{{ formatMoney(advance.amount) }}</h2>
                     <p>Ref ID: {{ advance.referenceNo }}</p>
                   </div>
                   <span class="status-pill" [ngClass]="getAdvanceStatusClass(advance.status)">{{ advance.status | titlecase }}</span>
@@ -380,8 +385,12 @@
 
                   <div class="meta-grid compact">
                     <div>
-                      <p>Proposed monthly</p>
-                      <strong>{{ formatMoney(advance.monthlyDeduction) }}</strong>
+                      <p>Requested amount</p>
+                      <strong>{{ formatMoney(advance.amount) }}</strong>
+                    </div>
+                    <div>
+                      <p>Planned deduction</p>
+                      <strong>{{ getAdvanceDeductionPeriodLabel(advance) }}</strong>
                     </div>
                     <div>
                       <p>Reason</p>
@@ -389,44 +398,80 @@
                     </div>
                     <div>
                       <p>Requested on</p>
-                      <strong>{{ formatDateLabel(advance.requestedOn) }}</strong>
+                      <strong>{{ formatDateLabel(advance.createdAt) }}</strong>
                     </div>
                     <div>
                       <p>Status</p>
                       <strong>Pending approval</strong>
                     </div>
                   </div>
-                } @else {
-                  <div class="progress-wrap">
-                    <div class="progress-head">
-                      <span>Repayment progress</span>
-                      <span>{{ advance.progressPercent }}% Complete</span>
+                } @else if (advance.status === 'rejected') {
+                  <div class="meta-grid compact">
+                    <div>
+                      <p>Requested amount</p>
+                      <strong>{{ formatMoney(advance.amount) }}</strong>
                     </div>
-                    <div class="progress-track">
-                      <div class="progress-fill" [style.width.%]="advance.progressPercent"></div>
+                    <div>
+                      <p>Planned deduction</p>
+                      <strong>{{ getAdvanceDeductionPeriodLabel(advance) }}</strong>
                     </div>
-                    <div class="progress-meta">
-                      <span>{{ formatMoney(advance.recoveredAmount) }} recovered</span>
-                      <span>Total: {{ formatMoney(advance.totalAmount) }}</span>
+                    <div>
+                      <p>Rejected on</p>
+                      <strong>{{ formatDateLabel(advance.rejectedAt) }}</strong>
+                    </div>
+                    <div>
+                      <p>Rejected by</p>
+                      <strong>{{ advance.rejectedBy || 'Payroll' }}</strong>
+                    </div>
+                    <div>
+                      <p>Reason</p>
+                      <strong>{{ advance.rejectionReason || advance.reason }}</strong>
                     </div>
                   </div>
-
-                  <div class="meta-grid">
+                } @else if (advance.status === 'cancelled') {
+                  <div class="meta-grid compact">
                     <div>
-                      <p>Monthly deduction</p>
-                      <strong>{{ formatMoney(advance.monthlyDeduction) }}</strong>
+                      <p>Requested amount</p>
+                      <strong>{{ formatMoney(advance.amount) }}</strong>
                     </div>
                     <div>
-                      <p>Period applied</p>
-                      <strong>{{ advance.periodApplied }}</strong>
+                      <p>Planned deduction</p>
+                      <strong>{{ getAdvanceDeductionPeriodLabel(advance) }}</strong>
+                    </div>
+                    <div>
+                      <p>Requested on</p>
+                      <strong>{{ formatDateLabel(advance.createdAt) }}</strong>
+                    </div>
+                    <div>
+                      <p>Updated on</p>
+                      <strong>{{ formatDateLabel(advance.updatedAt) }}</strong>
                     </div>
                     <div>
                       <p>Reason</p>
                       <strong>{{ advance.reason }}</strong>
                     </div>
+                  </div>
+                } @else {
+                  <div class="meta-grid">
                     <div>
-                      <p>Approved by</p>
-                      <strong>{{ advance.approvedBy }}</strong>
+                      <p>Amount</p>
+                      <strong>{{ formatMoney(advance.amount) }}</strong>
+                    </div>
+                    <div>
+                      <p>Planned deduction</p>
+                      <strong>{{ getAdvanceDeductionPeriodLabel(advance) }}</strong>
+                    </div>
+                    <div>
+                      <p>Approved on</p>
+                      <strong>{{ formatDateLabel(advance.approvedAt) }}</strong>
+                    </div>
+                    <div>
+                      <p>Disbursed on</p>
+                      <strong>{{ formatDateLabel(advance.disbursedAt) }}</strong>
+                    </div>
+                    <div>
+                      <p>Lifecycle</p>
+                      <strong>{{ getAdvanceLifecycleNote(advance) }}</strong>
                     </div>
                   </div>
                 }
@@ -434,10 +479,13 @@
 
               <div class="card-footer">
                 <div class="request-actions">
-                  @if (advance.status === 'approved' || advance.status === 'completed') {
+                  @if (advance.status === 'pending') {
+                    <button class="action-btn danger" (click)="cancelAdvanceRequest(advance)">
+                      <mat-icon>cancel</mat-icon>
+                      Cancel request
+                    </button>
+                  } @else if (advance.status === 'approved' || advance.status === 'disbursed') {
                     <button class="link-btn" (click)="goToAdvanceHistory()">View deductions</button>
-                  } @else {
-                    <button class="danger-link" [disabled]="advance.status !== 'pending'" (click)="cancelAdvanceRequest(advance)">Cancel request</button>
                   }
                 </div>
               </div>
@@ -451,21 +499,17 @@
           <div class="filters-row">
             <div class="search-box">
               <mat-icon>search</mat-icon>
-              <input type="text" placeholder="Search period..." [(ngModel)]="pendingAdvanceHistorySearch" />
+              <input type="text" placeholder="Search reference or reason..." [(ngModel)]="pendingAdvanceHistorySearch" />
             </div>
 
             <select class="filter-select" [(ngModel)]="pendingAdvanceHistoryStatus">
               <option value="">All status</option>
-              <option value="deducted">Deducted</option>
               <option value="pending">Pending</option>
-              <option value="skipped">Skipped</option>
-            </select>
-
-            <select class="filter-select" [(ngModel)]="pendingAdvanceHistoryPeriod">
-              <option value="">All periods</option>
-              @for (period of advanceHistoryPeriods; track period) {
-                <option [value]="period">{{ period }}</option>
-              }
+              <option value="approved">Approved</option>
+              <option value="disbursed">Disbursed</option>
+              <option value="rejected">Rejected</option>
+              <option value="deducted">Deducted</option>
+              <option value="cancelled">Cancelled</option>
             </select>
 
             <div class="filter-actions">
@@ -485,33 +529,35 @@
           <table>
             <thead>
               <tr>
-                <th>Period</th>
-                <th class="numeric">Deduction amount</th>
-                <th class="numeric remaining-column">Remaining</th>
+                <th>Reference</th>
+                <th class="numeric">Amount</th>
+                <th class="numeric remaining-column">Event date</th>
                 <th class="status-column">Status</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody>
               @if (advanceHistoryView.length === 0) {
                 <tr>
-                  <td colspan="4" class="empty-row">No salary advance payment history found.</td>
+                  <td colspan="5" class="empty-row">No salary advance history found.</td>
                 </tr>
               } @else {
-                @for (payment of advanceHistoryView; track payment.id) {
+                @for (advance of advanceHistoryView; track advance.id) {
                   <tr>
                     <td>
                       <div class="period-cell">
-                        <div class="icon-box"><mat-icon>calendar_month</mat-icon></div>
-                        <span>{{ payment.periodLabel }}</span>
+                        <div class="icon-box"><mat-icon>badge</mat-icon></div>
+                        <span>{{ advance.referenceNo }}</span>
                       </div>
                     </td>
-                    <td class="numeric">{{ payment.deductionAmount | number }}</td>
-                    <td class="numeric remaining-column">{{ payment.remainingAmount | number }}</td>
+                    <td class="numeric">{{ advance.amount | number }}</td>
+                    <td class="numeric remaining-column">{{ formatDateLabel(getAdvanceEventDate(advance)) }}</td>
                     <td class="status-column">
-                      <span class="status-pill" [ngClass]="getPaymentStatusClass(payment.status)">
-                        {{ payment.status | titlecase }}
+                      <span class="status-pill" [ngClass]="getAdvanceStatusClass(advance.status)">
+                        {{ advance.status | titlecase }}
                       </span>
                     </td>
+                    <td>{{ getAdvanceHistoryDetail(advance) }}</td>
                   </tr>
                 }
               }
