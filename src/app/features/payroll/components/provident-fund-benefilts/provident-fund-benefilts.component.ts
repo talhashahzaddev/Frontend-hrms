@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
@@ -14,9 +15,11 @@ import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/del
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
+import { AuthService } from '@core/services/auth.service';
 
-type ProvidentFundTab = 'requested' | 'active' | 'history';
-type ProvidentFundRequestStatus = 'pending' | 'approved' | 'active' | 'completed' | 'rejected' | 'cancelled' | 'update';
+type ProvidentFundTab = 'request' | 'history';
+type ProvidentFundRequestStatus = 'pending' | 'approved' | 'active' | 'inactive' | 'completed' | 'rejected' | 'cancelled' | 'update';
 
 interface ProvidentFundRequestRecord {
   id: string;
@@ -52,6 +55,7 @@ interface ProvidentFundHistoryRecord {
 
 interface ProvidentFundActiveRecord {
   pfId: string;
+  ruleId: string;
   ruleName: string;
   requestType: string;
   employeePct: number;
@@ -60,12 +64,13 @@ interface ProvidentFundActiveRecord {
   approvedAt: string | null;
   updatedAt: string;
   remarks: string | null;
+  status: ProvidentFundRequestStatus;
 }
 
 @Component({
   selector: 'app-provident-fund-benefilts',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './provident-fund-benefilts.component.html',
   styleUrl: './provident-fund-benefilts.component.scss'
 })
@@ -75,8 +80,10 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
   private readonly notification = inject(NotificationService);
+  private readonly employeeService = inject(EmployeeService);
+  private readonly authService = inject(AuthService);
 
-  tab: ProvidentFundTab = 'requested';
+  tab: ProvidentFundTab = 'request';
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
   readonly isLoading = signal(true);
 
@@ -84,6 +91,13 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   pendingRequest: ProvidentFundRequestRecord | null = null;
   activeRequest: ProvidentFundRequestRecord | null = null;
   transactions: ProvidentFundHistoryRecord[] = [];
+  historyTotalCount = 0;
+  currentEmployeeBasicSalary = 0;
+
+  pendingHistoryTypeFilter = '';
+  historyTypeFilter = '';
+  historyCurrentPage = 1;
+  historyPageSize = 10;
 
   get requestedRecords(): ProvidentFundRequestRecord[] {
     return this.pendingRequest ? [this.pendingRequest] : [];
@@ -94,9 +108,16 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       return [];
     }
 
+    const status = String(this.activeRequest.status ?? '').trim().toLowerCase();
+    const isActiveOrInactiveStatus = status === 'active' || status === 'inactive';
+    if (!isActiveOrInactiveStatus) {
+      return [];
+    }
+
     return [
       {
         pfId: this.activeRequest.pfId,
+        ruleId: this.activeRequest.ruleId,
         ruleName: this.activeRequest.ruleName,
         requestType: this.activeRequest.requestType,
         employeePct: this.activeRequest.employeePct,
@@ -104,7 +125,8 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         effectiveFrom: this.activeRequest.effectiveFrom,
         approvedAt: this.activeRequest.approvedAt,
         updatedAt: this.activeRequest.updatedAt,
-        remarks: this.activeRequest.remarks
+        remarks: this.activeRequest.remarks,
+        status: this.activeRequest.status
       }
     ];
   }
@@ -113,30 +135,61 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
     return this.transactions;
   }
 
+  get hasActiveHistoryFilters(): boolean {
+    return !!this.pendingHistoryTypeFilter;
+  }
+
+  get hasAppliedHistoryFilters(): boolean {
+    return !!this.historyTypeFilter;
+  }
+
+  get historyTotalPages(): number {
+    return Math.max(1, Math.ceil(this.historyTotalCount / this.historyPageSize));
+  }
+
+  get historyPage(): number {
+    return Math.min(this.historyCurrentPage, this.historyTotalPages);
+  }
+
+  get historyPageRange(): number[] {
+    return this.buildPageRange(this.historyPage, this.historyTotalPages);
+  }
+
+  get historyFromRecord(): number {
+    return this.historyTotalCount === 0
+      ? 0
+      : (this.historyPage - 1) * this.historyPageSize + 1;
+  }
+
+  get historyToRecord(): number {
+    return Math.min(this.historyPage * this.historyPageSize, this.historyTotalCount);
+  }
+
   get totalRequestedAmount(): number {
-    if (!this.pendingRequest) {
+    if (!this.pendingEnrollmentRequest) {
       return 0;
     }
-    return this.pendingRequest.employeePct + this.pendingRequest.employerPct;
+    return this.pendingEnrollmentRequest.employeePct + this.pendingEnrollmentRequest.employerPct;
   }
 
   get activeFundAmount(): number {
-    if (!this.activeRequest) {
-      return 0;
-    }
-    return Number(this.transactions[0]?.runningBalance ?? 0);
+    return this.contributionTransactions
+      .reduce((sum, row) => sum + Number(row.employeeAmount ?? 0), 0);
   }
 
   get settledAmount(): number {
-    return this.transactions.reduce((sum, row) => sum + row.totalAmount, 0);
+    return this.contributionTransactions
+      .reduce((sum, row) => sum + Number(row.employerAmount ?? 0), 0);
   }
 
   get totalContributions(): number {
-    return this.transactions.reduce((sum, row) => sum + row.employeeAmount + row.employerAmount, 0);
+    return this.contributionTransactions
+      .reduce((sum, row) => sum + Number(row.employeeAmount ?? 0) + Number(row.employerAmount ?? 0), 0);
   }
 
   ngOnInit(): void {
     this.loadCurrencySymbol();
+    this.loadCurrentEmployeeBasicSalary();
     this.loadActiveRules();
     this.refreshData();
   }
@@ -147,6 +200,75 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   setTab(tab: ProvidentFundTab): void {
     this.tab = tab;
+  }
+
+  applyHistoryFilters(): void {
+    this.historyTypeFilter = this.pendingHistoryTypeFilter;
+    this.historyCurrentPage = 1;
+    this.loadTransactions();
+  }
+
+  clearHistoryFilters(): void {
+    this.pendingHistoryTypeFilter = '';
+    this.historyTypeFilter = '';
+    this.historyCurrentPage = 1;
+    this.loadTransactions();
+  }
+
+  goToHistoryPage(page: number): void {
+    if (page < 1 || page > this.historyTotalPages || page === this.historyPage) {
+      return;
+    }
+    this.historyCurrentPage = page;
+    this.loadTransactions();
+  }
+
+  prevHistoryPage(): void {
+    this.goToHistoryPage(this.historyPage - 1);
+  }
+
+  nextHistoryPage(): void {
+    this.goToHistoryPage(this.historyPage + 1);
+  }
+
+  get pendingEnrollmentRequest(): ProvidentFundRequestRecord | null {
+    if (!this.pendingRequest) {
+      return null;
+    }
+
+    const requestType = String(this.pendingRequest.requestType ?? '').trim().toLowerCase();
+    const status = String(this.pendingRequest.status ?? '').trim().toLowerCase();
+    return requestType === 'enrollment' && status === 'pending' ? this.pendingRequest : null;
+  }
+
+  get activeLikeRequestRecord(): ProvidentFundActiveRecord | null {
+    if (this.activeRecords.length > 0) {
+      return this.activeRecords[0];
+    }
+
+    if (!this.pendingRequest) {
+      return null;
+    }
+
+    const requestType = String(this.pendingRequest.requestType ?? '').trim().toLowerCase();
+
+    if (requestType !== 'enrollment') {
+      return {
+        pfId: this.pendingRequest.pfId,
+        ruleId: this.pendingRequest.ruleId,
+        ruleName: this.pendingRequest.ruleName,
+        requestType: this.pendingRequest.requestType,
+        employeePct: this.pendingRequest.employeePct,
+        employerPct: this.pendingRequest.employerPct,
+        effectiveFrom: this.pendingRequest.effectiveFrom,
+        approvedAt: this.pendingRequest.approvedAt,
+        updatedAt: this.pendingRequest.updatedAt,
+        remarks: this.pendingRequest.remarks,
+        status: this.pendingRequest.status
+      };
+    }
+
+    return null;
   }
 
   openAddRequestDialog(): void {
@@ -163,7 +285,8 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       data: {
         currencySymbol: this.currencySymbol(),
         mode: 'enrollment',
-        rules: this.activeRules
+        rules: this.activeRules,
+        basicSalary: this.currentEmployeeBasicSalary
       }
     });
 
@@ -181,7 +304,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         .subscribe({
           next: () => {
             this.notification.showSuccess('Provident fund enrollment request submitted.');
-            this.tab = 'requested';
+            this.tab = 'request';
             this.refreshData();
           },
           error: (error) => {
@@ -206,6 +329,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         currencySymbol: this.currencySymbol(),
         mode: 'enrollment',
         rules: this.activeRules,
+        basicSalary: this.currentEmployeeBasicSalary,
         title: 'Edit provident fund request',
         submitText: 'Update request',
         initialValue: {
@@ -279,7 +403,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openPercentageUpdateDialog(): void {
-    const current = this.activeRecords[0];
+    const current = this.activeLikeRequestRecord;
     if (!current) {
       return;
     }
@@ -292,18 +416,23 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       data: {
         currencySymbol: this.currencySymbol(),
         mode: 'percentage-update',
+        rules: this.activeRules,
+        basicSalary: this.currentEmployeeBasicSalary,
+        currentRuleId: current.ruleId,
         initialValue: {
+          ruleId: current.ruleId,
           employeePct: current.employeePct
         }
       }
     });
 
     dialogRef.afterClosed().subscribe((result: ProvidentFundRequestDialogPayload | undefined) => {
-      if (!result || result.mode !== 'percentage-update') {
+      if (!result || result.mode !== 'percentage-update' || !result.ruleId) {
         return;
       }
 
       this.payrollService.updateProvidentFundPercentage({
+        ruleId: String(result.ruleId ?? ''),
         employeePct: Number(result.employeePct ?? 0)
       })
         .pipe(take(1))
@@ -460,12 +589,39 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
           this.activeRules = (rules ?? []).map((rule: any) => ({
             ruleId: String(rule.ruleId ?? rule.id ?? ''),
             ruleName: String(rule.ruleName ?? rule.name ?? 'Provident Fund Rule'),
-            defaultEmployeePct: Number(rule.defaultEmployeePct ?? 0)
+            defaultEmployeePct: Number(rule.defaultEmployeePct ?? rule.employeePct ?? 0),
+            defaultEmployerPct: Number(rule.defaultEmployerPct ?? rule.employerPct ?? 0)
           }))
             .filter((item: ProvidentFundRuleOption) => !!item.ruleId);
         },
         error: (error) => {
           console.error('Failed to load active provident fund rules', error);
+        }
+      });
+  }
+
+  private loadCurrentEmployeeBasicSalary(): void {
+    const currentUser = this.authService.getCurrentUserValue();
+    const employeeId = String(currentUser?.userId ?? '').trim();
+    if (!employeeId) {
+      this.currentEmployeeBasicSalary = 0;
+      return;
+    }
+
+    this.employeeService.getEmployee(employeeId)
+      .pipe(take(1))
+      .subscribe({
+        next: (employee: any) => {
+          const salary = Number(
+            employee?.basicSalary
+            ?? employee?.employmentDetails?.baseSalary
+            ?? 0
+          );
+          this.currentEmployeeBasicSalary = Number.isFinite(salary) ? salary : 0;
+        },
+        error: (error) => {
+          console.error('Failed to load current employee salary for provident fund dialog', error);
+          this.currentEmployeeBasicSalary = 0;
         }
       });
   }
@@ -505,7 +661,11 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   private loadTransactions(): void {
-    this.payrollService.getMyProvidentFundTransactions({ page: 1, pageSize: 100 })
+    this.payrollService.getMyProvidentFundTransactions({
+      transactionType: this.historyTypeFilter || null,
+      page: this.historyCurrentPage,
+      pageSize: this.historyPageSize
+    })
       .pipe(take(1))
       .subscribe({
         next: (result: any) => {
@@ -513,11 +673,13 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
           this.transactions = rows
             .map((item: any, index: number) => this.mapTransaction(item, index))
             .sort((a, b) => this.compareDateDesc(a.createdAt, b.createdAt));
+          this.historyTotalCount = this.extractTotalCount(result, this.transactions.length);
           this.isLoading.set(false);
         },
         error: (error) => {
           console.error('Failed to load provident fund transactions', error);
           this.transactions = [];
+          this.historyTotalCount = 0;
           this.isLoading.set(false);
         }
       });
@@ -539,7 +701,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       updatedAt: this.normalizeDate(item.updatedAt),
       createdAt: this.normalizeDate(item.createdAt),
       isActive: Boolean(item.isActive),
-      status: this.normalizeStatus(item.pfStatus)
+      status: this.normalizeStatus(item.pfStatus ?? item.status)
     };
   }
 
@@ -565,8 +727,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
     if (normalized === 'approved') return 'approved';
     if (normalized === 'rejected') return 'rejected';
     if (normalized === 'cancelled' || normalized === 'canceled') return 'cancelled';
-    if (normalized === 'completed') return 'completed';
+    if (normalized === 'completed' || normalized === 'closed') return 'completed';
     if (normalized === 'update') return 'update';
+    if (normalized === 'inactive') return 'inactive';
     return 'active';
   }
 
@@ -581,6 +744,17 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       return data.items;
     }
     return [];
+  }
+
+  private extractTotalCount(data: any, fallback: number): number {
+    return Number(
+      data?.totalCount
+      ?? data?.count
+      ?? data?.totalRecords
+      ?? data?.meta?.totalCount
+      ?? data?.meta?.total
+      ?? fallback
+    );
   }
 
   private normalizeDate(value: unknown): string {
@@ -609,6 +783,26 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
     const leftTs = left ? new Date(left).getTime() : 0;
     const rightTs = right ? new Date(right).getTime() : 0;
     return rightTs - leftTs;
+  }
+
+  private buildPageRange(currentPage: number, totalPages: number): number[] {
+    const delta = 2;
+    const start = Math.max(1, currentPage - delta);
+    const end = Math.min(totalPages, currentPage + delta);
+    const range: number[] = [];
+
+    for (let page = start; page <= end; page++) {
+      range.push(page);
+    }
+
+    return range;
+  }
+
+  private get contributionTransactions(): ProvidentFundHistoryRecord[] {
+    return this.transactions.filter((row) => {
+      const type = String(row.transactionType ?? '').trim().toLowerCase();
+      return type !== 'settlement';
+    });
   }
 
   private getTodayIsoDate(): string {

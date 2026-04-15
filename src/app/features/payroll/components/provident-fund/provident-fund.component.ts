@@ -10,12 +10,15 @@ import { SettingsService } from '../../../settings/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
+import {
+  AddPfFundsComponent,
+  AddPfFundsDialogPayload,
+  PfFundsEmployeeOption
+} from '../dialogs/add-pf-funds/add-pf-funds.component';
 
 type ProvidentFundTab = 'requests' | 'payments' | 'repayments';
 type ProvidentFundStatus = 'pending' | 'approved' | 'active' | 'completed' | 'rejected' | 'cancelled';
-type RepaymentType = 'installment' | 'full';
-type RepaymentMethod = 'cash' | 'bank transfer' | 'payroll deduction';
-type RepaymentStatus = 'deducted' | 'pending' | 'skipped';
+type ProvidentFundTransactionType = 'monthly' | 'withdrawal' | 'settlement' | 'profit' | 'adjustment' | string;
 
 interface PeriodOption {
   id: string;
@@ -56,20 +59,22 @@ interface ProvidentFundPaymentRow {
 }
 
 interface ProvidentFundRepaymentRow {
-  id: string;
+  transactionId: string;
   employeeId: string;
   employeeName: string;
-  referenceId: string;
-  referenceLabel: string;
+  pfId: string;
+  ruleName: string;
   periodId: string;
   periodName: string;
-  amount: number;
-  remainingAmount: number;
-  paidDate: string | null;
-  status: RepaymentStatus;
-  repaymentType: RepaymentType;
-  paymentMethod: RepaymentMethod;
-  fundStatus: ProvidentFundStatus;
+  employeePct: number;
+  employeeAmount: number;
+  employerPct: number;
+  employerAmount: number;
+  runningBalance: number;
+  totalAmount: number;
+  transactionType: ProvidentFundTransactionType;
+  pfStatus: string;
+  createdAt: string | null;
 }
 
 @Component({
@@ -100,13 +105,13 @@ export class ProvidentFundComponent implements OnInit {
   paymentStatus: string = '';
 
   pendingRepaymentSearch = '';
-  pendingRepaymentTypeFilter: RepaymentType | '' = '';
-  pendingRepaymentPaymentMethodFilter: RepaymentMethod | '' = '';
-  pendingRepaymentFundStatusFilter: ProvidentFundStatus | '' = '';
+  pendingRepaymentPeriodId = '';
+  pendingRepaymentTransactionTypeFilter = '';
+  pendingRepaymentPfStatusFilter = '';
   repaymentSearch = '';
-  repaymentTypeFilter: RepaymentType | '' = '';
-  repaymentPaymentMethodFilter: RepaymentMethod | '' = '';
-  repaymentFundStatusFilter: ProvidentFundStatus | '' = '';
+  repaymentPeriodId = '';
+  repaymentTransactionTypeFilter = '';
+  repaymentPfStatusFilter = '';
 
   requestCurrentPage = 1;
   requestPageSize = 5;
@@ -115,18 +120,22 @@ export class ProvidentFundComponent implements OnInit {
   paymentPageSize = 5;
 
   repaymentCurrentPage = 1;
-  repaymentPageSize = 6;
+  repaymentPageSize = 10;
 
   periods: PeriodOption[] = [];
+  private localPeriodsSeed: PeriodOption[] = [];
   requestRows: ProvidentFundRequestRow[] = [];
   repaymentRows: ProvidentFundRepaymentRow[] = [];
+  repaymentTotalCount = 0;
   isLoadingRequests = false;
+  isLoadingRepayments = false;
 
   ngOnInit(): void {
     this.loadCurrencySymbol();
-    this.periods = this.buildLocalPeriods();
+    this.localPeriodsSeed = this.buildLocalPeriods();
+    this.loadPayrollPeriods();
     this.loadProvidentFundRequests();
-    this.repaymentRows = this.buildLocalRepayments();
+    this.loadProvidentFundRepayments();
   }
 
   get hasActiveFilters(): boolean {
@@ -154,18 +163,18 @@ export class ProvidentFundComponent implements OnInit {
   get hasActiveRepaymentFilters(): boolean {
     return !!(
       this.pendingRepaymentSearch
-      || this.pendingRepaymentTypeFilter
-      || this.pendingRepaymentPaymentMethodFilter
-      || this.pendingRepaymentFundStatusFilter
+      || this.pendingRepaymentPeriodId
+      || this.pendingRepaymentTransactionTypeFilter
+      || this.pendingRepaymentPfStatusFilter
     );
   }
 
   get hasAppliedRepaymentFilters(): boolean {
     return !!(
       this.repaymentSearch
-      || this.repaymentTypeFilter
-      || this.repaymentPaymentMethodFilter
-      || this.repaymentFundStatusFilter
+      || this.repaymentPeriodId
+      || this.repaymentTransactionTypeFilter
+      || this.repaymentPfStatusFilter
     );
   }
 
@@ -219,23 +228,23 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get totalRepaymentCollected(): number {
-    return this.filteredRepayments
-      .filter((row) => row.status === 'deducted')
-      .reduce((sum, row) => sum + row.amount, 0);
+    return this.repaymentRows
+      .filter((row) => String(row.transactionType).toLowerCase() !== 'settlement')
+      .reduce((sum, row) => sum + row.totalAmount, 0);
   }
 
   get pendingRepaymentAmount(): number {
-    return this.filteredRepayments
-      .filter((row) => row.status === 'pending')
-      .reduce((sum, row) => sum + row.amount, 0);
+    return this.repaymentRows
+      .filter((row) => String(row.transactionType).toLowerCase() !== 'settlement')
+      .reduce((sum, row) => sum + row.runningBalance, 0);
   }
 
   get installmentRepaymentCount(): number {
-    return this.filteredRepayments.filter((row) => row.repaymentType === 'installment').length;
+    return this.repaymentRows.filter((row) => String(row.transactionType).toLowerCase() === 'monthly').length;
   }
 
   get fullRepaymentCount(): number {
-    return this.filteredRepayments.filter((row) => row.repaymentType === 'full').length;
+    return this.repaymentRows.filter((row) => String(row.transactionType).toLowerCase() === 'settlement').length;
   }
 
   get filteredRequests(): ProvidentFundRequestRow[] {
@@ -310,21 +319,11 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get filteredRepayments(): ProvidentFundRepaymentRow[] {
-    const search = this.repaymentSearch.trim().toLowerCase();
-    return this.repaymentRows.filter((row) => {
-      const matchesSearch = !search
-        || row.employeeName.toLowerCase().includes(search)
-        || row.referenceLabel.toLowerCase().includes(search)
-        || row.periodName.toLowerCase().includes(search);
-      const matchesType = !this.repaymentTypeFilter || row.repaymentType === this.repaymentTypeFilter;
-      const matchesMethod = !this.repaymentPaymentMethodFilter || row.paymentMethod === this.repaymentPaymentMethodFilter;
-      const matchesFundStatus = !this.repaymentFundStatusFilter || row.fundStatus === this.repaymentFundStatusFilter;
-      return matchesSearch && matchesType && matchesMethod && matchesFundStatus;
-    });
+    return this.repaymentRows;
   }
 
   get repaymentsTotalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredRepayments.length / this.repaymentPageSize));
+    return Math.max(1, Math.ceil(this.repaymentTotalCount / this.repaymentPageSize));
   }
 
   get repaymentsPage(): number {
@@ -336,19 +335,22 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get repaymentsFromRecord(): number {
-    return this.filteredRepayments.length === 0 ? 0 : (this.repaymentsPage - 1) * this.repaymentPageSize + 1;
+    return this.repaymentTotalCount === 0 ? 0 : (this.repaymentsPage - 1) * this.repaymentPageSize + 1;
   }
 
   get repaymentsToRecord(): number {
-    return Math.min(this.repaymentsPage * this.repaymentPageSize, this.filteredRepayments.length);
+    return Math.min(this.repaymentsPage * this.repaymentPageSize, this.repaymentTotalCount);
   }
 
   get repaymentView(): ProvidentFundRepaymentRow[] {
-    return this.paginate(this.filteredRepayments, this.repaymentsPage, this.repaymentPageSize);
+    return this.repaymentRows;
   }
 
   setTab(tab: ProvidentFundTab): void {
     this.currentTab = tab;
+    if (tab === 'repayments' && !this.repaymentRows.length) {
+      this.loadProvidentFundRepayments();
+    }
   }
 
   applyFilters(): void {
@@ -381,24 +383,75 @@ export class ProvidentFundComponent implements OnInit {
     this.paymentCurrentPage = 1;
   }
 
+  openAddPfFundsDialog(): void {
+    const employees = this.getDialogEmployees();
+    const periods = this.getAvailablePeriods();
+
+    if (!employees.length) {
+      this.notification.showError('No employees found to create provident fund funds entry.');
+      return;
+    }
+
+    if (!periods.length) {
+      this.notification.showError('No payroll periods found.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(AddPfFundsComponent, {
+      width: '520px',
+      panelClass: 'pf-funds-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        employees,
+        periods
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: AddPfFundsDialogPayload | undefined) => {
+      if (!result) {
+        return;
+      }
+
+      this.payrollService.addProvidentFundMonthlyTransaction({
+        employeeId: result.employeeId,
+        periodId: result.periodId
+      })
+        .pipe(take(1))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Provident fund monthly transaction added successfully.');
+            this.loadProvidentFundRequests();
+            this.loadProvidentFundRepayments();
+          },
+          error: (error) => {
+            console.error('Failed to add provident fund monthly transaction', error);
+            this.notification.showError('Failed to add provident fund monthly transaction.');
+          }
+        });
+    });
+  }
+
   applyRepaymentFilters(): void {
     this.repaymentSearch = this.pendingRepaymentSearch.trim();
-    this.repaymentTypeFilter = this.pendingRepaymentTypeFilter;
-    this.repaymentPaymentMethodFilter = this.pendingRepaymentPaymentMethodFilter;
-    this.repaymentFundStatusFilter = this.pendingRepaymentFundStatusFilter;
+    this.repaymentPeriodId = this.pendingRepaymentPeriodId;
+    this.repaymentTransactionTypeFilter = this.pendingRepaymentTransactionTypeFilter;
+    this.repaymentPfStatusFilter = this.pendingRepaymentPfStatusFilter;
     this.repaymentCurrentPage = 1;
+    this.loadProvidentFundRepayments();
   }
 
   clearRepaymentFilters(): void {
     this.pendingRepaymentSearch = '';
-    this.pendingRepaymentTypeFilter = '';
-    this.pendingRepaymentPaymentMethodFilter = '';
-    this.pendingRepaymentFundStatusFilter = '';
+    this.pendingRepaymentPeriodId = '';
+    this.pendingRepaymentTransactionTypeFilter = '';
+    this.pendingRepaymentPfStatusFilter = '';
     this.repaymentSearch = '';
-    this.repaymentTypeFilter = '';
-    this.repaymentPaymentMethodFilter = '';
-    this.repaymentFundStatusFilter = '';
+    this.repaymentPeriodId = '';
+    this.repaymentTransactionTypeFilter = '';
+    this.repaymentPfStatusFilter = '';
     this.repaymentCurrentPage = 1;
+    this.loadProvidentFundRepayments();
   }
 
   goToRequestPage(page: number): void {
@@ -436,6 +489,7 @@ export class ProvidentFundComponent implements OnInit {
       return;
     }
     this.repaymentCurrentPage = page;
+    this.loadProvidentFundRepayments();
   }
 
   prevRepaymentPage(): void {
@@ -569,6 +623,24 @@ export class ProvidentFundComponent implements OnInit {
       });
   }
 
+  private loadPayrollPeriods(): void {
+    this.payrollService.getPayrollPeriods({ page: 1, pageSize: 200, isDeleted: false })
+      .pipe(take(1))
+      .subscribe({
+        next: (result: any) => {
+          const rows = this.extractItems(result)
+            .map((item: any, index: number) => this.mapPeriodOption(item, index))
+            .filter((period: PeriodOption) => !!period.id && !!period.name);
+
+          this.periods = rows.length ? rows : [...this.localPeriodsSeed];
+        },
+        error: (error) => {
+          console.error('Error loading payroll periods for provident fund', error);
+          this.periods = [...this.localPeriodsSeed];
+        }
+      });
+  }
+
   private loadProvidentFundRequests(): void {
     this.isLoadingRequests = true;
     const filter = {
@@ -590,6 +662,35 @@ export class ProvidentFundComponent implements OnInit {
           this.notification.showError('Failed to load provident fund requests. Showing preview data.');
           this.requestRows = this.buildLocalRequests();
           this.isLoadingRequests = false;
+        }
+      });
+  }
+
+  private loadProvidentFundRepayments(): void {
+    this.isLoadingRepayments = true;
+
+    this.payrollService.getAllProvidentFundRepayments({
+      searchTerm: this.repaymentSearch || undefined,
+      periodId: this.repaymentPeriodId || undefined,
+      transactionType: this.repaymentTransactionTypeFilter || undefined,
+      pfStatus: this.repaymentPfStatusFilter || undefined,
+      page: this.repaymentCurrentPage,
+      pageSize: this.repaymentPageSize
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (response: any) => {
+          const items = this.extractItems(response);
+          this.repaymentRows = items.map((item: any) => this.mapRepaymentRow(item));
+          this.repaymentTotalCount = this.extractTotalCount(response, this.repaymentRows.length);
+          this.isLoadingRepayments = false;
+        },
+        error: (err) => {
+          console.error('Error loading provident fund repayments', err);
+          this.notification.showError('Failed to load provident fund repayments. Showing preview data.');
+          this.repaymentRows = this.buildLocalRepayments();
+          this.repaymentTotalCount = this.repaymentRows.length;
+          this.isLoadingRepayments = false;
         }
       });
   }
@@ -619,6 +720,27 @@ export class ProvidentFundComponent implements OnInit {
       initials: this.toInitials(employeeName),
       avatarTone: this.getAvatarTone(employeeName),
       status
+    };
+  }
+
+  private mapRepaymentRow(item: any): ProvidentFundRepaymentRow {
+    return {
+      transactionId: String(item.transactionId ?? item.id ?? ''),
+      employeeId: String(item.employeeId ?? ''),
+      employeeName: String(item.employeeName ?? item.employee?.name ?? 'Unknown Employee'),
+      pfId: String(item.pfId ?? ''),
+      ruleName: String(item.ruleName ?? ''),
+      periodId: String(item.periodId ?? ''),
+      periodName: String(item.periodName ?? ''),
+      employeePct: this.toNumber(item.employeePct ?? 0),
+      employeeAmount: this.toNumber(item.employeeAmount ?? 0),
+      employerPct: this.toNumber(item.employerPct ?? 0),
+      employerAmount: this.toNumber(item.employerAmount ?? 0),
+      runningBalance: this.toNumber(item.runningBalance ?? 0),
+      totalAmount: this.toNumber(item.totalAmount ?? 0),
+      transactionType: String(item.transactionType ?? '').trim().toLowerCase() || 'monthly',
+      pfStatus: String(item.pfStatus ?? '').trim().toLowerCase(),
+      createdAt: this.normalizeNullableDateString(item.createdAt)
     };
   }
 
@@ -654,6 +776,30 @@ export class ProvidentFundComponent implements OnInit {
       return data.records;
     }
     return [];
+  }
+
+  private extractTotalCount(data: any, fallback: number): number {
+    const candidates = [
+      data?.totalCount,
+      data?.TotalCount,
+      data?.pagination?.totalCount,
+      data?.meta?.totalCount
+    ];
+
+    for (const value of candidates) {
+      const n = Number(value);
+      if (Number.isFinite(n) && n >= 0) {
+        return n;
+      }
+    }
+
+    const items = this.extractItems(data);
+    const firstItemCount = Number(items[0]?.totalCount ?? items[0]?.TotalCount);
+    if (Number.isFinite(firstItemCount) && firstItemCount >= 0) {
+      return firstItemCount;
+    }
+
+    return fallback;
   }
 
   private buildPageRange(currentPage: number, totalPages: number): number[] {
@@ -783,54 +929,94 @@ export class ProvidentFundComponent implements OnInit {
   private buildLocalRepayments(): ProvidentFundRepaymentRow[] {
     return [
       {
-        id: 'pf-repay-1',
+        transactionId: 'pf-txn-1',
         employeeId: 'emp-1001',
         employeeName: 'Ahmed Hassan',
-        referenceId: 'pf-1001',
-        referenceLabel: 'PF-1001',
+        pfId: 'pf-1001',
+        ruleName: 'Standard PF Rule',
         periodId: 'period-2024-10',
         periodName: 'Oct 2024',
-        amount: 15000,
-        remainingAmount: 90000,
-        paidDate: '2024-10-31',
-        status: 'deducted',
-        repaymentType: 'installment',
-        paymentMethod: 'payroll deduction',
-        fundStatus: 'active'
+        employeePct: 10,
+        employeeAmount: 15000,
+        employerPct: 10,
+        employerAmount: 15000,
+        runningBalance: 90000,
+        totalAmount: 30000,
+        transactionType: 'monthly',
+        pfStatus: 'active',
+        createdAt: '2024-10-31'
       },
       {
-        id: 'pf-repay-2',
+        transactionId: 'pf-txn-2',
         employeeId: 'emp-1002',
         employeeName: 'Sarah Khan',
-        referenceId: 'pf-1002',
-        referenceLabel: 'PF-1002',
+        pfId: 'pf-1002',
+        ruleName: 'Standard PF Rule',
         periodId: 'period-2024-11',
         periodName: 'Nov 2024',
-        amount: 10000,
-        remainingAmount: 40000,
-        paidDate: '2024-11-30',
-        status: 'deducted',
-        repaymentType: 'installment',
-        paymentMethod: 'bank transfer',
-        fundStatus: 'approved'
+        employeePct: 8,
+        employeeAmount: 10000,
+        employerPct: 8,
+        employerAmount: 10000,
+        runningBalance: 40000,
+        totalAmount: 20000,
+        transactionType: 'monthly',
+        pfStatus: 'approved',
+        createdAt: '2024-11-30'
       },
       {
-        id: 'pf-repay-3',
+        transactionId: 'pf-txn-3',
         employeeId: 'emp-1003',
         employeeName: 'Omar Farooq',
-        referenceId: 'pf-1003',
-        referenceLabel: 'PF-1003',
+        pfId: 'pf-1003',
+        ruleName: 'Legacy PF Rule',
         periodId: 'period-2024-08',
         periodName: 'Aug 2024',
-        amount: 9000,
-        remainingAmount: 0,
-        paidDate: '2024-08-30',
-        status: 'deducted',
-        repaymentType: 'full',
-        paymentMethod: 'cash',
-        fundStatus: 'completed'
+        employeePct: 10,
+        employeeAmount: 9000,
+        employerPct: 10,
+        employerAmount: 9000,
+        runningBalance: 0,
+        totalAmount: 18000,
+        transactionType: 'settlement',
+        pfStatus: 'closed',
+        createdAt: '2024-08-30'
       }
     ];
+  }
+
+  private getAvailablePeriods(): PeriodOption[] {
+    return this.periods.length ? this.periods : this.localPeriodsSeed;
+  }
+
+  private getDialogEmployees(): PfFundsEmployeeOption[] {
+    const byId = new Map<string, PfFundsEmployeeOption>();
+    this.paymentRows.forEach((row) => {
+      const employeeId = String(row.employeeId ?? '').trim();
+      const employeeName = String(row.employeeName ?? '').trim();
+      if (employeeId && employeeName && !byId.has(employeeId)) {
+        byId.set(employeeId, { id: employeeId, name: employeeName });
+      }
+    });
+
+    // Fallback to all request rows if payment projection has no entries yet.
+    if (!byId.size) {
+      this.requestRows.forEach((row) => {
+        const employeeId = String(row.employeeId ?? '').trim();
+        const employeeName = String(row.employeeName ?? '').trim();
+        if (employeeId && employeeName && !byId.has(employeeId)) {
+          byId.set(employeeId, { id: employeeId, name: employeeName });
+        }
+      });
+    }
+
+    return [...byId.values()];
+  }
+
+  private mapPeriodOption(item: any, index: number): PeriodOption {
+    const id = String(item?.periodId ?? item?.id ?? `period-${index + 1}`).trim();
+    const name = String(item?.periodName ?? item?.name ?? '').trim();
+    return { id, name };
   }
 
   private toNumber(value: unknown): number {

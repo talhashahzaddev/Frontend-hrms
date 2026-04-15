@@ -1042,8 +1042,13 @@ export class PayrollService {
         );
     }
 
-    updateProvidentFundPercentage(data: { employeePct: number }): Observable<any> {
-      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/provident-fund/update-percentage`, data)
+    updateProvidentFundPercentage(data: { ruleId: string; employeePct: number }): Observable<any> {
+      const payload = {
+        RuleId: data.ruleId,
+        EmployeePct: data.employeePct
+      };
+
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/provident-fund/update-percentage`, payload)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1114,11 +1119,19 @@ export class PayrollService {
         );
     }
 
-    getMyProvidentFundTransactions(filter?: { year?: number | null; page?: number; pageSize?: number }): Observable<any> {
+    getMyProvidentFundTransactions(filter?: {
+      year?: number | null;
+      transactionType?: string | null;
+      page?: number;
+      pageSize?: number;
+    }): Observable<any> {
       let params = new HttpParams();
       if (filter) {
         if (filter.year !== null && filter.year !== undefined) {
           params = params.set('year', String(filter.year));
+        }
+        if (filter.transactionType !== null && filter.transactionType !== undefined && String(filter.transactionType).trim()) {
+          params = params.set('transactionType', String(filter.transactionType).trim());
         }
         if (filter.page !== null && filter.page !== undefined) {
           params = params.set('page', String(filter.page));
@@ -2012,6 +2025,25 @@ export class PayrollService {
         });
       }
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/repayments/all`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
+    getAllProvidentFundRepayments(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach((key) => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/provident-fund/repayments`, { params }).pipe(
         map((response: any) => {
           if (!response.success && response.message) {
             throw new Error(response.message);

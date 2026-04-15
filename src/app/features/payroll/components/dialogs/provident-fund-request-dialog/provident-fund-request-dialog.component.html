@@ -24,7 +24,7 @@
 
         <label class="field">
           <span>Employee percentage (%)</span>
-          <input type="number" formControlName="employeePct" min="0.01" max="100" step="0.01" placeholder="0.00" />
+          <input type="number" formControlName="employeePct" min="0.01" max="100" step="0.01" placeholder="0.00" [disabled]="mode === 'enrollment'" />
           @if (form.get('employeePct')?.touched && form.get('employeePct')?.invalid) {
             <small class="error-text">Enter a valid percentage between 0.01 and 100.</small>
           }
@@ -41,8 +41,24 @@
 
       @if (mode === 'percentage-update') {
         <label class="field full-span">
+          <span>Provident fund rule</span>
+          <select formControlName="ruleId">
+            <option [value]="null" disabled>Select provident fund rule</option>
+            @for (rule of selectableRules; track rule.ruleId) {
+              <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+            }
+          </select>
+          @if (form.get('ruleId')?.touched && form.get('ruleId')?.invalid) {
+            <small class="error-text">Please select a different provident fund rule.</small>
+          }
+          @if (selectableRules.length === 0) {
+            <small class="error-text">No alternative provident fund rule is available.</small>
+          }
+        </label>
+
+        <label class="field full-span">
           <span>New employee percentage (%)</span>
-          <input type="number" formControlName="employeePct" min="0.01" max="100" step="0.01" placeholder="0.00" />
+          <input type="number" formControlName="employeePct" min="0.01" max="100" step="0.01" placeholder="0.00" [disabled]="mode === 'percentage-update'" />
           @if (form.get('employeePct')?.touched && form.get('employeePct')?.invalid) {
             <small class="error-text">Enter a valid percentage between 0.01 and 100.</small>
           }
@@ -88,7 +104,25 @@
 
     <div class="info-box">
       <mat-icon>info</mat-icon>
-      <p>Your provident fund request will be reviewed by HR and payroll team before approval.</p>
+      @if ((mode === 'enrollment' || mode === 'percentage-update') && selectedRule) {
+        <div class="enrollment-breakdown">
+          <p><strong>{{ selectedRule.ruleName }}</strong> is applied for your request.</p>
+          <p>Basic salary: <strong>{{ currencySymbol }} {{ basicSalary | number:'1.0-2' }}</strong></p>
+          <p>
+            Employee contribution:
+            <strong>{{ selectedEmployeePct | number:'1.0-2' }}%</strong>
+            ({{ currencySymbol }} {{ employeeContributionAmount | number:'1.0-2' }})
+          </p>
+          <p>
+            Employer contribution:
+            <strong>{{ selectedEmployerPct | number:'1.0-2' }}%</strong>
+            ({{ currencySymbol }} {{ employerContributionAmount | number:'1.0-2' }})
+          </p>
+          <p>Total monthly contribution: <strong>{{ currencySymbol }} {{ totalContributionAmount | number:'1.0-2' }}</strong></p>
+        </div>
+      } @else {
+        <p>Your provident fund request will be reviewed by HR and payroll team before approval.</p>
+      }
     </div>
 
     <div class="dialog-actions">

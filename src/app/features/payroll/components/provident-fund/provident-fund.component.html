@@ -281,6 +281,13 @@
           </div>
         </div>
 
+        <div class="add-btn-wrap">
+          <button class="add-btn" (click)="openAddPfFundsDialog()">
+            <mat-icon>add</mat-icon>
+            Add PF funds
+          </button>
+        </div>
+
       </div>
 
       <div class="table-responsive">
@@ -362,53 +369,53 @@
       <div class="card">
         <div class="card-content">
           <div class="info">
-            <span class="label">Collected repayments</span>
+            <span class="label">Total transaction amount</span>
             <span class="value">{{ currencySymbol() }} {{ totalRepaymentCollected | number }}</span>
           </div>
           <div class="icon-wrapper color-blue">
             <mat-icon>request_quote</mat-icon>
           </div>
         </div>
-        <p class="card-footer">deducted records only</p>
+        <p class="card-footer">current page totals</p>
       </div>
 
       <div class="card">
         <div class="card-content">
           <div class="info">
-            <span class="label">Pending amount</span>
+            <span class="label">Running balance</span>
             <span class="value">{{ currencySymbol() }} {{ pendingRepaymentAmount | number }}</span>
           </div>
           <div class="icon-wrapper color-amber">
             <mat-icon>schedule</mat-icon>
           </div>
         </div>
-        <p class="card-footer">to be deducted</p>
+        <p class="card-footer">sum of running balances</p>
       </div>
 
       <div class="card">
         <div class="card-content">
           <div class="info">
-            <span class="label">Installment repayments</span>
+            <span class="label">Monthly transactions</span>
             <span class="value">{{ installmentRepaymentCount }}</span>
           </div>
           <div class="icon-wrapper color-green">
             <mat-icon>account_balance</mat-icon>
           </div>
         </div>
-        <p class="card-footer">installment-based entries</p>
+        <p class="card-footer">monthly contribution entries</p>
       </div>
 
       <div class="card">
         <div class="card-content">
           <div class="info">
-            <span class="label">Full repayments</span>
+            <span class="label">Settlement transactions</span>
             <span class="value">{{ fullRepaymentCount }}</span>
           </div>
           <div class="icon-wrapper color-purple">
             <mat-icon>done_all</mat-icon>
           </div>
         </div>
-        <p class="card-footer">full settlement entries</p>
+        <p class="card-footer">settlement type entries</p>
       </div>
     </div>
 
@@ -417,27 +424,32 @@
         <div class="filters-row">
           <div class="search-box">
             <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search employee, reference, or period..." [(ngModel)]="pendingRepaymentSearch" />
+            <input type="text" placeholder="Search by employee name..." [(ngModel)]="pendingRepaymentSearch" />
           </div>
 
-          <select class="filter-select" [(ngModel)]="pendingRepaymentTypeFilter">
-            <option value="">All repayment types</option>
-            <option value="installment">Installments</option>
-            <option value="full">Full</option>
+          <select class="filter-select" [(ngModel)]="pendingRepaymentPeriodId">
+            <option value="">All payroll periods</option>
+            @for (period of periods; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
           </select>
 
-          <select class="filter-select" [(ngModel)]="pendingRepaymentPaymentMethodFilter">
-            <option value="">All payment methods</option>
-            <option value="cash">Cash</option>
-            <option value="bank transfer">Bank transfer</option>
-            <option value="payroll deduction">Payroll deduction</option>
+          <select class="filter-select" [(ngModel)]="pendingRepaymentTransactionTypeFilter">
+            <option value="">All transaction types</option>
+            <option value="monthly">Monthly</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="settlement">Settlement</option>
+            <option value="profit">Profit</option>
+            <option value="adjustment">Adjustment</option>
           </select>
 
-          <select class="filter-select" [(ngModel)]="pendingRepaymentFundStatusFilter">
+          <select class="filter-select" [(ngModel)]="pendingRepaymentPfStatusFilter">
             <option value="">All fund status</option>
-            <option value="active">Active</option>
+            <option value="pending">Pending</option>
             <option value="approved">Approved</option>
-            <option value="completed">Completed</option>
+            <option value="active">Active</option>
+            <option value="rejected">Rejected</option>
+            <option value="closed">Closed</option>
           </select>
 
           <div class="filter-actions">
@@ -453,44 +465,40 @@
         </div>
       </div>
 
-      <div class="table-responsive">
+      <div class="table-responsive" [class.loading]="isLoadingRepayments">
+        @if (isLoadingRepayments) {
+          <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading provident fund repayments...</p>
+          </div>
+        }
         <table class="compact-table repayments-table">
           <thead>
             <tr>
               <th>Employee</th>
-              <th>Repayment type</th>
-              <th>PF reference ID</th>
+              <th>Employee amount / %</th>
+              <th>Employer amount / %</th>
+              <th class="text-right">Running balance</th>
+              <th class="text-right">Total amount</th>
               <th>Payroll period</th>
-              <th class="text-right">Amount</th>
-              <th class="text-right">Remaining</th>
-              <th>Paid date</th>
-              <th>Fund status</th>
+              <th>Transaction type</th>
             </tr>
           </thead>
           <tbody>
             @if (repaymentView.length === 0) {
               <tr>
-                <td class="empty-row" colspan="8">No repayment records available.</td>
+                <td class="empty-row" colspan="7">No repayment records available.</td>
               </tr>
             } @else {
-              @for (row of repaymentView; track row.id) {
+              @for (row of repaymentView; track row.transactionId) {
                 <tr>
                   <td>{{ row.employeeName }}</td>
-                  <td>
-                    <span class="type-pill">
-                      {{ row.repaymentType === 'full' ? 'Full' : 'Installments' }}
-                    </span>
-                  </td>
-                  <td>{{ row.referenceLabel }}</td>
+                  <td>{{ currencySymbol() }} {{ row.employeeAmount | number }} / {{ row.employeePct | number:'1.0-2' }}%</td>
+                  <td>{{ currencySymbol() }} {{ row.employerAmount | number }} / {{ row.employerPct | number:'1.0-2' }}%</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.runningBalance | number }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.totalAmount | number }}</td>
                   <td>{{ row.periodName }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ row.amount | number }}</td>
-                  <td class="text-right">{{ currencySymbol() }} {{ row.remainingAmount | number }}</td>
-                  <td>{{ formatDateLabel(row.paidDate) }}</td>
-                  <td>
-                    <span class="status-pill" [ngClass]="getFundStatusClass(row.fundStatus)">
-                      {{ getFundStatusLabel(row.fundStatus) }}
-                    </span>
-                  </td>
+                  <td>{{ row.transactionType | titlecase }}</td>
                 </tr>
               }
             }
@@ -500,10 +508,10 @@
 
       <div class="table-footer">
         <p>
-          @if (filteredRepayments.length === 0) {
+          @if (repaymentTotalCount === 0) {
             No records found
           } @else {
-            Showing {{ repaymentsFromRecord }}&ndash;{{ repaymentsToRecord }} of {{ filteredRepayments.length }} records
+            Showing {{ repaymentsFromRecord }}&ndash;{{ repaymentsToRecord }} of {{ repaymentTotalCount }} records
           }
         </p>
         <div class="pagination">

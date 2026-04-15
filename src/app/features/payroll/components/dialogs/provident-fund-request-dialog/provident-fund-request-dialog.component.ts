@@ -10,6 +10,7 @@ export interface ProvidentFundRuleOption {
   ruleId: string;
   ruleName: string;
   defaultEmployeePct: number;
+  defaultEmployerPct?: number;
 }
 
 export interface ProvidentFundRequestDialogPayload {
@@ -26,6 +27,8 @@ interface ProvidentFundRequestDialogData {
   currencySymbol?: string;
   mode?: ProvidentFundRequestDialogMode;
   rules?: ProvidentFundRuleOption[];
+  basicSalary?: number;
+  currentRuleId?: string;
   title?: string;
   submitText?: string;
   initialValue?: Partial<ProvidentFundRequestDialogPayload>;
@@ -48,6 +51,8 @@ export class ProvidentFundRequestDialogComponent {
   readonly title = this.data?.title ?? this.resolveDefaultTitle();
   readonly submitText = this.data?.submitText ?? this.resolveDefaultSubmitText();
   readonly rules: ProvidentFundRuleOption[] = this.data?.rules ?? [];
+  readonly basicSalary = this.toNumber(this.data?.basicSalary ?? 0);
+  readonly currentRuleId = String(this.data?.currentRuleId ?? this.data?.initialValue?.ruleId ?? '').trim();
 
   readonly form = this.fb.group({
     ruleId: [null as string | null],
@@ -61,16 +66,12 @@ export class ProvidentFundRequestDialogComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: ProvidentFundRequestDialogData) {
     this.applyModeValidators();
 
-    if (this.mode === 'enrollment' && !this.data?.initialValue?.employeePct && this.rules.length > 0) {
-      this.form.patchValue({
-        employeePct: Number(this.rules[0].defaultEmployeePct ?? 0)
-      });
-    }
-
     if (this.data?.initialValue) {
       this.form.patchValue({
         ruleId: this.data.initialValue.ruleId ?? null,
-        employeePct: this.data.initialValue.employeePct ?? this.form.get('employeePct')?.value ?? null,
+        employeePct: this.mode === 'enrollment'
+          ? this.form.get('employeePct')?.value ?? null
+          : this.data.initialValue.employeePct ?? this.form.get('employeePct')?.value ?? null,
         effectiveFrom: this.data.initialValue.effectiveFrom ?? this.getTodayDate(),
         amount: this.data.initialValue.amount ?? null,
         reason: this.data.initialValue.reason ?? '',
@@ -78,16 +79,80 @@ export class ProvidentFundRequestDialogComponent {
       });
     }
 
+    if (this.mode === 'enrollment' || this.mode === 'percentage-update') {
+      const selectedRuleId = String(this.form.get('ruleId')?.value ?? '').trim();
+      if (!selectedRuleId) {
+        const fallbackRule = this.firstSelectableRule;
+        if (fallbackRule) {
+          this.form.patchValue({ ruleId: fallbackRule.ruleId }, { emitEvent: false });
+        }
+      }
+      this.syncSelectedRuleValues(String(this.form.get('ruleId')?.value ?? '').trim() || null);
+    }
+
+    if (this.mode === 'percentage-update') {
+      const selectedRuleId = String(this.form.get('ruleId')?.value ?? '').trim();
+      if (selectedRuleId && selectedRuleId === this.currentRuleId) {
+        this.form.patchValue({ ruleId: null, employeePct: null }, { emitEvent: false });
+      }
+    }
+
     this.form.get('ruleId')?.valueChanges.subscribe((ruleId) => {
-      if (this.mode !== 'enrollment' || !ruleId) {
+      if (this.mode !== 'enrollment' && this.mode !== 'percentage-update') {
         return;
       }
-
-      const selected = this.rules.find((rule) => rule.ruleId === ruleId);
-      if (selected && !this.data?.initialValue?.employeePct) {
-        this.form.patchValue({ employeePct: Number(selected.defaultEmployeePct ?? 0) }, { emitEvent: false });
+      const normalizedRuleId = String(ruleId ?? '').trim() || null;
+      if (this.mode === 'percentage-update' && normalizedRuleId && normalizedRuleId === this.currentRuleId) {
+        this.form.patchValue({ ruleId: null, employeePct: null }, { emitEvent: false });
+        return;
       }
+      this.syncSelectedRuleValues(normalizedRuleId);
     });
+  }
+
+  get selectableRules(): ProvidentFundRuleOption[] {
+    if (this.mode !== 'percentage-update' || !this.currentRuleId) {
+      return this.rules;
+    }
+    return this.rules.filter((rule) => rule.ruleId !== this.currentRuleId);
+  }
+
+  get firstSelectableRule(): ProvidentFundRuleOption | null {
+    return this.selectableRules[0] ?? null;
+  }
+
+  get selectedRule(): ProvidentFundRuleOption | null {
+    if (this.mode !== 'enrollment' && this.mode !== 'percentage-update') {
+      return null;
+    }
+    const ruleId = String(this.form.get('ruleId')?.value ?? '').trim();
+    if (!ruleId) {
+      return null;
+    }
+    return this.rules.find((rule) => rule.ruleId === ruleId) ?? null;
+  }
+
+  get selectedEmployeePct(): number {
+    if (this.mode === 'enrollment') {
+      return this.toNumber(this.selectedRule?.defaultEmployeePct ?? 0);
+    }
+    return this.toNumber(this.form.get('employeePct')?.value ?? 0);
+  }
+
+  get selectedEmployerPct(): number {
+    return this.toNumber(this.selectedRule?.defaultEmployerPct ?? 0);
+  }
+
+  get employeeContributionAmount(): number {
+    return (this.basicSalary * this.selectedEmployeePct) / 100;
+  }
+
+  get employerContributionAmount(): number {
+    return (this.basicSalary * this.selectedEmployerPct) / 100;
+  }
+
+  get totalContributionAmount(): number {
+    return this.employeeContributionAmount + this.employerContributionAmount;
   }
 
   close(): void {
@@ -110,6 +175,7 @@ export class ProvidentFundRequestDialogComponent {
     }
 
     if (this.mode === 'percentage-update') {
+      payload.ruleId = String(raw.ruleId ?? '');
       payload.employeePct = Number(raw.employeePct ?? 0);
     }
 
@@ -145,10 +211,15 @@ export class ProvidentFundRequestDialogComponent {
       ruleIdControl?.setValidators([Validators.required]);
       employeePctControl?.setValidators([Validators.required, Validators.min(0.01), Validators.max(100)]);
       effectiveFromControl?.setValidators([Validators.required]);
+      employeePctControl?.disable({ emitEvent: false });
+    } else {
+      employeePctControl?.enable({ emitEvent: false });
     }
 
     if (this.mode === 'percentage-update') {
+      ruleIdControl?.setValidators([Validators.required]);
       employeePctControl?.setValidators([Validators.required, Validators.min(0.01), Validators.max(100)]);
+      employeePctControl?.disable({ emitEvent: false });
     }
 
     if (this.mode === 'withdrawal') {
@@ -181,6 +252,23 @@ export class ProvidentFundRequestDialogComponent {
     if (this.mode === 'percentage-update') return 'Update percentage';
     if (this.mode === 'withdrawal') return 'Submit withdrawal';
     return 'Submit settlement';
+  }
+
+  private syncSelectedRuleValues(ruleId: string | null): void {
+    if (!ruleId) {
+      this.form.patchValue({ employeePct: null }, { emitEvent: false });
+      return;
+    }
+
+    const selected = this.rules.find((rule) => rule.ruleId === ruleId);
+    this.form.patchValue({
+      employeePct: this.toNumber(selected?.defaultEmployeePct ?? 0)
+    }, { emitEvent: false });
+  }
+
+  private toNumber(value: unknown): number {
+    const parsed = Number(value ?? 0);
+    return Number.isFinite(parsed) ? parsed : 0;
   }
 
   private getTodayDate(): string {

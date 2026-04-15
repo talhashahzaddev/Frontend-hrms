@@ -163,6 +163,13 @@
       font-weight: 600;
       line-height: 1.35;
     }
+
+    .enrollment-breakdown {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      width: 100%;
+    }
   }
 
   .dialog-actions {
