@@ -929,6 +929,87 @@ export class PayrollService {
         );
     }
 
+    getAllProvidentFundRequests(filter?: {
+      SearchTerm?: string;
+      RequestType?: string;
+      Page?: number;
+      PageSize?: number;
+    }): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach((key) => {
+          const value = (filter as any)[key];
+          if (value !== null && value !== undefined && value !== '') {
+            params = params.set(key, value);
+          }
+        });
+      }
+
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/provident-fund/requests`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    approveProvidentFundRequest(data: { employeeId: string; requestType: string }): Observable<boolean> {
+      return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/provident-fund/requests/approve`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    rejectProvidentFundRequest(pfId: string, data: { remarks: string }): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/admin/provident-fund/requests/${pfId}/reject`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    addProvidentFundMonthlyTransaction(data: { employeeId: string; periodId: string }): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${environment.apiUrl}/admin/provident-fund/monthly-transaction`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    manualProvidentFundEnrollment(data: {
+      ruleId: string;
+      employeeId: string;
+      employeePct: number;
+      employerPct: number;
+      effectiveFrom: string;
+    }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/admin/provident-fund/manual-enroll`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     createProvidentFundEnrollmentRequest(data: {
       ruleId: string;
       employeePct: number;
@@ -1011,6 +1092,18 @@ export class PayrollService {
 
     getMyPendingProvidentFundRequest(): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-pending-request`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyActiveProvidentFundRequest(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-active-request`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {

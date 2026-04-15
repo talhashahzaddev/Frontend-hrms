@@ -10,6 +10,7 @@ import {
   ProvidentFundRequestDialogPayload,
   ProvidentFundRuleOption
 } from '../dialogs/provident-fund-request-dialog/provident-fund-request-dialog.component';
+import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
@@ -51,12 +52,14 @@ interface ProvidentFundHistoryRecord {
 
 interface ProvidentFundActiveRecord {
   pfId: string;
+  ruleName: string;
+  requestType: string;
   employeePct: number;
   employerPct: number;
-  runningBalance: number;
-  latestContribution: number;
-  lastPeriodName: string;
-  lastContributionDate: string;
+  effectiveFrom: string;
+  approvedAt: string | null;
+  updatedAt: string;
+  remarks: string | null;
 }
 
 @Component({
@@ -79,6 +82,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   activeRules: ProvidentFundRuleOption[] = [];
   pendingRequest: ProvidentFundRequestRecord | null = null;
+  activeRequest: ProvidentFundRequestRecord | null = null;
   transactions: ProvidentFundHistoryRecord[] = [];
 
   get requestedRecords(): ProvidentFundRequestRecord[] {
@@ -86,20 +90,21 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   get activeRecords(): ProvidentFundActiveRecord[] {
-    const latest = this.transactions[0];
-    if (!latest) {
+    if (!this.activeRequest) {
       return [];
     }
 
     return [
       {
-        pfId: latest.id,
-        employeePct: latest.employeePct,
-        employerPct: latest.employerPct,
-        runningBalance: latest.runningBalance,
-        latestContribution: latest.totalAmount,
-        lastPeriodName: latest.periodName,
-        lastContributionDate: latest.createdAt
+        pfId: this.activeRequest.pfId,
+        ruleName: this.activeRequest.ruleName,
+        requestType: this.activeRequest.requestType,
+        employeePct: this.activeRequest.employeePct,
+        employerPct: this.activeRequest.employerPct,
+        effectiveFrom: this.activeRequest.effectiveFrom,
+        approvedAt: this.activeRequest.approvedAt,
+        updatedAt: this.activeRequest.updatedAt,
+        remarks: this.activeRequest.remarks
       }
     ];
   }
@@ -116,7 +121,10 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   get activeFundAmount(): number {
-    return this.activeRecords.reduce((sum, row) => sum + row.runningBalance, 0);
+    if (!this.activeRequest) {
+      return 0;
+    }
+    return Number(this.transactions[0]?.runningBalance ?? 0);
   }
 
   get settledAmount(): number {
@@ -237,18 +245,37 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       return;
     }
 
-    this.payrollService.deleteProvidentFundRequest(row.pfId)
-      .pipe(take(1))
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Provident fund request cancelled.');
-          this.refreshData();
-        },
-        error: (error) => {
-          console.error('Failed to cancel provident fund request', error);
-          this.notification.showError('Failed to cancel provident fund request.');
-        }
-      });
+    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
+      width: '420px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Cancel provident fund request',
+        message: 'Are you sure you want to cancel this provident fund request?',
+        confirmText: 'Cancel request',
+        cancelText: 'Keep request'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.payrollService.deleteProvidentFundRequest(row.pfId)
+        .pipe(take(1))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Provident fund request cancelled.');
+            this.refreshData();
+          },
+          error: (error) => {
+            console.error('Failed to cancel provident fund request', error);
+            this.notification.showError('Failed to cancel provident fund request.');
+          }
+        });
+    });
   }
 
   openPercentageUpdateDialog(): void {
@@ -408,6 +435,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   private refreshData(): void {
     this.isLoading.set(true);
     this.loadPendingRequest();
+    this.loadActiveRequest();
     this.loadTransactions();
   }
 
@@ -455,6 +483,23 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
             console.error('Failed to load pending provident fund request', error);
           }
           this.pendingRequest = null;
+        }
+      });
+  }
+
+  private loadActiveRequest(): void {
+    this.payrollService.getMyActiveProvidentFundRequest()
+      .pipe(take(1))
+      .subscribe({
+        next: (row: any) => {
+          this.activeRequest = row ? this.mapPendingRequest(row) : null;
+        },
+        error: (error) => {
+          const status = Number(error?.status ?? 0);
+          if (status !== 404) {
+            console.error('Failed to load active provident fund request', error);
+          }
+          this.activeRequest = null;
         }
       });
   }

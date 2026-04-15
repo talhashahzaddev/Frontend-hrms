@@ -13,7 +13,8 @@
 .provident-fund-request-dialog {
   background: #ffffff;
   color: #0f172a;
-  width: min(560px, 94vw);
+  width: 100%;
+  max-width: 560px;
 
   .dialog-header {
     display: flex;

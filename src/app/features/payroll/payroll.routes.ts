@@ -25,6 +25,12 @@ export const payrollRoutes: Routes = [
     title: 'Loans - HRMS'
   },
   {
+    path: 'provident-fund',
+    loadComponent: () =>
+      import('./components/provident-fund/provident-fund.component').then(m => m.ProvidentFundComponent),
+    title: 'Provident Funds - HRMS'
+  },
+  {
     path: 'salary-advances',
     loadComponent: () =>
       import('./components/salary-advances/salary-advances.component').then(m => m.SalaryAdvancesComponent),

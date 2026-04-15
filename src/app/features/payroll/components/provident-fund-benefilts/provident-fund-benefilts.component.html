@@ -149,13 +149,17 @@
           <div class="card-body">
             <div class="card-top">
               <div>
-                <h2>{{ formatMoney(record.runningBalance) }}</h2>
-                <p>Current running balance</p>
+                <h2>{{ record.ruleName }}</h2>
+                <p>Active provident fund profile</p>
               </div>
               <span class="status-pill status-active">Active</span>
             </div>
 
             <div class="meta-grid">
+              <div>
+                <p>Request type</p>
+                <strong>{{ getRequestTypeLabel(record.requestType) }}</strong>
+              </div>
               <div>
                 <p>Employee %</p>
                 <strong>{{ record.employeePct | number:'1.2-2' }}%</strong>
@@ -165,18 +169,24 @@
                 <strong>{{ record.employerPct | number:'1.2-2' }}%</strong>
               </div>
               <div>
-                <p>Last period</p>
-                <strong>{{ record.lastPeriodName }}</strong>
+                <p>Effective from</p>
+                <strong>{{ formatDateLabel(record.effectiveFrom) }}</strong>
               </div>
               <div>
-                <p>Latest contribution</p>
-                <strong>{{ formatMoney(record.latestContribution) }}</strong>
+                <p>Approved at</p>
+                <strong>{{ formatDateLabel(record.approvedAt) }}</strong>
               </div>
               <div>
-                <p>Last contribution date</p>
-                <strong>{{ formatDateLabel(record.lastContributionDate) }}</strong>
+                <p>Last updated</p>
+                <strong>{{ formatDateLabel(record.updatedAt) }}</strong>
               </div>
             </div>
+
+            @if (record.remarks) {
+              <div class="remarks-text">
+                <strong>Remarks:</strong> {{ record.remarks }}
+              </div>
+            }
           </div>
 
           <div class="card-footer">
