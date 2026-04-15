@@ -23,32 +23,55 @@ export interface EmployeeSkill {
   updatedAt: string;
 }
 
+// export interface KRA {
+//   kraId: string;
+//   organizationId?: string;
+//   cycleId: string;
+//   positionId?: string;
+//   title: string;
+//   description?: string;
+//   weight: number;
+//   measurementCriteria?: string;
+//   isActive: boolean;
+//   createdAt: string;
+// }
+
 export interface KRA {
   kraId: string;
-  organizationId?: string;
-  positionId?: string;
-  title: string;
-  description?: string;
-  weight: number;
-  measurementCriteria?: string;
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface AppraisalCycle {
+  organizationId: string;
   cycleId: string;
   cycleName: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  reviewPeriodStart?: string;
-  reviewPeriodEnd?: string;
-  status: AppraisalCycleStatus;
-  ratingScale: RatingScale;
-  selfReviewEnabled: boolean;
-  peerReviewEnabled: boolean;
-  managerReviewEnabled: boolean;
+  title: string;
+  kraDescription: string;
+  kraRate: string; // varchar from DB
+  isActive: boolean;
   createdAt: string;
+  createdByName: string;
+}
+
+
+export interface AppraisalCycle {
+  cycleId: string;                 // CycleId
+  cycleName: string;               // CycleName
+  cycleType?: string;              // CycleType (optional)
+  description?: string;            // optional description
+  startDate: string;               // StartDate
+  endDate: string;                 // EndDate
+  reviewStartDate?: string;        // ReviewStartDate (optional)
+  reviewEndDate?: string;          // ReviewEndDate (optional)
+  status: string;                  // Status
+  selfReviewEnabled: boolean;      // SelfReviewEnabled
+  managerReviewEnabled: boolean;   // ManagerReviewEnabled
+  appraisalEnabled: boolean;       // AppraisalEnabled
+  organizationId: string;          // OrganizationId
+  createdBy?: string;              // CreatedBy (optional)
+  createdAt?: string;              // CreatedAt (optional)
+  updatedAt?: string;              // UpdatedAt (optional)
+  totalAppraisals?: number;        // TotalAppraisals (optional)
+  completedAppraisals?: number;    // CompletedAppraisals (optional)
+  ratingScale?: any;               // keep as any if needed, or define RatingScale interface
+//  peerReviewEnabled: boolean;   // optionally add forinital later its being removed PeerReviewEnabled,
+
 }
 
 export enum AppraisalCycleStatus {
@@ -86,6 +109,31 @@ export interface EmployeeAppraisal {
   createdAt: string;
   updatedAt: string;
 }
+
+// models/appraisal-cycle.model.ts
+export interface AppraisalCycleDto {
+  cycleId: string;
+  cycleName: string;
+  cycleType?: string;               // nullable
+  startDate: string;                // ISO string
+  reviewStartDate?: string;         // nullable
+  reviewEndDate?: string;           // nullable
+  endDate: string;                  // you had endDate in backend
+  status: string;
+
+  selfReviewEnabled: boolean;       // maps to isselfassessmentenable
+  managerReviewEnabled: boolean;    // maps to managerreview
+  appraisalEnabled: boolean;        // maps to isappraisalenable
+
+  organizationId: string;
+  createdBy?: string;               // nullable
+  createdAt?: string;               // nullable
+  updatedAt?: string;               // nullable
+
+  totalAppraisals: number;
+  completedAppraisals: number;
+}
+
 
 export interface EmployeeAppraisalForEmployee {
   appraisalId: string;
@@ -201,21 +249,35 @@ export interface EmployeePerformanceDetail {
   developmentPlan: string;
 }
 
+// export interface CreateKRARequest {
+//   positionId: string;
+//   title: string;
+//   description?: string;
+//   weight: number;
+//   measurementCriteria?: string;
+//   isActive?: boolean;
+// }
+
+// export interface UpdateKRARequest {
+//   title?: string;
+//   description?: string;
+//   weight?: number;
+//   measurementCriteria?: string;
+//   isActive?: boolean;
+// }
+
 export interface CreateKRARequest {
-  positionId: string;
   title: string;
-  description?: string;
-  weight: number;
-  measurementCriteria?: string;
+  kraDescription?: string;
+  cycleId: string;
   isActive?: boolean;
 }
 
 export interface UpdateKRARequest {
-  title?: string;
-  description?: string;
-  weight?: number;
-  measurementCriteria?: string;
-  isActive?: boolean;
+  title: string;
+  kraDescription?: string;
+  cycleId: string;
+  isActive: boolean;
 }
 
 export interface SkillSetFilter {
@@ -292,11 +354,25 @@ export interface UpdateEmployeeSkillRequest {
 //   managerReviewEnabled: boolean;
 // }
 
+// export interface CreateAppraisalCycleRequest {
+//   cycleName: string;
+//   description?: string;
+//   startDate: string;
+//   endDate: string;
+// }
+
 export interface CreateAppraisalCycleRequest {
   cycleName: string;
+  cycleType?: string;
   description?: string;
   startDate: string;
   endDate: string;
+  reviewStartDate?: string;
+  reviewEndDate?: string;
+  isSelfAssessmentEnable: boolean;
+  managerReview: boolean;
+  isAppraisalEnable: boolean;
+  status?: string; // upcoming, inprogress, concluded
 }
 
 
@@ -304,18 +380,32 @@ export interface CreateAppraisalCycleRequest {
 
 
 
+// export interface UpdateAppraisalCycleRequest {
+//   cycleName?: string;
+//   description?: string;
+//   startDate?: string;
+//   endDate?: string;
+//   reviewPeriodStart?: string;
+//   reviewPeriodEnd?: string;
+//   status?: AppraisalCycleStatus;
+//   ratingScale?: RatingScale;
+//   selfReviewEnabled?: boolean;
+//   peerReviewEnabled?: boolean;
+//   managerReviewEnabled?: boolean;
+// }
+
 export interface UpdateAppraisalCycleRequest {
-  cycleName?: string;
+  cycleName: string;
+  cycleType?: string;
+  startDate: string; // ISO string
+  endDate: string;
+  reviewStartDate?: string;
+  reviewEndDate?: string;
+  status?: string;
+  isSelfAssessmentEnable: boolean;
+  managerReview: boolean;
+  isAppraisalEnable: boolean;
   description?: string;
-  startDate?: string;
-  endDate?: string;
-  reviewPeriodStart?: string;
-  reviewPeriodEnd?: string;
-  status?: AppraisalCycleStatus;
-  ratingScale?: RatingScale;
-  selfReviewEnabled?: boolean;
-  peerReviewEnabled?: boolean;
-  managerReviewEnabled?: boolean;
 }
 
 export interface SubmitAppraisalRequest {
@@ -374,30 +464,27 @@ export interface PerformanceMetrics {
 // Self-Assessment Interfaces
 export interface SelfAssessment {
   selfAssessmentId: string;
-  employeeId: string;
-  cycleId: string;
-  kraId?: string;
-  skillId?: string;
-  rating: number;
-  comments?: string;
-  evidenceUrls?: string[];
-  status: 'draft' | 'submitted';
+  goalId: string;
+  kraId: string;
+  organizationId: string;
+  selfRating: number;
+  selfComment?: string;
+  status: string;
   createdAt: string;
   updatedAt: string;
-  cycleName?: string;
+  employeeId?: string;
+  goalName?: string;
   kraName?: string;
   employeeName?: string;
+  cycleId?: string;
+  cycleName?: string;
 }
 
 export interface CreateSelfAssessmentRequest {
-  employeeId: string;
-  cycleId: string;
-  kraId?: string;
-  skillId?: string;
-  rating: number;
-  comments?: string;
-  evidenceUrls?: string[];
-  status?: 'draft' | 'submitted';
+  goalId: string;
+  kraId: string;
+  selfRating: number;
+  selfComment?: string;
 }
 
 // Manager Review Interfaces
@@ -416,15 +503,34 @@ export interface ManagerReview {
 }
 
 export interface ManagerReviewRequest {
-  managerId: string;
   employeeId: string;
   cycleId: string;
-  overallRating: number;
+  kraId: string;
+  goalId: string;
+  rating: number;
   feedback?: string;
-  improvementAreas?: string;
-  developmentPlan?: string;
-  kraRatings?: { [kraId: string]: number };
-  skillRatings?: { [skillId: string]: number };
+  improvementArea?: string;
+  status?: string;
+}
+
+export interface ManagerReviewDto {
+  managerReviewId: string;
+  organizationId: string;
+  managerId: string;
+  managerName: string;
+  employeeId: string;
+  employeeName: string;
+  cycleId: string;
+  cycleName: string;
+  kraId: string;
+  kraName: string;
+  goalId: string;
+  goalName: string;
+  rating: number;
+  feedback?: string;
+  improvementArea?: string;
+  status: string;
+  createdAt: string;
 }
 
 // Appraisal Consolidation
@@ -481,20 +587,78 @@ export enum GoalStatus {
 
 export interface Goal {
   goalId: string;
-  employeeId: string;
+  organizationId: string;
   title: string;
   description?: string;
+  kraId?: string;
+  kraName?: string;
+  progress: string;
   startDate?: string;
   endDate?: string;
-  status: GoalStatus;
+  assignedTo?: string;
+  assignedtoName?: string;
+  createdBy?: string;
+  createdByName?: string;
+  isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface CreateGoalRequest {
-  employeeId: string;
+export interface GoalDto {
+  goalId: string;
   title: string;
-  description?: string;
+  description: string;
+  organizationId: string;
+  progress: string;
   startDate?: string;
   endDate?: string;
+  kraId?: string;
+  kraName?: string;
+  assignedTo?: string;
+  createdBy?: string;
+  createdByName?: string;
+  assignedtoName?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateGoalRequest {
+  title: string;
+  description: string;
+  kraId: string;
+  progress: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface UpdateGoalRequest {
+  goalId: string;
+  title: string;
+  description: string;
+  kraId: string;
+  progress: string;
+  startDate?: string;
+  endDate?: string;
+  isActive: boolean;
+}
+
+// HR Review DTO
+export interface HrReviewDto {
+  hrReviewId: string;
+  organizationId: string;
+  cycleId: string;
+  cycleName: string;
+  kraId: string;
+  kraName: string;
+  goalId: string;
+  goalName: string;
+  employeeId: string;
+  employeeName: string;
+  finalRating: number;
+  hrComments?: string;
+  improvementArea?: string;
+  feedback?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }

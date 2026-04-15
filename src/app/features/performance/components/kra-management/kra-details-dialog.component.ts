@@ -7,12 +7,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { KRA } from '../../../../core/models/performance.models';
 import { CreateKRADialogComponent } from './create-kra-dialog.component';
-import { Position } from '../../../../core/models/employee.models';
 
 export interface KRADetailsDialogData {
   kra: KRA;
-  positionName: string;
-  positions: Position[];
   hasEditPermission: boolean;
 }
 
@@ -52,36 +49,28 @@ export interface KRADetailsDialogData {
 
           <div class="detail-item">
             <div class="detail-label">
-              <mat-icon>work</mat-icon>
-              <span>Position</span>
+              <mat-icon>calendar_today</mat-icon>
+              <span>Cycle Name</span>
             </div>
-            <div class="detail-value">{{ data.positionName }}</div>
-          </div>
-
-          <div class="detail-item" *ngIf="data.kra.description">
-            <div class="detail-label">
-              <mat-icon>description</mat-icon>
-              <span>Description</span>
-            </div>
-            <div class="detail-value">{{ data.kra.description }}</div>
+            <div class="detail-value">{{ data.kra.cycleName }}</div>
           </div>
 
           <div class="detail-item">
             <div class="detail-label">
-              <mat-icon>percent</mat-icon>
-              <span>Weight</span>
+              <mat-icon>description</mat-icon>
+              <span>Description</span>
             </div>
-            <div class="detail-value">
-              <span class="weight-badge">{{ data.kra.weight }}%</span>
-            </div>
+            <div class="detail-value">{{ data.kra.kraDescription }}</div>
           </div>
 
-          <div class="detail-item" *ngIf="data.kra.measurementCriteria">
+          <div class="detail-item">
             <div class="detail-label">
-              <mat-icon>assessment</mat-icon>
-              <span>Measurement Criteria</span>
+              <mat-icon>trending_up</mat-icon>
+              <span>KRA Rate (Progress)</span>
             </div>
-            <div class="detail-value">{{ data.kra.measurementCriteria }}</div>
+            <div class="detail-value">
+              <span class="weight-badge">{{ data.kra.kraRate }}</span>
+            </div>
           </div>
 
           <div class="detail-item">
@@ -97,9 +86,17 @@ export interface KRADetailsDialogData {
             </div>
           </div>
 
+          <div class="detail-item">
+            <div class="detail-label">
+              <mat-icon>person</mat-icon>
+              <span>Created By</span>
+            </div>
+            <div class="detail-value">{{ data.kra.createdByName }}</div>
+          </div>
+
           <div class="detail-item" *ngIf="data.kra.createdAt">
             <div class="detail-label">
-              <mat-icon>calendar_today</mat-icon>
+              <mat-icon>access_time</mat-icon>
               <span>Created At</span>
             </div>
             <div class="detail-value">{{ data.kra.createdAt | date:'medium' }}</div>
@@ -343,7 +340,6 @@ export class KRADetailsDialogComponent {
       width: '800px',
       maxWidth: '90vw',
       data: {
-        positions: this.data.positions,
         kra: this.data.kra,
         isEditMode: true
       },

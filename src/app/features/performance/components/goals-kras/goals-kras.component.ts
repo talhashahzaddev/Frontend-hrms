@@ -55,6 +55,7 @@ export class GoalsKRAsComponent implements OnInit, OnDestroy {
   employees: Employee[] = [];
   allGoals: Goal[] = [];
   isLoadingGoals = false;
+  kraList: any[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -87,12 +88,12 @@ export class GoalsKRAsComponent implements OnInit, OnDestroy {
 
   private initializeForm(): void {
     this.goalForm = this.fb.group({
-      employeeId: [null, Validators.required],
       title: ['', Validators.required],
       description: [''],
+      kraId: ['', Validators.required],
+      progress: ['tostart', Validators.required],
       startDate: [''],
-      endDate: [''],
-      status: [GoalStatus.NOT_STARTED, Validators.required]
+      endDate: ['']
     });
   }
 
@@ -105,7 +106,8 @@ export class GoalsKRAsComponent implements OnInit, OnDestroy {
           console.log('current user;',this.currentUser)
           if (!user) return;
 
-          // Load employees and all goals for everyone
+          // Load KRAs, employees and all goals for everyone
+          this.loadKRAs();
           this.loadEmployees();
           this.loadAllGoals();
 
@@ -132,6 +134,19 @@ hasHRRole(): boolean {
       });
   }
 
+  private loadKRAs(): void {
+    this.performanceService.getAllKRAs()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          this.kraList = res.data || [];
+        },
+        error: (err) => {
+          console.error('Failed to load KRAs', err);
+          this.notificationService.showError('Failed to load KRAs');
+        }
+      });
+  }
 
   
 private loadAllGoals(): void {
@@ -205,12 +220,23 @@ onSubmitStatus(goal: Goal, status: 'IN_PROGRESS' | 'COMPLETED'): void {
     this.isSubmitting = true;
     const formValue = this.goalForm.value;
 
+    // Format dates for API
+    const formatDateForAPI = (dateValue: any) => {
+      if (!dateValue) return undefined;
+      if (typeof dateValue === 'string') return dateValue;
+      if (dateValue instanceof Date) {
+        return dateValue.toISOString().split('T')[0];
+      }
+      return undefined;
+    };
+
     const request: CreateGoalRequest = {
-      employeeId: formValue.employeeId,
       title: formValue.title,
       description: formValue.description,
-      startDate: formValue.startDate,
-      endDate: formValue.endDate
+      kraId: formValue.kraId,
+      progress: formValue.progress,
+      startDate: formatDateForAPI(formValue.startDate),
+      endDate: formatDateForAPI(formValue.endDate)
     };
 
     this.performanceService.createGoal(request)
@@ -218,7 +244,7 @@ onSubmitStatus(goal: Goal, status: 'IN_PROGRESS' | 'COMPLETED'): void {
       .subscribe({
         next: () => {
           this.notificationService.showSuccess('Goal created successfully!');
-          this.goalForm.reset({ status: GoalStatus.NOT_STARTED });
+          this.goalForm.reset({ progress: 'tostart' });
           this.isSubmitting = false;
           this.loadAllGoals(); // Reload goals for everyone
         },

@@ -1,508 +1,753 @@
-// KRA Management Component - Professional & Beautiful Styling
+// ============================================================
+// KRA Management — Redesigned to match Indigo HRM reference
+// ============================================================
+
+$indigo:        #6366f1;
+$indigo-dark:   #4f46e5;
+$indigo-light:  #e0e7ff;
+$violet:        #8b5cf6;
+$slate-900:     #0f172a;
+$slate-800:     #1e293b;
+$slate-700:     #334155;
+$slate-600:     #475569;
+$slate-500:     #64748b;
+$slate-400:     #94a3b8;
+$slate-300:     #cbd5e1;
+$slate-200:     #e2e8f0;
+$slate-100:     #f1f5f9;
+$slate-50:      #f8fafc;
+$white:         #ffffff;
+$green-bg:      #d1fae5;
+$green-text:    #065f46;
+$yellow-bg:     #fef3c7;
+$yellow-text:   #92400e;
+$red-bg:        #fee2e2;
+$red-text:      #991b1b;
+$gray-bg:       #f1f5f9;
+$gray-text:     #475569;
+
+// ─── Gradient helper ───────────────────────────────────────
+@mixin btn-gradient {
+  background: linear-gradient(to right, $violet, $indigo);
+}
+
+// ─── Container ─────────────────────────────────────────────
 .kra-management-container {
-  padding: 24px;
-  max-width: 1600px;
+  padding: 32px;
+  max-width: 1400px;
   margin: 0 auto;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: #f5f6fa;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
 
-  // Page Header
-  .page-header {
+// ─── Page Header ───────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: $slate-900;
+    letter-spacing: -0.4px;
+    margin: 0 0 4px;
+  }
+
+  .page-subtitle {
+    font-size: 14px;
+    color: $slate-500;
+    margin: 0;
+    font-weight: 400;
+  }
+}
+
+// ─── Buttons ───────────────────────────────────────────────
+.btn-primary {
+  @include btn-gradient;
+  color: $white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.25), 0 4px 12px rgba(99, 102, 241, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  }
+
+  mat-icon, .material-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+}
+
+.btn-outline {
+  background: $white;
+  border: 1px solid $slate-200;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $slate-600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: $slate-50;
+    border-color: $indigo;
+    color: $indigo;
+  }
+
+  mat-icon, .material-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $slate-500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    color: $indigo;
+    background: $indigo-light;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  mat-icon, .material-icon {
+    font-size: 16px;
+  }
+}
+
+// ─── Filter icon button (replaces missing btn-icon) ────────
+.btn-filter-icon {
+  background: $white;
+  border: 1px solid $slate-200;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $slate-500;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+  }
+
+  &:hover:not(:disabled) {
+    background: $indigo-light;
+    border-color: $indigo;
+    color: $indigo;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.btn-text-primary {
+  background: transparent;
+  border: none;
+  color: $indigo;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $indigo-dark;
+  }
+
+  mat-icon, .material-icon {
+    font-size: 20px;
+    transition: transform 0.15s ease;
+  }
+}
+
+// ─── Section Card ──────────────────────────────────────────
+.section-card {
+  background: $white;
+  border-radius: 16px;
+  border: 1px solid rgba($slate-200, 0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+// ─── Filter Bar ────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid $slate-100;
+  background: $slate-50;
+
+  .filter-left {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 32px;
-    padding: 24px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 300px;
 
-    .header-content {
-      flex: 1;
+    &.filters-wrapper {
+      gap: 10px;
+      max-width: 100%;
+    }
+  }
 
-      .page-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 0 0 8px;
-        font-size: 32px;
-        font-weight: 700;
-        color: #1f2937;
-        letter-spacing: -0.5px;
+  .filter-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
 
-        mat-icon {
-          font-size: 36px;
-          width: 36px;
-          height: 36px;
-          color: #667eea;
-        }
-      }
+// ─── Search Input ──────────────────────────────────────────
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 
-      .page-subtitle {
-        margin: 0;
-        font-size: 15px;
-        color: #6b7280;
-        font-weight: 500;
-      }
+  // Works for both <mat-icon> and <span class="mat-icon-inline">
+  mat-icon,
+  .mat-icon-inline {
+    position: absolute;
+    left: 10px;
+    font-size: 18px;
+    color: $slate-400;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .search-input {
+    padding: 8px 14px 8px 36px;
+    background: $white;
+    border: 1px solid $slate-200;
+    border-radius: 8px;
+    font-size: 13px;
+    color: $slate-800;
+    width: 220px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: $slate-400;
     }
 
-    .header-actions {
-      .add-button {
-        height: 48px;
-        padding: 0 28px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px !important;
+    &:focus {
+      border-color: $indigo;
+      box-shadow: 0 0 0 3px rgba($indigo, 0.1);
+    }
+  }
+}
 
-        mat-icon {
-          font-size: 20px !important;
-          width: 20px !important;
-          height: 20px !important;
-          margin: 0 !important;
-          flex-shrink: 0;
-        }
+// ─── Select ────────────────────────────────────────────────
+.select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-        }
+  .filter-select {
+    padding: 8px 36px 8px 12px;
+    background: $white;
+    border: 1px solid $slate-200;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: $slate-600;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: $indigo;
+      box-shadow: 0 0 0 3px rgba($indigo, 0.1);
+    }
+
+    &:hover {
+      background: $slate-50;
+    }
+  }
+
+  // Use Angular Material mat-icon for the chevron
+  .select-arrow-icon {
+    position: absolute;
+    right: 8px;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: $slate-400;
+    pointer-events: none;
+    line-height: 1 !important;
+  }
+}
+
+// ─── Legacy .material-icon span helper ─────────────────────
+// Keep this so any remaining spans don't break layout
+.material-icon {
+  font-family: 'Material Icons', 'Material Symbols Outlined', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  user-select: none;
+}
+
+// ─── Table ─────────────────────────────────────────────────
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  thead {
+    tr {
+      background: rgba($slate-50, 0.6);
+      border-bottom: 1px solid $slate-100;
+    }
+
+    th {
+      padding: 14px 24px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: $slate-500;
+      white-space: nowrap;
+
+      &.text-right {
+        text-align: right;
       }
     }
   }
 
-  // Filters Card
-  .filters-card {
-    margin-bottom: 24px;
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
+  tbody {
+    .table-row {
+      border-bottom: 1px solid $slate-100;
+      transition: background 0.15s ease;
 
-    .filters-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-      h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        &::before {
-          content: '';
-          width: 4px;
-          height: 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 2px;
-        }
+      &:hover {
+        background: rgba($slate-50, 0.8);
       }
 
-      .clear-filters-btn {
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        color: #667eea !important;
-        border-color: rgba(102, 126, 234, 0.3) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-
-        mat-icon {
-          font-size: 18px !important;
-          width: 18px !important;
-          height: 18px !important;
-        }
-
-        &:hover {
-          background: rgba(102, 126, 234, 0.1) !important;
-          border-color: rgba(102, 126, 234, 0.5) !important;
-        }
+      &:last-child {
+        border-bottom: none;
       }
     }
 
-    .filters-content {
-      display: grid;
-      grid-template-columns: 2fr repeat(2, 1fr) auto;
-      gap: 16px;
-      padding: 24px;
-      align-items: flex-start;
+    td {
+      padding: 18px 24px;
+      font-size: 14px;
+      color: $slate-700;
+      vertical-align: middle;
 
-      .search-field {
-        grid-column: 1 / 2;
+      &.text-right {
+        text-align: right;
       }
 
-      .filter-actions-container {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 12px;
-        padding: 0;
-
-        button.add-button {
-          height: 48px;
-          padding: 0 24px !important;
-          border-radius: 12px !important;
-          font-weight: 600 !important;
-          font-size: 15px !important;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-          color: white !important;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          gap: 8px !important;
-
-          mat-icon {
-            font-size: 20px !important;
-            width: 20px !important;
-            height: 20px !important;
-            margin: 0 !important;
-            flex-shrink: 0;
-          }
-
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-          }
-        }
-      }
-
-      ::ng-deep mat-form-field {
-        &.mat-form-field-appearance-outline {
-          .mat-mdc-text-field-wrapper {
-            background: white;
-            border-radius: 12px;
-          }
-
-          .mat-mdc-form-field-flex {
-            padding: 0 16px;
-          }
-
-          .mat-mdc-notch-piece {
-            border-color: #e5e7eb !important;
-            transition: border-color 0.3s ease;
-          }
-
-          &:hover .mat-mdc-text-field-wrapper {
-            background: #f9fafb;
-          }
-
-          &:hover .mat-mdc-notch-piece {
-            border-color: #667eea !important;
-          }
-
-          &.mat-focused {
-            .mat-mdc-text-field-wrapper {
-              background: white;
-              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-
-            .mat-mdc-notch-piece {
-              border-color: #667eea !important;
-              border-width: 2px !important;
-            }
-          }
-
-          .mat-mdc-form-field-icon-prefix {
-            padding-right: 12px;
-            margin-right: 4px;
-            display: flex;
-            align-items: center;
-
-            mat-icon {
-              color: #667eea;
-              font-size: 20px;
-              width: 20px;
-              height: 20px;
-            }
-          }
-
-          .mat-mdc-form-field-infix {
-            min-height: 48px;
-          }
-        }
-      }
-    }
-  }
-
-  // Table Card
-  .table-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
-
-    .table-header {
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-      h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        &::before {
-          content: '';
-          width: 4px;
-          height: 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 2px;
-        }
-      }
-    }
-
-    .table-container {
-      overflow-x: auto;
-      min-height: 200px;
-    }
-
-    .kra-table {
-      width: 100%;
-
-      ::ng-deep {
-        .mat-mdc-header-cell {
-          background: #f9fafb;
-          font-weight: 600;
-          color: #374151;
-          font-size: 14px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          padding: 16px;
-          border-bottom: 2px solid #e5e7eb;
-        }
-
-        .mat-mdc-cell {
-          padding: 16px;
-          border-bottom: 1px solid #f3f4f6;
-          color: #1f2937;
-          font-size: 14px;
-        }
-
-        .mat-mdc-row {
-          transition: all 0.2s ease;
-
-          &:hover {
-            background: #f9fafb;
-          }
-
-          &:last-child .mat-mdc-cell {
-            border-bottom: none;
-          }
-        }
-      }
-
-      .kra-info {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        strong {
-          font-size: 15px;
-          font-weight: 600;
-          color: #1f2937;
-        }
-
-        small {
-          color: #6b7280;
-          font-size: 13px;
-          line-height: 1.4;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      }
-
-      .position-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        color: #667eea;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
-
-        mat-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-        }
-      }
-
-      .weight-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-        color: #667eea;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      ::ng-deep mat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-weight: 600;
+      &.date-cell {
+        color: $slate-600;
         font-size: 13px;
-
-        mat-icon {
-          font-size: 16px;
-          width: 16px;
-          height: 16px;
-        }
-
-        &.status-active {
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
-          color: #059669;
-          border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        &.status-inactive {
-          background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
-          color: #dc2626;
-          border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-      }
-    }
-
-    // Empty State
-    .empty-state {
-      text-align: center;
-      padding: 80px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-
-      mat-icon {
-        font-size: 64px;
-        width: 64px;
-        height: 64px;
-        color: #cbd5e1;
-        margin-bottom: 16px;
-      }
-
-      h3 {
-        margin: 0 0 8px;
-        font-size: 20px;
-        font-weight: 600;
-        color: #1f2937;
-      }
-
-      p {
-        margin: 0 0 24px;
-        font-size: 14px;
-        color: #6b7280;
-      }
-
-      // .create-first-kra button styling is handled by global .empty-state button styles in styles.scss
-    }
-
-    // Loading Spinner
-    .loading-spinner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-      gap: 16px;
-
-      p {
-        margin: 0;
-        color: #6b7280;
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      ::ng-deep mat-spinner {
-        circle {
-          stroke: #667eea !important;
-        }
+        white-space: nowrap;
       }
     }
   }
+}
 
-  // Pagination
-  ::ng-deep mat-paginator {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-top: 1px solid #e5e7eb;
-    border-radius: 0 0 16px 16px;
+// ─── Cell helpers ──────────────────────────────────────────
+.cell-title {
+  font-weight: 700;
+  color: $slate-900;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
 
-    .mat-mdc-paginator-container {
-      padding: 12px 24px;
+.cell-sub {
+  font-size: 12px;
+  color: $slate-500;
+  line-height: 1.5;
+  max-width: 340px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cycle-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: $slate-600;
+}
+
+.goals-count {
+  font-weight: 700;
+  color: $slate-900;
+}
+
+// ─── Progress bar ──────────────────────────────────────────
+.progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 120px;
+}
+
+.progress-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: $indigo;
+}
+
+.progress-bar {
+  width: 120px;
+  height: 6px;
+  background: $slate-200;
+  border-radius: 99px;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    background: $indigo;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+}
+
+// ─── Status badge ──────────────────────────────────────────
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  &.status-active {
+    background: $indigo-light;
+    color: $indigo-dark;
+  }
+
+  &.status-inactive {
+    background: $slate-100;
+    color: $slate-500;
+  }
+}
+
+// ─── Progress badge (goals) ────────────────────────────────
+.progress-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  &.progress-completed {
+    background: $green-bg;
+    color: $green-text;
+  }
+
+  &.progress-inprogress {
+    background: $indigo-light;
+    color: $indigo-dark;
+  }
+
+  &.progress-onhold {
+    background: $yellow-bg;
+    color: $yellow-text;
+  }
+
+  &.progress-tostart,
+  &.progress-not\ started {
+    background: $gray-bg;
+    color: $gray-text;
+  }
+}
+
+// ─── KRA link badge ────────────────────────────────────────
+.kra-link-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: $slate-600;
+}
+
+// ─── Action button ─────────────────────────────────────────
+.action-btn {
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $slate-400;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: $slate-100;
+    color: $slate-600;
+  }
+}
+
+// ─── Empty state ───────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px;
+  text-align: center;
+  background: linear-gradient(to bottom, $slate-50, $white);
+
+  mat-icon.empty-icon {
+    font-size: 56px !important;
+    width: 56px !important;
+    height: 56px !important;
+    color: $slate-300;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: $slate-800;
+    margin: 0 0 6px;
+  }
+
+  p {
+    font-size: 13px;
+    color: $slate-500;
+    margin: 0 0 20px;
+  }
+}
+
+// ─── Loading state ─────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px;
+  gap: 12px;
+
+  p {
+    font-size: 13px;
+    color: $slate-500;
+    margin: 0;
+  }
+
+  ::ng-deep mat-spinner circle {
+    stroke: $indigo !important;
+  }
+}
+
+// ─── Paginator ─────────────────────────────────────────────
+.paginator-wrap {
+  border-top: 1px solid $slate-100;
+  background: $slate-50;
+
+  ::ng-deep .mat-mdc-paginator {
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+// ─── Goals section ─────────────────────────────────────────
+.goals-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.goals-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.goals-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.goals-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: $slate-900;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+// ─── Goals footer ──────────────────────────────────────────
+.goals-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  border-top: 1px solid $slate-100;
+  background: $slate-50;
+
+  ::ng-deep .mat-mdc-paginator {
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+// ─── mat-menu overrides ────────────────────────────────────
+::ng-deep {
+  .mat-mdc-menu-panel {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid $slate-200 !important;
+    font-family: 'Inter', sans-serif !important;
+    min-width: 160px !important;
+  }
+
+  .mat-mdc-menu-item {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: $slate-700 !important;
+    font-family: 'Inter', sans-serif !important;
+
+    .mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      color: $slate-500 !important;
+      margin-right: 10px !important;
+    }
+
+    &:hover {
+      background: $slate-50 !important;
+      color: $slate-900 !important;
     }
   }
 
-  // Responsive Design
-  @media (max-width: 1024px) {
-    .filters-content {
-      grid-template-columns: 1fr 1fr !important;
-      grid-template-rows: auto auto auto;
-
-      .search-field {
-        grid-column: 1 / -1;
-      }
-
-      .filter-actions-container {
-        grid-column: 1 / -1;
-        justify-content: stretch;
-
-        button {
-          flex: 1;
-        }
-      }
-    }
+  .mat-mdc-row,
+  .mat-mdc-header-row {
+    background: transparent !important;
   }
+}
 
-  @media (max-width: 768px) {
+// ─── Responsive ────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .search-wrap .search-input {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kra-management-container {
     padding: 16px;
+    gap: 20px;
+  }
 
-    .page-header {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+
+    .filter-left {
       flex-direction: column;
-      gap: 16px;
-      align-items: stretch;
+      min-width: 100%;
 
-      .header-actions {
-        .add-button {
-          width: 100%;
-        }
+      .search-wrap .search-input {
+        width: 100%;
+      }
+
+      .select-wrap .filter-select {
+        width: 100%;
       }
     }
 
-    .filters-content {
-      grid-template-columns: 1fr !important;
-      grid-template-rows: auto;
-
-      .filter-actions-container {
-        grid-column: 1 / -1;
+    .filter-right {
+      .btn-filter-icon {
+        width: 100%;
+        justify-content: center;
       }
     }
+  }
+
+  .data-table thead th,
+  .data-table tbody td {
+    padding: 12px 16px;
+  }
+
+  .progress-bar {
+    width: 80px;
   }
 }
