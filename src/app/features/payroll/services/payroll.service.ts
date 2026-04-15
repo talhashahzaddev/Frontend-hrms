@@ -929,6 +929,229 @@ export class PayrollService {
         );
     }
 
+    getAllProvidentFundRequests(filter?: {
+      SearchTerm?: string;
+      RequestType?: string;
+      Page?: number;
+      PageSize?: number;
+    }): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach((key) => {
+          const value = (filter as any)[key];
+          if (value !== null && value !== undefined && value !== '') {
+            params = params.set(key, value);
+          }
+        });
+      }
+
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/provident-fund/requests`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    approveProvidentFundRequest(data: { employeeId: string; requestType: string }): Observable<boolean> {
+      return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/provident-fund/requests/approve`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    rejectProvidentFundRequest(pfId: string, data: { remarks: string }): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/admin/provident-fund/requests/${pfId}/reject`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    addProvidentFundMonthlyTransaction(data: { employeeId: string; periodId: string }): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${environment.apiUrl}/admin/provident-fund/monthly-transaction`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    manualProvidentFundEnrollment(data: {
+      ruleId: string;
+      employeeId: string;
+      employeePct: number;
+      employerPct: number;
+      effectiveFrom: string;
+    }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/admin/provident-fund/manual-enroll`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createProvidentFundEnrollmentRequest(data: {
+      ruleId: string;
+      employeePct: number;
+      effectiveFrom: string;
+    }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/provident-fund/enroll`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateProvidentFundEnrollmentRequest(pfId: string, data: {
+      ruleId: string;
+      employeePct: number;
+      effectiveFrom: string;
+    }): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/enroll/${pfId}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateProvidentFundPercentage(data: { ruleId: string; employeePct: number }): Observable<any> {
+      const payload = {
+        RuleId: data.ruleId,
+        EmployeePct: data.employeePct
+      };
+
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/provident-fund/update-percentage`, payload)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createProvidentFundWithdrawalRequest(data: { amount: number; reason?: string | null }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/withdraw`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createProvidentFundSettlementRequest(data: { effectiveFrom: string; remarks?: string | null }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/settlement-request`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteProvidentFundRequest(pfId: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${environment.apiUrl}/employee/provident-fund/request/${pfId}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getMyPendingProvidentFundRequest(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-pending-request`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyActiveProvidentFundRequest(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-active-request`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getMyProvidentFundTransactions(filter?: {
+      year?: number | null;
+      transactionType?: string | null;
+      page?: number;
+      pageSize?: number;
+    }): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        if (filter.year !== null && filter.year !== undefined) {
+          params = params.set('year', String(filter.year));
+        }
+        if (filter.transactionType !== null && filter.transactionType !== undefined && String(filter.transactionType).trim()) {
+          params = params.set('transactionType', String(filter.transactionType).trim());
+        }
+        if (filter.page !== null && filter.page !== undefined) {
+          params = params.set('page', String(filter.page));
+        }
+        if (filter.pageSize !== null && filter.pageSize !== undefined) {
+          params = params.set('pageSize', String(filter.pageSize));
+        }
+      }
+
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-transactions`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     // Salary Advance Rules
     getSalaryAdvanceRules(): Observable<any[]> {
       return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/salary-advance-rules`)
@@ -1802,6 +2025,25 @@ export class PayrollService {
         });
       }
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/repayments/all`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) {
+            throw new Error(response.message);
+          }
+          return response.data;
+        })
+      );
+    }
+
+    getAllProvidentFundRepayments(filter?: any): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach((key) => {
+          if (filter[key] !== null && filter[key] !== undefined && filter[key] !== '') {
+            params = params.set(key, filter[key]);
+          }
+        });
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/provident-fund/repayments`, { params }).pipe(
         map((response: any) => {
           if (!response.success && response.message) {
             throw new Error(response.message);

@@ -25,6 +25,12 @@ export const payrollRoutes: Routes = [
     title: 'Loans - HRMS'
   },
   {
+    path: 'provident-fund',
+    loadComponent: () =>
+      import('./components/provident-fund/provident-fund.component').then(m => m.ProvidentFundComponent),
+    title: 'Provident Funds - HRMS'
+  },
+  {
     path: 'salary-advances',
     loadComponent: () =>
       import('./components/salary-advances/salary-advances.component').then(m => m.SalaryAdvancesComponent),
@@ -35,6 +41,12 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/loan-requests/loan-requests.component').then(m => m.LoanRequestsComponent),
     title: 'My Loan & Advance Requests - HRMS'
+  },
+  {
+    path: 'provident-fund-benefilts',
+    loadComponent: () =>
+      import('./components/provident-fund-benefilts/provident-fund-benefilts.component').then(m => m.ProvidentFundBenefiltsComponent),
+    title: 'Provident Fund Benefits - HRMS'
   },
   {
     path: 'loans/requests/compliance',

@@ -274,6 +274,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         {
+          label: 'Provident Funds',
+          icon: 'account_balance_wallet',
+          route: '/payroll/provident-fund',
+          exact: true
+        },
+        {
           label: 'Salary Advances',
           icon: 'savings',
           route: '/payroll/salary-advances',

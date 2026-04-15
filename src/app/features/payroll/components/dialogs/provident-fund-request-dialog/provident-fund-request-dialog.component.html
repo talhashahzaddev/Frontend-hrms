@@ -1,0 +1,133 @@
+<div class="provident-fund-request-dialog">
+  <div class="dialog-header">
+    <h2>{{ title }}</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      @if (mode === 'enrollment') {
+        <label class="field">
+          <span>Provident fund rule</span>
+          <select formControlName="ruleId">
+            <option [value]="null" disabled>Select provident fund rule</option>
+            @for (rule of rules; track rule.ruleId) {
+              <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+            }
+          </select>
+          @if (form.get('ruleId')?.touched && form.get('ruleId')?.invalid) {
+            <small class="error-text">Please select a provident fund rule.</small>
+          }
+        </label>
+
+        <label class="field">
+          <span>Employee percentage (%)</span>
+          <input type="number" formControlName="employeePct" min="0.01" max="100" step="0.01" placeholder="0.00" [disabled]="mode === 'enrollment'" />
+          @if (form.get('employeePct')?.touched && form.get('employeePct')?.invalid) {
+            <small class="error-text">Enter a valid percentage between 0.01 and 100.</small>
+          }
+        </label>
+
+        <label class="field full-span">
+          <span>Effective from</span>
+          <input type="date" formControlName="effectiveFrom" />
+          @if (form.get('effectiveFrom')?.touched && form.get('effectiveFrom')?.invalid) {
+            <small class="error-text">Please select an effective date.</small>
+          }
+        </label>
+      }
+
+      @if (mode === 'percentage-update') {
+        <label class="field full-span">
+          <span>Provident fund rule</span>
+          <select formControlName="ruleId">
+            <option [value]="null" disabled>Select provident fund rule</option>
+            @for (rule of selectableRules; track rule.ruleId) {
+              <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+            }
+          </select>
+          @if (form.get('ruleId')?.touched && form.get('ruleId')?.invalid) {
+            <small class="error-text">Please select a different provident fund rule.</small>
+          }
+          @if (selectableRules.length === 0) {
+            <small class="error-text">No alternative provident fund rule is available.</small>
+          }
+        </label>
+
+        <label class="field full-span">
+          <span>New employee percentage (%)</span>
+          <input type="number" formControlName="employeePct" min="0.01" max="100" step="0.01" placeholder="0.00" [disabled]="mode === 'percentage-update'" />
+          @if (form.get('employeePct')?.touched && form.get('employeePct')?.invalid) {
+            <small class="error-text">Enter a valid percentage between 0.01 and 100.</small>
+          }
+        </label>
+      }
+
+      @if (mode === 'withdrawal') {
+        <label class="field">
+          <span>Withdrawal amount {{ currencySymbol }}</span>
+          <div class="prefix-input">
+            <strong>{{ currencySymbol }}</strong>
+            <input type="number" formControlName="amount" min="1" placeholder="0.00" />
+          </div>
+          @if (form.get('amount')?.touched && form.get('amount')?.invalid) {
+            <small class="error-text">Please enter a valid withdrawal amount.</small>
+          }
+        </label>
+
+        <label class="field full-span">
+          <span>Reason</span>
+          <textarea formControlName="reason" rows="3" placeholder="Explain why you want to withdraw provident fund amount..."></textarea>
+          @if (form.get('reason')?.touched && form.get('reason')?.invalid) {
+            <small class="error-text">Please provide a reason for withdrawal.</small>
+          }
+        </label>
+      }
+
+      @if (mode === 'settlement') {
+        <label class="field">
+          <span>Settlement effective date</span>
+          <input type="date" formControlName="effectiveFrom" />
+          @if (form.get('effectiveFrom')?.touched && form.get('effectiveFrom')?.invalid) {
+            <small class="error-text">Please select settlement effective date.</small>
+          }
+        </label>
+
+        <label class="field full-span">
+          <span>Remarks</span>
+          <textarea formControlName="remarks" rows="3" placeholder="Optional settlement remarks..."></textarea>
+        </label>
+      }
+    </div>
+
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      @if ((mode === 'enrollment' || mode === 'percentage-update') && selectedRule) {
+        <div class="enrollment-breakdown">
+          <p><strong>{{ selectedRule.ruleName }}</strong> is applied for your request.</p>
+          <p>Basic salary: <strong>{{ currencySymbol }} {{ basicSalary | number:'1.0-2' }}</strong></p>
+          <p>
+            Employee contribution:
+            <strong>{{ selectedEmployeePct | number:'1.0-2' }}%</strong>
+            ({{ currencySymbol }} {{ employeeContributionAmount | number:'1.0-2' }})
+          </p>
+          <p>
+            Employer contribution:
+            <strong>{{ selectedEmployerPct | number:'1.0-2' }}%</strong>
+            ({{ currencySymbol }} {{ employerContributionAmount | number:'1.0-2' }})
+          </p>
+          <p>Total monthly contribution: <strong>{{ currencySymbol }} {{ totalContributionAmount | number:'1.0-2' }}</strong></p>
+        </div>
+      } @else {
+        <p>Your provident fund request will be reviewed by HR and payroll team before approval.</p>
+      }
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn" [disabled]="form.invalid">{{ submitText }}</button>
+    </div>
+  </form>
+</div>

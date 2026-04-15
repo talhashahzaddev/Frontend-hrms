@@ -1,0 +1,41 @@
+<div class="pf-funds-dialog-container">
+  <div class="dialog-header">
+    <h2>Add provident fund funds</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-body" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label>Employee</label>
+      <select class="form-control" formControlName="employeeId">
+        <option value="" disabled selected>Select employee</option>
+        @for (employee of employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        }
+      </select>
+      @if (form.controls.employeeId.touched && form.controls.employeeId.invalid) {
+        <p class="field-error">Please select an employee.</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Payroll period</label>
+      <select class="form-control" formControlName="periodId">
+        <option value="" disabled selected>Select period</option>
+        @for (period of periods; track period.id) {
+          <option [value]="period.id">{{ period.name }}</option>
+        }
+      </select>
+      @if (form.controls.periodId.touched && form.controls.periodId.invalid) {
+        <p class="field-error">Please select a payroll period.</p>
+      }
+    </div>
+  </form>
+
+  <div class="dialog-footer">
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="save-btn" [disabled]="form.invalid" (click)="submit()">Submit</button>
+  </div>
+</div>
