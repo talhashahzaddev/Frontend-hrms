@@ -26,8 +26,8 @@
             <th class="text-left">Basis</th>
             <th class="text-right">Employee %</th>
             <th class="text-right">Employer %</th>
-            <th class="text-right">Min Cont.</th>
-            <th class="text-right">Max Cont.</th>
+            <th class="text-left">Temporary Withdrawals</th>
+            <th class="text-left">Permanent Withdrawals</th>
             <th class="text-center">Vesting</th>
             <th class="text-center">Status</th>
             <th class="text-right">Actions</th>
@@ -68,10 +68,8 @@
             </td>
             <td class="text-right font-mono">{{ rule.employeePercentage | number:'1.2-2' }}%</td>
             <td class="text-right font-mono">{{ rule.employerPercentage | number:'1.2-2' }}%</td>
-            <td class="text-right font-mono">{{ currencySymbol() }} {{ rule.minContribution | number:'1.0-0' }}</td>
-            <td class="text-right font-mono">
-              {{ rule.maxContribution ? (currencySymbol() + ' ' + (rule.maxContribution | number:'1.0-0')) : '—' }}
-            </td>
+            <td class="text-left">{{ getWithdrawalSummary(rule, 'temporary') }}</td>
+            <td class="text-left">{{ getWithdrawalSummary(rule, 'permanent') }}</td>
             <td class="text-center">{{ rule.vestingMonths }} months</td>
             <td class="text-center">
               <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">

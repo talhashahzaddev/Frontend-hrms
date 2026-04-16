@@ -10,9 +10,9 @@
       </div>
     </div>
 
-    <button class="primary-action" type="button" (click)="openAddRequestDialog()">
+    <button class="primary-action" type="button" [disabled]="!!activeFund" (click)="openAddRequestDialog()">
       <mat-icon>add</mat-icon>
-      New provident fund request
+      Enroll in provident fund
     </button>
   </div>
 
@@ -75,105 +75,44 @@
   </div>
 
   <div class="section-tabs">
-    <button [class.active]="tab === 'request'" type="button" (click)="setTab('request')">Provident fund request</button>
+    <button [class.active]="tab === 'funds'" type="button" (click)="setTab('funds')">Provident Funds</button>
+    <button [class.active]="tab === 'my-requests'" type="button" (click)="setTab('my-requests')">My Requests</button>
     <button [class.active]="tab === 'history'" type="button" (click)="setTab('history')">Fund history</button>
   </div>
 
-  @if (tab === 'request') {
+  @if (tab === 'funds') {
     <section class="cards-stack">
-      @if (pendingEnrollmentRequest) {
+      @if (activeFund) {
         <article class="record-card">
           <div class="card-body">
             <div class="card-top">
               <div>
-                <h2>{{ pendingEnrollmentRequest.employeePct | number:'1.2-2' }}%</h2>
-                <p>Request type: {{ getRequestTypeLabel(pendingEnrollmentRequest.requestType) }}</p>
+                <h2>{{ activeFund.ruleName }}</h2>
+                <p>Active provident fund account</p>
               </div>
-              <span class="status-pill" [ngClass]="getStatusClass(pendingEnrollmentRequest.status)">{{ pendingEnrollmentRequest.status | titlecase }}</span>
-            </div>
-
-            <div class="meta-grid compact">
-              <div>
-                <p>Rule name</p>
-                <strong>{{ pendingEnrollmentRequest.ruleName }}</strong>
-              </div>
-              <div>
-                <p>Employee %</p>
-                <strong>{{ pendingEnrollmentRequest.employeePct | number:'1.2-2' }}%</strong>
-              </div>
-              <div>
-                <p>Employer %</p>
-                <strong>{{ pendingEnrollmentRequest.employerPct | number:'1.2-2' }}%</strong>
-              </div>
-              <div>
-                <p>Effective from</p>
-                <strong>{{ formatDateLabel(pendingEnrollmentRequest.effectiveFrom) }}</strong>
-              </div>
-              <div>
-                <p>Remarks</p>
-                <strong>{{ pendingEnrollmentRequest.remarks || '-' }}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-footer">
-            <div class="request-actions">
-              <button class="action-btn secondary" (click)="openEditRequestDialog(pendingEnrollmentRequest)">
-                <mat-icon>edit</mat-icon>
-                Edit request
-              </button>
-              <button class="action-btn danger" (click)="cancelRequest(pendingEnrollmentRequest)">
-                <mat-icon>cancel</mat-icon>
-                Cancel request
-              </button>
-            </div>
-          </div>
-        </article>
-      } @else if (activeLikeRequestRecord) {
-        <article class="record-card">
-          <div class="card-body">
-            <div class="card-top">
-              <div>
-                <h2>{{ activeLikeRequestRecord.ruleName }}</h2>
-                <p>Active provident fund profile</p>
-              </div>
-              <span class="status-pill" [ngClass]="getStatusClass(activeLikeRequestRecord.status)">
-                {{ activeLikeRequestRecord.status | titlecase }}
+              <span class="status-pill status-active">
+                {{ activeFund.pfStatus | titlecase }}
               </span>
             </div>
 
             <div class="meta-grid">
-              <div>
-                <p>Request type</p>
-                <strong>{{ getRequestTypeLabel(activeLikeRequestRecord.requestType) }}</strong>
-              </div>
+              <!-- <div>
+                <p>PF ID</p>
+                <strong>{{ activeFund.pfId }}</strong>
+              </div> -->
               <div>
                 <p>Employee %</p>
-                <strong>{{ activeLikeRequestRecord.employeePct | number:'1.2-2' }}%</strong>
+                <strong>{{ activeFund.employeePct | number:'1.2-2' }}%</strong>
               </div>
               <div>
                 <p>Employer %</p>
-                <strong>{{ activeLikeRequestRecord.employerPct | number:'1.2-2' }}%</strong>
+                <strong>{{ activeFund.employerPct | number:'1.2-2' }}%</strong>
               </div>
               <div>
                 <p>Effective from</p>
-                <strong>{{ formatDateLabel(activeLikeRequestRecord.effectiveFrom) }}</strong>
-              </div>
-              <div>
-                <p>Approved at</p>
-                <strong>{{ formatDateLabel(activeLikeRequestRecord.approvedAt) }}</strong>
-              </div>
-              <div>
-                <p>Last updated</p>
-                <strong>{{ formatDateLabel(activeLikeRequestRecord.updatedAt) }}</strong>
+                <strong>{{ formatDateLabel(activeFund.effectiveFrom) }}</strong>
               </div>
             </div>
-
-            @if (activeLikeRequestRecord.remarks) {
-              <div class="remarks-text">
-                <strong>Remarks:</strong> {{ activeLikeRequestRecord.remarks }}
-              </div>
-            }
           </div>
 
           <div class="card-footer">
@@ -181,7 +120,6 @@
               <button
                 class="action-btn secondary"
                 type="button"
-                [disabled]="activeLikeRequestRecord.status === 'pending' || activeLikeRequestRecord.status === 'completed'"
                 (click)="openPercentageUpdateDialog()">
                 <mat-icon>percent</mat-icon>
                 Update percentage
@@ -189,25 +127,153 @@
               <button
                 class="action-btn secondary"
                 type="button"
-                [disabled]="activeLikeRequestRecord.status === 'pending' || activeLikeRequestRecord.status === 'completed'"
+                [disabled]="!canRequestWithdrawal"
                 (click)="openWithdrawalDialog()">
                 <mat-icon>payments</mat-icon>
                 Withdraw request
-              </button>
-              <button
-                class="action-btn danger"
-                type="button"
-                [disabled]="activeLikeRequestRecord.status === 'pending' || activeLikeRequestRecord.status === 'completed'"
-                (click)="openSettlementDialog()">
-                <mat-icon>gavel</mat-icon>
-                Settlement request
               </button>
             </div>
           </div>
         </article>
       } @else {
-        <div class="empty-state">No provident fund request found.</div>
+        <div class="empty-state">
+          <p>No active provident fund account found.</p>
+          <button class="primary-action" type="button" (click)="openAddRequestDialog()">
+            <mat-icon>add</mat-icon>
+            Enroll in provident fund
+          </button>
+        </div>
       }
+    </section>
+  }
+
+  @if (tab === 'my-requests') {
+    <section class="history-card">
+      <div class="history-toolbar">
+        <div class="filters-row">
+          <select class="filter-select" [(ngModel)]="pendingMyRequestsTypeFilter">
+            <option value="">All request types</option>
+            <option value="enrollment">Enrollment</option>
+            <option value="update">Update</option>
+            <option value="withdrawal">Withdrawal</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="pendingMyRequestsStatusFilter">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" (click)="applyMyRequestsFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" (click)="clearMyRequestsFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Request date</th>
+              <th>Type</th>
+              <th>Rule</th>
+              <th class="numeric">Requested</th>
+              <th>Status</th>
+              <th class="status-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (myRequests.length === 0) {
+              <tr>
+                <td colspan="6" class="empty-row">No provident fund requests found.</td>
+              </tr>
+            }
+
+            @for (r of myRequests; track r.requestId) {
+              <tr>
+                <td>{{ formatDateLabel(r.createdAt) }}</td>
+                <td>
+                  {{ getRequestTypeLabel(r.requestType) }}
+                  @if (r.requestType === 'withdrawal' && r.withdrawalType) {
+                    <small>({{ r.withdrawalType | titlecase }})</small>
+                  }
+                </td>
+                <td>{{ r.ruleName || '-' }}</td>
+                <td class="numeric">
+                  @if (r.requestType === 'withdrawal') {
+                    {{ formatMoney(r.requestedAmount || 0) }}
+                  } @else {
+                    {{ (r.requestedEmployeePct || 0) | number:'1.2-2' }}% + {{ (r.requestedEmployerPct || 0) | number:'1.2-2' }}%
+                  }
+                </td>
+                <td>
+                  <span class="status-pill" [ngClass]="getStatusClass(r.status)">{{ r.status | titlecase }}</span>
+                </td>
+                <td class="status-column">
+                  <div class="request-actions">
+                    @if (r.requestType === 'enrollment' && r.status === 'pending') {
+                      <button class="action-btn secondary" type="button" (click)="openEditRequestDialog(r)">
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                      </button>
+                    }
+                    @if (r.status === 'pending') {
+                      <button class="action-btn danger" type="button" (click)="cancelRequest(r)">
+                        <mat-icon>cancel</mat-icon>
+                        Cancel
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (myRequestsTotalCount === 0) {
+            No records found
+          } @else {
+            Showing
+            {{ (myRequestsCurrentPage - 1) * myRequestsPageSize + 1 }}
+            &ndash;
+            {{ (myRequestsCurrentPage - 1) * myRequestsPageSize + myRequests.length }}
+            of
+            {{ myRequestsTotalCount }}
+            records
+          }
+        </p>
+        <div class="pagination">
+          <button
+            class="page-btn"
+            [class.disabled]="myRequestsCurrentPage === 1"
+            [disabled]="myRequestsCurrentPage === 1"
+            (click)="goToMyRequestsPage(myRequestsCurrentPage - 1)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <button class="page-btn active" type="button">{{ myRequestsCurrentPage }}</button>
+
+          <button
+            class="page-btn"
+            [class.disabled]="myRequests.length < myRequestsPageSize"
+            [disabled]="myRequests.length < myRequestsPageSize"
+            (click)="goToMyRequestsPage(myRequestsCurrentPage + 1)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
     </section>
   }
 

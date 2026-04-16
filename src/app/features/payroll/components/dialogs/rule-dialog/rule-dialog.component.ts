@@ -1,6 +1,6 @@
 import { Component, Inject, ViewEncapsulation, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { PayrollService } from '../../../services/payroll.service';
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '@core/services/notification.service';
@@ -32,8 +33,8 @@ export interface RuleDialogData {
     basis?: string;
     employeePercentage?: number;
     employerPercentage?: number;
-    minContribution?: number;
-    maxContribution?: number | null;
+    withdrawalConfig?: string | null;
+    allowPartialWithdraw?: boolean;
     vestingMonths?: number;
     maxLoanAmount?: number;
     maxAdvanceAmount?: number;
@@ -57,6 +58,7 @@ export interface RuleDialogData {
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
+    MatCheckboxModule,
     MatProgressSpinnerModule
   ],
   templateUrl: './rule-dialog.component.html',
@@ -119,8 +121,9 @@ export class RuleDialogComponent implements OnInit {
     basis: ['basic'],
     employeePercentage: [null as number | null],
     employerPercentage: [null as number | null],
-    minContribution: [null as number | null],
-    maxContribution: [null as number | null],
+    allowPartialWithdraw: [false],
+    temporaryWithdrawals: this.fb.array([]),
+    permanentWithdrawals: this.fb.array([]),
     vestingMonths: [0],
     // Salary Advance Policy fields
     maxPercentage: [null as number | null]
@@ -141,6 +144,9 @@ export class RuleDialogComponent implements OnInit {
     // When policy selection changes, update validators dynamically if needed
     this.ruleForm.get('selectedPolicy')?.valueChanges.subscribe(policy => {
       this.updateValidation(policy);
+      if (Number(policy) === 9 && !this.isEditMode && this.temporaryWithdrawals.length === 0 && this.permanentWithdrawals.length === 0) {
+        this.setWithdrawalConfig();
+      }
     });
 
     if (this.selectedPolicy) {
@@ -206,15 +212,20 @@ export class RuleDialogComponent implements OnInit {
       }
 
       if (this.data.policyId === 9) {
+        const parsedWithdrawalConfig = this.parseWithdrawalConfig(rule.withdrawalConfig);
+        this.setWithdrawalConfig(parsedWithdrawalConfig);
         this.ruleForm.patchValue({
           basis: (rule.basis || rule.contributionBasis || 'basic').toLowerCase(),
           employeePercentage: rule.employeePercentage ?? rule.defaultEmployeePct ?? null,
           employerPercentage: rule.employerPercentage ?? rule.defaultEmployerPct ?? null,
-          minContribution: rule.minContribution ?? null,
-          maxContribution: rule.maxContribution ?? null,
+          allowPartialWithdraw: rule.allowPartialWithdraw ?? !!parsedWithdrawalConfig?.temporary?.length,
           vestingMonths: rule.vestingMonths ?? 0
         });
       }
+    }
+
+    if (!this.isEditMode && this.selectedPolicy === 9) {
+      this.setWithdrawalConfig();
     }
   }
 
@@ -316,8 +327,7 @@ export class RuleDialogComponent implements OnInit {
     const basisControl = this.ruleForm.get('basis');
     const employeePercentageControl = this.ruleForm.get('employeePercentage');
     const employerPercentageControl = this.ruleForm.get('employerPercentage');
-    const minContributionControl = this.ruleForm.get('minContribution');
-    const maxContributionControl = this.ruleForm.get('maxContribution');
+    const allowPartialWithdrawControl = this.ruleForm.get('allowPartialWithdraw');
     const vestingMonthsControl = this.ruleForm.get('vestingMonths');
 
     if (Number(policyId) === 9) {
@@ -325,23 +335,23 @@ export class RuleDialogComponent implements OnInit {
       basisControl?.setValidators([Validators.required]);
       employeePercentageControl?.setValidators([Validators.required, Validators.min(0)]);
       employerPercentageControl?.setValidators([Validators.required, Validators.min(0)]);
-      minContributionControl?.setValidators([Validators.required, Validators.min(0)]);
-      maxContributionControl?.setValidators([Validators.min(0)]);
+      allowPartialWithdrawControl?.clearValidators();
       vestingMonthsControl?.setValidators([Validators.required, Validators.min(0)]);
+      if (this.temporaryWithdrawals.length === 0 && this.permanentWithdrawals.length === 0) {
+        this.setWithdrawalConfig();
+      }
     } else {
       basisControl?.clearValidators();
       employeePercentageControl?.clearValidators();
       employerPercentageControl?.clearValidators();
-      minContributionControl?.clearValidators();
-      maxContributionControl?.clearValidators();
+      allowPartialWithdrawControl?.clearValidators();
       vestingMonthsControl?.clearValidators();
     }
 
     basisControl?.updateValueAndValidity();
     employeePercentageControl?.updateValueAndValidity();
     employerPercentageControl?.updateValueAndValidity();
-    minContributionControl?.updateValueAndValidity();
-    maxContributionControl?.updateValueAndValidity();
+    allowPartialWithdrawControl?.updateValueAndValidity();
     vestingMonthsControl?.updateValueAndValidity();
     if (Number(policyId) === 8) {
       this.ruleForm.get('ruleName')?.setValidators(Validators.required);
@@ -383,6 +393,95 @@ export class RuleDialogComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  get temporaryWithdrawals(): FormArray {
+    return this.ruleForm.get('temporaryWithdrawals') as FormArray;
+  }
+
+  get permanentWithdrawals(): FormArray {
+    return this.ruleForm.get('permanentWithdrawals') as FormArray;
+  }
+
+  addTemporaryWithdrawal(): void {
+    this.temporaryWithdrawals.push(this.createWithdrawalGroup());
+  }
+
+  removeTemporaryWithdrawal(index: number): void {
+    if (this.temporaryWithdrawals.length > 1) {
+      this.temporaryWithdrawals.removeAt(index);
+    }
+  }
+
+  addPermanentWithdrawal(): void {
+    this.permanentWithdrawals.push(this.createWithdrawalGroup());
+  }
+
+  removePermanentWithdrawal(index: number): void {
+    if (this.permanentWithdrawals.length > 1) {
+      this.permanentWithdrawals.removeAt(index);
+    }
+  }
+
+  private createWithdrawalGroup(entry?: { reason?: string; min_pct?: number; max_pct?: number }): FormGroup {
+    return this.fb.group({
+      reason: [entry?.reason ?? '', [Validators.required, Validators.maxLength(100)]],
+      min_pct: [entry?.min_pct ?? 0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      max_pct: [entry?.max_pct ?? 100, [Validators.required, Validators.min(0), Validators.max(100)]]
+    });
+  }
+
+  private defaultWithdrawalConfig(): { temporary: any[]; permanent: any[] } {
+    return {
+      temporary: [
+        { reason: 'Medical', min_pct: 0, max_pct: 50 },
+        { reason: 'Education', min_pct: 0, max_pct: 30 },
+        { reason: 'Marriage', min_pct: 0, max_pct: 25 }
+      ],
+      permanent: [
+        { reason: 'Resignation', min_pct: 100, max_pct: 100 },
+        { reason: 'Termination', min_pct: 80, max_pct: 100 }
+      ]
+    };
+  }
+
+  private setWithdrawalConfig(config?: { temporary?: any[]; permanent?: any[] } | null): void {
+    const source = config ?? this.defaultWithdrawalConfig();
+    const temporary = Array.isArray(source.temporary) && source.temporary.length > 0
+      ? source.temporary
+      : this.defaultWithdrawalConfig().temporary;
+    const permanent = Array.isArray(source.permanent) && source.permanent.length > 0
+      ? source.permanent
+      : this.defaultWithdrawalConfig().permanent;
+
+    this.temporaryWithdrawals.clear();
+    this.permanentWithdrawals.clear();
+
+    temporary.forEach((entry) => this.temporaryWithdrawals.push(this.createWithdrawalGroup(entry)));
+    permanent.forEach((entry) => this.permanentWithdrawals.push(this.createWithdrawalGroup(entry)));
+  }
+
+  private parseWithdrawalConfig(raw: unknown): { temporary?: any[]; permanent?: any[] } | null {
+    if (!raw) {
+      return null;
+    }
+
+    if (typeof raw === 'object') {
+      return raw as { temporary?: any[]; permanent?: any[] };
+    }
+
+    if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw);
+        return typeof parsed === 'object' && parsed !== null
+          ? (parsed as { temporary?: any[]; permanent?: any[] })
+          : null;
+      } catch {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   onSubmit(): void {
@@ -607,16 +706,43 @@ export class RuleDialogComponent implements OnInit {
           }
         });
     } else if (formValue.selectedPolicy === 9) { // 9 is Provident Fund Policy
+      const allowPartialWithdraw = !!formValue.allowPartialWithdraw;
+      const temporary = allowPartialWithdraw
+        ? this.temporaryWithdrawals.controls.map((control) => ({
+            reason: String(control.get('reason')?.value ?? '').trim(),
+            min_pct: Number(control.get('min_pct')?.value ?? 0),
+            max_pct: Number(control.get('max_pct')?.value ?? 0)
+          }))
+        : [];
+      const permanent = allowPartialWithdraw
+        ? this.permanentWithdrawals.controls.map((control) => ({
+            reason: String(control.get('reason')?.value ?? '').trim(),
+            min_pct: Number(control.get('min_pct')?.value ?? 0),
+            max_pct: Number(control.get('max_pct')?.value ?? 0)
+          }))
+        : [];
+
+      if (allowPartialWithdraw && (temporary.some((entry) => !entry.reason) || permanent.some((entry) => !entry.reason))) {
+        this.ruleForm.markAllAsTouched();
+        this.notification.showError('Withdrawal reason is required for all rows');
+        this.isSubmitting.set(false);
+        return;
+      }
+
       const payload = {
         ruleName: formValue.ruleName,
         description: formValue.description,
         defaultEmployeePct: formValue.employeePercentage,
         defaultEmployerPct: formValue.employerPercentage,
         contributionBasis: formValue.basis,
-        minContribution: formValue.minContribution,
-        maxContribution: formValue.maxContribution,
+        withdrawalConfig: allowPartialWithdraw
+          ? JSON.stringify({
+              temporary,
+              permanent
+            })
+          : null,
         vestingMonths: formValue.vestingMonths,
-        allowPartialWithdraw: false,
+        allowPartialWithdraw,
         isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
       };
 

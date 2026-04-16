@@ -22,8 +22,8 @@ interface ProvidentFundRule {
   basis: string;
   employeePercentage: number;
   employerPercentage: number;
-  minContribution: number;
-  maxContribution: number | null;
+  withdrawalConfig?: string | null;
+  allowPartialWithdraw: boolean;
   vestingMonths: number;
   createdAt?: string;
   updatedAt?: string;
@@ -78,8 +78,10 @@ export class ProvidentFundRuleComponent implements OnInit {
           basis: rule.contributionBasis || 'basic',
           employeePercentage: rule.defaultEmployeePct ?? 0,
           employerPercentage: rule.defaultEmployerPct ?? 0,
-          minContribution: rule.minContribution ?? 0,
-          maxContribution: rule.maxContribution ?? null,
+          withdrawalConfig: typeof rule.withdrawalConfig === 'string'
+            ? rule.withdrawalConfig
+            : (rule.withdrawalConfig ? JSON.stringify(rule.withdrawalConfig) : null),
+          allowPartialWithdraw: !!rule.allowPartialWithdraw,
           vestingMonths: rule.vestingMonths ?? 0,
           createdAt: rule.createdAt,
           updatedAt: rule.updatedAt,
@@ -136,10 +138,9 @@ export class ProvidentFundRuleComponent implements OnInit {
       defaultEmployeePct: rule.employeePercentage,
       defaultEmployerPct: rule.employerPercentage,
       contributionBasis: (rule.basis || 'basic').toLowerCase(),
-      minContribution: rule.minContribution,
-      maxContribution: rule.maxContribution,
+      withdrawalConfig: rule.withdrawalConfig ?? null,
       vestingMonths: rule.vestingMonths,
-      allowPartialWithdraw: false,
+      allowPartialWithdraw: !!rule.allowPartialWithdraw,
       isActive: !rule.isActive
     };
 
@@ -189,7 +190,36 @@ export class ProvidentFundRuleComponent implements OnInit {
     if (!basis) {
       return 'Basic';
     }
-    return basis.toLowerCase() === 'gross' ? 'Gross' : 'Basic';
+    const normalizedBasis = basis.toLowerCase();
+    if (normalizedBasis === 'gross') {
+      return 'Gross';
+    }
+    if (normalizedBasis === 'fixed') {
+      return 'Fixed';
+    }
+    return 'Basic';
+  }
+
+  getWithdrawalSummary(rule: ProvidentFundRule, type: 'temporary' | 'permanent'): string {
+    if (!rule.withdrawalConfig) {
+      return '—';
+    }
+
+    try {
+      const parsed = JSON.parse(rule.withdrawalConfig);
+      const entries = Array.isArray(parsed?.[type]) ? parsed[type] : [];
+      if (entries.length === 0) {
+        return '—';
+      }
+
+      const preview = entries
+        .slice(0, 2)
+        .map((entry: any) => `${entry.reason} (${entry.min_pct}-${entry.max_pct}%)`)
+        .join(', ');
+      return entries.length > 2 ? `${preview} +${entries.length - 2} more` : preview;
+    } catch {
+      return 'Invalid config';
+    }
   }
 
   getUpdatedLabel(rule: ProvidentFundRule): string {
