@@ -4,7 +4,18 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
-export type ProvidentFundRequestDialogMode = 'enrollment' | 'percentage-update' | 'withdrawal' | 'settlement';
+export type ProvidentFundRequestDialogMode = 'enrollment' | 'percentage-update' | 'withdrawal';
+export type ProvidentFundWithdrawalType = 'temporary' | 'permanent';
+export interface ProvidentFundWithdrawalRule {
+  reason: string;
+  minPct: number;
+  maxPct: number;
+}
+
+export interface ProvidentFundWithdrawalConfig {
+  temporary: ProvidentFundWithdrawalRule[];
+  permanent: ProvidentFundWithdrawalRule[];
+}
 
 export interface ProvidentFundRuleOption {
   ruleId: string;
@@ -19,6 +30,7 @@ export interface ProvidentFundRequestDialogPayload {
   employeePct?: number;
   effectiveFrom?: string;
   amount?: number;
+  withdrawalType?: ProvidentFundWithdrawalType;
   reason?: string;
   remarks?: string;
 }
@@ -27,6 +39,8 @@ interface ProvidentFundRequestDialogData {
   currencySymbol?: string;
   mode?: ProvidentFundRequestDialogMode;
   rules?: ProvidentFundRuleOption[];
+  withdrawalConfig?: ProvidentFundWithdrawalConfig | null;
+  withdrawalBaseAmount?: number;
   basicSalary?: number;
   currentRuleId?: string;
   title?: string;
@@ -51,6 +65,8 @@ export class ProvidentFundRequestDialogComponent {
   readonly title = this.data?.title ?? this.resolveDefaultTitle();
   readonly submitText = this.data?.submitText ?? this.resolveDefaultSubmitText();
   readonly rules: ProvidentFundRuleOption[] = this.data?.rules ?? [];
+  readonly withdrawalConfig: ProvidentFundWithdrawalConfig | null = this.data?.withdrawalConfig ?? null;
+  readonly withdrawalBaseAmount = this.toNumber(this.data?.withdrawalBaseAmount ?? 0);
   readonly basicSalary = this.toNumber(this.data?.basicSalary ?? 0);
   readonly currentRuleId = String(this.data?.currentRuleId ?? this.data?.initialValue?.ruleId ?? '').trim();
 
@@ -59,6 +75,7 @@ export class ProvidentFundRequestDialogComponent {
     employeePct: [null as number | null],
     effectiveFrom: [this.getTodayDate()],
     amount: [null as number | null],
+    withdrawalType: ['temporary' as ProvidentFundWithdrawalType],
     reason: [''],
     remarks: ['']
   });
@@ -155,6 +172,32 @@ export class ProvidentFundRequestDialogComponent {
     return this.employeeContributionAmount + this.employerContributionAmount;
   }
 
+  get selectedWithdrawalType(): ProvidentFundWithdrawalType {
+    const type = String(this.form.get('withdrawalType')?.value ?? 'temporary').trim().toLowerCase();
+    return type === 'permanent' ? 'permanent' : 'temporary';
+  }
+
+  get selectedWithdrawalRules(): ProvidentFundWithdrawalRule[] {
+    if (!this.withdrawalConfig) {
+      return [];
+    }
+    return this.selectedWithdrawalType === 'permanent'
+      ? (this.withdrawalConfig.permanent ?? [])
+      : (this.withdrawalConfig.temporary ?? []);
+  }
+
+  get minWithdrawalBaseAmount(): number {
+    return Math.max(0, this.withdrawalBaseAmount);
+  }
+
+  getMinAmountByRule(rule: ProvidentFundWithdrawalRule): number {
+    return (this.minWithdrawalBaseAmount * this.toNumber(rule.minPct)) / 100;
+  }
+
+  getMaxAmountByRule(rule: ProvidentFundWithdrawalRule): number {
+    return (this.minWithdrawalBaseAmount * this.toNumber(rule.maxPct)) / 100;
+  }
+
   close(): void {
     this.dialogRef.close();
   }
@@ -181,12 +224,10 @@ export class ProvidentFundRequestDialogComponent {
 
     if (this.mode === 'withdrawal') {
       payload.amount = Number(raw.amount ?? 0);
+      payload.withdrawalType = (String(raw.withdrawalType ?? 'temporary').trim().toLowerCase() === 'permanent'
+        ? 'permanent'
+        : 'temporary');
       payload.reason = String(raw.reason ?? '').trim();
-    }
-
-    if (this.mode === 'settlement') {
-      payload.effectiveFrom = String(raw.effectiveFrom ?? this.getTodayDate());
-      payload.remarks = String(raw.remarks ?? '').trim();
     }
 
     this.dialogRef.close(payload);
@@ -197,6 +238,7 @@ export class ProvidentFundRequestDialogComponent {
     const employeePctControl = this.form.get('employeePct');
     const effectiveFromControl = this.form.get('effectiveFrom');
     const amountControl = this.form.get('amount');
+    const withdrawalTypeControl = this.form.get('withdrawalType');
     const reasonControl = this.form.get('reason');
     const remarksControl = this.form.get('remarks');
 
@@ -204,6 +246,7 @@ export class ProvidentFundRequestDialogComponent {
     employeePctControl?.clearValidators();
     effectiveFromControl?.clearValidators();
     amountControl?.clearValidators();
+    withdrawalTypeControl?.clearValidators();
     reasonControl?.clearValidators();
     remarksControl?.clearValidators();
 
@@ -224,18 +267,15 @@ export class ProvidentFundRequestDialogComponent {
 
     if (this.mode === 'withdrawal') {
       amountControl?.setValidators([Validators.required, Validators.min(1)]);
+      withdrawalTypeControl?.setValidators([Validators.required]);
       reasonControl?.setValidators([Validators.required, Validators.maxLength(500)]);
-    }
-
-    if (this.mode === 'settlement') {
-      effectiveFromControl?.setValidators([Validators.required]);
-      remarksControl?.setValidators([Validators.maxLength(500)]);
     }
 
     ruleIdControl?.updateValueAndValidity({ emitEvent: false });
     employeePctControl?.updateValueAndValidity({ emitEvent: false });
     effectiveFromControl?.updateValueAndValidity({ emitEvent: false });
     amountControl?.updateValueAndValidity({ emitEvent: false });
+    withdrawalTypeControl?.updateValueAndValidity({ emitEvent: false });
     reasonControl?.updateValueAndValidity({ emitEvent: false });
     remarksControl?.updateValueAndValidity({ emitEvent: false });
   }
@@ -244,14 +284,14 @@ export class ProvidentFundRequestDialogComponent {
     if (this.mode === 'enrollment') return 'New provident fund request';
     if (this.mode === 'percentage-update') return 'Update provident fund percentage';
     if (this.mode === 'withdrawal') return 'Request provident fund withdrawal';
-    return 'Request provident fund settlement';
+    return 'Provident fund request';
   }
 
   private resolveDefaultSubmitText(): string {
     if (this.mode === 'enrollment') return 'Submit request';
     if (this.mode === 'percentage-update') return 'Update percentage';
     if (this.mode === 'withdrawal') return 'Submit withdrawal';
-    return 'Submit settlement';
+    return 'Submit request';
   }
 
   private syncSelectedRuleValues(ruleId: string | null): void {

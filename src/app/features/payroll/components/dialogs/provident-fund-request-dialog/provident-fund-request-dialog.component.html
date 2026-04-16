@@ -67,6 +67,17 @@
 
       @if (mode === 'withdrawal') {
         <label class="field">
+          <span>Withdrawal type</span>
+          <select formControlName="withdrawalType">
+            <option value="temporary">Temporary</option>
+            <option value="permanent">Permanent</option>
+          </select>
+          @if (form.get('withdrawalType')?.touched && form.get('withdrawalType')?.invalid) {
+            <small class="error-text">Please select withdrawal type.</small>
+          }
+        </label>
+
+        <label class="field">
           <span>Withdrawal amount {{ currencySymbol }}</span>
           <div class="prefix-input">
             <strong>{{ currencySymbol }}</strong>
@@ -83,21 +94,6 @@
           @if (form.get('reason')?.touched && form.get('reason')?.invalid) {
             <small class="error-text">Please provide a reason for withdrawal.</small>
           }
-        </label>
-      }
-
-      @if (mode === 'settlement') {
-        <label class="field">
-          <span>Settlement effective date</span>
-          <input type="date" formControlName="effectiveFrom" />
-          @if (form.get('effectiveFrom')?.touched && form.get('effectiveFrom')?.invalid) {
-            <small class="error-text">Please select settlement effective date.</small>
-          }
-        </label>
-
-        <label class="field full-span">
-          <span>Remarks</span>
-          <textarea formControlName="remarks" rows="3" placeholder="Optional settlement remarks..."></textarea>
         </label>
       }
     </div>
@@ -119,6 +115,31 @@
             ({{ currencySymbol }} {{ employerContributionAmount | number:'1.0-2' }})
           </p>
           <p>Total monthly contribution: <strong>{{ currencySymbol }} {{ totalContributionAmount | number:'1.0-2' }}</strong></p>
+        </div>
+      } @else if (mode === 'withdrawal') {
+        <div class="withdrawal-rules">
+          <p>
+            Allowed reasons for
+            <strong>{{ selectedWithdrawalType | titlecase }}</strong>
+            withdrawal:
+          </p>
+          <p>
+            Calculated on total contributions:
+            <strong>{{ currencySymbol }} {{ minWithdrawalBaseAmount | number:'1.0-2' }}</strong>
+          </p>
+
+          @if (selectedWithdrawalRules.length > 0) {
+            <ul>
+              @for (rule of selectedWithdrawalRules; track rule.reason) {
+                <li>
+                  <strong>{{ rule.reason }}</strong>
+                  (Min: {{ currencySymbol }} {{ getMinAmountByRule(rule) | number:'1.0-2' }}, Max: {{ currencySymbol }} {{ getMaxAmountByRule(rule) | number:'1.0-2' }})
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>No withdrawal rules configured for this withdrawal type.</p>
+          }
         </div>
       } @else {
         <p>Your provident fund request will be reviewed by HR and payroll team before approval.</p>

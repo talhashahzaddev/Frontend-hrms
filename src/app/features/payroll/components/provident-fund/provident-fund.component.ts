@@ -17,7 +17,8 @@ import {
 } from '../dialogs/add-pf-funds/add-pf-funds.component';
 
 type ProvidentFundTab = 'requests' | 'payments' | 'repayments';
-type ProvidentFundStatus = 'pending' | 'approved' | 'active' | 'completed' | 'rejected' | 'cancelled';
+type ProvidentFundStatus = 'pending' | 'approved' | 'rejected';
+type ProvidentFundFundStatus = 'active' | 'closed' | 'pending';
 type ProvidentFundTransactionType = 'monthly' | 'withdrawal' | 'settlement' | 'profit' | 'adjustment' | string;
 
 interface PeriodOption {
@@ -33,10 +34,14 @@ interface ProvidentFundRequestRow {
   basicSalary: number;
   employeePct: number;
   employerPct: number;
-  effectiveFrom: string;
+  ruleName: string;
+  effectiveFrom: string | null;
   approvedAt: string | null;
   remarks: string;
   rejectionReason: string;
+  withdrawalType: string;
+  reason: string;
+  requestedAmount: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -49,13 +54,12 @@ interface ProvidentFundPaymentRow {
   id: string;
   employeeId: string;
   employeeName: string;
-  requestType: string;
+  ruleName: string;
   basicSalary: number;
   employeePct: number;
   employerPct: number;
   effectiveFrom: string;
-  approvedAt: string | null;
-  status: ProvidentFundStatus;
+  status: ProvidentFundFundStatus;
 }
 
 interface ProvidentFundRepaymentRow {
@@ -100,9 +104,9 @@ export class ProvidentFundComponent implements OnInit {
   filterStatus: ProvidentFundStatus | '' = '';
 
   pendingPaymentSearch = '';
-  pendingPaymentStatus: string = '';
+  pendingPaymentStatus: ProvidentFundFundStatus | '' = '';
   paymentSearch = '';
-  paymentStatus: string = '';
+  paymentStatus: ProvidentFundFundStatus | '' = '';
 
   pendingRepaymentSearch = '';
   pendingRepaymentPeriodId = '';
@@ -125,6 +129,9 @@ export class ProvidentFundComponent implements OnInit {
   periods: PeriodOption[] = [];
   private localPeriodsSeed: PeriodOption[] = [];
   requestRows: ProvidentFundRequestRow[] = [];
+  requestTotalCount = 0;
+  paymentRowsData: ProvidentFundPaymentRow[] = [];
+  paymentTotalCount = 0;
   repaymentRows: ProvidentFundRepaymentRow[] = [];
   repaymentTotalCount = 0;
   isLoadingRequests = false;
@@ -135,6 +142,7 @@ export class ProvidentFundComponent implements OnInit {
     this.localPeriodsSeed = this.buildLocalPeriods();
     this.loadPayrollPeriods();
     this.loadProvidentFundRequests();
+    this.loadProvidentFundAccounts();
     this.loadProvidentFundRepayments();
   }
 
@@ -179,15 +187,16 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get totalRequestsCount(): number {
-    return this.filteredRequests.length;
+    return this.requestTotalCount;
   }
 
   get pendingRequestsCount(): number {
+    // Current-page count (API doesn't return breakdown counts)
     return this.requestRows.filter((row) => row.status === 'pending').length;
   }
 
   get approvedRequestsCount(): number {
-    return this.requestRows.filter((row) => row.status === 'approved' || row.status === 'active').length;
+    return this.requestRows.filter((row) => row.status === 'approved').length;
   }
 
   get rejectedRequestsCount(): number {
@@ -195,28 +204,15 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get paymentRows(): ProvidentFundPaymentRow[] {
-    return this.requestRows
-      .filter((row) => row.status !== 'pending' && row.status !== 'rejected' && row.status !== 'cancelled')
-      .map((row) => ({
-        id: row.id,
-        employeeId: row.employeeId,
-        employeeName: row.employeeName,
-        requestType: row.requestType,
-        basicSalary: row.basicSalary,
-        employeePct: row.employeePct,
-        employerPct: row.employerPct,
-        effectiveFrom: row.effectiveFrom,
-        approvedAt: row.approvedAt,
-        status: row.status
-      }));
+    return this.paymentRowsData;
   }
 
   get totalPaymentProfilesCount(): number {
-    return this.paymentRows.length;
+    return this.paymentTotalCount;
   }
 
   get approvedPaymentProfilesCount(): number {
-    return this.paymentRows.filter((row) => row.status === 'approved').length;
+    return this.paymentRows.filter((row) => row.status === 'active').length;
   }
 
   get activeFundsCount(): number {
@@ -224,7 +220,7 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get completedPaymentProfilesCount(): number {
-    return this.paymentRows.filter((row) => row.status === 'completed').length;
+    return this.paymentRows.filter((row) => row.status === 'closed').length;
   }
 
   get totalRepaymentCollected(): number {
@@ -248,18 +244,12 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get filteredRequests(): ProvidentFundRequestRow[] {
-    const search = this.filterSearch.trim().toLowerCase();
-    return this.requestRows.filter((row) => {
-      const matchesSearch = !search
-        || row.employeeName.toLowerCase().includes(search)
-        || row.requestType.toLowerCase().includes(search);
-      const matchesStatus = !this.filterStatus || row.status === this.filterStatus;
-      return matchesSearch && matchesStatus;
-    });
+    // Server-side filtering + pagination; rows already represent the current page.
+    return this.requestRows;
   }
 
   get requestTotalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredRequests.length / this.requestPageSize));
+    return Math.max(1, Math.ceil(this.requestTotalCount / this.requestPageSize));
   }
 
   get requestPage(): number {
@@ -271,31 +261,23 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get requestsFromRecord(): number {
-    return this.filteredRequests.length === 0 ? 0 : (this.requestPage - 1) * this.requestPageSize + 1;
+    return this.requestTotalCount === 0 ? 0 : (this.requestPage - 1) * this.requestPageSize + 1;
   }
 
   get requestsToRecord(): number {
-    return Math.min(this.requestPage * this.requestPageSize, this.filteredRequests.length);
+    return Math.min(this.requestPage * this.requestPageSize, this.requestTotalCount);
   }
 
   get requestView(): ProvidentFundRequestRow[] {
-    return this.paginate(this.filteredRequests, this.requestPage, this.requestPageSize);
+    return this.filteredRequests;
   }
 
   get filteredPayments(): ProvidentFundPaymentRow[] {
-    const search = this.paymentSearch.trim().toLowerCase();
-    return this.paymentRows.filter((row) => {
-      const matchesSearch = !search
-        || row.employeeName.toLowerCase().includes(search)
-        || row.requestType.toLowerCase().includes(search);
-      const matchesStatus = !this.paymentStatus
-        || row.status === this.paymentStatus;
-      return matchesSearch && matchesStatus;
-    });
+    return this.paymentRows;
   }
 
   get paymentsTotalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredPayments.length / this.paymentPageSize));
+    return Math.max(1, Math.ceil(this.paymentTotalCount / this.paymentPageSize));
   }
 
   get paymentsPage(): number {
@@ -307,15 +289,15 @@ export class ProvidentFundComponent implements OnInit {
   }
 
   get paymentsFromRecord(): number {
-    return this.filteredPayments.length === 0 ? 0 : (this.paymentsPage - 1) * this.paymentPageSize + 1;
+    return this.paymentTotalCount === 0 ? 0 : (this.paymentsPage - 1) * this.paymentPageSize + 1;
   }
 
   get paymentsToRecord(): number {
-    return Math.min(this.paymentsPage * this.paymentPageSize, this.filteredPayments.length);
+    return Math.min(this.paymentsPage * this.paymentPageSize, this.paymentTotalCount);
   }
 
   get paymentView(): ProvidentFundPaymentRow[] {
-    return this.paginate(this.filteredPayments, this.paymentsPage, this.paymentPageSize);
+    return this.filteredPayments;
   }
 
   get filteredRepayments(): ProvidentFundRepaymentRow[] {
@@ -348,6 +330,9 @@ export class ProvidentFundComponent implements OnInit {
 
   setTab(tab: ProvidentFundTab): void {
     this.currentTab = tab;
+    if (tab === 'payments' && !this.paymentRows.length) {
+      this.loadProvidentFundAccounts();
+    }
     if (tab === 'repayments' && !this.repaymentRows.length) {
       this.loadProvidentFundRepayments();
     }
@@ -373,6 +358,7 @@ export class ProvidentFundComponent implements OnInit {
     this.paymentSearch = this.pendingPaymentSearch.trim();
     this.paymentStatus = this.pendingPaymentStatus;
     this.paymentCurrentPage = 1;
+    this.loadProvidentFundAccounts();
   }
 
   clearPaymentFilters(): void {
@@ -381,6 +367,7 @@ export class ProvidentFundComponent implements OnInit {
     this.paymentSearch = '';
     this.paymentStatus = '';
     this.paymentCurrentPage = 1;
+    this.loadProvidentFundAccounts();
   }
 
   openAddPfFundsDialog(): void {
@@ -459,6 +446,7 @@ export class ProvidentFundComponent implements OnInit {
       return;
     }
     this.requestCurrentPage = page;
+    this.loadProvidentFundRequests();
   }
 
   prevRequestPage(): void {
@@ -474,6 +462,7 @@ export class ProvidentFundComponent implements OnInit {
       return;
     }
     this.paymentCurrentPage = page;
+    this.loadProvidentFundAccounts();
   }
 
   prevPaymentPage(): void {
@@ -521,8 +510,7 @@ export class ProvidentFundComponent implements OnInit {
       }
 
       this.payrollService.approveProvidentFundRequest({
-        employeeId: row.employeeId,
-        requestType: row.requestType
+        requestId: row.id
       })
         .pipe(take(1))
         .subscribe({
@@ -571,23 +559,23 @@ export class ProvidentFundComponent implements OnInit {
     });
   }
 
-  getFundStatusClass(status: ProvidentFundStatus): string {
+  getFundStatusClass(status: string): string {
     const normalized = String(status || '').toLowerCase();
     if (normalized === 'active') return 'status-active';
+    if (normalized === 'closed') return 'status-completed';
     if (normalized === 'pending') return 'status-pending';
     if (normalized === 'approved') return 'status-approved';
-    if (normalized === 'completed') return 'status-completed';
-    if (normalized === 'rejected' || normalized === 'cancelled') return 'status-cancelled';
-    return 'status-inactive';
+    if (normalized === 'rejected') return 'status-cancelled';
+    return 'status-pending';
   }
 
-  getFundStatusLabel(status: ProvidentFundStatus): string {
+  getFundStatusLabel(status: string): string {
+    if (status === 'active') return 'Active';
+    if (status === 'closed') return 'Closed';
     if (status === 'approved') return 'Approved';
     if (status === 'rejected') return 'Rejected';
-    if (status === 'completed') return 'Completed';
-    if (status === 'cancelled') return 'Cancelled';
     if (status === 'pending') return 'Pending';
-    return 'Active';
+    return 'Pending';
   }
 
   formatDateLabel(dateValue: string | null): string {
@@ -605,7 +593,6 @@ export class ProvidentFundComponent implements OnInit {
     const normalized = String(requestType ?? '').trim().toLowerCase();
     if (normalized === 'enrollment') return 'Enrollment';
     if (normalized === 'withdrawal') return 'Withdrawal';
-    if (normalized === 'settlement') return 'Settlement';
     if (normalized === 'update') return 'Update';
     return 'Request';
   }
@@ -645,8 +632,9 @@ export class ProvidentFundComponent implements OnInit {
     this.isLoadingRequests = true;
     const filter = {
       SearchTerm: this.filterSearch || undefined,
-      Page: 1,
-      PageSize: 300
+      Status: this.filterStatus || undefined,
+      Page: this.requestCurrentPage,
+      PageSize: this.requestPageSize
     };
 
     this.payrollService.getAllProvidentFundRequests(filter)
@@ -655,13 +643,40 @@ export class ProvidentFundComponent implements OnInit {
         next: (response: any) => {
           const items = this.extractItems(response);
           this.requestRows = items.map((item: any) => this.mapRequestRow(item));
+          this.requestTotalCount = this.extractTotalCount(response, this.requestRows.length);
           this.isLoadingRequests = false;
         },
         error: (err) => {
           console.error('Error loading provident fund requests', err);
           this.notification.showError('Failed to load provident fund requests. Showing preview data.');
           this.requestRows = this.buildLocalRequests();
+          this.requestTotalCount = this.requestRows.length;
           this.isLoadingRequests = false;
+        }
+      });
+  }
+
+  private loadProvidentFundAccounts(): void {
+    const filter = {
+      SearchTerm: this.paymentSearch || undefined,
+      PfStatus: this.paymentStatus || undefined,
+      Page: this.paymentCurrentPage,
+      PageSize: this.paymentPageSize
+    };
+
+    this.payrollService.getAllProvidentFundAccounts(filter)
+      .pipe(take(1))
+      .subscribe({
+        next: (response: any) => {
+          const items = this.extractItems(response);
+          this.paymentRowsData = items.map((item: any) => this.mapPaymentRow(item));
+          this.paymentTotalCount = this.extractTotalCount(response, this.paymentRowsData.length);
+        },
+        error: (err) => {
+          console.error('Error loading provident fund accounts', err);
+          this.notification.showError('Failed to load provident fund accounts. Showing preview data.');
+          this.paymentRowsData = this.buildLocalPaymentRows();
+          this.paymentTotalCount = this.paymentRowsData.length;
         }
       });
   }
@@ -697,23 +712,27 @@ export class ProvidentFundComponent implements OnInit {
 
   private mapRequestRow(item: any): ProvidentFundRequestRow {
     const employeeName = String(item.employeeName ?? item.employee?.name ?? 'Unknown Employee');
-    const status = this.normalizeStatus(item.pfStatus ?? item.status);
+    const status = this.normalizeStatus(item.status);
     const requestType = this.normalizeRequestType(item.requestType);
 
     const fallbackId = `${String(item.employeeId ?? 'emp')}-${this.normalizeDateString(item.createdAt) || Date.now()}`;
 
     return {
-      id: String(item.pfId ?? item.id ?? fallbackId),
+      id: String(item.requestId ?? item.id ?? fallbackId),
       employeeId: String(item.employeeId ?? ''),
       employeeName,
       requestType,
       basicSalary: this.toNumber(item.basicSalary ?? item.salaryBasisAmount ?? 0),
-      employeePct: this.toNumber(item.employeePct ?? 0),
-      employerPct: this.toNumber(item.employerPct ?? 0),
-      effectiveFrom: this.normalizeDateString(item.effectiveFrom),
+      employeePct: this.toNumber(item.requestedEmployeePct ?? 0),
+      employerPct: this.toNumber(item.requestedEmployerPct ?? 0),
+      ruleName: String(item.ruleName ?? '').trim(),
+      effectiveFrom: this.normalizeNullableDateString(item.effectiveFrom),
       approvedAt: this.normalizeNullableDateString(item.approvedAt),
       remarks: String(item.remarks ?? '').trim(),
       rejectionReason: String(item.rejectionReason ?? '').trim(),
+      withdrawalType: String(item.withdrawalType ?? '').trim(),
+      reason: String(item.reason ?? '').trim(),
+      requestedAmount: this.toNumber(item.requestedAmount ?? 0),
       isActive: Boolean(item.isActive),
       createdAt: this.normalizeDateString(item.createdAt),
       updatedAt: this.normalizeDateString(item.updatedAt),
@@ -744,22 +763,41 @@ export class ProvidentFundComponent implements OnInit {
     };
   }
 
+  private mapPaymentRow(item: any): ProvidentFundPaymentRow {
+    return {
+      id: String(item.pfId ?? item.id ?? ''),
+      employeeId: String(item.employeeId ?? ''),
+      employeeName: String(item.employeeName ?? item.employee?.name ?? 'Unknown Employee'),
+      ruleName: String(item.ruleName ?? 'N/A'),
+      basicSalary: this.toNumber(item.basicSalary ?? 0),
+      employeePct: this.toNumber(item.employeePct ?? 0),
+      employerPct: this.toNumber(item.employerPct ?? 0),
+      effectiveFrom: this.normalizeDateString(item.effectiveFrom),
+      status: this.normalizeFundStatus(item.pfStatus)
+    };
+  }
+
   private normalizeStatus(rawStatus: unknown): ProvidentFundStatus {
     const normalized = String(rawStatus ?? '').trim().toLowerCase();
     if (normalized === 'pending') return 'pending';
     if (normalized === 'approved') return 'approved';
     if (normalized === 'rejected') return 'rejected';
-    if (normalized === 'cancelled' || normalized === 'canceled') return 'cancelled';
-    if (normalized === 'completed' || normalized === 'closed') return 'completed';
-    return 'active';
+    return 'pending';
   }
 
   private normalizeRequestType(rawType: unknown): string {
     const normalized = String(rawType ?? '').trim().toLowerCase();
-    if (normalized === 'enrollment' || normalized === 'withdrawal' || normalized === 'settlement' || normalized === 'update') {
+    if (normalized === 'enrollment' || normalized === 'withdrawal' || normalized === 'update') {
       return normalized;
     }
     return 'enrollment';
+  }
+
+  private normalizeFundStatus(rawStatus: unknown): ProvidentFundFundStatus {
+    const normalized = String(rawStatus ?? '').trim().toLowerCase();
+    if (normalized === 'active') return 'active';
+    if (normalized === 'closed') return 'closed';
+    return 'pending';
   }
 
   private extractItems(data: any): any[] {
@@ -840,14 +878,18 @@ export class ProvidentFundComponent implements OnInit {
         basicSalary: 150000,
         employeePct: 10,
         employerPct: 10,
+        ruleName: 'Standard PF Rule',
         effectiveFrom: '2024-01-01',
         approvedAt: '2024-01-05',
         remarks: 'Standard provident fund enrollment',
         rejectionReason: '',
+        withdrawalType: '',
+        reason: '',
+        requestedAmount: 0,
         isActive: true,
         createdAt: '2024-01-01',
         updatedAt: '2024-01-05',
-        status: 'active',
+        status: 'approved',
       },
       {
         id: 'pf-1002',
@@ -857,10 +899,14 @@ export class ProvidentFundComponent implements OnInit {
         basicSalary: 100000,
         employeePct: 8,
         employerPct: 8,
+        ruleName: 'Standard PF Rule',
         effectiveFrom: '2024-03-01',
         approvedAt: '2024-03-03',
         remarks: 'Approved request awaiting activation',
         rejectionReason: '',
+        withdrawalType: '',
+        reason: '',
+        requestedAmount: 0,
         isActive: false,
         createdAt: '2024-03-01',
         updatedAt: '2024-03-03',
@@ -874,14 +920,18 @@ export class ProvidentFundComponent implements OnInit {
         basicSalary: 90000,
         employeePct: 10,
         employerPct: 10,
+        ruleName: 'Legacy PF Rule',
         effectiveFrom: '2023-11-01',
         approvedAt: '2023-11-02',
         remarks: 'Contribution cycle completed',
         rejectionReason: '',
+        withdrawalType: '',
+        reason: '',
+        requestedAmount: 0,
         isActive: false,
         createdAt: '2023-11-01',
         updatedAt: '2024-08-01',
-        status: 'completed',
+        status: 'approved',
       },
       {
         id: 'pf-1004',
@@ -891,10 +941,14 @@ export class ProvidentFundComponent implements OnInit {
         basicSalary: 140000,
         employeePct: 10,
         employerPct: 10,
+        ruleName: 'Standard PF Rule',
         effectiveFrom: '2024-11-01',
         approvedAt: null,
         remarks: 'Pending review',
         rejectionReason: '',
+        withdrawalType: '',
+        reason: '',
+        requestedAmount: 0,
         isActive: false,
         createdAt: '2024-10-29',
         updatedAt: '2024-10-29',
@@ -908,10 +962,14 @@ export class ProvidentFundComponent implements OnInit {
         basicSalary: 100000,
         employeePct: 10,
         employerPct: 10,
+        ruleName: 'Standard PF Rule',
         effectiveFrom: '2024-10-01',
         approvedAt: null,
         remarks: '',
         rejectionReason: 'Rejected due to incomplete documents',
+        withdrawalType: '',
+        reason: '',
+        requestedAmount: 0,
         isActive: false,
         createdAt: '2024-09-28',
         updatedAt: '2024-10-02',
@@ -981,6 +1039,44 @@ export class ProvidentFundComponent implements OnInit {
         transactionType: 'settlement',
         pfStatus: 'closed',
         createdAt: '2024-08-30'
+      }
+    ];
+  }
+
+  private buildLocalPaymentRows(): ProvidentFundPaymentRow[] {
+    return [
+      {
+        id: 'pf-1001',
+        employeeId: 'emp-1001',
+        employeeName: 'Ahmed Hassan',
+        ruleName: 'Standard PF Rule',
+        basicSalary: 150000,
+        employeePct: 10,
+        employerPct: 10,
+        effectiveFrom: '2024-01-01',
+        status: 'active'
+      },
+      {
+        id: 'pf-1002',
+        employeeId: 'emp-1002',
+        employeeName: 'Sarah Khan',
+        ruleName: 'Standard PF Rule',
+        basicSalary: 100000,
+        employeePct: 8,
+        employerPct: 8,
+        effectiveFrom: '2024-03-01',
+        status: 'active'
+      },
+      {
+        id: 'pf-1003',
+        employeeId: 'emp-1003',
+        employeeName: 'Omar Farooq',
+        ruleName: 'Legacy PF Rule',
+        basicSalary: 90000,
+        employeePct: 10,
+        employerPct: 10,
+        effectiveFrom: '2023-11-01',
+        status: 'closed'
       }
     ];
   }

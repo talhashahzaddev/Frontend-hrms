@@ -81,6 +81,13 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -932,6 +939,7 @@ export class PayrollService {
     getAllProvidentFundRequests(filter?: {
       SearchTerm?: string;
       RequestType?: string;
+      Status?: string;
       Page?: number;
       PageSize?: number;
     }): Observable<any> {
@@ -956,7 +964,34 @@ export class PayrollService {
         );
     }
 
-    approveProvidentFundRequest(data: { employeeId: string; requestType: string }): Observable<boolean> {
+    getAllProvidentFundAccounts(filter?: {
+      SearchTerm?: string;
+      PfStatus?: string;
+      Page?: number;
+      PageSize?: number;
+    }): Observable<any> {
+      let params = new HttpParams();
+      if (filter) {
+        Object.keys(filter).forEach((key) => {
+          const value = (filter as any)[key];
+          if (value !== null && value !== undefined && value !== '') {
+            params = params.set(key, value);
+          }
+        });
+      }
+
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/provident-fund/accounts`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    approveProvidentFundRequest(data: { requestId: string }): Observable<boolean> {
       return this.http.patch<ApiResponse<boolean>>(`${this.apiUrl}/provident-fund/requests/approve`, data)
         .pipe(
           map((response: any) => {
@@ -968,8 +1003,8 @@ export class PayrollService {
         );
     }
 
-    rejectProvidentFundRequest(pfId: string, data: { remarks: string }): Observable<boolean> {
-      return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/admin/provident-fund/requests/${pfId}/reject`, data)
+    rejectProvidentFundRequest(requestId: string, data: { remarks: string }): Observable<boolean> {
+      return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/admin/provident-fund/requests/${requestId}/reject`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1026,12 +1061,12 @@ export class PayrollService {
         );
     }
 
-    updateProvidentFundEnrollmentRequest(pfId: string, data: {
+    updateProvidentFundEnrollmentRequest(requestId: string, data: {
       ruleId: string;
       employeePct: number;
       effectiveFrom: string;
     }): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/enroll/${pfId}`, data)
+      return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/enroll/${requestId}`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1059,7 +1094,7 @@ export class PayrollService {
         );
     }
 
-    createProvidentFundWithdrawalRequest(data: { amount: number; reason?: string | null }): Observable<any> {
+    createProvidentFundWithdrawalRequest(data: { amount: number; withdrawalType: 'temporary' | 'permanent'; reason: string }): Observable<any> {
       return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/withdraw`, data)
         .pipe(
           map((response: any) => {
@@ -1071,20 +1106,8 @@ export class PayrollService {
         );
     }
 
-    createProvidentFundSettlementRequest(data: { effectiveFrom: string; remarks?: string | null }): Observable<any> {
-      return this.http.post<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/settlement-request`, data)
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data;
-          })
-        );
-    }
-
-    deleteProvidentFundRequest(pfId: string): Observable<boolean> {
-      return this.http.delete<ApiResponse<boolean>>(`${environment.apiUrl}/employee/provident-fund/request/${pfId}`)
+    deleteProvidentFundRequest(requestId: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${environment.apiUrl}/employee/provident-fund/request/${requestId}`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1095,19 +1118,46 @@ export class PayrollService {
         );
     }
 
-    getMyPendingProvidentFundRequest(): Observable<any> {
-      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-pending-request`)
+    getMyProvidentFundRequests(filter?: {
+      requestType?: string | null;
+      status?: string | null;
+      page?: number;
+      pageSize?: number;
+    }): Observable<PagedResult<any>> {
+      let params = new HttpParams();
+      if (filter) {
+        if (filter.requestType !== null && filter.requestType !== undefined && String(filter.requestType).trim()) {
+          params = params.set('requestType', String(filter.requestType).trim());
+        }
+        if (filter.status !== null && filter.status !== undefined && String(filter.status).trim()) {
+          params = params.set('status', String(filter.status).trim());
+        }
+        if (filter.page !== null && filter.page !== undefined) {
+          params = params.set('page', String(filter.page));
+        }
+        if (filter.pageSize !== null && filter.pageSize !== undefined) {
+          params = params.set('pageSize', String(filter.pageSize));
+        }
+      }
+
+      return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-pending-request`, { params })
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
               throw new Error(response.message);
             }
-            return response.data;
+            const data = response.data ?? response;
+            return {
+              items: Array.isArray(data?.items) ? data.items : (Array.isArray(data?.data) ? data.data : []),
+              totalCount: Number(data?.totalCount ?? data?.count ?? 0),
+              page: Number(data?.page ?? filter?.page ?? 1),
+              pageSize: Number(data?.pageSize ?? filter?.pageSize ?? 10)
+            };
           })
         );
     }
 
-    getMyActiveProvidentFundRequest(): Observable<any> {
+    getMyActiveProvidentFund(): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/employee/provident-fund/my-active-request`)
         .pipe(
           map((response: any) => {

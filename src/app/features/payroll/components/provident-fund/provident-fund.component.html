@@ -79,8 +79,6 @@
             <option value="">All status</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
-            <option value="active">Active</option>
-            <option value="completed">Completed</option>
             <option value="rejected">Rejected</option>
           </select>
 
@@ -129,20 +127,41 @@
                       <strong>{{ getRequestTypeLabel(row.requestType) }}</strong>
                     </div>
                     <div class="stat-item">
-                      <label>Employee %</label>
-                      <strong>{{ row.employeePct | number:'1.0-2' }}%</strong>
+                      <label>
+                        @if (row.requestType === 'withdrawal') { Amount } @else { Employee % }
+                      </label>
+                      <strong>
+                        @if (row.requestType === 'withdrawal') {
+                          {{ currencySymbol() }} {{ row.requestedAmount | number }}
+                        } @else {
+                          {{ row.employeePct | number:'1.0-2' }}%
+                        }
+                      </strong>
                     </div>
                     <div class="stat-item">
-                      <label>Employer %</label>
-                      <strong>{{ row.employerPct | number:'1.0-2' }}%</strong>
+                      <label>
+                        @if (row.requestType === 'withdrawal') { Withdrawal type } @else { Employer % }
+                      </label>
+                      <strong>
+                        @if (row.requestType === 'withdrawal') {
+                          {{ row.withdrawalType ? (row.withdrawalType | titlecase) : 'N/A' }}
+                        } @else {
+                          {{ row.employerPct | number:'1.0-2' }}%
+                        }
+                      </strong>
                     </div>
                     <div class="stat-item">
-                      <label>Effective from</label>
-                      <strong>{{ row.effectiveFrom ? (row.effectiveFrom | date:'mediumDate') : 'N/A' }}</strong>
+                      <label>Rule</label>
+                      <strong>{{ row.ruleName || 'N/A' }}</strong>
                     </div>
                   </div>
 
-                  @if (row.rejectionReason || row.remarks) {
+                  @if (row.requestType === 'withdrawal' && row.reason) {
+                    <div class="card-note">
+                      <mat-icon>notes</mat-icon>
+                      <p [title]="row.reason">Reason: {{ row.reason }}</p>
+                    </div>
+                  } @else if (row.rejectionReason || row.remarks) {
                     <div class="card-note">
                       <mat-icon>notes</mat-icon>
                       <p [title]="row.rejectionReason || row.remarks">
@@ -179,10 +198,10 @@
 
       <div class="table-footer">
         <p>
-          @if (filteredRequests.length === 0) {
+          @if (requestTotalCount === 0) {
             No records found
           } @else {
-            Showing {{ requestsFromRecord }}&ndash;{{ requestsToRecord }} of {{ filteredRequests.length }} records
+            Showing {{ requestsFromRecord }}&ndash;{{ requestsToRecord }} of {{ requestTotalCount }} records
           }
         </p>
         <div class="pagination">
@@ -266,7 +285,8 @@
           <select class="filter-select" [(ngModel)]="pendingPaymentStatus">
             <option value="">All fund status</option>
             <option value="active">Active</option>
-            <option value="completed">Completed</option>
+            <option value="closed">Closed</option>
+            <option value="pending">Pending</option>
           </select>
 
           <div class="filter-actions">
@@ -294,41 +314,35 @@
         <table class="compact-table loan-payments-table">
           <colgroup>
             <col class="col-employee" />
-            <col class="col-end-date" />
             <col class="col-remaining" />
             <col class="col-status" />
             <col class="col-total" />
             <col class="col-paid" />
-            <col class="col-completion" />
             <col class="col-action" />
           </colgroup>
           <thead>
             <tr>
               <th class="col-employee">Employee</th>
-              <th class="col-end-date">Request type</th>
               <th class="col-remaining">Basic salary</th>
               <th class="col-status">Employee %</th>
               <th class="col-total">Employer %</th>
               <th class="col-paid">Effective from</th>
-              <th class="col-completion">Approved date</th>
               <th class="col-action">Status</th>
             </tr>
           </thead>
           <tbody>
             @if (paymentView.length === 0) {
               <tr>
-                <td class="empty-row" colspan="8">No provident fund payment profiles available.</td>
+                <td class="empty-row" colspan="6">No provident fund payment profiles available.</td>
               </tr>
             } @else {
               @for (payment of paymentView; track payment.id) {
                 <tr>
                   <td>{{ payment.employeeName }}</td>
-                  <td>{{ getRequestTypeLabel(payment.requestType) }}</td>
                   <td>{{ currencySymbol() }} {{ payment.basicSalary | number }}</td>
                   <td>{{ payment.employeePct | number:'1.0-2' }}%</td>
                   <td>{{ payment.employerPct | number:'1.0-2' }}%</td>
                   <td>{{ formatDateLabel(payment.effectiveFrom) }}</td>
-                  <td>{{ formatDateLabel(payment.approvedAt) }}</td>
                   <td>
                     <span class="status-pill" [ngClass]="getFundStatusClass(payment.status)">
                       {{ getFundStatusLabel(payment.status) }}
@@ -343,10 +357,10 @@
 
       <div class="table-footer">
         <p>
-          @if (filteredPayments.length === 0) {
+          @if (paymentTotalCount === 0) {
             No records found
           } @else {
-            Showing {{ paymentsFromRecord }}&ndash;{{ paymentsToRecord }} of {{ filteredPayments.length }} records
+            Showing {{ paymentsFromRecord }}&ndash;{{ paymentsToRecord }} of {{ paymentTotalCount }} records
           }
         </p>
         <div class="pagination">

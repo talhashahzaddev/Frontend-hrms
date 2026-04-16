@@ -9,7 +9,8 @@ import { take } from 'rxjs';
 import {
   ProvidentFundRequestDialogComponent,
   ProvidentFundRequestDialogPayload,
-  ProvidentFundRuleOption
+  ProvidentFundRuleOption,
+  ProvidentFundWithdrawalConfig
 } from '../dialogs/provident-fund-request-dialog/provident-fund-request-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import { PayrollService } from '../../services/payroll.service';
@@ -18,29 +19,31 @@ import { NotificationService } from '@core/services/notification.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { AuthService } from '@core/services/auth.service';
 
-type ProvidentFundTab = 'request' | 'history';
-type ProvidentFundRequestStatus = 'pending' | 'approved' | 'active' | 'inactive' | 'completed' | 'rejected' | 'cancelled' | 'update';
+type ProvidentFundTab = 'funds' | 'my-requests' | 'history';
+type ProvidentFundRequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
+type ProvidentFundRequestType = 'enrollment' | 'update' | 'withdrawal';
+type ProvidentFundWithdrawalType = 'temporary' | 'permanent';
 
 interface ProvidentFundRequestRecord {
-  id: string;
-  pfId: string;
-  ruleId: string;
-  ruleName: string;
-  requestType: string;
-  employeePct: number;
-  employerPct: number;
-  effectiveFrom: string;
-  remarks: string | null;
-  rejectionReason: string | null;
-  approvedAt: string | null;
-  updatedAt: string;
-  createdAt: string;
-  isActive: boolean;
+  requestId: string;
+  requestType: ProvidentFundRequestType;
   status: ProvidentFundRequestStatus;
+  ruleId: string | null;
+  ruleName: string | null;
+  requestedEmployeePct: number | null;
+  requestedEmployerPct: number | null;
+  effectiveFrom: string | null;
+  withdrawalType: ProvidentFundWithdrawalType | null;
+  requestedAmount: number | null;
+  reason: string | null;
+  rejectionReason: string | null;
+  createdAt: string | null;
+  approvedAt: string | null;
 }
 
 interface ProvidentFundHistoryRecord {
   id: string;
+  pfRequestId?: string | null;
   periodName: string;
   salaryBasisAmount: number;
   employeePct: number;
@@ -53,18 +56,16 @@ interface ProvidentFundHistoryRecord {
   createdAt: string;
 }
 
-interface ProvidentFundActiveRecord {
+interface ProvidentFundAccountRecord {
   pfId: string;
   ruleId: string;
   ruleName: string;
-  requestType: string;
   employeePct: number;
   employerPct: number;
   effectiveFrom: string;
-  approvedAt: string | null;
-  updatedAt: string;
-  remarks: string | null;
-  status: ProvidentFundRequestStatus;
+  pfStatus: string;
+  isActive: boolean;
+  withdrawalConfig: ProvidentFundWithdrawalConfig | null;
 }
 
 @Component({
@@ -83,13 +84,21 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly authService = inject(AuthService);
 
-  tab: ProvidentFundTab = 'request';
+  tab: ProvidentFundTab = 'funds';
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
   readonly isLoading = signal(true);
 
   activeRules: ProvidentFundRuleOption[] = [];
-  pendingRequest: ProvidentFundRequestRecord | null = null;
-  activeRequest: ProvidentFundRequestRecord | null = null;
+  activeFund: ProvidentFundAccountRecord | null = null;
+  myRequests: ProvidentFundRequestRecord[] = [];
+  myRequestsTotalCount = 0;
+  myRequestsCurrentPage = 1;
+  myRequestsPageSize = 10;
+  pendingMyRequestsStatusFilter: '' | ProvidentFundRequestStatus = '';
+  myRequestsStatusFilter: '' | ProvidentFundRequestStatus = '';
+  pendingMyRequestsTypeFilter: '' | ProvidentFundRequestType = '';
+  myRequestsTypeFilter: '' | ProvidentFundRequestType = '';
+
   transactions: ProvidentFundHistoryRecord[] = [];
   historyTotalCount = 0;
   currentEmployeeBasicSalary = 0;
@@ -98,38 +107,6 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   historyTypeFilter = '';
   historyCurrentPage = 1;
   historyPageSize = 10;
-
-  get requestedRecords(): ProvidentFundRequestRecord[] {
-    return this.pendingRequest ? [this.pendingRequest] : [];
-  }
-
-  get activeRecords(): ProvidentFundActiveRecord[] {
-    if (!this.activeRequest) {
-      return [];
-    }
-
-    const status = String(this.activeRequest.status ?? '').trim().toLowerCase();
-    const isActiveOrInactiveStatus = status === 'active' || status === 'inactive';
-    if (!isActiveOrInactiveStatus) {
-      return [];
-    }
-
-    return [
-      {
-        pfId: this.activeRequest.pfId,
-        ruleId: this.activeRequest.ruleId,
-        ruleName: this.activeRequest.ruleName,
-        requestType: this.activeRequest.requestType,
-        employeePct: this.activeRequest.employeePct,
-        employerPct: this.activeRequest.employerPct,
-        effectiveFrom: this.activeRequest.effectiveFrom,
-        approvedAt: this.activeRequest.approvedAt,
-        updatedAt: this.activeRequest.updatedAt,
-        remarks: this.activeRequest.remarks,
-        status: this.activeRequest.status
-      }
-    ];
-  }
 
   get historyRecords(): ProvidentFundHistoryRecord[] {
     return this.transactions;
@@ -166,10 +143,10 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   get totalRequestedAmount(): number {
-    if (!this.pendingEnrollmentRequest) {
-      return 0;
-    }
-    return this.pendingEnrollmentRequest.employeePct + this.pendingEnrollmentRequest.employerPct;
+    const pending = this.myRequests.find((r) => r.status === 'pending' && (r.requestType === 'enrollment' || r.requestType === 'update'));
+    const emp = Number(pending?.requestedEmployeePct ?? 0);
+    const empr = Number(pending?.requestedEmployerPct ?? 0);
+    return emp + empr;
   }
 
   get activeFundAmount(): number {
@@ -187,6 +164,14 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       .reduce((sum, row) => sum + Number(row.employeeAmount ?? 0) + Number(row.employerAmount ?? 0), 0);
   }
 
+  get canRequestWithdrawal(): boolean {
+    const config = this.activeFund?.withdrawalConfig;
+    if (!config) {
+      return false;
+    }
+    return (config.temporary?.length ?? 0) > 0 || (config.permanent?.length ?? 0) > 0;
+  }
+
   ngOnInit(): void {
     this.loadCurrencySymbol();
     this.loadCurrentEmployeeBasicSalary();
@@ -200,6 +185,30 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   setTab(tab: ProvidentFundTab): void {
     this.tab = tab;
+  }
+
+  applyMyRequestsFilters(): void {
+    this.myRequestsStatusFilter = this.pendingMyRequestsStatusFilter;
+    this.myRequestsTypeFilter = this.pendingMyRequestsTypeFilter;
+    this.myRequestsCurrentPage = 1;
+    this.loadMyRequests();
+  }
+
+  clearMyRequestsFilters(): void {
+    this.pendingMyRequestsStatusFilter = '';
+    this.pendingMyRequestsTypeFilter = '';
+    this.myRequestsStatusFilter = '';
+    this.myRequestsTypeFilter = '';
+    this.myRequestsCurrentPage = 1;
+    this.loadMyRequests();
+  }
+
+  goToMyRequestsPage(page: number): void {
+    const totalPages = Math.max(1, Math.ceil(this.myRequestsTotalCount / this.myRequestsPageSize));
+    const nextPage = Math.min(Math.max(1, page), totalPages);
+    if (nextPage === this.myRequestsCurrentPage) return;
+    this.myRequestsCurrentPage = nextPage;
+    this.loadMyRequests();
   }
 
   applyHistoryFilters(): void {
@@ -229,46 +238,6 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   nextHistoryPage(): void {
     this.goToHistoryPage(this.historyPage + 1);
-  }
-
-  get pendingEnrollmentRequest(): ProvidentFundRequestRecord | null {
-    if (!this.pendingRequest) {
-      return null;
-    }
-
-    const requestType = String(this.pendingRequest.requestType ?? '').trim().toLowerCase();
-    const status = String(this.pendingRequest.status ?? '').trim().toLowerCase();
-    return requestType === 'enrollment' && status === 'pending' ? this.pendingRequest : null;
-  }
-
-  get activeLikeRequestRecord(): ProvidentFundActiveRecord | null {
-    if (this.activeRecords.length > 0) {
-      return this.activeRecords[0];
-    }
-
-    if (!this.pendingRequest) {
-      return null;
-    }
-
-    const requestType = String(this.pendingRequest.requestType ?? '').trim().toLowerCase();
-
-    if (requestType !== 'enrollment') {
-      return {
-        pfId: this.pendingRequest.pfId,
-        ruleId: this.pendingRequest.ruleId,
-        ruleName: this.pendingRequest.ruleName,
-        requestType: this.pendingRequest.requestType,
-        employeePct: this.pendingRequest.employeePct,
-        employerPct: this.pendingRequest.employerPct,
-        effectiveFrom: this.pendingRequest.effectiveFrom,
-        approvedAt: this.pendingRequest.approvedAt,
-        updatedAt: this.pendingRequest.updatedAt,
-        remarks: this.pendingRequest.remarks,
-        status: this.pendingRequest.status
-      };
-    }
-
-    return null;
   }
 
   openAddRequestDialog(): void {
@@ -304,7 +273,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         .subscribe({
           next: () => {
             this.notification.showSuccess('Provident fund enrollment request submitted.');
-            this.tab = 'request';
+            this.tab = 'my-requests';
             this.refreshData();
           },
           error: (error) => {
@@ -316,7 +285,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openEditRequestDialog(row: ProvidentFundRequestRecord): void {
-    if (row.status !== 'pending' && row.status !== 'approved') {
+    if (row.status !== 'pending' || row.requestType !== 'enrollment') {
       return;
     }
 
@@ -333,9 +302,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         title: 'Edit provident fund request',
         submitText: 'Update request',
         initialValue: {
-          ruleId: row.ruleId,
-          employeePct: row.employeePct,
-          effectiveFrom: row.effectiveFrom
+          ruleId: row.ruleId ?? undefined,
+          employeePct: Number(row.requestedEmployeePct ?? 0),
+          effectiveFrom: row.effectiveFrom ?? undefined
         }
       }
     });
@@ -345,7 +314,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         return;
       }
 
-      this.payrollService.updateProvidentFundEnrollmentRequest(row.pfId, {
+      this.payrollService.updateProvidentFundEnrollmentRequest(row.requestId, {
         ruleId: result.ruleId,
         employeePct: Number(result.employeePct ?? 0),
         effectiveFrom: result.effectiveFrom
@@ -387,7 +356,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
         return;
       }
 
-      this.payrollService.deleteProvidentFundRequest(row.pfId)
+      this.payrollService.deleteProvidentFundRequest(row.requestId)
         .pipe(take(1))
         .subscribe({
           next: () => {
@@ -403,7 +372,7 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openPercentageUpdateDialog(): void {
-    const current = this.activeLikeRequestRecord;
+    const current = this.activeFund;
     if (!current) {
       return;
     }
@@ -450,6 +419,11 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openWithdrawalDialog(): void {
+    if (!this.canRequestWithdrawal) {
+      this.notification.showError('Withdrawal is not allowed because no withdrawal rules are configured.');
+      return;
+    }
+
     const dialogRef = this.dialog.open(ProvidentFundRequestDialogComponent, {
       width: '560px',
       panelClass: 'provident-fund-request-dialog-panel',
@@ -457,7 +431,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       restoreFocus: false,
       data: {
         currencySymbol: this.currencySymbol(),
-        mode: 'withdrawal'
+        mode: 'withdrawal',
+        withdrawalConfig: this.activeFund?.withdrawalConfig ?? null,
+        withdrawalBaseAmount: this.totalContributions
       }
     });
 
@@ -468,7 +444,8 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
       this.payrollService.createProvidentFundWithdrawalRequest({
         amount: Number(result.amount ?? 0),
-        reason: result.reason ?? ''
+        withdrawalType: result.withdrawalType ?? 'temporary',
+        reason: String(result.reason ?? '').trim()
       })
         .pipe(take(1))
         .subscribe({
@@ -479,41 +456,6 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
           error: (error) => {
             console.error('Failed to submit provident fund withdrawal request', error);
             this.notification.showError('Failed to submit withdrawal request.');
-          }
-        });
-    });
-  }
-
-  openSettlementDialog(): void {
-    const dialogRef = this.dialog.open(ProvidentFundRequestDialogComponent, {
-      width: '560px',
-      panelClass: 'provident-fund-request-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        currencySymbol: this.currencySymbol(),
-        mode: 'settlement'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: ProvidentFundRequestDialogPayload | undefined) => {
-      if (!result || result.mode !== 'settlement' || !result.effectiveFrom) {
-        return;
-      }
-
-      this.payrollService.createProvidentFundSettlementRequest({
-        effectiveFrom: result.effectiveFrom,
-        remarks: result.remarks ?? ''
-      })
-        .pipe(take(1))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Provident fund settlement request submitted.');
-            this.refreshData();
-          },
-          error: (error) => {
-            console.error('Failed to submit provident fund settlement request', error);
-            this.notification.showError('Failed to submit settlement request.');
           }
         });
     });
@@ -552,9 +494,6 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
     if (normalized === 'withdrawal') {
       return 'Withdrawal';
     }
-    if (normalized === 'settlement') {
-      return 'Settlement';
-    }
     if (normalized === 'update') {
       return 'Update';
     }
@@ -563,8 +502,8 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   private refreshData(): void {
     this.isLoading.set(true);
-    this.loadPendingRequest();
-    this.loadActiveRequest();
+    this.loadActiveFund();
+    this.loadMyRequests();
     this.loadTransactions();
   }
 
@@ -626,36 +565,44 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       });
   }
 
-  private loadPendingRequest(): void {
-    this.payrollService.getMyPendingProvidentFundRequest()
+  private loadActiveFund(): void {
+    this.payrollService.getMyActiveProvidentFund()
       .pipe(take(1))
       .subscribe({
         next: (row: any) => {
-          this.pendingRequest = row ? this.mapPendingRequest(row) : null;
+          this.activeFund = row ? this.mapActiveFund(row) : null;
         },
         error: (error) => {
           const status = Number(error?.status ?? 0);
           if (status !== 404) {
-            console.error('Failed to load pending provident fund request', error);
+            console.error('Failed to load active provident fund account', error);
           }
-          this.pendingRequest = null;
+          this.activeFund = null;
         }
       });
   }
 
-  private loadActiveRequest(): void {
-    this.payrollService.getMyActiveProvidentFundRequest()
+  private loadMyRequests(): void {
+    this.payrollService.getMyProvidentFundRequests({
+      requestType: this.myRequestsTypeFilter || null,
+      status: this.myRequestsStatusFilter || null,
+      page: this.myRequestsCurrentPage,
+      pageSize: this.myRequestsPageSize
+    })
       .pipe(take(1))
       .subscribe({
-        next: (row: any) => {
-          this.activeRequest = row ? this.mapPendingRequest(row) : null;
+        next: (result) => {
+          this.myRequests = (result?.items ?? [])
+            .map((row: any) => this.mapMyRequest(row))
+            .sort((a, b) => this.compareDateDesc(a.createdAt, b.createdAt));
+          this.myRequestsTotalCount = Number(result?.totalCount ?? this.myRequests.length);
+          this.isLoading.set(false);
         },
         error: (error) => {
-          const status = Number(error?.status ?? 0);
-          if (status !== 404) {
-            console.error('Failed to load active provident fund request', error);
-          }
-          this.activeRequest = null;
+          console.error('Failed to load provident fund requests', error);
+          this.myRequests = [];
+          this.myRequestsTotalCount = 0;
+          this.isLoading.set(false);
         }
       });
   }
@@ -685,29 +632,44 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
       });
   }
 
-  private mapPendingRequest(item: any): ProvidentFundRequestRecord {
+  private mapMyRequest(item: any): ProvidentFundRequestRecord {
+    const requestType = this.normalizeRequestType(item.requestType);
     return {
-      id: String(item.pfId ?? item.id ?? ''),
+      requestId: String(item.requestId ?? item.id ?? ''),
+      requestType,
+      status: this.normalizeRequestStatus(item.status),
+      ruleId: item.ruleId ? String(item.ruleId) : null,
+      ruleName: item.ruleName ? String(item.ruleName) : null,
+      requestedEmployeePct: item.requestedEmployeePct !== null && item.requestedEmployeePct !== undefined ? Number(item.requestedEmployeePct) : null,
+      requestedEmployerPct: item.requestedEmployerPct !== null && item.requestedEmployerPct !== undefined ? Number(item.requestedEmployerPct) : null,
+      effectiveFrom: this.normalizeDateNullable(item.effectiveFrom),
+      withdrawalType: requestType === 'withdrawal' ? this.normalizeWithdrawalType(item.withdrawalType) : null,
+      requestedAmount: item.requestedAmount !== null && item.requestedAmount !== undefined ? Number(item.requestedAmount) : null,
+      reason: item.reason ? String(item.reason) : null,
+      rejectionReason: item.rejectionReason ? String(item.rejectionReason) : null,
+      createdAt: this.normalizeDateNullable(item.createdAt),
+      approvedAt: this.normalizeDateNullable(item.approvedAt)
+    };
+  }
+
+  private mapActiveFund(item: any): ProvidentFundAccountRecord {
+    return {
       pfId: String(item.pfId ?? item.id ?? ''),
       ruleId: String(item.ruleId ?? ''),
-      ruleName: String(item.ruleName ?? item.ruleId ?? 'N/A'),
-      requestType: String(item.requestType ?? 'enrollment'),
+      ruleName: String(item.ruleName ?? 'N/A'),
       employeePct: Number(item.employeePct ?? 0),
       employerPct: Number(item.employerPct ?? 0),
       effectiveFrom: this.normalizeDate(item.effectiveFrom),
-      remarks: item.remarks ? String(item.remarks) : null,
-      rejectionReason: item.rejectionReason ? String(item.rejectionReason) : null,
-      approvedAt: this.normalizeDateNullable(item.approvedAt),
-      updatedAt: this.normalizeDate(item.updatedAt),
-      createdAt: this.normalizeDate(item.createdAt),
-      isActive: Boolean(item.isActive),
-      status: this.normalizeStatus(item.pfStatus ?? item.status)
+      pfStatus: String(item.pfStatus ?? item.status ?? 'active'),
+      isActive: Boolean(item.isActive ?? true),
+      withdrawalConfig: this.parseWithdrawalConfig(item.withdrawalConfig)
     };
   }
 
   private mapTransaction(item: any, index: number): ProvidentFundHistoryRecord {
     return {
       id: String(item.transactionId ?? item.id ?? `pf-tx-${index + 1}`),
+      pfRequestId: item.pfRequestId ? String(item.pfRequestId) : (item.pfrequestid ? String(item.pfrequestid) : null),
       periodName: String(item.periodName ?? 'N/A'),
       salaryBasisAmount: Number(item.salaryBasisAmount ?? 0),
       employeePct: Number(item.employeePct ?? 0),
@@ -721,16 +683,25 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
     };
   }
 
-  private normalizeStatus(value: unknown): ProvidentFundRequestStatus {
+  private normalizeRequestStatus(value: unknown): ProvidentFundRequestStatus {
     const normalized = String(value ?? '').trim().toLowerCase();
     if (normalized === 'pending') return 'pending';
     if (normalized === 'approved') return 'approved';
     if (normalized === 'rejected') return 'rejected';
     if (normalized === 'cancelled' || normalized === 'canceled') return 'cancelled';
-    if (normalized === 'completed' || normalized === 'closed') return 'completed';
+    return 'pending';
+  }
+
+  private normalizeRequestType(value: unknown): ProvidentFundRequestType {
+    const normalized = String(value ?? '').trim().toLowerCase();
     if (normalized === 'update') return 'update';
-    if (normalized === 'inactive') return 'inactive';
-    return 'active';
+    if (normalized === 'withdrawal') return 'withdrawal';
+    return 'enrollment';
+  }
+
+  private normalizeWithdrawalType(value: unknown): ProvidentFundWithdrawalType {
+    const normalized = String(value ?? '').trim().toLowerCase();
+    return normalized === 'permanent' ? 'permanent' : 'temporary';
   }
 
   private extractItems(data: any): any[] {
@@ -811,5 +782,42 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private parseWithdrawalConfig(value: unknown): ProvidentFundWithdrawalConfig | null {
+    let parsed: any = value;
+
+    try {
+      if (typeof parsed === 'string' && parsed.trim()) {
+        parsed = JSON.parse(parsed);
+      }
+      if (typeof parsed === 'string' && parsed.trim()) {
+        parsed = JSON.parse(parsed);
+      }
+    } catch {
+      return null;
+    }
+
+    if (!parsed || typeof parsed !== 'object') {
+      return null;
+    }
+
+    const normalizeRules = (rules: any): Array<{ reason: string; minPct: number; maxPct: number }> => {
+      if (!Array.isArray(rules)) {
+        return [];
+      }
+      return rules
+        .map((rule: any) => ({
+          reason: String(rule?.reason ?? '').trim(),
+          minPct: Number(rule?.min_pct ?? rule?.minPct ?? 0),
+          maxPct: Number(rule?.max_pct ?? rule?.maxPct ?? 0)
+        }))
+        .filter((rule) => rule.reason.length > 0);
+    };
+
+    return {
+      temporary: normalizeRules((parsed as any).temporary),
+      permanent: normalizeRules((parsed as any).permanent)
+    };
   }
 }
