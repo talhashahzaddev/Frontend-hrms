@@ -532,6 +532,7 @@
               <mat-select formControlName="basis">
                 <mat-option value="basic">Basic</mat-option>
                 <mat-option value="gross">Gross</mat-option>
+                <mat-option value="fixed">Fixed</mat-option>
               </mat-select>
               <mat-error *ngIf="ruleForm.get('basis')?.hasError('required')">Basis is required</mat-error>
             </mat-form-field>
@@ -564,23 +565,82 @@
           </div>
         </div>
 
-        <div class="rd-grid-2">
-          <div class="rd-field">
-            <label>Minimum Contribution *</label>
-            <mat-form-field appearance="outline" class="rd-mat-field">
-              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
-              <input matInput type="number" formControlName="minContribution" placeholder="1800">
-              <mat-error *ngIf="ruleForm.get('minContribution')?.hasError('required')">Minimum contribution is required</mat-error>
-            </mat-form-field>
+        <div class="rd-field">
+          <label>Allow Partial Withdraw *</label>
+          <div class="pf-toggle-wrap">
+            <mat-checkbox formControlName="allowPartialWithdraw" class="pf-toggle-checkbox">
+              Enable temporary/permanent withdrawal rules
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="pf-withdrawal-block" *ngIf="ruleForm.get('allowPartialWithdraw')?.value">
+          <div class="rd-section-title">
+            <h3>Temporary Withdrawal Rules</h3>
+          </div>
+          <div formArrayName="temporaryWithdrawals" class="pf-withdrawal-list">
+            <div class="pf-withdrawal-row" *ngFor="let entry of temporaryWithdrawals.controls; let i = index" [formGroupName]="i">
+              <div class="rd-field pf-reason-field">
+                <label>Reason *</label>
+                <mat-form-field appearance="outline" class="rd-mat-field">
+                  <input matInput formControlName="reason" placeholder="e.g. Medical">
+                </mat-form-field>
+              </div>
+              <div class="pf-range-grid">
+                <div class="rd-field">
+                  <label>Min % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="min_pct" placeholder="0">
+                  </mat-form-field>
+                </div>
+                <div class="rd-field">
+                  <label>Max % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="max_pct" placeholder="50">
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="pf-row-action">
+                <button class="pf-remove-btn" type="button" (click)="removeTemporaryWithdrawal(i)">Remove</button>
+              </div>
+            </div>
+          </div>
+          <div class="pf-action-row">
+            <button class="pf-add-btn" type="button" (click)="addTemporaryWithdrawal()">+ Add Temporary Reason</button>
           </div>
 
-          <div class="rd-field">
-            <label>Maximum Contribution</label>
-            <mat-form-field appearance="outline" class="rd-mat-field">
-              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
-              <input matInput type="number" formControlName="maxContribution" placeholder="Optional">
-              <mat-hint>Leave empty if there is no cap.</mat-hint>
-            </mat-form-field>
+          <div class="rd-section-title">
+            <h3>Permanent Withdrawal Rules</h3>
+          </div>
+          <div formArrayName="permanentWithdrawals" class="pf-withdrawal-list">
+            <div class="pf-withdrawal-row" *ngFor="let entry of permanentWithdrawals.controls; let i = index" [formGroupName]="i">
+              <div class="rd-field pf-reason-field">
+                <label>Reason *</label>
+                <mat-form-field appearance="outline" class="rd-mat-field">
+                  <input matInput formControlName="reason" placeholder="e.g. Resignation">
+                </mat-form-field>
+              </div>
+              <div class="pf-range-grid">
+                <div class="rd-field">
+                  <label>Min % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="min_pct" placeholder="80">
+                  </mat-form-field>
+                </div>
+                <div class="rd-field">
+                  <label>Max % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="max_pct" placeholder="100">
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="pf-row-action">
+                <button class="pf-remove-btn" type="button" (click)="removePermanentWithdrawal(i)">Remove</button>
+              </div>
+            </div>
+          </div>
+          <div class="pf-action-row">
+            <button class="pf-add-btn" type="button" (click)="addPermanentWithdrawal()">+ Add Permanent Reason</button>
           </div>
         </div>
       </section>

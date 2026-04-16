@@ -292,6 +292,121 @@ textarea.mat-mdc-input-element {
     min-height: 80px;
 }
 
+// ─── Provident Fund Withdrawal UI ──────────────────────────────────────────
+.pf-toggle-wrap {
+  padding: 12px 14px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  border-radius: 10px;
+}
+
+.pf-toggle-checkbox {
+  .mdc-form-field {
+    color: #1e3a8a;
+    font-weight: 600;
+    font-size: 14px;
+  }
+}
+
+.pf-withdrawal-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.pf-withdrawal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pf-withdrawal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.95fr) minmax(88px, 120px);
+  gap: 12px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pf-reason-field {
+  min-width: 0;
+}
+
+.pf-range-grid {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) minmax(100px, 1fr);
+  gap: 10px;
+  min-width: 0;
+}
+
+.pf-row-action {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.pf-action-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.pf-add-btn,
+.pf-remove-btn {
+  border-radius: 8px;
+  border: 1px solid;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.pf-add-btn {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background: #eff6ff;
+
+  &:hover {
+    background: #dbeafe;
+    border-color: #1d4ed8;
+  }
+}
+
+.pf-remove-btn {
+  border-color: #fecaca;
+  color: #b91c1c;
+  background: #fef2f2;
+  width: 100%;
+  min-width: 0;
+  max-width: 120px;
+  white-space: nowrap;
+
+  &:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+  }
+}
+
+@media (max-width: 860px) {
+  .pf-withdrawal-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .pf-row-action {
+    justify-content: flex-start;
+  }
+}
+
 // ─── Footer ────────────────────────────────────────────────────────────────
 .rd-footer {
   display: flex;
