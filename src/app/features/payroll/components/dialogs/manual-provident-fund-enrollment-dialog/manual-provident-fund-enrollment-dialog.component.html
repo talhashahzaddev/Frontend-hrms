@@ -1,0 +1,63 @@
+<div class="manual-provident-fund-enrollment-dialog">
+  <div class="dialog-header">
+    <h2>Enroll employee in provident fund</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-grid">
+      <label class="field">
+        <span>Employee</span>
+        <select formControlName="employeeId">
+          <option value="" disabled selected>Select employee</option>
+          @for (employee of employees; track employee.employeeId) {
+            <option [value]="employee.employeeId">
+              {{ getEmployeeDisplayName(employee) }} ({{ employee.employeeCode }})
+            </option>
+          }
+        </select>
+        @if (form.controls.employeeId.touched && form.controls.employeeId.invalid) {
+          <small class="error-text">Please select an employee.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Provident fund rule</span>
+        <select formControlName="ruleId">
+          <option value="" disabled selected>Select provident fund rule</option>
+          @for (rule of rules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+        @if (form.controls.ruleId.touched && form.controls.ruleId.invalid) {
+          <small class="error-text">Please select a provident fund rule.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Employee %</span>
+        <input type="number" formControlName="employeePct" readonly />
+      </label>
+
+      <label class="field">
+        <span>Employer %</span>
+        <input type="number" formControlName="employerPct" readonly />
+      </label>
+
+      <label class="field full-span">
+        <span>Effective from</span>
+        <input type="date" formControlName="effectiveFrom" />
+        @if (form.controls.effectiveFrom.touched && form.controls.effectiveFrom.invalid) {
+          <small class="error-text">Please select the effective date.</small>
+        }
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn" [disabled]="form.invalid">Enroll employee</button>
+    </div>
+  </form>
+</div>

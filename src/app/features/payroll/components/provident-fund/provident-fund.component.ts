@@ -3,11 +3,13 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { take } from 'rxjs';
+import { forkJoin, take } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { NotificationService } from '@core/services/notification.service';
+import { EmployeeService } from '../../../employee/services/employee.service';
+import { Employee } from '../../../../core/models/employee.models';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
 import {
@@ -15,6 +17,12 @@ import {
   AddPfFundsDialogPayload,
   PfFundsEmployeeOption
 } from '../dialogs/add-pf-funds/add-pf-funds.component';
+import {
+  ManualPfEnrollmentDialogPayload,
+  ManualPfEnrollmentEmployeeOption,
+  ManualPfEnrollmentRuleOption,
+  ManualProvidentFundEnrollmentDialogComponent
+} from '../dialogs/manual-provident-fund-enrollment-dialog/manual-provident-fund-enrollment-dialog.component';
 
 type ProvidentFundTab = 'requests' | 'payments' | 'repayments';
 type ProvidentFundStatus = 'pending' | 'approved' | 'rejected';
@@ -93,6 +101,7 @@ export class ProvidentFundComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
   private readonly notification = inject(NotificationService);
+  private readonly employeeService = inject(EmployeeService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
@@ -417,6 +426,71 @@ export class ProvidentFundComponent implements OnInit {
           }
         });
     });
+  }
+
+  openManualEnrollmentDialog(): void {
+    forkJoin({
+      employeesResult: this.employeeService.getEmployees({ page: 1, pageSize: 1000 } as any),
+      rulesResult: this.payrollService.getActiveProvidentFundRules()
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: ({ employeesResult, rulesResult }) => {
+          const employees = this.mapManualEnrollmentEmployees(employeesResult?.employees ?? []);
+          const rules = this.mapManualEnrollmentRules(rulesResult ?? []);
+
+          if (!employees.length) {
+            this.notification.showError('No employees found for provident fund enrollment.');
+            return;
+          }
+
+          if (!rules.length) {
+            this.notification.showError('No active provident fund rules found.');
+            return;
+          }
+
+          const dialogRef = this.dialog.open(ManualProvidentFundEnrollmentDialogComponent, {
+            width: '620px',
+            panelClass: 'manual-provident-fund-enrollment-dialog-panel',
+            autoFocus: false,
+            restoreFocus: false,
+            data: {
+              employees,
+              rules
+            }
+          });
+
+          dialogRef.afterClosed().subscribe((result: ManualPfEnrollmentDialogPayload | undefined) => {
+            if (!result) {
+              return;
+            }
+
+            this.payrollService.manualProvidentFundEnrollment({
+              employeeId: result.employeeId,
+              ruleId: result.ruleId,
+              employeePct: result.employeePct,
+              employerPct: result.employerPct,
+              effectiveFrom: result.effectiveFrom
+            })
+              .pipe(take(1))
+              .subscribe({
+                next: () => {
+                  this.notification.showSuccess('Employee enrolled in provident fund successfully.');
+                  this.loadProvidentFundRequests();
+                  this.loadProvidentFundAccounts();
+                },
+                error: (error) => {
+                  console.error('Failed to manually enroll employee in provident fund', error);
+                  this.notification.showError('Failed to enroll employee in provident fund.');
+                }
+              });
+          });
+        },
+        error: (error) => {
+          console.error('Failed to load manual provident fund enrollment dependencies', error);
+          this.notification.showError('Failed to load employees or provident fund rules.');
+        }
+      });
   }
 
   applyRepaymentFilters(): void {
@@ -1113,6 +1187,33 @@ export class ProvidentFundComponent implements OnInit {
     const id = String(item?.periodId ?? item?.id ?? `period-${index + 1}`).trim();
     const name = String(item?.periodName ?? item?.name ?? '').trim();
     return { id, name };
+  }
+
+  private mapManualEnrollmentEmployees(rows: Employee[]): ManualPfEnrollmentEmployeeOption[] {
+    return (rows ?? [])
+      .map((employee) => ({
+        employeeId: String(employee?.employeeId ?? '').trim(),
+        employeeCode: String(employee?.employeeCode ?? '').trim(),
+        firstName: String(employee?.firstName ?? '').trim(),
+        lastName: String(employee?.lastName ?? '').trim()
+      }))
+      .filter((employee) => !!employee.employeeId)
+      .sort((left, right) => {
+        const leftName = `${left.firstName} ${left.lastName}`.trim().toLowerCase();
+        const rightName = `${right.firstName} ${right.lastName}`.trim().toLowerCase();
+        return leftName.localeCompare(rightName);
+      });
+  }
+
+  private mapManualEnrollmentRules(rows: any[]): ManualPfEnrollmentRuleOption[] {
+    return (rows ?? [])
+      .map((rule) => ({
+        ruleId: String(rule?.ruleId ?? rule?.id ?? '').trim(),
+        ruleName: String(rule?.ruleName ?? rule?.name ?? 'Provident Fund Rule').trim(),
+        employeePct: this.toNumber(rule?.defaultEmployeePct ?? rule?.employeePct ?? 0),
+        employerPct: this.toNumber(rule?.defaultEmployerPct ?? rule?.employerPct ?? 0)
+      }))
+      .filter((rule) => !!rule.ruleId);
   }
 
   private toNumber(value: unknown): number {
