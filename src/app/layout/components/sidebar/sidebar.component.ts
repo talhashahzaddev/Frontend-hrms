@@ -286,6 +286,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         {
+          label: 'Gratuity',
+          icon: 'emoji_events',
+          route: '/payroll/gratuity',
+          exact: true
+        },
+        {
           label: 'Compliance Center',
           icon: 'verified_user',
           route: '/payroll/loans/requests/compliance',

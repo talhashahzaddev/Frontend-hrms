@@ -37,6 +37,12 @@ export const payrollRoutes: Routes = [
     title: 'Salary Advances - HRMS'
   },
   {
+    path: 'gratuity',
+    loadComponent: () =>
+      import('./components/gratuity/gratuity.component').then(m => m.GratuityComponent),
+    title: 'Gratuity - HRMS'
+  },
+  {
     path: 'loans/requests',
     loadComponent: () =>
       import('./components/loan-requests/loan-requests.component').then(m => m.LoanRequestsComponent),
@@ -137,5 +143,17 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/my-benefits/my-benefits.component').then(m => m.MyBenefitsComponent),
     title: 'My Benefits - HRMS'
+  },
+  {
+    path: 'policies/gratuity-rules',
+    loadComponent: () =>
+      import('./components/gratuity-rules/gratuity-rules.component').then(m => m.GratuityRulesComponent),
+    title: 'Gratuity Policy - HRMS'
+  },
+  {
+    path: 'my-gratuity',
+    loadComponent: () =>
+      import('./components/my-gratuity/my-gratuity.component').then(m => m.MyGratuityComponent),
+    title: 'My Gratuity - HRMS'
   }
 ];

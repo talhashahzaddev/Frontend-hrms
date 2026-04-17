@@ -126,7 +126,11 @@ export class RuleDialogComponent implements OnInit {
     permanentWithdrawals: this.fb.array([]),
     vestingMonths: [0],
     // Salary Advance Policy fields
-    maxPercentage: [null as number | null]
+    maxPercentage: [null as number | null],
+    // Gratuity Policy fields
+    yearsRequired: [null as number | null],
+    calculationType: ['peryear'],
+    calculationValue: [null as number | null]
   });
 
   ngOnInit(): void {
@@ -220,6 +224,14 @@ export class RuleDialogComponent implements OnInit {
           employerPercentage: rule.employerPercentage ?? rule.defaultEmployerPct ?? null,
           allowPartialWithdraw: rule.allowPartialWithdraw ?? !!parsedWithdrawalConfig?.temporary?.length,
           vestingMonths: rule.vestingMonths ?? 0
+        });
+      }
+
+      if (this.data.policyId === 12) {
+        this.ruleForm.patchValue({
+          yearsRequired: rule.yearsRequired ?? rule.yearsrequired ?? null,
+          calculationType: (rule.calculationType || rule.calculationtype || 'peryear').toLowerCase(),
+          calculationValue: rule.calculationValue ?? rule.calculationvalue ?? null
         });
       }
     }
@@ -360,6 +372,24 @@ export class RuleDialogComponent implements OnInit {
       maxPercentageControl?.clearValidators();
     }
     maxPercentageControl?.updateValueAndValidity();
+
+    const yearsRequiredControl = this.ruleForm.get('yearsRequired');
+    const calculationTypeControl = this.ruleForm.get('calculationType');
+    const calculationValueControl = this.ruleForm.get('calculationValue');
+
+    if (Number(policyId) === 12) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      yearsRequiredControl?.setValidators([Validators.required, Validators.min(0)]);
+      calculationTypeControl?.setValidators([Validators.required]);
+      calculationValueControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      yearsRequiredControl?.clearValidators();
+      calculationTypeControl?.clearValidators();
+      calculationValueControl?.clearValidators();
+    }
+    yearsRequiredControl?.updateValueAndValidity();
+    calculationTypeControl?.updateValueAndValidity();
+    calculationValueControl?.updateValueAndValidity();
 
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     this.ruleForm.get('amountType')?.updateValueAndValidity();
@@ -794,6 +824,37 @@ export class RuleDialogComponent implements OnInit {
             console.error(err);
             this.notification.showError(
               err?.message || (this.isEditMode ? 'Failed to update salary advance rule' : 'Failed to create salary advance rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 12) { // 12 is Gratuity Policy
+      const payload = {
+        configRuleName: formValue.ruleName,
+        description: formValue.description,
+        yearsRequired: formValue.yearsRequired,
+        calculationType: formValue.calculationType,
+        calculationValue: formValue.calculationValue,
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive : true
+      };
+
+      const editRuleId = String((this.data?.rule as any)?.id ?? (this.data?.rule as any)?.ruleId ?? '');
+      const request$ = this.isEditMode && editRuleId
+        ? this.payrollService.updateGratuityConfig(editRuleId, payload)
+        : this.payrollService.createGratuityConfig(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Gratuity rule updated successfully' : 'Gratuity rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 12 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update gratuity rule' : 'Failed to create gratuity rule')
             );
           }
         });

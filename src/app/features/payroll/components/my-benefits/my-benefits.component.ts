@@ -77,6 +77,12 @@ export class MyBenefitsComponent implements OnInit {
 
     if (module === 'Provident Fund') {
       this.router.navigate(['/payroll/provident-fund-benefilts']);
+      return;
+    }
+
+    if (module === 'Gratuity') {
+      this.router.navigate(['/payroll/my-gratuity']);
+      return;
     }
   }
 

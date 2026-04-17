@@ -159,10 +159,10 @@
 
     <!-- Card 5 (Gratuity) -->
     @if (isModuleActive('Gratuity')) {
-    <div class="benefit-card">
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Gratuity')" (keydown)="onBenefitCardKeydown($event, 'Gratuity')">
       <div class="card-header">
         <div class="icon-wrapper color-purple">
-          <mat-icon>award_star</mat-icon>
+          <mat-icon>emoji_events</mat-icon>
         </div>
         <span class="status-badge status-active">
           <span class="status-dot"></span>
@@ -171,7 +171,7 @@
       </div>
       <h3 class="benefit-title">Gratuity</h3>
       <p class="benefit-desc">View your gratuity entitlement based on service years</p>
-      <p class="card-link is-muted">Details available soon</p>
+      <p class="card-link">View gratuity status <mat-icon>arrow_forward</mat-icon></p>
     </div>
     }
 

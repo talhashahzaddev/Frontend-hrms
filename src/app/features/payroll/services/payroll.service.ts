@@ -2156,4 +2156,42 @@ export class PayrollService {
         })
       );
     }
+
+    // ─── Gratuity (additions) ────────────────────────────────────────────────
+
+    getActiveGratuityConfigs(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/gratuity-configs/active`).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    approveGratuityTransaction(id: string, data: { notes?: string }): Observable<any> {
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/gratuity-transactions/${id}/approve`, data).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    markGratuityPaid(id: string, data: { notes?: string; periodId?: string | null; paymentMethod?: string; paidAt?: string | null }): Observable<any> {
+      return this.http.patch<ApiResponse<any>>(`${this.apiUrl}/gratuity-transactions/${id}/mark-paid`, data).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    getMyGratuityStatus(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/gratuity-transactions/my-status`).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
 }

@@ -85,7 +85,7 @@ export class PayrollRulesComponent implements OnInit {
       'Provident Fund Policy': 'savings',
       'Income Tax Policy': 'request_quote',
       'Social Security Policy': 'shield_person',
-      'Gratuity Policy': 'award_star',
+      'Gratuity Policy': 'emoji_events',
       'Bonus Policy': 'redeem'
     };
     return config[policyTitle] || 'settings';
@@ -171,6 +171,8 @@ export class PayrollRulesComponent implements OnInit {
       this.router.navigate(['/payroll/policies/provident-fund-rule']);
     } else if (policy.key === 'salaryAdvancePolicy') {
       this.router.navigate(['/payroll/policies/salary-advance-rules']);
+    } else if (policy.key === 'gratuityPolicy') {
+      this.router.navigate(['/payroll/policies/gratuity-rules']);
     }
   }
 }
