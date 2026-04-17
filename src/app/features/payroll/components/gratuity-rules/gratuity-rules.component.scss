@@ -1,0 +1,308 @@
+.gratuity-rules-container {
+  width: 100%;
+  color: #0b1c30;
+  background-color: #f8fafc;
+  padding: 2rem;
+  font-family: 'Public Sans', 'Inter', sans-serif;
+  min-height: 100vh;
+
+  .page-header-wrapper {
+    width: 100%;
+    margin-bottom: 2.5rem;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    .title-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .icon-button.back-btn {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #191c1e;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #e6e8ea;
+      }
+
+      mat-icon {
+        font-size: 1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+
+    .title-text-group {
+      padding-left: 3.5rem;
+
+      .title {
+        font-family: 'Manrope', inherit;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #191c1e;
+        letter-spacing: -0.025em;
+        margin: 0;
+        margin-bottom: 0.25rem;
+      }
+
+      .subtitle {
+        color: #434655;
+        font-size: 0.875rem;
+        margin: 0;
+      }
+    }
+  }
+
+  .create-rule-btn {
+    background: linear-gradient(to bottom right, #004ac6, #2563eb);
+    color: #ffffff;
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 20px 40px rgba(0, 74, 198, 0.06);
+    transition: transform 0.1s;
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    mat-icon {
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+
+  .content-card {
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 40px rgba(0, 74, 198, 0.06);
+    outline: 1px solid rgba(195, 198, 215, 0.15);
+    overflow: hidden;
+    margin-bottom: 2rem;
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .custom-table {
+      width: 100%;
+      text-align: left;
+      border-collapse: collapse;
+
+      thead tr {
+        background-color: rgba(242, 244, 246, 0.5);
+      }
+
+      th {
+        padding: 1rem 1.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      tbody .table-row {
+        transition: background-color 0.2s;
+        border-bottom: 1px solid #f1f5f9;
+
+        &:hover {
+          background-color: #eff6ff;
+        }
+
+        &.inactive-row {
+          opacity: 0.6;
+        }
+
+        td {
+          padding: 1rem 1.5rem;
+          font-size: 0.875rem;
+          color: #475569;
+
+          .rule-name-with-icon {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            .rule-icon-box {
+              width: 2.25rem;
+              height: 2.25rem;
+              background-color: rgba(124, 58, 237, 0.08);
+              color: #7c3aed;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 0.5rem;
+
+              &.calc-fixed {
+                background: #ede9fe;
+                color: #6d28d9;
+              }
+
+              &.calc-peryear {
+                background: #cffafe;
+                color: #0e7490;
+              }
+
+              &.calc-percentage {
+                background: #dcfce7;
+                color: #166534;
+              }
+
+              mat-icon {
+                font-size: 1.125rem;
+                width: 1.125rem;
+                height: 1.125rem;
+              }
+            }
+          }
+
+          .font-semibold {
+            font-weight: 600;
+            color: #334155;
+          }
+
+          .highlight-val {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #334155;
+          }
+
+          .calc-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: #ede9fe;
+            color: #6d28d9;
+
+            mat-icon {
+              width: 0.82rem;
+              height: 0.82rem;
+              font-size: 0.82rem;
+            }
+
+            &.calc-fixed {
+              background: #ede9fe;
+              color: #6d28d9;
+            }
+
+            &.calc-peryear {
+              background: #cffafe;
+              color: #0e7490;
+            }
+
+            &.calc-percentage {
+              background: #dcfce7;
+              color: #166534;
+            }
+          }
+
+          .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+
+            &.status-active {
+              background-color: #dbeafe;
+              color: #1d4ed8;
+            }
+
+            &.status-inactive {
+              background-color: #e2e8f0;
+              color: #64748b;
+            }
+          }
+        }
+      }
+
+      .text-center { text-align: center; }
+      .text-left { text-align: left; }
+      .text-right { text-align: right; }
+
+      .action-cell {
+        white-space: nowrap;
+
+        .action-btn {
+          width: 36px !important;
+          height: 36px !important;
+          padding: 8px !important;
+          margin-left: 0.25rem;
+          color: #94a3b8;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border: none !important;
+          outline: none !important;
+          background: transparent !important;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+
+          &.hover-primary:hover {
+            color: #2563eb;
+            background-color: rgba(37, 99, 235, 0.05);
+          }
+
+          &.hover-danger:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.05);
+          }
+        }
+      }
+    }
+
+    .table-footer {
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #434655;
+      font-size: 0.8125rem;
+
+      p { margin: 0; }
+    }
+  }
+}

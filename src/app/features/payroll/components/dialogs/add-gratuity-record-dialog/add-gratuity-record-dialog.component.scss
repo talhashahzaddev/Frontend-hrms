@@ -3,16 +3,17 @@
   border-radius: 0.95rem;
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 20, 60, 0.16);
+  max-width: 95vw;
 }
 
 .gratuity-record-dialog-panel .mdc-dialog__surface {
   border-radius: 0.95rem;
   overflow: hidden;
+  max-width: 95vw;
 }
 
 .gratuity-record-dialog {
   width: 100%;
-  max-width: 480px;
   background: #ffffff;
   color: #0f172a;
 
@@ -105,6 +106,65 @@
     }
   }
 
+  .select-wrap,
+  .date-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .leading {
+      position: absolute;
+      left: 0.7rem;
+      color: #64748b;
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+
+  .select-wrap {
+    .trailing {
+      position: absolute;
+      right: 0.65rem;
+      color: #94a3b8;
+      font-size: 1.05rem;
+      width: 1.05rem;
+      height: 1.05rem;
+      pointer-events: none;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+      padding-left: 2.2rem;
+      padding-right: 2.1rem;
+      background: linear-gradient(180deg, #f8fbff 0%, #f4f8fd 100%);
+    }
+  }
+
+  .date-wrap input {
+    padding-left: 2.2rem;
+  }
+
+  .field .calc-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #2563eb;
+    font-size: 0.76rem;
+    margin-top: 0.15rem;
+
+    mat-icon {
+      width: 0.95rem;
+      height: 0.95rem;
+      font-size: 0.95rem;
+    }
+  }
+
   .prefix-wrap {
     position: relative;
 
@@ -155,6 +215,46 @@
       color: #ffffff;
       background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       box-shadow: 0 8px 16px rgba(37, 99, 235, 0.26);
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .gratuity-record-dialog {
+    .dialog-header {
+      padding: 0.85rem 0.95rem;
+
+      h2 {
+        font-size: 1.04rem;
+      }
+    }
+
+    .dialog-form {
+      padding: 0.85rem 0.95rem 1rem;
+    }
+
+    .form-grid {
+      gap: 0.7rem;
+    }
+
+    .field {
+      span {
+        font-size: 0.68rem;
+      }
+
+      input,
+      select {
+        min-height: 2.45rem;
+        font-size: 0.84rem;
+      }
+    }
+
+    .dialog-actions {
+      gap: 0.5rem;
+
+      .btn {
+        flex: 1 1 calc(50% - 0.25rem);
+      }
     }
   }
 }

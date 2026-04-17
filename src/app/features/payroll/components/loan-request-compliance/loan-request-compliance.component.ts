@@ -17,22 +17,9 @@ import {
   SocialSecurityConfigDialogPayload,
   SocialSecurityConfigStatus
 } from '../dialogs/add-social-security-config-dialog/add-social-security-config-dialog.component';
-import {
-  AddGratuityConfigDialogComponent,
-  GratuityCalculationType,
-  GratuityConfigDialogPayload,
-  GratuityConfigStatus
-} from '../dialogs/add-gratuity-config-dialog/add-gratuity-config-dialog.component';
-import {
-  AddGratuityRecordDialogComponent,
-  GratuityEmployeeOption,
-  GratuityRecordDialogPayload,
-  GratuityRecordStatus
-} from '../dialogs/add-gratuity-record-dialog/add-gratuity-record-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 
-type ComplianceTab = 'tax-slabs' | 'social-security' | 'gratuity';
-type GratuityView = 'dashboard' | 'configurations';
+type ComplianceTab = 'tax-slabs' | 'social-security';
 
 interface TaxSlabRow {
   id: string;
@@ -80,28 +67,6 @@ interface SocialSecurityTransactionRow {
   periodLabel: string;
 }
 
-interface GratuityConfigRow {
-  id: string;
-  configName: string;
-  calculationType: GratuityCalculationType;
-  value: number;
-  minYearsRequired: number;
-  status: GratuityConfigStatus;
-  effectiveSince: string;
-}
-
-interface GratuityTransactionRow {
-  id: string;
-  employeeId: string;
-  employeeName: string;
-  designation: string;
-  yearsWorked: number;
-  lastSalary: number;
-  gratuityAmount: number;
-  status: GratuityRecordStatus;
-  paidDate: string | null;
-}
-
 @Component({
   selector: 'app-loan-request-compliance',
   standalone: true,
@@ -115,7 +80,6 @@ export class LoanRequestComplianceComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
 
   activeTab: ComplianceTab = 'tax-slabs';
-  gratuityView: GratuityView = 'dashboard';
 
   currencySymbol = 'PKR';
   fiscalYears = ['2023-2024', '2024-2025', '2025-2026'];
@@ -123,28 +87,21 @@ export class LoanRequestComplianceComponent implements OnInit {
   selectedFiscalYear = '2024-2025';
   selectedTaxPeriod = '';
   selectedSocialPeriod = '';
-  gratuityStatusFilter: GratuityRecordStatus | '' = '';
 
   taxSlabs: TaxSlabRow[] = [];
   taxTransactions: TaxTransactionRow[] = [];
   socialSecurityConfigs: SocialSecurityConfigRow[] = [];
   socialSecurityTransactions: SocialSecurityTransactionRow[] = [];
-  gratuityConfigs: GratuityConfigRow[] = [];
-  gratuityTransactions: GratuityTransactionRow[] = [];
 
   private localTaxSlabSeed: TaxSlabRow[] = [];
   private localTaxTransactionSeed: TaxTransactionRow[] = [];
   private localSocialConfigSeed: SocialSecurityConfigRow[] = [];
   private localSocialTransactionSeed: SocialSecurityTransactionRow[] = [];
-  private localGratuityConfigSeed: GratuityConfigRow[] = [];
-  private localGratuityTransactionSeed: GratuityTransactionRow[] = [];
 
   usingLocalTaxSlabs = false;
   usingLocalTaxTransactions = false;
   usingLocalSocialConfigs = false;
   usingLocalSocialTransactions = false;
-  usingLocalGratuityConfigs = false;
-  usingLocalGratuityTransactions = false;
 
   ngOnInit(): void {
     this.settingsService.getOrganizationCurrency()
@@ -162,24 +119,18 @@ export class LoanRequestComplianceComponent implements OnInit {
     this.localTaxTransactionSeed = this.buildLocalTaxTransactions();
     this.localSocialConfigSeed = this.buildLocalSocialConfigs();
     this.localSocialTransactionSeed = this.buildLocalSocialTransactions();
-    this.localGratuityConfigSeed = this.buildLocalGratuityConfigs();
-    this.localGratuityTransactionSeed = this.buildLocalGratuityTransactions();
 
     this.loadTaxSlabs();
     this.loadTaxTransactions();
     this.loadSocialSecurityConfigs();
     this.loadSocialSecurityTransactions();
-    this.loadGratuityConfigs();
-    this.loadGratuityTransactions();
   }
 
   get hasFallbackNotice(): boolean {
     return this.usingLocalTaxSlabs
       || this.usingLocalTaxTransactions
       || this.usingLocalSocialConfigs
-      || this.usingLocalSocialTransactions
-      || this.usingLocalGratuityConfigs
-      || this.usingLocalGratuityTransactions;
+      || this.usingLocalSocialTransactions;
   }
 
   get taxSlabCount(): number {
@@ -188,10 +139,6 @@ export class LoanRequestComplianceComponent implements OnInit {
 
   get socialSecurityConfigCount(): number {
     return this.socialSecurityConfigs.length;
-  }
-
-  get gratuityConfigCount(): number {
-    return this.gratuityConfigs.length;
   }
 
   get activeFiscalYear(): string {
@@ -212,16 +159,6 @@ export class LoanRequestComplianceComponent implements OnInit {
 
   get totalSocialContribution(): number {
     return this.visibleSocialTransactions.reduce((sum, row) => sum + row.totalContribution, 0);
-  }
-
-  get gratuityActiveConfig(): GratuityConfigRow | null {
-    return this.gratuityConfigs.find((row) => row.status === 'active') ?? null;
-  }
-
-  get gratuityLiability(): number {
-    return this.gratuityTransactions
-      .filter((row) => row.status !== 'paid')
-      .reduce((sum, row) => sum + row.gratuityAmount, 0);
   }
 
   get visibleTaxSlabs(): TaxSlabRow[] {
@@ -252,40 +189,8 @@ export class LoanRequestComplianceComponent implements OnInit {
     return this.socialSecurityTransactions.filter((row) => row.periodLabel === this.selectedSocialPeriod);
   }
 
-  get visibleGratuityTransactions(): GratuityTransactionRow[] {
-    if (!this.gratuityStatusFilter) {
-      return this.gratuityTransactions;
-    }
-
-    return this.gratuityTransactions.filter((row) => row.status === this.gratuityStatusFilter);
-  }
-
-  get gratuityEmployeeOptions(): GratuityEmployeeOption[] {
-    const optionMap = new Map<string, GratuityEmployeeOption>();
-
-    this.gratuityTransactions.forEach((row) => {
-      optionMap.set(row.employeeId, {
-        id: row.employeeId,
-        name: row.employeeName,
-        designation: row.designation
-      });
-    });
-
-    if (!optionMap.size) {
-      optionMap.set('emp-001', { id: 'emp-001', name: 'Ali Hassan', designation: 'Senior Engineer' });
-      optionMap.set('emp-002', { id: 'emp-002', name: 'Sara Ahmed', designation: 'Project Manager' });
-      optionMap.set('emp-003', { id: 'emp-003', name: 'Usman Khan', designation: 'Associate Designer' });
-    }
-
-    return Array.from(optionMap.values());
-  }
-
   setTab(tab: ComplianceTab): void {
     this.activeTab = tab;
-  }
-
-  setGratuityView(view: GratuityView): void {
-    this.gratuityView = view;
   }
 
   onFiscalYearChange(): void {
@@ -337,51 +242,6 @@ export class LoanRequestComplianceComponent implements OnInit {
     });
   }
 
-  openAddGratuityConfigDialog(editing?: GratuityConfigRow): void {
-    const dialogRef = this.dialog.open(AddGratuityConfigDialogComponent, {
-      width: '480px',
-      maxWidth: '95vw',
-      panelClass: 'gratuity-config-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        mode: editing ? 'edit' : 'create',
-        initialValue: editing
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: GratuityConfigDialogPayload | undefined) => {
-      if (!result) {
-        return;
-      }
-
-      this.saveGratuityConfig(result, editing);
-    });
-  }
-
-  openAddGratuityRecordDialog(editing?: GratuityTransactionRow): void {
-    const dialogRef = this.dialog.open(AddGratuityRecordDialogComponent, {
-      width: '480px',
-      maxWidth: '95vw',
-      panelClass: 'gratuity-record-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        mode: editing ? 'edit' : 'create',
-        employees: this.gratuityEmployeeOptions,
-        initialValue: editing
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: GratuityRecordDialogPayload | undefined) => {
-      if (!result) {
-        return;
-      }
-
-      this.saveGratuityRecord(result, editing);
-    });
-  }
-
   confirmDeleteTaxSlab(row: TaxSlabRow): void {
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
@@ -422,58 +282,12 @@ export class LoanRequestComplianceComponent implements OnInit {
     });
   }
 
-  confirmDeleteGratuityConfig(row: GratuityConfigRow): void {
-    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
-      width: '420px',
-      panelClass: 'delete-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        title: 'Delete gratuity config',
-        message: `Delete ${row.configName}? This action cannot be undone.`,
-        confirmText: 'Delete config'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (confirmed) {
-        this.deleteGratuityConfig(row);
-      }
-    });
-  }
-
-  confirmDeleteGratuityRecord(row: GratuityTransactionRow): void {
-    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
-      width: '420px',
-      panelClass: 'delete-dialog-panel',
-      autoFocus: false,
-      restoreFocus: false,
-      data: {
-        title: 'Delete gratuity record',
-        message: `Delete record for ${row.employeeName}? This action cannot be undone.`,
-        confirmText: 'Delete record'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
-      if (confirmed) {
-        this.deleteGratuityRecord(row);
-      }
-    });
-  }
-
   getSlabStatusClass(status: TaxSlabStatus): string {
     return status === 'active' ? 'status-active' : 'status-inactive';
   }
 
-  getConfigStatusClass(status: SocialSecurityConfigStatus | GratuityConfigStatus): string {
+  getConfigStatusClass(status: SocialSecurityConfigStatus): string {
     return status === 'active' ? 'status-active' : 'status-inactive';
-  }
-
-  getGratuityStatusClass(status: GratuityRecordStatus): string {
-    if (status === 'paid') return 'status-paid';
-    if (status === 'approved') return 'status-approved';
-    return 'status-calculated';
   }
 
   formatMoney(value: number): string {
@@ -595,52 +409,6 @@ export class LoanRequestComplianceComponent implements OnInit {
     });
   }
 
-  private loadGratuityConfigs(): void {
-    if (this.usingLocalGratuityConfigs) {
-      this.gratuityConfigs = [...this.localGratuityConfigSeed];
-      return;
-    }
-
-    this.payrollService.getGratuityConfigs({ page: 1, pageSize: 200 }).subscribe({
-      next: (data: any) => {
-        const rows = this.extractItems(data).map((item: any, index: number) => this.mapGratuityConfig(item, index));
-        this.gratuityConfigs = rows;
-      },
-      error: (error: any) => {
-        if (this.isUnsupportedEndpointError(error)) {
-          this.usingLocalGratuityConfigs = true;
-          this.gratuityConfigs = [...this.localGratuityConfigSeed];
-          return;
-        }
-
-        this.gratuityConfigs = [];
-      }
-    });
-  }
-
-  private loadGratuityTransactions(): void {
-    if (this.usingLocalGratuityTransactions) {
-      this.gratuityTransactions = [...this.localGratuityTransactionSeed];
-      return;
-    }
-
-    this.payrollService.getGratuityTransactions({ page: 1, pageSize: 500 }).subscribe({
-      next: (data: any) => {
-        const rows = this.extractItems(data).map((item: any, index: number) => this.mapGratuityTransaction(item, index));
-        this.gratuityTransactions = rows;
-      },
-      error: (error: any) => {
-        if (this.isUnsupportedEndpointError(error)) {
-          this.usingLocalGratuityTransactions = true;
-          this.gratuityTransactions = [...this.localGratuityTransactionSeed];
-          return;
-        }
-
-        this.gratuityTransactions = [];
-      }
-    });
-  }
-
   private saveTaxSlab(payload: TaxSlabDialogPayload, editing?: TaxSlabRow): void {
     const requestPayload = {
       slabName: payload.slabName,
@@ -713,77 +481,6 @@ export class LoanRequestComplianceComponent implements OnInit {
     });
   }
 
-  private saveGratuityConfig(payload: GratuityConfigDialogPayload, editing?: GratuityConfigRow): void {
-    const requestPayload = {
-      configName: payload.configName,
-      calculationType: payload.calculationType,
-      value: Number(payload.value),
-      minYearsRequired: Number(payload.minYearsRequired),
-      status: payload.status
-    };
-
-    if (this.usingLocalGratuityConfigs) {
-      this.saveLocalGratuityConfig(payload, editing);
-      return;
-    }
-
-    if (editing) {
-      this.payrollService.updateGratuityConfig(editing.id, requestPayload).subscribe({
-        next: () => this.loadGratuityConfigs(),
-        error: () => {
-          this.usingLocalGratuityConfigs = true;
-          this.saveLocalGratuityConfig(payload, editing);
-        }
-      });
-      return;
-    }
-
-    this.payrollService.createGratuityConfig(requestPayload).subscribe({
-      next: () => this.loadGratuityConfigs(),
-      error: () => {
-        this.usingLocalGratuityConfigs = true;
-        this.saveLocalGratuityConfig(payload);
-      }
-    });
-  }
-
-  private saveGratuityRecord(payload: GratuityRecordDialogPayload, editing?: GratuityTransactionRow): void {
-    const employee = this.gratuityEmployeeOptions.find((row) => row.id === payload.employeeId);
-
-    const requestPayload = {
-      employeeId: payload.employeeId,
-      yearsWorked: Number(payload.yearsWorked),
-      lastSalary: Number(payload.lastSalary),
-      gratuityAmount: Number(payload.gratuityAmount),
-      status: payload.status,
-      paidDate: payload.paidDate
-    };
-
-    if (this.usingLocalGratuityTransactions) {
-      this.saveLocalGratuityRecord(payload, employee?.name ?? 'Employee', employee?.designation ?? 'Employee', editing);
-      return;
-    }
-
-    if (editing) {
-      this.payrollService.updateGratuityTransaction(editing.id, requestPayload).subscribe({
-        next: () => this.loadGratuityTransactions(),
-        error: () => {
-          this.usingLocalGratuityTransactions = true;
-          this.saveLocalGratuityRecord(payload, employee?.name ?? editing.employeeName, employee?.designation ?? editing.designation, editing);
-        }
-      });
-      return;
-    }
-
-    this.payrollService.createGratuityTransaction(requestPayload).subscribe({
-      next: () => this.loadGratuityTransactions(),
-      error: () => {
-        this.usingLocalGratuityTransactions = true;
-        this.saveLocalGratuityRecord(payload, employee?.name ?? 'Employee', employee?.designation ?? 'Employee');
-      }
-    });
-  }
-
   private deleteTaxSlab(row: TaxSlabRow): void {
     if (this.usingLocalTaxSlabs) {
       this.localTaxSlabSeed = this.localTaxSlabSeed.filter((item) => item.id !== row.id);
@@ -814,40 +511,6 @@ export class LoanRequestComplianceComponent implements OnInit {
         this.usingLocalSocialConfigs = true;
         this.localSocialConfigSeed = this.localSocialConfigSeed.filter((item) => item.id !== row.id);
         this.socialSecurityConfigs = [...this.localSocialConfigSeed];
-      }
-    });
-  }
-
-  private deleteGratuityConfig(row: GratuityConfigRow): void {
-    if (this.usingLocalGratuityConfigs) {
-      this.localGratuityConfigSeed = this.localGratuityConfigSeed.filter((item) => item.id !== row.id);
-      this.gratuityConfigs = [...this.localGratuityConfigSeed];
-      return;
-    }
-
-    this.payrollService.deleteGratuityConfig(row.id).subscribe({
-      next: () => this.loadGratuityConfigs(),
-      error: () => {
-        this.usingLocalGratuityConfigs = true;
-        this.localGratuityConfigSeed = this.localGratuityConfigSeed.filter((item) => item.id !== row.id);
-        this.gratuityConfigs = [...this.localGratuityConfigSeed];
-      }
-    });
-  }
-
-  private deleteGratuityRecord(row: GratuityTransactionRow): void {
-    if (this.usingLocalGratuityTransactions) {
-      this.localGratuityTransactionSeed = this.localGratuityTransactionSeed.filter((item) => item.id !== row.id);
-      this.gratuityTransactions = [...this.localGratuityTransactionSeed];
-      return;
-    }
-
-    this.payrollService.deleteGratuityTransaction(row.id).subscribe({
-      next: () => this.loadGratuityTransactions(),
-      error: () => {
-        this.usingLocalGratuityTransactions = true;
-        this.localGratuityTransactionSeed = this.localGratuityTransactionSeed.filter((item) => item.id !== row.id);
-        this.gratuityTransactions = [...this.localGratuityTransactionSeed];
       }
     });
   }
@@ -892,53 +555,6 @@ export class LoanRequestComplianceComponent implements OnInit {
     }
 
     this.socialSecurityConfigs = [...this.localSocialConfigSeed];
-  }
-
-  private saveLocalGratuityConfig(payload: GratuityConfigDialogPayload, editing?: GratuityConfigRow): void {
-    const nextRow: GratuityConfigRow = {
-      id: editing?.id ?? `local-gratuity-config-${Date.now()}`,
-      configName: payload.configName,
-      calculationType: payload.calculationType,
-      value: Number(payload.value),
-      minYearsRequired: Number(payload.minYearsRequired),
-      status: payload.status,
-      effectiveSince: editing?.effectiveSince ?? this.getTodayIsoDate()
-    };
-
-    if (editing) {
-      this.localGratuityConfigSeed = this.localGratuityConfigSeed.map((row) => row.id === editing.id ? nextRow : row);
-    } else {
-      this.localGratuityConfigSeed = [nextRow, ...this.localGratuityConfigSeed];
-    }
-
-    this.gratuityConfigs = [...this.localGratuityConfigSeed];
-  }
-
-  private saveLocalGratuityRecord(
-    payload: GratuityRecordDialogPayload,
-    employeeName: string,
-    designation: string,
-    editing?: GratuityTransactionRow
-  ): void {
-    const nextRow: GratuityTransactionRow = {
-      id: editing?.id ?? `local-gratuity-row-${Date.now()}`,
-      employeeId: payload.employeeId,
-      employeeName,
-      designation,
-      yearsWorked: Number(payload.yearsWorked),
-      lastSalary: Number(payload.lastSalary),
-      gratuityAmount: Number(payload.gratuityAmount),
-      status: payload.status,
-      paidDate: payload.paidDate
-    };
-
-    if (editing) {
-      this.localGratuityTransactionSeed = this.localGratuityTransactionSeed.map((row) => row.id === editing.id ? nextRow : row);
-    } else {
-      this.localGratuityTransactionSeed = [nextRow, ...this.localGratuityTransactionSeed];
-    }
-
-    this.gratuityTransactions = [...this.localGratuityTransactionSeed];
   }
 
   private mapTaxSlab(item: any, index: number): TaxSlabRow {
@@ -997,32 +613,6 @@ export class LoanRequestComplianceComponent implements OnInit {
     };
   }
 
-  private mapGratuityConfig(item: any, index: number): GratuityConfigRow {
-    return {
-      id: String(item.gratuityConfigId ?? item.id ?? `gratuity-config-${index + 1}`),
-      configName: String(item.configName ?? item.name ?? `Gratuity Config ${index + 1}`),
-      calculationType: this.normalizeCalculationType(item.calculationType),
-      value: this.toNumber(item.value ?? item.calculationValue),
-      minYearsRequired: this.toNumber(item.minYearsRequired ?? item.minimumYears),
-      status: this.normalizeSimpleStatus(item.status),
-      effectiveSince: this.normalizeDate(item.effectiveSince ?? item.effectiveFrom ?? item.createdAt)
-    };
-  }
-
-  private mapGratuityTransaction(item: any, index: number): GratuityTransactionRow {
-    return {
-      id: String(item.gratuityTransactionId ?? item.id ?? `gratuity-tx-${index + 1}`),
-      employeeId: String(item.employeeId ?? item.employee?.id ?? `emp-${index + 1}`),
-      employeeName: String(item.employeeName ?? item.employee?.name ?? `Employee ${index + 1}`),
-      designation: String(item.designation ?? item.employee?.designation ?? 'Employee'),
-      yearsWorked: this.toNumber(item.yearsWorked ?? item.serviceYears),
-      lastSalary: this.toNumber(item.lastSalary ?? item.lastDrawnSalary),
-      gratuityAmount: this.toNumber(item.gratuityAmount ?? item.amount),
-      status: this.normalizeGratuityStatus(item.status),
-      paidDate: this.normalizeDateNullable(item.paidDate)
-    };
-  }
-
   private ensureSelectedPeriods(): void {
     if (!this.selectedTaxPeriod && this.taxPeriods.length) {
       this.selectedTaxPeriod = this.taxPeriods[0];
@@ -1056,20 +646,6 @@ export class LoanRequestComplianceComponent implements OnInit {
   private normalizeSimpleStatus(value: unknown): 'active' | 'inactive' {
     const status = String(value ?? '').trim().toLowerCase();
     return status === 'inactive' ? 'inactive' : 'active';
-  }
-
-  private normalizeGratuityStatus(value: unknown): GratuityRecordStatus {
-    const status = String(value ?? '').trim().toLowerCase();
-    if (status === 'paid') return 'paid';
-    if (status === 'approved') return 'approved';
-    return 'calculated';
-  }
-
-  private normalizeCalculationType(value: unknown): GratuityCalculationType {
-    const type = String(value ?? '').trim().toLowerCase();
-    if (type === 'fixed') return 'fixed';
-    if (type === 'percentage') return 'percentage';
-    return 'perYear';
   }
 
   private normalizeDate(value: unknown): string {
@@ -1308,64 +884,4 @@ export class LoanRequestComplianceComponent implements OnInit {
     ];
   }
 
-  private buildLocalGratuityConfigs(): GratuityConfigRow[] {
-    return [
-      {
-        id: 'gratuity-config-1',
-        configName: 'Standard gratuity 2024',
-        calculationType: 'perYear',
-        value: 1,
-        minYearsRequired: 3,
-        status: 'active',
-        effectiveSince: '2024-01-01'
-      },
-      {
-        id: 'gratuity-config-2',
-        configName: 'Legacy policy',
-        calculationType: 'fixed',
-        value: 15,
-        minYearsRequired: 5,
-        status: 'inactive',
-        effectiveSince: '2022-01-01'
-      }
-    ];
-  }
-
-  private buildLocalGratuityTransactions(): GratuityTransactionRow[] {
-    return [
-      {
-        id: 'gratuity-tx-1',
-        employeeId: 'emp-001',
-        employeeName: 'Ali Hassan',
-        designation: 'Senior Engineer',
-        yearsWorked: 7,
-        lastSalary: 150000,
-        gratuityAmount: 1050000,
-        status: 'paid',
-        paidDate: '2024-10-12'
-      },
-      {
-        id: 'gratuity-tx-2',
-        employeeId: 'emp-002',
-        employeeName: 'Sara Ahmed',
-        designation: 'Project Manager',
-        yearsWorked: 5,
-        lastSalary: 200000,
-        gratuityAmount: 1000000,
-        status: 'approved',
-        paidDate: null
-      },
-      {
-        id: 'gratuity-tx-3',
-        employeeId: 'emp-003',
-        employeeName: 'Usman Khan',
-        designation: 'Associate Designer',
-        yearsWorked: 4,
-        lastSalary: 75000,
-        gratuityAmount: 300000,
-        status: 'calculated',
-        paidDate: null
-      }
-    ];
-  }
 }

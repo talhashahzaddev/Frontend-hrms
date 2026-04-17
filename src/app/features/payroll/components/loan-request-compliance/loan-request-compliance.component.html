@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1>Compliance</h1>
-      <p>Manage tax slabs, social security contributions, and gratuity rules.</p>
+      <p>Manage tax slabs and social security contributions.</p>
     </div>
 
     <div class="header-actions">
@@ -10,7 +10,7 @@
         <mat-icon>file_download</mat-icon>
         Export audit
       </button>
-      <button class="primary-btn" (click)="activeTab === 'tax-slabs' ? openAddTaxSlabDialog() : activeTab === 'social-security' ? openAddSocialConfigDialog() : openAddGratuityConfigDialog()">
+      <button class="primary-btn" (click)="activeTab === 'tax-slabs' ? openAddTaxSlabDialog() : openAddSocialConfigDialog()">
         <mat-icon>add</mat-icon>
         New rule
       </button>
@@ -23,9 +23,6 @@
     </button>
     <button [class.active]="activeTab === 'social-security'" (click)="setTab('social-security')">
       Social security <span>{{ socialSecurityConfigCount }}</span>
-    </button>
-    <button [class.active]="activeTab === 'gratuity'" (click)="setTab('gratuity')">
-      Gratuity <span>{{ gratuityConfigCount }}</span>
     </button>
   </div>
 
@@ -288,146 +285,5 @@
     </section>
   }
 
-  @if (activeTab === 'gratuity') {
-    <div class="sub-tab-strip">
-      <button [class.active]="gratuityView === 'dashboard'" (click)="setGratuityView('dashboard')">Dashboard</button>
-      <button [class.active]="gratuityView === 'configurations'" (click)="setGratuityView('configurations')">Configurations</button>
-    </div>
 
-    <section class="stats-grid">
-      <article class="stat-card">
-        <p>Active config</p>
-        <h3>{{ gratuityActiveConfig?.calculationType || 'N/A' }}</h3>
-        <small>{{ gratuityActiveConfig?.configName || 'No active policy' }}</small>
-      </article>
-      <article class="stat-card">
-        <p>Min service</p>
-        <h3>{{ gratuityActiveConfig?.minYearsRequired ?? 0 }} years</h3>
-        <small>eligibility threshold</small>
-      </article>
-      <article class="stat-card">
-        <p>Calculated</p>
-        <h3>{{ gratuityTransactions.length }}</h3>
-        <small>employees</small>
-      </article>
-      <article class="stat-card">
-        <p>Total liability</p>
-        <h3>{{ formatMoney(gratuityLiability) }}</h3>
-        <small>estimated payout</small>
-      </article>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>Gratuity configuration</h2>
-          <p>Manage global calculation rules and eligibility periods.</p>
-        </div>
-        <button class="primary-btn" (click)="openAddGratuityConfigDialog()">
-          <mat-icon>add</mat-icon>
-          Add config
-        </button>
-      </div>
-
-      <div class="gratuity-config-list" [class.compact]="gratuityView === 'dashboard'">
-        @if (gratuityConfigs.length === 0) {
-          <div class="empty-card">No gratuity configurations found.</div>
-        } @else {
-          @for (cfg of gratuityConfigs; track cfg.id) {
-            <article class="gratuity-config-card">
-              <div class="config-head">
-                <div>
-                  <h3>{{ cfg.configName }}</h3>
-                  <p>Effective since {{ formatDateLabel(cfg.effectiveSince) }}</p>
-                </div>
-                <span class="status-pill" [ngClass]="getConfigStatusClass(cfg.status)">{{ cfg.status }}</span>
-              </div>
-
-              <div class="metrics-row">
-                <div>
-                  <small>Calculation type</small>
-                  <strong>{{ cfg.calculationType }}</strong>
-                </div>
-                <div>
-                  <small>Value</small>
-                  <strong>{{ cfg.value }}</strong>
-                </div>
-                <div>
-                  <small>Years required</small>
-                  <strong>{{ cfg.minYearsRequired }} years</strong>
-                </div>
-              </div>
-
-              <div class="config-actions">
-                <button (click)="openAddGratuityConfigDialog(cfg)"><mat-icon>edit</mat-icon></button>
-                <button (click)="confirmDeleteGratuityConfig(cfg)"><mat-icon>delete</mat-icon></button>
-              </div>
-            </article>
-          }
-        }
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h2>Gratuity transactions</h2>
-        <div class="panel-tools">
-          <select [(ngModel)]="gratuityStatusFilter">
-            <option value="">Status: All</option>
-            <option value="calculated">Calculated</option>
-            <option value="approved">Approved</option>
-            <option value="paid">Paid</option>
-          </select>
-
-          <button class="soft-btn" (click)="openAddGratuityRecordDialog()">
-            <mat-icon>add</mat-icon>
-            Add record
-          </button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Years worked</th>
-              <th>Last salary</th>
-              <th>Gratuity amount</th>
-              <th>Status</th>
-              <th>Paid date</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (visibleGratuityTransactions.length === 0) {
-              <tr>
-                <td colspan="7" class="empty-row">No gratuity transactions found.</td>
-              </tr>
-            } @else {
-              @for (tx of visibleGratuityTransactions; track tx.id) {
-                <tr>
-                  <td>
-                    <div class="employee-block">
-                      <strong>{{ tx.employeeName }}</strong>
-                      <small>{{ tx.designation }}</small>
-                    </div>
-                  </td>
-                  <td>{{ tx.yearsWorked }} yrs</td>
-                  <td>{{ tx.lastSalary | number }}</td>
-                  <td class="success-text">{{ formatMoney(tx.gratuityAmount) }}</td>
-                  <td><span class="status-pill" [ngClass]="getGratuityStatusClass(tx.status)">{{ tx.status }}</span></td>
-                  <td>{{ formatDateLabel(tx.paidDate) }}</td>
-                  <td class="text-right actions">
-                    <button (click)="openAddGratuityRecordDialog(tx)"><mat-icon>edit</mat-icon></button>
-                    <button (click)="confirmDeleteGratuityRecord(tx)"><mat-icon>delete</mat-icon></button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
-  }
 </div>

@@ -1,0 +1,174 @@
+<div class="loan-requests-page my-gratuity-page">
+  <div class="requests-headline">
+    <div class="title-section">
+      <button class="icon-button back-btn" type="button" aria-label="Back to My Benefits" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-text-group">
+        <h1 class="title">My Gratuity</h1>
+        <p class="subtitle">Manage and review your gratuity entitlement and payout status.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your gratuity information...</p>
+    </div>
+  } @else if (!gratuityRecord()) {
+    <div class="empty-state">
+      No gratuity record found yet. Please contact HR for eligibility and processing details.
+    </div>
+  } @else {
+    @if (gratuityRecord(); as record) {
+      <div class="summary-cards">
+        <div class="card">
+          <div class="card-content">
+            <div class="info">
+              <span class="label">Total gratuity</span>
+              <span class="value">{{ currencySymbol() }} {{ (record.totalAmount ?? record.totalamount) | number:'1.2-2' }}</span>
+            </div>
+            <div class="icon-wrapper color-purple">
+              <mat-icon>workspace_premium</mat-icon>
+            </div>
+          </div>
+          <p class="card-footer">entitlement amount</p>
+        </div>
+
+        <div class="card">
+          <div class="card-content">
+            <div class="info">
+              <span class="label">Years of service</span>
+              <span class="value">{{ record.yearsWorked ?? record.yearsworked }}</span>
+            </div>
+            <div class="icon-wrapper color-blue">
+              <mat-icon>schedule</mat-icon>
+            </div>
+          </div>
+          <p class="card-footer">completed tenure</p>
+        </div>
+
+        <div class="card">
+          <div class="card-content">
+            <div class="info">
+              <span class="label">Last salary</span>
+              <span class="value">{{ currencySymbol() }} {{ (record.lastSalary ?? record.lastsalary) | number:'1.2-2' }}</span>
+            </div>
+            <div class="icon-wrapper color-amber">
+              <mat-icon>payments</mat-icon>
+            </div>
+          </div>
+          <p class="card-footer">salary basis</p>
+        </div>
+
+        <div class="card">
+          <div class="card-content">
+            <div class="info">
+              <span class="label">Calculation method</span>
+              <span class="value value-sm">{{ getCalcTypeLabel(record.calculationType ?? record.calculationtype) }}</span>
+            </div>
+            <div class="icon-wrapper color-green">
+              <mat-icon>calculate</mat-icon>
+            </div>
+          </div>
+          <p class="card-footer">policy formula</p>
+        </div>
+      </div>
+
+      <div class="section-tabs single-status">
+        <button type="button" class="active">
+          Gratuity Status: {{ getStatusLabel(record.paymentStatus ?? record.paymentstatus) }}
+        </button>
+      </div>
+
+      <div class="cards-stack">
+        <article class="record-card">
+          <div class="card-body">
+            <div class="card-top">
+              <div>
+                <h2>{{ currencySymbol() }} {{ (record.totalAmount ?? record.totalamount) | number:'1.2-2' }}</h2>
+                <p>Policy: {{ record.configRuleName || record.configrulename || 'Company gratuity policy' }}</p>
+              </div>
+              <span class="status-pill" [ngClass]="getStatusClass(record.paymentStatus ?? record.paymentstatus)">
+                {{ getStatusLabel(record.paymentStatus ?? record.paymentstatus) }}
+              </span>
+            </div>
+
+            @if ((record.paymentStatus ?? record.paymentstatus)?.toLowerCase() === 'calculated') {
+              <div class="awaiting-box">
+                <mat-icon>info</mat-icon>
+                <span>Calculated and awaiting management approval.</span>
+              </div>
+            } @else if ((record.paymentStatus ?? record.paymentstatus)?.toLowerCase() === 'approved') {
+              <div class="awaiting-box approval">
+                <mat-icon>task_alt</mat-icon>
+                <span>Approved and awaiting disbursement.</span>
+              </div>
+            } @else if ((record.paymentStatus ?? record.paymentstatus)?.toLowerCase() === 'cancelled') {
+              <div class="awaiting-box rejected">
+                <mat-icon>cancel</mat-icon>
+                <span>Record has been cancelled.</span>
+              </div>
+            }
+
+            <div class="meta-grid compact">
+              <div>
+                <p>Payroll handling</p>
+                <strong>{{ (record.periodId ?? record.periodid) ? 'Linked payroll period' : 'Off-cycle / manual' }}</strong>
+              </div>
+              <div>
+                <p>Payment method</p>
+                <strong>{{ getPaymentMethodLabel(record.paymentMethod ?? record.paymentmethod) }}</strong>
+              </div>
+              <div>
+                <p>Approved on</p>
+                <strong>{{ (record.approvedAt ?? record.approvedat) ? ((record.approvedAt ?? record.approvedat) | date:'dd MMM yyyy') : 'Pending' }}</strong>
+              </div>
+              <div>
+                <p>Paid on</p>
+                <strong>{{ (record.paidAt ?? record.paidat) ? ((record.paidAt ?? record.paidat) | date:'dd MMM yyyy') : 'Not paid yet' }}</strong>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      @if (record.notes) {
+        <div class="history-card notes-card">
+          <h4><mat-icon>notes</mat-icon> Notes</h4>
+          <p>{{ record.notes }}</p>
+        </div>
+      }
+
+      <div class="history-card timeline-card">
+        <h4>Status Timeline</h4>
+        <div class="timeline">
+          <div class="timeline-step done">
+            <div class="step-dot done"></div>
+            <div class="step-content">
+              <span class="step-title">Calculated</span>
+              <span class="step-sub">Gratuity amount has been computed.</span>
+            </div>
+          </div>
+
+          <div class="timeline-step" [class.done]="['approved','paid'].includes((record.paymentStatus ?? record.paymentstatus)?.toLowerCase())">
+            <div class="step-dot" [class.done]="['approved','paid'].includes((record.paymentStatus ?? record.paymentstatus)?.toLowerCase())"></div>
+            <div class="step-content">
+              <span class="step-title">Approved</span>
+              <span class="step-sub">Reviewed and approved by management.</span>
+            </div>
+          </div>
+
+          <div class="timeline-step" [class.done]="(record.paymentStatus ?? record.paymentstatus)?.toLowerCase() === 'paid'">
+            <div class="step-dot" [class.done]="(record.paymentStatus ?? record.paymentstatus)?.toLowerCase() === 'paid'"></div>
+            <div class="step-content">
+              <span class="step-title">Paid</span>
+              <span class="step-sub">Gratuity has been disbursed to employee.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

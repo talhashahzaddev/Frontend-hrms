@@ -1,0 +1,114 @@
+<div class="gratuity-rules-container">
+  <!-- Page Header -->
+  <div class="page-header-wrapper">
+    <div class="page-header">
+      <div class="title-section">
+        <button class="icon-button back-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="title-text-group">
+          <h1 class="title">Gratuity Rules</h1>
+          <p class="subtitle">Define gratuity entitlement policies based on years of service.</p>
+        </div>
+      </div>
+      <button class="create-rule-btn" (click)="openRuleDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Add Gratuity Policy</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="text-left">Rule Name</th>
+            <th class="text-center">Min. Years</th>
+            <th class="text-center">Calc. Type</th>
+            <th class="text-right">Calc. Value</th>
+            <th class="text-center">Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+          <tr>
+            <td colspan="6" class="text-center" style="padding: 3rem;">
+              <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
+            </td>
+          </tr>
+          } @else if (gratuityRules().length === 0) {
+          <tr>
+            <td colspan="6" class="text-center" style="padding: 4rem;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                <h3 style="color: #64748b; font-weight: 500; margin: 0;">No gratuity rules defined yet.</h3>
+                <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+                  <mat-icon>add</mat-icon>
+                  <span>Create rule</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          @for (rule of gratuityRules(); track rule.id) {
+          <tr class="table-row" [class.inactive-row]="!(rule.isActive ?? rule.isactive)">
+            <td class="text-left">
+              <div class="rule-name-with-icon">
+                <div class="rule-icon-box" [ngClass]="getCalcTypeClass(rule.calculationType ?? rule.calculationtype)">
+                  <mat-icon>{{ getRuleIcon(rule.calculationType ?? rule.calculationtype) }}</mat-icon>
+                </div>
+                <span class="font-semibold">{{ rule.configRuleName || rule.configrulename }}</span>
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="highlight-val">{{ rule.yearsRequired ?? rule.yearsrequired }} yrs</span>
+            </td>
+            <td class="text-center">
+              <span class="calc-type-badge" [ngClass]="getCalcTypeClass(rule.calculationType ?? rule.calculationtype)">
+                <mat-icon>{{ getRuleIcon(rule.calculationType ?? rule.calculationtype) }}</mat-icon>
+                {{ getCalcTypeLabel(rule.calculationType ?? rule.calculationtype) }}
+              </span>
+            </td>
+            <td class="text-right">
+              <span class="highlight-val">
+                @if ((rule.calculationType ?? rule.calculationtype) === 'percentage') {
+                  {{ rule.calculationValue ?? rule.calculationvalue }}%
+                } @else {
+                  {{ currencySymbol() }} {{ (rule.calculationValue ?? rule.calculationvalue) | number:'1.2-2' }}
+                }
+              </span>
+            </td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="(rule.isActive ?? rule.isactive) ? 'status-active' : 'status-inactive'">
+                {{ (rule.isActive ?? rule.isactive) ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="text-right action-cell">
+              <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
+                (click)="editRule(rule)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule)"
+                [title]="(rule.isActive ?? rule.isactive) ? 'Deactivate' : 'Activate'">
+                <mat-icon>{{ (rule.isActive ?? rule.isactive) ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn text-muted hover-danger"
+                (click)="onDelete(rule.id, rule.configRuleName || rule.configrulename)" title="Delete Rule">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="table-footer">
+      <p>Showing {{ gratuityRules().length }} of {{ gratuityRules().length }} policies</p>
+    </div>
+  </div>
+</div>
