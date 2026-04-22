@@ -1,29 +1,52 @@
-<!-- KRA Management Container -->
 <div class="kra-management-container">
 
-  <!-- Page Header -->
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
   <div class="page-header">
     <div class="header-left">
-      <h1 class="page-title">Key Result Areas (KRAs)</h1>
-      <p class="page-subtitle">Define and manage top-level performance indicators for the organization.</p>
+      <div class="header-icon">
+        <mat-icon>business</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Performance Management</h1>
+        <p class="page-subtitle">Manage KRAs and goals for organizational performance tracking</p>
+      </div>
     </div>
     <div class="header-actions">
-      <button *ngIf="hasHRRole()"
-              (click)="openCreateDialog()"
-              class="btn-primary">
-        <span class="material-icon">add</span>
-        New KRA
+      <button *ngIf="selectedTab === 0" (click)="openCreateDialog()" class="btn-primary">
+        <mat-icon>add</mat-icon> New KRA
+      </button>
+      <button *ngIf="selectedTab === 1" (click)="openCreateGoalDialog()" class="btn-primary">
+        <mat-icon>add</mat-icon> Add Goal
       </button>
     </div>
   </div>
 
-  <!-- KRA Table Section -->
-  <div class="section-card" [formGroup]="filterForm">
+  <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
+  <div class="page-tabs">
+    <button class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+      <mat-icon>category</mat-icon>
+      <span>KRA Management</span>
+      <span class="tab-badge" *ngIf="filteredKRAs.length > 0">{{ filteredKRAs.length }}</span>
+    </button>
+    <button class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+      <mat-icon>flag</mat-icon>
+      <span>Goals</span>
+      <span class="tab-badge" *ngIf="goals.length > 0">{{ goals.length }}</span>
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 1 — KRA MANAGEMENT                                             -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div [ngSwitch]="selectedTab" class="tab-content-wrapper">
+    <div *ngSwitchCase="0" class="tab-content">
+
+    <!-- KRA Table Section -->
+    <div class="section-card" [formGroup]="filterForm">
 
     <!-- Search & Filter Bar -->
     <div class="filter-bar">
       <div class="filter-left filters-wrapper">
-        <!-- Search -->
         <div class="search-wrap">
           <span class="search-icon material-icon">search</span>
           <input class="search-input"
@@ -31,7 +54,6 @@
                  placeholder="Search..." />
         </div>
 
-        <!-- Status Filter -->
         <div class="select-wrap">
           <select class="filter-select" formControlName="status">
             <option value="">All</option>
@@ -41,13 +63,11 @@
           <span class="select-arrow material-icon">expand_more</span>
         </div>
 
-        <!-- Apply Filters -->
         <button class="btn-icon" (click)="applyFilters()" title="Apply Filters">
           <span class="material-icon">filter_list</span>
         </button>
       </div>
 
-      <!-- Clear Filters -->
       <div class="filter-right">
         <button class="btn-icon"
                 (click)="clearFilters()"
@@ -105,16 +125,20 @@
                   <mat-icon>visibility</mat-icon>
                   <span>View Details</span>
                 </button>
-                <button mat-menu-item (click)="openEditDialog(kra)" *ngIf="hasHRRole()">
+
+                <button mat-menu-item (click)="openEditDialog(kra)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
-                <button mat-menu-item (click)="toggleKRAStatus(kra)" *ngIf="hasHRRole()">
+
+                <button mat-menu-item (click)="toggleKRAStatus(kra)">
                   <mat-icon>{{ kra.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
                   <span>{{ kra.isActive ? 'Deactivate' : 'Activate' }}</span>
                 </button>
-                <mat-divider *ngIf="hasHRRole()"></mat-divider>
-                <button mat-menu-item (click)="deleteKRA(kra)" *ngIf="hasHRRole()">
+
+                <mat-divider></mat-divider>
+
+                <button mat-menu-item (click)="deleteKRA(kra)">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
@@ -129,7 +153,7 @@
         <span class="material-icon empty-icon">inbox</span>
         <h3>No KRAs Found</h3>
         <p>No KRAs match your current filters.</p>
-        <button *ngIf="hasHRRole()" class="btn-primary" (click)="openCreateDialog()">
+        <button class="btn-primary" (click)="openCreateDialog()">
           <span class="material-icon">add</span>
           Create Your First KRA
         </button>
@@ -154,31 +178,25 @@
       </mat-paginator>
     </div>
   </div>
-
-  <!-- Goals Section -->
-  <div class="goals-section">
-
-    <!-- Goals Section Header -->
-    <div class="goals-header-row">
-      <div class="goals-title-wrap">
-        <h2 class="goals-title">Goals Management</h2>
-      </div>
-      <button *ngIf="hasHRRole()"
-              (click)="openCreateGoalDialog()"
-              class="btn-text-primary">
-        Add Goal
-      </button>
     </div>
 
-    <!-- Goals Card -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- TAB 2 — GOALS MANAGEMENT                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div *ngSwitchCase="1" class="tab-content">
+
+    <!-- Goals Management Section -->
     <div class="section-card">
 
-    <!-- Goals Filter Bar -->
+      <div class="section-header">
+        <h3>All Goals <span class="count-badge">{{ goals.length }}</span></h3>
+      </div>
+
       <div class="filter-bar">
         <div class="filter-left">
           <div class="search-wrap">
             <span class="search-icon material-icon">search</span>
-            <input class="search-input" 
+            <input class="search-input"
                    [(ngModel)]="goalsSearchTerm"
                    (ngModelChange)="filterGoals()"
                    placeholder="Search Goals..." />
@@ -186,7 +204,6 @@
         </div>
       </div>
 
-      <!-- Goals Table -->
       <div class="table-wrap" *ngIf="!isLoadingGoals">
         <table class="data-table">
           <thead>
@@ -205,7 +222,6 @@
             <tr *ngFor="let goal of goalsDataSource.data" class="table-row">
               <td>
                 <div class="cell-title">{{ goal.title }}</div>
-                <!-- <div class="cell-sub" *ngIf="goal.description">{{ goal.description }}</div> -->
               </td>
               <td>
                 <span class="kra-link-badge">
@@ -214,7 +230,8 @@
               </td>
               <td>
                 <span class="assigned-to-text">
- {{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}                </span>
+                  {{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}
+                </span>
               </td>
               <td class="date-cell">{{ goal.startDate | date:'MMM dd, yyyy' }}</td>
               <td class="date-cell">{{ goal.endDate | date:'MMM dd, yyyy' }}</td>
@@ -232,25 +249,31 @@
                 <button mat-icon-button [matMenuTriggerFor]="goalMenu" class="action-btn">
                   <span style="font-weight: normal; font-size: 20px;">⋮</span>
                 </button>
+
                 <mat-menu #goalMenu="matMenu">
                   <button mat-menu-item (click)="viewGoalDetails(goal)">
                     <mat-icon>visibility</mat-icon>
                     <span>View Details</span>
                   </button>
-                  <button mat-menu-item (click)="openAssignGoalDialog(goal)" *ngIf="hasHRRole()">
+
+                  <button mat-menu-item (click)="openAssignGoalDialog(goal)">
                     <mat-icon>person_add</mat-icon>
                     <span>Assign Goal</span>
                   </button>
-                  <button mat-menu-item (click)="openEditGoalDialog(goal)" *ngIf="hasHRRole()">
+
+                  <button mat-menu-item (click)="openEditGoalDialog(goal)">
                     <mat-icon>edit</mat-icon>
                     <span>Edit</span>
                   </button>
-                  <button mat-menu-item (click)="toggleGoalStatus(goal)" *ngIf="hasHRRole()">
+
+                  <button mat-menu-item (click)="toggleGoalStatus(goal)">
                     <mat-icon>{{ goal.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
                     <span>{{ goal.isActive ? 'Deactivate' : 'Activate' }}</span>
                   </button>
-                  <mat-divider *ngIf="hasHRRole()"></mat-divider>
-                  <button mat-menu-item (click)="deleteGoal(goal)" *ngIf="hasHRRole()">
+
+                  <mat-divider></mat-divider>
+
+                  <button mat-menu-item (click)="deleteGoal(goal)">
                     <mat-icon>delete</mat-icon>
                     <span>Delete</span>
                   </button>
@@ -260,25 +283,22 @@
           </tbody>
         </table>
 
-        <!-- Empty State -->
         <div *ngIf="goals.length === 0" class="empty-state">
           <span class="material-icon empty-icon">flag</span>
           <h3>No Goals Found</h3>
           <p>Create your first goal to get started.</p>
-          <button *ngIf="hasHRRole()" class="btn-primary" (click)="openCreateGoalDialog()">
+          <button class="btn-primary" (click)="openCreateGoalDialog()">
             <span class="material-icon">add</span>
             Create Your First Goal
           </button>
         </div>
       </div>
 
-      <!-- Goals Loading -->
       <div class="loading-state" *ngIf="isLoadingGoals">
         <mat-spinner diameter="40"></mat-spinner>
         <p>Loading Goals...</p>
       </div>
 
-      <!-- Goals Footer -->
       <div class="goals-footer" *ngIf="!isLoadingGoals && goals.length > 0">
         <mat-paginator
           [length]="totalGoals"
@@ -290,27 +310,19 @@
         </mat-paginator>
       </div>
     </div>
-  </div>
 
-  <!-- Employee Goals Section -->
-  <div class="goals-section">
+    <!-- Employee Goals Section -->
+    <div class="section-card" style="margin-top: 24px;">
 
-    <!-- Employee Goals Section Header -->
-    <div class="goals-header-row">
-      <div class="goals-title-wrap">
-        <h2 class="goals-title">Employee Goals</h2>
+      <div class="section-header">
+        <h3>Employee Goals <span class="count-badge">{{ employeeGoals.length }}</span></h3>
       </div>
-    </div>
 
-    <!-- Employee Goals Card -->
-    <div class="section-card">
-
-    <!-- Employee Goals Filter Bar -->
       <div class="filter-bar">
         <div class="filter-left">
           <div class="search-wrap">
             <span class="search-icon material-icon">search</span>
-            <input class="search-input" 
+            <input class="search-input"
                    [(ngModel)]="employeeGoalsSearchTerm"
                    (ngModelChange)="filterEmployeeGoals()"
                    placeholder="Search Employee Goals..." />
@@ -318,7 +330,6 @@
         </div>
       </div>
 
-      <!-- Employee Goals Table -->
       <div class="table-wrap" *ngIf="!isLoadingEmployeeGoals">
         <table class="data-table">
           <thead>
@@ -364,24 +375,29 @@
                 <button mat-icon-button [matMenuTriggerFor]="employeeGoalMenu" class="action-btn">
                   <span style="font-weight: normal; font-size: 20px;">⋮</span>
                 </button>
+
                 <mat-menu #employeeGoalMenu="matMenu">
                   <button mat-menu-item (click)="viewEmployeeGoalDetails(goal)">
                     <mat-icon>visibility</mat-icon>
                     <span>View Details</span>
                   </button>
+
                   <mat-divider></mat-divider>
+
                   <button mat-menu-item 
                           (click)="updateGoalStatusTo(goal, 'ToStart')"
                           [disabled]="goal.progress.toLowerCase() === 'tostart'">
                     <mat-icon>play_arrow</mat-icon>
                     <span>Start</span>
                   </button>
+
                   <button mat-menu-item 
                           (click)="updateGoalStatusTo(goal, 'InProgress')"
                           [disabled]="goal.progress.toLowerCase() === 'inprogress'">
                     <mat-icon>loop</mat-icon>
                     <span>In Progress</span>
                   </button>
+
                   <button mat-menu-item 
                           (click)="updateGoalStatusTo(goal, 'Completed')"
                           [disabled]="goal.progress.toLowerCase() === 'completed'">
@@ -394,7 +410,6 @@
           </tbody>
         </table>
 
-        <!-- Empty State -->
         <div *ngIf="employeeGoals.length === 0" class="empty-state">
           <span class="material-icon empty-icon">flag</span>
           <h3>No Employee Goals Found</h3>
@@ -402,13 +417,11 @@
         </div>
       </div>
 
-      <!-- Employee Goals Loading -->
       <div class="loading-state" *ngIf="isLoadingEmployeeGoals">
         <mat-spinner diameter="40"></mat-spinner>
         <p>Loading Employee Goals...</p>
       </div>
 
-      <!-- Employee Goals Footer -->
       <div class="goals-footer" *ngIf="!isLoadingEmployeeGoals && employeeGoals.length > 0">
         <mat-paginator
           [length]="totalEmployeeGoals"
@@ -421,5 +434,5 @@
       </div>
     </div>
   </div>
-
-</div>
+    </div>
+  </div>

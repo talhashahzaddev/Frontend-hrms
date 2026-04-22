@@ -6,8 +6,8 @@
     <p>Loading performance data...</p>
   </div>
 
-  <!-- Employee Dashboard (visible only to non-HR users) -->
-  <div *ngIf="!hasHRRole() && !isLoading">
+  <!-- Employee Dashboard (visible to all users) -->
+  <div *ngIf="!isLoading">
 
     <!-- Header Section -->
     <div class="page-header">
@@ -22,7 +22,8 @@
 
     <!-- Performance Stats Grid -->
     <div class="stats-grid">
-      <!-- My Performance Card -->
+
+      <!-- Current Rating Card -->
       <mat-card class="stat-card stat-card-primary">
         <mat-card-content>
           <div class="stat-item">
@@ -34,7 +35,7 @@
               <div class="stat-value">{{ currentRating || 0 | number:'1.1-1' }}</div>
               <div class="stat-footer">
                 <div class="rating-stars">
-                  <mat-icon *ngFor="let star of starRatings" 
+                  <mat-icon *ngFor="let star of starRatings"
                             [class.filled]="star <= (currentRating || 0)">
                     {{ star <= (currentRating || 0) ? 'star' : 'star_border' }}
                   </mat-icon>
@@ -81,120 +82,201 @@
         </mat-card-content>
       </mat-card>
 
-      <!-- Last Appraisal Card -->
-      <!-- <mat-card class="stat-card stat-card-warning" >
-        <mat-card-content>
-          <div class="stat-item">
-            <div class="stat-icon-wrapper">
-              <mat-icon class="stat-icon">calendar_today</mat-icon>
-            </div>
-            <div class="stat-details">
-              <div class="stat-label">Last Review</div>
-              <div class="stat-value">{{ myPerformanceMetrics.lastAppraisalDate | date:'MMM dd' }}</div>
-              <div class="stat-footer">
-                <span class="stat-hint">{{ myPerformanceMetrics.lastAppraisalDate | date:'yyyy' }}</span>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card> -->
     </div>
 
     <!-- Main Content Section -->
-   <div class="main-content-section">
+    <div class="main-content-section">
 
-  <!-- HEADER -->
-  <mat-card class="content-card appraisals-card">
+      <!-- HR Appraisals Card -->
+      <mat-card class="content-card appraisals-card">
 
-    <div class="card-header">
-      <h3>
-        <mat-icon>assessment</mat-icon>
-        HR Appraisals
-      </h3>
+        <div class="card-header">
+          <h3>
+            <mat-icon>assessment</mat-icon>
+            HR Appraisals Given to Me
+          </h3>
+        </div>
+
+        <mat-card-content>
+
+          <!-- Table -->
+          <div *ngIf="employeeHrReviews.length > 0" class="table-container">
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="hrReviewsDataSource" class="appraisals-table">
+
+                <!-- Cycle -->
+                <ng-container matColumnDef="cycleName">
+                  <th mat-header-cell *matHeaderCellDef>Cycle</th>
+                  <td mat-cell *matCellDef="let review">
+                    <div class="cycle-info">
+                      <mat-icon>schedule</mat-icon>
+                      <span>{{ review.cycleName }}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Employee -->
+                <ng-container matColumnDef="employeeName">
+                  <th mat-header-cell *matHeaderCellDef>Employee</th>
+                  <td mat-cell *matCellDef="let review">
+                    <span class="name-primary">{{ review.employeeName }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- HR Name -->
+                <ng-container matColumnDef="kraName">
+                  <th mat-header-cell *matHeaderCellDef>HR Reviewer</th>
+                  <td mat-cell *matCellDef="let review">
+                    <span class="name-primary">{{ review.hrName }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- Rating -->
+                <ng-container matColumnDef="finalRating">
+                  <th mat-header-cell *matHeaderCellDef>Rating</th>
+                  <td mat-cell *matCellDef="let review">
+                    <div class="star-row">
+                      <mat-icon *ngFor="let star of [1,2,3,4,5]"
+                                [ngClass]="getStarClass(star, +review.finalRating)">star</mat-icon>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Status -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
+                  <td mat-cell *matCellDef="let review" class="col-right">
+                    <mat-chip [class]="getStatusChipClass(review.status)">
+                      {{ review.status | titlecase }}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Comments -->
+                <ng-container matColumnDef="hrComments">
+                  <th mat-header-cell *matHeaderCellDef>Comments</th>
+                  <td mat-cell *matCellDef="let review">
+                    <span class="goal-cell">{{ review.hrComments || 'No comments' }}</span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+              </table>
+            </div>
+          </div>
+
+          <!-- Empty -->
+          <div *ngIf="!employeeHrReviews.length" class="empty-state">
+            <mat-icon>assessment</mat-icon>
+            <h3>No HR Reviews Found</h3>
+            <p>No performance reviews available.</p>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Reviews Received Section -->
+      <section>
+        <div class="section-header">
+          <h2>Reviews Received from Managers</h2>
+          <span class="section-meta">{{ receivedReviews.length }} Total Reviews</span>
+        </div>
+
+        <div class="table-card">
+
+          <!-- Loading -->
+          <div *ngIf="isLoadingReceivedReviews" class="loading-container">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Loading received reviews...</p>
+          </div>
+
+          <div *ngIf="!isLoadingReceivedReviews" class="table-container">
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="receivedReviewsDataSource" class="appraisals-table">
+
+                <!-- Cycle Name -->
+                <ng-container matColumnDef="cycleName">
+                  <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
+                  <td mat-cell *matCellDef="let review">
+                    <span class="goal-cell">{{ review.cycleName }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- Manager Name -->
+                <ng-container matColumnDef="employeeName">
+                  <th mat-header-cell *matHeaderCellDef>Manager</th>
+                  <td mat-cell *matCellDef="let review">
+                    <div class="employee-cell">
+                      <span class="employee-name">{{ review.employeeName }}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- KRA Name -->
+                <ng-container matColumnDef="kraName">
+                  <th mat-header-cell *matHeaderCellDef>KRA Name</th>
+                  <td mat-cell *matCellDef="let review">
+                    <mat-chip [class]="getKraChipClass(review.kraName)">
+                      {{ review.kraName }}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+
+                <!-- Goal Name -->
+                <ng-container matColumnDef="goalName">
+                  <th mat-header-cell *matHeaderCellDef>Goal Name</th>
+                  <td mat-cell *matCellDef="let review">
+                    <span class="goal-cell">{{ review.goalName }}</span>
+                  </td>
+                </ng-container>
+
+                <!-- Rating -->
+                <ng-container matColumnDef="rating">
+                  <th mat-header-cell *matHeaderCellDef>Rating</th>
+                  <td mat-cell *matCellDef="let review">
+                    <div class="star-row">
+                      <mat-icon *ngFor="let star of [1,2,3,4,5]"
+                                [ngClass]="getStarClass(star, +review.rating)">star</mat-icon>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Actions -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let review">
+                    <button mat-icon-button [matMenuTriggerFor]="receivedActionMenu">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #receivedActionMenu="matMenu">
+                      <button mat-menu-item>
+                        <mat-icon>visibility</mat-icon>
+                        <span>View Details</span>
+                      </button>
+                    </mat-menu>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="receivedReviewDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let review; columns: receivedReviewDisplayedColumns;"></tr>
+
+              </table>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="receivedReviewsDataSource.data.length === 0" class="empty-state">
+              <mat-icon>assessment</mat-icon>
+              <h3>No Reviews Received</h3>
+              <p>You haven't received any reviews from your managers yet.</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
     </div>
 
-    <mat-card-content>
-
-      <!-- SIMPLE TABLE (NO FILTERS, NO METRICS) -->
-      <div class="table-container" *ngIf="employeeHrReviews.length > 0">
-
-        <table mat-table [dataSource]="hrReviewsDataSource" class="appraisals-table">
-
-          <!-- Cycle -->
-          <ng-container matColumnDef="cycleName">
-            <th mat-header-cell *matHeaderCellDef>Cycle</th>
-            <td mat-cell *matCellDef="let review">
-              <mat-icon>schedule</mat-icon>
-              {{ review.cycleName }}
-            </td>
-          </ng-container>
-
-          <!-- Employee -->
-          <ng-container matColumnDef="employeeName">
-            <th mat-header-cell *matHeaderCellDef>Employee</th>
-            <td mat-cell *matCellDef="let review">
-              <mat-icon>person</mat-icon>
-              {{ review.employeeName }}
-            </td>
-          </ng-container>
-
-          <!-- KRA -->
-          <ng-container matColumnDef="kraName">
-            <th mat-header-cell *matHeaderCellDef>Hr Name</th>
-            <td mat-cell *matCellDef="let review">
-              {{ review.hrName }}
-            </td>
-          </ng-container>
-
-          <!-- Rating -->
-          <ng-container matColumnDef="finalRating">
-            <th mat-header-cell *matHeaderCellDef>Rating</th>
-            <td mat-cell *matCellDef="let review">
-
-              <span class="rating-value">
-                {{ review.finalRating }}
-              </span>
-
-            </td>
-          </ng-container>
-
-          <!-- Status -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let review">
-              <mat-chip>
-                {{ review.status }}
-              </mat-chip>
-            </td>
-          </ng-container>
-
-          <!-- COMMENTS -->
-          <ng-container matColumnDef="hrComments">
-            <th mat-header-cell *matHeaderCellDef>Comments</th>
-            <td mat-cell *matCellDef="let review">
-              {{ review.hrComments || 'No comments' }}
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        </table>
-
-      </div>
-
-      <!-- EMPTY -->
-      <div *ngIf="!employeeHrReviews.length" class="empty-state">
-        <mat-icon>assessment</mat-icon>
-        <h3>No HR Reviews Found</h3>
-        <p>No performance reviews available.</p>
-      </div>
-
-    </mat-card-content>
-
-  </mat-card>
-
-</div>
-
-   
+  </div>
 </div>

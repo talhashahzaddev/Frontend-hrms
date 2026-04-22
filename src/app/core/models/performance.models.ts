@@ -1,26 +1,26 @@
 export interface SkillSet {
   skillId: string;
   skillName: string;
-  category: string;
+  category?: string;
   description?: string;
-  skillLevelScale: number[];
   isActive: boolean;
   createdAt: string;
+  employeeCount: number; // NEW
 }
 
 export interface EmployeeSkill {
   employeeSkillId: string;
   employeeId: string;
-  employeeName?: string;
+  employeeName: string;
+  employeeEmail?: string;
   skillId: string;
   skillName: string;
+  skillCategory?: string;
   proficiencyLevel: number;
   assessedBy?: string;
-  assessorName?: string;
   lastAssessed?: string;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  assessorName?: string;
 }
 
 // export interface KRA {
@@ -304,10 +304,9 @@ export interface AppraisalFilter {
 }
 export interface CreateSkillSetRequest {
   skillName: string;
-  category: string;
+  category?: string;
   description?: string;
-  skillLevelScale: number[];
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 export interface PerformanceReportFilter {
@@ -327,7 +326,7 @@ export interface UpdateSkillSetRequest {
 }
 
 export interface CreateEmployeeSkillRequest {
-  employeeId: string;
+  //employeeId: string;
   skillId: string;
   proficiencyLevel: number;
   assessedBy?: string;
@@ -335,10 +334,10 @@ export interface CreateEmployeeSkillRequest {
 }
 
 export interface UpdateEmployeeSkillRequest {
-  proficiencyLevel?: number;
+  proficiencyLevel: number; // 1-10
   assessedBy?: string;
-  notes?: string;
   lastAssessed?: string;
+  notes?: string;
 }
 
 // export interface CreateAppraisalCycleRequest {
@@ -600,6 +599,9 @@ export interface Goal {
   createdBy?: string;
   createdByName?: string;
   isActive: boolean;
+  isSelfAssessmentEnable?: boolean;
+  managerReview?: boolean;
+  isAppraisalEnable?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -662,3 +664,172 @@ export interface HrReviewDto {
   createdAt: string;
   updatedAt: string;
 }
+//new models
+export interface SkillWithEmployees extends SkillSet {
+  employees: EmployeeSkillDetail[];
+}
+
+export interface EmployeeSkillDetail {
+  employeeSkillId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeEmail?: string;
+  department?: string;
+  position?: string;
+  proficiencyLevel: number;
+  notes?: string;
+  assessorName?: string;
+  lastAssessed?: string;
+}
+
+// Row in the "all employees with skills" table
+export interface EmployeeSkillSummary {
+  employeeId: string;
+  employeeName: string;
+  email?: string;
+  department?: string;
+  position?: string;
+  skillNames: string[];
+  skillCount: number;
+  averageProficiency?: number;
+}
+
+// Full detail for view dialog
+export interface EmployeeSkillFullDetail {
+  employeeId: string;
+  employeeName: string;
+  email?: string;
+  department?: string;
+  position?: string;
+  skills: EmployeeSkill[];
+}
+
+export interface CreateEmployeeSkillRequest {
+  employeeId: string;
+  skillId: string;
+  proficiencyLevel: number; // 1-10
+  assessedBy?: string;
+  lastAssessed?: string;
+  notes?: string;
+}
+
+export interface PagedResult<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+// Open API skill categories and their skills
+export interface SkillCategory {
+  name: string;
+  skills: string[];
+}
+
+// Predefined skill categories with popular skills
+export const SKILL_CATEGORIES: SkillCategory[] = [
+  {
+    name: 'Technical',
+    skills: [
+      'JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'C++', 'Go', 'Rust', 'Ruby', 'PHP',
+      'Swift', 'Kotlin', 'Scala', 'R', 'MATLAB', 'SQL', 'NoSQL', 'GraphQL', 'REST APIs',
+      'Angular', 'React', 'Vue.js', 'Node.js', 'Django', 'Spring Boot', '.NET', 'Laravel',
+      'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'CI/CD', 'Git', 'Linux', 'Terraform',
+      'Machine Learning', 'Deep Learning', 'Data Science', 'Data Analysis', 'Power BI', 'Tableau',
+      'Cybersecurity', 'Penetration Testing', 'Network Administration', 'Database Administration',
+      'Microservices', 'System Design', 'Algorithms & Data Structures', 'Agile/Scrum', 'DevOps'
+    ]
+  },
+  {
+    name: 'Soft Skills',
+    skills: [
+      'Communication', 'Leadership', 'Teamwork', 'Problem Solving', 'Critical Thinking',
+      'Time Management', 'Adaptability', 'Creativity', 'Emotional Intelligence', 'Conflict Resolution',
+      'Negotiation', 'Persuasion', 'Active Listening', 'Empathy', 'Decision Making',
+      'Strategic Thinking', 'Attention to Detail', 'Self-Motivation', 'Resilience', 'Mentoring',
+      'Public Speaking', 'Presentation Skills', 'Written Communication', 'Collaboration', 'Networking'
+    ]
+  },
+  {
+    name: 'Management',
+    skills: [
+      'Project Management', 'Product Management', 'People Management', 'Budget Management',
+      'Risk Management', 'Change Management', 'Performance Management', 'Stakeholder Management',
+      'Resource Planning', 'Strategic Planning', 'OKR Setting', 'KPI Tracking', 'Agile Coaching',
+      'Scrum Master', 'PMP', 'Six Sigma', 'Lean Management', 'Process Improvement',
+      'Business Analysis', 'Requirements Gathering', 'Vendor Management', 'Contract Management'
+    ]
+  },
+  {
+    name: 'Design',
+    skills: [
+      'UI Design', 'UX Design', 'Product Design', 'Graphic Design', 'Motion Design',
+      'Figma', 'Adobe XD', 'Sketch', 'Adobe Photoshop', 'Adobe Illustrator', 'Adobe After Effects',
+      'Brand Identity', 'Typography', 'Color Theory', 'Wireframing', 'Prototyping',
+      'User Research', 'Usability Testing', 'Accessibility Design', 'Design Systems',
+      'Visual Communication', '3D Modeling', 'Video Editing', 'Animation'
+    ]
+  },
+  {
+    name: 'Finance',
+    skills: [
+      'Financial Analysis', 'Accounting', 'Budgeting & Forecasting', 'Financial Reporting',
+      'Tax Compliance', 'Auditing', 'Cost Accounting', 'Payroll Management', 'Accounts Payable',
+      'Accounts Receivable', 'Excel / Financial Modeling', 'QuickBooks', 'SAP Finance',
+      'Investment Analysis', 'Risk Assessment', 'Cash Flow Management', 'IFRS/GAAP',
+      'Corporate Finance', 'Mergers & Acquisitions', 'Valuation'
+    ]
+  },
+  {
+    name: 'Marketing',
+    skills: [
+      'Digital Marketing', 'Content Marketing', 'SEO', 'SEM / PPC', 'Social Media Marketing',
+      'Email Marketing', 'Marketing Automation', 'Brand Management', 'Market Research',
+      'Customer Segmentation', 'CRM', 'HubSpot', 'Salesforce', 'Google Analytics',
+      'Performance Marketing', 'Affiliate Marketing', 'Influencer Marketing',
+      'Copywriting', 'Campaign Management', 'Product Marketing', 'Growth Hacking'
+    ]
+  },
+  {
+    name: 'Sales',
+    skills: [
+      'B2B Sales', 'B2C Sales', 'Inside Sales', 'Enterprise Sales', 'Cold Calling',
+      'Lead Generation', 'Account Management', 'Customer Success', 'CRM Management',
+      'Sales Forecasting', 'Proposal Writing', 'Contract Negotiation', 'Pipeline Management',
+      'Consultative Selling', 'Solution Selling', 'Relationship Building', 'Closing Deals',
+      'Upselling & Cross-selling', 'Channel Sales', 'Partner Management'
+    ]
+  },
+  {
+    name: 'HR',
+    skills: [
+      'Talent Acquisition', 'Recruitment', 'Onboarding', 'Performance Management',
+      'Employee Relations', 'Compensation & Benefits', 'HRIS', 'Learning & Development',
+      'Organizational Development', 'Workforce Planning', 'HR Analytics', 'Policy Development',
+      'Labor Law', 'Payroll', 'Diversity & Inclusion', 'Culture Building', 'HR Business Partnering',
+      'Succession Planning', 'Job Analysis', 'Competency Framework'
+    ]
+  },
+  {
+    name: 'Operations',
+    skills: [
+      'Supply Chain Management', 'Logistics', 'Inventory Management', 'Process Optimization',
+      'Quality Assurance', 'Quality Control', 'ERP Systems', 'SAP', 'Oracle', 'Lean Manufacturing',
+      'Production Planning', 'Warehouse Management', 'Vendor Negotiation', 'Procurement',
+      'Business Process Management', 'Continuous Improvement', 'ISO Standards', 'Compliance',
+      'Facilities Management', 'Fleet Management'
+    ]
+  },
+  {
+    name: 'Customer Service',
+    skills: [
+      'Customer Support', 'Technical Support', 'Help Desk', 'Live Chat Support',
+      'Complaint Resolution', 'Customer Retention', 'Zendesk', 'Freshdesk', 'Salesforce Service Cloud',
+      'Call Center Operations', 'SLA Management', 'CSAT Improvement', 'NPS Tracking',
+      'Escalation Management', 'Knowledge Base Management', 'Customer Journey Mapping'
+    ]
+  }
+];

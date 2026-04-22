@@ -97,6 +97,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
   employeeGoalPageIndex = 0;
   totalEmployeeGoals = 0;
 
+  // Tab management
+  selectedTab = 0;
+
   // Filter form
   filterForm: FormGroup;
 
@@ -137,6 +140,10 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  selectTab(tabIndex: number): void {
+    this.selectedTab = tabIndex;
   }
 
   loadPositions(): void {
@@ -370,7 +377,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
               maxWidth: '90vw',
               data: {
                 kra: response.data,
-                hasEditPermission: this.hasHRRole()
+                hasEditPermission: true
               },
               disableClose: false
             });
@@ -405,10 +412,6 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
 
   getGoalCountForKRA(kraId: string): number {
     return this.goals.filter(goal => goal.kraId === kraId).length;
-  }
-
-  hasHRRole(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
   }
 
   // Helper method to check if filters are applied
@@ -733,15 +736,17 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
           if (response.success) {
             this.notificationService.showSuccess(`Goal status updated to ${status}`);
             this.loadEmployeeGoals();
+            this.loadKRAs(); // Reload KRAs to reflect any changes in goal counts
             
-            // Open self-assessment dialog if status is Completed
-            if (status?.toLowerCase() === 'completed') {
+            // Open self-assessment dialog if status is Completed and self-assessment is enabled for this goal
+            if (status?.toLowerCase() === 'completed' && goal.isSelfAssessmentEnable) {
               this.openSelfAssessmentDialog(goal);
             }
           } else {
             this.notificationService.showError(response.message || 'Failed to update goal status');
           }
           this.isLoadingEmployeeGoals = false;
+          this.loadKRAs(); 
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -823,5 +828,12 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
         }
       });
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Performance', 'Goals & KRAs', actionKey);
+  }
+
+
+
 }
 

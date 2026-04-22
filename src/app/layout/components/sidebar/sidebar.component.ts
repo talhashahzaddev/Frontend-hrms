@@ -182,6 +182,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'trending_up',
       menuName: 'Performance',
       children: [
+        
         { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'My Performance' },
         { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'Performance' },
         { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/cycles', menuName: 'Performance', subMenuName: 'Appraisal Cycles' },

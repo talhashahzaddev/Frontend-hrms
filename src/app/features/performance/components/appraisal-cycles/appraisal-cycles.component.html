@@ -6,7 +6,7 @@
       <h2 class="page-title">Appraisal Cycles</h2>
       <p class="page-subtitle">Manage and track performance review windows for your organization iii.</p>
     </div>
-    <div class="header-actions" *ngIf="hasHRRole()">
+    <div class="header-actions" >
       <button class="btn-create" (click)="openCreateDialog()">
         <span class="material-icons btn-icon">add</span>
         Create Cycle
@@ -111,11 +111,11 @@
               <span class="material-icons">more_vert</span>
             </button>
             <mat-menu #cycleMenu="matMenu" class="cycle-action-menu">
-              <button mat-menu-item (click)="openEditDialog(cycle)" *ngIf="hasHRRole()">
+              <button mat-menu-item (click)="openEditDialog(cycle)">
                 <span class="material-icons menu-icon">edit</span>
                 Edit
               </button>
-              <button mat-menu-item class="menu-item--danger" (click)="deleteCycle(cycle)" *ngIf="hasHRRole()">
+              <button mat-menu-item class="menu-item--danger" (click)="deleteCycle(cycle)" >
                 <span class="material-icons menu-icon">delete</span>
                 Delete
               </button>

@@ -1,816 +1,589 @@
-// import { Component, OnInit } from '@angular/core';
-// import { PerformanceService } from '../../services/performance.service';
-// import { SkillSet } from '../../../../core/models/performance.models';
-
-// import { CommonModule } from '@angular/common';
-
-// @Component({
-//   selector: 'app-skill-matrix',
-//   imports: [CommonModule],
-//   templateUrl: './skill-matrix.component.html',
-//   styleUrl: './skill-matrix.component.scss'
-// })
-// export class SkillMatrixComponent implements OnInit {
-//   skills: SkillSet[] = [];
-//   groupedSkills: { [category: string]: SkillSet[] } = {};
-//   loading = true;
-
-//   constructor(private performanceService: PerformanceService) {}
-
-//   ngOnInit() {
-//     this.performanceService.getSkillsMatrix().subscribe(res => {
-//       this.skills = (res.data || []).map((skill: any) => ({
-//         skillId: skill.skillId,
-//         skillName: skill.skillName,
-//         category: skill.category,
-//         description: skill.description,
-//         skillLevelScale: skill.skillLevelScale,
-//         isActive: skill.isActive,
-//         createdAt: skill.createdAt
-//       }));
-//       this.groupedSkills = this.groupByCategory(this.skills);
-//       this.loading = false;
-//     });
-//   }
-
-//   groupByCategory(skills: SkillSet[]): { [category: string]: SkillSet[] } {
-//     return skills.reduce((acc, skill) => {
-//       if (!acc[skill.category]) acc[skill.category] = [];
-//       acc[skill.category].push(skill);
-//       return acc;
-//     }, {} as { [category: string]: SkillSet[] });
-//   }
-// }
-
+// skill-matrix.component.ts
+import {
+  Component, OnInit, OnDestroy, ChangeDetectorRef,
+  ViewChild, TemplateRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { PerformanceService } from '../../services/performance.service';
-import { EmployeeService } from '../../../employee/services/employee.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { 
-  FormsModule, 
-  ReactiveFormsModule, 
-  FormBuilder, 
-  FormGroup, 
-  Validators 
-} from '@angular/forms';
-import { 
-  CreateSkillSetRequest, 
-  SkillSet,
-  EmployeeSkill,
-  CreateEmployeeSkillRequest,
-  UpdateEmployeeSkillRequest
-} from 'src/app/core/models/performance.models';
-import { Employee } from '../../../../core/models/employee.models';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subject, takeUntil, debounceTime } from 'rxjs';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { CreateSkillDialogComponent } from './create-skill-dialog.component';
-import { AddEmployeeSkillDialogComponent } from './add-employee-skill-dialog.component';
-import { RateEmployeeSkillDialogComponent } from './rate-employee-skill-dialog.component';
-import { Subject, takeUntil } from 'rxjs';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+
+import { PerformanceService } from '../../services/performance.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import {
+  SkillSet, SkillWithEmployees, EmployeeSkill, EmployeeSkillSummary,
+  EmployeeSkillFullDetail, SKILL_CATEGORIES
+} from 'src/app/core/models/performance.models';
 
 @Component({
   selector: 'app-skill-matrix',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatTabsModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatTooltipModule,
-    MatButtonToggleModule
+    CommonModule, FormsModule, ReactiveFormsModule,
+    MatTableModule, MatIconModule, MatButtonModule, MatMenuModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule,
+    MatProgressSpinnerModule, MatChipsModule, MatDialogModule, MatDividerModule
   ],
   templateUrl: './skill-matrix.component.html',
   styleUrl: './skill-matrix.component.scss'
 })
 export class SkillMatrixComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
-  // Skill Sets
-  skills: SkillSet[] = [];
-  filteredSkills: SkillSet[] = [];
-  groupedSkills: { [category: string]: SkillSet[] } = {};
-  groupedSkillsDataSource = new MatTableDataSource<any>([]);
-  categories: string[] = [];
-  loading = true;
-  
-  // Employee Skills
-  employeeSkills: EmployeeSkill[] = [];
-  filteredEmployeeSkills: EmployeeSkill[] = [];
-  filteredEmployeeSkillsDataSource = new MatTableDataSource<EmployeeSkill>([]);
-  employees: Employee[] = [];
-  selectedEmployeeId: string = '';
-  
-  // Forms
-  skillFilterForm: FormGroup;
-  employeeSkillFilterForm: FormGroup;
-  
-  // UI State
+  private searchSubject$ = new Subject<void>();
+  private empSearchSubject$ = new Subject<void>();
+
+  // Templates
+  @ViewChild('createSkillTpl') createSkillTpl!: TemplateRef<any>;
+  @ViewChild('addMySkillTpl') addMySkillTpl!: TemplateRef<any>;
+  @ViewChild('editMySkillTpl') editMySkillTpl!: TemplateRef<any>;
+  @ViewChild('viewSkillTpl') viewSkillTpl!: TemplateRef<any>;
+  @ViewChild('viewEmployeeTpl') viewEmployeeTpl!: TemplateRef<any>;
+  @ViewChild('assessTpl') assessTpl!: TemplateRef<any>;
+
+  // ─── Tab ─────────────────────────────────────────────────────────────
   selectedTab = 0;
-  isLoadingEmployeeSkills = false;
-  managerViewMode: 'my-skills' | 'team-skills' = 'team-skills'; // For managers: view own skills or team skills
-  
-  // Table
-  skillDisplayedColumns: string[] = ['category', 'skillName', 'levelScale', 'status', 'actions'];
-  displayedColumns: string[] = ['employeeName', 'skillName', 'proficiencyLevel', 'assessorName', 'lastAssessed', 'actions'];
-  
-  // Get displayed columns for employee skills table (exclude actions for managers viewing own skills)
-  get employeeSkillsDisplayedColumns(): string[] {
-    if (this.isOnlyManager() && this.managerViewMode === 'my-skills') {
-      // Managers viewing their own skills - no actions column
-      return ['employeeName', 'skillName', 'proficiencyLevel', 'assessorName', 'lastAssessed'];
-    }
-    // Employees or managers viewing team skills - include actions
-    return this.displayedColumns;
-  }
-  
-  pageSize = 10;
-  pageIndex = 0;
-  totalItems = 0;
+
+  // ─── Tab 1: Skill Sets ────────────────────────────────────────────────
+  skills: SkillSet[] = [];
+  totalSkills = 0;
+  loadingSkills = false;
+  skillsPageIndex = 0;
+  skillsPageSize = 10;
+  get skillsTotalPages() { return Math.max(1, Math.ceil(this.totalSkills / this.skillsPageSize)); }
+  skillColumns = ['skillName', 'category', 'employeeCount', 'createdAt', 'status', 'actions'];
+
+  skillsFilter = { search: '', category: '', isActive: null as boolean | null };
+
+  // Employee skills summary (bottom table of tab 1)
+  employeeSkillSummaries: EmployeeSkillSummary[] = [];
+  totalEmployeeSkills = 0;
+  loadingEmpSkills = false;
+  empSkillsPageIndex = 0;
+  empSkillsPageSize = 10;
+  get empSkillsTotalPages() { return Math.max(1, Math.ceil(this.totalEmployeeSkills / this.empSkillsPageSize)); }
+  empSkillColumns = ['employee', 'department', 'skills', 'avgProficiency', 'actions'];
+  empSkillsFilter = { search: '' };
+
+  // ─── Tab 2: My Skills ────────────────────────────────────────────────
+  mySkills: EmployeeSkill[] = [];
+  filteredMySkills: EmployeeSkill[] = [];
+  loadingMySkills = false;
+  mySkillsFilter = '';
+  mySkillColumns = ['category', 'skillName', 'proficiency', 'assessedBy', 'lastAssessed', 'actions'];
+
+  // ─── Shared ──────────────────────────────────────────────────────────
+  allCategories = SKILL_CATEGORIES.map(c => c.name);
+  pageSizeOptions = [5, 10, 25, 50];
+  profLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  // ─── Create Skill Dialog ──────────────────────────────────────────────
+  createSkillForm!: FormGroup;
+  filteredSkillsForCreate: string[] = [];
+  isSubmittingSkill = false;
+
+  // ─── Add My Skill Dialog ──────────────────────────────────────────────
+  addMySkillForm!: FormGroup;
+  filteredSkillsForAdd: SkillSet[] = [];
+  availableSkillCategories: string[] = [];
+  isSubmittingMySkill = false;
+
+  // ─── Edit My Skill Dialog ─────────────────────────────────────────────
+  editMySkillForm!: FormGroup;
+  editingSkill: EmployeeSkill | null = null;
+
+  // ─── View Skill Employees Dialog ──────────────────────────────────────
+  viewingSkill: SkillWithEmployees | null = null;
+  loadingViewSkill = false;
+  viewSkillColumns = ['employee', 'dept', 'proficiency', 'assessor', 'notes'];
+
+  // ─── View Employee Detail Dialog ──────────────────────────────────────
+  viewingEmployee: EmployeeSkillFullDetail | null = null;
+  loadingViewEmployee = false;
+
+  // ─── Assess Dialog ────────────────────────────────────────────────────
+  assessingEmployee: EmployeeSkillSummary | null = null;
+  assessEmployeeSkills: EmployeeSkill[] = [];
+  assessRatings: { [empSkillId: string]: number } = {};
+  assessNotes: { [empSkillId: string]: string } = {};
+  loadingAssessSkills = false;
+  isSubmittingAssessment = false;
 
   constructor(
     private performanceService: PerformanceService,
-    private employeeService: EmployeeService,
     private authService: AuthService,
     private notificationService: NotificationService,
     private fb: FormBuilder,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
-  ) {
-    this.skillFilterForm = this.fb.group({
-      search: [''],
-      category: [''],
-      status: ['']
-    });
-
-    this.employeeSkillFilterForm = this.fb.group({
-      employeeId: [''],
-      search: [''],
-      proficiencyLevel: ['']
-    });
-  }
+  ) {}
 
   ngOnInit() {
+    this.initForms();
     this.loadSkills();
-    this.loadEmployees();
-    if (this.hasHRRole()) {
-      // For HR Managers, show only Skill Sets tab
-      this.selectedTab = 0; // Show Skill Sets tab
-    } else if (this.isOnlyManager()) {
-      // For managers only (not HR Managers), show employee skills tab
-      this.selectedTab = 1; // Show employee skills for managers
-      this.loadEmployeeSkills(); // Load team employee skills
-    } else {
-      // For employees, show employee skills tab
-      this.selectedTab = 1; // Show employee skills for employees
-      this.loadCurrentUserSkills();
+    if (this.hasHRRole() || this.hasManagerRole()) {
+      this.loadEmployeeSkills();
     }
+    this.loadMySkills();
+
+    // Debounced search
+    this.searchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadSkills());
+    this.empSearchSubject$.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => this.loadEmployeeSkills());
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
+
+  private initForms() {
+    this.createSkillForm = this.fb.group({
+      category: ['', Validators.required],
+      skillName: ['', Validators.required],
+      description: [''],
+      isActive: [true]
+    });
+
+    this.addMySkillForm = this.fb.group({
+      category: ['', Validators.required],
+      skillId: ['', Validators.required],
+      proficiencyLevel: [null, Validators.required],
+      notes: ['']
+    });
+
+    this.editMySkillForm = this.fb.group({
+      proficiencyLevel: [null, Validators.required],
+      notes: ['']
+    });
   }
 
+  // ─── Tab ─────────────────────────────────────────────────────────────
+  selectTab(tab: number) {
+    this.selectedTab = tab;
+    if (tab === 1 && this.mySkills.length === 0) this.loadMySkills();
+  }
+
+  // ─── Skills Loading ───────────────────────────────────────────────────
   loadSkills() {
-    this.loading = true;
-    this.performanceService.getSkillsMatrix()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          this.skills = (res.data || []).map((skill: any) => ({
-            skillId: skill.skillId,
-            skillName: skill.skillName,
-            category: skill.category,
-            description: skill.description,
-            skillLevelScale: skill.skillLevelScale,
-            isActive: skill.isActive,
-            createdAt: skill.createdAt
-          }));
-          this.categories = [...new Set(this.skills.map(s => s.category || 'Uncategorized'))];
-          this.applySkillFilters();
-          this.loading = false;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Error loading skills:', error);
-          this.notificationService.showError('Failed to load skills');
-          this.loading = false;
-          this.cdr.markForCheck();
+    this.loadingSkills = true;
+    this.performanceService.getSkillSets({
+      search: this.skillsFilter.search || undefined,
+      category: this.skillsFilter.category || undefined,
+      isActive: this.skillsFilter.isActive ?? undefined,
+      page: this.skillsPageIndex + 1,
+      limit: this.skillsPageSize
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.skills = res.data.data;
+          this.totalSkills = res.data.totalCount;
+          // Rebuild category list from skills
+          const cats = [...new Set(this.skills.map(s => s.category).filter(Boolean))] as string[];
+          // Merge with SKILL_CATEGORIES to always show all
+          this.allCategories = SKILL_CATEGORIES.map(c => c.name);
         }
-      });
+        this.loadingSkills = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load skills');
+        this.loadingSkills = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
-  loadEmployees() {
-    this.employeeService.getEmployees()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          this.employees = res.employees || [];
+  onSkillSearchChange() { this.searchSubject$.next(); }
+  onEmpSearchChange() { this.empSearchSubject$.next(); }
+
+  clearSkillFilters() {
+    this.skillsFilter = { search: '', category: '', isActive: null };
+    this.skillsPageIndex = 0;
+    this.loadSkills();
+  }
+
+  hasSkillFilters() {
+    return !!(this.skillsFilter.search || this.skillsFilter.category || this.skillsFilter.isActive !== null);
+  }
+
+  // ─── Employee Skills Loading ──────────────────────────────────────────
+  loadEmployeeSkills() {
+    this.loadingEmpSkills = true;
+    this.performanceService.getAllEmployeeSkills({
+      search: this.empSkillsFilter.search || undefined,
+      page: this.empSkillsPageIndex + 1,
+      limit: this.empSkillsPageSize
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.employeeSkillSummaries = res.data.data;
+          this.totalEmployeeSkills = res.data.totalCount;
+        }
+        this.loadingEmpSkills = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load employee skills');
+        this.loadingEmpSkills = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // ─── My Skills ───────────────────────────────────────────────────────
+  loadMySkills() {
+    this.loadingMySkills = true;
+    this.performanceService.getMySkills().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.mySkills = res.data;
+          this.applyMySkillFilters();
+        }
+        this.loadingMySkills = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load your skills');
+        this.loadingMySkills = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  applyMySkillFilters() {
+    const q = this.mySkillsFilter.toLowerCase();
+    this.filteredMySkills = q
+      ? this.mySkills.filter(s =>
+          s.skillName.toLowerCase().includes(q) ||
+          (s.skillCategory || '').toLowerCase().includes(q) ||
+          (s.notes || '').toLowerCase().includes(q))
+      : [...this.mySkills];
+  }
+
+  // ─── Create Skill Dialog ──────────────────────────────────────────────
+  openCreateSkillDialog() {
+    this.createSkillForm.reset({ isActive: true });
+    this.filteredSkillsForCreate = [];
+    this.dialog.open(this.createSkillTpl, { width: '520px', disableClose: false });
+  }
+
+  onCreateCategoryChange(cat: string) {
+    const found = SKILL_CATEGORIES.find(c => c.name === cat);
+    this.filteredSkillsForCreate = found ? found.skills : [];
+    this.createSkillForm.get('skillName')?.setValue('');
+  }
+
+  submitCreateSkill() {
+    if (this.createSkillForm.invalid) { this.createSkillForm.markAllAsTouched(); return; }
+    this.isSubmittingSkill = true;
+    const v = this.createSkillForm.value;
+    this.performanceService.createSkillSet({
+      skillName: v.skillName,
+      category: v.category,
+      description: v.description || undefined,
+      isActive: v.isActive !== false
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.notificationService.showSuccess('Skill created successfully');
+          this.dialog.closeAll();
+          this.loadSkills();
+        } else {
+          this.notificationService.showError(res.message || 'Failed to create skill');
+        }
+        this.isSubmittingSkill = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        const msg = err.error?.message || (err.status === 409 ? 'A skill with this name already exists.' : 'Failed to create skill');
+        this.notificationService.showError(msg);
+        this.isSubmittingSkill = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  // ─── Toggle / Delete Skill ────────────────────────────────────────────
+  toggleSkillStatus(skill: SkillSet) {
+    this.performanceService.toggleSkillStatus(skill.skillId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => { this.notificationService.showSuccess('Status updated'); this.loadSkills(); },
+      error: () => this.notificationService.showError('Failed to update status')
+    });
+  }
+
+  deleteSkill(skill: SkillSet) {
+    if (!confirm(`Delete "${skill.skillName}"? ${skill.employeeCount > 0 ? `It will be deactivated (${skill.employeeCount} employees have this skill).` : 'This action cannot be undone.'}`)) return;
+    this.performanceService.deleteSkill(skill.skillId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => { this.notificationService.showSuccess('Skill deleted'); this.loadSkills(); },
+      error: () => this.notificationService.showError('Failed to delete skill')
+    });
+  }
+
+  // ─── View Skill Employees Dialog ──────────────────────────────────────
+  viewSkillEmployees(skill: SkillSet) {
+    this.viewingSkill = { ...skill, employees: [] };
+    this.loadingViewSkill = true;
+    this.dialog.open(this.viewSkillTpl, { width: '820px', maxWidth: '95vw' });
+    this.performanceService.getSkillWithEmployees(skill.skillId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) this.viewingSkill = res.data;
+        this.loadingViewSkill = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.loadingViewSkill = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  // ─── View Employee Detail Dialog ──────────────────────────────────────
+  viewEmployeeSkillDetail(emp: EmployeeSkillSummary) {
+    this.viewingEmployee = null;
+    this.loadingViewEmployee = true;
+    this.dialog.open(this.viewEmployeeTpl, { width: '680px', maxWidth: '95vw' });
+    this.performanceService.getEmployeeSkillDetail(emp.employeeId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) this.viewingEmployee = res.data;
+        this.loadingViewEmployee = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.loadingViewEmployee = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  // ─── Assess Dialog ────────────────────────────────────────────────────
+  openAssessDialog(emp: EmployeeSkillSummary) {
+    this.assessingEmployee = emp;
+    this.assessEmployeeSkills = [];
+    this.assessRatings = {};
+    this.assessNotes = {};
+    this.loadingAssessSkills = true;
+    this.dialog.open(this.assessTpl, { width: '620px', maxWidth: '95vw' });
+
+    this.performanceService.getEmployeeSkillDetail(emp.employeeId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.assessEmployeeSkills = res.data.skills;
+          // Pre-fill existing ratings
+          res.data.skills.forEach(sk => {
+            this.assessRatings[sk.employeeSkillId] = sk.proficiencyLevel || 0;
+            this.assessNotes[sk.employeeSkillId] = sk.notes || '';
+          });
+        }
+        this.loadingAssessSkills = false;
+        this.cdr.markForCheck();
+      },
+      error: () => { this.loadingAssessSkills = false; this.cdr.markForCheck(); }
+    });
+  }
+
+  hasAllRatings(): boolean {
+    return this.assessEmployeeSkills.every(sk => !!this.assessRatings[sk.employeeSkillId]);
+  }
+
+  submitAssessment() {
+    if (!this.hasAllRatings()) return;
+    this.isSubmittingAssessment = true;
+
+    const requests = this.assessEmployeeSkills.map(sk =>
+      this.performanceService.assessEmployeeSkill(sk.employeeSkillId, {
+        proficiencyLevel: this.assessRatings[sk.employeeSkillId],
+        notes: this.assessNotes[sk.employeeSkillId] || undefined,
+        lastAssessed: new Date().toISOString()
+      })
+    );
+
+    let done = 0;
+    let errors = 0;
+    requests.forEach(req => {
+      req.pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          done++;
+          if (done + errors === requests.length) this.finishAssessment(done, errors);
         },
         error: () => {
-          this.notificationService.showError('Failed to load employees');
+          errors++;
+          if (done + errors === requests.length) this.finishAssessment(done, errors);
         }
       });
+    });
   }
 
-  loadCurrentUserSkills() {
-    const currentUser = this.authService.getCurrentUserValue();
-    if (currentUser?.userId) {
-      this.loadEmployeeSkills(currentUser.userId);
-    }
-  }
-
-  loadEmployeeSkills(employeeId?: string) {
-    // Prevent concurrent API calls
-    if (this.isLoadingEmployeeSkills) {
-      return;
-    }
-    
-    this.isLoadingEmployeeSkills = true;
-    
-    // If Manager role (not HR Manager), check view mode
-    // If HR Manager role, load all employee skills
-    // Otherwise load current user's skills
-    if (this.isOnlyManager()) {
-      // For managers, check if viewing own skills or team skills
-      if (this.managerViewMode === 'my-skills') {
-        // Load manager's own skills
-        const currentUser = this.authService.getCurrentUserValue();
-        if (currentUser?.userId) {
-          const filterValue = this.employeeSkillFilterForm.value;
-          this.performanceService.getEmployeeSkillsByEmployee(currentUser.userId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-              next: (response) => {
-                if (response.success && response.data) {
-                  this.employeeSkills = response.data || [];
-                  this.totalItems = this.employeeSkills.length;
-                  // Apply filters
-                  this.applyEmployeeSkillFilters();
-                }
-                this.isLoadingEmployeeSkills = false;
-                this.cdr.markForCheck();
-              },
-              error: (error) => {
-                console.error('Error loading manager skills:', error);
-                this.notificationService.showError('Failed to load your skills');
-                this.isLoadingEmployeeSkills = false;
-                this.cdr.markForCheck();
-              }
-            });
-        } else {
-          this.isLoadingEmployeeSkills = false;
-        }
-      } else {
-        // Load team employee skills
-        const filterValue = this.employeeSkillFilterForm.value;
-        this.performanceService.getMyTeamEmployeeSkills(
-          {
-            employeeId: employeeId || filterValue.employeeId || undefined,
-            search: filterValue.search || undefined,
-            proficiencyLevel: filterValue.proficiencyLevel || undefined
-          },
-          this.pageIndex + 1,
-          this.pageSize
-        )
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              if (response.success && response.data) {
-                const paginatedData = response.data as any;
-                this.employeeSkills = paginatedData.items || paginatedData.data || [];
-                this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
-                // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
-                this.filteredEmployeeSkills = this.employeeSkills;
-                this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
-              }
-              this.isLoadingEmployeeSkills = false;
-              this.cdr.markForCheck();
-            },
-            error: (error) => {
-              console.error('Error loading employee skills:', error);
-              this.notificationService.showError('Failed to load employee skills');
-              this.isLoadingEmployeeSkills = false;
-              this.cdr.markForCheck();
-            }
-          });
-      }
-    } else if (this.hasHRRole()) {
-      // For HR Managers, load all employee skills
-      const filterValue = this.employeeSkillFilterForm.value;
-      this.performanceService.getEmployeeSkills(
-        {
-          employeeId: employeeId || filterValue.employeeId || undefined,
-          search: filterValue.search || undefined,
-          proficiencyLevel: filterValue.proficiencyLevel || undefined
-        },
-        this.pageIndex + 1,
-        this.pageSize
-      )
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success && response.data) {
-              const paginatedData = response.data as any;
-              this.employeeSkills = paginatedData.items || paginatedData.data || [];
-              this.totalItems = paginatedData.totalCount || paginatedData.total || 0;
-              // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
-              this.filteredEmployeeSkills = this.employeeSkills;
-              this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
-            }
-            this.isLoadingEmployeeSkills = false;
-            this.cdr.markForCheck();
-          },
-          error: (error) => {
-            console.error('Error loading employee skills:', error);
-            this.notificationService.showError('Failed to load employee skills');
-            this.isLoadingEmployeeSkills = false;
-            this.cdr.markForCheck();
-          }
-        });
-    } else {
-      // Employee view - load only their own skills
-      const currentUser = this.authService.getCurrentUserValue();
-      if (currentUser?.userId) {
-        this.performanceService.getEmployeeSkillsByEmployee(currentUser.userId)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe({
-            next: (response) => {
-              if (response.success && response.data) {
-                this.employeeSkills = response.data;
-                this.totalItems = response.data.length;
-                // Update data source directly - don't call applyEmployeeSkillFilters() to avoid infinite loop
-                this.filteredEmployeeSkills = this.employeeSkills;
-                this.filteredEmployeeSkillsDataSource.data = this.employeeSkills;
-              }
-              this.isLoadingEmployeeSkills = false;
-              this.cdr.markForCheck();
-            },
-            error: (error) => {
-              console.error('Error loading employee skills:', error);
-              this.notificationService.showError('Failed to load employee skills');
-              this.isLoadingEmployeeSkills = false;
-              this.cdr.markForCheck();
-            }
-          });
-      }
-    }
-  }
-
-  onEmployeeChange(employeeId: string) {
-    if (employeeId) {
-      this.loadEmployeeSkills(employeeId);
-    } else {
-      this.employeeSkills = [];
-      this.filteredEmployeeSkills = [];
-      this.filteredEmployeeSkillsDataSource.data = [];
-      this.totalItems = 0;
-    }
-  }
-
-  onEmployeeFilterChange(employeeId: string) {
-    this.pageIndex = 0; // Reset to first page when changing employee filter
-    if (employeeId) {
-      this.loadEmployeeSkills(employeeId);
-    } else {
-      this.loadEmployeeSkills(); // Load all if no employee selected
-    }
-  }
-
-  groupByCategory(skills: SkillSet[]): { [category: string]: SkillSet[] } {
-    return skills.reduce((groups, skill) => {
-      const category = skill.category || 'Uncategorized';
-      if (!groups[category]) {
-        groups[category] = [];
-      }
-      groups[category].push(skill);
-      return groups;
-    }, {} as { [category: string]: SkillSet[] });
-  }
-
-  applySkillFilters(): void {
-    const filterValue = this.skillFilterForm.value;
-    let filtered = [...this.skills];
-
-    // Search filter
-    if (filterValue.search) {
-      const searchLower = filterValue.search.toLowerCase();
-      filtered = filtered.filter(skill => 
-        skill.skillName.toLowerCase().includes(searchLower) ||
-        (skill.category && skill.category.toLowerCase().includes(searchLower)) ||
-        (skill.description && skill.description.toLowerCase().includes(searchLower))
-      );
-    }
-
-    // Category filter
-    if (filterValue.category) {
-      filtered = filtered.filter(skill => skill.category === filterValue.category);
-    }
-
-    // Status filter
-    if (filterValue.status) {
-      const isActive = filterValue.status === 'active';
-      filtered = filtered.filter(skill => skill.isActive === isActive);
-    }
-
-    this.filteredSkills = filtered;
-    
-    // Convert to flat array for table with category info
-    const tableData = filtered.map(skill => ({
-      ...skill,
-      category: skill.category || 'Uncategorized'
-    }));
-    this.groupedSkillsDataSource.data = tableData;
-  }
-
-  clearSkillFilters(): void {
-    this.skillFilterForm.reset();
-    this.applySkillFilters();
-  }
-
-  applyEmployeeSkillFilters(): void {
-    const filterValue = this.employeeSkillFilterForm.value;
-    
-    // If manager viewing team skills or HR Manager, reload from API with filters
-    // Otherwise (employee or manager viewing own skills), filter locally
-    if (this.hasHRRole() || (this.isOnlyManager() && this.managerViewMode === 'team-skills')) {
-      this.pageIndex = 0; // Reset to first page when filtering
+  private finishAssessment(done: number, errors: number) {
+    this.isSubmittingAssessment = false;
+    if (done > 0) {
+      this.notificationService.showSuccess(`${done} skill(s) assessed successfully`);
+      this.dialog.closeAll();
       this.loadEmployeeSkills();
-    } else {
-      // Employee view or manager viewing own skills - filter locally
-      let filtered = [...this.employeeSkills];
-
-      // Search filter
-      if (filterValue.search) {
-        const searchLower = filterValue.search.toLowerCase();
-        filtered = filtered.filter(skill => 
-          skill.skillName.toLowerCase().includes(searchLower) ||
-          (skill.notes && skill.notes.toLowerCase().includes(searchLower))
-        );
-      }
-
-      // Proficiency level filter
-      if (filterValue.proficiencyLevel) {
-        filtered = filtered.filter(skill => skill.proficiencyLevel === parseInt(filterValue.proficiencyLevel));
-      }
-
-      this.filteredEmployeeSkills = filtered;
-      this.filteredEmployeeSkillsDataSource.data = filtered;
-      this.totalItems = filtered.length;
     }
+    if (errors > 0) this.notificationService.showError(`${errors} skill(s) failed to update`);
+    this.cdr.markForCheck();
   }
 
-  clearEmployeeSkillFilters(): void {
-    this.employeeSkillFilterForm.reset();
-    this.applyEmployeeSkillFilters();
+  // ─── Add My Skill Dialog ──────────────────────────────────────────────
+  openAddSkillDialog() {
+    this.addMySkillForm.reset({ proficiencyLevel: null });
+    this.filteredSkillsForAdd = [];
+    // Build categories from existing org skills
+    this.availableSkillCategories = [...new Set(this.skills.map(s => s.category).filter(Boolean))] as string[];
+    this.dialog.open(this.addMySkillTpl, { width: '520px', disableClose: false });
   }
 
-  openCreateSkillDialog(): void {
-    const dialogRef = this.dialog.open(CreateSkillDialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
-      data: {
-        categories: this.categories
+  onAddSkillCategoryChange(cat: string) {
+    this.filteredSkillsForAdd = this.skills.filter(s => s.category === cat && s.isActive);
+    this.addMySkillForm.get('skillId')?.setValue('');
+  }
+
+  isAlreadyAdded(skillId: string): boolean {
+    return this.mySkills.some(s => s.skillId === skillId);
+  }
+
+  submitAddMySkill() {
+    if (this.addMySkillForm.invalid) { this.addMySkillForm.markAllAsTouched(); return; }
+    const v = this.addMySkillForm.value;
+    if (!v.proficiencyLevel) { this.notificationService.showWarning('Please select a proficiency level'); return; }
+    this.isSubmittingMySkill = true;
+    this.performanceService.addMySkill({
+      employeeId: '', // server sets from token
+      skillId: v.skillId,
+      proficiencyLevel: v.proficiencyLevel,
+      notes: v.notes || undefined
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.notificationService.showSuccess('Skill added successfully');
+          this.dialog.closeAll();
+          this.loadMySkills();
+        } else {
+          this.notificationService.showError(res.message || 'Failed to add skill');
+        }
+        this.isSubmittingMySkill = false;
+        this.cdr.markForCheck();
       },
-      disableClose: false
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result) {
-          this.createSkill(result);
-        }
-      });
-  }
-
-  private createSkill(request: CreateSkillSetRequest): void {
-    this.loading = true;
-    this.performanceService.createSkillSet(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          if (res.success && res.data) {
-            this.notificationService.showSuccess('Skill created successfully');
-            this.loadSkills(); // Reload skills
-            this.loading = false;
-            this.cdr.markForCheck();
-          } else {
-            this.notificationService.showError(res.message || 'Failed to create skill');
-            this.loading = false;
-            this.cdr.markForCheck();
-          }
-        },
-        error: (error) => {
-          console.error('Error creating skill:', error);
-          this.notificationService.showError('Failed to create skill');
-          this.loading = false;
-          this.cdr.markForCheck();
-        }
-      });
-  }
-
-  editSkill(skill: SkillSet): void {
-    // TODO: Open edit dialog
-    this.notificationService.showInfo('Edit Skill dialog will be implemented');
-  }
-
-  toggleSkillStatus(skill: SkillSet): void {
-    // TODO: Implement toggle status
-    this.notificationService.showInfo('Toggle skill status will be implemented');
-  }
-
-  isSkillAlreadyRated(skill: EmployeeSkill): boolean {
-    // Check if skill is already rated (has assessorName and it's not empty)
-    // If assessorName exists and is not empty, it means the skill has been rated
-    return !!(skill.assessorName && skill.assessorName.trim() !== '');
-  }
-
-  rateEmployeeSkill(skill: EmployeeSkill): void {
-    // Check if already rated
-    if (this.isSkillAlreadyRated(skill)) {
-      this.notificationService.showWarning('This skill has already been rated. Cannot rate again.');
-      return;
-    }
-
-    const dialogRef = this.dialog.open(RateEmployeeSkillDialogComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      data: {
-        employeeId: skill.employeeId,
-        employeeName: skill.employeeName || 'Unknown Employee',
-        skillId: skill.skillId,
-        skillName: skill.skillName,
-        employeeSkillId: skill.employeeSkillId,
-        currentProficiencyLevel: skill.proficiencyLevel || 0
-      },
-      disableClose: false
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result && result.success) {
-          this.loadEmployeeSkills(skill.employeeId);
-        }
-      });
-  }
-
-  openAddEmployeeSkillDialog(): void {
-    const currentUser = this.authService.getCurrentUserValue();
-    const isHRManager = this.hasHRRole();
-    const isManager = this.isOnlyManager();
-    
-    // If manager is viewing their own skills, allow them to add skills to themselves (employee mode)
-    // Otherwise, if HR Manager or manager viewing team skills, use manager mode
-    let mode: 'employee' | 'manager' = 'employee';
-    let defaultEmployeeId: string | undefined = currentUser?.userId;
-    
-    if (isHRManager || (isManager && this.managerViewMode === 'team-skills')) {
-      mode = 'manager';
-      defaultEmployeeId = undefined;
-    }
-
-    // For employee mode (employees or managers adding to themselves), ensure skills are loaded
-    if (mode === 'employee' && currentUser?.userId) {
-      // If employee skills haven't been loaded yet, load them first
-      if (this.employeeSkills.length === 0 || !this.employeeSkills.some(s => s.employeeId === currentUser.userId)) {
-        this.loadCurrentUserSkills();
-        // Wait a bit for the skills to load, then open dialog
-        setTimeout(() => {
-          this.openDialogWithSkills(currentUser.userId, mode, defaultEmployeeId);
-        }, 300);
-        return;
+      error: (err) => {
+        const msg = err.status === 409 ? 'You already have this skill.' : 'Failed to add skill';
+        this.notificationService.showError(msg);
+        this.isSubmittingMySkill = false;
+        this.cdr.markForCheck();
       }
-    }
-
-    this.openDialogWithSkills(currentUser?.userId, mode, defaultEmployeeId);
+    });
   }
 
-  onManagerViewModeChange(mode: 'my-skills' | 'team-skills'): void {
-    this.managerViewMode = mode;
-    this.pageIndex = 0; // Reset pagination
-    if (mode === 'my-skills') {
-      this.loadEmployeeSkills(); // Load manager's own skills
-    } else {
-      this.loadEmployeeSkills(); // Load team skills
-    }
+  // ─── Edit My Skill Dialog ─────────────────────────────────────────────
+  editMySkill(skill: EmployeeSkill) {
+    this.editingSkill = skill;
+    this.editMySkillForm.setValue({ proficiencyLevel: skill.proficiencyLevel, notes: skill.notes || '' });
+    this.dialog.open(this.editMySkillTpl, { width: '480px', disableClose: false });
   }
 
-  private openDialogWithSkills(employeeId?: string, mode: 'employee' | 'manager' = 'employee', defaultEmployeeId?: string): void {
-    // For employee mode, get their existing skills to filter out
-    const existingEmployeeSkills = mode === 'employee' && employeeId
-      ? this.employeeSkills.filter(skill => {
-          const skillEmpId = skill.employeeId?.toString().toLowerCase().trim();
-          const checkEmpId = employeeId?.toString().toLowerCase().trim();
-          return skillEmpId === checkEmpId && skillEmpId !== '';
-        })
-      : undefined;
-    
-
-    const dialogRef = this.dialog.open(AddEmployeeSkillDialogComponent, {
-      width: '900px',
-      maxWidth: '90vw',
-      data: {
-        employees: this.employees,
-        skills: this.skills.filter(s => s.isActive),
-        defaultEmployeeId: defaultEmployeeId,
-        mode: mode,
-        existingEmployeeSkills: existingEmployeeSkills
+  submitEditMySkill() {
+    if (this.editMySkillForm.invalid || !this.editingSkill) return;
+    this.isSubmittingMySkill = true;
+    const v = this.editMySkillForm.value;
+    this.performanceService.updateMySkill(this.editingSkill.employeeSkillId, {
+      proficiencyLevel: v.proficiencyLevel,
+      notes: v.notes || undefined,
+      lastAssessed: new Date().toISOString()
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.notificationService.showSuccess('Skill updated');
+          this.dialog.closeAll();
+          this.loadMySkills();
+        }
+        this.isSubmittingMySkill = false;
+        this.cdr.markForCheck();
       },
-      disableClose: false
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result) {
-          if (result.mode === 'manager') {
-            this.updateEmployeeSkills(result.updates);
-          } else {
-            this.createEmployeeSkill(result.request);
-          }
-        }
-      });
-  }
-
-  private createEmployeeSkill(request: CreateEmployeeSkillRequest): void {
-    this.performanceService.createEmployeeSkill(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          // Only handle success case - all errors go to error handler
-          if (response.success) {
-            this.notificationService.showSuccess('Employee skill added successfully');
-            if (request.employeeId) {
-              this.loadEmployeeSkills(request.employeeId);
-            } else {
-              this.loadCurrentUserSkills();
-            }
-            this.cdr.markForCheck();
-          }
-          // Don't show error here - let error handler handle it
-        },
-        error: (error) => {
-          console.error('Error creating employee skill:', error);
-          // Check if it's a conflict (duplicate) error
-          if (error.status === 409) {
-            const errorMessage = error.error?.message || error.error?.error?.message || 'This skill has already been added. Cannot add duplicate skills.';
-            this.notificationService.showWarning(errorMessage);
-          } else if (error.error?.success === false) {
-            // Handle case where backend returns 200 with success: false
-            const errorMessage = error.error?.message || 'Failed to add employee skill';
-            if (errorMessage.toLowerCase().includes('duplicate') || errorMessage.toLowerCase().includes('already been added') || errorMessage.toLowerCase().includes('already added')) {
-              this.notificationService.showWarning(errorMessage);
-            } else {
-              this.notificationService.showError(errorMessage);
-            }
-          } else {
-            this.notificationService.showError('Failed to add employee skill');
-          }
-        }
-      });
-  }
-
-  private updateEmployeeSkills(updates: Array<{ employeeSkillId: string; request: UpdateEmployeeSkillRequest }>): void {
-    if (!updates || updates.length === 0) {
-      return;
-    }
-
-    let completed = 0;
-    let failed = 0;
-    const total = updates.length;
-    let employeeId: string | null = null;
-
-    updates.forEach(({ employeeSkillId, request }) => {
-      this.performanceService.updateEmployeeSkill(employeeSkillId, request)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              completed++;
-              // Get employeeId from the first response for reloading
-              if (!employeeId && response.data) {
-                employeeId = response.data.employeeId;
-              }
-            } else {
-              failed++;
-            }
-
-            // When all requests are done
-            if (completed + failed === total) {
-              if (completed > 0) {
-                this.notificationService.showSuccess(`Successfully rated ${completed} skill(s)`);
-                if (employeeId) {
-                  this.loadEmployeeSkills(employeeId);
-                }
-              }
-              if (failed > 0) {
-                this.notificationService.showError(`Failed to rate ${failed} skill(s)`);
-              }
-              this.cdr.markForCheck();
-            }
-          },
-          error: (error) => {
-            console.error('Error updating employee skill:', error);
-            failed++;
-            if (completed + failed === total) {
-              if (completed > 0) {
-                this.notificationService.showSuccess(`Successfully rated ${completed} skill(s)`);
-                if (employeeId) {
-                  this.loadEmployeeSkills(employeeId);
-                }
-              }
-              if (failed > 0) {
-                this.notificationService.showError(`Failed to rate ${failed} skill(s)`);
-              }
-              this.cdr.markForCheck();
-            }
-          }
-        });
+      error: () => {
+        this.notificationService.showError('Failed to update skill');
+        this.isSubmittingMySkill = false;
+        this.cdr.markForCheck();
+      }
     });
   }
 
-  hasManagerRole(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
+  // ─── Remove My Skill ──────────────────────────────────────────────────
+  removeMySkill(skill: EmployeeSkill) {
+    if (!confirm(`Remove "${skill.skillName}" from your skills?`)) return;
+    this.performanceService.deleteMySkill(skill.employeeSkillId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => { this.notificationService.showSuccess('Skill removed'); this.loadMySkills(); },
+      error: () => this.notificationService.showError('Failed to remove skill')
+    });
   }
 
-  isOnlyManager(): boolean {
-    const userRole = this.authService.getCurrentUserValue()?.roleName || '';
-    return userRole === 'Manager';
+  // ─── Stats ────────────────────────────────────────────────────────────
+  getMyAvgProficiency(): string {
+    if (!this.mySkills.length) return '0';
+    const avg = this.mySkills.reduce((s, sk) => s + sk.proficiencyLevel, 0) / this.mySkills.length;
+    return avg.toFixed(1);
   }
 
-  deleteEmployeeSkill(skill: EmployeeSkill) {
-    if (confirm(`Are you sure you want to remove this skill from the employee?`)) {
-      // Note: Backend might need delete endpoint
-      this.notificationService.showInfo('Delete functionality may require backend implementation');
-    }
+  getMyTopCategory(): string {
+    if (!this.mySkills.length) return '';
+    const counts: Record<string, number> = {};
+    this.mySkills.forEach(s => {
+      const cat = s.skillCategory || 'Other';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
   }
 
-  hasHRRole(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  getAssessedCount(): number {
+    return this.mySkills.filter(s => s.assessorName).length;
   }
 
-  getSkillLevelColor(level: number): string {
-    if (level >= 4) return 'primary';
-    if (level >= 3) return 'accent';
-    return 'warn';
+  // ─── Pagination helpers ───────────────────────────────────────────────
+  min(a: number, b: number) { return Math.min(a, b); }
+
+  goToFirstSkillPage() { this.skillsPageIndex = 0; this.loadSkills(); }
+  prevSkillPage() { if (this.skillsPageIndex > 0) { this.skillsPageIndex--; this.loadSkills(); } }
+  nextSkillPage() { if (this.skillsPageIndex < this.skillsTotalPages - 1) { this.skillsPageIndex++; this.loadSkills(); } }
+  goToLastSkillPage() { this.skillsPageIndex = this.skillsTotalPages - 1; this.loadSkills(); }
+  onSkillPageSizeChange(size: number) { this.skillsPageSize = size; this.skillsPageIndex = 0; this.loadSkills(); }
+
+  goToFirstEmpPage() { this.empSkillsPageIndex = 0; this.loadEmployeeSkills(); }
+  prevEmpPage() { if (this.empSkillsPageIndex > 0) { this.empSkillsPageIndex--; this.loadEmployeeSkills(); } }
+  nextEmpPage() { if (this.empSkillsPageIndex < this.empSkillsTotalPages - 1) { this.empSkillsPageIndex++; this.loadEmployeeSkills(); } }
+  goToLastEmpPage() { this.empSkillsPageIndex = this.empSkillsTotalPages - 1; this.loadEmployeeSkills(); }
+  onEmpPageSizeChange(size: number) { this.empSkillsPageSize = size; this.empSkillsPageIndex = 0; this.loadEmployeeSkills(); }
+
+  // ─── Role helpers ─────────────────────────────────────────────────────
+  hasHRRole(): boolean { return this.authService.hasAnyRole(['Super Admin', 'HR Manager']); }
+  hasManagerRole(): boolean { return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']); }
+
+  // ─── Proficiency helpers ──────────────────────────────────────────────
+  getProfClass(level: number): string {
+    if (level >= 9) return 'prof--expert';
+    if (level >= 7) return 'prof--advanced';
+    if (level >= 5) return 'prof--intermediate';
+    if (level >= 3) return 'prof--beginner';
+    return 'prof--novice';
   }
 
-  getSkillLevelClass(level: number): string {
-    if (level >= 4) return 'level-expert';
-    if (level >= 3) return 'level-advanced';
-    if (level >= 2) return 'level-intermediate';
-    return 'level-beginner';
+  getProfClass2(level: number): string {
+    // For button color class
+    if (level >= 9) return 'expert';
+    if (level >= 7) return 'advanced';
+    if (level >= 5) return 'intermediate';
+    if (level >= 3) return 'beginner';
+    return 'novice';
   }
 
-  getSkillStatusClass(isActive: boolean): string {
-    return isActive ? 'status-active' : 'status-inactive';
+  getProfLabel(level: number): string {
+    if (level >= 9) return 'Expert';
+    if (level >= 7) return 'Advanced';
+    if (level >= 5) return 'Intermediate';
+    if (level >= 3) return 'Beginner';
+    return 'Novice';
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.loadEmployeeSkills(); // Reload with new pagination
-  }
-
-  // Helper methods to check if filters are applied
-  hasSkillFiltersApplied(): boolean {
-    if (!this.skillFilterForm) return false;
-    const values = this.skillFilterForm.value;
-    return !!(values.search?.trim() || values.category || values.status);
-  }
-
-  hasEmployeeSkillFiltersApplied(): boolean {
-    if (!this.employeeSkillFilterForm) return false;
-    const values = this.employeeSkillFilterForm.value;
-    return !!(values.employeeId || values.search?.trim() || values.proficiencyLevel);
+  getInitials(name: string): string {
+    return name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || '?';
   }
 }
