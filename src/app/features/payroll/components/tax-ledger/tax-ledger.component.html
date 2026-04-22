@@ -1,0 +1,177 @@
+<div class="time-tracking-container loans-advances-page provident-fund-page">
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Tax Ledger</h1>
+      <p class="subtitle">Manage and track employee tax deductions and payment history.</p>
+    </div>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total profiles</span>
+          <span class="value">{{ activeProfilesCount }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">active tax deduction profiles</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Gross Income</span>
+          <span class="value">{{ currencySymbol() }} {{ totalGrossIncomeAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>account_balance</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">overall gross income calculated</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Taxable Income</span>
+          <span class="value">{{ currencySymbol() }} {{ totalTaxableIncomeAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">net income eligible for taxation</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Tax Amount</span>
+          <span class="value">{{ currencySymbol() }} {{ totalTaxAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>hourglass_bottom</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">total tax calculated for the period</p>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="toolbar supporting-toolbar">
+      <div class="filters-row">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee..." [(ngModel)]="searchTerm" />
+        </div>
+
+        <select class="filter-select" [(ngModel)]="periodId">
+          <option value="">All Periods</option>
+          @for (period of periods; track period.id || $index) {
+          <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+
+        <select class="filter-select" [(ngModel)]="categoryId">
+          <option value="">All Categories</option>
+          @for (category of categories; track category.id || $index) {
+          <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+
+        <div class="filter-actions">
+          <button class="apply-btn" (click)="applyFilters()" [disabled]="!searchTerm && !periodId && !categoryId">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" (click)="clearFilters()" [disabled]="!searchTerm && !periodId && !categoryId">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openAddTaxEntryDialog()">
+          <mat-icon>add</mat-icon>
+          Add Tax Entry
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="compact-table loan-payments-table">
+        <colgroup>
+          <col class="col-employee" />
+          <col class="col-period" />
+          <col class="col-category" />
+          <col class="col-gross" />
+          <col class="col-taxable" />
+          <col class="col-tax" />
+          <col class="col-monthly" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="col-employee">Employee</th>
+            <th class="col-period">Period</th>
+            <th class="col-category">Category</th>
+            <th class="col-gross">Gross Income</th>
+            <th class="col-taxable">Taxable Income</th>
+            <th class="col-tax">Tax Amount</th>
+            <th class="col-monthly">Monthly Tax</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (taxLedgerRows.length === 0) {
+          <tr>
+            <td class="empty-row" colspan="7">No tax ledger records available.</td>
+          </tr>
+          } @else {
+          @for (row of taxLedgerRows; track row.id) {
+          <tr>
+            <td>
+              <div style="font-weight: 600;">{{ row.employeeName }}</div>
+              <!-- <div style="font-size: 0.75rem; color: #64748b;">{{ row.employeeId }}</div> -->
+            </td>
+            <td>{{ row.periodName }}</td>
+            <td>{{ row.categoryName }}</td>
+            <td>{{ currencySymbol() }} {{ (row.grossIncome || 0) | number }}</td>
+            <td>{{ currencySymbol() }} {{ (row.taxableIncome || 0) | number }}</td>
+            <td>{{ currencySymbol() }} {{ (row.taxAmount || 0) | number }}</td>
+            <td>{{ currencySymbol() }} {{ (row.monthlyTax || 0) | number }}</td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (totalCount === 0) {
+        No records found
+        } @else {
+        Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalCount }} records
+        }
+      </p>
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="currentPage === 1" [disabled]="currentPage === 1"
+          (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

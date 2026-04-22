@@ -31,6 +31,12 @@ export const payrollRoutes: Routes = [
     title: 'Provident Funds - HRMS'
   },
   {
+    path: 'tax-ledger',
+    loadComponent: () =>
+      import('./components/tax-ledger/tax-ledger.component').then(m => m.TaxLedgerComponent),
+    title: 'Tax Ledger - HRMS'
+  },
+  {
     path: 'salary-advances',
     loadComponent: () =>
       import('./components/salary-advances/salary-advances.component').then(m => m.SalaryAdvancesComponent),

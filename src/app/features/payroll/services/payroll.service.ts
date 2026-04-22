@@ -1629,6 +1629,18 @@ export class PayrollService {
         );
     }
 
+    createTaxTransaction(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-transactions`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     // Social Security
     getSocialSecurityConfigs(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security-configs`, { params })
