@@ -12,6 +12,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // ← replaced MatCheckboxModule
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -37,6 +38,7 @@ import {
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
+    MatSelectModule,
     MatSlideToggleModule // ← replaced MatCheckboxModule
   ],
   templateUrl: './appraisal-cycle-form.component.html',
@@ -62,6 +64,8 @@ export class AppraisalCycleFormComponent {
     this.cycleForm = this.fb.group({
       cycleName: [data?.cycle?.cycleName || '', Validators.required],
       cycleType: [data?.cycle?.cycleType || ''],
+      description: [(data as any)?.cycle?.description || ''],
+      status: [data?.cycle?.status || 'upcoming'],
       startDate: [data?.cycle?.startDate ? new Date(data.cycle.startDate) : '', Validators.required],
       endDate: [data?.cycle?.endDate ? new Date(data.cycle.endDate) : '', Validators.required],
       reviewStartDate: [data?.cycle?.reviewStartDate ? new Date(data.cycle.reviewStartDate) : ''],
@@ -89,7 +93,8 @@ export class AppraisalCycleFormComponent {
       isSelfAssessmentEnable: f.isSelfAssessmentEnable,
       managerReview: f.managerReview,
       isAppraisalEnable: f.isAppraisalEnable,
-      status: this.isEditMode ? this.data.cycle?.status || 'upcoming' : 'upcoming'
+      description: f.description || null,
+      status: f.status || (this.isEditMode ? this.data.cycle?.status || 'upcoming' : 'upcoming')
     };
 
     // Call create or update service method

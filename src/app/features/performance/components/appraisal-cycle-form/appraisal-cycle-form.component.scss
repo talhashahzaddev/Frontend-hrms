@@ -149,15 +149,15 @@ form {
   // Flex row inside the field
   .mat-mdc-form-field-flex {
     padding: 0 8px !important;
-    min-height: 32px !important;
-    height: 32px !important;
+    min-height: 28px !important;
+    height: 28px !important;
     align-items: center !important;
   }
 
   // Infix (where input lives)
   .mat-mdc-form-field-infix {
-    min-height: 32px !important;
-    height: 32px !important;
+    min-height: 28px !important;
+    height: 28px !important;
     padding: 0 !important;
     border-top: none !important;
     display: flex !important;
@@ -167,7 +167,7 @@ form {
   // Textarea overrides height restrictions
   &.textarea-field .mat-mdc-form-field-flex {
     height: auto !important;
-    min-height: 32px !important;
+    min-height: 36px !important;
     align-items: flex-start !important;
     padding-top: 4px !important;
     padding-bottom: 4px !important;
@@ -175,7 +175,7 @@ form {
 
   &.textarea-field .mat-mdc-form-field-infix {
     height: auto !important;
-    min-height: 40px !important;
+    min-height: 36px !important;
     align-items: flex-start !important;
   }
 
@@ -217,8 +217,8 @@ form {
     font-size: 11px;
     color: #0f172a;
     font-weight: 400;
-    height: 32px !important;
-    line-height: 32px !important;
+    height: 28px !important;
+    line-height: 28px !important;
     padding: 0 !important;
     margin: 0 !important;
   }
@@ -255,9 +255,9 @@ form {
 
   // Datepicker toggle button — shrink it
   .mat-mdc-icon-button.mat-mdc-button-base {
-    width: 30px !important;
-    height: 30px !important;
-    padding: 4px !important;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 3px !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -446,4 +446,21 @@ form {
   .dialog-footer {
     padding: 8px 14px;
   }
+}
+
+// Make the dialog body scrollable and reserve space for header/footer
+.dialog-body {
+  overflow: auto !important;
+  max-height: calc(90vh - 100px) !important;
+}
+
+// Align mat-select trigger height with inputs so dropdowns match other fields
+::ng-deep .mat-mdc-select-trigger,
+::ng-deep .mat-mdc-select-value {
+  min-height: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+  font-size: 11px !important;
 }
