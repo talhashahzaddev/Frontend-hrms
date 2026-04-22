@@ -182,9 +182,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'trending_up',
       menuName: 'Performance',
       children: [
+        
         { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'My Performance' },
         { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'Performance' },
-        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'Appraisal Cycles' },
+        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/cycles', menuName: 'Performance', subMenuName: 'Appraisal Cycles' },
         { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals', menuName: 'Performance', subMenuName: 'Appraisals' },
         { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills', menuName: 'Performance', subMenuName: 'Skill Matrix' },
         { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals', menuName: 'Performance', subMenuName: 'Goals & KRAs' },

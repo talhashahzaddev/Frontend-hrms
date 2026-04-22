@@ -1,54 +1,77 @@
 export interface SkillSet {
   skillId: string;
   skillName: string;
-  category: string;
+  category?: string;
   description?: string;
-  skillLevelScale: number[];
   isActive: boolean;
   createdAt: string;
+  employeeCount: number; // NEW
 }
 
 export interface EmployeeSkill {
   employeeSkillId: string;
   employeeId: string;
-  employeeName?: string;
+  employeeName: string;
+  employeeEmail?: string;
   skillId: string;
   skillName: string;
+  skillCategory?: string;
   proficiencyLevel: number;
   assessedBy?: string;
-  assessorName?: string;
   lastAssessed?: string;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  assessorName?: string;
 }
+
+// export interface KRA {
+//   kraId: string;
+//   organizationId?: string;
+//   cycleId: string;
+//   positionId?: string;
+//   title: string;
+//   description?: string;
+//   weight: number;
+//   measurementCriteria?: string;
+//   isActive: boolean;
+//   createdAt: string;
+// }
 
 export interface KRA {
   kraId: string;
-  organizationId?: string;
-  positionId?: string;
-  title: string;
-  description?: string;
-  weight: number;
-  measurementCriteria?: string;
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface AppraisalCycle {
+  organizationId: string;
   cycleId: string;
   cycleName: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  reviewPeriodStart?: string;
-  reviewPeriodEnd?: string;
-  status: AppraisalCycleStatus;
-  ratingScale: RatingScale;
-  selfReviewEnabled: boolean;
-  peerReviewEnabled: boolean;
-  managerReviewEnabled: boolean;
+  title: string;
+  kraDescription: string;
+  kraRate: string; // varchar from DB
+  isActive: boolean;
   createdAt: string;
+  createdByName: string;
+}
+
+
+export interface AppraisalCycle {
+  cycleId: string;                 // CycleId
+  cycleName: string;               // CycleName
+  cycleType?: string;              // CycleType (optional)
+  description?: string;            // optional description
+  startDate: string;               // StartDate
+  endDate: string;                 // EndDate
+  reviewStartDate?: string;        // ReviewStartDate (optional)
+  reviewEndDate?: string;          // ReviewEndDate (optional)
+  status: string;                  // Status
+  selfReviewEnabled: boolean;      // SelfReviewEnabled
+  managerReviewEnabled: boolean;   // ManagerReviewEnabled
+  appraisalEnabled: boolean;       // AppraisalEnabled
+  organizationId: string;          // OrganizationId
+  createdBy?: string;              // CreatedBy (optional)
+  createdAt?: string;              // CreatedAt (optional)
+  updatedAt?: string;              // UpdatedAt (optional)
+  totalAppraisals?: number;        // TotalAppraisals (optional)
+  completedAppraisals?: number;    // CompletedAppraisals (optional)
+  ratingScale?: any;               // keep as any if needed, or define RatingScale interface
+//  peerReviewEnabled: boolean;   // optionally add forinital later its being removed PeerReviewEnabled,
+
 }
 
 export enum AppraisalCycleStatus {
@@ -86,6 +109,31 @@ export interface EmployeeAppraisal {
   createdAt: string;
   updatedAt: string;
 }
+
+// models/appraisal-cycle.model.ts
+export interface AppraisalCycleDto {
+  cycleId: string;
+  cycleName: string;
+  cycleType?: string;               // nullable
+  startDate: string;                // ISO string
+  reviewStartDate?: string;         // nullable
+  reviewEndDate?: string;           // nullable
+  endDate: string;                  // you had endDate in backend
+  status: string;
+
+  selfReviewEnabled: boolean;       // maps to isselfassessmentenable
+  managerReviewEnabled: boolean;    // maps to managerreview
+  appraisalEnabled: boolean;        // maps to isappraisalenable
+
+  organizationId: string;
+  createdBy?: string;               // nullable
+  createdAt?: string;               // nullable
+  updatedAt?: string;               // nullable
+
+  totalAppraisals: number;
+  completedAppraisals: number;
+}
+
 
 export interface EmployeeAppraisalForEmployee {
   appraisalId: string;
@@ -201,21 +249,35 @@ export interface EmployeePerformanceDetail {
   developmentPlan: string;
 }
 
+// export interface CreateKRARequest {
+//   positionId: string;
+//   title: string;
+//   description?: string;
+//   weight: number;
+//   measurementCriteria?: string;
+//   isActive?: boolean;
+// }
+
+// export interface UpdateKRARequest {
+//   title?: string;
+//   description?: string;
+//   weight?: number;
+//   measurementCriteria?: string;
+//   isActive?: boolean;
+// }
+
 export interface CreateKRARequest {
-  positionId: string;
   title: string;
-  description?: string;
-  weight: number;
-  measurementCriteria?: string;
+  kraDescription?: string;
+  cycleId: string;
   isActive?: boolean;
 }
 
 export interface UpdateKRARequest {
-  title?: string;
-  description?: string;
-  weight?: number;
-  measurementCriteria?: string;
-  isActive?: boolean;
+  title: string;
+  kraDescription?: string;
+  cycleId: string;
+  isActive: boolean;
 }
 
 export interface SkillSetFilter {
@@ -242,10 +304,9 @@ export interface AppraisalFilter {
 }
 export interface CreateSkillSetRequest {
   skillName: string;
-  category: string;
+  category?: string;
   description?: string;
-  skillLevelScale: number[];
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 export interface PerformanceReportFilter {
@@ -265,7 +326,7 @@ export interface UpdateSkillSetRequest {
 }
 
 export interface CreateEmployeeSkillRequest {
-  employeeId: string;
+  //employeeId: string;
   skillId: string;
   proficiencyLevel: number;
   assessedBy?: string;
@@ -273,10 +334,10 @@ export interface CreateEmployeeSkillRequest {
 }
 
 export interface UpdateEmployeeSkillRequest {
-  proficiencyLevel?: number;
+  proficiencyLevel: number; // 1-10
   assessedBy?: string;
-  notes?: string;
   lastAssessed?: string;
+  notes?: string;
 }
 
 // export interface CreateAppraisalCycleRequest {
@@ -292,11 +353,25 @@ export interface UpdateEmployeeSkillRequest {
 //   managerReviewEnabled: boolean;
 // }
 
+// export interface CreateAppraisalCycleRequest {
+//   cycleName: string;
+//   description?: string;
+//   startDate: string;
+//   endDate: string;
+// }
+
 export interface CreateAppraisalCycleRequest {
   cycleName: string;
+  cycleType?: string;
   description?: string;
   startDate: string;
   endDate: string;
+  reviewStartDate?: string;
+  reviewEndDate?: string;
+  isSelfAssessmentEnable: boolean;
+  managerReview: boolean;
+  isAppraisalEnable: boolean;
+  status?: string; // upcoming, inprogress, concluded
 }
 
 
@@ -304,18 +379,32 @@ export interface CreateAppraisalCycleRequest {
 
 
 
+// export interface UpdateAppraisalCycleRequest {
+//   cycleName?: string;
+//   description?: string;
+//   startDate?: string;
+//   endDate?: string;
+//   reviewPeriodStart?: string;
+//   reviewPeriodEnd?: string;
+//   status?: AppraisalCycleStatus;
+//   ratingScale?: RatingScale;
+//   selfReviewEnabled?: boolean;
+//   peerReviewEnabled?: boolean;
+//   managerReviewEnabled?: boolean;
+// }
+
 export interface UpdateAppraisalCycleRequest {
-  cycleName?: string;
+  cycleName: string;
+  cycleType?: string;
+  startDate: string; // ISO string
+  endDate: string;
+  reviewStartDate?: string;
+  reviewEndDate?: string;
+  status?: string;
+  isSelfAssessmentEnable: boolean;
+  managerReview: boolean;
+  isAppraisalEnable: boolean;
   description?: string;
-  startDate?: string;
-  endDate?: string;
-  reviewPeriodStart?: string;
-  reviewPeriodEnd?: string;
-  status?: AppraisalCycleStatus;
-  ratingScale?: RatingScale;
-  selfReviewEnabled?: boolean;
-  peerReviewEnabled?: boolean;
-  managerReviewEnabled?: boolean;
 }
 
 export interface SubmitAppraisalRequest {
@@ -374,30 +463,27 @@ export interface PerformanceMetrics {
 // Self-Assessment Interfaces
 export interface SelfAssessment {
   selfAssessmentId: string;
-  employeeId: string;
-  cycleId: string;
-  kraId?: string;
-  skillId?: string;
-  rating: number;
-  comments?: string;
-  evidenceUrls?: string[];
-  status: 'draft' | 'submitted';
+  goalId: string;
+  kraId: string;
+  organizationId: string;
+  selfRating: number;
+  selfComment?: string;
+  status: string;
   createdAt: string;
   updatedAt: string;
-  cycleName?: string;
+  employeeId?: string;
+  goalName?: string;
   kraName?: string;
   employeeName?: string;
+  cycleId?: string;
+  cycleName?: string;
 }
 
 export interface CreateSelfAssessmentRequest {
-  employeeId: string;
-  cycleId: string;
-  kraId?: string;
-  skillId?: string;
-  rating: number;
-  comments?: string;
-  evidenceUrls?: string[];
-  status?: 'draft' | 'submitted';
+  goalId: string;
+  kraId: string;
+  selfRating: number;
+  selfComment?: string;
 }
 
 // Manager Review Interfaces
@@ -416,15 +502,34 @@ export interface ManagerReview {
 }
 
 export interface ManagerReviewRequest {
-  managerId: string;
   employeeId: string;
   cycleId: string;
-  overallRating: number;
+  kraId: string;
+  goalId: string;
+  rating: number;
   feedback?: string;
-  improvementAreas?: string;
-  developmentPlan?: string;
-  kraRatings?: { [kraId: string]: number };
-  skillRatings?: { [skillId: string]: number };
+  improvementArea?: string;
+  status?: string;
+}
+
+export interface ManagerReviewDto {
+  managerReviewId: string;
+  organizationId: string;
+  managerId: string;
+  managerName: string;
+  employeeId: string;
+  employeeName: string;
+  cycleId: string;
+  cycleName: string;
+  kraId: string;
+  kraName: string;
+  goalId: string;
+  goalName: string;
+  rating: number;
+  feedback?: string;
+  improvementArea?: string;
+  status: string;
+  createdAt: string;
 }
 
 // Appraisal Consolidation
@@ -481,20 +586,250 @@ export enum GoalStatus {
 
 export interface Goal {
   goalId: string;
-  employeeId: string;
+  organizationId: string;
   title: string;
   description?: string;
+  kraId?: string;
+  kraName?: string;
+  progress: string;
   startDate?: string;
   endDate?: string;
-  status: GoalStatus;
+  assignedTo?: string;
+  assignedtoName?: string;
+  createdBy?: string;
+  createdByName?: string;
+  isActive: boolean;
+  isSelfAssessmentEnable?: boolean;
+  managerReview?: boolean;
+  isAppraisalEnable?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface CreateGoalRequest {
-  employeeId: string;
+export interface GoalDto {
+  goalId: string;
   title: string;
-  description?: string;
+  description: string;
+  organizationId: string;
+  progress: string;
+  startDate?: string;
+  endDate?: string;
+  kraId?: string;
+  kraName?: string;
+  assignedTo?: string;
+  createdBy?: string;
+  createdByName?: string;
+  assignedtoName?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateGoalRequest {
+  title: string;
+  description: string;
+  kraId: string;
+  progress: string;
   startDate?: string;
   endDate?: string;
 }
+
+export interface UpdateGoalRequest {
+  goalId: string;
+  title: string;
+  description: string;
+  kraId: string;
+  progress: string;
+  startDate?: string;
+  endDate?: string;
+  isActive: boolean;
+}
+
+// HR Review DTO
+export interface HrReviewDto {
+  hrReviewId: string;
+  organizationId: string;
+  cycleId: string;
+  cycleName: string;
+  kraId: string;
+  kraName: string;
+  goalId: string;
+  goalName: string;
+  employeeId: string;
+  employeeName: string;
+  finalRating: number;
+  hrComments?: string;
+  improvementArea?: string;
+  feedback?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+//new models
+export interface SkillWithEmployees extends SkillSet {
+  employees: EmployeeSkillDetail[];
+}
+
+export interface EmployeeSkillDetail {
+  employeeSkillId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeEmail?: string;
+  department?: string;
+  position?: string;
+  proficiencyLevel: number;
+  notes?: string;
+  assessorName?: string;
+  lastAssessed?: string;
+}
+
+// Row in the "all employees with skills" table
+export interface EmployeeSkillSummary {
+  employeeId: string;
+  employeeName: string;
+  email?: string;
+  department?: string;
+  position?: string;
+  skillNames: string[];
+  skillCount: number;
+  averageProficiency?: number;
+}
+
+// Full detail for view dialog
+export interface EmployeeSkillFullDetail {
+  employeeId: string;
+  employeeName: string;
+  email?: string;
+  department?: string;
+  position?: string;
+  skills: EmployeeSkill[];
+}
+
+export interface CreateEmployeeSkillRequest {
+  employeeId: string;
+  skillId: string;
+  proficiencyLevel: number; // 1-10
+  assessedBy?: string;
+  lastAssessed?: string;
+  notes?: string;
+}
+
+export interface PagedResult<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+// Open API skill categories and their skills
+export interface SkillCategory {
+  name: string;
+  skills: string[];
+}
+
+// Predefined skill categories with popular skills
+export const SKILL_CATEGORIES: SkillCategory[] = [
+  {
+    name: 'Technical',
+    skills: [
+      'JavaScript', 'TypeScript', 'Python', 'Java', 'C#', 'C++', 'Go', 'Rust', 'Ruby', 'PHP',
+      'Swift', 'Kotlin', 'Scala', 'R', 'MATLAB', 'SQL', 'NoSQL', 'GraphQL', 'REST APIs',
+      'Angular', 'React', 'Vue.js', 'Node.js', 'Django', 'Spring Boot', '.NET', 'Laravel',
+      'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'CI/CD', 'Git', 'Linux', 'Terraform',
+      'Machine Learning', 'Deep Learning', 'Data Science', 'Data Analysis', 'Power BI', 'Tableau',
+      'Cybersecurity', 'Penetration Testing', 'Network Administration', 'Database Administration',
+      'Microservices', 'System Design', 'Algorithms & Data Structures', 'Agile/Scrum', 'DevOps'
+    ]
+  },
+  {
+    name: 'Soft Skills',
+    skills: [
+      'Communication', 'Leadership', 'Teamwork', 'Problem Solving', 'Critical Thinking',
+      'Time Management', 'Adaptability', 'Creativity', 'Emotional Intelligence', 'Conflict Resolution',
+      'Negotiation', 'Persuasion', 'Active Listening', 'Empathy', 'Decision Making',
+      'Strategic Thinking', 'Attention to Detail', 'Self-Motivation', 'Resilience', 'Mentoring',
+      'Public Speaking', 'Presentation Skills', 'Written Communication', 'Collaboration', 'Networking'
+    ]
+  },
+  {
+    name: 'Management',
+    skills: [
+      'Project Management', 'Product Management', 'People Management', 'Budget Management',
+      'Risk Management', 'Change Management', 'Performance Management', 'Stakeholder Management',
+      'Resource Planning', 'Strategic Planning', 'OKR Setting', 'KPI Tracking', 'Agile Coaching',
+      'Scrum Master', 'PMP', 'Six Sigma', 'Lean Management', 'Process Improvement',
+      'Business Analysis', 'Requirements Gathering', 'Vendor Management', 'Contract Management'
+    ]
+  },
+  {
+    name: 'Design',
+    skills: [
+      'UI Design', 'UX Design', 'Product Design', 'Graphic Design', 'Motion Design',
+      'Figma', 'Adobe XD', 'Sketch', 'Adobe Photoshop', 'Adobe Illustrator', 'Adobe After Effects',
+      'Brand Identity', 'Typography', 'Color Theory', 'Wireframing', 'Prototyping',
+      'User Research', 'Usability Testing', 'Accessibility Design', 'Design Systems',
+      'Visual Communication', '3D Modeling', 'Video Editing', 'Animation'
+    ]
+  },
+  {
+    name: 'Finance',
+    skills: [
+      'Financial Analysis', 'Accounting', 'Budgeting & Forecasting', 'Financial Reporting',
+      'Tax Compliance', 'Auditing', 'Cost Accounting', 'Payroll Management', 'Accounts Payable',
+      'Accounts Receivable', 'Excel / Financial Modeling', 'QuickBooks', 'SAP Finance',
+      'Investment Analysis', 'Risk Assessment', 'Cash Flow Management', 'IFRS/GAAP',
+      'Corporate Finance', 'Mergers & Acquisitions', 'Valuation'
+    ]
+  },
+  {
+    name: 'Marketing',
+    skills: [
+      'Digital Marketing', 'Content Marketing', 'SEO', 'SEM / PPC', 'Social Media Marketing',
+      'Email Marketing', 'Marketing Automation', 'Brand Management', 'Market Research',
+      'Customer Segmentation', 'CRM', 'HubSpot', 'Salesforce', 'Google Analytics',
+      'Performance Marketing', 'Affiliate Marketing', 'Influencer Marketing',
+      'Copywriting', 'Campaign Management', 'Product Marketing', 'Growth Hacking'
+    ]
+  },
+  {
+    name: 'Sales',
+    skills: [
+      'B2B Sales', 'B2C Sales', 'Inside Sales', 'Enterprise Sales', 'Cold Calling',
+      'Lead Generation', 'Account Management', 'Customer Success', 'CRM Management',
+      'Sales Forecasting', 'Proposal Writing', 'Contract Negotiation', 'Pipeline Management',
+      'Consultative Selling', 'Solution Selling', 'Relationship Building', 'Closing Deals',
+      'Upselling & Cross-selling', 'Channel Sales', 'Partner Management'
+    ]
+  },
+  {
+    name: 'HR',
+    skills: [
+      'Talent Acquisition', 'Recruitment', 'Onboarding', 'Performance Management',
+      'Employee Relations', 'Compensation & Benefits', 'HRIS', 'Learning & Development',
+      'Organizational Development', 'Workforce Planning', 'HR Analytics', 'Policy Development',
+      'Labor Law', 'Payroll', 'Diversity & Inclusion', 'Culture Building', 'HR Business Partnering',
+      'Succession Planning', 'Job Analysis', 'Competency Framework'
+    ]
+  },
+  {
+    name: 'Operations',
+    skills: [
+      'Supply Chain Management', 'Logistics', 'Inventory Management', 'Process Optimization',
+      'Quality Assurance', 'Quality Control', 'ERP Systems', 'SAP', 'Oracle', 'Lean Manufacturing',
+      'Production Planning', 'Warehouse Management', 'Vendor Negotiation', 'Procurement',
+      'Business Process Management', 'Continuous Improvement', 'ISO Standards', 'Compliance',
+      'Facilities Management', 'Fleet Management'
+    ]
+  },
+  {
+    name: 'Customer Service',
+    skills: [
+      'Customer Support', 'Technical Support', 'Help Desk', 'Live Chat Support',
+      'Complaint Resolution', 'Customer Retention', 'Zendesk', 'Freshdesk', 'Salesforce Service Cloud',
+      'Call Center Operations', 'SLA Management', 'CSAT Improvement', 'NPS Tracking',
+      'Escalation Management', 'Knowledge Base Management', 'Customer Journey Mapping'
+    ]
+  }
+];
