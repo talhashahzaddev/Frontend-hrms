@@ -153,26 +153,42 @@ export class PayrollRulesComponent implements OnInit {
   }
 
   onPolicyClick(policy: { key: string; title: string; rulesCount: number }): void {
-    if (policy.key === 'overtimePolicy') {
-      this.router.navigate(['/payroll/policies/overtime-rules']);
-    } else if (policy.key === 'attendanceDeductionPolicy') {
-      this.router.navigate(['/payroll/policies/attendance-deduction-rules']);
-    } else if (policy.key === 'lateArrivalPolicy') {
-      this.router.navigate(['/payroll/policies/late-arrival-rules']);
-    } else if (policy.key === 'leaveDeductionPolicy') {
-      this.router.navigate(['/payroll/policies/leave-deduction-rules']);
-    } else if (policy.key === 'performanceBonusPolicy') {
-      this.router.navigate(['/payroll/policies/performance-rules']);
-    } else if (policy.key === 'bonusPolicy') {
-      this.router.navigate(['/payroll/policies/bonus-rules']);
-    } else if (policy.key === 'employeeLoanPolicy') {
-      this.router.navigate(['/payroll/policies/loan-rules']);
-    } else if (policy.key === 'providentFundPolicy') {
-      this.router.navigate(['/payroll/policies/provident-fund-rule']);
-    } else if (policy.key === 'salaryAdvancePolicy') {
-      this.router.navigate(['/payroll/policies/salary-advance-rules']);
-    } else if (policy.key === 'gratuityPolicy') {
-      this.router.navigate(['/payroll/policies/gratuity-rules']);
+    switch (policy.key) {
+      case 'overtimePolicy':
+        this.router.navigate(['/payroll/policies/overtime-rules']);
+        break;
+      case 'attendanceDeductionPolicy':
+        this.router.navigate(['/payroll/policies/attendance-deduction-rules']);
+        break;
+      case 'lateArrivalPolicy':
+        this.router.navigate(['/payroll/policies/late-arrival-rules']);
+        break;
+      case 'leaveDeductionPolicy':
+        this.router.navigate(['/payroll/policies/leave-deduction-rules']);
+        break;
+      case 'performanceBonusPolicy':
+        this.router.navigate(['/payroll/policies/performance-rules']);
+        break;
+      case 'bonusPolicy':
+        this.router.navigate(['/payroll/policies/bonus-rules']);
+        break;
+      case 'employeeLoanPolicy':
+        this.router.navigate(['/payroll/policies/loan-rules']);
+        break;
+      case 'providentFundPolicy':
+        this.router.navigate(['/payroll/policies/provident-fund-rule']);
+        break;
+      case 'salaryAdvancePolicy':
+        this.router.navigate(['/payroll/policies/salary-advance-rules']);
+        break;
+      case 'incomeTaxPolicy':
+        this.router.navigate(['/payroll/policies/tax-regime-rules']);
+        break;
+      case 'gratuityPolicy':
+        this.router.navigate(['/payroll/policies/gratuity-rules']);
+        break;
+      default:
+        break;
     }
   }
 }

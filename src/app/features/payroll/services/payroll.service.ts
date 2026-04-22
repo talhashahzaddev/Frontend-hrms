@@ -74,6 +74,54 @@ export interface LeaveSummaryFilter {
   pageSize: number;
 }
 
+export interface TaxRegimeDto {
+  regimeId: string;
+  organizationId: string;
+  country?: string;
+  regimeName?: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface TaxCategoryDto {
+  categoryId: string;
+  regimeId: string;
+  regimeName?: string;
+  categoryName?: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
+export interface TaxSlabDto {
+  slabId: string;
+  categoryId: string;
+  categoryName?: string;
+  slabOrder: number;
+  minIncome: number;
+  maxIncome?: number | null;
+  fixedAmount: number;
+  percentage: number;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
+export interface TaxComponentRuleDto {
+  componentRuleId: string;
+  regimeId: string;
+  regimeName?: string;
+  organizationId: string;
+  componentName?: string;
+  taxability?: string;
+  limitAmount: number;
+  limitPercentage: number;
+  applyStage?: string;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -1264,14 +1312,172 @@ export class PayrollService {
     }
 
     // Tax Slabs
-    getTaxSlabs(params?: any): Observable<any> {
-      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, { params })
+    getTaxSlabs(params?: any): Observable<TaxSlabDto[]> {
+      return this.http.get<ApiResponse<TaxSlabDto[]>>(`${this.apiUrl}/tax-slabs`, { params })
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
               throw new Error(response.message);
             }
             return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxSlabs(): Observable<TaxSlabDto[]> {
+      return this.http.get<ApiResponse<TaxSlabDto[]>>(`${this.apiUrl}/tax-slabs/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    // Tax Regimes
+    getTaxRegimes(): Observable<TaxRegimeDto[]> {
+      return this.http.get<ApiResponse<TaxRegimeDto[]>>(`${this.apiUrl}/tax-regimes`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxRegimes(): Observable<TaxRegimeDto[]> {
+      return this.http.get<ApiResponse<TaxRegimeDto[]>>(`${this.apiUrl}/tax-regimes/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createTaxRegime(data: {
+      country?: string;
+      regimeName?: string;
+      startDate: string;
+      endDate: string;
+      isActive: boolean;
+    }): Observable<TaxRegimeDto> {
+      return this.http.post<ApiResponse<TaxRegimeDto>>(`${this.apiUrl}/tax-regimes`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateTaxRegime(id: string, data: {
+      country?: string;
+      regimeName?: string;
+      startDate: string;
+      endDate: string;
+      isActive: boolean;
+    }): Observable<TaxRegimeDto> {
+      return this.http.put<ApiResponse<TaxRegimeDto>>(`${this.apiUrl}/tax-regimes/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxRegime(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-regimes/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    // Tax Categories
+    getTaxCategories(): Observable<TaxCategoryDto[]> {
+      return this.http.get<ApiResponse<TaxCategoryDto[]>>(`${this.apiUrl}/tax-categories`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxCategories(): Observable<TaxCategoryDto[]> {
+      return this.http.get<ApiResponse<TaxCategoryDto[]>>(`${this.apiUrl}/tax-categories/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getTaxCategoriesByRegimeId(regimeId: string): Observable<TaxCategoryDto[]> {
+      return this.http.get<ApiResponse<TaxCategoryDto[]>>(`${this.apiUrl}/tax-categories/regime/${regimeId}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createTaxCategory(data: { regimeId: string; categoryName?: string; isActive: boolean }): Observable<TaxCategoryDto> {
+      return this.http.post<ApiResponse<TaxCategoryDto>>(`${this.apiUrl}/tax-categories`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateTaxCategory(id: string, data: { regimeId: string; categoryName?: string; isActive: boolean }): Observable<TaxCategoryDto> {
+      return this.http.put<ApiResponse<TaxCategoryDto>>(`${this.apiUrl}/tax-categories/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxCategory(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-categories/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
           })
         );
     }
@@ -1300,8 +1506,8 @@ export class PayrollService {
         );
     }
 
-    createTaxSlab(data: any): Observable<any> {
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, data)
+    createTaxSlab(data: any): Observable<TaxSlabDto> {
+      return this.http.post<ApiResponse<TaxSlabDto>>(`${this.apiUrl}/tax-slabs`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1312,8 +1518,8 @@ export class PayrollService {
         );
     }
 
-    updateTaxSlab(id: string, data: any): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/tax-slabs/${id}`, data)
+    updateTaxSlab(id: string, data: any): Observable<TaxSlabDto> {
+      return this.http.put<ApiResponse<TaxSlabDto>>(`${this.apiUrl}/tax-slabs/${id}`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1326,6 +1532,81 @@ export class PayrollService {
 
     deleteTaxSlab(id: string): Observable<boolean> {
       return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-slabs/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    // Tax Component Rules
+    getTaxComponentRules(): Observable<TaxComponentRuleDto[]> {
+      return this.http.get<ApiResponse<TaxComponentRuleDto[]>>(`${this.apiUrl}/tax-component-rules`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxComponentRules(): Observable<TaxComponentRuleDto[]> {
+      return this.http.get<ApiResponse<TaxComponentRuleDto[]>>(`${this.apiUrl}/tax-component-rules/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createTaxComponentRule(data: {
+      regimeId: string;
+      componentName?: string;
+      taxability?: string;
+      limitAmount: number;
+      limitPercentage: number;
+      applyStage?: string;
+    }): Observable<TaxComponentRuleDto> {
+      return this.http.post<ApiResponse<TaxComponentRuleDto>>(`${this.apiUrl}/tax-component-rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateTaxComponentRule(id: string, data: {
+      regimeId: string;
+      componentName?: string;
+      taxability?: string;
+      limitAmount: number;
+      limitPercentage: number;
+      applyStage?: string;
+    }): Observable<TaxComponentRuleDto> {
+      return this.http.put<ApiResponse<TaxComponentRuleDto>>(`${this.apiUrl}/tax-component-rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxComponentRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-component-rules/${id}`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
