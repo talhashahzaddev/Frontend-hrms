@@ -15,6 +15,7 @@
           data.policyId === 7 ? (isEditMode ? 'Edit Loan Rule' : 'Create Loan Rule') :
           data.policyId === 9 ? (isEditMode ? 'Edit Provident Fund Rule' : 'Create Provident Fund Rule') :
           data.policyId === 8 ? (isEditMode ? 'Edit Salary Advance Rule' : 'Create Salary Advance Rule') :
+          data.policyId === 10 ? (isEditMode ? 'Edit Tax Regime Rule' : 'Create Tax Regime Rule') :
           data.policyId === 12 ? (isEditMode ? 'Edit Gratuity Rule' : 'Create Gratuity Rule') :
           (isEditMode ? 'Edit Policy' : 'Create Policy') }}
         </h2>
@@ -681,6 +682,49 @@
       </section>
 
       <!-- Section: Gratuity Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 10">
+        <div class="rd-section-title">
+          <h3>Tax Regime Details</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Country *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="taxCountry" placeholder="e.g. Pakistan" maxlength="50">
+              <mat-error *ngIf="ruleForm.get('taxCountry')?.hasError('required')">Country is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Regime Name *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="taxRegimeName" placeholder="e.g. Finance Act 2026" maxlength="100">
+              <mat-error *ngIf="ruleForm.get('taxRegimeName')?.hasError('required')">Regime name is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Start Date *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="date" formControlName="taxStartDate">
+              <mat-error *ngIf="ruleForm.get('taxStartDate')?.hasError('required')">Start date is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>End Date *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="date" formControlName="taxEndDate">
+              <mat-error *ngIf="ruleForm.get('taxEndDate')?.hasError('required')">End date is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Gratuity Policy Configuration -->
       <section class="rd-section" *ngIf="selectedPolicy === 12">
         <div class="rd-section-title">
           <h3>Gratuity Rule Details</h3>
@@ -754,7 +798,7 @@
 
       <!-- Alert when feature is not yet implemented for other policies -->
       <section class="rd-section"
-        *ngIf="selectedPolicy && selectedPolicy !== 1 && selectedPolicy !== 2 && selectedPolicy !== 3 && selectedPolicy !== 4 && selectedPolicy !== 5 && selectedPolicy !== 6 && selectedPolicy !== 7 && selectedPolicy !== 8 && selectedPolicy !== 9 && selectedPolicy !== 12">
+        *ngIf="selectedPolicy && selectedPolicy !== 1 && selectedPolicy !== 2 && selectedPolicy !== 3 && selectedPolicy !== 4 && selectedPolicy !== 5 && selectedPolicy !== 6 && selectedPolicy !== 7 && selectedPolicy !== 8 && selectedPolicy !== 9 && selectedPolicy !== 10 && selectedPolicy !== 12">
         <div style="padding: 16px; background: #fffbeb; color: #b45309; border-radius: 8px; border: 1px solid #fde68a;">
           <mat-icon style="vertical-align: middle; margin-right: 8px;">construction</mat-icon>
           Configuration for this policy will be implemented later.

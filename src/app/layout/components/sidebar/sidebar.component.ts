@@ -281,6 +281,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         {
+          label: 'Tax Ledger',
+          icon: 'history_edu',
+          route: '/payroll/tax-ledger',
+          exact: true
+        },
+        {
           label: 'Salary Advances',
           icon: 'savings',
           route: '/payroll/salary-advances',

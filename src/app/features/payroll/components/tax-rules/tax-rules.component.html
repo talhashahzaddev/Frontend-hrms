@@ -1,0 +1,89 @@
+<div class="tax-page-container">
+  <div class="page-header-wrapper">
+    <div class="page-header">
+      <div class="title-section">
+        <button class="icon-button back-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="title-text-group">
+          <h1 class="title">Tax Rules</h1>
+          <p class="subtitle">Manage tax component rules and applicability conditions.</p>
+        </div>
+      </div>
+      <button class="create-rule-btn" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Add Rule</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-navigation">
+    @for (tab of taxTabs; track tab.key) {
+    <button class="tab" [class.active]="tab.key === 'rules'" (click)="navigateToTab(tab.route)">
+      {{ tab.label }}
+    </button>
+    }
+  </div>
+
+  <div class="content-card">
+    @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="34"></mat-spinner>
+    </div>
+    } @else if (taxRules().length === 0) {
+    <div class="empty-state">
+      <h3>No tax rules configured yet.</h3>
+      <button class="create-rule-btn" (click)="openCreateDialog()" style="width: auto;">
+        <mat-icon>add</mat-icon>
+        <span>Create rule</span>
+      </button>
+    </div>
+    } @else {
+    <div class="rules-grid">
+      @for (rule of taxRules(); track rule.componentRuleId) {
+      <article class="rule-card">
+        <div class="card-head">
+          <div class="rule-name-with-icon">
+            <div class="rule-icon-box">
+              <mat-icon>rule</mat-icon>
+            </div>
+            <div class="card-title-wrap">
+              <h3>{{ rule.componentName || '-' }}</h3>
+              <p>{{ rule.regimeName || '-' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="meta-item">
+            <span class="meta-label">Taxability</span>
+            <span class="meta-value">{{ rule.taxability || '-' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Apply Stage</span>
+            <span class="meta-value">{{ rule.applyStage || '-' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Limit Amount</span>
+            <span class="meta-value">{{ rule.limitAmount | number:'1.0-2' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Limit Percentage</span>
+            <span class="meta-value">{{ rule.limitPercentage | number:'1.0-2' }}%</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button mat-icon-button class="action-btn hover-primary" title="Edit Rule" (click)="editRule(rule)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button class="action-btn hover-danger" title="Delete Rule" (click)="deleteRule(rule)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </article>
+      }
+    </div>
+    }
+  </div>
+</div>
