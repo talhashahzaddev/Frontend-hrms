@@ -577,7 +577,7 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
   }
 
   getEmployeeGoals(): Observable<ApiResponse<Goal[]>> {
-    return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/Performance/goals`);
+    return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/Performance/employee/Assigned/goals`);
   }
 
   getGoalById(goalId: string): Observable<ApiResponse<Goal>> {
@@ -637,9 +637,9 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     feedback?: string;
     status?: string;
   }): Observable<ApiResponse<HrReviewDto>> {
-    return this.http.post<ApiResponse<HrReviewDto>>(`${this.apiUrl}/Performance/HR/Review`, request);
+    return this.http.post<ApiResponse<HrReviewDto>>(`${this.apiUrl}/Performance/Create/HR/Appraisal`, request);
   }
-
+  
   //Getting overall managers reviews
   getAllManagerReviews(search?: any): Observable<ApiResponse<ManagerReviewDto[]>> {
   return this.http.get<ApiResponse<ManagerReviewDto[]>>(
