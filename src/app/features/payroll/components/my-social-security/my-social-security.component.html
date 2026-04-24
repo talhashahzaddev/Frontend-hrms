@@ -1,0 +1,144 @@
+<div class="loan-requests-page my-social-security-page">
+  <div class="requests-headline">
+    <div class="title-section">
+      <button class="icon-button back-btn" type="button" aria-label="Back to My Benefits" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-text-group">
+        <h1 class="title">My Social Security</h1>
+        <p class="subtitle">Review employee and employer contributions for each payroll period.</p>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your social security records...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Employee contribution</span>
+            <span class="value">{{ currencySymbol() }} {{ totalEmployeeContribution | number:'1.0-0' }}</span>
+          </div>
+          <div class="icon-wrapper color-amber">
+            <mat-icon>person</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">your contribution total</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Employer contribution</span>
+            <span class="value">{{ currencySymbol() }} {{ totalEmployerContribution | number:'1.0-0' }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>business</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">company contribution total</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total contribution</span>
+            <span class="value">{{ currencySymbol() }} {{ totalContribution | number:'1.0-0' }}</span>
+          </div>
+          <div class="icon-wrapper color-green">
+            <mat-icon>payments</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">combined employee + employer</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Enrolled periods</span>
+            <span class="value">{{ enrolledPeriodsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-purple">
+            <mat-icon>date_range</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">periods with enrollment</p>
+      </div>
+    </div>
+
+    <div class="section-tabs with-tools single-tab">
+      <div>
+        <button type="button" class="active">Social Security Transactions</button>
+      </div>
+
+      <div class="filters">
+        <select class="filter-select" [(ngModel)]="selectedPeriodId">
+          <option value="">All periods</option>
+          @for (period of periodOptions; track period.id) {
+            <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+
+        <select class="filter-select" [(ngModel)]="selectedStatus">
+          <option value="all">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="deducted">Deducted</option>
+          <option value="rejected">Rejected</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search config or period..." [(ngModel)]="searchTerm" />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>Rule</th>
+              <th class="text-right">Actual salary</th>
+              <th class="text-right">Capped salary</th>
+              <th class="text-right">Employee</th>
+              <th class="text-right">Employer</th>
+              <th class="text-right">Total</th>
+              <th class="text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (visibleTransactions.length === 0) {
+              <tr>
+                <td colspan="8" class="empty-row">No social security records found for the selected filters.</td>
+              </tr>
+            } @else {
+              @for (row of visibleTransactions; track row.id) {
+                <tr>
+                  <td>{{ row.periodName }}</td>
+                  <td>{{ row.configName }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.actualSalary | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.salaryCapped | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.employeeAmount | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.employerAmount | number:'1.0-0' }}</td>
+                  <td class="text-right strong">{{ currencySymbol() }} {{ row.totalAmount | number:'1.0-0' }}</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(row.requestStatus)">{{ row.requestStatus }}</span>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

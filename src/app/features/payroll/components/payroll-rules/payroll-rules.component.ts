@@ -146,6 +146,11 @@ export class PayrollRulesComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
+      if (result?.redirectTo) {
+        this.router.navigateByUrl(result.redirectTo);
+        return;
+      }
+
       if (result?.success) {
         this.fetchRules();
       }
@@ -171,6 +176,8 @@ export class PayrollRulesComponent implements OnInit {
       this.router.navigate(['/payroll/policies/provident-fund-rule']);
     } else if (policy.key === 'salaryAdvancePolicy') {
       this.router.navigate(['/payroll/policies/salary-advance-rules']);
+    } else if (policy.key === 'socialSecurityPolicy') {
+      this.router.navigate(['/payroll/policies/social-security-rules']);
     } else if (policy.key === 'gratuityPolicy') {
       this.router.navigate(['/payroll/policies/gratuity-rules']);
     }

@@ -292,15 +292,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         {
-          label: 'Compliance Center',
-          icon: 'verified_user',
-          route: '/payroll/loans/requests/compliance',
+          label: 'Income Tax',
+          icon: 'request_quote',
+          route: '/payroll/tax-management',
+          exact: true
+        },
+        {
+          label: 'Social Security',
+          icon: 'shield_person',
+          route: '/payroll/social-security',
           exact: true
         },
         {
           label: 'Payslip Management',
           icon: 'receipt_long',
-          route: '/payroll/loans/requests/compliance/payslips',
+          route: '/payroll/payslips',
           exact: true
         },
         { label: 'Policies', icon: 'rule', route: '/payroll/policies' },

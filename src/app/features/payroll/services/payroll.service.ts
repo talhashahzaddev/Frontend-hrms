@@ -88,6 +88,52 @@ export interface PagedResult<T> {
   pageSize: number;
 }
 
+export interface SocialSecurityJurisdictionOption {
+  jurisdictionId: string;
+  jurisdictionCode: string;
+  jurisdictionName: string;
+  countryCode?: string;
+  currency?: string;
+  isDefault?: boolean;
+}
+
+export interface SocialSecurityAuthorityOption {
+  authorityId: string;
+  jurisdictionId: string;
+  authorityCode: string;
+  authorityName: string;
+  portalUrl?: string;
+  remittanceFrequency?: string;
+}
+
+export interface SocialSecuritySchemeOption {
+  schemeId: string;
+  jurisdictionId: string;
+  authorityId?: string;
+  schemeCode: string;
+  schemeName: string;
+  schemeType?: string;
+  mandatoryMode?: string;
+}
+
+export interface SocialSecurityRuleOption {
+  ruleId: string;
+  schemeId: string;
+  ruleName: string;
+  description?: string;
+  contributionBasis?: string;
+  employeeDefaultPct?: number;
+  employerDefaultPct?: number;
+  employeeFixedAmount?: number | null;
+  employerFixedAmount?: number | null;
+  minSalaryLimit?: number | null;
+  maxSalaryLimit?: number | null;
+  annualSalaryCap?: number | null;
+  effectiveFrom?: string | null;
+  effectiveTo?: string | null;
+  isActive?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -1271,6 +1317,18 @@ export class PayrollService {
             if (!response.success && response.message) {
               throw new Error(response.message);
             }
+            return response.data;
+          })
+        );
+    }
+
+    getActiveTaxSlabs(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/tax-slabs/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
             return response.data || [];
           })
         );
@@ -1301,7 +1359,20 @@ export class PayrollService {
     }
 
     createTaxSlab(data: any): Observable<any> {
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, data)
+      const payload = {
+        slabName: data?.slabName,
+        description: data?.description ?? null,
+        fiscalYear: data?.fiscalYear,
+        minIncome: Number(data?.minIncome ?? data?.minIncomePkr ?? 0),
+        maxIncome: data?.maxIncome ?? data?.maxIncomePkr ?? null,
+        fixedAmount: Number(data?.fixedAmount ?? data?.fixedAmountPkr ?? 0),
+        percentage: Number(data?.percentage ?? 0),
+        isActive: typeof data?.isActive === 'boolean'
+          ? data.isActive
+          : String(data?.status ?? 'active').toLowerCase() !== 'inactive'
+      };
+
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, payload)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1313,7 +1384,20 @@ export class PayrollService {
     }
 
     updateTaxSlab(id: string, data: any): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/tax-slabs/${id}`, data)
+      const payload = {
+        slabName: data?.slabName,
+        description: data?.description ?? null,
+        fiscalYear: data?.fiscalYear,
+        minIncome: Number(data?.minIncome ?? data?.minIncomePkr ?? 0),
+        maxIncome: data?.maxIncome ?? data?.maxIncomePkr ?? null,
+        fixedAmount: Number(data?.fixedAmount ?? data?.fixedAmountPkr ?? 0),
+        percentage: Number(data?.percentage ?? 0),
+        isActive: typeof data?.isActive === 'boolean'
+          ? data.isActive
+          : String(data?.status ?? 'active').toLowerCase() !== 'inactive'
+      };
+
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/tax-slabs/${id}`, payload)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1348,7 +1432,283 @@ export class PayrollService {
         );
     }
 
+    getTaxTransactionById(id: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-transactions/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createTaxTransaction(data: any): Observable<any> {
+      const payload = {
+        employeeId: data?.employeeId,
+        periodId: data?.periodId,
+        slabId: data?.slabId,
+        annualSalary: Number(data?.annualSalary ?? 0),
+        taxableIncome: Number(data?.taxableIncome ?? 0)
+      };
+
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-transactions`, payload)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateTaxTransaction(id: string, data: any): Observable<any> {
+      const payload = {
+        slabId: data?.slabId ?? null,
+        annualSalary: Number(data?.annualSalary ?? 0),
+        taxableIncome: Number(data?.taxableIncome ?? 0)
+      };
+
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/tax-transactions/${id}`, payload)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxTransaction(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-transactions/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getMyTaxTransactions(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-transactions/my`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     // Social Security
+    getSocialSecurityJurisdictions(): Observable<SocialSecurityJurisdictionOption[]> {
+      return this.http.get<ApiResponse<SocialSecurityJurisdictionOption[]>>(`${this.apiUrl}/social-security/jurisdictions`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getSocialSecurityAuthorities(jurisdictionId?: string): Observable<SocialSecurityAuthorityOption[]> {
+      const params = jurisdictionId ? { jurisdictionId } : undefined;
+      return this.http.get<ApiResponse<SocialSecurityAuthorityOption[]>>(`${this.apiUrl}/social-security/authorities`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getSocialSecuritySchemes(jurisdictionId?: string, authorityId?: string): Observable<SocialSecuritySchemeOption[]> {
+      let params = new HttpParams();
+      if (jurisdictionId) {
+        params = params.set('jurisdictionId', jurisdictionId);
+      }
+      if (authorityId) {
+        params = params.set('authorityId', authorityId);
+      }
+
+      return this.http.get<ApiResponse<SocialSecuritySchemeOption[]>>(`${this.apiUrl}/social-security/schemes`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getSocialSecurityRules(schemeId?: string): Observable<SocialSecurityRuleOption[]> {
+      const params = schemeId ? { schemeId } : undefined;
+      return this.http.get<ApiResponse<SocialSecurityRuleOption[]>>(`${this.apiUrl}/social-security/rules`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createSocialSecurityJurisdiction(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security/jurisdictions`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateSocialSecurityJurisdiction(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security/jurisdictions/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteSocialSecurityJurisdiction(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/social-security/jurisdictions/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    createSocialSecurityAuthority(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security/authorities`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateSocialSecurityAuthority(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security/authorities/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteSocialSecurityAuthority(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/social-security/authorities/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    createSocialSecurityScheme(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security/schemes`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateSocialSecurityScheme(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security/schemes/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteSocialSecurityScheme(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/social-security/schemes/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    createSocialSecurityRule(data: any): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security/rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateSocialSecurityRule(id: string, data: any): Observable<any> {
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security/rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteSocialSecurityRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/social-security/rules/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
     getSocialSecurityConfigs(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security-configs`, { params })
         .pipe(
@@ -1361,8 +1721,46 @@ export class PayrollService {
         );
     }
 
+    getActiveSocialSecurityConfigs(): Observable<any[]> {
+      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/social-security-configs/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
     createSocialSecurityConfig(data: any): Observable<any> {
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security-configs`, data)
+      const payload = {
+        configName: data?.configName,
+        description: data?.description ?? null,
+        jurisdictionId: data?.jurisdictionId ?? null,
+        authorityId: data?.authorityId ?? null,
+        schemeId: data?.schemeId ?? null,
+        ruleId: data?.ruleId ?? null,
+        contributionBasis: data?.contributionBasis ?? 'gross',
+        employeeContributionPct: Number(data?.employeeContributionPct ?? data?.employeePercentage ?? 0),
+        employerContributionPct: Number(data?.employerContributionPct ?? data?.employerPercentage ?? 0),
+        employeeFixedAmount: data?.employeeFixedAmount == null ? null : Number(data.employeeFixedAmount),
+        employerFixedAmount: data?.employerFixedAmount == null ? null : Number(data.employerFixedAmount),
+        minSalaryLimit: data?.minSalaryLimit == null ? null : Number(data.minSalaryLimit),
+        maxSalaryCap: data?.maxSalaryCap ?? data?.maxSalaryCapPkr ?? null,
+        currency: data?.currency ?? null,
+        isStatutory: data?.isStatutory !== false,
+        allowVoluntary: !!data?.allowVoluntary,
+        allowWithdrawal: data?.allowWithdrawal !== false,
+        metadata: data?.metadata ?? null,
+        effectiveFrom: data?.effectiveFrom ?? null,
+        effectiveTo: data?.effectiveTo ?? null,
+        isActive: typeof data?.isActive === 'boolean'
+          ? data.isActive
+          : String(data?.status ?? 'active').toLowerCase() !== 'inactive'
+      };
+
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security-configs`, payload)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1374,7 +1772,33 @@ export class PayrollService {
     }
 
     updateSocialSecurityConfig(id: string, data: any): Observable<any> {
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security-configs/${id}`, data)
+      const payload = {
+        configName: data?.configName,
+        description: data?.description ?? null,
+        jurisdictionId: data?.jurisdictionId ?? null,
+        authorityId: data?.authorityId ?? null,
+        schemeId: data?.schemeId ?? null,
+        ruleId: data?.ruleId ?? null,
+        contributionBasis: data?.contributionBasis ?? 'gross',
+        employeeContributionPct: Number(data?.employeeContributionPct ?? data?.employeePercentage ?? 0),
+        employerContributionPct: Number(data?.employerContributionPct ?? data?.employerPercentage ?? 0),
+        employeeFixedAmount: data?.employeeFixedAmount == null ? null : Number(data.employeeFixedAmount),
+        employerFixedAmount: data?.employerFixedAmount == null ? null : Number(data.employerFixedAmount),
+        minSalaryLimit: data?.minSalaryLimit == null ? null : Number(data.minSalaryLimit),
+        maxSalaryCap: data?.maxSalaryCap ?? data?.maxSalaryCapPkr ?? null,
+        currency: data?.currency ?? null,
+        isStatutory: data?.isStatutory !== false,
+        allowVoluntary: !!data?.allowVoluntary,
+        allowWithdrawal: data?.allowWithdrawal !== false,
+        metadata: data?.metadata ?? null,
+        effectiveFrom: data?.effectiveFrom ?? null,
+        effectiveTo: data?.effectiveTo ?? null,
+        isActive: typeof data?.isActive === 'boolean'
+          ? data.isActive
+          : String(data?.status ?? 'active').toLowerCase() !== 'inactive'
+      };
+
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security-configs/${id}`, payload)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1399,6 +1823,84 @@ export class PayrollService {
 
     getSocialSecurityTransactions(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security-transactions`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getSocialSecurityTransactionById(id: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security-transactions/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    createSocialSecurityTransaction(data: any): Observable<any> {
+      const payload = {
+        employeeId: data?.employeeId,
+        periodId: data?.periodId,
+        configId: data?.configId || null,
+        ruleId: data?.ruleId || null,
+        actualSalary: Number(data?.actualSalary ?? 0),
+        isEnrolled: data?.isEnrolled !== false,
+        requestStatus: data?.requestStatus ?? 'pending'
+      };
+
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/social-security-transactions`, payload)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateSocialSecurityTransaction(id: string, data: any): Observable<any> {
+      const payload = {
+        configId: data?.configId || null,
+        ruleId: data?.ruleId || null,
+        actualSalary: Number(data?.actualSalary ?? 0),
+        isEnrolled: data?.isEnrolled !== false,
+        requestStatus: data?.requestStatus ?? 'pending'
+      };
+
+      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/social-security-transactions/${id}`, payload)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteSocialSecurityTransaction(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/social-security-transactions/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    getMySocialSecurityTransactions(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security-transactions/my`, { params })
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
