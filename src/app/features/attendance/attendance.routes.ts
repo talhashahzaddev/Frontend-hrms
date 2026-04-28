@@ -15,6 +15,10 @@ export const attendanceRoutes: Routes = [
     path: 'time-tracker',
     loadComponent: () => import('./components/time-tracker/time-tracker.component').then(m => m.TimeTrackerComponent)
   },
+   {
+    path: 'overtime',
+    loadComponent: () => import('./components/overtime/overtime.component').then(m => m.OvertimeComponent)
+  },
   {
     path: 'team-attendance',
     loadComponent: () => import('./components/team-attandence/team-attandence.component').then(m => m.TeamAttandenceComponent)
