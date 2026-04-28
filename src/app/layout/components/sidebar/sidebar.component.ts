@@ -163,6 +163,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods', menuName: 'Payroll', subMenuName: 'Payroll Periods' },
         { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process', menuName: 'Payroll', subMenuName: 'Process Payroll' },
+        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation', menuName: 'Payroll', subMenuName: 'Payroll Calculation' },
         { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component', menuName: 'Payroll', subMenuName: 'Salary Components' },
         { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports', menuName: 'Payroll', subMenuName: 'Payroll Reports' },
         { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips', menuName: 'Payroll', subMenuName: 'Salary Slips' }
@@ -313,7 +314,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
         { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
         { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
-        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' }
+        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
+        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
       ]
     },
     {

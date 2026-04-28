@@ -185,5 +185,11 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/my-gratuity/my-gratuity.component').then(m => m.MyGratuityComponent),
     title: 'My Gratuity - HRMS'
+  },
+  {
+    path: 'calculation',
+    loadComponent: () =>
+      import('./components/payroll-calculation/payroll-calculation.component').then(m => m.PayrollCalculationComponent),
+    title: 'Payroll Calculation - HRMS'
   }
 ];
