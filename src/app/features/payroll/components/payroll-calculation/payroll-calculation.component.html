@@ -1,0 +1,346 @@
+<div class="time-tracking-container payroll-calculation-page">
+    <div class="page-header">
+        <div class="title-section">
+            <h1 class="title">Run Payroll</h1>
+            <p class="subtitle">Configure policies and define the scope for the current payroll execution.</p>
+        </div>
+    </div>
+
+    <!-- Scope Selection -->
+    <section class="scope-section" [class.loading]="isLoading">
+        <span class="section-title">Payroll Scope</span>
+        <div class="scope-grid">
+            <div class="scope-item">
+                <label class="scope-label">
+                    Payroll Period <span class="required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedPeriodId">
+                        <option value="">Select Payroll Period</option>
+                        @for (p of periods; track p.periodId) {
+                        <option [value]="p.periodId">{{ p.periodName }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="scope-item">
+                <label class="scope-label">
+                    Department <span class="optional">(Optional)</span>
+                </label>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedDepartmentId">
+                        <option value="">All Departments</option>
+                        @for (dept of departments; track dept.departmentId) {
+                        <option [value]="dept.departmentId">{{ dept.departmentName }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Policy Configuration -->
+    <div class="policy-section">
+        <span class="policy-section-title">Policy Configuration</span>
+        <div class="policy-grid">
+
+            <!-- Card 1: Overtime -->
+            <div class="policy-card">
+                <div class="card-header">
+                    <div class="policy-info">
+                        <div class="icon-wrapper blue">
+                            <mat-icon>schedule</mat-icon>
+                        </div>
+                        <div class="detail">
+                            <h4>Overtime Policy</h4>
+                            <p>Calculate extra hours pay</p>
+                        </div>
+                    </div>
+                    <span class="status-pill" [class.configured]="selectedOvertimeRuleId"
+                        [class.skipped]="!selectedOvertimeRuleId">
+                        {{ selectedOvertimeRuleId ? 'Configured' : 'Skipped' }}
+                    </span>
+                </div>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedOvertimeRuleId">
+                        <option value="">Select Rule (Optional)</option>
+                        @for (rule of overtimeRules; track rule.ruleId) {
+                        <option [value]="rule.ruleId">
+                            {{ rule.ruleName }}
+                            ({{ rule.overtimeType }}: {{ rule.fixedAmount > 0 ? (rule.fixedAmount | number) :
+                            (rule.percentage + '%') }})
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card 2: Attendance Deduction -->
+            <div class="policy-card">
+                <div class="card-header">
+                    <div class="policy-info">
+                        <div class="icon-wrapper amber">
+                            <mat-icon>event_busy</mat-icon>
+                        </div>
+                        <div class="detail">
+                            <h4>Attendance Deduction</h4>
+                            <p>Penalties for absenteeism</p>
+                        </div>
+                    </div>
+                    <span class="status-pill" [class.configured]="selectedAttendanceRuleId"
+                        [class.skipped]="!selectedAttendanceRuleId">
+                        {{ selectedAttendanceRuleId ? 'Configured' : 'Skipped' }}
+                    </span>
+                </div>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedAttendanceRuleId">
+                        <option value="">Select Rule</option>
+                        @for (rule of attendanceRules; track rule.ruleId) {
+                        <option [value]="rule.ruleId">
+                            {{ rule.ruleName }}
+                            (Deduct: {{ rule.fixedDeduction > 0 ? (rule.fixedDeduction | number) :
+                            (rule.percentageDeduction + '%') }})
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card 3: Late Arrival -->
+            <div class="policy-card">
+                <div class="card-header">
+                    <div class="policy-info">
+                        <div class="icon-wrapper rose">
+                            <mat-icon>alarm</mat-icon>
+                        </div>
+                        <div class="detail">
+                            <h4>Late Arrival Policy</h4>
+                            <p>Deductions for tardiness</p>
+                        </div>
+                    </div>
+                    <span class="status-pill" [class.configured]="selectedLateArrivalRuleId"
+                        [class.skipped]="!selectedLateArrivalRuleId">
+                        {{ selectedLateArrivalRuleId ? 'Configured' : 'Skipped' }}
+                    </span>
+                </div>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedLateArrivalRuleId">
+                        <option value="">Select Rule</option>
+                        @for (rule of lateArrivalRules; track rule.ruleId) {
+                        <option [value]="rule.ruleId">
+                            {{ rule.ruleName }}
+                            (Grace: {{ rule.graceMinutes }}m, Deduct: {{ rule.fixedDeduction > 0 ? (rule.fixedDeduction
+                            | number) : (rule.percentageDeduction + '%') }})
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card 4: Leave Deduction -->
+            <div class="policy-card">
+                <div class="card-header">
+                    <div class="policy-info">
+                        <div class="icon-wrapper amber">
+                            <mat-icon>file_copy</mat-icon>
+                        </div>
+                        <div class="detail">
+                            <h4>Leave Deduction Policy</h4>
+                            <p>Deduct unpaid or excess leaves</p>
+                        </div>
+                    </div>
+                    <span class="status-pill" [class.configured]="selectedLeaveRuleId"
+                        [class.skipped]="!selectedLeaveRuleId">
+                        {{ selectedLeaveRuleId ? 'Configured' : 'Skipped' }}
+                    </span>
+                </div>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedLeaveRuleId">
+                        <option value="">Select Rule</option>
+                        @for (rule of leaveRules; track rule.ruleId) {
+                        <option [value]="rule.ruleId">
+                            {{ rule.ruleName }}
+                            (Unpaid Mult: {{ rule.unpaidMultiplier }}x)
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card 5: Performance Bonus -->
+            <div class="policy-card">
+                <div class="card-header">
+                    <div class="policy-info">
+                        <div class="icon-wrapper blue">
+                            <mat-icon>trending_up</mat-icon>
+                        </div>
+                        <div class="detail">
+                            <h4>Performance Bonus Policy</h4>
+                            <p>Bonus from appraisal cycle scores</p>
+                        </div>
+                    </div>
+                    <span class="status-pill" [class.configured]="selectedPerformanceCycleId"
+                        [class.skipped]="!selectedPerformanceCycleId">
+                        {{ selectedPerformanceCycleId ? 'Configured' : 'Skipped' }}
+                    </span>
+                </div>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedPerformanceCycleId">
+                        <option value="">Select Appraisal Cycle</option>
+                        @for (cycle of appraisalCycles; track cycle.cycleId) {
+                            <option [value]="cycle.cycleId">
+                                {{ cycle.cycleName }} 
+                                ({{ cycle.startDate | date:'MMM yyyy' }} - {{ cycle.endDate | date:'MMM yyyy' }})
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card 6: Bonus -->
+            <div class="policy-card">
+                <div class="card-header">
+                    <div class="policy-info">
+                        <div class="icon-wrapper blue">
+                            <mat-icon>redeem</mat-icon>
+                        </div>
+                        <div class="detail">
+                            <h4>Bonus Policy</h4>
+                            <p>Annual or special bonuses</p>
+                        </div>
+                    </div>
+                    <span class="status-pill" [class.configured]="selectedBonusRuleId"
+                        [class.skipped]="!selectedBonusRuleId">
+                        {{ selectedBonusRuleId ? 'Configured' : 'Skipped' }}
+                    </span>
+                </div>
+                <div class="input-wrapper">
+                    <select class="select-input" [(ngModel)]="selectedBonusRuleId">
+                        <option value="">Select Rule</option>
+                        @for (rule of bonusRules; track rule.ruleId) {
+                        <option [value]="rule.ruleId">
+                            {{ rule.ruleName }}
+                            (Value: {{ rule.fixedAmount > 0 ? (rule.fixedAmount | number) : (rule.percentage + '%') }})
+                        </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Card 7: Employee Loan -->
+            <div class="policy-card card-row">
+                <div class="policy-info">
+                    <div class="icon-wrapper indigo">
+                        <mat-icon>account_balance</mat-icon>
+                    </div>
+                    <div class="detail">
+                        <h4>Employee Loan</h4>
+                        <p>Deduct active loan installments</p>
+                    </div>
+                </div>
+                <div class="toggle-group" (click)="enableLoan = !enableLoan">
+                    <span class="toggle-label" [class.enabled]="enableLoan" [class.disabled]="!enableLoan">
+                        {{ enableLoan ? 'Enabled' : 'Disabled' }}
+                    </span>
+                    <div class="switch" [class.active]="enableLoan" [class.inactive]="!enableLoan">
+                        <div class="dot" [class.right]="enableLoan" [class.left]="!enableLoan"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 8: Salary Advance -->
+            <div class="policy-card card-row">
+                <div class="policy-info">
+                    <div class="icon-wrapper indigo">
+                        <mat-icon>account_balance_wallet</mat-icon>
+                    </div>
+                    <div class="detail">
+                        <h4>Salary Advance</h4>
+                        <p>Recover disbursed advance payments</p>
+                    </div>
+                </div>
+                <div class="toggle-group" (click)="enableAdvance = !enableAdvance">
+                    <span class="toggle-label" [class.enabled]="enableAdvance" [class.disabled]="!enableAdvance">
+                        {{ enableAdvance ? 'Enabled' : 'Disabled' }}
+                    </span>
+                    <div class="switch" [class.active]="enableAdvance" [class.inactive]="!enableAdvance">
+                        <div class="dot" [class.right]="enableAdvance" [class.left]="!enableAdvance"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 9: Provident Fund -->
+            <div class="policy-card card-row">
+                <div class="policy-info">
+                    <div class="icon-wrapper indigo">
+                        <mat-icon>savings</mat-icon>
+                    </div>
+                    <div class="detail">
+                        <h4>Provident Fund</h4>
+                        <p>Auto-calculate PF contributions</p>
+                    </div>
+                </div>
+                <div class="toggle-group" (click)="enablePF = !enablePF">
+                    <span class="toggle-label" [class.enabled]="enablePF" [class.disabled]="!enablePF">
+                        {{ enablePF ? 'Enabled' : 'Disabled' }}
+                    </span>
+                    <div class="switch" [class.active]="enablePF" [class.inactive]="!enablePF">
+                        <div class="dot" [class.right]="enablePF" [class.left]="!enablePF"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 10: Income Tax -->
+            <div class="policy-card card-row">
+                <div class="policy-info">
+                    <div class="icon-wrapper indigo">
+                        <mat-icon>receipt_long</mat-icon>
+                    </div>
+                    <div class="detail">
+                        <h4>Income Tax</h4>
+                        <p>Auto-compute from active tax slabs</p>
+                    </div>
+                </div>
+                <div class="toggle-group" (click)="enableTax = !enableTax">
+                    <span class="toggle-label" [class.enabled]="enableTax" [class.disabled]="!enableTax">
+                        {{ enableTax ? 'Enabled' : 'Disabled' }}
+                    </span>
+                    <div class="switch" [class.active]="enableTax" [class.inactive]="!enableTax">
+                        <div class="dot" [class.right]="enableTax" [class.left]="!enableTax"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 11: Gratuity -->
+            <div class="policy-card card-row">
+                <div class="policy-info">
+                    <div class="icon-wrapper indigo">
+                        <mat-icon>workspace_premium</mat-icon>
+                    </div>
+                    <div class="detail">
+                        <h4>Gratuity</h4>
+                        <p>Calculate for eligible employees by tenure</p>
+                    </div>
+                </div>
+                <div class="toggle-group" (click)="enableGratuity = !enableGratuity">
+                    <span class="toggle-label" [class.enabled]="enableGratuity" [class.disabled]="!enableGratuity">
+                        {{ enableGratuity ? 'Enabled' : 'Disabled' }}
+                    </span>
+                    <div class="switch" [class.active]="enableGratuity" [class.inactive]="!enableGratuity">
+                        <div class="dot" [class.right]="enableGratuity" [class.left]="!enableGratuity"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button class="btn-preview">Preview Payroll</button>
+            <button class="btn-calculate">
+                <mat-icon>play_arrow</mat-icon> Calculate Payroll
+            </button>
+        </div>
+
+    </div>
+</div>
