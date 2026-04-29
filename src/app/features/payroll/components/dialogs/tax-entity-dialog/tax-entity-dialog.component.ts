@@ -143,9 +143,10 @@ export class TaxEntityDialogComponent {
       return;
     }
 
+    const isPartiallyExempt = raw.taxability === 'PartiallyExempt';
     const limitType = (raw.limitType ?? 'fixed') as SlabAmountType;
-    const limitAmount = limitType === 'fixed' ? Number(raw.limitAmount ?? 0) : null;
-    const limitPercentage = limitType === 'percentage' ? Number(raw.limitPercentage ?? 0) : null;
+    const limitAmount = isPartiallyExempt && limitType === 'fixed' ? Number(raw.limitAmount ?? 0) : null;
+    const limitPercentage = isPartiallyExempt && limitType === 'percentage' ? Number(raw.limitPercentage ?? 0) : null;
 
     this.dialogRef.close({
       regimeId: String(raw.regimeId || ''),
@@ -178,8 +179,10 @@ export class TaxEntityDialogComponent {
     this.form.get('componentName')?.setValidators([Validators.required, Validators.maxLength(100)]);
     this.form.get('taxability')?.setValidators([Validators.required, Validators.maxLength(30)]);
     this.form.get('applyStage')?.setValidators([Validators.required, Validators.maxLength(50)]);
-    this.form.get('limitType')?.setValidators([Validators.required]);
-    this.updateRuleLimitValidators((this.form.get('limitType')?.value ?? 'fixed') as SlabAmountType);
+    this.updateRuleLimitValidators(
+      (this.form.get('limitType')?.value ?? 'fixed') as SlabAmountType,
+      this.form.get('taxability')?.value
+    );
   }
 
   private patchInitialValue(): void {
@@ -213,7 +216,7 @@ export class TaxEntityDialogComponent {
         limitAmount: limitType === 'fixed' ? limitAmount ?? 0 : null,
         limitPercentage: limitType === 'percentage' ? limitPercentage ?? 0 : null
       });
-      this.updateRuleLimitValidators(limitType);
+      this.updateRuleLimitValidators(limitType, this.form.get('taxability')?.value);
       return;
     }
     this.form.patchValue(this.data.initialValue);
@@ -230,7 +233,14 @@ export class TaxEntityDialogComponent {
     this.form.get('limitType')?.valueChanges.subscribe((value) => {
       if (this.isRule) {
         const limitType = (value ?? 'fixed') as SlabAmountType;
-        this.updateRuleLimitValidators(limitType);
+        this.updateRuleLimitValidators(limitType, this.form.get('taxability')?.value);
+      }
+    });
+
+    this.form.get('taxability')?.valueChanges.subscribe((value) => {
+      if (this.isRule) {
+        const limitType = (this.form.get('limitType')?.value ?? 'fixed') as SlabAmountType;
+        this.updateRuleLimitValidators(limitType, value);
       }
     });
   }
@@ -256,23 +266,32 @@ export class TaxEntityDialogComponent {
     percentControl.updateValueAndValidity({ emitEvent: false });
   }
 
-  private updateRuleLimitValidators(limitType: SlabAmountType): void {
+  private updateRuleLimitValidators(limitType: SlabAmountType, taxability?: string | null): void {
     if (!this.isRule) return;
 
+    const limitTypeControl = this.form.get('limitType');
     const amountControl = this.form.get('limitAmount');
     const percentControl = this.form.get('limitPercentage');
-    if (!amountControl || !percentControl) return;
+    if (!limitTypeControl || !amountControl || !percentControl) return;
 
-    if (limitType === 'fixed') {
-      amountControl.setValidators([Validators.required, Validators.min(0)]);
-      percentControl.clearValidators();
-      percentControl.setValue(null, { emitEvent: false });
-    } else {
-      percentControl.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+    if (taxability !== 'PartiallyExempt') {
+      limitTypeControl.clearValidators();
       amountControl.clearValidators();
-      amountControl.setValue(null, { emitEvent: false });
+      percentControl.clearValidators();
+    } else {
+      limitTypeControl.setValidators([Validators.required]);
+      if (limitType === 'fixed') {
+        amountControl.setValidators([Validators.required, Validators.min(0)]);
+        percentControl.clearValidators();
+        percentControl.setValue(null, { emitEvent: false });
+      } else {
+        percentControl.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+        amountControl.clearValidators();
+        amountControl.setValue(null, { emitEvent: false });
+      }
     }
 
+    limitTypeControl.updateValueAndValidity({ emitEvent: false });
     amountControl.updateValueAndValidity({ emitEvent: false });
     percentControl.updateValueAndValidity({ emitEvent: false });
   }
