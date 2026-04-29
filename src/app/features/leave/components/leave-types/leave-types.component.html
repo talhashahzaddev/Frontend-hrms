@@ -57,6 +57,11 @@
                         Paid
                     </div>
 
+                    <div class="flag-item" *ngIf="type.isHalfPaid">
+                        <mat-icon [style.color]="type.color || '#2196F3'">percent</mat-icon>
+                        Half Paid
+                    </div>
+
                     <!-- Carry Forward Info -->
                     <div class="flag-item" *ngIf="type.carryForwardAllowed && type.maxCarryForwardDays">
                         <mat-icon [style.color]="type.color || '#2196F3'">event_repeat</mat-icon>
