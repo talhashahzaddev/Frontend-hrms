@@ -154,16 +154,17 @@
             </mat-form-field>
           </div>
           <div class="rd-field">
-            <label>Apply Stage *</label>
+            <label>Apply On *</label>
             <mat-form-field appearance="outline" class="rd-mat-field">
               <mat-select formControlName="applyStage">
-                <mat-option value="BeforeTax">BeforeTax</mat-option>
-                <mat-option value="AfterTax">AfterTax</mat-option>
+                <mat-option value="ProvidentFunds">Provident Funds</mat-option>
+                <mat-option value="SocialSecurity">Social Security</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
         </div>
 
+        @if (form.get('taxability')?.value === 'PartiallyExempt') {
         <div class="rd-grid-2">
           <div class="rd-field">
             <label>Limit Type *</label>
@@ -190,6 +191,7 @@
           </div>
           }
         </div>
+        }
       </section>
       }
     </form>
