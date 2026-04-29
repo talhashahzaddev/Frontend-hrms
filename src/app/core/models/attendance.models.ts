@@ -584,3 +584,21 @@ export interface OrgSubmissionProgress {
   submissionRate: number;
   complianceRate: number;
 }
+
+export interface EmployeeOverTimeDto {
+  requestId: string;
+  employeeId: string;
+  requestedBy?: string;
+  managerid?: string;
+  attendanceId?: string;
+  requestedByName?: string;
+  requestType?: string;
+  overtimeType?: string;
+  overtimeDate?: string;
+  overtimeStart?: string;
+  overtimeEnd?: string;
+  requestedHours?: number;
+  reason?: string;
+  status?: 'pending' | 'approved' | 'rejected' | string;
+  createdAt?: string;
+}

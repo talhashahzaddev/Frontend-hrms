@@ -38,6 +38,7 @@ import {
   ProcessAttendanceRequestDto,
   PendingAttendanceRequest,
   EmployeeSubmissionPackage,
+  EmployeeOverTimeDto,
   CorrectionRecord,
   EmployeeReviewPackage,
   DailyReviewRecord,
@@ -279,6 +280,16 @@ getAllTimeZones() {
   getTodaySessions(): Observable<AttendanceSessionDto[]> {
     return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
       .pipe(map(res => res.data || []));
+  }
+
+  // Get all overtime requests created by the current employee
+  getAllEmployeeCreatedOvertime(): Observable<EmployeeOverTimeDto[]> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto[]>>(`${this.apiUrl}/getall/EmployeeCreated/overtime`)
+      .pipe(
+        map(response => {
+          return response.data || [];
+        })
+      );
   }
 
 
@@ -796,6 +807,156 @@ getAllTimeZones() {
         return response.data || true;
       })
     );
+  }
+
+  /**
+   * Create a manager overtime request
+   * POST /Attendance/create/manager/overtime
+   */
+  createManagerOvertime(request: any): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/create/manager/overtime`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create manager overtime');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  /**
+   * Create an employee overtime request
+   * POST /Attendance/create/employee/overtime
+   */
+  createEmployeeOvertime(request: any): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/create/employee/overtime`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create employee overtime');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  /**
+   * Get employee overtime requests pending for manager approval
+   * GET /Attendance/manager/overtime/pending
+   */
+  getManagerPendingOvertime(): Observable<EmployeeOverTimeDto[]> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto[]>>(`${this.apiUrl}/manager/overtime/pending`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch manager pending overtime requests');
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  /**
+   * Approve an overtime request as manager
+   * POST /Attendance/manager/overtime/approve
+   */
+  approveManagerOvertime(requestId: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/manager/overtime/approve`, { requestId })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to approve overtime request');
+          }
+          return response.data || true;
+        })
+      );
+  }
+
+  /**
+   * Reject an overtime request as manager
+   * POST /Attendance/manager/overtime/reject
+   */
+  rejectManagerOvertime(requestId: string, reason?: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/manager/overtime/reject`, { requestId, reason })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to reject overtime request');
+          }
+          return response.data || true;
+        })
+      );
+  }
+
+  /**
+   * Get employee overtime requests assigned to the manager
+   * GET /Attendance/employee/overtime/assigned
+   */
+  getEmployeeAssignedOvertime(): Observable<EmployeeOverTimeDto[]> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto[]>>(`${this.apiUrl}/employee/overtime/assigned`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch employee assigned overtime requests');
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  /**
+   * Respond to an employee overtime request that was assigned to a manager
+   * POST /Attendance/employee/overtime/respond/{requestId}?response=accept|reject
+   */
+  respondToAssignedOvertime(requestId: string, response: 'accept' | 'reject'): Observable<boolean> {
+    const params = new HttpParams().set('response', response);
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/employee/overtime/respond/${requestId}`, null, { params })
+      .pipe(
+        map(res => {
+          if (!res.success) {
+            throw new Error(res.message || 'Failed to respond to assigned overtime request');
+          }
+          return res.data || true;
+        })
+      );
+  }
+
+  /**
+   * Approve an employee overtime request (manager action)
+   * POST /Attendance/employee/overtime/approve
+   */
+  approveEmployeeOvertime(requestId: string): Observable<boolean> {
+    // Backend supports POST /Attendance/employee/overtime/{requestId}?status=approved
+    const params = new HttpParams().set('status', 'approved');
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/employee/overtime/${requestId}`, null, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to approve employee overtime request');
+          }
+          return response.data || true;
+        })
+      );
+  }
+
+  /**
+   * Reject an employee overtime request (manager action)
+   * POST /Attendance/employee/overtime/reject
+   */
+  rejectEmployeeOvertime(requestId: string, reason?: string): Observable<boolean> {
+    // Backend supports POST /Attendance/employee/overtime/{requestId}?status=rejected
+    let params = new HttpParams().set('status', 'rejected');
+    if (reason) params = params.set('reason', reason);
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/employee/overtime/${requestId}`, null, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to reject employee overtime request');
+          }
+          return response.data || true;
+        })
+      );
   }
 
   finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {

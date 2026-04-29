@@ -1,0 +1,317 @@
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { Subject, takeUntil } from 'rxjs';
+import { AttendanceService } from '../../services/attendance.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+
+@Component({
+  selector: 'app-create-employee-overtime-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatDialogModule
+  ],
+  template: `
+  <div class="dialog-wrapper">
+    <!-- Header -->
+    <div class="dialog-header">
+      <h2 class="dialog-title">Create Employee Overtime</h2>
+      <button class="close-btn" type="button" (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dialog-body">
+
+      <!-- Overtime Date -->
+      <div class="field-group">
+        <label class="field-label">Overtime Date</label>
+        <div class="input-wrap">
+          <input class="field-input" [matDatepicker]="picker" formControlName="overtimeDate"
+                 placeholder="mm/dd/yyyy" readonly (click)="picker.open()">
+          <mat-datepicker-toggle matSuffix [for]="picker" class="date-toggle"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </div>
+      </div>
+
+      <!-- Overtime Type -->
+      <div class="field-group">
+        <label class="field-label">Overtime Type</label>
+        <div class="select-wrap">
+          <select class="field-select" formControlName="overtimeType">
+            <option value="" disabled>Select type...</option>
+            <option value="regular">Regular</option>
+            <option value="holiday">Holiday</option>
+            <option value="weekend">Weekend</option>
+          </select>
+          <mat-icon class="select-icon">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <!-- Start Time & End Time -->
+      <div class="row-2col">
+        <div class="field-group">
+          <label class="field-label">Start Time</label>
+          <div class="input-wrap">
+            <input class="field-input" type="time" formControlName="overtimeStartTime">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">End Time</label>
+          <div class="input-wrap">
+            <input class="field-input" type="time" formControlName="overtimeEndTime">
+          </div>
+        </div>
+      </div>
+
+      <!-- Reason -->
+      <div class="field-group">
+        <label class="field-label">Reason</label>
+        <textarea class="field-textarea" formControlName="reason" rows="3"
+                  placeholder="Provide context for the overtime request..."></textarea>
+      </div>
+
+      <!-- Footer -->
+      <div class="dialog-footer">
+        <button class="btn-cancel" type="button" (click)="onCancel()">Cancel</button>
+        <button class="btn-save" type="submit" [disabled]="form.invalid || isSubmitting">Save</button>
+      </div>
+
+    </form>
+  </div>
+  `,
+  styles: [
+    `
+    /* Force the Material Dialog container to fit the content tightly */
+    ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+      border-radius: 8px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .dialog-wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 420px;
+      background: #ffffff;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px !important;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .dialog-title {
+      margin: 0;
+      font-size: 15px !important;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 0;
+    }
+
+    .dialog-body {
+      padding: 12px 16px !important;
+      display: flex;
+      flex-direction: column;
+      gap: 10px !important;
+      overflow-y: auto;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .field-label {
+      font-size: 10px !important;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .field-input, .field-select {
+      width: 100%;
+      height: 32px !important;
+      padding: 0 10px !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 4px !important;
+      font-size: 13px !important;
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .select-wrap { position: relative; }
+    .select-icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .field-textarea {
+      width: 100%;
+      padding: 6px 10px !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 4px !important;
+      font-size: 13px !important;
+      min-height: 45px !important;
+      resize: none;
+      box-sizing: border-box;
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 10px 16px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-cancel, .btn-save {
+      height: 30px !important;
+      padding: 0 14px !important;
+      font-size: 12px !important;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-cancel { background: #f1f5f9; color: #475569; }
+    .btn-save { background: #2563eb; color: #ffffff; }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .date-toggle {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    ::ng-deep .date-toggle .mat-mdc-icon-button {
+      width: 24px !important;
+      height: 24px !important;
+      padding: 0 !important;
+    }
+    `
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class CreateEmployeeOvertimeDialogComponent implements OnInit, OnDestroy {
+  form: FormGroup;
+  isSubmitting = false;
+
+  private destroy$ = new Subject<void>();
+
+  constructor(
+    private fb: FormBuilder,
+    private attendanceService: AttendanceService,
+    private notification: NotificationService,
+    private dialogRef: MatDialogRef<CreateEmployeeOvertimeDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data?: any
+  ) {
+    this.form = this.fb.group({
+      overtimeDate: [new Date(), Validators.required],
+      overtimeType: ['', Validators.required],
+      reason: [''],
+      overtimeStartTime: ['', Validators.required],
+      overtimeEndTime: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {}
+
+  onCancel(): void {
+    this.dialogRef.close();
+  }
+
+  private formatTimeForBackend(timeValue: string): string {
+    if (!timeValue) return '';
+    return timeValue.length === 5 ? `${timeValue}:00` : timeValue;
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.notification.showError('Please correct the highlighted fields');
+      return;
+    }
+
+    this.isSubmitting = true;
+    const v = this.form.value;
+    const payload = {
+      overTimeDate: this.toIsoDate(v.overtimeDate),
+      overtimeType: v.overtimeType,
+      reason: v.reason || '',
+      overtimeStartTime: this.formatTimeForBackend(v.overtimeStartTime),
+      overtimeEndTime: this.formatTimeForBackend(v.overtimeEndTime)
+    } as any;
+
+    this.attendanceService.createEmployeeOvertime(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.notification.showSuccess('Overtime request created');
+          this.isSubmitting = false;
+          this.dialogRef.close(res ?? 'created');
+        },
+        error: (err) => {
+          const msg = err?.error?.message || err?.message || 'Failed to create overtime';
+          this.notification.showError(msg);
+          this.isSubmitting = false;
+        }
+      });
+  }
+
+  private toIsoDate(dt: any): string {
+    if (!dt) return '';
+    const d = (dt instanceof Date) ? dt : new Date(dt);
+    const y = d.getFullYear();
+    const m = ('0' + (d.getMonth() + 1)).slice(-2);
+    const day = ('0' + d.getDate()).slice(-2);
+    return `${y}-${m}-${day}`;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
