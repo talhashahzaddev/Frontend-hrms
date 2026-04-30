@@ -79,6 +79,58 @@
         <mat-icon matPrefix>assignment_turned_in</mat-icon>
       </mat-form-field>
 
+      <!-- Leave-type picker — only shown when status is "On Leave". Drives leave_type /
+           leave_pay_type on the finalized record (and the bridge counters). -->
+      @if (isOnLeave) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Leave Type *</mat-label>
+          <mat-select formControlName="leaveTypeId" required>
+            @for (lt of leaveTypes; track lt.leaveTypeId) {
+              <mat-option [value]="lt.leaveTypeId">
+                {{ lt.typeName }}
+                <span class="leave-pay-hint">
+                  ({{ lt.isHalfPaid ? 'Half-Paid' : (lt.isPaid ? 'Paid' : 'Unpaid') }})
+                </span>
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>event_busy</mat-icon>
+          <mat-hint>Pay treatment is derived from the selected leave type.</mat-hint>
+          <mat-error *ngIf="overrideForm.get('leaveTypeId')?.touched && overrideForm.get('leaveTypeId')?.hasError('required')">
+            Leave type is required when overriding to On Leave.
+          </mat-error>
+        </mat-form-field>
+      }
+
+      <!-- Overtime override. Both fields are optional; type drives which typed bucket
+           the hours land in (regular_overtime_hours / weekend_overtime_hours / holiday_overtime_hours). -->
+      <div class="time-row">
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Overtime Hours</mat-label>
+          <input matInput type="number" min="0" step="0.25" formControlName="overtimeHours" placeholder="e.g. 2.5">
+          <mat-icon matPrefix>schedule</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Overtime Type</mat-label>
+          <mat-select formControlName="overtimeType">
+            <mat-option [value]="null">— None —</mat-option>
+            @for (option of overtimeTypeOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Late minutes override. Manager can waive lateness (set 0) or set explicitly. -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Late Minutes</mat-label>
+        <input matInput type="number" min="0" step="1" formControlName="lateMinutes" placeholder="e.g. 0 to waive, 30 to set">
+        <mat-icon matPrefix>timer</mat-icon>
+        <mat-hint>Set 0 to waive a late mark, or any positive integer to record minutes-late.</mat-hint>
+      </mat-form-field>
+
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Notes (Optional)</mat-label>
         <textarea matInput formControlName="notes" rows="2" placeholder="Any additional notes..."></textarea>

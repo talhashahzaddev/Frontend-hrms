@@ -54,19 +54,14 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
 
 
 export interface TimesheetDialogData {
-
   timesheetId: string;
-
   timesheetName: string;
-
-  month: number;
-
-  year: number;
-
-  monthName: string;
-
+  startDate: string;
+  endDate: string;
+  /** @deprecated Use startDate/endDate */ month?: number;
+  /** @deprecated Use startDate/endDate */ year?: number;
+  /** @deprecated Use startDate/endDate */ monthName?: string;
   userRole: string;
-
 }
 
 
@@ -1146,100 +1141,88 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
   getDailyRecordsForMonth(employee: EmployeeTimesheetDto): any[] {
-
     if (this.dailyRecordsCache.has(employee.employeeId)) {
       return this.dailyRecordsCache.get(employee.employeeId)!;
     }
 
-    const daysInMonth = new Date(this.data.year, this.data.month, 0).getDate();
-
+    const { periodStart, periodEnd } = this.resolvePeriodDates();
     const allDays: any[] = [];
-
     const employeeRecords = employee.dailyRecords || [];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
 
-    const today = new Date();
+    const cur = new Date(periodStart); cur.setHours(0, 0, 0, 0);
+    const end = new Date(periodEnd);   end.setHours(0, 0, 0, 0);
 
-    for (let day = 1; day <= daysInMonth; day++) {
-
-      const dateObj = new Date(this.data.year, this.data.month - 1, day);
-
-      const dateStr = `${this.data.year}-${String(this.data.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-      const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
-
-      const isFuture = dateObj > today;
+    while (cur <= end) {
+      const dateStr = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+      const isWeekend = cur.getDay() === 0 || cur.getDay() === 6;
+      const isFuture  = cur > today;
 
       const existingRecord = employeeRecords.find(r =>
-
-        r.date === dateStr || new Date(r.date).getDate() === day
-
+        r.date === dateStr || (r.date && r.date.startsWith(dateStr))
       );
 
       if (existingRecord) {
-
-        (existingRecord as any).status = this.titleCaseStatus((existingRecord as any).status || (existingRecord as any).Status || '');
-
-        (existingRecord as any).isWeekend = !!(existingRecord as any).isWeekend;
-
+        (existingRecord as any).status    = this.titleCaseStatus((existingRecord as any).status || (existingRecord as any).Status || '');
+        (existingRecord as any).isWeekend = !!(existingRecord as any).isWeekend || isWeekend;
         allDays.push(existingRecord);
-
       } else {
-
         let statusLabel = 'No Record';
-
-        if (isWeekend) {
-
-          statusLabel = 'Weekend';
-
-        } else if (!isFuture) {
-
-          statusLabel = 'Absent';
-
-        }
+        if (isWeekend)       statusLabel = 'Weekend';
+        else if (!isFuture)  statusLabel = 'Absent';
 
         allDays.push({
-
           date: dateStr,
-
           checkInTime: null,
-
           checkOutTime: null,
-
           status: statusLabel,
-
           totalHours: 0,
-
           notes: isWeekend ? 'Weekend' : 'No attendance record',
-
           is_finalized: false,
-
           hasPendingRequest: false,
-
           hasDraftRequest: false,
-
           isPlaceholder: true,
-
-          isWeekend: isWeekend
-
+          isWeekend
         });
-
       }
-
+      cur.setDate(cur.getDate() + 1);
     }
 
     if (this.isEmployeePayrollLocked(employee)) {
-      const todayMs = new Date().setHours(0, 0, 0, 0);
       allDays.forEach((r: any) => {
-        if (!r.isWeekend && new Date(r.date).setHours(0, 0, 0, 0) <= todayMs) {
+        if (!r.isWeekend && new Date(r.date).setHours(0, 0, 0, 0) <= today.getTime()) {
           r.is_finalized = true;
         }
       });
     }
 
     this.dailyRecordsCache.set(employee.employeeId, allDays);
-
     return allDays;
+  }
 
+  /** Resolves period bounds, falling back to legacy month/year if dialog data is older. */
+  private resolvePeriodDates(): { periodStart: Date; periodEnd: Date } {
+    if (this.data.startDate && this.data.endDate) {
+      return {
+        periodStart: new Date(this.data.startDate),
+        periodEnd:   new Date(this.data.endDate)
+      };
+    }
+    const m = this.data.month ?? new Date().getMonth() + 1;
+    const y = this.data.year  ?? new Date().getFullYear();
+    return {
+      periodStart: new Date(y, m - 1, 1),
+      periodEnd:   new Date(y, m,     0)
+    };
+  }
+
+  /** Human-friendly period label for dialog headers. */
+  getPeriodLabel(): string {
+    if (this.data.startDate && this.data.endDate) {
+      const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `${fmt(new Date(this.data.startDate))} – ${fmt(new Date(this.data.endDate))}`;
+    }
+    return `${this.data.monthName ?? ''} ${this.data.year ?? ''}`.trim();
   }
 
 
@@ -1347,29 +1330,21 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
 
   needsAttentionAlert(employee: EmployeeTimesheetDto): boolean {
+    if (employee.attendancePercentage === 0) return true;
 
-    if (employee.attendancePercentage === 0) {
-
-      return true;
-
+    const { periodStart, periodEnd } = this.resolvePeriodDates();
+    let workDays = 0;
+    const cur = new Date(periodStart);
+    while (cur <= periodEnd) {
+      const d = cur.getDay();
+      if (d !== 0 && d !== 6) workDays++;
+      cur.setDate(cur.getDate() + 1);
     }
-
-
-
-    const daysInMonth = new Date(this.data.year, this.data.month, 0).getDate();
-
     const recordCount = employee.dailyRecords?.filter(r =>
-
       r.status !== 'No Record' && r.checkInTime !== null
-
     ).length || 0;
 
-    const missingPercentage = ((daysInMonth - recordCount) / daysInMonth) * 100;
-
-
-
-    return missingPercentage > 50;
-
+    return workDays > 0 && ((workDays - recordCount) / workDays) * 100 > 50;
   }
 
 
@@ -1388,34 +1363,22 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     if (!timeStr) return '-';
 
+    // ISO timestamp (with or without offset / Z): parse as a moment and render in
+    // the viewer's local timezone. The DB stores timestamptz so the wire value
+    // pinpoints the same instant regardless of representation; toLocaleTimeString
+    // normalizes that instant to "what the clock said in the viewer's timezone".
     if (typeof timeStr === 'string' && timeStr.includes('T')) {
-
-      const tIndex = timeStr.indexOf('T');
-      const afterT = timeStr.substring(tIndex + 1);
-
-      let hour: number;
-      let minute: string;
-
-      if (/[+-]\d{2}:\d{2}$/.test(afterT)) {
-        const hhmm = afterT.substring(0, 5);
-        hour   = parseInt(hhmm.split(':')[0], 10);
-        minute = hhmm.split(':')[1];
-      } else {
-        const d = new Date(timeStr);
-        hour   = d.getHours();
-        minute = String(d.getMinutes()).padStart(2, '0');
+      const d = new Date(timeStr);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
       }
-
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-
-      hour = hour % 12;
-
-      if (hour === 0) hour = 12;
-
-      return `${hour}:${minute} ${ampm}`;
-
     }
 
+    // Bare "HH:MM" string (no date) — handle directly without date parsing.
     if (typeof timeStr === 'string' && /^\d{2}:\d{2}$/.test(timeStr)) {
 
       let [hour, minute] = timeStr.split(':');
@@ -1512,6 +1475,30 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
         status: status || 'No Record',
 
         totalHours: raw.totalHours || raw.TotalHours || 0,
+
+        overtimeHours: raw.overtimeHours ?? raw.OvertimeHours ?? raw.overtime_hours ?? 0,
+
+        overtimeType: raw.overtimeType ?? raw.OvertimeType ?? raw.overtime_type ?? null,
+
+        lateMinutes: raw.lateMinutes ?? raw.LateMinutes ?? raw.late_minutes ?? 0,
+
+        leaveTypeId: raw.leaveTypeId ?? raw.LeaveTypeId ?? raw.leave_type_id ?? null,
+
+        leaveTypeName: raw.leaveTypeName ?? raw.LeaveTypeName ?? raw.leave_type_name ?? null,
+
+        leavePayType: raw.leavePayType ?? raw.LeavePayType ?? raw.leave_pay_type ?? null,
+
+        requestedLeaveTypeId: raw.requestedLeaveTypeId ?? raw.RequestedLeaveTypeId ?? null,
+
+        requestedLeaveTypeName: raw.requestedLeaveTypeName ?? raw.RequestedLeaveTypeName ?? null,
+
+        requestedLeavePayType: raw.requestedLeavePayType ?? raw.RequestedLeavePayType ?? null,
+
+        requestedOvertimeHours: raw.requestedOvertimeHours ?? raw.RequestedOvertimeHours ?? null,
+
+        requestedOvertimeType: raw.requestedOvertimeType ?? raw.RequestedOvertimeType ?? null,
+
+        requestedLateMinutes: raw.requestedLateMinutes ?? raw.RequestedLateMinutes ?? null,
 
         notes: raw.notes || raw.Notes || null,
 

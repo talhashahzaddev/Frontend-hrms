@@ -44,7 +44,10 @@ import {
   DailyReviewRecord,
   ManagerOverrideDto,
   OrgSubmissionProgress,
-  ManualAttendanceUpdateDto
+  ManualAttendanceUpdateDto,
+  TimesheetPayrollSummaryDto,
+  TimesheetPeriodLinkDto,
+  LockTimesheetRequestDto
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 import { FinalizeBatchRequestDto } from '../models/finalize-batch-request.dto';
@@ -1272,6 +1275,55 @@ submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }
           throw new Error(response.message || 'Failed to finalize timesheet batch');
         }
         return response.data || { finalizedCount: 0 };
+      })
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PAYROLL BRIDGE
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /** Returns the lightweight list of finalized timesheets (for payroll dropdowns). */
+  getFinalizedTimesheetLinks(): Observable<TimesheetPeriodLinkDto[]> {
+    return this.http.get<ApiResponse<TimesheetPeriodLinkDto[]>>(
+      `${this.apiUrl}/timesheet/finalized-links`
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch finalized timesheets');
+        }
+        return response.data || [];
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  /** Returns the full payroll-ready summary for one finalized timesheet. */
+  getTimesheetPayrollSummary(timesheetId: string): Observable<TimesheetPayrollSummaryDto> {
+    return this.http.get<ApiResponse<TimesheetPayrollSummaryDto>>(
+      `${this.apiUrl}/timesheet/payroll-summary`,
+      { params: new HttpParams().set('timesheetId', timesheetId) }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch payroll summary');
+        }
+        return response.data!;
+      })
+    );
+  }
+
+  /** Locks a finalized timesheet so payroll can claim it as the source of truth. */
+  lockTimesheet(dto: LockTimesheetRequestDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/lock`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to lock timesheet');
+        }
+        return response.data || false;
       })
     );
   }

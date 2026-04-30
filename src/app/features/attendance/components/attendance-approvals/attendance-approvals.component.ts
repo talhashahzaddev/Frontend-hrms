@@ -174,9 +174,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (snapshots) => {
-          this.allSnapshots = [...snapshots].sort((a, b) =>
-            b.year !== a.year ? b.year - a.year : b.month - a.month
-          );
+          this.allSnapshots = [...snapshots].sort((a, b) => {
+            const aKey = a.startDate || `${a.year ?? 0}-${String(a.month ?? 0).padStart(2,'0')}-01`;
+            const bKey = b.startDate || `${b.year ?? 0}-${String(b.month ?? 0).padStart(2,'0')}-01`;
+            return bKey.localeCompare(aKey);
+          });
 
           if (this.allSnapshots.length === 0) {
             this.loadFallbackWithPendingRequests();
@@ -192,8 +194,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
           }
 
           this.selectedTimesheetId = latest.timesheetId;
-          this.currentMonth = latest.month;
-          this.currentYear = latest.year;
+          this.currentMonth = latest.month ?? (latest.startDate ? new Date(latest.startDate).getMonth() + 1 : new Date().getMonth() + 1);
+          this.currentYear  = latest.year  ?? (latest.startDate ? new Date(latest.startDate).getFullYear()  : new Date().getFullYear());
 
           this.loadReviewDashboard(this.selectedTimesheetId);
         },
@@ -223,8 +225,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     }
 
     this.selectedTimesheetId = snapshot.timesheetId;
-    this.currentMonth = snapshot.month;
-    this.currentYear = snapshot.year;
+    this.currentMonth = snapshot.month ?? (snapshot.startDate ? new Date(snapshot.startDate).getMonth() + 1 : new Date().getMonth() + 1);
+    this.currentYear  = snapshot.year  ?? (snapshot.startDate ? new Date(snapshot.startDate).getFullYear()  : new Date().getFullYear());
     this.showHistoryDrawer = false;
     this.isLoading = true;
 
@@ -272,9 +274,11 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (snapshots) => {
-          this.allSnapshots = [...snapshots].sort((a, b) =>
-            b.year !== a.year ? b.year - a.year : b.month - a.month
-          );
+          this.allSnapshots = [...snapshots].sort((a, b) => {
+            const aKey = a.startDate || `${a.year ?? 0}-${String(a.month ?? 0).padStart(2,'0')}-01`;
+            const bKey = b.startDate || `${b.year ?? 0}-${String(b.month ?? 0).padStart(2,'0')}-01`;
+            return bKey.localeCompare(aKey);
+          });
           this.isLoadingSnapshots = false;
         },
         error: (err) => {

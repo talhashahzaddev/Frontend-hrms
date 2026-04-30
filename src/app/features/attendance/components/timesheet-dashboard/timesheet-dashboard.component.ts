@@ -143,6 +143,9 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
       data: {
         timesheetId: timesheet.timesheetId,
         timesheetName: timesheet.timesheetName,
+        startDate: timesheet.startDate,
+        endDate:   timesheet.endDate,
+        // legacy back-compat
         month: timesheet.month,
         year: timesheet.year,
         monthName: timesheet.monthName,
@@ -168,19 +171,45 @@ export class TimesheetDashboardComponent implements OnInit, OnDestroy {
     return 'danger';
   }
 
+  /** Renders the timesheet's period as a human-friendly date range. Falls back to month/year for legacy rows. */
+  getPeriodDisplay(timesheet: MonthlyTimesheetSummary): string {
+    if (timesheet.startDate && timesheet.endDate) {
+      const start = new Date(timesheet.startDate);
+      const end   = new Date(timesheet.endDate);
+      const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `${fmt(start)} – ${fmt(end)}`;
+    }
+    if (timesheet.monthName && timesheet.year) {
+      return `${timesheet.monthName} ${timesheet.year}`;
+    }
+    return 'Unknown Period';
+  }
+
+  /** @deprecated kept so older templates still compile — delegates to getPeriodDisplay. */
   getMonthYearDisplay(timesheet: MonthlyTimesheetSummary): string {
-    return `${timesheet.monthName} ${timesheet.year}`;
+    return this.getPeriodDisplay(timesheet);
   }
 
   getStatusChipClass(status?: string): string {
-    switch (status?.toLowerCase()) {
-      case 'finalized':
-        return 'status-finalized';
+    const k = (status || '').toLowerCase().replace(/\s+/g, '');
+    switch (k) {
+      case 'locked':       return 'status-locked';
+      case 'finalized':    return 'status-finalized';
+      case 'approved':     return 'status-approved';
+      case 'submitted':    return 'status-submitted';
+      case 'underreview':  return 'status-review';
+      case 'inprogress':   return 'status-in-progress';
+      case 'archived':     return 'status-archived';
       case 'draft':
-        return 'status-draft';
-      default:
-        return 'status-draft';
+      default:             return 'status-draft';
     }
+  }
+
+  /** Pretty label, e.g. "InProgress" → "In Progress". */
+  getStatusLabel(status?: string): string {
+    if (!status) return 'Draft';
+    // Insert space before capital letters that follow a lowercase letter
+    return status.replace(/([a-z])([A-Z])/g, '$1 $2');
   }
 
   getEmployeeCodeLabel(snapshot: MonthlyTimesheetSummary): string {

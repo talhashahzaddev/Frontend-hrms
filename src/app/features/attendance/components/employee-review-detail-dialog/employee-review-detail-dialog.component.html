@@ -110,19 +110,38 @@
           </td>
         </ng-container>
 
-        <!-- Hours -->
+        <!-- Hours (with OT and late chips so payroll-relevant counters are visible per day) -->
         <ng-container matColumnDef="totalHours">
           <th mat-header-cell *matHeaderCellDef>Hrs</th>
           <td mat-cell *matCellDef="let r">
             @if (r.hasRecord && !isNonWorkStatus(r.originalStatus)) {
               <span class="hours-val">{{ (r.originalTotalHours || 0) | number:'1.1-1' }}h</span>
+              @if ((r.overtimeHours || 0) > 0) {
+                <span class="ot-chip"
+                      [matTooltip]="(r.overtimeType ? (r.overtimeType | titlecase) + ' OT' : 'Overtime') + ': ' + (r.overtimeHours | number:'1.0-2') + 'h'">
+                  +{{ r.overtimeHours | number:'1.0-2' }}h OT
+                </span>
+              }
+              @if ((r.lateMinutes || 0) > 0) {
+                <span class="late-min-chip"
+                      [matTooltip]="'Late by ' + r.lateMinutes + ' min'">
+                  +{{ r.lateMinutes }}m late
+                </span>
+              }
+            } @else if (r.leaveTypeName) {
+              <span class="leave-type-chip"
+                    [matTooltip]="r.leaveTypeName + ' — ' + (r.leavePayType === 'half_paid' ? 'Half-Paid' : (r.leavePayType === 'unpaid' ? 'Unpaid' : 'Paid'))">
+                {{ r.leaveTypeName }}
+                <small>· {{ r.leavePayType === 'half_paid' ? '½' : (r.leavePayType === 'unpaid' ? 'U' : 'P') }}</small>
+              </span>
             } @else {
               <span class="dash">-</span>
             }
           </td>
         </ng-container>
 
-        <!-- Requested -->
+        <!-- Requested column — shows what the employee asked for as a single block.
+             Includes leave-type, overtime hours/type, and late minutes if requested. -->
         <ng-container matColumnDef="requested">
           <th mat-header-cell *matHeaderCellDef>Requested</th>
           <td mat-cell *matCellDef="let r">
@@ -139,6 +158,25 @@
                 @if (r.requestedStatus) {
                   <span class="status-pill" [ngClass]="getStatusClass(r.requestedStatus)">
                     {{ r.requestedStatus | titlecase }}
+                  </span>
+                }
+                @if (r.requestedLeaveTypeName) {
+                  <span class="leave-type-chip requested-chip"
+                        [matTooltip]="r.requestedLeaveTypeName + ' — ' + (r.requestedLeavePayType === 'half_paid' ? 'Half-Paid' : (r.requestedLeavePayType === 'unpaid' ? 'Unpaid' : 'Paid'))">
+                    {{ r.requestedLeaveTypeName }}
+                    <small>· {{ r.requestedLeavePayType === 'half_paid' ? '½' : (r.requestedLeavePayType === 'unpaid' ? 'U' : 'P') }}</small>
+                  </span>
+                }
+                @if (r.requestedOvertimeHours != null) {
+                  <span class="ot-chip requested-chip"
+                        [matTooltip]="'Requested OT: ' + (r.requestedOvertimeHours | number:'1.0-2') + 'h' + (r.requestedOvertimeType ? ' (' + (r.requestedOvertimeType | titlecase) + ')' : '')">
+                    OT {{ r.requestedOvertimeHours | number:'1.0-2' }}h<ng-container *ngIf="r.requestedOvertimeType"> · {{ (r.requestedOvertimeType || '').charAt(0).toUpperCase() }}</ng-container>
+                  </span>
+                }
+                @if (r.requestedLateMinutes != null) {
+                  <span class="late-min-chip requested-chip"
+                        [matTooltip]="'Requested late minutes: ' + r.requestedLateMinutes">
+                    Late {{ r.requestedLateMinutes }}m
                   </span>
                 }
               </div>

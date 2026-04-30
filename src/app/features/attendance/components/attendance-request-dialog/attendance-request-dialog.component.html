@@ -95,6 +95,52 @@
         <mat-hint>Select new status or leave unchanged</mat-hint>
       </mat-form-field>
 
+      <!-- Leave-type picker. Only shown when the status is "On Leave". The selection
+           drives leave_type / leave_pay_type on the finalized record at approval time. -->
+      <mat-form-field *ngIf="isOnLeave" appearance="outline" class="full-width">
+        <mat-label>Leave Type *</mat-label>
+        <mat-select formControlName="requestedLeaveTypeId" required>
+          <mat-option *ngFor="let lt of leaveTypes" [value]="lt.leaveTypeId">
+            {{ lt.typeName }}
+            <span class="leave-pay-hint">
+              ({{ lt.isHalfPaid ? 'Half-Paid' : (lt.isPaid ? 'Paid' : 'Unpaid') }})
+            </span>
+          </mat-option>
+        </mat-select>
+        <mat-icon matPrefix>event_busy</mat-icon>
+        <mat-hint>Pay treatment is derived from the selected leave type.</mat-hint>
+        <mat-error *ngIf="requestForm.get('requestedLeaveTypeId')?.touched && requestForm.get('requestedLeaveTypeId')?.hasError('required')">
+          Leave type is required when requesting On Leave.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Overtime correction (optional). The type drives which typed bucket on the
+           bridge the hours land in (regular / weekend / holiday). -->
+      <div class="time-row">
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Overtime Hours (Optional)</mat-label>
+          <input matInput type="number" min="0" step="0.25" formControlName="requestedOvertimeHours" placeholder="e.g. 2.5">
+          <mat-icon matPrefix>schedule</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="time-field">
+          <mat-label>Overtime Type</mat-label>
+          <mat-select formControlName="requestedOvertimeType">
+            <mat-option [value]="null">— None —</mat-option>
+            <mat-option *ngFor="let opt of overtimeTypeOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Late minutes correction (optional). 0 claims no lateness; positive sets explicitly. -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Late Minutes (Optional)</mat-label>
+        <input matInput type="number" min="0" step="1" formControlName="requestedLateMinutes" placeholder="e.g. 0 to claim on-time, 30 to record">
+        <mat-icon matPrefix>timer</mat-icon>
+        <mat-hint>Use 0 to claim on-time; positive values request a specific minutes-late.</mat-hint>
+      </mat-form-field>
+
       <mat-form-field appearance="outline" class="full-width reason-field">
         <mat-label>Reason for Edit *</mat-label>
         <textarea matInput formControlName="reasonForEdit" rows="3"
