@@ -7,8 +7,8 @@
         <mat-icon class="header-icon">event_note</mat-icon>
       </div>
       <div class="header-text">
-        <h2 class="header-title">{{ data.timesheetName || (data.monthName + ' ' + data.year + ' Timesheet') }}</h2>
-        <p class="subtitle" *ngIf="!isEmployee()">{{ employees.length }} Employee{{ employees.length !== 1 ? 's' : '' }} &bull; {{ data.monthName }} {{ data.year }}</p>
+        <h2 class="header-title">{{ data.timesheetName || getPeriodLabel() }}</h2>
+        <p class="subtitle" *ngIf="!isEmployee()">{{ employees.length }} Employee{{ employees.length !== 1 ? 's' : '' }} &bull; {{ getPeriodLabel() }}</p>
       </div>
     </div>
     <div class="header-right" style="display:flex;align-items:center;gap:8px;">
@@ -125,11 +125,24 @@
           <!-- ── Records List Table ─────────────────────────────── -->
           <div class="records-table-wrap">
 
-            <!-- Compact stats bar inside table wrapper (managers/admins only) -->
+            <!-- Compact stats bar inside table wrapper (managers/admins only).
+                 Numbers come straight from the backend (EmployeeTimesheetDto): bridge data
+                 when the timesheet is finalized, computed-on-the-fly otherwise. -->
             <div class="records-stats-bar" *ngIf="!isEmployee()">
               <span class="mini-label">Present</span><span class="mini-value">{{ se.presentDays }}</span>
               <span class="mini-sep">·</span>
               <span class="mini-label">Absent</span><span class="mini-value">{{ se.absentDays }}</span>
+              <span class="mini-sep">·</span>
+              <span class="mini-label">Late</span><span class="mini-value">{{ se.lateDays || 0 }}d / {{ (se.lateHours ?? ((se.lateMinutes || 0) / 60)) | number:'1.0-2' }}h</span>
+              <span class="mini-sep">·</span>
+              <span class="mini-label">Hours</span><span class="mini-value">{{ se.totalHoursWorked || 0 | number:'1.0-2' }}h</span>
+              <span class="mini-sep">·</span>
+              <span class="mini-label">OT</span>
+              <span class="mini-value"
+                    [matTooltip]="'Regular: ' + ((se.regularOvertimeHours || 0) | number:'1.0-2') + 'h\nWeekend: ' + ((se.weekendOvertimeHours || 0) | number:'1.0-2') + 'h\nHoliday: ' + ((se.holidayOvertimeHours || 0) | number:'1.0-2') + 'h'"
+                    matTooltipClass="ot-breakdown-tooltip">
+                {{ se.overtimeHours || 0 | number:'1.0-2' }}h
+              </span>
               <span class="mini-sep">·</span>
               <span class="mini-label">Attendance</span><span class="mini-value">{{ se.attendancePercentage | number:'1.0-0' }}%</span>
             </div>
@@ -161,41 +174,70 @@
                   <span class="row-date-full">{{ formatDate(record.date) }}</span>
                 </div>
 
-                <!-- Check-In -->
+                <!-- Check-In: actual time is the source of truth.
+                     A pending/draft request is shown as a small annotation, never replaces the actual time. -->
                 <div class="rc-checkin">
                   <ng-container *ngIf="showTimes(record)">
-                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckIn" class="edited-info">
-                      {{ formatTime(record.requestedCheckIn) }}
-                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
-                    </span>
-                    <span *ngIf="!((record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckIn)" class="time-val">
+                    <span class="time-val">
                       {{ record.checkInTime ? formatTime(record.checkInTime) : '—' }}
                     </span>
+                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckIn"
+                          class="requested-annotation"
+                          [matTooltip]="(record.hasDraftRequest ? 'Draft' : 'Pending') + ' edit request: ' + formatTime(record.requestedCheckIn)">
+                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                      <small>→ {{ formatTime(record.requestedCheckIn) }}</small>
+                    </span>
                   </ng-container>
                   <span *ngIf="!showTimes(record)" class="time-dash">—</span>
                 </div>
 
-                <!-- Check-Out -->
+                <!-- Check-Out: same treatment as check-in. -->
                 <div class="rc-checkout">
                   <ng-container *ngIf="showTimes(record)">
-                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckOut" class="edited-info">
-                      {{ formatTime(record.requestedCheckOut) }}
-                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
-                    </span>
-                    <span *ngIf="!((record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckOut)" class="time-val">
+                    <span class="time-val">
                       {{ record.checkOutTime ? formatTime(record.checkOutTime) : '—' }}
+                    </span>
+                    <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedCheckOut"
+                          class="requested-annotation"
+                          [matTooltip]="(record.hasDraftRequest ? 'Draft' : 'Pending') + ' edit request: ' + formatTime(record.requestedCheckOut)">
+                      <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                      <small>→ {{ formatTime(record.requestedCheckOut) }}</small>
                     </span>
                   </ng-container>
                   <span *ngIf="!showTimes(record)" class="time-dash">—</span>
                 </div>
 
-                <!-- Hours -->
+                <!-- Hours (with OT and late-minute annotations when applicable, plus
+                     a draft chip for any pending/draft OT or late correction request). -->
                 <div class="rc-hours">
                   <span *ngIf="record.totalHours" class="hours-val">{{ record.totalHours }}</span>
                   <span *ngIf="!record.totalHours" class="time-dash">—</span>
+                  <span *ngIf="(record.overtimeHours || 0) > 0" class="ot-chip"
+                        [matTooltip]="(record.overtimeType ? (record.overtimeType | titlecase) + ' OT' : 'Overtime') + ': ' + (record.overtimeHours | number:'1.0-2') + 'h'">
+                    +{{ record.overtimeHours | number:'1.0-2' }}h OT
+                  </span>
+                  <span *ngIf="(record.lateMinutes || 0) > 0" class="late-min-chip"
+                        [matTooltip]="'Late by ' + record.lateMinutes + ' min'">
+                    +{{ record.lateMinutes }}m late
+                  </span>
+                  <!-- Draft/pending OT correction request -->
+                  <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && (record.requestedOvertimeHours != null)"
+                        class="ot-chip requested-chip"
+                        [matTooltip]="(record.hasDraftRequest ? 'Draft' : 'Pending') + ' OT request: ' + (record.requestedOvertimeHours | number:'1.0-2') + 'h' + (record.requestedOvertimeType ? ' (' + (record.requestedOvertimeType | titlecase) + ')' : '')">
+                    <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                    → {{ record.requestedOvertimeHours | number:'1.0-2' }}h<ng-container *ngIf="record.requestedOvertimeType"> ({{ (record.requestedOvertimeType || '').charAt(0).toUpperCase() }})</ng-container>
+                  </span>
+                  <!-- Draft/pending late-minutes correction request -->
+                  <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && (record.requestedLateMinutes != null)"
+                        class="late-min-chip requested-chip"
+                        [matTooltip]="(record.hasDraftRequest ? 'Draft' : 'Pending') + ' late request: ' + record.requestedLateMinutes + ' min'">
+                    <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                    → {{ record.requestedLateMinutes }}m
+                  </span>
                 </div>
 
-                <!-- Status -->
+                <!-- Status (with leave-type label inline + draft annotation when a
+                     leave-type correction was requested). -->
                 <div class="rc-status">
                   <span class="status-badge" [ngClass]="{
                     'present':  getEffectiveStatus(record) === 'present',
@@ -215,6 +257,19 @@
                     <ng-container *ngIf="!(record.hasDraftRequest || record.hasPendingRequest)">
                       {{ record.status }}
                     </ng-container>
+                  </span>
+                  <!-- Leave type chip — shown when the day is on leave and the type is known. -->
+                  <span *ngIf="record.leaveTypeName" class="leave-type-chip"
+                        [matTooltip]="record.leaveTypeName + ' — ' + (record.leavePayType === 'half_paid' ? 'Half-Paid' : (record.leavePayType === 'unpaid' ? 'Unpaid' : 'Paid'))">
+                    {{ record.leaveTypeName }}
+                    <small>· {{ record.leavePayType === 'half_paid' ? '½' : (record.leavePayType === 'unpaid' ? 'U' : 'P') }}</small>
+                  </span>
+                  <!-- Draft/pending leave-type correction request -->
+                  <span *ngIf="(record.hasDraftRequest || record.hasPendingRequest) && record.requestedLeaveTypeName"
+                        class="leave-type-chip requested-chip"
+                        [matTooltip]="(record.hasDraftRequest ? 'Draft' : 'Pending') + ' leave-type request: ' + record.requestedLeaveTypeName + ' (' + (record.requestedLeavePayType === 'half_paid' ? 'Half-Paid' : (record.requestedLeavePayType === 'unpaid' ? 'Unpaid' : 'Paid')) + ')'">
+                    <mat-icon class="requested-icon">{{ record.hasDraftRequest ? 'history_edu' : 'pending' }}</mat-icon>
+                    → {{ record.requestedLeaveTypeName }}
                   </span>
                 </div>
 

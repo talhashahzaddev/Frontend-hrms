@@ -12,8 +12,10 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AttendanceService } from '../../services/attendance.service';
+import { LeaveService } from '../../../leave/services/leave.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AttendanceUpdateRequestDto, ManualAttendanceRequest } from '../../../../core/models/attendance.models';
+import { LeaveType } from '../../../../core/models/leave.models';
 
 export interface AttendanceRequestDialogData {
   attendanceId?: string | null;
@@ -50,6 +52,7 @@ export interface AttendanceRequestDialogData {
 export class AttendanceRequestDialogComponent implements OnInit {
   requestForm: FormGroup;
   isSubmitting = false;
+  leaveTypes: LeaveType[] = [];
 
   statusOptions = [
     { value: 'present', label: 'Present' },
@@ -59,8 +62,19 @@ export class AttendanceRequestDialogComponent implements OnInit {
     { value: 'absent', label: 'Absent' }
   ];
 
+  overtimeTypeOptions = [
+    { value: 'regular', label: 'Regular' },
+    { value: 'weekend', label: 'Weekend' },
+    { value: 'holiday', label: 'Holiday' }
+  ];
+
   get isCreateMode(): boolean {
     return this.data.mode === 'create';
+  }
+
+  /** True when the requested status is a leave — drives the leave-type dropdown visibility. */
+  get isOnLeave(): boolean {
+    return (this.requestForm.get('requestedStatus')?.value || '').toLowerCase() === 'on_leave';
   }
 
   constructor(
@@ -68,18 +82,43 @@ export class AttendanceRequestDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: AttendanceRequestDialogData,
     private fb: FormBuilder,
     private attendanceService: AttendanceService,
+    private leaveService: LeaveService,
     private notificationService: NotificationService
   ) {
     this.requestForm = this.fb.group({
       requestedCheckIn: [''],
       requestedCheckOut: [''],
       requestedStatus: [''],
+      // Required only when requestedStatus = 'on_leave' — validator wired in ngOnInit.
+      requestedLeaveTypeId: [null],
+      // Optional payroll-relevant fields the employee can request to correct.
+      requestedOvertimeHours: [null],
+      requestedOvertimeType: [null],
+      requestedLateMinutes: [null],
       reasonForEdit: ['', [Validators.required, Validators.minLength(10)]],
       requestedNotes: ['']
     });
   }
 
   ngOnInit(): void {
+    // Load leave types so the user can pick paid / unpaid / half-paid when requesting leave.
+    this.leaveService.getLeaveTypes().subscribe({
+      next: (types) => { this.leaveTypes = types || []; },
+      error: () => { this.leaveTypes = []; }
+    });
+
+    // Toggle leave-type required validator based on selected status.
+    this.requestForm.get('requestedStatus')?.valueChanges.subscribe((status: string) => {
+      const ctrl = this.requestForm.get('requestedLeaveTypeId');
+      if ((status || '').toLowerCase() === 'on_leave') {
+        ctrl?.setValidators([Validators.required]);
+      } else {
+        ctrl?.clearValidators();
+        ctrl?.setValue(null, { emitEvent: false });
+      }
+      ctrl?.updateValueAndValidity({ emitEvent: false });
+    });
+
     if (this.isCreateMode) {
       this.requestForm.patchValue({
         requestedCheckIn: '09:00',
@@ -241,6 +280,7 @@ export class AttendanceRequestDialogComponent implements OnInit {
 
   private submitEditRequest(formValue: any, timeout?: any): void {
     const isAbsent = formValue.requestedStatus?.toLowerCase() === 'absent';
+    const isOnLeave = formValue.requestedStatus?.toLowerCase() === 'on_leave';
     const requestDto: AttendanceUpdateRequestDto = {
       attendanceId: this.data.attendanceId || null,
       employeeId: this.data.employeeId!,
@@ -249,6 +289,14 @@ export class AttendanceRequestDialogComponent implements OnInit {
       requestedCheckIn: (!isAbsent && formValue.requestedCheckIn) ? this.formatDateTime(formValue.requestedCheckIn) : undefined,
       requestedCheckOut: (!isAbsent && formValue.requestedCheckOut) ? this.formatDateTime(formValue.requestedCheckOut) : undefined,
       requestedStatus: formValue.requestedStatus || undefined,
+      // Only include the leave-type when requesting an on_leave correction.
+      requestedLeaveTypeId: isOnLeave ? (formValue.requestedLeaveTypeId || undefined) : undefined,
+      // Only send payroll-counter overrides when the employee actually filled them in.
+      requestedOvertimeHours: formValue.requestedOvertimeHours != null && formValue.requestedOvertimeHours !== ''
+        ? Number(formValue.requestedOvertimeHours) : undefined,
+      requestedOvertimeType:  formValue.requestedOvertimeType || undefined,
+      requestedLateMinutes:   formValue.requestedLateMinutes != null && formValue.requestedLateMinutes !== ''
+        ? Number(formValue.requestedLateMinutes) : undefined,
       reasonForEdit: formValue.reasonForEdit,
       requestedNotes: formValue.requestedNotes || undefined
     };

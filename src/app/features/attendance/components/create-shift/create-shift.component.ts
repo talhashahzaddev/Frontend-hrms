@@ -92,6 +92,9 @@ private destroy$ = new Subject<void>();
       timezone: [''],
       marginHours: [0, [Validators.min(0), Validators.max(5)]],
       applyMarginhours: [],
+      // Per-shift grace period (minutes). Used by timesheet late calc when set; falls
+      // back to the payroll late-arrival rule, then a 15-minute default, when 0.
+      graceMinutes: [0, [Validators.min(0), Validators.max(120)]],
       geoFenceId: ['']
     });
 
@@ -131,7 +134,8 @@ ngOnDestroy(): void {
       daysofWeek: data.daysofWeek,
       timezone: data.timezone,
       marginHours: data.marginHours ?? 0,
-      applyMarginhours: data.applyMarginhours ?? true
+      applyMarginhours: data.applyMarginhours ?? true,
+      graceMinutes: data.graceMinutes ?? 0
 
 
     });
@@ -284,7 +288,8 @@ private loadInitialData(): void {
         daysofWeek: formValue.daysofWeek,
         timezone: formValue.timezone,
         marginHours: formValue.marginHours ?? 0,
-        applyMarginhours: formValue.applyMarginhours
+        applyMarginhours: formValue.applyMarginhours,
+        graceMinutes: formValue.graceMinutes ?? 0
 
       };
 
@@ -310,7 +315,8 @@ private loadInitialData(): void {
         daysofWeek: formValue.daysofWeek,
         timezone: formValue.timezone,
         marginHours: formValue.marginHours ?? 0,
-        applyMarginhours: formValue.applyMarginhours
+        applyMarginhours: formValue.applyMarginhours,
+        graceMinutes: formValue.graceMinutes ?? 0
 
       };
 

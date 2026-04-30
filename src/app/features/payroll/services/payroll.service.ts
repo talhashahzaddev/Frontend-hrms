@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { TimesheetPayrollSummaryDto, TimesheetPeriodLinkDto } from '../../../core/models/attendance.models';
 
 export interface PayRollRuleDto {
   id: string;
@@ -2484,6 +2485,46 @@ export class PayrollService {
         map((response: any) => {
           if (!response.success && response.message) throw new Error(response.message);
           return response.data;
+        })
+      );
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // TIMESHEET → PAYROLL BRIDGE
+    // Same endpoints as AttendanceService — mirrored here so payroll components
+    // don't need to import from another module.
+    // ───────────────────────────────────────────────────────────────────────
+
+    /** List finalized timesheets payroll can attach to a payroll run. */
+    getFinalizedTimesheetLinks(): Observable<TimesheetPeriodLinkDto[]> {
+      const url = `${environment.apiUrl}/Attendance/timesheet/finalized-links`;
+      return this.http.get<ApiResponse<TimesheetPeriodLinkDto[]>>(url).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data || [];
+        })
+      );
+    }
+
+    /** Returns the per-employee payroll summary for one finalized timesheet. */
+    getTimesheetPayrollSummary(timesheetId: string): Observable<TimesheetPayrollSummaryDto> {
+      const url = `${environment.apiUrl}/Attendance/timesheet/payroll-summary`;
+      const params = new HttpParams().set('timesheetId', timesheetId);
+      return this.http.get<ApiResponse<TimesheetPayrollSummaryDto>>(url, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    /** Lock a finalized timesheet — call after payroll has consumed it. */
+    lockTimesheet(timesheetId: string, payrollPeriodId?: string): Observable<boolean> {
+      const url = `${environment.apiUrl}/Attendance/timesheet/lock`;
+      return this.http.post<ApiResponse<boolean>>(url, { timesheetId, payrollPeriodId }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data ?? false;
         })
       );
     }
