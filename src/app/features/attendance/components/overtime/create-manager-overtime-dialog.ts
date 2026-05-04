@@ -78,7 +78,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
             <select class="field-select" formControlName="overtimeType">
               <option value="" disabled>Select type...</option>
               <option value="regular">Regular</option>
-              <option value="holiday">Holiday </option>
+              <option value="holiday">Holiday</option>
               <option value="weekend">Weekend</option>
             </select>
             <mat-icon class="select-icon">expand_more</mat-icon>
@@ -105,7 +105,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
       <!-- Reason for Overtime -->
       <div class="field-group">
         <label class="field-label">Reason for Overtime</label>
-        <textarea class="field-textarea" formControlName="reason" rows="4"
+        <textarea class="field-textarea" formControlName="reason" rows="3"
                   placeholder="Briefly describe the project or task that required additional hours..."></textarea>
       </div>
 
@@ -127,182 +127,173 @@ import { NotificationService } from '../../../../core/services/notification.serv
     </form>
   </div>
   `,
-  styles: [
-    `
-    /* ── Reset dialog shell ── */
-    ::ng-deep .mat-mdc-dialog-container {
-      position: fixed !important;
-      inset: 0 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      padding: 0 !important;
-      border-radius: 12px !important;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.18) !important;
-    }
+  styles: [`
+
+    /* ── Reset Material dialog surface ── */
     ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
       border-radius: 12px !important;
       padding: 0 !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-      margin: 0 auto !important;
+      overflow: hidden !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18) !important;
+      border: 1px solid #e2e8f0 !important;
     }
 
     /* ── Dialog wrapper ── */
     .dialog-wrapper {
       display: flex;
       flex-direction: column;
-      width: 520px;
-      max-width: 92vw;
+      width: 512px;
+      max-width: 100%;
       background: #ffffff;
-      border-radius: 12px;
-      overflow: visible;
       font-family: 'Inter', sans-serif;
-      margin: 0 auto;
-      box-shadow: 0 8px 30px rgba(2,6,23,0.12);
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     /* ── Header ── */
     .dialog-header {
-      position: relative;
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 16px 20px;
-      border-bottom: 1px solid #e6eef6;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f1f5f9;
       background: #ffffff;
     }
-    .header-text { display: flex; flex-direction: column; gap: 2px; text-align: center; }
+
+    .header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
     .dialog-title {
       margin: 0;
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 600;
       color: #0f172a;
-      line-height: 24px;
+      letter-spacing: -0.01em;
+      line-height: 22px;
     }
+
     .dialog-subtitle {
       margin: 0;
-      font-size: 13px;
+      font-size: 11.5px;
       color: #64748b;
-      line-height: 18px;
+      line-height: 16px;
+      font-weight: 400;
     }
+
     .close-btn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: none;
       border: none;
       cursor: pointer;
       color: #94a3b8;
-      padding: 6px;
-      border-radius: 6px;
-      transition: color 0.12s;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: color 0.15s;
       flex-shrink: 0;
     }
-    .close-btn:hover { color: #334155; }
+    .close-btn:hover { color: #475569; }
 
     /* ── Body / Form ── */
     .dialog-body {
-      padding: 18px 20px;
+      padding: 14px 20px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      max-height: calc(80vh - 100px);
+      gap: 10px;
+      overflow: hidden;
     }
 
     /* ── Field group ── */
     .field-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
+
     .field-label {
       font-size: 10px;
       font-weight: 700;
       color: #475569;
       letter-spacing: 0.05em;
+      line-height: 14px;
       text-transform: uppercase;
     }
 
-    /* ── Input wrapper ── */
+    /* ── Input wrap ── */
     .input-wrap {
       position: relative;
+      display: flex;
+      align-items: center;
     }
+
+    /* ── Shared input base ── */
     .field-input {
       width: 100%;
-      height: 36px;
+      height: 34px;
       padding: 0 36px 0 12px;
-      border: 1px solid #d1d5db;
+      border: 1px solid #cbd5e1;
       border-radius: 6px;
       font-size: 13px;
+      font-family: 'Inter', sans-serif;
       color: #0f172a;
       background: #ffffff;
-      outline: none;
       box-sizing: border-box;
-      transition: border-color 0.12s, box-shadow 0.12s;
-      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
     }
+
     .field-input:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
     }
+
     .field-input::placeholder { color: #94a3b8; }
 
-    /* ── Datepicker toggle ── */
-    .date-toggle {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    ::ng-deep .date-toggle .mat-mdc-icon-button {
-      width: 28px !important;
-      height: 28px !important;
-      padding: 0 !important;
-      line-height: 28px !important;
-    }
-    ::ng-deep .date-toggle .mat-icon { font-size: 18px !important; color: #94a3b8; }
-
-    /* ── Select ── */
+    /* ── Select wrapper ── */
     .select-wrap {
       position: relative;
     }
+
     .field-select {
       width: 100%;
-      height: 36px;
-      padding: 0 34px 0 12px;
-      border: 1px solid #d1d5db;
+      height: 34px;
+      padding: 0 36px 0 12px;
+      border: 1px solid #cbd5e1;
       border-radius: 6px;
       font-size: 13px;
+      font-family: 'Inter', sans-serif;
       color: #0f172a;
       background: #ffffff;
-      appearance: none;
-      outline: none;
-      cursor: pointer;
       box-sizing: border-box;
-      transition: border-color 0.12s, box-shadow 0.12s;
-      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
     }
+
     .field-select:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
     }
+
     .select-icon {
       position: absolute;
-      right: 12px;
+      right: 10px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 20px;
+      font-size: 18px;
       color: #94a3b8;
       pointer-events: none;
     }
 
-    /* ── 2-column grid ── */
+    /* ── Two-column row ── */
     .row-2col {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -312,93 +303,119 @@ import { NotificationService } from '../../../../core/services/notification.serv
     /* ── Textarea ── */
     .field-textarea {
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
+      padding: 7px 12px;
+      border: 1px solid #cbd5e1;
       border-radius: 6px;
       font-size: 13px;
+      font-family: 'Inter', sans-serif;
       color: #0f172a;
       background: #ffffff;
-      resize: vertical;
-      min-height: 64px;
-      outline: none;
+      resize: none;
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
-      line-height: 1.45;
-      transition: border-color 0.12s, box-shadow 0.12s;
+      outline: none;
+      min-height: 58px;
+      max-height: 58px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      line-height: 18px;
     }
+
+    .field-textarea::placeholder { color: #94a3b8; }
+
     .field-textarea:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
     }
-    .field-textarea::placeholder { color: #94a3b8; }
 
     /* ── Info box ── */
     .info-box {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      padding: 10px 12px;
-      background: #f7fbff;
-      border: 1px solid rgba(195,198,215,0.35);
+      gap: 8px;
+      padding: 8px 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
       border-radius: 6px;
     }
+
     .info-icon {
-      font-size: 20px;
+      font-size: 16px;
       color: #2563eb;
       flex-shrink: 0;
       margin-top: 1px;
     }
+
     .info-text {
       margin: 0;
-      font-size: 13px;
+      font-size: 11.5px;
       color: #475569;
-      line-height: 1.6;
+      line-height: 1.55;
+      font-family: 'Inter', sans-serif;
     }
 
     /* ── Footer ── */
     .dialog-footer {
       display: flex;
       justify-content: flex-end;
+      align-items: center;
       gap: 10px;
-      padding-top: 8px;
+      padding: 10px 20px;
+      background: #f8fafc;
       border-top: 1px solid #f1f5f9;
-      margin-top: 4px;
+      margin: 0 -20px -14px -20px;
     }
-    .btn-cancel {
-      height: 36px;
+
+    /* ── Buttons ── */
+    .btn-cancel,
+    .btn-save {
+      height: 34px;
       padding: 0 18px;
-      border: 1px solid #e2e8f0;
-      background: #ffffff;
-      border-radius: 6px;
       font-size: 13px;
       font-weight: 600;
-      color: #475569;
-      cursor: pointer;
       font-family: 'Inter', sans-serif;
-      transition: background 0.12s, border-color 0.12s;
-    }
-    .btn-cancel:hover {
-      background: #f8fafc;
-      border-color: #94a3b8;
-    }
-    .btn-save {
-      height: 36px;
-      padding: 0 20px;
-      border: none;
       border-radius: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #ffffff;
-      background: #2563eb;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      box-shadow: 0 2px 6px rgba(37,99,235,0.22);
-      transition: background 0.12s;
+      transition: background 0.15s, opacity 0.15s;
+      line-height: 1;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      border: none;
+      color: #475569;
+    }
+    .btn-cancel:hover { background: #e2e8f0; }
+
+    .btn-save {
+      background: #2563eb;
+      border: none;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.25);
     }
     .btn-save:hover:not(:disabled) { background: #1d4ed8; }
-    .btn-save:disabled { opacity: 0.55; cursor: not-allowed; }
-    `
-  ],
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+    /* ── Datepicker toggle sizing ── */
+    .date-toggle {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    ::ng-deep .date-toggle .mat-mdc-icon-button {
+      width: 28px !important;
+      height: 28px !important;
+      padding: 0 !important;
+      color: #94a3b8 !important;
+    }
+
+    ::ng-deep .date-toggle .mat-mdc-icon-button svg,
+    ::ng-deep .date-toggle .mat-mdc-icon-button .mat-icon {
+      font-size: 16px !important;
+      width: 16px !important;
+      height: 16px !important;
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateManagerOvertimeDialogComponent implements OnInit, OnDestroy {

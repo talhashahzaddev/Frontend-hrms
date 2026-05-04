@@ -168,6 +168,16 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="field">
+          <mat-label>Tax Category</mat-label>
+          <mat-select formControlName="taxCategoryId">
+            <mat-option value="">Not Set</mat-option>
+            <mat-option *ngFor="let cat of taxCategories" [value]="cat.categoryId">
+              {{ cat.categoryName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
           <mat-label>Work Location</mat-label>
           <input matInput formControlName="workLocation" placeholder="New York Office">
         </mat-form-field>

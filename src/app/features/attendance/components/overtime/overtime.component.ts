@@ -24,6 +24,7 @@ export class OvertimeComponent implements OnInit {
   pendingRequests: EmployeeOverTimeDto[] = [];
   employeeAssignedRequests: EmployeeOverTimeDto[] = [];
   employeeCreatedRequests: EmployeeOverTimeDto[] = [];
+  selectedTab = 0;
   displayedColumns = ['requestedByName', 'overtimeType', 'overtimeDate', 'requestedHours', 'reason', 'createdAt', 'status', 'actions'];
 
   displayedEmployeeColumns = ['requestedByName', 'overtimeStart', 'overtimeEnd', 'overtimeDate', 'overtimeType', 'status', 'actions'];
@@ -180,6 +181,10 @@ export class OvertimeComponent implements OnInit {
         this.notification.showError('Failed to reject employee request');
       }
     });
+  }
+
+  selectTab(index: number): void {
+    this.selectedTab = index;
   }
 
 }
