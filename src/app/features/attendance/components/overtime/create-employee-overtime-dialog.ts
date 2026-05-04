@@ -30,6 +30,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
   ],
   template: `
   <div class="dialog-wrapper">
+
     <!-- Header -->
     <div class="dialog-header">
       <h2 class="dialog-title">Create Employee Overtime</h2>
@@ -98,36 +99,46 @@ import { NotificationService } from '../../../../core/services/notification.serv
     </form>
   </div>
   `,
-  styles: [
-    `
-    /* Force the Material Dialog container to fit the content tightly */
+  styles: [`
+
+    /* ── Reset Material dialog surface ── */
     ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
-      border-radius: 8px !important;
+      border-radius: 12px !important;
       padding: 0 !important;
       overflow: hidden !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18) !important;
+      border: 1px solid #e2e8f0 !important;
     }
 
+    /* ── Wrapper ── */
     .dialog-wrapper {
       display: flex;
       flex-direction: column;
-      width: 420px;
+      width: 512px;
+      max-width: 100%;
       background: #ffffff;
       font-family: 'Inter', sans-serif;
+      border-radius: 12px;
+      overflow: hidden;
     }
 
+    /* ── Header ── */
     .dialog-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px !important;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 20px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #ffffff;
     }
 
     .dialog-title {
       margin: 0;
-      font-size: 15px !important;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 600;
       color: #0f172a;
+      letter-spacing: -0.01em;
+      line-height: 28px;
     }
 
     .close-btn {
@@ -135,104 +146,180 @@ import { NotificationService } from '../../../../core/services/notification.serv
       border: none;
       cursor: pointer;
       color: #94a3b8;
-      padding: 0;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: color 0.15s;
     }
+    .close-btn:hover { color: #475569; }
 
+    /* ── Body / Form ── */
     .dialog-body {
-      padding: 12px 16px !important;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 10px !important;
-      overflow-y: auto;
+      gap: 20px;
     }
 
+    /* ── Field group ── */
     .field-group {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 6px;
     }
 
     .field-label {
-      font-size: 10px !important;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: 0.02em;
+      line-height: 16px;
     }
 
-    .field-input, .field-select {
+    /* ── Input wrap (for date with toggle) ── */
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ── Shared input / select base ── */
+    .field-input,
+    .field-select {
       width: 100%;
-      height: 32px !important;
-      padding: 0 10px !important;
-      border: 1px solid #cbd5e1 !important;
-      border-radius: 4px !important;
-      font-size: 13px !important;
+      height: 42px;
+      padding: 0 40px 0 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+      background: #ffffff;
       box-sizing: border-box;
       outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
     }
 
-    .select-wrap { position: relative; }
+    .field-input:focus,
+    .field-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    }
+
+    /* ── Select wrapper ── */
+    .select-wrap {
+      position: relative;
+    }
+
     .select-icon {
       position: absolute;
-      right: 8px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 18px;
+      font-size: 20px;
       color: #94a3b8;
       pointer-events: none;
     }
 
+    /* ── Two-column row ── */
     .row-2col {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 16px;
     }
 
+    /* ── Textarea ── */
     .field-textarea {
       width: 100%;
-      padding: 6px 10px !important;
-      border: 1px solid #cbd5e1 !important;
-      border-radius: 4px !important;
-      font-size: 13px !important;
-      min-height: 45px !important;
+      padding: 10px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+      background: #ffffff;
       resize: none;
       box-sizing: border-box;
+      outline: none;
+      min-height: 80px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      line-height: 20px;
     }
 
+    .field-textarea::placeholder { color: #94a3b8; }
+
+    .field-textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+    }
+
+    /* ── Footer ── */
     .dialog-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
-      padding: 10px 16px;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: #f8fafc;
       border-top: 1px solid #f1f5f9;
+      margin: 0 -24px -24px -24px;
     }
 
-    .btn-cancel, .btn-save {
-      height: 30px !important;
-      padding: 0 14px !important;
-      font-size: 12px !important;
+    /* ── Buttons ── */
+    .btn-cancel,
+    .btn-save {
+      height: 38px;
+      padding: 0 20px;
+      font-size: 14px;
       font-weight: 600;
-      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      border-radius: 8px;
       cursor: pointer;
       border: none;
+      transition: background 0.15s, opacity 0.15s;
+      line-height: 1;
     }
 
-    .btn-cancel { background: #f1f5f9; color: #475569; }
-    .btn-save { background: #2563eb; color: #ffffff; }
-    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-cancel {
+      background: transparent;
+      color: #475569;
+    }
+    .btn-cancel:hover { background: #e2e8f0; }
 
+    .btn-save {
+      background: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+    }
+    .btn-save:hover { background: #1d4ed8; }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+    /* ── Datepicker toggle sizing ── */
     .date-toggle {
       position: absolute;
-      right: 2px;
+      right: 4px;
       top: 50%;
       transform: translateY(-50%);
     }
+
     ::ng-deep .date-toggle .mat-mdc-icon-button {
-      width: 24px !important;
-      height: 24px !important;
+      width: 32px !important;
+      height: 32px !important;
       padding: 0 !important;
+      color: #94a3b8 !important;
     }
-    `
-  ],
+
+    ::ng-deep .date-toggle .mat-mdc-icon-button svg,
+    ::ng-deep .date-toggle .mat-mdc-icon-button .mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+    }
+  `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEmployeeOvertimeDialogComponent implements OnInit, OnDestroy {

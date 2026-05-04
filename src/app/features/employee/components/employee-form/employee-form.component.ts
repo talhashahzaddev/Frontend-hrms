@@ -17,6 +17,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { SettingsService } from '../../../settings/services/settings.service';
 import { Employee, Department, Position, CreateEmployeeRequest, UpdateEmployeeRequest } from '../../../../core/models/employee.models';
 import { PaymentService } from '../../../../core/services/payment.service';
+import { PayrollService } from 'src/app/features/payroll/services/payroll.service';
+import { TaxCategoryDto } from 'src/app/features/payroll/services/payroll.service';
 
 @Component({
   selector: 'app-employee-form',
@@ -48,6 +50,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   departments: Department[] = [];
   positions: Position[] = [];
   managers: Employee[] = [];
+  taxCategories: TaxCategoryDto[] = [];
   organizationCurrency: string = 'USD';
   currencySymbol: string = '$';
 
@@ -74,7 +77,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     private paymentService: PaymentService,
     private settingsService: SettingsService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private payrollService: PayrollService
   ) {
     this.initializeForm();
   }
@@ -157,6 +161,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       hireDate: ['', [Validators.required]],
       departmentId: ['', [Validators.required]],
       positionId: ['', [Validators.required]],
+      taxCategoryId: [''],
       employmentType: ['full_time'],
       basicSalary: [''],
       reportingManagerId: [''],
@@ -198,7 +203,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     const requests: any[] = [
       this.employeeService.getDepartments(),
       this.employeeService.getPositions(),
-      this.employeeService.getManagers()
+      this.employeeService.getManagers(),
+      this.payrollService.getActiveTaxCategories()
     ];
 
     if (this.isEditMode && this.employeeId) {
@@ -209,12 +215,11 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results: any[]) => {
-          // this.departments = results[0];
-          // this.positions = results[1];
-          this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === results[3]?.employmentDetails?.departmentId));
-          this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === results[3]?.employmentDetails?.positionId));
+          this.departments = (results[0] as Department[]).filter(d => d.isActive || (this.isEditMode && d.departmentId === results[4]?.employmentDetails?.departmentId));
+          this.positions = (results[1] as Position[]).filter(p => p.isActive || (this.isEditMode && p.positionId === results[4]?.employmentDetails?.positionId));
 
           this.managers = results[2];
+          this.taxCategories = results[3] as TaxCategoryDto[] || [];
 
           // Debug logging for managers
           console.log('Managers loaded:', this.managers);
@@ -229,8 +234,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
           console.log('After managers loaded - Reporting Manager control:', reportingManagerControl);
           console.log('After managers loaded - Control value:', reportingManagerControl?.value);
 
-          if (this.isEditMode && results[3]) {
-            this.populateForm(results[3]);
+          if (this.isEditMode && results[4]) {
+            this.populateForm(results[4]);
           }
 
           this.isLoading = false;
@@ -257,6 +262,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       hireDate: new Date(employee.hireDate),
       departmentId: employee.employmentDetails?.departmentId,
       positionId: employee.employmentDetails?.positionId,
+      taxCategoryId: (employee.employmentDetails as any)?.taxCategoryId,
       employmentType: employee.employmentDetails?.employmentType || 'full_time',
       basicSalary: employee.employmentDetails?.baseSalary,
       reportingManagerId: employee.employmentDetails?.managerId,
@@ -315,11 +321,18 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
 
       // Debug: Log the final request
       console.log('Final request object:', request);
-      console.log('Final reportingManagerId in request:', request.reportingManagerId);
+      // build untyped payload so we can add optional fields not present in the TS DTO
+      const payload: any = {
+        ...request,
+        taxCategoryId: formValue.taxCategoryId || undefined,
+        reportingManagerId: formValue.reportingManagerId || undefined
+      };
 
-const operation = this.isEditMode
-  ? this.employeeService.updateEmployee(formValue)
-  : this.employeeService.createEmployee(request as CreateEmployeeRequest);
+      console.log('Final reportingManagerId in payload:', payload.reportingManagerId);
+
+      const operation = this.isEditMode
+        ? this.employeeService.updateEmployee(formValue)
+        : this.employeeService.createEmployee(payload as CreateEmployeeRequest);
 
 operation
   .pipe(takeUntil(this.destroy$))
