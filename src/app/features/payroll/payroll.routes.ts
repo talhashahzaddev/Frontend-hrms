@@ -191,5 +191,11 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/payroll-calculation/payroll-calculation.component').then(m => m.PayrollCalculationComponent),
     title: 'Payroll Calculation - HRMS'
+  },
+  {
+    path: 'results',
+    loadComponent: () =>
+      import('./components/payroll-result/payroll-result.component').then(m => m.PayrollResultComponent),
+    title: 'Payroll Results - HRMS'
   }
 ];

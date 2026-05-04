@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
 
@@ -13,7 +14,7 @@ import { AppraisalCycle } from '../../../../core/models/performance.models';
 @Component({
   selector: 'app-payroll-calculation',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './payroll-calculation.component.html',
   styleUrls: ['./payroll-calculation.component.scss']
 })
