@@ -1,9 +1,701 @@
+// :host {
+// 	display: block;
+// }
+
+// .overtime-actions { margin-bottom: 16px; }
+
+// // Unified theme tokens (match KRA management)
+// $color-primary: #6366f1;
+// $color-primary-dark: #4f46e5;
+// $color-primary-light: rgba(99, 102, 241, 0.1);
+// $color-bg: #f5f6fa;
+// $color-surface: #ffffff;
+// $color-border: #e9eaf0;
+// $color-text: #111827;
+// $color-text-secondary: #6b7280;
+// $color-text-muted: #9ca3af;
+
+// // Status tokens
+// $color-success: #10b981;
+// $color-warning: #f59e0b;
+// $color-error: #ef4444;
+
+// .overtime-management-container {
+// 	padding: 12px 16px;
+// 	max-width: 1200px;
+// 	margin: 0 auto;
+// 	background: $color-bg;
+// 	min-height: 100vh;
+// 	font-family: 'Inter', 'DM Sans', sans-serif;
+// 	display: flex;
+// 	flex-direction: column;
+// 	gap: 16px;
+// }
+
+// .page-header {
+// 	display: flex;
+// 	justify-content: space-between;
+// 	align-items: flex-start;
+// 	gap: 12px;
+// 	margin-bottom: 12px;
+
+// 	.header-left { display: flex; align-items: center; gap: 12px; }
+
+// 	.header-icon {
+// 		width: 44px;
+// 		height: 44px;
+// 		border-radius: 10px;
+// 		background: linear-gradient(135deg, $color-primary 0%, #8b5cf6 100%);
+// 		display: flex;
+// 		align-items: center;
+// 		justify-content: center;
+// 		color: white;
+// 	}
+
+// 	.page-title { margin: 0 0 2px; font-size: 20px; font-weight: 700; color: $color-text; }
+// 	.page-subtitle { margin: 0; font-size: 13px; color: $color-text-secondary; }
+
+// 	.header-actions { display: flex; gap: 8px; align-items: center; }
+// 	.header-actions button[mat-flat-button], .btn-primary {
+// 		height: 38px;
+// 		padding: 0 14px;
+// 		border-radius: 8px;
+// 		font-weight: 600;
+// 		display: inline-flex;
+// 		align-items: center;
+// 		gap: 8px;
+// 		background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+// 		color: white;
+// 		border: none;
+// 		cursor: pointer;
+// 	}
+// }
+
+// .page-tabs {
+// 	display: flex;
+// 	gap: 6px;
+// 	background: $color-surface;
+// 	border-radius: 12px 12px 0 0;
+// 	padding: 10px 12px 0;
+// 	border-bottom: 1px solid $color-border;
+// }
+
+// .page-tab {
+// 	display: flex;
+// 	align-items: center;
+// 	gap: 8px;
+// 	padding: 8px 14px;
+// 	background: transparent;
+// 	border-radius: 8px 8px 0 0;
+// 	font-size: 13px;
+// 	font-weight: 500;
+// 	color: $color-text-secondary;
+// 	cursor: pointer;
+// 	border-bottom: 2px solid transparent;
+
+// 	&.active { color: $color-primary; font-weight: 600; border-bottom-color: $color-primary; }
+
+// 	.tab-badge {
+// 		background: $color-border;
+// 		color: $color-text-secondary;
+// 		padding: 2px 8px;
+// 		border-radius: 999px;
+// 		font-size: 12px;
+// 		margin-left: 6px;
+// 	}
+// }
+
+// .tab-content-wrapper { background: $color-bg; padding-top: 16px; }
+
+// .section-card { background: $color-surface; border-radius: 12px; border: 1px solid $color-border; overflow: hidden; }
+
+// /* Table styling */
+// .overtime-table { margin-top: 8px; }
+// .overtime-table table { width: 100%; border-collapse: collapse; background: $color-surface; }
+// .overtime-table th.mat-header-cell,
+// .overtime-table td.mat-cell {
+// 	padding: 14px 16px;
+// 	vertical-align: middle;
+// 	color: $color-text;
+// }
+// .overtime-table th.mat-header-cell { font-size: 12px; font-weight: 700; color: $color-text-secondary; text-transform: uppercase; }
+// .overtime-table tr.mat-row:hover { background: rgba(99,102,241,0.03); }
+
+// .action-btn { background: transparent; border: none; border-radius: 8px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: $color-text; }
+
+// .empty-state, .empty { color: $color-text-secondary; padding: 24px; text-align: center; }
+
+// /* Helpers */
+// .material-icon { font-family: 'Material Icons', 'Material Symbols Outlined', sans-serif; font-size: 20px; line-height: 1; display: inline-flex; align-items: center; vertical-align: middle; user-select: none; }
+
+// /* Responsive adjustments */
+// @media (max-width: 768px) {
+// 	.overtime-management-container { padding: 12px 10px; }
+// 	.page-tab { padding: 8px 10px; font-size: 12.5px; }
+// 	.overtime-table th.mat-header-cell, .overtime-table td.mat-cell { padding: 10px 8px; }
+// }
+
+
+
+
+
+// Overtime Management — Unified with KRA Management Design System
+// ══════════════════════════════════════════════════════════════════════
+
+$color-primary:       #6366f1;
+$color-primary-dark:  #4f46e5;
+$color-primary-light: rgba(99, 102, 241, 0.1);
+$color-bg:            #f5f6fa;
+$color-surface:       #ffffff;
+$color-border:        #e9eaf0;
+$color-text:          #111827;
+$color-text-secondary:#6b7280;
+$color-text-muted:    #9ca3af;
+
+$color-success:       #10b981;
+$color-warning:       #f59e0b;
+$color-error:         #ef4444;
+
+$indigo:              #4f46e5;
+$indigo-mid:          #6366f1;
+$indigo-dark:         #4f46e5;
+$indigo-light:        #eef2ff;
+$violet:              #8b5cf6;
+$slate-900:           #111827;
+$slate-700:           #374151;
+$slate-600:           #6b7280;
+$slate-500:           #9ca3af;
+$slate-400:           #d1d5db;
+$slate-300:           #e5e7eb;
+$slate-200:           #f0f1f5;
+$slate-100:           #f5f6fa;
+$slate-50:            #fafafa;
+$slate-25:            #fafbff;
+$white:               #ffffff;
+$green-bg:            #f0fdf4;
+$green-text:          #16a34a;
+$green-border:        #bbf7d0;
+$yellow-bg:           #fffbeb;
+$yellow-text:         #d97706;
+$yellow-border:       #fde68a;
+$red-bg:              #fef2f2;
+$red-text:            #dc2626;
+$red-border:          #fecaca;
+
+// ─── Host ──────────────────────────────────────────────────────────────────
 :host {
-	display: block;
+  display: block;
 }
 
-.overtime-actions { margin-bottom: 16px; }
+// ─── Container ─────────────────────────────────────────────────────────────
+.overtime-management-container {
+  padding: 12px 16px;
+  max-width: 1600px;
+  margin: 0 auto;
+  background: $slate-100;
+  min-height: 100vh;
+  font-family: 'Inter', 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
-.overtime-table table { width: 100%; }
-.overtime-table th.mat-header-cell, .overtime-table td.mat-cell { padding: 12px 8px; }
-.empty { color: rgba(0,0,0,0.6); padding: 12px; }
+// ─── Page Header ────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, $color-primary 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      color: white;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .page-title {
+    margin: 0 0 2px;
+    font-size: 24px;
+    font-weight: 700;
+    color: $slate-900;
+    letter-spacing: -0.3px;
+  }
+
+  .page-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: $slate-600;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}
+
+// ─── Primary Button ────────────────────────────────────────────────────────
+.btn-primary {
+  background: linear-gradient(135deg, $violet 0%, $indigo-mid 100%);
+  color: $white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 20px;
+  height: 42px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+  letter-spacing: 0.1px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    transform: translateY(-1px);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 1;
+  }
+}
+
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+.page-tabs {
+  display: flex;
+  gap: 4px;
+  background: $white;
+  border-radius: 12px 12px 0 0;
+  padding: 12px 16px 0;
+  border-bottom: 1px solid $color-border;
+  margin-bottom: 0;
+}
+
+.page-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  background: transparent;
+  border-radius: 8px 8px 0 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: $slate-600;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(.active) {
+    color: $slate-900;
+    background: #f8f9ff;
+  }
+
+  &.active {
+    color: $indigo-mid;
+    font-weight: 600;
+    border-bottom-color: $indigo-mid;
+    background: #f5f5ff;
+  }
+
+  .tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: $color-primary-light;
+    color: $indigo-mid;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+// ─── Tab Content Wrapper ────────────────────────────────────────────────────
+.tab-content-wrapper {
+  background: $slate-100;
+  padding-top: 16px;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ─── Section Card ──────────────────────────────────────────────────────────
+.section-card {
+  background: $white;
+  border-radius: 12px;
+  border: 1px solid $slate-300;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+// ─── Section Header (inside cards) ────────────────────────────────────────
+.section-header {
+  padding: 16px 20px 0;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: $slate-900;
+  }
+}
+
+// ─── Material Icon Helper ───────────────────────────────────────────────────
+.material-icon {
+  font-family: 'Material Icons', 'Material Symbols Outlined', sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  user-select: none;
+}
+
+// ─── Table ─────────────────────────────────────────────────────────────────
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  thead {
+    tr {
+      background: $slate-50;
+      border-bottom: 1px solid $slate-200;
+    }
+
+    th {
+      padding: 0 20px;
+      height: 44px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: $slate-500;
+      white-space: nowrap;
+
+      &.text-right {
+        text-align: right;
+      }
+    }
+  }
+
+  tbody {
+    .table-row {
+      border-bottom: 1px solid $slate-200;
+      transition: background 0.12s ease;
+      height: 60px;
+
+      &:hover {
+        background: $slate-25;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      padding: 0 20px;
+      font-size: 13.5px;
+      color: $slate-700;
+      vertical-align: middle;
+
+      &.text-right {
+        text-align: right;
+      }
+
+      &.date-cell {
+        color: $slate-600;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+// ─── Cell Helpers ──────────────────────────────────────────────────────────
+.cell-title {
+  font-weight: 600;
+  color: $slate-900;
+  font-size: 13.5px;
+  margin-bottom: 2px;
+}
+
+.cell-sub {
+  font-size: 12px;
+  color: $slate-500;
+  line-height: 1.5;
+}
+
+// ─── Status Badge ──────────────────────────────────────────────────────────
+.status-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid;
+
+  &.status-pending {
+    background: $yellow-bg;
+    color: $yellow-text;
+    border-color: $yellow-border;
+  }
+
+  &.status-approved {
+    background: $green-bg;
+    color: $green-text;
+    border-color: $green-border;
+  }
+
+  &.status-rejected {
+    background: $red-bg;
+    color: $red-text;
+    border-color: $red-border;
+  }
+
+  &.status-default {
+    background: #f9fafb;
+    color: $slate-600;
+    border-color: $slate-300;
+  }
+}
+
+// ─── Action Button ─────────────────────────────────────────────────────────
+.action-btn {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $slate-900;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: $slate-200;
+    color: $slate-700;
+  }
+}
+
+// ─── Empty State ────────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px;
+  text-align: center;
+
+  mat-icon,
+  .material-icon.empty-icon {
+    font-size: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+    color: $slate-400;
+    margin-bottom: 14px;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: $slate-900;
+    margin: 0 0 6px;
+  }
+
+  p {
+    font-size: 13px;
+    color: $slate-500;
+    margin: 0;
+  }
+}
+
+// ─── mat-menu Overrides ────────────────────────────────────────────────────
+::ng-deep {
+  .mat-mdc-menu-panel {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid $slate-200 !important;
+    font-family: 'Inter', sans-serif !important;
+    min-width: 160px !important;
+  }
+
+  .mat-mdc-menu-item {
+    border-radius: 6px !important;
+    margin: 1px 0 !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: $slate-700 !important;
+    font-family: 'Inter', sans-serif !important;
+
+    .mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+      color: $slate-600 !important;
+      margin-right: 10px !important;
+    }
+
+    &:hover {
+      background: $slate-100 !important;
+      color: $slate-900 !important;
+    }
+  }
+
+  .mat-mdc-row,
+  .mat-mdc-header-row {
+    background: transparent !important;
+  }
+}
+
+// ─── Responsive ────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .overtime-management-container {
+    padding: 12px 10px;
+    gap: 18px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .page-title { font-size: 20px; }
+    .header-icon { width: 38px; height: 38px; }
+  }
+
+  .page-tabs {
+    padding: 10px 12px 0;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .page-tab {
+    padding: 8px 14px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .data-table {
+    thead th { padding: 0 12px; font-size: 10px; }
+    tbody td { padding: 0 12px; font-size: 12px; }
+  }
+}
+
+// ─── Today's Overtime Card ──────────────────────────────────────────────────
+.today-overtime-card {
+  .section-card {
+    padding: 0;
+  }
+
+  &.empty {
+    .section-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 24px;
+      background: linear-gradient(180deg, rgba(99,102,241,0.03), rgba(245,246,255,0.6));
+      border: 1px dashed rgba(99,102,241,0.12);
+      min-height: 120px;
+    }
+
+    .section-header h3 {
+      font-size: 15px;
+      color: $slate-700;
+    }
+
+    .table-wrap.compact.empty-state.small {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 8px 0 0;
+
+      mat-icon.empty-icon {
+        font-size: 36px !important;
+        color: $indigo-mid;
+        background: rgba(99,102,241,0.07);
+        border-radius: 10px;
+        padding: 8px;
+        box-shadow: 0 6px 18px rgba(79,70,229,0.06);
+      }
+
+      .empty-text {
+        font-size: 14px;
+        color: $slate-600;
+        margin: 0;
+      }
+    }
+  }
+
+  .today-info-row {
+    display: flex;
+    gap: 18px;
+    padding: 16px 20px 20px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    > div {
+      background: $slate-50;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: $slate-700;
+      box-shadow: 0 2px 6px rgba(16,24,40,0.03);
+    }
+  }
+
+  .today-reason {
+    padding: 0 20px 20px;
+    color: $slate-600;
+    font-size: 13px;
+  }
+}

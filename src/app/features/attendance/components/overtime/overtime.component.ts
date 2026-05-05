@@ -24,6 +24,7 @@ export class OvertimeComponent implements OnInit {
   pendingRequests: EmployeeOverTimeDto[] = [];
   employeeAssignedRequests: EmployeeOverTimeDto[] = [];
   employeeCreatedRequests: EmployeeOverTimeDto[] = [];
+  todayOvertime: EmployeeOverTimeDto | null = null;
   selectedTab = 0;
   displayedColumns = ['requestedByName', 'overtimeType', 'overtimeDate', 'requestedHours', 'reason', 'createdAt', 'status', 'actions'];
 
@@ -41,6 +42,23 @@ export class OvertimeComponent implements OnInit {
     this.loadPendingRequests();
     this.loadEmployeeAssignedRequests();
     this.loadEmployeeCreatedRequests();
+    this.loadTodayOvertime();
+  }
+
+  private loadTodayOvertime(): void {
+    if (!this.attendanceService.getEmployeeTodayOvertime) {
+      return;
+    }
+
+    this.attendanceService.getEmployeeTodayOvertime().pipe(take(1)).subscribe({
+      next: (res) => {
+        this.todayOvertime = res || null;
+      },
+      error: (err) => {
+        console.error('Failed to load today overtime', err);
+        this.todayOvertime = null;
+      }
+    });
   }
 
   openManagerOvertime(): void {
@@ -185,6 +203,23 @@ export class OvertimeComponent implements OnInit {
 
   selectTab(index: number): void {
     this.selectedTab = index;
+  }
+
+  getStatusClass(status?: string): string {
+    if (!status) {
+      return 'status-default';
+    }
+    switch (String(status).toLowerCase()) {
+      case 'pending':
+      case 'pending_approval':
+        return 'status-pending';
+      case 'approved':
+        return 'status-approved';
+      case 'rejected':
+        return 'status-rejected';
+      default:
+        return 'status-default';
+    }
   }
 
 }

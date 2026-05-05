@@ -909,6 +909,27 @@ getAllTimeZones() {
   }
 
   /**
+   * Get today's overtime request for the current employee
+   * GET /Attendance/employee/today/overtime
+   */
+  getEmployeeTodayOvertime(): Observable<EmployeeOverTimeDto | null> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto>>(`${this.apiUrl}/employee/today/overtime`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            return null;
+          }
+          return response.data || null;
+        }),
+        // In case backend returns raw payload without ApiResponse wrapper
+        catchError(() => this.http.get<EmployeeOverTimeDto | null>(`${this.apiUrl}/employee/today/overtime`).pipe(
+          map((r: any) => r || null),
+          catchError(() => of(null))
+        ))
+      );
+  }
+
+  /**
    * Respond to an employee overtime request that was assigned to a manager
    * POST /Attendance/employee/overtime/respond/{requestId}?response=accept|reject
    */
