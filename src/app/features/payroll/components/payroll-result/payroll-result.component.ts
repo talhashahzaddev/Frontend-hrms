@@ -23,13 +23,28 @@ export class PayrollResultComponent implements OnInit {
   searchTerm: string = '';
   hasAppliedFilters: boolean = false;
 
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalRecords: number = 0;
+  totalPages: number = 0;
+  pageRange: number[] = [];
+
+  get fromRecord(): number {
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get toRecord(): number {
+    return Math.min(this.currentPage * this.pageSize, this.totalRecords);
+  }
+
   get hasActiveFilters(): boolean {
     return !!this.selectedPeriodId || !!this.selectedDepartmentId || !!this.searchTerm;
   }
 
   applyFilters(): void {
-    if (!this.hasActiveFilters) return;
+    this.currentPage = 1;
     this.hasAppliedFilters = true;
+    this.loadPayrollResults();
   }
 
   clearFilters(): void {
@@ -37,73 +52,17 @@ export class PayrollResultComponent implements OnInit {
     this.selectedDepartmentId = '';
     this.searchTerm = '';
     this.hasAppliedFilters = false;
+    this.currentPage = 1;
+    this.loadPayrollResults();
   }
 
-  // Dummy data based on stitch_screen.html
-  employees = [
-    {
-      id: 'EMP-001',
-      name: 'Alex Mercer',
-      department: 'Engineering',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBQFUIEHo1i6y4ApRtgit8cLqHEugl9w0Xoh74haJo7WJ5TNe6-ym246Lm4A2NhC_5r5bbvw155kKYUASUsBsdoZIS-qTCyrnnre_F7KPAzhQx2UCO-BDjeUtxJWnwxj7doGnvzuDSNQHOeH6tiiwtWjVFMXx_6VvSU-w1Jkos8VxWY0qnBWe7RglHzTQ7vwWPfJtSRrQamnTX5lPRtoudFRJ2fanyQTChKcA1BLC0MBNaU3OPnTX3pHrEdx5iqnRTFB_HUhlUUYdxP',
-      earnings: {
-        basic: 250000,
-        ot: 15000,
-        perfBonus: 20000,
-        bonus: 0,
-        gross: 285000
-      },
-      deductions: {
-        attendance: 0,
-        late: 1500,
-        leave: 0,
-        loan: 5000,
-        advance: 0,
-        pfEmp: 12500,
-        tax: 18400,
-        total: 37400
-      },
-      contributions: {
-        pfEmployer: 12500,
-        gratuity: 8333
-      },
-      netPayable: 247600
-    },
-    {
-      id: 'EMP-042',
-      name: 'Sarah Jenkins',
-      department: 'Marketing',
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDECXQqQTidp0Xabg7hmaLB3IkxEoI4CQIbxsPeA6hVzjU2GwvJ9k0P2yQY0-kXHTi8n5U6mxJsJGf3MbFDyCBG42h3lAimjyNhEEBJSXi4tQOP8bh8H46l95mf5SzArSe_93qIkUmlEMc5lWTNQG1QH13ysbmDzz14fDq5TFg9V2jb9BfyKM7pVtblVR1Jhe0YwhKgrOg8PquGiCqlWMCZrYpBAmxmB_v2sUiPI-PKN9mX0A4hpAiLFSBMt-UqLMpI0u7uMefQx0pA',
-      earnings: {
-        basic: 180000,
-        ot: 0,
-        perfBonus: 10000,
-        bonus: 5000,
-        gross: 195000
-      },
-      deductions: {
-        attendance: 3000,
-        late: 0,
-        leave: 0,
-        loan: 0,
-        advance: 10000,
-        pfEmp: 9000,
-        tax: 7200,
-        total: 29200
-      },
-      contributions: {
-        pfEmployer: 9000,
-        gratuity: 6000
-      },
-      netPayable: 165800
-    }
-  ];
+  employees: any[] = [];
 
-  totalEmployees = 142;
-  totalGrossSalary = 4250000;
-  totalDeductions = 620000;
-  totalBonuses = 180000;
-  totalNetPayable = 3810000;
+  totalEmployees = 0;
+  totalGrossSalary = 0;
+  totalDeductions = 0;
+  totalBonuses = 0;
+  totalNetPayable = 0;
 
   constructor(
     private payrollService: PayrollService,
@@ -112,6 +71,7 @@ export class PayrollResultComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInitialData();
+    this.loadPayrollResults();
   }
 
   loadInitialData(): void {
@@ -130,6 +90,111 @@ export class PayrollResultComponent implements OnInit {
       },
       error: (err) => console.error('Error loading departments', err)
     });
+  }
+
+  loadPayrollResults(): void {
+    const filter = {
+      periodId: this.selectedPeriodId,
+      departmentId: this.selectedDepartmentId,
+      searchTerm: this.searchTerm,
+      page: this.currentPage,
+      pageSize: this.pageSize
+    };
+
+    this.payrollService.getPayrollResults(filter).subscribe({
+      next: (res) => {
+        const data = res.data || [];
+        this.employees = data.map((item: any) => ({
+          id: item.employeeCode || item.employeeId,
+          name: item.employeeName,
+          department: item.departmentName,
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.employeeName)}&background=random`,
+          earnings: {
+            basic: item.basicSalary,
+            ot: this.sumJson(item.overtimeDetails, 'totalOvertimeAmount'),
+            perfBonus: this.sumJson(item.performanceBonuses, 'bonusAmount'),
+            bonus: this.sumJson(item.generalBonuses, 'bonusAmount'),
+            gross: item.basicSalary + item.totalBonuses
+          },
+          deductions: {
+            attendance: this.sumJson(item.attendanceDeductions, 'totalDeduction'),
+            late: this.sumJson(item.lateAttendanceDeductions, 'totalDeduction'),
+            leave: this.sumJson(item.leaveDeductions, 'totalDeduction'),
+            loan: this.sumJson(item.loanDeductions, 'installmentAmount'),
+            advance: this.sumJson(item.salaryAdvanceDeductions, 'deductedAmount'),
+            pfEmp: this.sumJson(item.pfDeductions, 'employeeAmount'),
+            tax: this.sumJson(item.taxDeductions, 'monthlyTax'),
+            total: item.totalDeductions
+          },
+          contributions: {
+            pfEmployer: this.sumJson(item.pfDeductions, 'employerAmount'),
+            gratuity: this.sumJson(item.gratuity, 'gratuityAmount')
+          },
+          netPayable: item.netSalary
+        }));
+
+        this.totalRecords = res.totalCount;
+        this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
+        this.updatePageRange();
+        
+        // Update summary totals based on the current list (or you might want a separate API for global totals)
+        this.updateSummaryTotals();
+      },
+      error: (err) => console.error('Error loading payroll results', err)
+    });
+  }
+
+  private updateSummaryTotals(): void {
+    // This only updates for the current page. For global totals, the API should ideally return them.
+    this.totalEmployees = this.totalRecords;
+    // We don't have global sums from the current paginated API yet, so we'll leave these as placeholders 
+    // or calculate if the API is updated.
+  }
+
+  private sumJson(jsonString: string | null, field: string): number {
+    if (!jsonString) return 0;
+    try {
+      const data = JSON.parse(jsonString);
+      if (!Array.isArray(data)) return 0;
+      return data.reduce((sum: number, item: any) => sum + (item[field] || 0), 0);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  updatePageRange(): void {
+    const range = [];
+    const maxVisible = 5;
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      range.push(i);
+    }
+    this.pageRange = range;
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = page;
+    this.loadPayrollResults();
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadPayrollResults();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadPayrollResults();
+    }
   }
 
   private extractItems(data: any): any[] {
