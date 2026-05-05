@@ -194,6 +194,7 @@ export class AddLeaveTypeDialogTemplate {
     description: [''],
     maxDaysPerYear: [15, [Validators.required, Validators.min(1)]],
     isPaid: [true],
+    isHalfPaid: [false],
     carryForwardAllowed: [false],
     maxCarryForwardDays: [1, [Validators.min(1)]],
     requiresApproval: [true],
@@ -234,6 +235,44 @@ export class AddLeaveTypeDialogTemplate {
 
       if (carryForwardDays && maxDaysPerYear && carryForwardDays > maxDaysPerYear) {
         maxCarryForwardControl?.setErrors({ 'max': true });
+      }
+    });
+
+    // Ensure isPaid and isHalfPaid are mutually exclusive
+    const isPaidCtrl = this.form.get('isPaid');
+    const isHalfPaidCtrl = this.form.get('isHalfPaid');
+
+    // Initialize disabled state based on defaults
+    if (isPaidCtrl?.value) {
+      isHalfPaidCtrl?.setValue(false, { emitEvent: false });
+      isHalfPaidCtrl?.disable({ emitEvent: false });
+    } else if (isHalfPaidCtrl?.value) {
+      isPaidCtrl?.setValue(false, { emitEvent: false });
+      isPaidCtrl?.disable({ emitEvent: false });
+    }
+
+    isPaidCtrl?.valueChanges.subscribe(val => {
+      if (val) {
+        isHalfPaidCtrl?.setValue(false, { emitEvent: false });
+        isHalfPaidCtrl?.disable({ emitEvent: false });
+      } else {
+        if (isHalfPaidCtrl && isHalfPaidCtrl.disabled === false) return;
+        // only re-enable the other control if it's currently disabled
+        if (isHalfPaidCtrl?.disabled) {
+          isHalfPaidCtrl.enable({ emitEvent: false });
+        }
+      }
+    });
+
+    isHalfPaidCtrl?.valueChanges.subscribe(val => {
+      if (val) {
+        isPaidCtrl?.setValue(false, { emitEvent: false });
+        isPaidCtrl?.disable({ emitEvent: false });
+      } else {
+        if (isPaidCtrl && isPaidCtrl.disabled === false) return;
+        if (isPaidCtrl?.disabled) {
+          isPaidCtrl.enable({ emitEvent: false });
+        }
       }
     });
   }
@@ -289,6 +328,7 @@ export class EditLeaveTypeDialogTemplate {
     description: [this.data.leaveType.description || ''],
     maxDaysPerYear: [this.data.leaveType.maxDaysPerYear, [Validators.required, Validators.min(1)]],
     isPaid: [this.data.leaveType.isPaid],
+    isHalfPaid: [this.data.leaveType.isHalfPaid],
     carryForwardAllowed: [this.data.leaveType.carryForwardAllowed],
     maxCarryForwardDays: [this.data.leaveType.maxCarryForwardDays || 1, [Validators.min(1)]],
     requiresApproval: [this.data.leaveType.requiresApproval ?? true],
@@ -329,6 +369,43 @@ export class EditLeaveTypeDialogTemplate {
 
       if (carryForwardDays && maxDaysPerYear && carryForwardDays > maxDaysPerYear) {
         maxCarryForwardControl?.setErrors({ 'max': true });
+      }
+    });
+
+    // Ensure isPaid and isHalfPaid are mutually exclusive
+    const isPaidCtrl = this.form.get('isPaid');
+    const isHalfPaidCtrl = this.form.get('isHalfPaid');
+
+    // Initialize based on current values from data
+    if (isPaidCtrl?.value) {
+      isHalfPaidCtrl?.setValue(false, { emitEvent: false });
+      isHalfPaidCtrl?.disable({ emitEvent: false });
+    } else if (isHalfPaidCtrl?.value) {
+      isPaidCtrl?.setValue(false, { emitEvent: false });
+      isPaidCtrl?.disable({ emitEvent: false });
+    }
+
+    isPaidCtrl?.valueChanges.subscribe(val => {
+      if (val) {
+        isHalfPaidCtrl?.setValue(false, { emitEvent: false });
+        isHalfPaidCtrl?.disable({ emitEvent: false });
+      } else {
+        if (isHalfPaidCtrl && isHalfPaidCtrl.disabled === false) return;
+        if (isHalfPaidCtrl?.disabled) {
+          isHalfPaidCtrl.enable({ emitEvent: false });
+        }
+      }
+    });
+
+    isHalfPaidCtrl?.valueChanges.subscribe(val => {
+      if (val) {
+        isPaidCtrl?.setValue(false, { emitEvent: false });
+        isPaidCtrl?.disable({ emitEvent: false });
+      } else {
+        if (isPaidCtrl && isPaidCtrl.disabled === false) return;
+        if (isPaidCtrl?.disabled) {
+          isPaidCtrl.enable({ emitEvent: false });
+        }
       }
     });
   }

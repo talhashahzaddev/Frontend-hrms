@@ -26,8 +26,13 @@ export interface RuleDialogData {
   policyId?: number;
   rule?: {
     ruleId: string;
+    regimeId?: string;
     ruleName: string;
     description?: string;
+    country?: string;
+    regimeName?: string;
+    startDate?: string;
+    endDate?: string;
     overtimeType: string;
     fixedAmount: number | null;
     percentage: number | null;
@@ -104,7 +109,7 @@ export class RuleDialogComponent implements OnInit {
     { id: 7, name: 'Employee Loan Policy' },
     { id: 8, name: 'Salary Advance Policy' },
     { id: 9, name: 'Provident Fund Policy' },
-    { id: 10, name: 'Income Tax Policy' },
+    { id: 10, name: 'Tax regime Policy' },
     { id: 11, name: 'Social Security Policy' },
     { id: 12, name: 'Gratuity Policy' }
   ];
@@ -148,6 +153,11 @@ export class RuleDialogComponent implements OnInit {
     vestingMonths: [0],
     // Salary Advance Policy fields
     maxPercentage: [null as number | null],
+    // Tax Regime fields
+    taxCountry: [''],
+    taxRegimeName: [''],
+    taxStartDate: [''],
+    taxEndDate: [''],
     // Gratuity Policy fields
     yearsRequired: [null as number | null],
     calculationType: ['peryear'],
@@ -309,6 +319,15 @@ export class RuleDialogComponent implements OnInit {
         });
       }
 
+      if (this.data.policyId === 10) {
+        this.ruleForm.patchValue({
+          taxCountry: rule.country ?? '',
+          taxRegimeName: rule.regimeName ?? '',
+          taxStartDate: this.toDateInputValue(rule.startDate),
+          taxEndDate: this.toDateInputValue(rule.endDate)
+        });
+      }
+
       if (this.data.policyId === 11) {
         this.ruleForm.patchValue({
           socialSchemeId: String(rule.schemeId ?? ''),
@@ -413,7 +432,7 @@ export class RuleDialogComponent implements OnInit {
       this.ruleForm.get('ruleName')?.setValidators(Validators.required);
       loanAmountControl?.setValidators([Validators.required, Validators.min(0)]);
       repaymentTypeControl?.setValidators([Validators.required]);
-      
+
       if (repaymentTypeControl?.value === 'installment') {
         loanInstallmentsControl?.setValidators([Validators.required, Validators.min(1)]);
       } else {
@@ -464,6 +483,27 @@ export class RuleDialogComponent implements OnInit {
       maxPercentageControl?.clearValidators();
     }
     maxPercentageControl?.updateValueAndValidity();
+
+    const taxCountryControl = this.ruleForm.get('taxCountry');
+    const taxRegimeNameControl = this.ruleForm.get('taxRegimeName');
+    const taxStartDateControl = this.ruleForm.get('taxStartDate');
+    const taxEndDateControl = this.ruleForm.get('taxEndDate');
+
+    if (Number(policyId) === 10) {
+      taxCountryControl?.setValidators([Validators.required]);
+      taxRegimeNameControl?.setValidators([Validators.required]);
+      taxStartDateControl?.setValidators([Validators.required]);
+      taxEndDateControl?.setValidators([Validators.required]);
+    } else {
+      taxCountryControl?.clearValidators();
+      taxRegimeNameControl?.clearValidators();
+      taxStartDateControl?.clearValidators();
+      taxEndDateControl?.clearValidators();
+    }
+    taxCountryControl?.updateValueAndValidity();
+    taxRegimeNameControl?.updateValueAndValidity();
+    taxStartDateControl?.updateValueAndValidity();
+    taxEndDateControl?.updateValueAndValidity();
 
     const yearsRequiredControl = this.ruleForm.get('yearsRequired');
     const calculationTypeControl = this.ruleForm.get('calculationType');
@@ -750,6 +790,19 @@ export class RuleDialogComponent implements OnInit {
     return null;
   }
 
+  private toDateInputValue(value: unknown): string {
+    if (!value) {
+      return '';
+    }
+
+    const date = new Date(String(value));
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    return date.toISOString().slice(0, 10);
+  }
+
   onSubmit(): void {
     if (this.ruleForm.invalid || this.isSubmitting()) {
       this.ruleForm.markAllAsTouched();
@@ -975,17 +1028,17 @@ export class RuleDialogComponent implements OnInit {
       const allowPartialWithdraw = !!formValue.allowPartialWithdraw;
       const temporary = allowPartialWithdraw
         ? this.temporaryWithdrawals.controls.map((control) => ({
-            reason: String(control.get('reason')?.value ?? '').trim(),
-            min_pct: Number(control.get('min_pct')?.value ?? 0),
-            max_pct: Number(control.get('max_pct')?.value ?? 0)
-          }))
+          reason: String(control.get('reason')?.value ?? '').trim(),
+          min_pct: Number(control.get('min_pct')?.value ?? 0),
+          max_pct: Number(control.get('max_pct')?.value ?? 0)
+        }))
         : [];
       const permanent = allowPartialWithdraw
         ? this.permanentWithdrawals.controls.map((control) => ({
-            reason: String(control.get('reason')?.value ?? '').trim(),
-            min_pct: Number(control.get('min_pct')?.value ?? 0),
-            max_pct: Number(control.get('max_pct')?.value ?? 0)
-          }))
+          reason: String(control.get('reason')?.value ?? '').trim(),
+          min_pct: Number(control.get('min_pct')?.value ?? 0),
+          max_pct: Number(control.get('max_pct')?.value ?? 0)
+        }))
         : [];
 
       if (allowPartialWithdraw && (temporary.some((entry) => !entry.reason) || permanent.some((entry) => !entry.reason))) {
@@ -1003,9 +1056,9 @@ export class RuleDialogComponent implements OnInit {
         contributionBasis: formValue.basis,
         withdrawalConfig: allowPartialWithdraw
           ? JSON.stringify({
-              temporary,
-              permanent
-            })
+            temporary,
+            permanent
+          })
           : null,
         vestingMonths: formValue.vestingMonths,
         allowPartialWithdraw,
@@ -1060,6 +1113,36 @@ export class RuleDialogComponent implements OnInit {
             console.error(err);
             this.notification.showError(
               err?.message || (this.isEditMode ? 'Failed to update salary advance rule' : 'Failed to create salary advance rule')
+            );
+          }
+        });
+    } else if (formValue.selectedPolicy === 10) { // 10 is Tax Regime Policy
+      const payload = {
+        country: String(formValue.taxCountry ?? '').trim(),
+        regimeName: String(formValue.taxRegimeName ?? '').trim(),
+        startDate: String(formValue.taxStartDate ?? ''),
+        endDate: String(formValue.taxEndDate ?? ''),
+        isActive: this.isEditMode ? ((this.data?.rule as any)?.isActive ?? true) : true
+      };
+
+      const editRegimeId = String((this.data?.rule as any)?.regimeId ?? (this.data?.rule as any)?.ruleId ?? '');
+      const request$ = this.isEditMode && editRegimeId
+        ? this.payrollService.updateTaxRegime(editRegimeId, payload)
+        : this.payrollService.createTaxRegime(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Tax regime updated successfully' : 'Tax regime created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 10 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update tax regime' : 'Failed to create tax regime')
             );
           }
         });

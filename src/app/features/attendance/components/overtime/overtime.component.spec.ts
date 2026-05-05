@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GoalsKRAsComponent } from './goals-kras.component';
+import { OvertimeComponent } from './overtime.component';
 
-describe('GoalsKRAsComponent', () => {
-  let component: GoalsKRAsComponent;
-  let fixture: ComponentFixture<GoalsKRAsComponent>;
+describe('OvertimeComponent', () => {
+  let component: OvertimeComponent;
+  let fixture: ComponentFixture<OvertimeComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GoalsKRAsComponent]
+      imports: [OvertimeComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(GoalsKRAsComponent);
+    fixture = TestBed.createComponent(OvertimeComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

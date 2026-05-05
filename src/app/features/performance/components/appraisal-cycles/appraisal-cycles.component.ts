@@ -23,7 +23,10 @@ import { Subject, takeUntil } from 'rxjs';
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { AppraisalCycle, AppraisalCycleStatus, CreateAppraisalCycleRequest, UpdateAppraisalCycleRequest } from '../../../../core/models/performance.models';
+import {
+  AppraisalCycle,
+  AppraisalCycleStatus
+} from '../../../../core/models/performance.models';
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
@@ -56,12 +59,15 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
 })
 export class AppraisalCyclesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   isLoading = false;
   appraisalCycles: AppraisalCycle[] = [];
-  displayedColumns: string[] = ['cycleName', 'dates', 'status', 'appraisals', 'actions'];
+
+  // ✅ CHANGED: removed 'appraisals', added 'endDate' to match new HTML columns
+  displayedColumns: string[] = ['cycleName', 'dates', 'endDate', 'status', 'actions'];
+
   filterForm: FormGroup;
-  
+
   // Pagination
   pageSize = 10;
   pageIndex = 0;
@@ -75,9 +81,11 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
+    // ✅ CHANGED: replaced 'status' with 'startDate' and 'endDate' to match new filter bar
     this.filterForm = this.fb.group({
       search: [''],
-      status: ['']
+      startDate: [''],
+      endDate: ['']
     });
   }
 
@@ -97,8 +105,33 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.appraisalCycles = response.data;
-            this.totalItems = response.data.length;
+            let cycles = response.data;
+
+            const search    = this.filterForm.get('search')?.value?.toLowerCase();
+            const startDate = this.filterForm.get('startDate')?.value;
+            const endDate   = this.filterForm.get('endDate')?.value;
+
+            // Filter by search
+            if (search) {
+              cycles = cycles.filter(c => c.cycleName.toLowerCase().includes(search));
+            }
+
+            // Filter by start date (cycles that start on or after the selected start date)
+            if (startDate) {
+              cycles = cycles.filter(c => new Date(c.startDate) >= new Date(startDate));
+            }
+
+            // Filter by end date (cycles that end on or before the selected end date)
+            if (endDate) {
+              cycles = cycles.filter(c => new Date(c.endDate) <= new Date(endDate));
+            }
+
+            this.totalItems = cycles.length;
+
+            // Pagination
+            const startIndex = this.pageIndex * this.pageSize;
+            const endIndex   = startIndex + this.pageSize;
+            this.appraisalCycles = cycles.slice(startIndex, endIndex);
           }
           this.isLoading = false;
           this.cdr.markForCheck();
@@ -185,26 +218,19 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
   }
 
   applyFilters(): void {
+    this.pageIndex = 0;
     this.loadAppraisalCycles();
   }
 
   clearFilters(): void {
     this.filterForm.reset();
+    this.pageIndex = 0;
     this.loadAppraisalCycles();
   }
 
-  getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
-    switch (status?.toLowerCase()) {
-      case 'active': return 'primary';
-      case 'completed': return 'accent';
-      case 'cancelled': return 'warn';
-      default: return undefined;
-    }
-  }
-
-  hasHRRole(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
-  }
+  // hasHRRole(): boolean {
+  //   return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  // }
 
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;
@@ -212,4 +238,3 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
     this.loadAppraisalCycles();
   }
 }
-

@@ -31,6 +31,12 @@ export const payrollRoutes: Routes = [
     title: 'Provident Funds - HRMS'
   },
   {
+    path: 'tax-ledger',
+    loadComponent: () =>
+      import('./components/tax-ledger/tax-ledger.component').then(m => m.TaxLedgerComponent),
+    title: 'Tax Ledger - HRMS'
+  },
+  {
     path: 'salary-advances',
     loadComponent: () =>
       import('./components/salary-advances/salary-advances.component').then(m => m.SalaryAdvancesComponent),
@@ -149,6 +155,30 @@ export const payrollRoutes: Routes = [
     title: 'Salary Advance Policy - HRMS'
   },
   {
+    path: 'policies/tax-regime-rules',
+    loadComponent: () =>
+      import('./components/tax-regime-rules/tax-regime-rules.component').then(m => m.TaxRegimeRulesComponent),
+    title: 'Tax Regime Policy - HRMS'
+  },
+  {
+    path: 'policies/tax-categories',
+    loadComponent: () =>
+      import('./components/tax-categories/tax-categories.component').then(m => m.TaxCategoriesComponent),
+    title: 'Tax Categories - HRMS'
+  },
+  {
+    path: 'policies/tax-slabs',
+    loadComponent: () =>
+      import('./components/tax-slabs/tax-slabs.component').then(m => m.TaxSlabsComponent),
+    title: 'Tax Slabs - HRMS'
+  },
+  {
+    path: 'policies/tax-rules',
+    loadComponent: () =>
+      import('./components/tax-rules/tax-rules.component').then(m => m.TaxRulesComponent),
+    title: 'Tax Rules - HRMS'
+  },
+  {
     path: 'policies/social-security-rules',
     loadComponent: () =>
       import('./components/social-security-rules/social-security-rules.component').then(m => m.SocialSecurityRulesComponent),
@@ -177,6 +207,12 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/my-gratuity/my-gratuity.component').then(m => m.MyGratuityComponent),
     title: 'My Gratuity - HRMS'
+  },
+  {
+    path: 'calculation',
+    loadComponent: () =>
+      import('./components/payroll-calculation/payroll-calculation.component').then(m => m.PayrollCalculationComponent),
+    title: 'Payroll Calculation - HRMS'
   },
   {
     path: 'my-social-security',

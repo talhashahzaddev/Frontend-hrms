@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { take } from 'rxjs';
 
 import { EmployeeService } from '../../../employee/services/employee.service';
+import { Department } from '../../../../core/models/employee.models';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollService } from '../../services/payroll.service';
 import {
@@ -39,10 +40,10 @@ interface PeriodOption {
   label: string;
 }
 
-interface DepartmentOption {
-  id: string;
-  label: string;
-}
+// interface DepartmentOption {
+//   id: string;
+//   label: string;
+// }
 
 interface EmployeeOption {
   id: string;
@@ -89,16 +90,21 @@ export class CompliancePayslipsComponent implements OnInit {
 
   currencySymbol = 'PKR';
 
-  searchKeyword = '';
-  selectedPeriodId = '';
-  selectedStatus: PayslipStatus | '' = '';
-  selectedDepartmentId = '';
+  pendingSearchKeyword = '';
+  pendingPeriodId = '';
+  pendingStatus: PayslipStatus | '' = '';
+  pendingDepartmentId = '';
+
+  appliedSearchKeyword = '';
+  appliedPeriodId = '';
+  appliedStatus: PayslipStatus | '' = '';
+  appliedDepartmentId = '';
 
   currentPage = 1;
   pageSize = 7;
 
   periods: PeriodOption[] = [];
-  departments: DepartmentOption[] = [];
+  departments: Department[] = [];
   employees: EmployeeOption[] = [];
   payslips: PayslipRow[] = [];
 
@@ -126,12 +132,21 @@ export class CompliancePayslipsComponent implements OnInit {
       });
 
     this.loadEmployees();
+    this.loadDepartments();
     this.loadPeriods();
     this.loadPayslips();
   }
 
+  get hasActiveFilters(): boolean {
+    return !!(this.pendingSearchKeyword || this.pendingPeriodId || this.pendingStatus || this.pendingDepartmentId);
+  }
+
+  get hasAppliedFilters(): boolean {
+    return !!(this.appliedSearchKeyword || this.appliedPeriodId || this.appliedStatus || this.appliedDepartmentId);
+  }
+
   get filteredPayslips(): PayslipRow[] {
-    const search = this.searchKeyword.trim().toLowerCase();
+    const search = this.appliedSearchKeyword.trim().toLowerCase();
 
     return this.payslips.filter((row) => {
       const matchesSearch = !search
@@ -139,9 +154,9 @@ export class CompliancePayslipsComponent implements OnInit {
         || row.employeeCode.toLowerCase().includes(search)
         || row.departmentName.toLowerCase().includes(search);
 
-      const matchesPeriod = !this.selectedPeriodId || row.periodId === this.selectedPeriodId;
-      const matchesStatus = !this.selectedStatus || row.status === this.selectedStatus;
-      const matchesDepartment = !this.selectedDepartmentId || row.departmentId === this.selectedDepartmentId;
+      const matchesPeriod = !this.appliedPeriodId || row.periodId === this.appliedPeriodId;
+      const matchesStatus = !this.appliedStatus || row.status === this.appliedStatus;
+      const matchesDepartment = !this.appliedDepartmentId || row.departmentId === this.appliedDepartmentId;
 
       return matchesSearch && matchesPeriod && matchesStatus && matchesDepartment;
     });
@@ -205,7 +220,7 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   get activePeriodLabel(): string {
-    const selected = this.periods.find((period) => period.id === this.selectedPeriodId);
+    const selected = this.periods.find((period) => period.id === this.appliedPeriodId);
     return selected?.label ?? 'All periods';
   }
 
@@ -218,6 +233,30 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   onFiltersChanged(): void {
+    // Optionally auto-clear selection if needed
+    // this.selectedPayslipIds.clear();
+  }
+
+  applyFilters(): void {
+    this.appliedSearchKeyword = this.pendingSearchKeyword;
+    this.appliedPeriodId = this.pendingPeriodId;
+    this.appliedStatus = this.pendingStatus;
+    this.appliedDepartmentId = this.pendingDepartmentId;
+    this.currentPage = 1;
+    this.reconcileSelection();
+  }
+
+  clearFilters(): void {
+    this.pendingSearchKeyword = '';
+    this.pendingPeriodId = '';
+    this.pendingStatus = '';
+    this.pendingDepartmentId = '';
+    
+    this.appliedSearchKeyword = '';
+    this.appliedPeriodId = '';
+    this.appliedStatus = '';
+    this.appliedDepartmentId = '';
+    
     this.currentPage = 1;
     this.reconcileSelection();
   }
@@ -313,7 +352,7 @@ export class CompliancePayslipsComponent implements OnInit {
       name: employee.name,
       departmentId: employee.departmentId,
       departmentName: employee.departmentName,
-      currentStatus: this.getCurrentEmployeeStatus(employee.id, this.selectedPeriodId || this.periods[0]?.id || '')
+      currentStatus: this.getCurrentEmployeeStatus(employee.id, this.appliedPeriodId || this.periods[0]?.id || '')
     }));
 
     const dialogRef = this.dialog.open(BulkGeneratePayslipsDialogComponent, {
@@ -324,9 +363,9 @@ export class CompliancePayslipsComponent implements OnInit {
       restoreFocus: false,
       data: {
         periods: this.periods.map((period) => ({ id: period.id, label: period.label })) as BulkGeneratePeriodOption[],
-        departments: this.departments.map((department) => ({ id: department.id, label: department.label })) as BulkGenerateDepartmentOption[],
+        departments: this.departments.map((department) => ({ id: department.departmentId, label: department.departmentName })) as BulkGenerateDepartmentOption[],
         employees,
-        defaultPeriodId: this.selectedPeriodId || this.periods[0]?.id
+        defaultPeriodId: this.appliedPeriodId || this.periods[0]?.id
       }
     });
 
@@ -340,7 +379,7 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   openBulkEmailDialog(): void {
-    const defaultPeriodId = this.selectedPeriodId || this.periods[0]?.id || '';
+    const defaultPeriodId = this.appliedPeriodId || this.periods[0]?.id || '';
     const periodLabel = this.getPeriodLabelById(defaultPeriodId);
 
     const dialogRef = this.dialog.open(BulkEmailPayslipsDialogComponent, {
@@ -447,13 +486,19 @@ export class CompliancePayslipsComponent implements OnInit {
             } as EmployeeOption;
           })
           .filter((row: EmployeeOption | null): row is EmployeeOption => !!row);
-
-        this.refreshDepartmentOptions();
       },
       error: () => {
         this.employees = [];
-        this.refreshDepartmentOptions();
       }
+    });
+  }
+
+  private loadDepartments(): void {
+    this.employeeService.getDepartments('', 'active').subscribe({
+      next: (response: any) => {
+        this.departments = response?.data ?? response ?? [];
+      },
+      error: (err: any) => console.error('Error loading departments', err)
     });
   }
 
@@ -500,7 +545,6 @@ export class CompliancePayslipsComponent implements OnInit {
         const mapped = this.extractItems(data).map((item: any, index: number) => this.mapPayslipRow(item, index));
 
         this.payslips = mapped;
-        this.refreshDepartmentOptions();
         this.ensureDefaultPeriodSelection();
         this.ensurePageInRange();
       },
@@ -508,7 +552,6 @@ export class CompliancePayslipsComponent implements OnInit {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
           this.payslips = [...this.localPayslipSeed];
-          this.refreshDepartmentOptions();
           this.ensureDefaultPeriodSelection();
           this.ensurePageInRange();
           return;
@@ -976,38 +1019,24 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   private refreshDepartmentOptions(): void {
-    const map = new Map<string, DepartmentOption>();
-
-    this.employees.forEach((employee) => {
-      map.set(employee.departmentId, {
-        id: employee.departmentId,
-        label: employee.departmentName
-      });
-    });
-
-    this.payslips.forEach((row) => {
-      map.set(row.departmentId, {
-        id: row.departmentId,
-        label: row.departmentName
-      });
-    });
-
-    this.departments = Array.from(map.values());
+    // No longer needed as we load full department list from API
   }
 
   private ensureDefaultPeriodSelection(): void {
-    if (this.selectedPeriodId) {
+    if (this.appliedPeriodId) {
       return;
     }
 
     const firstFromRows = this.payslips[0]?.periodId;
     if (firstFromRows) {
-      this.selectedPeriodId = firstFromRows;
+      this.pendingPeriodId = firstFromRows;
+      this.appliedPeriodId = firstFromRows;
       return;
     }
 
     if (this.periods[0]?.id) {
-      this.selectedPeriodId = this.periods[0].id;
+      this.pendingPeriodId = this.periods[0].id;
+      this.appliedPeriodId = this.periods[0].id;
     }
   }
 

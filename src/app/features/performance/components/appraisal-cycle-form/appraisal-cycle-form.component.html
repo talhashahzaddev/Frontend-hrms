@@ -1,59 +1,153 @@
+<!-- Modal Header -->
 <div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>{{ isEditMode ? 'edit' : 'add' }}</mat-icon>
-    {{ isEditMode ? 'Edit Appraisal Cycle' : 'Create Appraisal Cycle' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
+  <h2 class="dialog-title">{{ isEditMode ? 'Edit Appraisal Cycle' : 'Create New Appraisal Cycle' }}</h2>
+  <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
-<mat-dialog-content class="dialog-content">
+<!-- Modal Body -->
+<mat-dialog-content class="dialog-body">
   <form [formGroup]="cycleForm" (ngSubmit)="onSubmit()">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Cycle Name *</mat-label>
-      <mat-icon matPrefix>schedule</mat-icon>
-      <input matInput formControlName="cycleName" placeholder="Enter cycle name">
-      <mat-error *ngIf="cycleForm.get('cycleName')?.hasError('required')">Cycle name is required</mat-error>
-    </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Description</mat-label>
-      <mat-icon matPrefix>description</mat-icon>
-      <textarea matInput formControlName="description" rows="3" placeholder="Enter description"></textarea>
-    </mat-form-field>
-
-    <div class="date-row">
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>Start Date *</mat-label>
-        <mat-icon matPrefix>event</mat-icon>
-        <input matInput [matDatepicker]="pickerStart" formControlName="startDate">
-        <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
-        <mat-datepicker #pickerStart></mat-datepicker>
-        <mat-error *ngIf="cycleForm.get('startDate')?.hasError('required')">Start date is required</mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="date-field">
-        <mat-label>End Date *</mat-label>
-        <mat-icon matPrefix>event</mat-icon>
-        <input matInput [matDatepicker]="pickerEnd" formControlName="endDate">
-        <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
-        <mat-datepicker #pickerEnd></mat-datepicker>
-        <mat-error *ngIf="cycleForm.get('endDate')?.hasError('required')">End date is required</mat-error>
+    <!-- Cycle Name -->
+    <div class="field-group">
+      <label class="field-label">Appraisal Cycle Name</label>
+      <mat-form-field appearance="outline" class="field-input">
+        <input matInput formControlName="cycleName" placeholder="e.g. Annual Performance Review 2024">
+        <mat-error *ngIf="cycleForm.get('cycleName')?.hasError('required')">Required</mat-error>
       </mat-form-field>
     </div>
+
+    <!-- Description -->
+    <div class="field-group">
+      <label class="field-label">Description</label>
+      <mat-form-field appearance="outline" class="field-input textarea-field">
+        <textarea matInput formControlName="description" rows="2"
+          placeholder="Briefly describe the purpose of this appraisal cycle..."></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Cycle Start & End Dates -->
+    <div class="date-row">
+      <div class="field-group">
+        <label class="field-label">Cycle Start Date</label>
+        <mat-form-field appearance="outline" class="field-input">
+          <input matInput [matDatepicker]="pickerStart" formControlName="startDate" placeholder="mm/dd/yyyy">
+          <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+          <mat-datepicker #pickerStart></mat-datepicker>
+          <mat-error *ngIf="cycleForm.get('startDate')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Cycle End Date</label>
+        <mat-form-field appearance="outline" class="field-input">
+          <input matInput [matDatepicker]="pickerEnd" formControlName="endDate" placeholder="mm/dd/yyyy">
+          <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+          <mat-datepicker #pickerEnd></mat-datepicker>
+          <mat-error *ngIf="cycleForm.get('endDate')?.hasError('required')">Required</mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Review Start & End Dates -->
+    <div class="date-row">
+      <div class="field-group">
+        <label class="field-label">Review Start Date</label>
+        <mat-form-field appearance="outline" class="field-input">
+          <mat-icon matPrefix class="cal-icon">calendar_month</mat-icon>
+          <input matInput [matDatepicker]="pickerReviewStart" formControlName="reviewStartDate" placeholder="Jan 2024">
+          <mat-datepicker-toggle matSuffix [for]="pickerReviewStart"></mat-datepicker-toggle>
+          <mat-datepicker #pickerReviewStart></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Review End Date</label>
+        <mat-form-field appearance="outline" class="field-input">
+          <mat-icon matPrefix class="cal-icon">calendar_month</mat-icon>
+          <input matInput [matDatepicker]="pickerReviewEnd" formControlName="reviewEndDate" placeholder="Dec 2024">
+          <mat-datepicker-toggle matSuffix [for]="pickerReviewEnd"></mat-datepicker-toggle>
+          <mat-datepicker #pickerReviewEnd></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Cycle Type -->
+    <div class="field-group">
+      <label class="field-label">Cycle Type</label>
+      <mat-form-field appearance="outline" class="field-input">
+        <input matInput formControlName="cycleType" placeholder="e.g. Annual, Mid-Year">
+      </mat-form-field>
+    </div>
+
+    <!-- Status -->
+    <div class="field-group">
+      <label class="field-label">Status</label>
+      <mat-form-field appearance="outline" class="field-input">
+        <mat-select formControlName="status">
+          <mat-option value="upcoming">Upcoming</mat-option>
+          <mat-option value="start">Start</mat-option>
+          <mat-option value="end">End</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Toggle Section -->
+    <div class="toggle-section">
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-icon-wrap">
+            <mat-icon class="toggle-icon">person_search</mat-icon>
+          </div>
+          <div class="toggle-text">
+            <p class="toggle-title">Self Assessment Allowed</p>
+            <p class="toggle-desc">Enable employees to review themselves.</p>
+          </div>
+        </div>
+        <mat-slide-toggle formControlName="isSelfAssessmentEnable" class="custom-toggle"></mat-slide-toggle>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-icon-wrap">
+            <mat-icon class="toggle-icon">supervisor_account</mat-icon>
+          </div>
+          <div class="toggle-text">
+            <p class="toggle-title">Manager Review Allowed</p>
+            <p class="toggle-desc">Enable direct supervisors to provide feedback.</p>
+          </div>
+        </div>
+        <mat-slide-toggle formControlName="managerReview" class="custom-toggle"></mat-slide-toggle>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-icon-wrap">
+            <mat-icon class="toggle-icon">star_rate</mat-icon>
+          </div>
+          <div class="toggle-text">
+            <p class="toggle-title">Appraisal Enabled</p>
+            <p class="toggle-desc">Allow final appraisal scores to be submitted.</p>
+          </div>
+        </div>
+        <mat-slide-toggle formControlName="isAppraisalEnable" class="custom-toggle"></mat-slide-toggle>
+      </div>
+
+    </div>
+
   </form>
 </mat-dialog-content>
 
-<div class="dialog-actions">
-  <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSaving">
-    <mat-icon>close</mat-icon>
+<!-- Footer -->
+<div class="dialog-footer">
+  <button class="btn-cancel" mat-button type="button" (click)="onCancel()" [disabled]="isSaving">
     Cancel
   </button>
-  <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" [disabled]="isSaving || cycleForm.invalid" class="submit-button">
-    <mat-spinner diameter="20" *ngIf="isSaving"></mat-spinner>
-    <mat-icon *ngIf="!isSaving">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
-    {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Cycle' : 'Create Cycle') }}
+  <button class="btn-save" mat-flat-button type="button" (click)="onSubmit()"
+    [disabled]="isSaving || cycleForm.invalid">
+    <mat-spinner diameter="14" *ngIf="isSaving"></mat-spinner>
+    <span *ngIf="!isSaving">{{ isEditMode ? 'Update Cycle' : 'Save Cycle' }}</span>
+    <span *ngIf="isSaving">Saving...</span>
   </button>
 </div>
-

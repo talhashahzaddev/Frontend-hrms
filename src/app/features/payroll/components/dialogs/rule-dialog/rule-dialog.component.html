@@ -15,6 +15,7 @@
           data.policyId === 7 ? (isEditMode ? 'Edit Loan Rule' : 'Create Loan Rule') :
           data.policyId === 9 ? (isEditMode ? 'Edit Provident Fund Rule' : 'Create Provident Fund Rule') :
           data.policyId === 8 ? (isEditMode ? 'Edit Salary Advance Rule' : 'Create Salary Advance Rule') :
+          data.policyId === 10 ? (isEditMode ? 'Edit Tax Regime Rule' : 'Create Tax Regime Rule') :
           data.policyId === 11 ? (isEditMode ? 'Edit Social Security Policy' : 'Create Social Security Policy') :
           data.policyId === 12 ? (isEditMode ? 'Edit Gratuity Rule' : 'Create Gratuity Rule') :
           (isEditMode ? 'Edit Policy' : 'Create Policy') }}
@@ -678,6 +679,49 @@
             <mat-error *ngIf="ruleForm.get('maxPercentage')?.hasError('min')">Value cannot be below 0</mat-error>
             <mat-error *ngIf="ruleForm.get('maxPercentage')?.hasError('max')">Value cannot exceed 100</mat-error>
           </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Gratuity Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 10">
+        <div class="rd-section-title">
+          <h3>Tax Regime Details</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Country *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="taxCountry" placeholder="e.g. Pakistan" maxlength="50">
+              <mat-error *ngIf="ruleForm.get('taxCountry')?.hasError('required')">Country is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Regime Name *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="taxRegimeName" placeholder="e.g. Finance Act 2026" maxlength="100">
+              <mat-error *ngIf="ruleForm.get('taxRegimeName')?.hasError('required')">Regime name is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Start Date *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="date" formControlName="taxStartDate">
+              <mat-error *ngIf="ruleForm.get('taxStartDate')?.hasError('required')">Start date is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>End Date *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="date" formControlName="taxEndDate">
+              <mat-error *ngIf="ruleForm.get('taxEndDate')?.hasError('required')">End date is required</mat-error>
+            </mat-form-field>
+          </div>
         </div>
       </section>
 

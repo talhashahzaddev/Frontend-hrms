@@ -1,5 +1,3 @@
-
-
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,9 +12,15 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // ← replaced MatCheckboxModule
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { AppraisalCycle, UpdateAppraisalCycleRequest } from '../../../../core/models/performance.models';
+import {
+  AppraisalCycleDto,
+  UpdateAppraisalCycleRequest,
+  CreateAppraisalCycleRequest
+} from '../../../../core/models/performance.models';
 
 @Component({
   selector: 'app-appraisal-cycle-form',
@@ -33,12 +37,13 @@ import { AppraisalCycle, UpdateAppraisalCycleRequest } from '../../../../core/mo
     MatSnackBarModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatDialogModule
+    MatDialogModule,
+    MatSelectModule,
+    MatSlideToggleModule // ← replaced MatCheckboxModule
   ],
   templateUrl: './appraisal-cycle-form.component.html',
   styleUrls: ['./appraisal-cycle-form.component.scss']
 })
-
 export class AppraisalCycleFormComponent {
   cycleForm: FormGroup;
   isSaving = false;
@@ -50,76 +55,73 @@ export class AppraisalCycleFormComponent {
     private performanceService: PerformanceService,
     private notificationService: NotificationService,
     private dialogRef: MatDialogRef<AppraisalCycleFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: { cycle?: AppraisalCycleDto }
   ) {
     this.isEditMode = !!data?.cycle;
     this.cycleId = data?.cycle?.cycleId;
 
+    // Initialize reactive form with existing data if in edit mode
     this.cycleForm = this.fb.group({
       cycleName: [data?.cycle?.cycleName || '', Validators.required],
-      description: [data?.cycle?.description || ''],
+      cycleType: [data?.cycle?.cycleType || ''],
+      description: [(data as any)?.cycle?.description || ''],
+      status: [data?.cycle?.status || 'upcoming'],
       startDate: [data?.cycle?.startDate ? new Date(data.cycle.startDate) : '', Validators.required],
-      endDate: [data?.cycle?.endDate ? new Date(data.cycle.endDate) : '', Validators.required]
+      endDate: [data?.cycle?.endDate ? new Date(data.cycle.endDate) : '', Validators.required],
+      reviewStartDate: [data?.cycle?.reviewStartDate ? new Date(data.cycle.reviewStartDate) : ''],
+      reviewEndDate: [data?.cycle?.reviewEndDate ? new Date(data.cycle.reviewEndDate) : ''],
+      isSelfAssessmentEnable: [data?.cycle?.selfReviewEnabled || false],
+      managerReview: [data?.cycle?.managerReviewEnabled || false],
+      isAppraisalEnable: [data?.cycle?.appraisalEnabled || false]
     });
   }
 
   onSubmit(): void {
-    if (this.cycleForm.valid) {
-      this.isSaving = true;
-      const formValue = this.cycleForm.value;
-      
-      // Format dates
-      const request = {
-        cycleName: formValue.cycleName,
-        description: formValue.description || '',
-        startDate: formValue.startDate instanceof Date 
-          ? formValue.startDate.toISOString().split('T')[0]
-          : formValue.startDate,
-        endDate: formValue.endDate instanceof Date
-          ? formValue.endDate.toISOString().split('T')[0]
-          : formValue.endDate
-      };
+    if (!this.cycleForm.valid) return;
 
-      if (this.isEditMode && this.cycleId) {
-        const updateRequest: UpdateAppraisalCycleRequest = {
-          ...request,
-          status: this.data.cycle.status
-        };
-        this.performanceService.updateAppraisalCycle(this.cycleId, updateRequest).subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.notificationService.showSuccess('Appraisal cycle updated successfully');
-              this.dialogRef.close('saved');
-            } else {
-              this.notificationService.showError(response.message || 'Failed to update cycle');
-            }
-            this.isSaving = false;
-          },
-          error: (err) => {
-            console.error('Error updating cycle:', err);
-            this.notificationService.showError(err.error?.message || 'Failed to update appraisal cycle');
-            this.isSaving = false;
-          }
-        });
-      } else {
-        this.performanceService.createAppraisalCycle(request).subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.notificationService.showSuccess('Appraisal cycle created successfully');
-              this.dialogRef.close('saved');
-            } else {
-              this.notificationService.showError(response.message || 'Failed to create cycle');
-            }
-            this.isSaving = false;
-          },
-          error: (err) => {
-            console.error('Error creating cycle:', err);
-            this.notificationService.showError(err.error?.message || 'Failed to create appraisal cycle');
-            this.isSaving = false;
-          }
-        });
+    this.isSaving = true;
+    const f = this.cycleForm.value;
+
+    // Map form values to backend DTO
+    const request: UpdateAppraisalCycleRequest | CreateAppraisalCycleRequest = {
+      cycleName: f.cycleName,
+      cycleType: f.cycleType || null,
+      startDate: f.startDate instanceof Date ? f.startDate.toISOString() : f.startDate,
+      endDate: f.endDate instanceof Date ? f.endDate.toISOString() : f.endDate,
+      reviewStartDate: f.reviewStartDate instanceof Date ? f.reviewStartDate.toISOString() : f.reviewStartDate,
+      reviewEndDate: f.reviewEndDate instanceof Date ? f.reviewEndDate.toISOString() : f.reviewEndDate,
+      isSelfAssessmentEnable: f.isSelfAssessmentEnable,
+      managerReview: f.managerReview,
+      isAppraisalEnable: f.isAppraisalEnable,
+      description: f.description || null,
+      status: f.status || (this.isEditMode ? this.data.cycle?.status || 'upcoming' : 'upcoming')
+    };
+
+    // Call create or update service method
+    const request$ = this.isEditMode && this.cycleId
+      ? this.performanceService.updateAppraisalCycle(this.cycleId, request)
+      : this.performanceService.createAppraisalCycle(request);
+
+    request$.subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notificationService.showSuccess(
+            this.isEditMode
+              ? 'Appraisal cycle updated successfully'
+              : 'Appraisal cycle created successfully'
+          );
+          this.dialogRef.close('saved');
+        } else {
+          this.notificationService.showError(res.message || 'Operation failed');
+        }
+        this.isSaving = false;
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.notificationService.showError(err.error?.message || 'Operation failed');
+        this.isSaving = false;
       }
-    }
+    });
   }
 
   onCancel(): void {

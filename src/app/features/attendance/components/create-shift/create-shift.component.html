@@ -75,6 +75,20 @@
         </div>
       </div>
 
+      <!-- Grace minutes for late calculation. Per-shift so timesheet lateness works
+           even for orgs that haven't enabled the payroll module. -->
+      <div class="form-row">
+        <label class="field-label">
+          Grace Period (minutes)
+          <span class="field-hint">— minutes of late check-in tolerated before counting as late. Leave 0 to use the org-wide payroll rule.</span>
+        </label>
+        <mat-form-field appearance="outline" class="mat-field">
+          <input matInput type="number" formControlName="graceMinutes" min="0" max="120" placeholder="e.g. 10" />
+          <mat-error *ngIf="shiftForm.get('graceMinutes')?.hasError('min')">Cannot be negative.</mat-error>
+          <mat-error *ngIf="shiftForm.get('graceMinutes')?.hasError('max')">Maximum is 120.</mat-error>
+        </mat-form-field>
+      </div>
+
       <div class="form-row">
         <label class="field-label">Days of Week <span class="required">*</span></label>
         <div class="days-chips-row">

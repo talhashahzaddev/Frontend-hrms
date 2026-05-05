@@ -4,8 +4,8 @@
     <div class="header-content">
       <mat-icon class="header-icon">date_range</mat-icon>
       <div class="header-text">
-        <h1>Monthly Timesheet Snapshots</h1>
-        <p>Create, manage, and finalize monthly attendance snapshots for payroll processing</p>
+        <h1>Timesheet Periods</h1>
+        <p>Create, manage, and finalize attendance periods for payroll processing</p>
       </div>
     </div>
     <div class="header-actions">
@@ -56,11 +56,11 @@
             <mat-icon>calendar_month</mat-icon>
           </div>
           <div class="snap-title-block">
-            <span class="snap-month">{{ getMonthYearDisplay(snapshot) }}</span>
+            <span class="snap-month">{{ getPeriodDisplay(snapshot) }}</span>
             <span class="snap-name">{{ snapshot.timesheetName }}</span>
           </div>
-          <span class="snap-status-badge" [class.finalized]="snapshot.status === 'Finalized'">
-            {{ snapshot.status === 'Finalized' ? 'Finalized' : 'Draft' }}
+          <span class="snap-status-badge" [ngClass]="getStatusChipClass(snapshot.status)">
+            {{ getStatusLabel(snapshot.status) }}
           </span>
         </div>
 

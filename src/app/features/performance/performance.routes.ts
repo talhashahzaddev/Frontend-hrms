@@ -22,7 +22,6 @@ export const performanceRoutes: Routes = [
   {
     path: 'reports',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/reports/reports.component').then(m => m.ReportsComponent)
   },
   {
@@ -37,14 +36,14 @@ export const performanceRoutes: Routes = [
     path: 'goals',
     loadComponent: () => import('./components/kra-management/kra-management.component').then(m => m.KRAManagementComponent)
   },
-  {
-    path: 'self-assessment',
-    loadComponent: () => import('./components/self-assessment/self-assessment.component').then(m => m.SelfAssessmentComponent)
-  },
-  {
-    path: 'manager-review',
-    loadComponent: () => import('./components/manager-review/manager-review.component').then(m => m.ManagerReviewComponent)
-  },
+  // {
+  //   path: 'self-assessment',
+  //   loadComponent: () => import('./components/self-assessment/self-assessment.component').then(m => m.SelfAssessmentComponent)
+  // },
+  // {
+  //   path: 'manager-review',
+  //   loadComponent: () => import('./components/manager-review/manager-review.component').then(m => m.ManagerReviewComponent)
+  // },
   {
     path: 'employee/:id/history',
     loadComponent: () => import('./components/employee-performance-history/employee-performance-history.component').then(m => m.EmployeePerformanceHistoryComponent)

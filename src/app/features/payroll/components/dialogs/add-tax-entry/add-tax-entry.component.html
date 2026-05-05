@@ -1,0 +1,90 @@
+<div class="manual-provident-fund-enrollment-dialog">
+  <div class="dialog-header">
+    <h2>Add Tax Entry</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-grid">
+      <label class="field full-span">
+        <span>Employee</span>
+        <select formControlName="employeeId">
+          <option value="" disabled selected>Select employee</option>
+          @for (employee of employees; track employee.employeeId) {
+            <option [value]="employee.employeeId">
+              {{ getEmployeeDisplayName(employee) }} ({{ employee.employeeCode }})
+            </option>
+          }
+        </select>
+        @if (form.controls.employeeId.touched && form.controls.employeeId.invalid) {
+          <small class="error-text">Please select an employee.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Period</span>
+        <select formControlName="periodId">
+          <option value="" disabled selected>Select period</option>
+          @for (period of periods; track period.id) {
+            <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+        @if (form.controls.periodId.touched && form.controls.periodId.invalid) {
+          <small class="error-text">Please select a period.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Category</span>
+        <select formControlName="categoryId">
+          <option value="" disabled selected>Select category</option>
+          @for (category of categories; track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+        @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
+          <small class="error-text">Please select a category.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Gross Income</span>
+        <input type="number" formControlName="grossIncome" placeholder="0.00" />
+        @if (form.controls.grossIncome.touched && form.controls.grossIncome.invalid) {
+          <small class="error-text">Valid gross income is required.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Taxable Income</span>
+        <input type="number" formControlName="taxableIncome" placeholder="0.00" />
+        @if (form.controls.taxableIncome.touched && form.controls.taxableIncome.invalid) {
+          <small class="error-text">Valid taxable income is required.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Tax Amount</span>
+        <input type="number" formControlName="taxAmount" placeholder="0.00" />
+        @if (form.controls.taxAmount.touched && form.controls.taxAmount.invalid) {
+          <small class="error-text">Valid tax amount is required.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Monthly Tax</span>
+        <input type="number" formControlName="monthlyTax" placeholder="0.00" />
+        @if (form.controls.monthlyTax.touched && form.controls.monthlyTax.invalid) {
+          <small class="error-text">Valid monthly tax is required.</small>
+        }
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn" [disabled]="form.invalid">Add Entry</button>
+    </div>
+  </form>
+</div>

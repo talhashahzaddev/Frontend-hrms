@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { TimesheetPayrollSummaryDto, TimesheetPeriodLinkDto } from '../../../core/models/attendance.models';
 
 export interface PayRollRuleDto {
   id: string;
@@ -72,6 +73,54 @@ export interface LeaveSummaryFilter {
   periodId?: string;
   page: number;
   pageSize: number;
+}
+
+export interface TaxRegimeDto {
+  regimeId: string;
+  organizationId: string;
+  country?: string;
+  regimeName?: string;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface TaxCategoryDto {
+  categoryId: string;
+  regimeId: string;
+  regimeName?: string;
+  categoryName?: string;
+  isActive: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
+export interface TaxSlabDto {
+  slabId: string;
+  categoryId: string;
+  categoryName?: string;
+  slabOrder: number;
+  minIncome: number;
+  maxIncome?: number | null;
+  fixedAmount: number;
+  percentage: number;
+  isDeleted: boolean;
+  createdAt: string;
+}
+
+export interface TaxComponentRuleDto {
+  componentRuleId: string;
+  regimeId: string;
+  regimeName?: string;
+  organizationId: string;
+  componentName?: string;
+  taxability?: string;
+  limitAmount: number;
+  limitPercentage: number;
+  applyStage?: string;
+  isDeleted: boolean;
+  createdAt: string;
 }
 
 export interface ApiResponse<T> {
@@ -1310,8 +1359,63 @@ export class PayrollService {
     }
 
     // Tax Slabs
-    getTaxSlabs(params?: any): Observable<any> {
-      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, { params })
+    getTaxSlabs(params?: any): Observable<TaxSlabDto[]> {
+      return this.http.get<ApiResponse<TaxSlabDto[]>>(`${this.apiUrl}/tax-slabs`, { params })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxSlabs(): Observable<TaxSlabDto[]> {
+      return this.http.get<ApiResponse<TaxSlabDto[]>>(`${this.apiUrl}/tax-slabs/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    // Tax Regimes
+    getTaxRegimes(): Observable<TaxRegimeDto[]> {
+      return this.http.get<ApiResponse<TaxRegimeDto[]>>(`${this.apiUrl}/tax-regimes`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxRegimes(): Observable<TaxRegimeDto[]> {
+      return this.http.get<ApiResponse<TaxRegimeDto[]>>(`${this.apiUrl}/tax-regimes/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createTaxRegime(data: {
+      country?: string;
+      regimeName?: string;
+      startDate: string;
+      endDate: string;
+      isActive: boolean;
+    }): Observable<TaxRegimeDto> {
+      return this.http.post<ApiResponse<TaxRegimeDto>>(`${this.apiUrl}/tax-regimes`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1322,14 +1426,105 @@ export class PayrollService {
         );
     }
 
-    getActiveTaxSlabs(): Observable<any[]> {
-      return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/tax-slabs/active`)
+    updateTaxRegime(id: string, data: {
+      country?: string;
+      regimeName?: string;
+      startDate: string;
+      endDate: string;
+      isActive: boolean;
+    }): Observable<TaxRegimeDto> {
+      return this.http.put<ApiResponse<TaxRegimeDto>>(`${this.apiUrl}/tax-regimes/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxRegime(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-regimes/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
+    // Tax Categories
+    getTaxCategories(): Observable<TaxCategoryDto[]> {
+      return this.http.get<ApiResponse<TaxCategoryDto[]>>(`${this.apiUrl}/tax-categories`)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
               throw new Error(response.message);
             }
             return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxCategories(): Observable<TaxCategoryDto[]> {
+      return this.http.get<ApiResponse<TaxCategoryDto[]>>(`${this.apiUrl}/tax-categories/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getTaxCategoriesByRegimeId(regimeId: string): Observable<TaxCategoryDto[]> {
+      return this.http.get<ApiResponse<TaxCategoryDto[]>>(`${this.apiUrl}/tax-categories/regime/${regimeId}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createTaxCategory(data: { regimeId: string; categoryName?: string; isActive: boolean }): Observable<TaxCategoryDto> {
+      return this.http.post<ApiResponse<TaxCategoryDto>>(`${this.apiUrl}/tax-categories`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateTaxCategory(id: string, data: { regimeId: string; categoryName?: string; isActive: boolean }): Observable<TaxCategoryDto> {
+      return this.http.put<ApiResponse<TaxCategoryDto>>(`${this.apiUrl}/tax-categories/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxCategory(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-categories/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
           })
         );
     }
@@ -1358,21 +1553,8 @@ export class PayrollService {
         );
     }
 
-    createTaxSlab(data: any): Observable<any> {
-      const payload = {
-        slabName: data?.slabName,
-        description: data?.description ?? null,
-        fiscalYear: data?.fiscalYear,
-        minIncome: Number(data?.minIncome ?? data?.minIncomePkr ?? 0),
-        maxIncome: data?.maxIncome ?? data?.maxIncomePkr ?? null,
-        fixedAmount: Number(data?.fixedAmount ?? data?.fixedAmountPkr ?? 0),
-        percentage: Number(data?.percentage ?? 0),
-        isActive: typeof data?.isActive === 'boolean'
-          ? data.isActive
-          : String(data?.status ?? 'active').toLowerCase() !== 'inactive'
-      };
-
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-slabs`, payload)
+    createTaxSlab(data: any): Observable<TaxSlabDto> {
+      return this.http.post<ApiResponse<TaxSlabDto>>(`${this.apiUrl}/tax-slabs`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1383,21 +1565,8 @@ export class PayrollService {
         );
     }
 
-    updateTaxSlab(id: string, data: any): Observable<any> {
-      const payload = {
-        slabName: data?.slabName,
-        description: data?.description ?? null,
-        fiscalYear: data?.fiscalYear,
-        minIncome: Number(data?.minIncome ?? data?.minIncomePkr ?? 0),
-        maxIncome: data?.maxIncome ?? data?.maxIncomePkr ?? null,
-        fixedAmount: Number(data?.fixedAmount ?? data?.fixedAmountPkr ?? 0),
-        percentage: Number(data?.percentage ?? 0),
-        isActive: typeof data?.isActive === 'boolean'
-          ? data.isActive
-          : String(data?.status ?? 'active').toLowerCase() !== 'inactive'
-      };
-
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/tax-slabs/${id}`, payload)
+    updateTaxSlab(id: string, data: any): Observable<TaxSlabDto> {
+      return this.http.put<ApiResponse<TaxSlabDto>>(`${this.apiUrl}/tax-slabs/${id}`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -1420,6 +1589,81 @@ export class PayrollService {
         );
     }
 
+    // Tax Component Rules
+    getTaxComponentRules(): Observable<TaxComponentRuleDto[]> {
+      return this.http.get<ApiResponse<TaxComponentRuleDto[]>>(`${this.apiUrl}/tax-component-rules`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    getActiveTaxComponentRules(): Observable<TaxComponentRuleDto[]> {
+      return this.http.get<ApiResponse<TaxComponentRuleDto[]>>(`${this.apiUrl}/tax-component-rules/active`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || [];
+          })
+        );
+    }
+
+    createTaxComponentRule(data: {
+      regimeId: string;
+      componentName?: string;
+      taxability?: string;
+      limitAmount: number;
+      limitPercentage: number;
+      applyStage?: string;
+    }): Observable<TaxComponentRuleDto> {
+      return this.http.post<ApiResponse<TaxComponentRuleDto>>(`${this.apiUrl}/tax-component-rules`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    updateTaxComponentRule(id: string, data: {
+      regimeId: string;
+      componentName?: string;
+      taxability?: string;
+      limitAmount: number;
+      limitPercentage: number;
+      applyStage?: string;
+    }): Observable<TaxComponentRuleDto> {
+      return this.http.put<ApiResponse<TaxComponentRuleDto>>(`${this.apiUrl}/tax-component-rules/${id}`, data)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    deleteTaxComponentRule(id: string): Observable<boolean> {
+      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-component-rules/${id}`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data || response.success;
+          })
+        );
+    }
+
     getTaxTransactions(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-transactions`, { params })
         .pipe(
@@ -1432,70 +1676,8 @@ export class PayrollService {
         );
     }
 
-    getTaxTransactionById(id: string): Observable<any> {
-      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-transactions/${id}`)
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data;
-          })
-        );
-    }
-
     createTaxTransaction(data: any): Observable<any> {
-      const payload = {
-        employeeId: data?.employeeId,
-        periodId: data?.periodId,
-        slabId: data?.slabId,
-        annualSalary: Number(data?.annualSalary ?? 0),
-        taxableIncome: Number(data?.taxableIncome ?? 0)
-      };
-
-      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-transactions`, payload)
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data;
-          })
-        );
-    }
-
-    updateTaxTransaction(id: string, data: any): Observable<any> {
-      const payload = {
-        slabId: data?.slabId ?? null,
-        annualSalary: Number(data?.annualSalary ?? 0),
-        taxableIncome: Number(data?.taxableIncome ?? 0)
-      };
-
-      return this.http.put<ApiResponse<any>>(`${this.apiUrl}/tax-transactions/${id}`, payload)
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data;
-          })
-        );
-    }
-
-    deleteTaxTransaction(id: string): Observable<boolean> {
-      return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/tax-transactions/${id}`)
-        .pipe(
-          map((response: any) => {
-            if (!response.success && response.message) {
-              throw new Error(response.message);
-            }
-            return response.data || response.success;
-          })
-        );
-    }
-
-    getMyTaxTransactions(params?: any): Observable<any> {
-      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/tax-transactions/my`, { params })
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/tax-transactions`, data)
         .pipe(
           map((response: any) => {
             if (!response.success && response.message) {
@@ -2693,6 +2875,46 @@ export class PayrollService {
         map((response: any) => {
           if (!response.success && response.message) throw new Error(response.message);
           return response.data;
+        })
+      );
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // TIMESHEET → PAYROLL BRIDGE
+    // Same endpoints as AttendanceService — mirrored here so payroll components
+    // don't need to import from another module.
+    // ───────────────────────────────────────────────────────────────────────
+
+    /** List finalized timesheets payroll can attach to a payroll run. */
+    getFinalizedTimesheetLinks(): Observable<TimesheetPeriodLinkDto[]> {
+      const url = `${environment.apiUrl}/Attendance/timesheet/finalized-links`;
+      return this.http.get<ApiResponse<TimesheetPeriodLinkDto[]>>(url).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data || [];
+        })
+      );
+    }
+
+    /** Returns the per-employee payroll summary for one finalized timesheet. */
+    getTimesheetPayrollSummary(timesheetId: string): Observable<TimesheetPayrollSummaryDto> {
+      const url = `${environment.apiUrl}/Attendance/timesheet/payroll-summary`;
+      const params = new HttpParams().set('timesheetId', timesheetId);
+      return this.http.get<ApiResponse<TimesheetPayrollSummaryDto>>(url, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    /** Lock a finalized timesheet — call after payroll has consumed it. */
+    lockTimesheet(timesheetId: string, payrollPeriodId?: string): Observable<boolean> {
+      const url = `${environment.apiUrl}/Attendance/timesheet/lock`;
+      return this.http.post<ApiResponse<boolean>>(url, { timesheetId, payrollPeriodId }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data ?? false;
         })
       );
     }

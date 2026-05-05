@@ -94,6 +94,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', menuName: 'Attendance', subMenuName: 'Timesheet Dashboard' },
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts' },
+      { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime' },
+
         {
           label: 'Geo-Fences',
           icon: 'fence',
@@ -163,6 +165,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods', menuName: 'Payroll', subMenuName: 'Payroll Periods' },
         { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process', menuName: 'Payroll', subMenuName: 'Process Payroll' },
+        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation', menuName: 'Payroll', subMenuName: 'Payroll Calculation' },
         { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component', menuName: 'Payroll', subMenuName: 'Salary Components' },
         { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports', menuName: 'Payroll', subMenuName: 'Payroll Reports' },
         { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips', menuName: 'Payroll', subMenuName: 'Salary Slips' }
@@ -182,9 +185,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'trending_up',
       menuName: 'Performance',
       children: [
+        
         { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'My Performance' },
         { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'Performance' },
-        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'Appraisal Cycles' },
+        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/cycles', menuName: 'Performance', subMenuName: 'Appraisal Cycles' },
         { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals', menuName: 'Performance', subMenuName: 'Appraisals' },
         { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills', menuName: 'Performance', subMenuName: 'Skill Matrix' },
         { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals', menuName: 'Performance', subMenuName: 'Goals & KRAs' },
@@ -280,6 +284,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         {
+          label: 'Tax Ledger',
+          icon: 'history_edu',
+          route: '/payroll/tax-ledger',
+          exact: true
+        },
+        {
           label: 'Salary Advances',
           icon: 'savings',
           route: '/payroll/salary-advances',
@@ -312,7 +322,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
         { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
         { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
-        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' }
+        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
+        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
       ]
     },
     {

@@ -1,0 +1,17 @@
+@use '../provident-fund/provident-fund.component.scss' as pf;
+@use '../loans/loans.component.scss' as *;
+
+// Reuse the same layout as provident fund
+.time-tracking-container.loans-advances-page.provident-fund-page {
+  // Add any tax-ledger specific styles here if needed
+}
+
+.loan-payments-table {
+  .col-employee { width: 25%; }
+  .col-period { width: 15%; }
+  .col-taxable { width: 15%; }
+  .col-tax { width: 15%; }
+  .col-paid { width: 10%; }
+  .col-balance { width: 10%; }
+  .col-status { width: 10%; }
+}

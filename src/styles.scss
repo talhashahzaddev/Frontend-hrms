@@ -436,6 +436,10 @@ a {
   }
 }
 
+
+.cdk-overlay-container {
+  z-index: 2000 !important;
+}
 // Card Styles (Hubstaff-inspired)
 .card {
   background: white;
