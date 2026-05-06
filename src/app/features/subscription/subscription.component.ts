@@ -95,6 +95,10 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  get isSuperAdmin(): boolean {
+    return this.authService.hasRole('Super Admin');
+  }
+
   loadSubscriptionPlans(): void {
     this.isLoading = true;
     this.error = null;

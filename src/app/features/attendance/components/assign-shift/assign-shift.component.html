@@ -46,7 +46,7 @@
           </div>
         </div>
 
-        <div class="field-full custom-field">
+        <div class="field-full custom-field" *ngIf="!isManager">
           <label class="field-label">Department</label>
           <mat-form-field appearance="outline" class="mat-field">
             <mat-select [formControl]="departmentControl" placeholder="All Departments">

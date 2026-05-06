@@ -17,6 +17,7 @@ import {
     SettingsService,
     CareerPageSettings
 } from '../../services/settings.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
@@ -46,6 +47,7 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
     form: FormGroup;
     isLoading = false;
     isSaving = false;
+    isSuperAdmin = false;
 
     /** View mode vs edit mode toggle */
     isEditMode = false;
@@ -88,6 +90,7 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
     constructor(
         private fb: FormBuilder,
         private settingsService: SettingsService,
+        private authService: AuthService,
         private notificationService: NotificationService
     ) {
         this.form = this.fb.group({
@@ -99,7 +102,10 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.loadSettings();
+        this.isSuperAdmin = this.authService.hasRole('Super Admin');
+        if (this.isSuperAdmin) {
+            this.loadSettings();
+        }
     }
 
     ngOnDestroy(): void {
@@ -237,7 +243,7 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
 
     // ─── Save ─────────────────────────────────────────────────────
     onSave(): void {
-        if (this.isSaving) return;
+        if (!this.isSuperAdmin || this.isSaving) return;
 
         this.isSaving = true;
         const v = this.form.value;

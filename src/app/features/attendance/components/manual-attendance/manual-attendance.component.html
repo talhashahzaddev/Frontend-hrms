@@ -22,7 +22,7 @@
           <mat-datepicker #endPicker></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" *ngIf="isManagerOrAdmin">
           <mat-label>Employee ID (Optional)</mat-label>
           <input matInput formControlName="employeeId" placeholder="Search by Employee ID">
         </mat-form-field>

@@ -13,7 +13,7 @@
     <!-- Welcome Header -->
     <div class="dashboard-header">
       <!-- Super Admin Onboarding Section -->
-      <div *ngIf="!isOnboardingComplete" class="onboarding-wrapper">
+      <div *ngIf="isSuperAdmin && !isOnboardingComplete" class="onboarding-wrapper">
         <mat-expansion-panel 
           class="onboarding-main-panel"
           [expanded]="false">
@@ -78,7 +78,7 @@
       </div>
 
       <!-- Regular Welcome Section (for non-Super Admin or completed onboarding) -->
-      <div *ngIf="isOnboardingComplete" class="welcome-section">
+      <div *ngIf="!isSuperAdmin || isOnboardingComplete" class="welcome-section">
         <h2 class="welcome-title">
           👋 Welcome, {{ currentUser?.firstName || 'User' }}
         </h2>
@@ -231,7 +231,7 @@
           </mat-card-header>
           <mat-card-content>
             <div class="quick-actions-grid">
-              <button mat-stroked-button class="quick-action-button action-primary" (click)="quickemployee()">
+              <button mat-stroked-button class="quick-action-button action-primary" *ngIf="!isEmployee && !isManager" (click)="quickemployee()">
                 <div class="action-icon-wrapper">
                   <mat-icon>person_add</mat-icon>
                 </div>

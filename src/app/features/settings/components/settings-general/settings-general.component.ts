@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SettingsService, OrganizationSettings } from '../../services/settings.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
@@ -49,6 +50,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup;
   organizationSettings: OrganizationSettings | null = null;
   availableCurrencies: Array<{ code: string; name: string; symbol: string }> = [];
+  isSuperAdmin = false;
   isLoading = false;
   isSaving = false;
   isDropdownOpen = false;
@@ -64,6 +66,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private notification: NotificationService,
     private notificationService: NotificationService,
@@ -78,15 +81,23 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.checkUserRole();
     this.loadTimeZones();
     this.generateCultureOptions();
-    this.loadSettings();
+    if (this.isSuperAdmin) {
+      this.loadSettings();
+    }
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  private checkUserRole(): void {
+    this.isSuperAdmin = this.authService.hasRole('Super Admin');
+  }
+
 
   loadTimeZones(): void {
     this.settingsService.getAllTimeZones().subscribe({
@@ -134,6 +145,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   }
 
   toggleDropdown(): void {
+    if (!this.isSuperAdmin) return;
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
@@ -144,7 +156,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
 
 
   onSave(): void {
-    if (this.settingsForm.invalid) {
+    if (this.settingsForm.invalid || !this.isSuperAdmin) {
       return;
     }
 

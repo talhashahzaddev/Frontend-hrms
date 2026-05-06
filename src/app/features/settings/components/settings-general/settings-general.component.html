@@ -12,7 +12,7 @@
 
 
   <!-- ACCESS DENIED -->
-  <div class="access-denied">
+  <div *ngIf="!isSuperAdmin" class="access-denied">
     <mat-icon class="access-denied-icon">lock</mat-icon>
     <h2>Access Restricted</h2>
     <p>Only Super Administrators can modify organization settings.</p>
@@ -21,7 +21,7 @@
 
 
   <!-- SETTINGS FORM -->
-  <div *ngIf="!isLoading" class="settings-content">
+  <div *ngIf="isSuperAdmin && !isLoading" class="settings-content">
 
     <mat-card class="settings-card">
 
@@ -202,7 +202,7 @@
 
 
   <!-- LOADING -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="isSuperAdmin && isLoading" class="loading-container">
 
     <mat-spinner diameter="50"></mat-spinner>
 

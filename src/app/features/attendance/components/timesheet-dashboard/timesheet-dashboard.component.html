@@ -31,12 +31,17 @@
     <div class="empty-state">
       <mat-icon>event_busy</mat-icon>
       <h3>No Timesheet Snapshots</h3>
-      <p>You haven't created any monthly timesheet snapshots yet.</p>
-      <p class="hint-text">Click <strong>Create New Snapshot</strong> to get started.</p>
-      <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" *ngIf="hasPermission('timesheet_create_new_snapshot')">
-        <mat-icon>add_circle</mat-icon>
-        Create First Snapshot
-      </button>
+      @if (isEmployee()) {
+        <p>No timesheet snapshots are available yet.</p>
+        <p class="hint-text">Please contact your manager for more information.</p>
+      } @else {
+        <p>You haven't created any monthly timesheet snapshots yet.</p>
+        <p class="hint-text">Click <strong>Create New Snapshot</strong> to get started.</p>
+        <button mat-raised-button color="primary" (click)="openCreateSnapshotDialog()" *ngIf="hasPermission('timesheet_create_new_snapshot')">
+          <mat-icon>add_circle</mat-icon>
+          Create First Snapshot
+        </button>
+      }
     </div>
   }
 
@@ -63,12 +68,17 @@
         <div class="snap-stats">
           <div class="snap-stat-row">
             <div class="snap-stat">
-              <span class="ss-val">{{ snapshot.totalEmployees }}</span>
-              <span class="ss-lbl">Employees</span>
+              @if (isEmployee()) {
+                <span class="ss-val ss-name-val">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</span>
+                <span class="ss-lbl">Employee</span>
+              } @else {
+                <span class="ss-val">{{ snapshot.totalEmployees }}</span>
+                <span class="ss-lbl">Employees</span>
+              }
             </div>
             <div class="snap-stat accent-blue">
               <span class="ss-val">{{ snapshot.attendancePercentage | number:'1.1-1' }}%</span>
-              <span class="ss-lbl">Org Attendance %</span>
+              <span class="ss-lbl">{{ isEmployee() ? 'Attendance Rate' : 'Org Attendance %' }}</span>
             </div>
             <div class="snap-stat accent-green">
               <span class="ss-val">{{ snapshot.totalPresentDays }}</span>

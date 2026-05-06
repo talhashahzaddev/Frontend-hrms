@@ -143,7 +143,7 @@
               <span>{{ currentUser?.roleName }}</span>
             </div>
             <div class="user-plan" [class.expired]="isSubscriptionExpired"
-              *ngIf="currentPlanName">
+              *ngIf="currentPlanName && currentUser?.roleName === 'Super Admin'">
               <mat-icon>{{ isSubscriptionExpired ? 'error' : 'workspace_premium' }}</mat-icon>
               <span>{{ isSubscriptionExpired ? 'Expired: ' : '' }}{{ currentPlanName }}</span>
               <span class="plan-cycle" *ngIf="currentBillingCycle">({{ currentBillingCycle | titlecase }})</span>

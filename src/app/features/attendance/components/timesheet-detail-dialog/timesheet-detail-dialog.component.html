@@ -20,7 +20,7 @@
   </div>
 
   <!-- Employee info bar (employee role only — replaces sidebar) -->
-  <div class="employee-info-bar" *ngIf="selectedEmployee">
+  <div class="employee-info-bar" *ngIf="isEmployee() && selectedEmployee">
     <div class="eib-left">
       <span class="eib-name">{{ selectedEmployee.employeeName }}</span>
       <span class="eib-chip code">{{ selectedEmployee.employeeCode }}</span>
@@ -45,10 +45,10 @@
   </div>
 
   <!-- Master-detail split -->
-  <div class="content-area" [class.no-sidebar]="false">
-    <aside class="master-sidebar">
+  <div class="content-area" [class.no-sidebar]="isEmployee()">
+    <aside class="master-sidebar" *ngIf="!isEmployee()">
       <!-- Sidebar search & filter (managers/admins only) -->
-      <div class="sidebar-search-area">
+      <div class="sidebar-search-area" *ngIf="!isEmployee()">
         <div class="ss-filter-bar">
           <mat-icon class="ss-search-icon">search</mat-icon>
           <input class="ss-input" type="text" placeholder="Search employees…" [(ngModel)]="searchText" (input)="applyFilter()" />
@@ -115,7 +115,7 @@
       </div>
     </aside>
 
-    <section class="detail-panel" [class.full-width]="false">
+    <section class="detail-panel" [class.full-width]="isEmployee()">
       <ng-container *ngIf="!selectedEmployee; else detailView">
         <div class="empty-detail">Select an employee to view daily records</div>
       </ng-container>
@@ -125,8 +125,10 @@
           <!-- ── Records List Table ─────────────────────────────── -->
           <div class="records-table-wrap">
 
-            <!-- Compact stats bar inside table wrapper (managers/admins only) -->
-            <div class="records-stats-bar">
+            <!-- Compact stats bar inside table wrapper (managers/admins only).
+                 Numbers come straight from the backend (EmployeeTimesheetDto): bridge data
+                 when the timesheet is finalized, computed-on-the-fly otherwise. -->
+            <div class="records-stats-bar" *ngIf="!isEmployee()">
               <span class="mini-label">Present</span><span class="mini-value">{{ se.presentDays }}</span>
               <span class="mini-sep">·</span>
               <span class="mini-label">Absent</span><span class="mini-value">{{ se.absentDays }}</span>
@@ -320,7 +322,7 @@
 
                   <!-- Manager-override lock indicator (employee view) -->
                   <button
-                    *ngIf="isOwnTimesheetSelected() && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && (record.is_manager_override || record.isManagerOverride)"
+                    *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && (record.is_manager_override || record.isManagerOverride)"
                     type="button"
                     (click)="onDisabledButtonClick(record)"
                     title="Adjusted by manager — contact your manager to dispute this record"
@@ -330,7 +332,7 @@
 
                   <!-- Employee correction button -->
                   <button
-                    *ngIf="isOwnTimesheetSelected() && !timesheetSubmitted && !isTimesheetUnderReview(se) && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
+                    *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(se) && !isEmployeePayrollLocked(se) && !record.isWeekend && record.status !== 'No Record' && !isFutureDay(record) && canRequestCorrection(record)"
                     type="button"
                     (click)="requestDailyCorrection(se, record)"
                     [title]="record.hasDraftRequest ? 'Edit draft correction' : record.hasPendingRequest ? 'Re-edit pending request' : 'Request correction'"
@@ -355,14 +357,14 @@
     <div class="footer-right">     
       <!-- Under-review banner: replaces the submit button once batch is pending manager review -->
       <div
-        *ngIf="isOwnTimesheetSelected() && isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
+        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
         style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:#fef9c3;color:#92400e;font-size:13px;font-weight:500;border:1px solid #fbbf24;">
         <mat-icon style="font-size:16px;width:16px;height:16px;line-height:16px;">hourglass_top</mat-icon>
         Awaiting Manager Review
       </div>
 
       <button
-        *ngIf="isOwnTimesheetSelected() && !timesheetSubmitted && !isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
+        *ngIf="(isEmployee() || isOwnTimesheetSelected()) && !timesheetSubmitted && !isTimesheetUnderReview(selectedEmployee) && !isEmployeePayrollLocked(selectedEmployee)"
         mat-raised-button
         color="primary"
         (click)="submitAllEdits()"

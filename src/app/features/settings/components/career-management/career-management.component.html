@@ -16,13 +16,13 @@
         </div>
         <div class="cm-page-header-right">
             <button mat-flat-button class="cm-btn cm-btn--primary"
-                *ngIf="!isLoading && !isEditMode && hasAnyData()" (click)="enterEditMode()"
+                *ngIf="!isLoading && isSuperAdmin && !isEditMode && hasAnyData()" (click)="enterEditMode()"
                 id="career-edit-btn">
                 <mat-icon>edit</mat-icon>
                 Edit
             </button>
             <button mat-flat-button class="cm-btn cm-btn--primary"
-                *ngIf="!isLoading && !isEditMode && !hasAnyData() && savedData !== null"
+                *ngIf="!isLoading && isSuperAdmin && !isEditMode && !hasAnyData() && savedData !== null"
                 (click)="enterEditMode()" id="career-setup-btn">
                 <mat-icon>add</mat-icon>
                 Set Up Career Page
@@ -33,7 +33,7 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- ACCESS DENIED                                                -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <div class="cm-state-card">
+    <div class="cm-state-card" *ngIf="!isSuperAdmin">
         <div class="cm-state-icon cm-state-icon--lock"><mat-icon>lock</mat-icon></div>
         <p class="cm-state-title">Access Restricted</p>
         <p class="cm-state-sub">Only Super Admins can manage career page settings.</p>
@@ -42,7 +42,7 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- LOADING                                                      -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <div class="cm-loading" *ngIf="isLoading">
+    <div class="cm-loading" *ngIf="isSuperAdmin && isLoading">
         <mat-spinner diameter="36"></mat-spinner>
         <span>Loading career page settings…</span>
     </div>
@@ -50,7 +50,7 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- VIEW MODE                                                    -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <ng-container *ngIf="!isLoading && !isEditMode">
+    <ng-container *ngIf="isSuperAdmin && !isLoading && !isEditMode">
 
         <!-- Empty state -->
         <div class="cm-state-card cm-state-card--dashed" *ngIf="!hasAnyData()">
@@ -148,7 +148,7 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- EDIT MODE                                                    -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="!isLoading && isEditMode"
+    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="isSuperAdmin && !isLoading && isEditMode"
         class="cm-edit-form">
 
         <!-- Section 1: Branding -->

@@ -162,9 +162,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: user => {
           this.currentUser = user;
           // Load onboarding status if Super Admin
-          // if (this.isSuperAdmin) {
-          //   this.loadOnboardingStatus();
-          // }
+          if (this.isSuperAdmin) {
+            this.loadOnboardingStatus();
+          }
         },
         error: () => {
           this.currentUser = null;
@@ -194,26 +194,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // Role helpers for DashboardComponent (or any component)
-// get isAdmin(): boolean {
-//   return this.authService.hasRole('Admin');
-// }
-// get isSuperAdmin(): boolean {
-//   return this.authService.hasRole('Super Admin');
-// }
+get isAdmin(): boolean {
+  return this.authService.hasRole('Admin');
+}
+get isSuperAdmin(): boolean {
+  return this.authService.hasRole('Super Admin');
+}
 
-// get isHR(): boolean {
-//   return this.authService.hasRole('HR');
-// }
+get isHR(): boolean {
+  return this.authService.hasRole('HR');
+}
 
-// get isManager(): boolean {
-//   return this.authService.hasRole('Manager');
-// }
+get isManager(): boolean {
+  return this.authService.hasRole('Manager');
+}
 
-// get isEmployee(): boolean {
-//   return this.authService.hasRole('Employee');
-// }
+get isEmployee(): boolean {
+  return this.authService.hasRole('Employee');
+}
 
-// (role helpers removed)
+// Generic function if you want to check any role dynamically
+hasRole(role: string): boolean {
+  return this.authService.hasRole(role);
+}
+
+// Check multiple roles at once
+hasAnyRole(roles: string[]): boolean {
+  return this.authService.hasAnyRole(roles);
+  }
   
   
   

@@ -295,7 +295,7 @@
       <mat-icon>refresh</mat-icon>Refresh
     </button>
     <div style="flex:1"></div>
-    @if (true) {
+    @if (!isEmployeeRole()) {
       <button class="foot-btn finalize"
               [disabled]="isLoading || pkg.isFinalized || (pkg.pendingRequestCount || 0) > 0 || isFinalizing"
               [matTooltip]="pkg.isFinalized ? 'Already finalized for payroll' : (pkg.pendingRequestCount || 0) > 0 ? 'Resolve all pending requests first' : 'Lock all records for payroll'"

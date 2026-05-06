@@ -207,7 +207,7 @@
 
   <!-- ═══ BOTTOM GRID: Swap Requests + Shift Details ═══ -->
   <!-- <div class="bottom-grid"> -->
-  <div class="bottom-grid" [class.bottom-grid-full]="false">
+  <div class="bottom-grid" [class.bottom-grid-full]="!(isAdminOrHR || isManager)">
 
     <!-- Team Swap Requests -->
     <div class="bottom-card">
@@ -218,7 +218,7 @@
       <div class="swap-list">
 
         <!-- MY REQUESTS (employee view) -->
-        <ng-container>
+        <ng-container *ngIf="isManager || isEmployee || isHRManager">
           <div *ngIf="employeeShiftSwaps.length > 0; else noMyRequests">
             <div *ngFor="let swap of employeeShiftSwaps" class="swap-item">
               <div class="swap-item-top">
@@ -251,7 +251,7 @@
         </ng-container>
 
         <!-- TEAM REQUESTS (manager/admin view) -->
-        <ng-container>
+        <ng-container *ngIf="isManager || isAdminOrHR">
           <div *ngIf="superAdminPendingSwaps.length > 0; else noTeamRequests">
             <div *ngFor="let swap of superAdminPendingSwaps" class="swap-item">
               <div class="swap-item-top">
@@ -288,7 +288,7 @@
     </div>
 
     <!-- Shift Details -->
-    <div class="bottom-card">
+    <div class="bottom-card" *ngIf="isAdminOrHR || isManager">
       <div class="bottom-card-header">
         <h4 class="bottom-card-title">Shift Details</h4>
         <mat-form-field appearance="outline" class="shift-select">
@@ -388,7 +388,9 @@
   <!-- ═══ QUICK NAV STAT CARDS (non-admin) ═══ -->
   <!-- <div class="quick-nav-grid" *ngIf="!isAdminOrHR">
 
-    <mat-card class="stat-card stat-card-primary" (click)="openAssignShiftDialog()">
+    <mat-card class="stat-card stat-card-primary"
+              *ngIf="isManager"
+              (click)="openAssignShiftDialog()">
       <mat-card-content>
         <div class="stat-item">
           <div class="stat-icon-wrapper">

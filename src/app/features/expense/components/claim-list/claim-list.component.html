@@ -17,7 +17,7 @@
   </div>
 
   <!-- View toggle: My Claims / All Claims (Super Admin only) -->
-  <div class="view-tabs">
+  <div class="view-tabs" *ngIf="isSuperAdmin">
     <button type="button" class="view-tab" [class.active]="activeView === 'my-claims'"
       (click)="setActiveView('my-claims')">
       <mat-icon>person</mat-icon>
@@ -31,7 +31,7 @@
   </div>
 
   <!-- Super Admin: sliding panels (My Claims + All Claims) -->
-  <div class="view-content-wrapper">
+  <div class="view-content-wrapper" *ngIf="isSuperAdmin">
     <div class="view-slider" [class.slide-all]="activeView === 'all-claims'">
       <!-- Panel 1: My Claims -->
       <div class="view-panel view-panel-my-claims">
@@ -131,11 +131,11 @@
                       <mat-icon>visibility</mat-icon>
                       View details
                     </button>
-                    <button mat-menu-item (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
+                    <button mat-menu-item (click)="editClaim(row)" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                       <mat-icon>edit</mat-icon>
                       Edit
                     </button>
-                    <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isClaimPending(row)">
+                    <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                       <mat-icon>delete</mat-icon>
                       Delete
                     </button>
@@ -290,7 +290,7 @@
   </div>
 
   <!-- Non–Super Admin (Employee, HR, Manager): only My Claims, no tabs -->
-  <ng-container>
+  <ng-container *ngIf="!isSuperAdmin">
     <mat-card class="filters-card">
       <div class="filters-header">
         <h3>Search &amp; Filters</h3>
@@ -386,11 +386,11 @@
                   <mat-icon>visibility</mat-icon>
                   View details
                 </button>
-                <button mat-menu-item (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
+                <button mat-menu-item (click)="editClaim(row)" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                   <mat-icon>edit</mat-icon>
                   Edit
                 </button>
-                <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isClaimPending(row)">
+                <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isSuperAdmin && !isClaimPending(row)">
                   <mat-icon>delete</mat-icon>
                   Delete
                 </button>
@@ -424,7 +424,7 @@
   </ng-container>
 
   <!-- Claim Requests (Super Admin, All Claims tab only): card-style Accept / Reject -->
-  <div class="claim-requests-section" *ngIf="activeView === 'all-claims'">
+  <div class="claim-requests-section" *ngIf="isSuperAdmin && activeView === 'all-claims'">
     <h2 class="section-title">
       <mat-icon>pending_actions</mat-icon>
       Claim requests

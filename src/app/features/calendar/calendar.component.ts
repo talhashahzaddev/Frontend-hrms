@@ -784,4 +784,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
         return !!(att.details.checkInTime && !att.details.checkOutTime);
     }
 
+    // Helper for role-based UI visibility
+    get isSuperAdmin(): boolean {
+        const user = this.authService.getCurrentUserValue();
+        return user?.roleName?.toLowerCase() === 'super admin';
+    }
 }

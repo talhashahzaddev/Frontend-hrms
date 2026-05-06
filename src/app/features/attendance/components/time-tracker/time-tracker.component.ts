@@ -158,7 +158,12 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   }
 
   // ── role helpers ──────────────────────────────────────────────────────────
+  get isSuperAdmin(): boolean { return this.authService.hasRole('Super Admin'); }
+  get isManager(): boolean { return this.authService.hasRole('Manager'); }
+  get isHRManager(): boolean { return this.authService.hasRole('HR Manager'); }
   get isAdminOrHR(): boolean { return this.authService.hasAnyRole(['Super Admin', 'HR Manager']); }
+  get isEmployee(): boolean { return this.authService.hasRole('Employee'); }
+  hasRole(role: string): boolean { return this.authService.hasRole(role); }
   hasPermission(actionKey: string): boolean {
     return this.authService.hasMenuPermission('Attendance', 'TimeTracker', actionKey);
   }

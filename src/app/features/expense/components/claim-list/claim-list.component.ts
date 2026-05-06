@@ -20,6 +20,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith, merg
 import { ExpenseDto, ExpenseCategoryDto } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { ClaimFormDialogComponent } from '../claim-form-dialog/claim-form-dialog.component';
 import { ClaimDetailsDialogComponent } from '../claim-details-dialog/claim-details-dialog.component';
@@ -103,15 +104,22 @@ export class ClaimListComponent implements OnInit, OnDestroy {
     private expenseService: ExpenseService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
+    private authService: AuthService,
     private settingsService: SettingsService
   ) {}
+
+  get isSuperAdmin(): boolean {
+    return this.authService.hasRole('Super Admin');
+  }
 
   ngOnInit(): void {
     this.loadOrganizationCurrency();
     this.loadCategories();
     this.loadClaims();
-    this.loadAllClaims();
-    this.loadPendingClaims();
+    if (this.isSuperAdmin) {
+      this.loadAllClaims();
+      this.loadPendingClaims();
+    }
     merge(
       this.searchControl.valueChanges.pipe(startWith('')),
       this.myClaimsStartDate.valueChanges.pipe(startWith(this.myClaimsStartDate.value)),
