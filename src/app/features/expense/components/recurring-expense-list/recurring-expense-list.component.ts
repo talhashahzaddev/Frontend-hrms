@@ -18,7 +18,6 @@ import { Subject, takeUntil, debounceTime, merge, startWith } from 'rxjs';
 import { RecurringExpenseDto, ExpenseCategoryDto } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { AuthService } from '../../../../core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { RecurringDetailsDialogComponent } from '../recurring-details-dialog/recurring-details-dialog.component';
 import { RecurringFormDialogComponent } from '../recurring-form-dialog/recurring-form-dialog.component';
@@ -96,22 +95,15 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
     private expenseService: ExpenseService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
-    private authService: AuthService,
     private settingsService: SettingsService
   ) {}
-
-  get isSuperAdmin(): boolean {
-    return this.authService.hasRole('Super Admin');
-  }
 
   ngOnInit(): void {
     this.loadOrganizationCurrency();
     this.loadCategories();
     this.loadMyRecurring();
-    if (this.isSuperAdmin) {
-      this.loadAllRecurring();
-      this.loadPendingRecurring();
-    }
+    this.loadAllRecurring();
+    this.loadPendingRecurring();
     merge(
       this.searchControl.valueChanges.pipe(startWith('')),
       this.myStatus.valueChanges.pipe(startWith(this.myStatus.value)),
@@ -128,7 +120,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
     this.allStatus.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        if (this.isSuperAdmin) this.loadAllRecurring(1);
+        this.loadAllRecurring(1);
       });
   }
 
@@ -370,10 +362,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadMyRecurring();
-        if (this.isSuperAdmin) {
-          this.loadAllRecurring();
-          this.loadPendingRecurring();
-        }
+        this.loadAllRecurring();
+        this.loadPendingRecurring();
       }
     });
   }
@@ -387,10 +377,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.loadMyRecurring();
-        if (this.isSuperAdmin) {
-          this.loadAllRecurring();
-          this.loadPendingRecurring();
-        }
+        this.loadAllRecurring();
+        this.loadPendingRecurring();
       }
     });
   }
@@ -415,10 +403,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
           .subscribe({
             next: () => {
               this.loadMyRecurring();
-              if (this.isSuperAdmin) {
-                this.loadAllRecurring();
-                this.loadPendingRecurring();
-              }
+              this.loadAllRecurring();
+              this.loadPendingRecurring();
               this.notificationService.showSuccess('Recurring expense deleted successfully');
             },
             error: (err) => {

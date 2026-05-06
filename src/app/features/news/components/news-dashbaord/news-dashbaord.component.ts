@@ -19,9 +19,7 @@ import { NewsDto } from '@/app/core/models/news.models';
 import { CreateNewsComponent } from '../create-news/create-news.component';
 import { Subject, takeUntil } from 'rxjs';
 import { NewsViewDialogueboxComponent } from './news-view-dialoguebox';
-import { AuthService } from '@/app/core/services/auth.service';
 import { MatMenuModule } from '@angular/material/menu';
-import { is } from 'date-fns/locale';
 @Component({
   selector: 'app-news-dashbaord',
   standalone: true,
@@ -85,7 +83,6 @@ export class NewsDashbaordComponent implements OnInit {
 
   constructor(
     private newsService: NewsService,
-    private authService: AuthService,
     private dialog: MatDialog,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
@@ -100,35 +97,9 @@ export class NewsDashbaordComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadNews();
-    
-  if (this.isAdminOrHR) {
+
     this.displayedColumns.push('VisibleTo');
     this.displayedColumns.push('actions');
-  }
-  }
-
-  // Role helpers
-  get isSuperAdmin(): boolean {
-    return this.authService.hasRole('Super Admin');
-  }
-  get isManager(): boolean {
-    return this.authService.hasRole('Manager');
-  }
-
-  get isHRManager(): boolean {
-    return this.authService.hasRole('HR Manager');
-  }
-
-  get isAdminOrHR(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
-  }
-
-  get isEmployee(): boolean {
-    return this.authService.hasRole('Employee');
-  }
-
-  hasRole(role: string): boolean {
-    return this.authService.hasRole(role);
   }
 
   loadNews(): void {

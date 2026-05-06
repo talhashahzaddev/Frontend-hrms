@@ -85,24 +85,9 @@ export class ShiftComponent implements OnInit, OnDestroy {
     this.loadCurrentUser();
     this.loadAllShifts();
   this.loadShiftSummary(); 
-    if (this.isAdminOrHR) {
-      this.loadSuperAdminPendingSwaps();
-       this.loadEmployeeCurrentShift();
-    }
-    if (this.isHRManager) {
-      this.loadSuperAdminPendingSwaps();
-       this.loadEmployeeCurrentShift();
-    }
-    if (this.isManager) {
-      this.loadSuperAdminPendingSwaps();
-      this.loadEmployeeShiftSwaps();
-      this.loadEmployeeCurrentShift();
-    }
-
-    if (this.isEmployee) {
-      this.loadEmployeeShiftSwaps();
-      this.loadEmployeeCurrentShift();
-    }
+    this.loadSuperAdminPendingSwaps();
+    this.loadEmployeeShiftSwaps();
+    this.loadEmployeeCurrentShift();
 
 
     this.selectedShiftId = '';
@@ -119,29 +104,6 @@ export class ShiftComponent implements OnInit, OnDestroy {
 
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
-  }
-
-  get isSuperAdmin(): boolean {
-    return this.authService.hasRole('Super Admin');
-  }
-  get isManager(): boolean {
-    return this.authService.hasRole('Manager');
-  }
-
-  get isHRManager(): boolean {
-    return this.authService.hasRole('HR Manager');
-  }
-
-  get isAdminOrHR(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
-  }
-
-  get isEmployee(): boolean {
-    return this.authService.hasRole('Employee');
-  }
-
-  hasRole(role: string): boolean {
-    return this.authService.hasRole(role);
   }
 
   loadAllShifts(): void {
@@ -213,23 +175,6 @@ export class ShiftComponent implements OnInit, OnDestroy {
 
   private loadAllEmployees(): void {
     this.isLoading = true;
-
-    if (this.isManager && !this.isAdminOrHR) {
-      this.performanceService.getMyTeamEmployees()
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (res) => {
-            this.allEmployees = res?.success ? res.data : [];
-            this.isLoading = false;
-          },
-          error: () => {
-            this.notification.showError('Failed to load team employees');
-            this.allEmployees = [];
-            this.isLoading = false;
-          }
-        });
-      return;
-    }
 
     const searchRequest: EmployeeSearchRequest = {
       searchTerm: '',
@@ -510,7 +455,7 @@ rejectRequest(swap: PendingShiftSwap): void {
       autoFocus: false,
       panelClass: 'custom-dialog-container',
       data: {
-        isManager: this.isManager && !this.isAdminOrHR
+        isManager: false
       }
     });
 
@@ -530,9 +475,8 @@ rejectRequest(swap: PendingShiftSwap): void {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === 'swapped' && this.isEmployee) {
+      if (result === 'swapped') {
         this.loadEmployeeShiftSwaps();
-      } else if (result === 'swapped' && this.isAdminOrHR) {
         this.loadAllShifts();
       }
     });

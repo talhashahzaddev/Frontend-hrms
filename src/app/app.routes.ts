@@ -35,7 +35,7 @@ export const appRoutes: Routes = [
   {
     path: 'employee/dashboard',
     canActivate: [AuthGuard],
-    data: { roles: ['Employee','Manager'] },
+    //data: { roles: ['Employee','Manager'] },
     loadComponent: () =>
       import('./features/employee-dashboard/employee-dashboard.component').then(m => m.EmployeeDashboardComponent),
     pathMatch: 'full'
@@ -173,7 +173,6 @@ export const appRoutes: Routes = [
   {
     path: 'subscription',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
     loadComponent: () =>
       import('./features/subscription/subscription.component').then(m => m.SubscriptionComponent),
     title: 'Subscription Plans - HRMS'
@@ -181,7 +180,6 @@ export const appRoutes: Routes = [
   {
     path: 'subscription/checkout',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
     loadComponent: () =>
       import('./features/subscription/payment-checkout/payment-checkout.component').then(m => m.PaymentCheckoutComponent),
     title: 'Checkout - HRMS'
@@ -189,7 +187,6 @@ export const appRoutes: Routes = [
   {
     path: 'subscription/confirmation',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
     loadComponent: () =>
       import('./features/subscription/payment-confirmation/payment-confirmation.component').then(m => m.PaymentConfirmationComponent),
     title: 'Payment Confirmation - HRMS'
@@ -197,7 +194,6 @@ export const appRoutes: Routes = [
   {
     path: 'subscription/billing',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
     loadComponent: () =>
       import('./features/subscription/billing-history/billing-history.component').then(m => m.BillingHistoryComponent),
     title: 'Billing History - HRMS'

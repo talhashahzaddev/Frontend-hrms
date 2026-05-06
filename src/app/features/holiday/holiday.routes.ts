@@ -5,7 +5,6 @@ export const holidayRoutes: Routes = [
   {
     path: '',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () =>
       import('./components/holiday-management/holiday-management.component').then(m => m.HolidayManagementComponent),
     title: 'Holiday Management - HRMS'
