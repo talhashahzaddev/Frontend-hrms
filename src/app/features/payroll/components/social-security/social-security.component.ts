@@ -28,9 +28,34 @@ import {
   AddSocialSecurityBulkAssignDialogComponent,
   SocialSecurityBulkAssignDialogPayload
 } from '../dialogs/add-social-security-bulk-assign-dialog/add-social-security-bulk-assign-dialog.component';
+import {
+  AddSocialSecurityJurisdictionDialogComponent,
+  SocialSecurityJurisdictionDialogPayload
+} from '../dialogs/add-social-security-jurisdiction-dialog/add-social-security-jurisdiction-dialog.component';
+import {
+  AddSocialSecurityAuthorityDialogComponent,
+  SocialSecurityAuthorityDialogPayload
+} from '../dialogs/add-social-security-authority-dialog/add-social-security-authority-dialog.component';
+import {
+  AddSocialSecuritySchemeDialogComponent,
+  SocialSecuritySchemeDialogPayload
+} from '../dialogs/add-social-security-scheme-dialog/add-social-security-scheme-dialog.component';
+import {
+  AddSocialSecurityRuleDialogComponent,
+  SocialSecurityRuleDialogPayload
+} from '../dialogs/add-social-security-rule-dialog/add-social-security-rule-dialog.component';
+import {
+  SocialSecurityAdminActionDialogComponent,
+  SocialSecurityAdminActionDialogData,
+  SocialSecurityAdminActionResult
+} from '../dialogs/social-security-admin-action-dialog/social-security-admin-action-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
+import {
+  SocialSecurityClaim,
+  SocialSecurityEnrollmentRequest
+} from '../../services/payroll.service';
 
-type SocialTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules' | 'transactions';
+type SocialTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules' | 'requests' | 'transactions' | 'claims';
 
 interface SocialTransactionRow {
   id: string;
@@ -76,48 +101,6 @@ export class SocialSecurityComponent implements OnInit {
   schemes: SocialSecuritySchemeOption[] = [];
   rules: SocialSecurityRuleOption[] = [];
 
-  editingJurisdictionId: string | null = null;
-  editingAuthorityId: string | null = null;
-  editingSchemeId: string | null = null;
-  editingRuleId: string | null = null;
-
-  jurisdictionForm = {
-    jurisdictionCode: '',
-    jurisdictionName: '',
-    countryCode: '',
-    currency: '',
-    isDefault: false
-  };
-
-  authorityForm = {
-    jurisdictionId: '',
-    authorityCode: '',
-    authorityName: '',
-    portalUrl: '',
-    remittanceFrequency: ''
-  };
-
-  schemeForm = {
-    jurisdictionId: '',
-    authorityId: '',
-    schemeCode: '',
-    schemeName: '',
-    schemeType: '',
-    mandatoryMode: ''
-  };
-
-  ruleForm = {
-    schemeId: '',
-    ruleName: '',
-    contributionBasis: 'gross',
-    employeeDefaultPct: 0,
-    employerDefaultPct: 0,
-    employeeFixedAmount: null as number | null,
-    employerFixedAmount: null as number | null,
-    minSalaryLimit: null as number | null,
-    maxSalaryLimit: null as number | null
-  };
-
   transactionRows: SocialTransactionRow[] = [];
   transactionTotalRecords = 0;
   transactionCurrentPage = 1;
@@ -138,6 +121,24 @@ export class SocialSecurityComponent implements OnInit {
   configOptions: SocialSecurityTransactionConfigOption[] = [];
   ruleOptions: SocialSecurityTransactionRuleOption[] = [];
 
+  // Admin: enrollment requests
+  enrollmentRequests: SocialSecurityEnrollmentRequest[] = [];
+  enrollmentRequestsTotal = 0;
+  enrollmentRequestsPage = 1;
+  readonly enrollmentRequestsPageSize = 10;
+  enrollmentRequestsLoading = false;
+  enrollmentRequestStatusFilter = '';
+  enrollmentRequestTypeFilter = '';
+
+  // Admin: claims
+  benefitClaims: SocialSecurityClaim[] = [];
+  benefitClaimsTotal = 0;
+  benefitClaimsPage = 1;
+  readonly benefitClaimsPageSize = 10;
+  benefitClaimsLoading = false;
+  benefitClaimStatusFilter = '';
+  benefitClaimTypeFilter = '';
+
   ngOnInit(): void {
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
@@ -151,6 +152,8 @@ export class SocialSecurityComponent implements OnInit {
     this.loadSocialMasterData();
     this.loadConfigOptions();
     this.loadSocialTransactions();
+    this.loadEnrollmentRequests();
+    this.loadBenefitClaims();
   }
 
   get showPoliciesBackButton(): boolean {
@@ -213,299 +216,341 @@ export class SocialSecurityComponent implements OnInit {
     return this.schemes.find((item) => item.schemeId === schemeId)?.schemeName ?? '-';
   }
 
-  saveJurisdiction(): void {
-    const payload = {
-      jurisdictionCode: this.jurisdictionForm.jurisdictionCode.trim(),
-      jurisdictionName: this.jurisdictionForm.jurisdictionName.trim(),
-      countryCode: this.asNullableString(this.jurisdictionForm.countryCode),
-      currency: this.asNullableString(this.jurisdictionForm.currency),
-      isDefault: !!this.jurisdictionForm.isDefault
-    };
+  openCreateJurisdictionDialog(): void {
+    this.openJurisdictionDialog('create');
+  }
 
-    if (!payload.jurisdictionCode || !payload.jurisdictionName) {
-      this.notification.showError('Jurisdiction code and name are required.');
-      return;
-    }
+  openEditJurisdictionDialog(item: SocialSecurityJurisdictionOption): void {
+    this.openJurisdictionDialog('edit', item);
+  }
 
-    const request$ = this.editingJurisdictionId
-      ? this.payrollService.updateSocialSecurityJurisdiction(this.editingJurisdictionId, payload)
-      : this.payrollService.createSocialSecurityJurisdiction(payload);
-
-    request$.pipe(take(1)).subscribe({
-      next: () => {
-        this.notification.showSuccess(`Jurisdiction ${this.editingJurisdictionId ? 'updated' : 'created'} successfully.`);
-        this.cancelJurisdictionEdit();
-        this.loadSocialMasterData();
-      },
-      error: (error) => {
-        this.notification.showError(this.resolveErrorMessage(error, `Failed to ${this.editingJurisdictionId ? 'update' : 'create'} jurisdiction.`));
+  private openJurisdictionDialog(mode: 'create' | 'edit', item?: SocialSecurityJurisdictionOption): void {
+    const dialogRef = this.dialog.open(AddSocialSecurityJurisdictionDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        mode,
+        initialValue: item
+          ? {
+              jurisdictionCode: String(item.jurisdictionCode ?? ''),
+              jurisdictionName: String(item.jurisdictionName ?? ''),
+              countryCode: String(item.countryCode ?? ''),
+              currency: String(item.currency ?? ''),
+              isDefault: !!item.isDefault
+            }
+          : undefined
       }
     });
-  }
 
-  editJurisdiction(item: SocialSecurityJurisdictionOption): void {
-    this.editingJurisdictionId = item.jurisdictionId;
-    this.jurisdictionForm = {
-      jurisdictionCode: String(item.jurisdictionCode ?? ''),
-      jurisdictionName: String(item.jurisdictionName ?? ''),
-      countryCode: String(item.countryCode ?? ''),
-      currency: String(item.currency ?? ''),
-      isDefault: !!item.isDefault
-    };
-  }
+    dialogRef.afterClosed().subscribe((payload: SocialSecurityJurisdictionDialogPayload | undefined) => {
+      if (!payload) {
+        return;
+      }
 
-  cancelJurisdictionEdit(): void {
-    this.editingJurisdictionId = null;
-    this.jurisdictionForm = {
-      jurisdictionCode: '',
-      jurisdictionName: '',
-      countryCode: '',
-      currency: '',
-      isDefault: false
-    };
+      const request$ = mode === 'edit' && item
+        ? this.payrollService.updateSocialSecurityJurisdiction(item.jurisdictionId, payload)
+        : this.payrollService.createSocialSecurityJurisdiction(payload);
+
+      request$.pipe(take(1)).subscribe({
+        next: () => {
+          this.notification.showSuccess(`Jurisdiction ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
+          this.loadSocialMasterData();
+        },
+        error: (error) => {
+          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} jurisdiction.`));
+        }
+      });
+    });
   }
 
   deleteJurisdiction(item: SocialSecurityJurisdictionOption): void {
-    if (!window.confirm(`Delete jurisdiction ${item.jurisdictionName}?`)) {
-      return;
-    }
-
-    this.payrollService.deleteSocialSecurityJurisdiction(item.jurisdictionId)
-      .pipe(take(1))
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Jurisdiction deleted successfully.');
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete jurisdiction.'));
-        }
-      });
-  }
-
-  saveAuthority(): void {
-    const payload = {
-      jurisdictionId: this.authorityForm.jurisdictionId,
-      authorityCode: this.authorityForm.authorityCode.trim(),
-      authorityName: this.authorityForm.authorityName.trim(),
-      portalUrl: this.asNullableString(this.authorityForm.portalUrl),
-      remittanceFrequency: this.asNullableString(this.authorityForm.remittanceFrequency)
-    };
-
-    if (!payload.jurisdictionId || !payload.authorityCode || !payload.authorityName) {
-      this.notification.showError('Jurisdiction, authority code, and authority name are required.');
-      return;
-    }
-
-    const request$ = this.editingAuthorityId
-      ? this.payrollService.updateSocialSecurityAuthority(this.editingAuthorityId, payload)
-      : this.payrollService.createSocialSecurityAuthority(payload);
-
-    request$.pipe(take(1)).subscribe({
-      next: () => {
-        this.notification.showSuccess(`Authority ${this.editingAuthorityId ? 'updated' : 'created'} successfully.`);
-        this.cancelAuthorityEdit();
-        this.loadSocialMasterData();
-      },
-      error: (error) => {
-        this.notification.showError(this.resolveErrorMessage(error, `Failed to ${this.editingAuthorityId ? 'update' : 'create'} authority.`));
+    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
+      width: '420px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Delete jurisdiction',
+        message: `Delete jurisdiction ${item.jurisdictionName}? This action cannot be undone.`,
+        confirmText: 'Delete jurisdiction'
       }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.payrollService.deleteSocialSecurityJurisdiction(item.jurisdictionId)
+        .pipe(take(1))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Jurisdiction deleted successfully.');
+            this.loadSocialMasterData();
+          },
+          error: (error) => {
+            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete jurisdiction.'));
+          }
+        });
     });
   }
 
-  editAuthority(item: SocialSecurityAuthorityOption): void {
-    this.editingAuthorityId = item.authorityId;
-    this.authorityForm = {
-      jurisdictionId: String(item.jurisdictionId ?? ''),
-      authorityCode: String(item.authorityCode ?? ''),
-      authorityName: String(item.authorityName ?? ''),
-      portalUrl: String(item.portalUrl ?? ''),
-      remittanceFrequency: String(item.remittanceFrequency ?? '')
-    };
+  openCreateAuthorityDialog(): void {
+    this.openAuthorityDialog('create');
   }
 
-  cancelAuthorityEdit(): void {
-    this.editingAuthorityId = null;
-    this.authorityForm = {
-      jurisdictionId: '',
-      authorityCode: '',
-      authorityName: '',
-      portalUrl: '',
-      remittanceFrequency: ''
-    };
+  openEditAuthorityDialog(item: SocialSecurityAuthorityOption): void {
+    this.openAuthorityDialog('edit', item);
+  }
+
+  private openAuthorityDialog(mode: 'create' | 'edit', item?: SocialSecurityAuthorityOption): void {
+    const dialogRef = this.dialog.open(AddSocialSecurityAuthorityDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        mode,
+        jurisdictions: this.jurisdictions,
+        initialValue: item
+          ? {
+              jurisdictionId: String(item.jurisdictionId ?? ''),
+              authorityCode: String(item.authorityCode ?? ''),
+              authorityName: String(item.authorityName ?? ''),
+              portalUrl: String(item.portalUrl ?? ''),
+              remittanceFrequency: String(item.remittanceFrequency ?? '')
+            }
+          : undefined
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((payload: SocialSecurityAuthorityDialogPayload | undefined) => {
+      if (!payload) {
+        return;
+      }
+
+      const request$ = mode === 'edit' && item
+        ? this.payrollService.updateSocialSecurityAuthority(item.authorityId, payload)
+        : this.payrollService.createSocialSecurityAuthority(payload);
+
+      request$.pipe(take(1)).subscribe({
+        next: () => {
+          this.notification.showSuccess(`Authority ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
+          this.loadSocialMasterData();
+        },
+        error: (error) => {
+          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} authority.`));
+        }
+      });
+    });
   }
 
   deleteAuthority(item: SocialSecurityAuthorityOption): void {
-    if (!window.confirm(`Delete authority ${item.authorityName}?`)) {
-      return;
-    }
-
-    this.payrollService.deleteSocialSecurityAuthority(item.authorityId)
-      .pipe(take(1))
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Authority deleted successfully.');
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete authority.'));
-        }
-      });
-  }
-
-  saveScheme(): void {
-    const payload = {
-      jurisdictionId: this.schemeForm.jurisdictionId,
-      authorityId: this.asNullableString(this.schemeForm.authorityId),
-      schemeCode: this.schemeForm.schemeCode.trim(),
-      schemeName: this.schemeForm.schemeName.trim(),
-      schemeType: this.asNullableString(this.schemeForm.schemeType),
-      mandatoryMode: this.asNullableString(this.schemeForm.mandatoryMode)
-    };
-
-    if (!payload.jurisdictionId || !payload.schemeCode || !payload.schemeName) {
-      this.notification.showError('Jurisdiction, scheme code, and scheme name are required.');
-      return;
-    }
-
-    const request$ = this.editingSchemeId
-      ? this.payrollService.updateSocialSecurityScheme(this.editingSchemeId, payload)
-      : this.payrollService.createSocialSecurityScheme(payload);
-
-    request$.pipe(take(1)).subscribe({
-      next: () => {
-        this.notification.showSuccess(`Scheme ${this.editingSchemeId ? 'updated' : 'created'} successfully.`);
-        this.cancelSchemeEdit();
-        this.loadSocialMasterData();
-      },
-      error: (error) => {
-        this.notification.showError(this.resolveErrorMessage(error, `Failed to ${this.editingSchemeId ? 'update' : 'create'} scheme.`));
+    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
+      width: '420px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Delete authority',
+        message: `Delete authority ${item.authorityName}? This action cannot be undone.`,
+        confirmText: 'Delete authority'
       }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.payrollService.deleteSocialSecurityAuthority(item.authorityId)
+        .pipe(take(1))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Authority deleted successfully.');
+            this.loadSocialMasterData();
+          },
+          error: (error) => {
+            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete authority.'));
+          }
+        });
     });
   }
 
-  editScheme(item: SocialSecuritySchemeOption): void {
-    this.editingSchemeId = item.schemeId;
-    this.schemeForm = {
-      jurisdictionId: String(item.jurisdictionId ?? ''),
-      authorityId: String(item.authorityId ?? ''),
-      schemeCode: String(item.schemeCode ?? ''),
-      schemeName: String(item.schemeName ?? ''),
-      schemeType: String(item.schemeType ?? ''),
-      mandatoryMode: String(item.mandatoryMode ?? '')
-    };
+  openCreateSchemeDialog(): void {
+    this.openSchemeDialog('create');
   }
 
-  cancelSchemeEdit(): void {
-    this.editingSchemeId = null;
-    this.schemeForm = {
-      jurisdictionId: '',
-      authorityId: '',
-      schemeCode: '',
-      schemeName: '',
-      schemeType: '',
-      mandatoryMode: ''
-    };
+  openEditSchemeDialog(item: SocialSecuritySchemeOption): void {
+    this.openSchemeDialog('edit', item);
+  }
+
+  private openSchemeDialog(mode: 'create' | 'edit', item?: SocialSecuritySchemeOption): void {
+    const dialogRef = this.dialog.open(AddSocialSecuritySchemeDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        mode,
+        jurisdictions: this.jurisdictions,
+        authorities: this.authorities,
+        initialValue: item
+          ? {
+              jurisdictionId: String(item.jurisdictionId ?? ''),
+              authorityId: String(item.authorityId ?? ''),
+              schemeCode: String(item.schemeCode ?? ''),
+              schemeName: String(item.schemeName ?? ''),
+              schemeType: String(item.schemeType ?? ''),
+              mandatoryMode: String(item.mandatoryMode ?? '')
+            }
+          : undefined
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((payload: SocialSecuritySchemeDialogPayload | undefined) => {
+      if (!payload) {
+        return;
+      }
+
+      const request$ = mode === 'edit' && item
+        ? this.payrollService.updateSocialSecurityScheme(item.schemeId, payload)
+        : this.payrollService.createSocialSecurityScheme(payload);
+
+      request$.pipe(take(1)).subscribe({
+        next: () => {
+          this.notification.showSuccess(`Scheme ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
+          this.loadSocialMasterData();
+        },
+        error: (error) => {
+          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} scheme.`));
+        }
+      });
+    });
   }
 
   deleteScheme(item: SocialSecuritySchemeOption): void {
-    if (!window.confirm(`Delete scheme ${item.schemeName}?`)) {
-      return;
-    }
-
-    this.payrollService.deleteSocialSecurityScheme(item.schemeId)
-      .pipe(take(1))
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Scheme deleted successfully.');
-          this.loadSocialMasterData();
-        },
-        error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete scheme.'));
-        }
-      });
-  }
-
-  saveRule(): void {
-    const payload = {
-      schemeId: this.ruleForm.schemeId,
-      ruleName: this.ruleForm.ruleName.trim(),
-      contributionBasis: this.ruleForm.contributionBasis,
-      employeeDefaultPct: Number(this.ruleForm.employeeDefaultPct ?? 0),
-      employerDefaultPct: Number(this.ruleForm.employerDefaultPct ?? 0),
-      employeeFixedAmount: this.asNullableNumber(this.ruleForm.employeeFixedAmount),
-      employerFixedAmount: this.asNullableNumber(this.ruleForm.employerFixedAmount),
-      minSalaryLimit: this.asNullableNumber(this.ruleForm.minSalaryLimit),
-      maxSalaryLimit: this.asNullableNumber(this.ruleForm.maxSalaryLimit)
-    };
-
-    if (!payload.schemeId || !payload.ruleName) {
-      this.notification.showError('Scheme and rule name are required.');
-      return;
-    }
-
-    const request$ = this.editingRuleId
-      ? this.payrollService.updateSocialSecurityRule(this.editingRuleId, payload)
-      : this.payrollService.createSocialSecurityRule(payload);
-
-    request$.pipe(take(1)).subscribe({
-      next: () => {
-        this.notification.showSuccess(`Rule ${this.editingRuleId ? 'updated' : 'created'} successfully.`);
-        this.cancelRuleEdit();
-        this.loadSocialMasterData();
-      },
-      error: (error) => {
-        this.notification.showError(this.resolveErrorMessage(error, `Failed to ${this.editingRuleId ? 'update' : 'create'} rule.`));
+    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
+      width: '420px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Delete scheme',
+        message: `Delete scheme ${item.schemeName}? This action cannot be undone.`,
+        confirmText: 'Delete scheme'
       }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.payrollService.deleteSocialSecurityScheme(item.schemeId)
+        .pipe(take(1))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Scheme deleted successfully.');
+            this.loadSocialMasterData();
+          },
+          error: (error) => {
+            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete scheme.'));
+          }
+        });
     });
   }
 
-  editRule(item: SocialSecurityRuleOption): void {
-    this.editingRuleId = item.ruleId;
-    this.ruleForm = {
-      schemeId: String(item.schemeId ?? ''),
-      ruleName: String(item.ruleName ?? ''),
-      contributionBasis: String(item.contributionBasis ?? 'gross'),
-      employeeDefaultPct: Number(item.employeeDefaultPct ?? 0),
-      employerDefaultPct: Number(item.employerDefaultPct ?? 0),
-      employeeFixedAmount: item.employeeFixedAmount == null ? null : Number(item.employeeFixedAmount),
-      employerFixedAmount: item.employerFixedAmount == null ? null : Number(item.employerFixedAmount),
-      minSalaryLimit: item.minSalaryLimit == null ? null : Number(item.minSalaryLimit),
-      maxSalaryLimit: item.maxSalaryLimit == null ? null : Number(item.maxSalaryLimit)
-    };
+  openCreateRuleDialog(): void {
+    this.openRuleDialog('create');
   }
 
-  cancelRuleEdit(): void {
-    this.editingRuleId = null;
-    this.ruleForm = {
-      schemeId: '',
-      ruleName: '',
-      contributionBasis: 'gross',
-      employeeDefaultPct: 0,
-      employerDefaultPct: 0,
-      employeeFixedAmount: null,
-      employerFixedAmount: null,
-      minSalaryLimit: null,
-      maxSalaryLimit: null
-    };
+  openEditRuleDialog(item: SocialSecurityRuleOption): void {
+    this.openRuleDialog('edit', item);
   }
 
-  deleteRule(item: SocialSecurityRuleOption): void {
-    if (!window.confirm(`Delete rule ${item.ruleName}?`)) {
-      return;
-    }
+  private openRuleDialog(mode: 'create' | 'edit', item?: SocialSecurityRuleOption): void {
+    const dialogRef = this.dialog.open(AddSocialSecurityRuleDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        mode,
+        schemes: this.schemes,
+        initialValue: item
+          ? {
+              schemeId: String(item.schemeId ?? ''),
+              ruleName: String(item.ruleName ?? ''),
+              contributionBasis: String(item.contributionBasis ?? 'gross'),
+              employeeDefaultPct: Number(item.employeeDefaultPct ?? 0),
+              employerDefaultPct: Number(item.employerDefaultPct ?? 0),
+              employeeFixedAmount: item.employeeFixedAmount == null ? null : Number(item.employeeFixedAmount),
+              employerFixedAmount: item.employerFixedAmount == null ? null : Number(item.employerFixedAmount),
+              minSalaryLimit: item.minSalaryLimit == null ? null : Number(item.minSalaryLimit),
+              maxSalaryLimit: item.maxSalaryLimit == null ? null : Number(item.maxSalaryLimit)
+            }
+          : undefined
+      }
+    });
 
-    this.payrollService.deleteSocialSecurityRule(item.ruleId)
-      .pipe(take(1))
-      .subscribe({
+    dialogRef.afterClosed().subscribe((payload: SocialSecurityRuleDialogPayload | undefined) => {
+      if (!payload) {
+        return;
+      }
+
+      const request$ = mode === 'edit' && item
+        ? this.payrollService.updateSocialSecurityRule(item.ruleId, payload)
+        : this.payrollService.createSocialSecurityRule(payload);
+
+      request$.pipe(take(1)).subscribe({
         next: () => {
-          this.notification.showSuccess('Rule deleted successfully.');
+          this.notification.showSuccess(`Rule ${mode === 'edit' ? 'updated' : 'created'} successfully.`);
           this.loadSocialMasterData();
         },
         error: (error) => {
-          this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete rule.'));
+          this.notification.showError(this.resolveErrorMessage(error, `Failed to ${mode === 'edit' ? 'update' : 'create'} rule.`));
         }
       });
+    });
+  }
+
+  deleteRule(item: SocialSecurityRuleOption): void {
+    const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
+      width: '420px',
+      panelClass: 'delete-dialog-panel',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        title: 'Delete rule',
+        message: `Delete rule ${item.ruleName}? This action cannot be undone.`,
+        confirmText: 'Delete rule'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean | undefined) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.payrollService.deleteSocialSecurityRule(item.ruleId)
+        .pipe(take(1))
+        .subscribe({
+          next: () => {
+            this.notification.showSuccess('Rule deleted successfully.');
+            this.loadSocialMasterData();
+          },
+          error: (error) => {
+            this.notification.showError(this.resolveErrorMessage(error, 'Failed to delete rule.'));
+          }
+        });
+    });
   }
 
   hasPendingTransactionFilters(): boolean {
@@ -895,19 +940,6 @@ export class SocialSecurityComponent implements OnInit {
     };
   }
 
-  private asNullableString(value: string | null | undefined): string | null {
-    const parsed = String(value ?? '').trim();
-    return parsed ? parsed : null;
-  }
-
-  private asNullableNumber(value: number | null | undefined): number | null {
-    if (value == null || Number.isNaN(Number(value))) {
-      return null;
-    }
-
-    return Number(value);
-  }
-
   private extractItems(result: any): any[] {
     if (Array.isArray(result)) {
       return result;
@@ -970,5 +1002,205 @@ export class SocialSecurityComponent implements OnInit {
   private resolveErrorMessage(error: any, fallback: string): string {
     const message = error?.error?.message ?? error?.message;
     return typeof message === 'string' && message.trim() ? message : fallback;
+  }
+
+  // ── Enrollment requests (admin) ──────────────────────────────────────────
+
+  loadEnrollmentRequests(): void {
+    this.enrollmentRequestsLoading = true;
+    const params: any = { page: this.enrollmentRequestsPage, pageSize: this.enrollmentRequestsPageSize };
+    if (this.enrollmentRequestStatusFilter) params.requestStatus = this.enrollmentRequestStatusFilter;
+    if (this.enrollmentRequestTypeFilter) params.requestType = this.enrollmentRequestTypeFilter;
+
+    this.payrollService.getSocialSecurityEnrollmentRequests(params).pipe(take(1)).subscribe({
+      next: (result: any) => {
+        this.enrollmentRequests = this.extractItems(result) as SocialSecurityEnrollmentRequest[];
+        this.enrollmentRequestsTotal = this.extractTotalCount(result, this.enrollmentRequests.length);
+        this.enrollmentRequestsLoading = false;
+      },
+      error: (err) => {
+        this.enrollmentRequests = [];
+        this.enrollmentRequestsTotal = 0;
+        this.enrollmentRequestsLoading = false;
+        this.notification.showError(this.resolveErrorMessage(err, 'Failed to load enrollment requests.'));
+      }
+    });
+  }
+
+  applyEnrollmentRequestFilters(): void {
+    this.enrollmentRequestsPage = 1;
+    this.loadEnrollmentRequests();
+  }
+
+  approveEnrollmentRequest(req: SocialSecurityEnrollmentRequest): void {
+    const data: SocialSecurityAdminActionDialogData = {
+      mode: 'approve-request',
+      subject: `${req.employeeName} — ${req.requestType}`,
+      defaultEmployeePct: req.requestedEmployeePct ?? null,
+      defaultEmployerPct: req.requestedEmployerPct ?? null,
+      defaultSalaryCap: req.requestedSalaryCap ?? null,
+      defaultEffectiveDate: req.requestedEffectiveDate ? String(req.requestedEffectiveDate).slice(0, 10) : null
+    };
+
+    const ref = this.dialog.open(SocialSecurityAdminActionDialogComponent, {
+      width: '560px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+
+    ref.afterClosed().subscribe((result: SocialSecurityAdminActionResult | undefined) => {
+      if (!result) return;
+      this.payrollService.approveSocialSecurityEnrollmentRequest(req.requestId, {
+        remarks: result.remarks ?? null,
+        overrideEmployeePct: result.overrideEmployeePct ?? null,
+        overrideEmployerPct: result.overrideEmployerPct ?? null,
+        overrideSalaryCap: result.overrideSalaryCap ?? null,
+        effectiveDate: result.effectiveDate ?? null
+      }).subscribe({
+        next: () => {
+          this.notification.showSuccess('Enrollment request approved.');
+          this.loadEnrollmentRequests();
+        },
+        error: (err) => this.notification.showError(this.resolveErrorMessage(err, 'Failed to approve request.'))
+      });
+    });
+  }
+
+  rejectEnrollmentRequest(req: SocialSecurityEnrollmentRequest): void {
+    const data: SocialSecurityAdminActionDialogData = {
+      mode: 'reject-request',
+      subject: `${req.employeeName} — ${req.requestType}`
+    };
+
+    const ref = this.dialog.open(SocialSecurityAdminActionDialogComponent, {
+      width: '480px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+
+    ref.afterClosed().subscribe((result: SocialSecurityAdminActionResult | undefined) => {
+      if (!result) return;
+      this.payrollService.rejectSocialSecurityEnrollmentRequest(req.requestId, {
+        rejectionReason: result.rejectionReason ?? null
+      }).subscribe({
+        next: () => {
+          this.notification.showSuccess('Enrollment request rejected.');
+          this.loadEnrollmentRequests();
+        },
+        error: (err) => this.notification.showError(this.resolveErrorMessage(err, 'Failed to reject request.'))
+      });
+    });
+  }
+
+  // ── Benefit claims (admin) ───────────────────────────────────────────────
+
+  loadBenefitClaims(): void {
+    this.benefitClaimsLoading = true;
+    const params: any = { page: this.benefitClaimsPage, pageSize: this.benefitClaimsPageSize };
+    if (this.benefitClaimStatusFilter) params.claimStatus = this.benefitClaimStatusFilter;
+    if (this.benefitClaimTypeFilter) params.claimType = this.benefitClaimTypeFilter;
+
+    this.payrollService.getSocialSecurityClaims(params).pipe(take(1)).subscribe({
+      next: (result: any) => {
+        this.benefitClaims = this.extractItems(result) as SocialSecurityClaim[];
+        this.benefitClaimsTotal = this.extractTotalCount(result, this.benefitClaims.length);
+        this.benefitClaimsLoading = false;
+      },
+      error: (err) => {
+        this.benefitClaims = [];
+        this.benefitClaimsTotal = 0;
+        this.benefitClaimsLoading = false;
+        this.notification.showError(this.resolveErrorMessage(err, 'Failed to load benefit claims.'));
+      }
+    });
+  }
+
+  applyClaimFilters(): void {
+    this.benefitClaimsPage = 1;
+    this.loadBenefitClaims();
+  }
+
+  approveBenefitClaim(claim: SocialSecurityClaim): void {
+    const data: SocialSecurityAdminActionDialogData = {
+      mode: 'approve-claim',
+      subject: `${claim.employeeName} — ${claim.claimType}`,
+      claimedAmount: claim.claimedAmount ?? 0
+    };
+
+    const ref = this.dialog.open(SocialSecurityAdminActionDialogComponent, {
+      width: '560px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+
+    ref.afterClosed().subscribe((result: SocialSecurityAdminActionResult | undefined) => {
+      if (!result) return;
+      this.payrollService.approveSocialSecurityClaim(claim.claimId, {
+        approvedAmount: Number(result.approvedAmount ?? 0),
+        decisionNotes: result.remarks ?? null
+      }).subscribe({
+        next: () => {
+          this.notification.showSuccess('Claim approved.');
+          this.loadBenefitClaims();
+        },
+        error: (err) => this.notification.showError(this.resolveErrorMessage(err, 'Failed to approve claim.'))
+      });
+    });
+  }
+
+  rejectBenefitClaim(claim: SocialSecurityClaim): void {
+    const data: SocialSecurityAdminActionDialogData = {
+      mode: 'reject-claim',
+      subject: `${claim.employeeName} — ${claim.claimType}`
+    };
+
+    const ref = this.dialog.open(SocialSecurityAdminActionDialogComponent, {
+      width: '480px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+
+    ref.afterClosed().subscribe((result: SocialSecurityAdminActionResult | undefined) => {
+      if (!result) return;
+      this.payrollService.rejectSocialSecurityClaim(claim.claimId, {
+        rejectionReason: result.rejectionReason ?? null
+      }).subscribe({
+        next: () => {
+          this.notification.showSuccess('Claim rejected.');
+          this.loadBenefitClaims();
+        },
+        error: (err) => this.notification.showError(this.resolveErrorMessage(err, 'Failed to reject claim.'))
+      });
+    });
+  }
+
+  markBenefitClaimPaid(claim: SocialSecurityClaim): void {
+    const data: SocialSecurityAdminActionDialogData = {
+      mode: 'mark-claim-paid',
+      subject: `${claim.employeeName} — ${claim.claimType}`,
+      approvedAmount: claim.approvedAmount ?? claim.claimedAmount ?? 0
+    };
+
+    const ref = this.dialog.open(SocialSecurityAdminActionDialogComponent, {
+      width: '560px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+
+    ref.afterClosed().subscribe((result: SocialSecurityAdminActionResult | undefined) => {
+      if (!result) return;
+      this.payrollService.markSocialSecurityClaimPaid(claim.claimId, {
+        paidAmount: Number(result.paidAmount ?? 0),
+        paymentDate: String(result.paymentDate ?? new Date().toISOString().slice(0, 10)),
+        paymentReference: result.paymentReference ?? null,
+        authorityReference: result.authorityReference ?? null
+      }).subscribe({
+        next: () => {
+          this.notification.showSuccess('Claim marked as paid.');
+          this.loadBenefitClaims();
+        },
+        error: (err) => this.notification.showError(this.resolveErrorMessage(err, 'Failed to mark claim paid.'))
+      });
+    });
   }
 }

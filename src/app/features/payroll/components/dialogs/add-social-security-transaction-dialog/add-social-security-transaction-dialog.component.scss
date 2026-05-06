@@ -225,6 +225,117 @@
     line-height: 1.3;
   }
 
+  textarea {
+    width: 100%;
+    min-height: 5rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.7rem;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.75rem;
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+  }
+
+  .attachments {
+    .upload-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      border: 1px dashed #cbd5e1;
+      border-radius: 0.7rem;
+      padding: 0.85rem 0.95rem;
+      cursor: pointer;
+      color: #475569;
+      background: #f8fafc;
+      transition: all 0.18s ease;
+
+      mat-icon {
+        color: #1d4ed8;
+      }
+
+      &:hover {
+        border-color: #1d4ed8;
+        background: #eff6ff;
+      }
+    }
+
+    .attachment-list {
+      list-style: none;
+      margin: 0.4rem 0 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.6rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.55rem;
+        background: #ffffff;
+        font-size: 0.82rem;
+
+        mat-icon {
+          color: #64748b;
+          font-size: 1.05rem;
+          width: 1.05rem;
+          height: 1.05rem;
+        }
+
+        .name {
+          flex: 1 1 auto;
+          color: #0f172a;
+          font-weight: 600;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .status {
+          font-size: 0.7rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          padding: 0.15rem 0.45rem;
+          border-radius: 999px;
+
+          &.uploading { background: #fef3c7; color: #92400e; }
+          &.uploaded  { background: #dcfce7; color: #166534; }
+          &.error     { background: #fee2e2; color: #991b1b; }
+        }
+
+        .remove-btn {
+          border: none;
+          background: transparent;
+          color: #64748b;
+          cursor: pointer;
+          width: 1.6rem;
+          height: 1.6rem;
+          display: grid;
+          place-items: center;
+          border-radius: 999px;
+
+          &:hover {
+            background: #f1f5f9;
+            color: #b91c1c;
+          }
+        }
+      }
+    }
+  }
+
   .dialog-actions {
     margin-top: 1rem;
     padding-top: 1rem;

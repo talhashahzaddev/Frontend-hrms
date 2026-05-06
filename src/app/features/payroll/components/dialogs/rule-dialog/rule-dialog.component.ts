@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import {
   PayrollService,
   SocialSecurityAuthorityOption,
@@ -82,7 +84,9 @@ export interface RuleDialogData {
     MatIconModule,
     MatSelectModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './rule-dialog.component.html',
   styleUrls: ['./rule-dialog.component.scss']
@@ -174,8 +178,8 @@ export class RuleDialogComponent implements OnInit {
     socialMinSalaryLimit: [null as number | null],
     socialMaxSalaryLimit: [null as number | null],
     socialAnnualSalaryCap: [null as number | null],
-    socialEffectiveFrom: [''],
-    socialEffectiveTo: ['']
+    socialEffectiveFrom: [null as Date | null],
+    socialEffectiveTo: [null as Date | null]
   }, {
     validators: [this.socialSecurityDateRangeValidator()]
   });
@@ -339,8 +343,8 @@ export class RuleDialogComponent implements OnInit {
           socialMinSalaryLimit: rule.minSalaryLimit ?? null,
           socialMaxSalaryLimit: rule.maxSalaryLimit ?? null,
           socialAnnualSalaryCap: rule.annualSalaryCap ?? null,
-          socialEffectiveFrom: rule.effectiveFrom ? String(rule.effectiveFrom).slice(0, 10) : '',
-          socialEffectiveTo: rule.effectiveTo ? String(rule.effectiveTo).slice(0, 10) : ''
+          socialEffectiveFrom: rule.effectiveFrom ? new Date(String(rule.effectiveFrom)) : null,
+          socialEffectiveTo: rule.effectiveTo ? new Date(String(rule.effectiveTo)) : null
         });
 
         this.syncSocialHierarchyFromScheme(String(rule.schemeId ?? ''));
@@ -1167,8 +1171,8 @@ export class RuleDialogComponent implements OnInit {
         minSalaryLimit: formValue.socialMinSalaryLimit == null ? null : Number(formValue.socialMinSalaryLimit),
         maxSalaryLimit: formValue.socialMaxSalaryLimit == null ? null : Number(formValue.socialMaxSalaryLimit),
         annualSalaryCap: formValue.socialAnnualSalaryCap == null ? null : Number(formValue.socialAnnualSalaryCap),
-        effectiveFrom: formValue.socialEffectiveFrom ? String(formValue.socialEffectiveFrom) : null,
-        effectiveTo: formValue.socialEffectiveTo ? String(formValue.socialEffectiveTo) : null,
+        effectiveFrom: this.toIsoDate(formValue.socialEffectiveFrom),
+        effectiveTo: this.toIsoDate(formValue.socialEffectiveTo),
         isActive: this.isEditMode ? (this.data?.rule as any)?.isActive ?? true : true
       };
 
@@ -1240,14 +1244,38 @@ export class RuleDialogComponent implements OnInit {
         return null;
       }
 
-      const effectiveFrom = String(group.get('socialEffectiveFrom')?.value ?? '');
-      const effectiveTo = String(group.get('socialEffectiveTo')?.value ?? '');
+      const fromValue = group.get('socialEffectiveFrom')?.value;
+      const toValue = group.get('socialEffectiveTo')?.value;
+      const fromDate = this.coerceDate(fromValue);
+      const toDate = this.coerceDate(toValue);
 
-      if (effectiveFrom && effectiveTo && effectiveTo < effectiveFrom) {
+      if (fromDate && toDate && toDate.getTime() < fromDate.getTime()) {
         return { socialInvalidDateRange: true };
       }
 
       return null;
     };
+  }
+
+  private coerceDate(value: unknown): Date | null {
+    if (!value) {
+      return null;
+    }
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+    const parsed = new Date(String(value));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private toIsoDate(value: unknown): string | null {
+    const date = this.coerceDate(value);
+    if (!date) {
+      return null;
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -1,0 +1,42 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field">
+        <span>Jurisdiction code</span>
+        <input type="text" formControlName="jurisdictionCode" placeholder="PK-SD" />
+      </label>
+
+      <label class="field">
+        <span>Jurisdiction name</span>
+        <input type="text" formControlName="jurisdictionName" placeholder="Sindh" />
+      </label>
+
+      <label class="field">
+        <span>Country code</span>
+        <input type="text" formControlName="countryCode" placeholder="PK" />
+      </label>
+
+      <label class="field">
+        <span>Currency</span>
+        <input type="text" formControlName="currency" placeholder="PKR" />
+      </label>
+
+      <label class="field field-span-2 checkbox-field">
+        <input type="checkbox" formControlName="isDefault" />
+        <span>Default jurisdiction</span>
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

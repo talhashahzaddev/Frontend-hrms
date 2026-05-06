@@ -6,6 +6,34 @@
     </div>
 
     <div class="header-actions">
+      @if (currentTab === 'jurisdictions') {
+        <button class="add-btn" type="button" (click)="openCreateJurisdictionDialog()">
+          <mat-icon>add</mat-icon>
+          Add jurisdiction
+        </button>
+      }
+
+      @if (currentTab === 'authorities') {
+        <button class="add-btn" type="button" (click)="openCreateAuthorityDialog()">
+          <mat-icon>add</mat-icon>
+          Add authority
+        </button>
+      }
+
+      @if (currentTab === 'schemes') {
+        <button class="add-btn" type="button" (click)="openCreateSchemeDialog()">
+          <mat-icon>add</mat-icon>
+          Add scheme
+        </button>
+      }
+
+      @if (currentTab === 'rules') {
+        <button class="add-btn" type="button" (click)="openCreateRuleDialog()">
+          <mat-icon>add</mat-icon>
+          Add rule
+        </button>
+      }
+
       @if (currentTab === 'transactions') {
         <button class="add-btn" type="button" (click)="openAddTransactionDialog()">
           <mat-icon>add</mat-icon>
@@ -31,7 +59,9 @@
     <button class="tab" [class.active]="currentTab === 'authorities'" (click)="setTab('authorities')">Authorities</button>
     <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
     <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
+    <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
     <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
+    <button class="tab" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">Claims</button>
   </div>
 
   <div class="summary-cards">
@@ -89,42 +119,6 @@
 
   @if (!isMasterLoading && currentTab === 'jurisdictions') {
     <div class="content-card master-card">
-      <div class="form-grid">
-        <label class="field">
-          <span>Jurisdiction code</span>
-          <input type="text" [(ngModel)]="jurisdictionForm.jurisdictionCode" placeholder="PK-SD" />
-        </label>
-
-        <label class="field">
-          <span>Jurisdiction name</span>
-          <input type="text" [(ngModel)]="jurisdictionForm.jurisdictionName" placeholder="Sindh" />
-        </label>
-
-        <label class="field">
-          <span>Country code</span>
-          <input type="text" [(ngModel)]="jurisdictionForm.countryCode" placeholder="PK" />
-        </label>
-
-        <label class="field">
-          <span>Currency</span>
-          <input type="text" [(ngModel)]="jurisdictionForm.currency" placeholder="PKR" />
-        </label>
-
-        <label class="field checkbox-field field-span-2">
-          <input type="checkbox" [(ngModel)]="jurisdictionForm.isDefault" />
-          <span>Default jurisdiction</span>
-        </label>
-      </div>
-
-      <div class="dialog-actions">
-        @if (editingJurisdictionId) {
-          <button type="button" class="btn ghost" (click)="cancelJurisdictionEdit()">Cancel edit</button>
-        }
-        <button type="button" class="btn primary" (click)="saveJurisdiction()">
-          {{ editingJurisdictionId ? 'Update jurisdiction' : 'Create jurisdiction' }}
-        </button>
-      </div>
-
       <div class="table-responsive">
         <table class="compact-table">
           <thead>
@@ -151,7 +145,7 @@
                   <td>{{ item.currency || '-' }}</td>
                   <td>{{ item.isDefault ? 'Yes' : 'No' }}</td>
                   <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="editJurisdiction(item)">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditJurisdictionDialog(item)">
                       <mat-icon>edit</mat-icon>
                     </button>
                     <button class="action-btn hover-danger" type="button" (click)="deleteJurisdiction(item)">
@@ -169,47 +163,6 @@
 
   @if (!isMasterLoading && currentTab === 'authorities') {
     <div class="content-card master-card">
-      <div class="form-grid">
-        <label class="field">
-          <span>Jurisdiction</span>
-          <select [(ngModel)]="authorityForm.jurisdictionId">
-            <option value="" disabled>Select jurisdiction</option>
-            @for (item of jurisdictions; track item.jurisdictionId) {
-              <option [value]="item.jurisdictionId">{{ item.jurisdictionName }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Authority code</span>
-          <input type="text" [(ngModel)]="authorityForm.authorityCode" placeholder="SESSI" />
-        </label>
-
-        <label class="field">
-          <span>Authority name</span>
-          <input type="text" [(ngModel)]="authorityForm.authorityName" placeholder="Sindh Employees Social Security Institution" />
-        </label>
-
-        <label class="field">
-          <span>Portal URL</span>
-          <input type="text" [(ngModel)]="authorityForm.portalUrl" placeholder="https://..." />
-        </label>
-
-        <label class="field field-span-2">
-          <span>Remittance frequency</span>
-          <input type="text" [(ngModel)]="authorityForm.remittanceFrequency" placeholder="monthly" />
-        </label>
-      </div>
-
-      <div class="dialog-actions">
-        @if (editingAuthorityId) {
-          <button type="button" class="btn ghost" (click)="cancelAuthorityEdit()">Cancel edit</button>
-        }
-        <button type="button" class="btn primary" (click)="saveAuthority()">
-          {{ editingAuthorityId ? 'Update authority' : 'Create authority' }}
-        </button>
-      </div>
-
       <div class="table-responsive">
         <table class="compact-table">
           <thead>
@@ -234,7 +187,7 @@
                   <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
                   <td>{{ item.portalUrl || '-' }}</td>
                   <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="editAuthority(item)">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditAuthorityDialog(item)">
                       <mat-icon>edit</mat-icon>
                     </button>
                     <button class="action-btn hover-danger" type="button" (click)="deleteAuthority(item)">
@@ -252,57 +205,6 @@
 
   @if (!isMasterLoading && currentTab === 'schemes') {
     <div class="content-card master-card">
-      <div class="form-grid">
-        <label class="field">
-          <span>Jurisdiction</span>
-          <select [(ngModel)]="schemeForm.jurisdictionId">
-            <option value="" disabled>Select jurisdiction</option>
-            @for (item of jurisdictions; track item.jurisdictionId) {
-              <option [value]="item.jurisdictionId">{{ item.jurisdictionName }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Authority</span>
-          <select [(ngModel)]="schemeForm.authorityId">
-            <option value="">Any authority</option>
-            @for (item of authorities; track item.authorityId) {
-              <option [value]="item.authorityId">{{ item.authorityName }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Scheme code</span>
-          <input type="text" [(ngModel)]="schemeForm.schemeCode" placeholder="ESSI-REG" />
-        </label>
-
-        <label class="field">
-          <span>Scheme name</span>
-          <input type="text" [(ngModel)]="schemeForm.schemeName" placeholder="Employee Social Security" />
-        </label>
-
-        <label class="field">
-          <span>Scheme type</span>
-          <input type="text" [(ngModel)]="schemeForm.schemeType" placeholder="Statutory" />
-        </label>
-
-        <label class="field">
-          <span>Mandatory mode</span>
-          <input type="text" [(ngModel)]="schemeForm.mandatoryMode" placeholder="mandatory" />
-        </label>
-      </div>
-
-      <div class="dialog-actions">
-        @if (editingSchemeId) {
-          <button type="button" class="btn ghost" (click)="cancelSchemeEdit()">Cancel edit</button>
-        }
-        <button type="button" class="btn primary" (click)="saveScheme()">
-          {{ editingSchemeId ? 'Update scheme' : 'Create scheme' }}
-        </button>
-      </div>
-
       <div class="table-responsive">
         <table class="compact-table">
           <thead>
@@ -327,7 +229,7 @@
                   <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
                   <td>{{ getAuthorityName(item.authorityId) }}</td>
                   <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="editScheme(item)">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditSchemeDialog(item)">
                       <mat-icon>edit</mat-icon>
                     </button>
                     <button class="action-btn hover-danger" type="button" (click)="deleteScheme(item)">
@@ -345,72 +247,6 @@
 
   @if (!isMasterLoading && currentTab === 'rules') {
     <div class="content-card master-card">
-      <div class="form-grid">
-        <label class="field">
-          <span>Scheme</span>
-          <select [(ngModel)]="ruleForm.schemeId">
-            <option value="" disabled>Select scheme</option>
-            @for (item of schemes; track item.schemeId) {
-              <option [value]="item.schemeId">{{ item.schemeName }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Rule name</span>
-          <input type="text" [(ngModel)]="ruleForm.ruleName" placeholder="ESSI contribution rule" />
-        </label>
-
-        <label class="field">
-          <span>Contribution basis</span>
-          <select [(ngModel)]="ruleForm.contributionBasis">
-            <option value="gross">Gross salary</option>
-            <option value="basic">Basic salary</option>
-            <option value="fixed">Fixed amount</option>
-            <option value="component">Selected components</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Employee default %</span>
-          <input type="number" min="0" max="100" step="0.01" [(ngModel)]="ruleForm.employeeDefaultPct" />
-        </label>
-
-        <label class="field">
-          <span>Employer default %</span>
-          <input type="number" min="0" max="100" step="0.01" [(ngModel)]="ruleForm.employerDefaultPct" />
-        </label>
-
-        <label class="field">
-          <span>Employee fixed amount</span>
-          <input type="number" min="0" step="0.01" [(ngModel)]="ruleForm.employeeFixedAmount" />
-        </label>
-
-        <label class="field">
-          <span>Employer fixed amount</span>
-          <input type="number" min="0" step="0.01" [(ngModel)]="ruleForm.employerFixedAmount" />
-        </label>
-
-        <label class="field">
-          <span>Min salary limit</span>
-          <input type="number" min="0" [(ngModel)]="ruleForm.minSalaryLimit" />
-        </label>
-
-        <label class="field">
-          <span>Max salary limit</span>
-          <input type="number" min="0" [(ngModel)]="ruleForm.maxSalaryLimit" />
-        </label>
-      </div>
-
-      <div class="dialog-actions">
-        @if (editingRuleId) {
-          <button type="button" class="btn ghost" (click)="cancelRuleEdit()">Cancel edit</button>
-        }
-        <button type="button" class="btn primary" (click)="saveRule()">
-          {{ editingRuleId ? 'Update rule' : 'Create rule' }}
-        </button>
-      </div>
-
       <div class="table-responsive">
         <table class="compact-table">
           <thead>
@@ -437,7 +273,7 @@
                   <td class="text-right">{{ item.employerDefaultPct ?? 0 | number:'1.0-2' }}%</td>
                   <td class="text-right">{{ item.maxSalaryLimit ?? '-' }}</td>
                   <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="editRule(item)">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditRuleDialog(item)">
                       <mat-icon>edit</mat-icon>
                     </button>
                     <button class="action-btn hover-danger" type="button" (click)="deleteRule(item)">
@@ -577,6 +413,172 @@
             <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'requests') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <select class="filter-select" [(ngModel)]="enrollmentRequestStatusFilter" (change)="applyEnrollmentRequestFilters()">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="processing">Processing</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="enrollmentRequestTypeFilter" (change)="applyEnrollmentRequestFilters()">
+            <option value="">All types</option>
+            <option value="enrollment">Enrollment</option>
+            <option value="update">Update</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="suspension">Suspension</option>
+            <option value="reactivation">Reactivation</option>
+            <option value="exemption">Exemption</option>
+            <option value="correction">Correction</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="enrollmentRequestsLoading">
+        @if (enrollmentRequestsLoading) {
+          <div class="loading-overlay"><div class="spinner"></div><p>Loading requests...</p></div>
+        }
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Submitted</th>
+              <th>Reason</th>
+              <th class="text-right">Requested EE %</th>
+              <th class="text-right">Requested ER %</th>
+              <th>Documents</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (enrollmentRequests.length === 0) {
+              <tr><td colspan="9" class="empty-row">No enrollment requests found.</td></tr>
+            } @else {
+              @for (req of enrollmentRequests; track req.requestId) {
+                <tr>
+                  <td>{{ req.employeeName }}</td>
+                  <td>{{ req.requestType }}</td>
+                  <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                  <td>{{ req.reason || '-' }}</td>
+                  <td class="text-right">{{ req.requestedEmployeePct != null ? (req.requestedEmployeePct + '%') : '-' }}</td>
+                  <td class="text-right">{{ req.requestedEmployerPct != null ? (req.requestedEmployerPct + '%') : '-' }}</td>
+                  <td>{{ req.documentCount }} file(s)</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(req.requestStatus)">{{ req.requestStatus }}</span>
+                  </td>
+                  <td class="text-right action-cell">
+                    @if (req.requestStatus === 'pending') {
+                      <button class="action-btn hover-primary" type="button" title="Approve" (click)="approveEnrollmentRequest(req)">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectEnrollmentRequest(req)">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    } @else {
+                      <span class="muted">{{ req.rejectionReason || req.remarks || '—' }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'claims') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <select class="filter-select" [(ngModel)]="benefitClaimStatusFilter" (change)="applyClaimFilters()">
+            <option value="">All statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="under_review">Under review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="paid">Paid</option>
+            <option value="closed">Closed</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="benefitClaimTypeFilter" (change)="applyClaimFilters()">
+            <option value="">All types</option>
+            <option value="retirement">Retirement</option>
+            <option value="disability">Disability</option>
+            <option value="medical">Medical</option>
+            <option value="maternity">Maternity</option>
+            <option value="injury">Injury</option>
+            <option value="unemployment">Unemployment</option>
+            <option value="survivor">Survivor</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="benefitClaimsLoading">
+        @if (benefitClaimsLoading) {
+          <div class="loading-overlay"><div class="spinner"></div><p>Loading claims...</p></div>
+        }
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Claim date</th>
+              <th class="text-right">Claimed</th>
+              <th class="text-right">Approved</th>
+              <th class="text-right">Paid</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (benefitClaims.length === 0) {
+              <tr><td colspan="8" class="empty-row">No claims found.</td></tr>
+            } @else {
+              @for (claim of benefitClaims; track claim.claimId) {
+                <tr>
+                  <td>{{ claim.employeeName }}</td>
+                  <td>{{ claim.claimType }}</td>
+                  <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
+                  <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>
+                  <td class="text-right">{{ claim.paidAmount != null ? (currencySymbol() + ' ' + (claim.paidAmount | number:'1.0-2')) : '-' }}</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
+                  </td>
+                  <td class="text-right action-cell">
+                    @if (claim.claimStatus === 'submitted' || claim.claimStatus === 'under_review' || claim.claimStatus === 'draft') {
+                      <button class="action-btn hover-primary" type="button" title="Approve" (click)="approveBenefitClaim(claim)">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectBenefitClaim(claim)">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    } @else if (claim.claimStatus === 'approved') {
+                      <button class="action-btn hover-primary" type="button" title="Mark paid" (click)="markBenefitClaimPaid(claim)">
+                        <mat-icon>payments</mat-icon>
+                      </button>
+                    } @else {
+                      <span class="muted">{{ claim.rejectionReason || claim.decisionNotes || '—' }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
       </div>
     </div>
   }

@@ -2918,4 +2918,300 @@ export class PayrollService {
         })
       );
     }
+
+    // ────────────────────────────────────────────────────────────────────────────
+    //  Social Security — Employee lifecycle (enrollments, requests, claims, docs)
+    // ────────────────────────────────────────────────────────────────────────────
+
+    getMySocialSecurityEnrollment(): Observable<SocialSecurityEnrollment | null> {
+      return this.http.get<ApiResponse<SocialSecurityEnrollment | null>>(`${this.apiUrl}/social-security/my/enrollment`).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data ?? null;
+        })
+      );
+    }
+
+    getMySocialSecurityRequests(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/my/enrollment-requests`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    createMySocialSecurityRequest(data: CreateSocialSecurityEnrollmentRequestPayload): Observable<string> {
+      return this.http.post<ApiResponse<string>>(`${this.apiUrl}/social-security/my/enrollment-requests`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to submit request');
+          return response.data;
+        })
+      );
+    }
+
+    getSocialSecurityEnrollmentRequests(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/enrollment-requests`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    approveSocialSecurityEnrollmentRequest(requestId: string, data: ApproveSocialSecurityEnrollmentRequestPayload): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/social-security/enrollment-requests/${requestId}/approve`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to approve request');
+          return response.data ?? true;
+        })
+      );
+    }
+
+    rejectSocialSecurityEnrollmentRequest(requestId: string, data: RejectSocialSecurityEnrollmentRequestPayload): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/social-security/enrollment-requests/${requestId}/reject`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to reject request');
+          return response.data ?? true;
+        })
+      );
+    }
+
+    getMySocialSecurityClaims(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/my/claims`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    createMySocialSecurityClaim(data: CreateSocialSecurityClaimPayload): Observable<string> {
+      return this.http.post<ApiResponse<string>>(`${this.apiUrl}/social-security/my/claims`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to submit claim');
+          return response.data;
+        })
+      );
+    }
+
+    getSocialSecurityClaims(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/claims`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    approveSocialSecurityClaim(claimId: string, data: ApproveSocialSecurityClaimPayload): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/social-security/claims/${claimId}/approve`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to approve claim');
+          return response.data ?? true;
+        })
+      );
+    }
+
+    rejectSocialSecurityClaim(claimId: string, data: RejectSocialSecurityClaimPayload): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/social-security/claims/${claimId}/reject`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to reject claim');
+          return response.data ?? true;
+        })
+      );
+    }
+
+    markSocialSecurityClaimPaid(claimId: string, data: MarkSocialSecurityClaimPaidPayload): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/social-security/claims/${claimId}/mark-paid`, data).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to mark claim paid');
+          return response.data ?? true;
+        })
+      );
+    }
+
+    getSocialSecurityRequestDocuments(requestId: string): Observable<SocialSecurityRequestDocument[]> {
+      return this.http.get<ApiResponse<SocialSecurityRequestDocument[]>>(`${this.apiUrl}/social-security/requests/${requestId}/documents`).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data ?? [];
+        })
+      );
+    }
+
+    uploadSocialSecurityFile(file: File): Observable<string> {
+      const formData = new FormData();
+      formData.append('file', file);
+      return this.http.post<{ url: string } | ApiResponse<any>>(`${environment.apiUrl}/uploads/files`, formData).pipe(
+        map((res: any) => {
+          const url = res?.url ?? res?.data?.url;
+          if (!url) throw new Error('Upload failed');
+          return url as string;
+        })
+      );
+    }
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+//  Social Security — Employee lifecycle interfaces
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface SocialSecurityEnrollment {
+  enrollmentId: string;
+  organizationId: string;
+  employeeId: string;
+  ruleId: string;
+  ruleName?: string;
+  schemeId?: string;
+  schemeName?: string;
+  configId?: string;
+  configName?: string;
+  externalMemberId?: string;
+  enrollmentType: string;
+  enrollmentStatus: string;
+  effectiveDate: string;
+  endDate?: string | null;
+  employeeCustomPct?: number | null;
+  employerCustomPct?: number | null;
+  salaryCapOverride?: number | null;
+  ruleEmployeeDefaultPct?: number | null;
+  ruleEmployerDefaultPct?: number | null;
+  contributionBasis?: string;
+  isCurrent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SocialSecurityEnrollmentRequest {
+  requestId: string;
+  organizationId: string;
+  employeeId: string;
+  employeeName: string;
+  enrollmentId?: string | null;
+  ruleId?: string | null;
+  ruleName?: string | null;
+  configId?: string | null;
+  configName?: string | null;
+  requestType: string;
+  requestStatus: string;
+  requestedAt: string;
+  reason?: string | null;
+  remarks?: string | null;
+  rejectionReason?: string | null;
+  requestedEmployeePct?: number | null;
+  requestedEmployerPct?: number | null;
+  requestedSalaryCap?: number | null;
+  requestedEffectiveDate?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  processedAt?: string | null;
+  documentCount: number;
+}
+
+export interface SocialSecurityClaim {
+  claimId: string;
+  organizationId: string;
+  employeeId: string;
+  employeeName: string;
+  enrollmentId?: string | null;
+  requestId?: string | null;
+  claimType: string;
+  claimStatus: string;
+  claimDate: string;
+  incidentDate?: string | null;
+  periodFrom?: string | null;
+  periodTo?: string | null;
+  currency?: string | null;
+  claimedAmount?: number | null;
+  approvedAmount?: number | null;
+  paidAmount?: number | null;
+  paymentReference?: string | null;
+  paymentDate?: string | null;
+  authorityReference?: string | null;
+  decisionNotes?: string | null;
+  rejectionReason?: string | null;
+  documentCount: number;
+}
+
+export interface SocialSecurityRequestDocument {
+  documentId: string;
+  requestId?: string | null;
+  claimId?: string | null;
+  organizationId: string;
+  employeeId: string;
+  documentType: string;
+  documentName: string;
+  fileUrl: string;
+  mimeType?: string | null;
+  fileSize?: number | null;
+  issuer?: string | null;
+  issuedDate?: string | null;
+  expiryDate?: string | null;
+  verifiedStatus: string;
+  verifiedBy?: string | null;
+  verifiedAt?: string | null;
+  createdAt: string;
+}
+
+export interface SocialSecurityRequestDocumentInput {
+  documentType: string;
+  documentName: string;
+  fileUrl: string;
+  mimeType?: string | null;
+  fileSize?: number | null;
+  issuer?: string | null;
+  issuedDate?: string | null;
+  expiryDate?: string | null;
+}
+
+export interface CreateSocialSecurityEnrollmentRequestPayload {
+  ruleId?: string | null;
+  configId?: string | null;
+  requestType: string;
+  reason?: string | null;
+  requestedEmployeePct?: number | null;
+  requestedEmployerPct?: number | null;
+  requestedSalaryCap?: number | null;
+  requestedEffectiveDate?: string | null;
+  documents: SocialSecurityRequestDocumentInput[];
+}
+
+export interface ApproveSocialSecurityEnrollmentRequestPayload {
+  remarks?: string | null;
+  overrideEmployeePct?: number | null;
+  overrideEmployerPct?: number | null;
+  overrideSalaryCap?: number | null;
+  effectiveDate?: string | null;
+}
+
+export interface RejectSocialSecurityEnrollmentRequestPayload {
+  rejectionReason?: string | null;
+}
+
+export interface CreateSocialSecurityClaimPayload {
+  claimType: string;
+  incidentDate?: string | null;
+  periodFrom?: string | null;
+  periodTo?: string | null;
+  currency?: string | null;
+  claimedAmount?: number | null;
+  decisionNotes?: string | null;
+  documents: SocialSecurityRequestDocumentInput[];
+}
+
+export interface ApproveSocialSecurityClaimPayload {
+  approvedAmount: number;
+  decisionNotes?: string | null;
+}
+
+export interface RejectSocialSecurityClaimPayload {
+  rejectionReason?: string | null;
+}
+
+export interface MarkSocialSecurityClaimPaidPayload {
+  paidAmount: number;
+  paymentDate: string;
+  paymentReference?: string | null;
+  authorityReference?: string | null;
 }

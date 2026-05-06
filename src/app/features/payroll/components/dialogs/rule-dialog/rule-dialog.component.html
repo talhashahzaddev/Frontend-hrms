@@ -943,7 +943,9 @@
           <div class="rd-field">
             <label>Effective From</label>
             <mat-form-field appearance="outline" class="rd-mat-field">
-              <input matInput type="date" formControlName="socialEffectiveFrom">
+              <input matInput [matDatepicker]="socialFromPicker" formControlName="socialEffectiveFrom" placeholder="Select date" readonly (click)="socialFromPicker.open()">
+              <mat-datepicker-toggle matSuffix [for]="socialFromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #socialFromPicker></mat-datepicker>
             </mat-form-field>
           </div>
         </div>
@@ -951,7 +953,9 @@
         <div class="rd-field">
           <label>Effective To</label>
           <mat-form-field appearance="outline" class="rd-mat-field">
-            <input matInput type="date" formControlName="socialEffectiveTo">
+            <input matInput [matDatepicker]="socialToPicker" formControlName="socialEffectiveTo" placeholder="Select date" readonly (click)="socialToPicker.open()">
+            <mat-datepicker-toggle matSuffix [for]="socialToPicker"></mat-datepicker-toggle>
+            <mat-datepicker #socialToPicker></mat-datepicker>
             <mat-error *ngIf="ruleForm.hasError('socialInvalidDateRange') && (ruleForm.get('socialEffectiveTo')?.touched || ruleForm.get('socialEffectiveFrom')?.touched)">
               Effective To must be on or after Effective From
             </mat-error>

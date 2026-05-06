@@ -1,0 +1,91 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field field-span-2">
+        <span>Request type</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">tune</mat-icon>
+          <select formControlName="requestType">
+            @for (option of availableRequestTypes; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field field-span-2">
+        <span>Reason</span>
+        <textarea formControlName="reason" placeholder="Briefly explain your request..." rows="3"></textarea>
+      </label>
+
+      @if (showRateFields) {
+        <label class="field">
+          <span>Requested employee %</span>
+          <input type="number" min="0" max="100" step="0.01" formControlName="requestedEmployeePct" placeholder="optional" />
+        </label>
+
+        <label class="field">
+          <span>Requested employer %</span>
+          <input type="number" min="0" max="100" step="0.01" formControlName="requestedEmployerPct" placeholder="optional" />
+        </label>
+
+        <label class="field">
+          <span>Salary cap override</span>
+          <input type="number" min="0" formControlName="requestedSalaryCap" placeholder="optional" />
+        </label>
+      }
+
+      <label class="field">
+        <span>Effective from</span>
+        <input type="date" formControlName="requestedEffectiveDate" />
+      </label>
+
+      <div class="field field-span-2 attachments">
+        <span>Supporting documents</span>
+        <label class="upload-trigger">
+          <input type="file" multiple (change)="onFileSelected($event)" hidden />
+          <mat-icon>cloud_upload</mat-icon>
+          <span>Click to upload (PDF, image, max 10 MB)</span>
+        </label>
+
+        @if (uploadError) {
+          <p class="error">{{ uploadError }}</p>
+        }
+
+        @if (documents.length > 0) {
+          <ul class="attachment-list">
+            @for (doc of documents; track doc.fileUrl + doc.documentName) {
+              <li>
+                <mat-icon>description</mat-icon>
+                <span class="name">{{ doc.documentName }}</span>
+                @if (doc.uploading) {
+                  <span class="status uploading">Uploading...</span>
+                } @else if (doc.error) {
+                  <span class="status error">Failed</span>
+                } @else {
+                  <span class="status uploaded">Ready</span>
+                }
+                <button type="button" class="remove-btn" (click)="removeDocument(doc)" aria-label="Remove">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">Submit request</button>
+    </div>
+  </form>
+</div>
