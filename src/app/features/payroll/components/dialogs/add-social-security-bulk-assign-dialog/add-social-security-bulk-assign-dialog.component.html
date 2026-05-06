@@ -1,0 +1,103 @@
+<div class="social-security-transaction-dialog social-security-bulk-dialog">
+  <div class="dialog-header">
+    <h2>Bulk assign social security</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <div class="field field-span-2">
+        <div class="field-head">
+          <span>Employees</span>
+          <div class="employee-actions">
+            <button type="button" class="btn-inline" (click)="selectAllEmployees()">Select all</button>
+            <button type="button" class="btn-inline" (click)="clearEmployees()">Clear</button>
+          </div>
+        </div>
+
+        <div class="employee-list">
+          @for (employee of employees; track employee.id) {
+            <label class="employee-item">
+              <input
+                type="checkbox"
+                [checked]="isEmployeeSelected(employee.id)"
+                (change)="toggleEmployee(employee.id)"
+              />
+              <span>{{ employee.name }}</span>
+            </label>
+          }
+        </div>
+
+        <p class="helper">{{ selectedEmployeesCount }} selected</p>
+
+        @if (showEmployeeError) {
+          <p class="error">Select at least one employee.</p>
+        }
+      </div>
+
+      <label class="field">
+        <span>Payroll period</span>
+        <select formControlName="periodId">
+          <option value="" disabled>Select period...</option>
+          @for (period of periods; track period.id) {
+            <option [value]="period.id">{{ period.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Config</span>
+        <select formControlName="configId">
+          <option value="">No config</option>
+          @for (config of configs; track config.id) {
+            <option [value]="config.id">{{ config.configName }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Rule</span>
+        <select formControlName="ruleId">
+          <option value="">No explicit rule</option>
+          @for (rule of availableRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+      </label>
+
+      @if (showConfigOrRuleError) {
+        <p class="error field-span-2">Select a config or a rule before assigning.</p>
+      }
+
+      <label class="field">
+        <span>Actual salary (applies to all selected)</span>
+        <div class="prefix-wrap">
+          <strong>PKR</strong>
+          <input type="number" min="0" formControlName="actualSalary" placeholder="0" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Request status</span>
+        <select formControlName="requestStatus">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="deducted">Deducted</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </label>
+
+      <label class="field field-span-2 checkbox-field">
+        <input type="checkbox" formControlName="isEnrolled" />
+        <span>Mark employees as enrolled</span>
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">Assign selected employees</button>
+    </div>
+  </form>
+</div>

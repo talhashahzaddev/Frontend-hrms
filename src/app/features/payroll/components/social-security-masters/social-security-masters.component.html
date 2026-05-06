@@ -1,0 +1,395 @@
+<div class="time-tracking-container loans-advances-page social-security-page social-security-masters-page">
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Social Security Masters</h1>
+      <p class="subtitle">Create and maintain jurisdictions, authorities, schemes, and rules used by social security configs.</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="add-btn" type="button" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to management
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-navigation">
+    <button class="tab" [class.active]="currentTab === 'jurisdictions'" (click)="setTab('jurisdictions')">Jurisdictions</button>
+    <button class="tab" [class.active]="currentTab === 'authorities'" (click)="setTab('authorities')">Authorities</button>
+    <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
+    <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading social security masters...</p>
+    </div>
+  } @else {
+    @if (currentTab === 'jurisdictions') {
+      <div class="content-card master-card">
+        <div class="form-grid">
+          <label class="field">
+            <span>Jurisdiction code</span>
+            <input type="text" [(ngModel)]="jurisdictionForm.jurisdictionCode" placeholder="PK-SD" />
+          </label>
+
+          <label class="field">
+            <span>Jurisdiction name</span>
+            <input type="text" [(ngModel)]="jurisdictionForm.jurisdictionName" placeholder="Sindh" />
+          </label>
+
+          <label class="field">
+            <span>Country code</span>
+            <input type="text" [(ngModel)]="jurisdictionForm.countryCode" placeholder="PK" />
+          </label>
+
+          <label class="field">
+            <span>Currency</span>
+            <input type="text" [(ngModel)]="jurisdictionForm.currency" placeholder="PKR" />
+          </label>
+
+          <label class="field checkbox-field field-span-2">
+            <input type="checkbox" [(ngModel)]="jurisdictionForm.isDefault" />
+            <span>Default jurisdiction</span>
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          @if (editingJurisdictionId) {
+            <button type="button" class="btn ghost" (click)="cancelJurisdictionEdit()">Cancel edit</button>
+          }
+          <button type="button" class="btn primary" (click)="saveJurisdiction()">
+            {{ editingJurisdictionId ? 'Update jurisdiction' : 'Create jurisdiction' }}
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Country</th>
+                <th>Currency</th>
+                <th>Default</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (jurisdictions.length === 0) {
+                <tr>
+                  <td colspan="6" class="empty-row">No jurisdictions found.</td>
+                </tr>
+              } @else {
+                @for (item of jurisdictions; track item.jurisdictionId) {
+                  <tr>
+                    <td>{{ item.jurisdictionCode }}</td>
+                    <td>{{ item.jurisdictionName }}</td>
+                    <td>{{ item.countryCode || '-' }}</td>
+                    <td>{{ item.currency || '-' }}</td>
+                    <td>{{ item.isDefault ? 'Yes' : 'No' }}</td>
+                    <td class="text-right action-cell">
+                      <button class="action-btn hover-primary" type="button" (click)="editJurisdiction(item)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" (click)="deleteJurisdiction(item)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'authorities') {
+      <div class="content-card master-card">
+        <div class="form-grid">
+          <label class="field">
+            <span>Jurisdiction</span>
+            <select [(ngModel)]="authorityForm.jurisdictionId">
+              <option value="" disabled>Select jurisdiction</option>
+              @for (item of jurisdictions; track item.jurisdictionId) {
+                <option [value]="item.jurisdictionId">{{ item.jurisdictionName }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Authority code</span>
+            <input type="text" [(ngModel)]="authorityForm.authorityCode" placeholder="SESSI" />
+          </label>
+
+          <label class="field">
+            <span>Authority name</span>
+            <input type="text" [(ngModel)]="authorityForm.authorityName" placeholder="Sindh Employees Social Security Institution" />
+          </label>
+
+          <label class="field">
+            <span>Portal URL</span>
+            <input type="text" [(ngModel)]="authorityForm.portalUrl" placeholder="https://..." />
+          </label>
+
+          <label class="field field-span-2">
+            <span>Remittance frequency</span>
+            <input type="text" [(ngModel)]="authorityForm.remittanceFrequency" placeholder="monthly" />
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          @if (editingAuthorityId) {
+            <button type="button" class="btn ghost" (click)="cancelAuthorityEdit()">Cancel edit</button>
+          }
+          <button type="button" class="btn primary" (click)="saveAuthority()">
+            {{ editingAuthorityId ? 'Update authority' : 'Create authority' }}
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Jurisdiction</th>
+                <th>Portal</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (authorities.length === 0) {
+                <tr>
+                  <td colspan="5" class="empty-row">No authorities found.</td>
+                </tr>
+              } @else {
+                @for (item of authorities; track item.authorityId) {
+                  <tr>
+                    <td>{{ item.authorityCode }}</td>
+                    <td>{{ item.authorityName }}</td>
+                    <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
+                    <td>{{ item.portalUrl || '-' }}</td>
+                    <td class="text-right action-cell">
+                      <button class="action-btn hover-primary" type="button" (click)="editAuthority(item)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" (click)="deleteAuthority(item)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'schemes') {
+      <div class="content-card master-card">
+        <div class="form-grid">
+          <label class="field">
+            <span>Jurisdiction</span>
+            <select [(ngModel)]="schemeForm.jurisdictionId">
+              <option value="" disabled>Select jurisdiction</option>
+              @for (item of jurisdictions; track item.jurisdictionId) {
+                <option [value]="item.jurisdictionId">{{ item.jurisdictionName }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Authority</span>
+            <select [(ngModel)]="schemeForm.authorityId">
+              <option value="">Any authority</option>
+              @for (item of authorities; track item.authorityId) {
+                <option [value]="item.authorityId">{{ item.authorityName }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Scheme code</span>
+            <input type="text" [(ngModel)]="schemeForm.schemeCode" placeholder="ESSI-REG" />
+          </label>
+
+          <label class="field">
+            <span>Scheme name</span>
+            <input type="text" [(ngModel)]="schemeForm.schemeName" placeholder="Employee Social Security" />
+          </label>
+
+          <label class="field">
+            <span>Scheme type</span>
+            <input type="text" [(ngModel)]="schemeForm.schemeType" placeholder="Statutory" />
+          </label>
+
+          <label class="field">
+            <span>Mandatory mode</span>
+            <input type="text" [(ngModel)]="schemeForm.mandatoryMode" placeholder="mandatory" />
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          @if (editingSchemeId) {
+            <button type="button" class="btn ghost" (click)="cancelSchemeEdit()">Cancel edit</button>
+          }
+          <button type="button" class="btn primary" (click)="saveScheme()">
+            {{ editingSchemeId ? 'Update scheme' : 'Create scheme' }}
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Jurisdiction</th>
+                <th>Authority</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (schemes.length === 0) {
+                <tr>
+                  <td colspan="5" class="empty-row">No schemes found.</td>
+                </tr>
+              } @else {
+                @for (item of schemes; track item.schemeId) {
+                  <tr>
+                    <td>{{ item.schemeCode }}</td>
+                    <td>{{ item.schemeName }}</td>
+                    <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
+                    <td>{{ getAuthorityName(item.authorityId) }}</td>
+                    <td class="text-right action-cell">
+                      <button class="action-btn hover-primary" type="button" (click)="editScheme(item)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" (click)="deleteScheme(item)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'rules') {
+      <div class="content-card master-card">
+        <div class="form-grid">
+          <label class="field">
+            <span>Scheme</span>
+            <select [(ngModel)]="ruleForm.schemeId">
+              <option value="" disabled>Select scheme</option>
+              @for (item of schemes; track item.schemeId) {
+                <option [value]="item.schemeId">{{ item.schemeName }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Rule name</span>
+            <input type="text" [(ngModel)]="ruleForm.ruleName" placeholder="ESSI contribution rule" />
+          </label>
+
+          <label class="field">
+            <span>Contribution basis</span>
+            <select [(ngModel)]="ruleForm.contributionBasis">
+              <option value="gross">Gross salary</option>
+              <option value="basic">Basic salary</option>
+              <option value="fixed">Fixed amount</option>
+              <option value="component">Selected components</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Employee default %</span>
+            <input type="number" min="0" max="100" step="0.01" [(ngModel)]="ruleForm.employeeDefaultPct" />
+          </label>
+
+          <label class="field">
+            <span>Employer default %</span>
+            <input type="number" min="0" max="100" step="0.01" [(ngModel)]="ruleForm.employerDefaultPct" />
+          </label>
+
+          <label class="field">
+            <span>Employee fixed amount</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="ruleForm.employeeFixedAmount" />
+          </label>
+
+          <label class="field">
+            <span>Employer fixed amount</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="ruleForm.employerFixedAmount" />
+          </label>
+
+          <label class="field">
+            <span>Min salary limit</span>
+            <input type="number" min="0" [(ngModel)]="ruleForm.minSalaryLimit" />
+          </label>
+
+          <label class="field">
+            <span>Max salary limit</span>
+            <input type="number" min="0" [(ngModel)]="ruleForm.maxSalaryLimit" />
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          @if (editingRuleId) {
+            <button type="button" class="btn ghost" (click)="cancelRuleEdit()">Cancel edit</button>
+          }
+          <button type="button" class="btn primary" (click)="saveRule()">
+            {{ editingRuleId ? 'Update rule' : 'Create rule' }}
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>Rule</th>
+                <th>Scheme</th>
+                <th class="text-right">Employee %</th>
+                <th class="text-right">Employer %</th>
+                <th class="text-right">Max salary</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (rules.length === 0) {
+                <tr>
+                  <td colspan="6" class="empty-row">No rules found.</td>
+                </tr>
+              } @else {
+                @for (item of rules; track item.ruleId) {
+                  <tr>
+                    <td>{{ item.ruleName }}</td>
+                    <td>{{ getSchemeName(item.schemeId) }}</td>
+                    <td class="text-right">{{ item.employeeDefaultPct ?? 0 | number:'1.0-2' }}%</td>
+                    <td class="text-right">{{ item.employerDefaultPct ?? 0 | number:'1.0-2' }}%</td>
+                    <td class="text-right">{{ item.maxSalaryLimit ?? '-' }}</td>
+                    <td class="text-right action-cell">
+                      <button class="action-btn hover-primary" type="button" (click)="editRule(item)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" (click)="deleteRule(item)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</div>

@@ -146,6 +146,11 @@ export class PayrollRulesComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
+      if (result?.redirectTo) {
+        this.router.navigateByUrl(result.redirectTo);
+        return;
+      }
+
       if (result?.success) {
         this.fetchRules();
       }
@@ -183,6 +188,9 @@ export class PayrollRulesComponent implements OnInit {
         break;
       case 'incomeTaxPolicy':
         this.router.navigate(['/payroll/policies/tax-regime-rules']);
+        break;
+        case 'socialSecurityPolicy':
+        this.router.navigate(['/payroll/policies/social-security-rules']);
         break;
       case 'gratuityPolicy':
         this.router.navigate(['/payroll/policies/gratuity-rules']);

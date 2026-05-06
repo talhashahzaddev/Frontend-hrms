@@ -1,0 +1,51 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field field-span-2">
+        <span>Jurisdiction</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">public</mat-icon>
+          <select formControlName="jurisdictionId">
+            <option value="" disabled>Select jurisdiction</option>
+            @for (item of jurisdictions; track item.jurisdictionId) {
+              <option [value]="item.jurisdictionId">{{ item.jurisdictionName }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Authority code</span>
+        <input type="text" formControlName="authorityCode" placeholder="SESSI" />
+      </label>
+
+      <label class="field">
+        <span>Authority name</span>
+        <input type="text" formControlName="authorityName" placeholder="Sindh Employees Social Security Institution" />
+      </label>
+
+      <label class="field">
+        <span>Portal URL</span>
+        <input type="text" formControlName="portalUrl" placeholder="https://..." />
+      </label>
+
+      <label class="field">
+        <span>Remittance frequency</span>
+        <input type="text" formControlName="remittanceFrequency" placeholder="monthly" />
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

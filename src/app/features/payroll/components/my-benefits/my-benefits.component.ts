@@ -84,6 +84,11 @@ export class MyBenefitsComponent implements OnInit {
       this.router.navigate(['/payroll/my-gratuity']);
       return;
     }
+
+    if (module === 'Social Security') {
+      this.router.navigate(['/payroll/my-social-security']);
+      return;
+    }
   }
 
   onBenefitCardKeydown(event: KeyboardEvent, module: string): void {

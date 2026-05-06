@@ -140,8 +140,26 @@
     }
 
     <!-- Card 4 (Social Security) -->
+    @if (isModuleActive('Income Tax')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Income Tax')" (keydown)="onBenefitCardKeydown($event, 'Income Tax')">
+      <div class="card-header">
+        <div class="icon-wrapper color-secondary">
+          <mat-icon>request_quote</mat-icon>
+        </div>
+        <span class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span class="status-text">Active</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Income Tax</h3>
+      <p class="benefit-desc">Track your monthly tax deductions and applied slab details</p>
+      <p class="card-link">Open tax transactions <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+    <!-- Card 4 (Social Security) -->
     @if (isModuleActive('Social Security')) {
-    <div class="benefit-card">
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Social Security')" (keydown)="onBenefitCardKeydown($event, 'Social Security')">
       <div class="card-header">
         <div class="icon-wrapper color-teal">
           <mat-icon>group</mat-icon>
@@ -153,7 +171,7 @@
       </div>
       <h3 class="benefit-title">Social Security</h3>
       <p class="benefit-desc">EOBI / ESSI enrollment and contribution history</p>
-      <p class="card-link is-muted">Details available soon</p>
+      <p class="card-link">Open social security status <mat-icon>arrow_forward</mat-icon></p>
     </div>
     }
 

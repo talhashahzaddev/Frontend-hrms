@@ -1,0 +1,92 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ title }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <p class="line" style="margin: 0 0 0.85rem; color: #475569; font-size: 0.86rem;">
+      <strong>{{ data.subject }}</strong>
+    </p>
+
+    <div class="form-grid">
+      @if (isApproveRequest) {
+        <label class="field">
+          <span>Override employee %</span>
+          <input type="number" min="0" max="100" step="0.01" formControlName="overrideEmployeePct" placeholder="leave blank to use requested value" />
+        </label>
+
+        <label class="field">
+          <span>Override employer %</span>
+          <input type="number" min="0" max="100" step="0.01" formControlName="overrideEmployerPct" placeholder="leave blank to use requested value" />
+        </label>
+
+        <label class="field">
+          <span>Salary cap override</span>
+          <input type="number" min="0" formControlName="overrideSalaryCap" placeholder="optional" />
+        </label>
+
+        <label class="field">
+          <span>Effective from</span>
+          <input type="date" formControlName="effectiveDate" />
+        </label>
+
+        <label class="field field-span-2">
+          <span>Remarks (optional)</span>
+          <textarea formControlName="remarks" rows="3" placeholder="Internal notes..."></textarea>
+        </label>
+      }
+
+      @if (isRejectRequest || isRejectClaim) {
+        <label class="field field-span-2">
+          <span>Rejection reason</span>
+          <textarea formControlName="rejectionReason" rows="3" placeholder="Tell the employee why..."></textarea>
+          @if (form.get('rejectionReason')?.touched && form.get('rejectionReason')?.errors?.['required']) {
+            <small class="error">Please provide a reason.</small>
+          }
+        </label>
+      }
+
+      @if (isApproveClaim) {
+        <label class="field">
+          <span>Approved amount</span>
+          <input type="number" min="0" step="0.01" formControlName="approvedAmount" />
+        </label>
+
+        <label class="field field-span-2">
+          <span>Decision notes</span>
+          <textarea formControlName="remarks" rows="3" placeholder="Optional notes..."></textarea>
+        </label>
+      }
+
+      @if (isMarkPaid) {
+        <label class="field">
+          <span>Paid amount</span>
+          <input type="number" min="0" step="0.01" formControlName="paidAmount" />
+        </label>
+
+        <label class="field">
+          <span>Payment date</span>
+          <input type="date" formControlName="paymentDate" />
+        </label>
+
+        <label class="field">
+          <span>Payment reference</span>
+          <input type="text" formControlName="paymentReference" placeholder="Bank ref / cheque #" />
+        </label>
+
+        <label class="field">
+          <span>Authority reference</span>
+          <input type="text" formControlName="authorityReference" placeholder="optional" />
+        </label>
+      }
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

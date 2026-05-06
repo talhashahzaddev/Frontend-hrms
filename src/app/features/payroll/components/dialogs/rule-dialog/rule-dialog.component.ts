@@ -1,6 +1,6 @@
 import { Component, Inject, ViewEncapsulation, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,7 +9,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { PayrollService } from '../../../services/payroll.service';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import {
+  PayrollService,
+  SocialSecurityAuthorityOption,
+  SocialSecurityJurisdictionOption,
+  SocialSecuritySchemeOption
+} from '../../../services/payroll.service';
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../../settings/services/settings.service';
@@ -41,6 +48,19 @@ export interface RuleDialogData {
     withdrawalConfig?: string | null;
     allowPartialWithdraw?: boolean;
     vestingMonths?: number;
+    schemeId?: string;
+    jurisdictionId?: string;
+    authorityId?: string;
+    contributionBasis?: string;
+    employeeDefaultPct?: number;
+    employerDefaultPct?: number;
+    employeeFixedAmount?: number | null;
+    employerFixedAmount?: number | null;
+    minSalaryLimit?: number | null;
+    maxSalaryLimit?: number | null;
+    annualSalaryCap?: number | null;
+    effectiveFrom?: string | null;
+    effectiveTo?: string | null;
     maxLoanAmount?: number;
     maxAdvanceAmount?: number;
     maxPercentage?: number;
@@ -64,7 +84,9 @@ export interface RuleDialogData {
     MatIconModule,
     MatSelectModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './rule-dialog.component.html',
   styleUrls: ['./rule-dialog.component.scss']
@@ -97,6 +119,9 @@ export class RuleDialogComponent implements OnInit {
   ];
 
   readonly overtimeTypes = ['regular', 'holiday', 'weekend'];
+  readonly socialSecurityJurisdictions = signal<SocialSecurityJurisdictionOption[]>([]);
+  readonly socialSecurityAuthorities = signal<SocialSecurityAuthorityOption[]>([]);
+  readonly socialSecuritySchemes = signal<SocialSecuritySchemeOption[]>([]);
 
   get isEditMode(): boolean {
     return this.data?.mode === 'edit';
@@ -140,7 +165,23 @@ export class RuleDialogComponent implements OnInit {
     // Gratuity Policy fields
     yearsRequired: [null as number | null],
     calculationType: ['peryear'],
-    calculationValue: [null as number | null]
+    calculationValue: [null as number | null],
+    // Social Security Policy fields
+    socialJurisdictionId: [''],
+    socialAuthorityId: [''],
+    socialSchemeId: [''],
+    socialContributionBasis: ['gross'],
+    socialEmployeeDefaultPct: [0, [Validators.min(0), Validators.max(100)]],
+    socialEmployerDefaultPct: [0, [Validators.min(0), Validators.max(100)]],
+    socialEmployeeFixedAmount: [null as number | null],
+    socialEmployerFixedAmount: [null as number | null],
+    socialMinSalaryLimit: [null as number | null],
+    socialMaxSalaryLimit: [null as number | null],
+    socialAnnualSalaryCap: [null as number | null],
+    socialEffectiveFrom: [null as Date | null],
+    socialEffectiveTo: [null as Date | null]
+  }, {
+    validators: [this.socialSecurityDateRangeValidator()]
   });
 
   ngOnInit(): void {
@@ -155,9 +196,16 @@ export class RuleDialogComponent implements OnInit {
         }
       });
 
+    if (this.selectedPolicy === 11 || this.data?.policyId === 11) {
+      this.loadSocialSecurityLookups();
+    }
+
     // When policy selection changes, update validators dynamically if needed
     this.ruleForm.get('selectedPolicy')?.valueChanges.subscribe(policy => {
       this.updateValidation(policy);
+      if (Number(policy) === 11) {
+        this.loadSocialSecurityLookups();
+      }
       if (Number(policy) === 9 && !this.isEditMode && this.temporaryWithdrawals.length === 0 && this.permanentWithdrawals.length === 0) {
         this.setWithdrawalConfig();
       }
@@ -174,6 +222,36 @@ export class RuleDialogComponent implements OnInit {
 
     this.ruleForm.get('repaymentType')?.valueChanges.subscribe(() => {
       this.updateValidation(this.selectedPolicy);
+    });
+
+    this.ruleForm.get('socialJurisdictionId')?.valueChanges.subscribe((jurisdictionId) => {
+      if (this.selectedPolicy !== 11) {
+        return;
+      }
+
+      const currentAuthorityId = String(this.ruleForm.get('socialAuthorityId')?.value ?? '');
+      const availableAuthorities = this.getAvailableSocialAuthorities(String(jurisdictionId ?? ''));
+      if (currentAuthorityId && !availableAuthorities.some((item) => item.authorityId === currentAuthorityId)) {
+        this.ruleForm.patchValue({ socialAuthorityId: '', socialSchemeId: '' }, { emitEvent: false });
+      } else {
+        this.ruleForm.patchValue({ socialSchemeId: '' }, { emitEvent: false });
+      }
+    });
+
+    this.ruleForm.get('socialAuthorityId')?.valueChanges.subscribe((authorityId) => {
+      if (this.selectedPolicy !== 11) {
+        return;
+      }
+
+      const currentSchemeId = String(this.ruleForm.get('socialSchemeId')?.value ?? '');
+      const availableSchemes = this.getAvailableSocialSchemes(
+        String(this.ruleForm.get('socialJurisdictionId')?.value ?? ''),
+        String(authorityId ?? '')
+      );
+
+      if (currentSchemeId && !availableSchemes.some((item) => item.schemeId === currentSchemeId)) {
+        this.ruleForm.patchValue({ socialSchemeId: '' }, { emitEvent: false });
+      }
     });
 
     if (this.isEditMode && this.data?.rule) {
@@ -252,6 +330,24 @@ export class RuleDialogComponent implements OnInit {
           taxStartDate: this.toDateInputValue(rule.startDate),
           taxEndDate: this.toDateInputValue(rule.endDate)
         });
+      }
+
+      if (this.data.policyId === 11) {
+        this.ruleForm.patchValue({
+          socialSchemeId: String(rule.schemeId ?? ''),
+          socialContributionBasis: String(rule.contributionBasis ?? 'gross').toLowerCase(),
+          socialEmployeeDefaultPct: rule.employeeDefaultPct ?? 0,
+          socialEmployerDefaultPct: rule.employerDefaultPct ?? 0,
+          socialEmployeeFixedAmount: rule.employeeFixedAmount ?? null,
+          socialEmployerFixedAmount: rule.employerFixedAmount ?? null,
+          socialMinSalaryLimit: rule.minSalaryLimit ?? null,
+          socialMaxSalaryLimit: rule.maxSalaryLimit ?? null,
+          socialAnnualSalaryCap: rule.annualSalaryCap ?? null,
+          socialEffectiveFrom: rule.effectiveFrom ? new Date(String(rule.effectiveFrom)) : null,
+          socialEffectiveTo: rule.effectiveTo ? new Date(String(rule.effectiveTo)) : null
+        });
+
+        this.syncSocialHierarchyFromScheme(String(rule.schemeId ?? ''));
       }
     }
 
@@ -416,6 +512,19 @@ export class RuleDialogComponent implements OnInit {
     const yearsRequiredControl = this.ruleForm.get('yearsRequired');
     const calculationTypeControl = this.ruleForm.get('calculationType');
     const calculationValueControl = this.ruleForm.get('calculationValue');
+    const socialSchemeIdControl = this.ruleForm.get('socialSchemeId');
+    const socialJurisdictionIdControl = this.ruleForm.get('socialJurisdictionId');
+    const socialAuthorityIdControl = this.ruleForm.get('socialAuthorityId');
+    const socialContributionBasisControl = this.ruleForm.get('socialContributionBasis');
+    const socialEmployeeDefaultPctControl = this.ruleForm.get('socialEmployeeDefaultPct');
+    const socialEmployerDefaultPctControl = this.ruleForm.get('socialEmployerDefaultPct');
+    const socialEmployeeFixedAmountControl = this.ruleForm.get('socialEmployeeFixedAmount');
+    const socialEmployerFixedAmountControl = this.ruleForm.get('socialEmployerFixedAmount');
+    const socialMinSalaryLimitControl = this.ruleForm.get('socialMinSalaryLimit');
+    const socialMaxSalaryLimitControl = this.ruleForm.get('socialMaxSalaryLimit');
+    const socialAnnualSalaryCapControl = this.ruleForm.get('socialAnnualSalaryCap');
+    const socialEffectiveFromControl = this.ruleForm.get('socialEffectiveFrom');
+    const socialEffectiveToControl = this.ruleForm.get('socialEffectiveTo');
 
     if (Number(policyId) === 12) {
       this.ruleForm.get('ruleName')?.setValidators(Validators.required);
@@ -431,8 +540,139 @@ export class RuleDialogComponent implements OnInit {
     calculationTypeControl?.updateValueAndValidity();
     calculationValueControl?.updateValueAndValidity();
 
+    if (Number(policyId) === 11) {
+      this.ruleForm.get('ruleName')?.setValidators(Validators.required);
+      socialJurisdictionIdControl?.setValidators([Validators.required]);
+      socialAuthorityIdControl?.clearValidators();
+      socialSchemeIdControl?.setValidators([Validators.required]);
+      socialContributionBasisControl?.setValidators([Validators.required]);
+      socialEmployeeDefaultPctControl?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+      socialEmployerDefaultPctControl?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+      socialEmployeeFixedAmountControl?.setValidators([Validators.min(0)]);
+      socialEmployerFixedAmountControl?.setValidators([Validators.min(0)]);
+      socialMinSalaryLimitControl?.setValidators([Validators.min(0)]);
+      socialMaxSalaryLimitControl?.setValidators([Validators.min(0)]);
+      socialAnnualSalaryCapControl?.setValidators([Validators.min(0)]);
+      socialEffectiveFromControl?.clearValidators();
+      socialEffectiveToControl?.clearValidators();
+    } else {
+      socialJurisdictionIdControl?.clearValidators();
+      socialAuthorityIdControl?.clearValidators();
+      socialSchemeIdControl?.clearValidators();
+      socialContributionBasisControl?.clearValidators();
+      socialEmployeeDefaultPctControl?.clearValidators();
+      socialEmployerDefaultPctControl?.clearValidators();
+      socialEmployeeFixedAmountControl?.clearValidators();
+      socialEmployerFixedAmountControl?.clearValidators();
+      socialMinSalaryLimitControl?.clearValidators();
+      socialMaxSalaryLimitControl?.clearValidators();
+      socialAnnualSalaryCapControl?.clearValidators();
+      socialEffectiveFromControl?.clearValidators();
+      socialEffectiveToControl?.clearValidators();
+    }
+
+    socialJurisdictionIdControl?.updateValueAndValidity();
+    socialAuthorityIdControl?.updateValueAndValidity();
+    socialSchemeIdControl?.updateValueAndValidity();
+    socialContributionBasisControl?.updateValueAndValidity();
+    socialEmployeeDefaultPctControl?.updateValueAndValidity();
+    socialEmployerDefaultPctControl?.updateValueAndValidity();
+    socialEmployeeFixedAmountControl?.updateValueAndValidity();
+    socialEmployerFixedAmountControl?.updateValueAndValidity();
+    socialMinSalaryLimitControl?.updateValueAndValidity();
+    socialMaxSalaryLimitControl?.updateValueAndValidity();
+    socialAnnualSalaryCapControl?.updateValueAndValidity();
+    socialEffectiveFromControl?.updateValueAndValidity();
+    socialEffectiveToControl?.updateValueAndValidity();
+
     this.ruleForm.get('ruleName')?.updateValueAndValidity();
     this.ruleForm.get('amountType')?.updateValueAndValidity();
+  }
+
+  private loadSocialSecurityLookups(): void {
+    const hasLookupData =
+      this.socialSecurityJurisdictions().length > 0
+      && this.socialSecurityAuthorities().length > 0
+      && this.socialSecuritySchemes().length > 0;
+
+    if (hasLookupData) {
+      return;
+    }
+
+    this.payrollService.getSocialSecurityJurisdictions().pipe(take(1)).subscribe({
+      next: (jurisdictions) => {
+        this.socialSecurityJurisdictions.set(jurisdictions ?? []);
+      },
+      error: () => {
+        this.socialSecurityJurisdictions.set([]);
+      }
+    });
+
+    this.payrollService.getSocialSecurityAuthorities().pipe(take(1)).subscribe({
+      next: (authorities) => {
+        this.socialSecurityAuthorities.set(authorities ?? []);
+      },
+      error: () => {
+        this.socialSecurityAuthorities.set([]);
+      }
+    });
+
+    this.payrollService.getSocialSecuritySchemes().pipe(take(1)).subscribe({
+      next: (schemes) => {
+        this.socialSecuritySchemes.set(schemes ?? []);
+        const selectedSchemeId = String(this.ruleForm.get('socialSchemeId')?.value ?? '');
+        if (selectedSchemeId) {
+          this.syncSocialHierarchyFromScheme(selectedSchemeId);
+        }
+      },
+      error: () => {
+        this.socialSecuritySchemes.set([]);
+        this.notification.showError('Unable to load social security schemes.');
+      }
+    });
+  }
+
+  get availableSocialAuthorities(): SocialSecurityAuthorityOption[] {
+    return this.getAvailableSocialAuthorities(String(this.ruleForm.get('socialJurisdictionId')?.value ?? ''));
+  }
+
+  get availableSocialSchemes(): SocialSecuritySchemeOption[] {
+    return this.getAvailableSocialSchemes(
+      String(this.ruleForm.get('socialJurisdictionId')?.value ?? ''),
+      String(this.ruleForm.get('socialAuthorityId')?.value ?? '')
+    );
+  }
+
+  private getAvailableSocialAuthorities(jurisdictionId: string): SocialSecurityAuthorityOption[] {
+    if (!jurisdictionId) {
+      return this.socialSecurityAuthorities();
+    }
+
+    return this.socialSecurityAuthorities().filter((authority) => String(authority.jurisdictionId) === jurisdictionId);
+  }
+
+  private getAvailableSocialSchemes(jurisdictionId: string, authorityId: string): SocialSecuritySchemeOption[] {
+    return this.socialSecuritySchemes().filter((scheme) => {
+      const jurisdictionMatch = !jurisdictionId || String(scheme.jurisdictionId) === jurisdictionId;
+      const authorityMatch = !authorityId || !scheme.authorityId || String(scheme.authorityId) === authorityId;
+      return jurisdictionMatch && authorityMatch;
+    });
+  }
+
+  private syncSocialHierarchyFromScheme(schemeId: string): void {
+    if (!schemeId) {
+      return;
+    }
+
+    const selectedScheme = this.socialSecuritySchemes().find((item) => String(item.schemeId) === schemeId);
+    if (!selectedScheme) {
+      return;
+    }
+
+    this.ruleForm.patchValue({
+      socialJurisdictionId: String(selectedScheme.jurisdictionId ?? ''),
+      socialAuthorityId: String(selectedScheme.authorityId ?? '')
+    }, { emitEvent: false });
   }
 
   private updateAmountValidation() {
@@ -910,6 +1150,53 @@ export class RuleDialogComponent implements OnInit {
             );
           }
         });
+    } else if (formValue.selectedPolicy === 11) { // 11 is Social Security Policy
+      if (this.ruleForm.hasError('socialInvalidDateRange')) {
+        this.ruleForm.get('socialEffectiveFrom')?.markAsTouched();
+        this.ruleForm.get('socialEffectiveTo')?.markAsTouched();
+        this.notification.showError('Effective To must be on or after Effective From.');
+        this.isSubmitting.set(false);
+        return;
+      }
+
+      const payload = {
+        schemeId: String(formValue.socialSchemeId ?? ''),
+        ruleName: String(formValue.ruleName ?? '').trim(),
+        description: formValue.description ? String(formValue.description).trim() : null,
+        contributionBasis: String(formValue.socialContributionBasis ?? 'gross').toLowerCase(),
+        employeeDefaultPct: Number(formValue.socialEmployeeDefaultPct ?? 0),
+        employerDefaultPct: Number(formValue.socialEmployerDefaultPct ?? 0),
+        employeeFixedAmount: formValue.socialEmployeeFixedAmount == null ? null : Number(formValue.socialEmployeeFixedAmount),
+        employerFixedAmount: formValue.socialEmployerFixedAmount == null ? null : Number(formValue.socialEmployerFixedAmount),
+        minSalaryLimit: formValue.socialMinSalaryLimit == null ? null : Number(formValue.socialMinSalaryLimit),
+        maxSalaryLimit: formValue.socialMaxSalaryLimit == null ? null : Number(formValue.socialMaxSalaryLimit),
+        annualSalaryCap: formValue.socialAnnualSalaryCap == null ? null : Number(formValue.socialAnnualSalaryCap),
+        effectiveFrom: this.toIsoDate(formValue.socialEffectiveFrom),
+        effectiveTo: this.toIsoDate(formValue.socialEffectiveTo),
+        isActive: this.isEditMode ? (this.data?.rule as any)?.isActive ?? true : true
+      };
+
+      const editRuleId = String((this.data?.rule as any)?.ruleId ?? (this.data?.rule as any)?.id ?? '');
+      const request$ = this.isEditMode && editRuleId
+        ? this.payrollService.updateSocialSecurityRule(editRuleId, payload)
+        : this.payrollService.createSocialSecurityRule(payload);
+
+      request$
+        .pipe(finalize(() => this.isSubmitting.set(false)))
+        .subscribe({
+          next: (res) => {
+            this.notification.showSuccess(
+              this.isEditMode ? 'Social security rule updated successfully' : 'Social security rule created successfully'
+            );
+            this.dialogRef.close({ success: true, data: res, policyId: 11 });
+          },
+          error: (err: any) => {
+            console.error(err);
+            this.notification.showError(
+              err?.message || (this.isEditMode ? 'Failed to update social security rule' : 'Failed to create social security rule')
+            );
+          }
+        });
     } else if (formValue.selectedPolicy === 12) { // 12 is Gratuity Policy
       const payload = {
         configRuleName: formValue.ruleName,
@@ -948,5 +1235,47 @@ export class RuleDialogComponent implements OnInit {
         this.dialogRef.close(resultPayload);
       }, 500);
     }
+  }
+
+  private socialSecurityDateRangeValidator(): ValidatorFn {
+    return (group): ValidationErrors | null => {
+      const selectedPolicy = Number(group.get('selectedPolicy')?.value ?? 0);
+      if (selectedPolicy !== 11) {
+        return null;
+      }
+
+      const fromValue = group.get('socialEffectiveFrom')?.value;
+      const toValue = group.get('socialEffectiveTo')?.value;
+      const fromDate = this.coerceDate(fromValue);
+      const toDate = this.coerceDate(toValue);
+
+      if (fromDate && toDate && toDate.getTime() < fromDate.getTime()) {
+        return { socialInvalidDateRange: true };
+      }
+
+      return null;
+    };
+  }
+
+  private coerceDate(value: unknown): Date | null {
+    if (!value) {
+      return null;
+    }
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value;
+    }
+    const parsed = new Date(String(value));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  private toIsoDate(value: unknown): string | null {
+    const date = this.coerceDate(value);
+    if (!date) {
+      return null;
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

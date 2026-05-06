@@ -79,7 +79,8 @@
     }
 
     input,
-    select {
+    select,
+    textarea {
       width: 100%;
       min-height: 2.7rem;
       border: 1px solid #dbe3ef;
@@ -97,6 +98,40 @@
         background: #ffffff;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
       }
+    }
+
+    textarea {
+      min-height: 4.2rem;
+      resize: vertical;
+      line-height: 1.35;
+      font-family: inherit;
+    }
+  }
+
+  .checkbox-field {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 0.15rem;
+
+    input[type='checkbox'] {
+      width: 1rem;
+      height: 1rem;
+      min-height: 1rem;
+      margin: 0;
+      border-radius: 0.2rem;
+      border: 1px solid #cbd5e1;
+      accent-color: #1d4ed8;
+      padding: 0;
+      background: #ffffff;
+    }
+
+    span {
+      text-transform: none;
+      letter-spacing: 0.01em;
+      font-size: 0.84rem;
+      color: #334155;
+      font-weight: 600;
     }
   }
 

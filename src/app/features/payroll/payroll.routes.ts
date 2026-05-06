@@ -61,16 +61,32 @@ export const payrollRoutes: Routes = [
     title: 'Provident Fund Benefits - HRMS'
   },
   {
-    path: 'loans/requests/compliance',
+    path: 'social-security',
     loadComponent: () =>
-      import('./components/loan-request-compliance/loan-request-compliance.component').then(m => m.LoanRequestComplianceComponent),
-    title: 'Payroll Compliance - HRMS'
+      import('./components/social-security/social-security.component').then(m => m.SocialSecurityComponent),
+    title: 'Social Security Management - HRMS'
   },
   {
-    path: 'loans/requests/compliance/payslips',
+    path: 'social-security-masters',
+    loadComponent: () =>
+      import('./components/social-security-masters/social-security-masters.component').then(m => m.SocialSecurityMastersComponent),
+    title: 'Social Security Masters - HRMS'
+  },
+  {
+    path: 'loans/requests/compliance',
+    redirectTo: 'tax-management',
+    pathMatch: 'full'
+  },
+  {
+    path: 'payslips',
     loadComponent: () =>
       import('./components/compliance-payslips/compliance-payslips.component').then(m => m.CompliancePayslipsComponent),
     title: 'Payslip Management - HRMS'
+  },
+  {
+    path: 'loans/requests/compliance/payslips',
+    redirectTo: 'payslips',
+    pathMatch: 'full'
   },
   {
     path: 'policies',
@@ -163,6 +179,12 @@ export const payrollRoutes: Routes = [
     title: 'Tax Rules - HRMS'
   },
   {
+    path: 'policies/social-security-rules',
+    loadComponent: () =>
+      import('./components/social-security-rules/social-security-rules.component').then(m => m.SocialSecurityRulesComponent),
+    title: 'Social Security Policy - HRMS'
+  },
+  {
     path: 'periods',
     loadComponent: () =>
       import('./components/payroll-period/payroll-period.component').then(m => m.PayrollPeriodComponent),
@@ -191,6 +213,12 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/payroll-calculation/payroll-calculation.component').then(m => m.PayrollCalculationComponent),
     title: 'Payroll Calculation - HRMS'
+  },
+  {
+    path: 'my-social-security',
+    loadComponent: () =>
+      import('./components/my-social-security/my-social-security.component').then(m => m.MySocialSecurityComponent),
+    title: 'My Social Security - HRMS'
   },
   {
     path: 'results',

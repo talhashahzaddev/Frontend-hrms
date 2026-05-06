@@ -1,0 +1,585 @@
+<div class="time-tracking-container loans-advances-page social-security-page social-security-masters-page">
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Social Security Management</h1>
+      <p class="subtitle">Create masters and manage monthly social security transactions.</p>
+    </div>
+
+    <div class="header-actions">
+      @if (currentTab === 'jurisdictions') {
+        <button class="add-btn" type="button" (click)="openCreateJurisdictionDialog()">
+          <mat-icon>add</mat-icon>
+          Add jurisdiction
+        </button>
+      }
+
+      @if (currentTab === 'authorities') {
+        <button class="add-btn" type="button" (click)="openCreateAuthorityDialog()">
+          <mat-icon>add</mat-icon>
+          Add authority
+        </button>
+      }
+
+      @if (currentTab === 'schemes') {
+        <button class="add-btn" type="button" (click)="openCreateSchemeDialog()">
+          <mat-icon>add</mat-icon>
+          Add scheme
+        </button>
+      }
+
+      @if (currentTab === 'rules') {
+        <button class="add-btn" type="button" (click)="openCreateRuleDialog()">
+          <mat-icon>add</mat-icon>
+          Add rule
+        </button>
+      }
+
+      @if (currentTab === 'transactions') {
+        <button class="add-btn" type="button" (click)="openAddTransactionDialog()">
+          <mat-icon>add</mat-icon>
+          Add transaction
+        </button>
+        <button class="add-btn" type="button" (click)="openBulkAssignDialog()">
+          <mat-icon>groups</mat-icon>
+          Bulk assign
+        </button>
+      }
+
+      @if (showPoliciesBackButton) {
+        <button class="add-btn" type="button" (click)="goBackToPolicies()">
+          <mat-icon>arrow_back</mat-icon>
+          Back to policies
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="tab-navigation">
+    <button class="tab" [class.active]="currentTab === 'jurisdictions'" (click)="setTab('jurisdictions')">Jurisdictions</button>
+    <button class="tab" [class.active]="currentTab === 'authorities'" (click)="setTab('authorities')">Authorities</button>
+    <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
+    <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
+    <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
+    <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
+    <button class="tab" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">Claims</button>
+  </div>
+
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Jurisdictions</span>
+          <span class="value">{{ jurisdictionsCount }}</span>
+        </div>
+        <div class="icon-wrapper color-blue"><mat-icon>public</mat-icon></div>
+      </div>
+      <p class="card-footer">configured regions</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Authorities</span>
+          <span class="value">{{ authoritiesCount }}</span>
+        </div>
+        <div class="icon-wrapper color-green"><mat-icon>apartment</mat-icon></div>
+      </div>
+      <p class="card-footer">registered authorities</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Enrolled employees</span>
+          <span class="value">{{ enrolledEmployeesCount }}</span>
+        </div>
+        <div class="icon-wrapper color-amber"><mat-icon>groups</mat-icon></div>
+      </div>
+      <p class="card-footer">in current transaction view</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total contribution</span>
+          <span class="value">{{ currencySymbol() }} {{ totalContributionAmount | number:'1.0-0' }}</span>
+        </div>
+        <div class="icon-wrapper color-purple"><mat-icon>payments</mat-icon></div>
+      </div>
+      <p class="card-footer">current page total</p>
+    </div>
+  </div>
+
+  @if (isMasterLoading && currentTab !== 'transactions') {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading social security masters...</p>
+    </div>
+  }
+
+  @if (!isMasterLoading && currentTab === 'jurisdictions') {
+    <div class="content-card master-card">
+      <div class="table-responsive">
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Country</th>
+              <th>Currency</th>
+              <th>Default</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (jurisdictions.length === 0) {
+              <tr>
+                <td colspan="6" class="empty-row">No jurisdictions found.</td>
+              </tr>
+            } @else {
+              @for (item of jurisdictions; track item.jurisdictionId) {
+                <tr>
+                  <td>{{ item.jurisdictionCode }}</td>
+                  <td>{{ item.jurisdictionName }}</td>
+                  <td>{{ item.countryCode || '-' }}</td>
+                  <td>{{ item.currency || '-' }}</td>
+                  <td>{{ item.isDefault ? 'Yes' : 'No' }}</td>
+                  <td class="text-right action-cell">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditJurisdictionDialog(item)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="action-btn hover-danger" type="button" (click)="deleteJurisdiction(item)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (!isMasterLoading && currentTab === 'authorities') {
+    <div class="content-card master-card">
+      <div class="table-responsive">
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Jurisdiction</th>
+              <th>Portal</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (authorities.length === 0) {
+              <tr>
+                <td colspan="5" class="empty-row">No authorities found.</td>
+              </tr>
+            } @else {
+              @for (item of authorities; track item.authorityId) {
+                <tr>
+                  <td>{{ item.authorityCode }}</td>
+                  <td>{{ item.authorityName }}</td>
+                  <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
+                  <td>{{ item.portalUrl || '-' }}</td>
+                  <td class="text-right action-cell">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditAuthorityDialog(item)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="action-btn hover-danger" type="button" (click)="deleteAuthority(item)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (!isMasterLoading && currentTab === 'schemes') {
+    <div class="content-card master-card">
+      <div class="table-responsive">
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Jurisdiction</th>
+              <th>Authority</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (schemes.length === 0) {
+              <tr>
+                <td colspan="5" class="empty-row">No schemes found.</td>
+              </tr>
+            } @else {
+              @for (item of schemes; track item.schemeId) {
+                <tr>
+                  <td>{{ item.schemeCode }}</td>
+                  <td>{{ item.schemeName }}</td>
+                  <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
+                  <td>{{ getAuthorityName(item.authorityId) }}</td>
+                  <td class="text-right action-cell">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditSchemeDialog(item)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="action-btn hover-danger" type="button" (click)="deleteScheme(item)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (!isMasterLoading && currentTab === 'rules') {
+    <div class="content-card master-card">
+      <div class="table-responsive">
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Rule</th>
+              <th>Scheme</th>
+              <th class="text-right">Employee %</th>
+              <th class="text-right">Employer %</th>
+              <th class="text-right">Max salary</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (rules.length === 0) {
+              <tr>
+                <td colspan="6" class="empty-row">No rules found.</td>
+              </tr>
+            } @else {
+              @for (item of rules; track item.ruleId) {
+                <tr>
+                  <td>{{ item.ruleName }}</td>
+                  <td>{{ getSchemeName(item.schemeId) }}</td>
+                  <td class="text-right">{{ item.employeeDefaultPct ?? 0 | number:'1.0-2' }}%</td>
+                  <td class="text-right">{{ item.employerDefaultPct ?? 0 | number:'1.0-2' }}%</td>
+                  <td class="text-right">{{ item.maxSalaryLimit ?? '-' }}</td>
+                  <td class="text-right action-cell">
+                    <button class="action-btn hover-primary" type="button" (click)="openEditRuleDialog(item)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="action-btn hover-danger" type="button" (click)="deleteRule(item)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'transactions') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="pendingTransactionSearch" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="pendingTransactionPeriodId">
+            <option value="">All periods</option>
+            @for (period of periodOptions; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+
+          <select class="filter-select" [(ngModel)]="pendingTransactionConfigId">
+            <option value="">All rules</option>
+            @for (config of configOptions; track config.id) {
+              <option [value]="config.id">{{ config.configName }}</option>
+            }
+          </select>
+
+          <select class="filter-select" [(ngModel)]="pendingTransactionStatus">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="deducted">Deducted</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" [disabled]="!hasPendingTransactionFilters() && !hasAppliedTransactionFilters()" (click)="applyTransactionFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" [disabled]="!hasPendingTransactionFilters() && !hasAppliedTransactionFilters()" (click)="clearTransactionFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="transactionIsLoading">
+        @if (transactionIsLoading) {
+          <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading social security transactions...</p>
+          </div>
+        }
+
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Period</th>
+              <th>Rule</th>
+              <th class="text-right">Actual salary</th>
+              <th class="text-right">Capped salary</th>
+              <th class="text-right">Employee</th>
+              <th class="text-right">Employer</th>
+              <th class="text-right">Total</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (transactionRows.length === 0) {
+              <tr>
+                <td class="empty-row" colspan="10">No social security transactions found.</td>
+              </tr>
+            } @else {
+              @for (row of transactionRows; track row.id) {
+                <tr>
+                  <td>{{ row.employeeName }}</td>
+                  <td>{{ row.periodName }}</td>
+                  <td>{{ row.configName }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.actualSalary | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.salaryCapped | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.employeeAmount | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.employerAmount | number:'1.0-0' }}</td>
+                  <td class="text-right"><strong>{{ currencySymbol() }} {{ row.totalAmount | number:'1.0-0' }}</strong></td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(row.requestStatus)">{{ row.requestStatus }}</span>
+                  </td>
+                  <td class="text-right action-cell">
+                    <button class="action-btn hover-primary" type="button" title="Edit transaction" (click)="openEditTransactionDialog(row)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button class="action-btn hover-danger" type="button" title="Delete transaction" (click)="deleteTransaction(row)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (transactionTotalRecords === 0) {
+            No records found
+          } @else {
+            Showing {{ transactionFromRecord }}-{{ transactionToRecord }} of {{ transactionTotalRecords }} records
+          }
+        </p>
+        <div class="pagination">
+          <button class="page-btn" [class.disabled]="transactionCurrentPage === 1" [disabled]="transactionCurrentPage === 1" (click)="previousTransactionPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          @for (page of transactionPageRange; track page) {
+            @if (page === -1) {
+              <span class="page-ellipsis">...</span>
+            } @else {
+              <button class="page-btn" [class.active]="page === transactionCurrentPage" (click)="goToTransactionPage(page)">{{ page }}</button>
+            }
+          }
+          <button class="page-btn" [class.disabled]="transactionCurrentPage === transactionTotalPages" [disabled]="transactionCurrentPage === transactionTotalPages" (click)="nextTransactionPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'requests') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <select class="filter-select" [(ngModel)]="enrollmentRequestStatusFilter" (change)="applyEnrollmentRequestFilters()">
+            <option value="">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="processing">Processing</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="enrollmentRequestTypeFilter" (change)="applyEnrollmentRequestFilters()">
+            <option value="">All types</option>
+            <option value="enrollment">Enrollment</option>
+            <option value="update">Update</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="suspension">Suspension</option>
+            <option value="reactivation">Reactivation</option>
+            <option value="exemption">Exemption</option>
+            <option value="correction">Correction</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="enrollmentRequestsLoading">
+        @if (enrollmentRequestsLoading) {
+          <div class="loading-overlay"><div class="spinner"></div><p>Loading requests...</p></div>
+        }
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Submitted</th>
+              <th>Reason</th>
+              <th class="text-right">Requested EE %</th>
+              <th class="text-right">Requested ER %</th>
+              <th>Documents</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (enrollmentRequests.length === 0) {
+              <tr><td colspan="9" class="empty-row">No enrollment requests found.</td></tr>
+            } @else {
+              @for (req of enrollmentRequests; track req.requestId) {
+                <tr>
+                  <td>{{ req.employeeName }}</td>
+                  <td>{{ req.requestType }}</td>
+                  <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                  <td>{{ req.reason || '-' }}</td>
+                  <td class="text-right">{{ req.requestedEmployeePct != null ? (req.requestedEmployeePct + '%') : '-' }}</td>
+                  <td class="text-right">{{ req.requestedEmployerPct != null ? (req.requestedEmployerPct + '%') : '-' }}</td>
+                  <td>{{ req.documentCount }} file(s)</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(req.requestStatus)">{{ req.requestStatus }}</span>
+                  </td>
+                  <td class="text-right action-cell">
+                    @if (req.requestStatus === 'pending') {
+                      <button class="action-btn hover-primary" type="button" title="Approve" (click)="approveEnrollmentRequest(req)">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectEnrollmentRequest(req)">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    } @else {
+                      <span class="muted">{{ req.rejectionReason || req.remarks || '—' }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'claims') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <select class="filter-select" [(ngModel)]="benefitClaimStatusFilter" (change)="applyClaimFilters()">
+            <option value="">All statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="under_review">Under review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="paid">Paid</option>
+            <option value="closed">Closed</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="benefitClaimTypeFilter" (change)="applyClaimFilters()">
+            <option value="">All types</option>
+            <option value="retirement">Retirement</option>
+            <option value="disability">Disability</option>
+            <option value="medical">Medical</option>
+            <option value="maternity">Maternity</option>
+            <option value="injury">Injury</option>
+            <option value="unemployment">Unemployment</option>
+            <option value="survivor">Survivor</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="benefitClaimsLoading">
+        @if (benefitClaimsLoading) {
+          <div class="loading-overlay"><div class="spinner"></div><p>Loading claims...</p></div>
+        }
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Claim date</th>
+              <th class="text-right">Claimed</th>
+              <th class="text-right">Approved</th>
+              <th class="text-right">Paid</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (benefitClaims.length === 0) {
+              <tr><td colspan="8" class="empty-row">No claims found.</td></tr>
+            } @else {
+              @for (claim of benefitClaims; track claim.claimId) {
+                <tr>
+                  <td>{{ claim.employeeName }}</td>
+                  <td>{{ claim.claimType }}</td>
+                  <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
+                  <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>
+                  <td class="text-right">{{ claim.paidAmount != null ? (currencySymbol() + ' ' + (claim.paidAmount | number:'1.0-2')) : '-' }}</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
+                  </td>
+                  <td class="text-right action-cell">
+                    @if (claim.claimStatus === 'submitted' || claim.claimStatus === 'under_review' || claim.claimStatus === 'draft') {
+                      <button class="action-btn hover-primary" type="button" title="Approve" (click)="approveBenefitClaim(claim)">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+                      <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectBenefitClaim(claim)">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    } @else if (claim.claimStatus === 'approved') {
+                      <button class="action-btn hover-primary" type="button" title="Mark paid" (click)="markBenefitClaimPaid(claim)">
+                        <mat-icon>payments</mat-icon>
+                      </button>
+                    } @else {
+                      <span class="muted">{{ claim.rejectionReason || claim.decisionNotes || '—' }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

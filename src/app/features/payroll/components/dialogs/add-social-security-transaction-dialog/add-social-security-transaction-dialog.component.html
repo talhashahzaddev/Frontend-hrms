@@ -1,0 +1,114 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field field-span-2">
+        <span>Employee</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">badge</mat-icon>
+          <select formControlName="employeeId">
+            <option value="" disabled>Select employee...</option>
+            @for (employee of employees; track employee.id) {
+              <option [value]="employee.id">{{ employee.name }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Payroll period</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">calendar_month</mat-icon>
+          <select formControlName="periodId">
+            <option value="" disabled>Select period...</option>
+            @for (period of periods; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Config</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">shield_person</mat-icon>
+          <select formControlName="configId">
+            <option value="">No config</option>
+            @for (config of configs; track config.id) {
+              <option [value]="config.id">{{ config.configName }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Rule</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">policy</mat-icon>
+          <select formControlName="ruleId">
+            <option value="">No explicit rule</option>
+            @for (rule of availableRules; track rule.ruleId) {
+              <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      @if (showConfigOrRuleError) {
+        <p class="error field-span-2">Select a config or a rule before saving this transaction.</p>
+      }
+
+      <label class="field">
+        <span>Actual salary</span>
+        <div class="prefix-wrap">
+          <strong>PKR</strong>
+          <input type="number" min="0" formControlName="actualSalary" placeholder="0" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Request status</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">fact_check</mat-icon>
+          <select formControlName="requestStatus">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="deducted">Deducted</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field field-span-2 checkbox-field">
+        <input type="checkbox" formControlName="isEnrolled" />
+        <span>Employee is enrolled</span>
+      </label>
+
+      <div class="estimate-box field-span-2">
+        <p class="line">Calculated contribution</p>
+        <strong>PKR {{ totalAmount | number:'1.2-2' }}</strong>
+        @if (selectedConfig || selectedRule) {
+          <small>
+            Salary capped: PKR {{ salaryCapped | number:'1.2-2' }} | Employee: {{ employeeAmount | number:'1.2-2' }} | Employer: {{ employerAmount | number:'1.2-2' }}
+          </small>
+        }
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

@@ -14,6 +14,63 @@
       </label>
 
       <label class="field">
+        <span>Jurisdiction</span>
+        <select formControlName="jurisdictionId" (change)="onJurisdictionChanged()">
+          <option value="" disabled>Select jurisdiction</option>
+          @for (jurisdiction of jurisdictions; track jurisdiction.jurisdictionId) {
+            <option [value]="jurisdiction.jurisdictionId">
+              {{ jurisdiction.jurisdictionName }} ({{ jurisdiction.jurisdictionCode }})
+            </option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Authority</span>
+        <select formControlName="authorityId" (change)="onAuthorityChanged()">
+          <option value="">Any authority</option>
+          @for (authority of availableAuthorities; track authority.authorityId) {
+            <option [value]="authority.authorityId">{{ authority.authorityName }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Scheme</span>
+        <select formControlName="schemeId" (change)="onSchemeChanged()">
+          <option value="" disabled>Select scheme</option>
+          @for (scheme of availableSchemes; track scheme.schemeId) {
+            <option [value]="scheme.schemeId">{{ scheme.schemeName }} ({{ scheme.schemeCode }})</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Rule</span>
+        <select formControlName="ruleId">
+          <option value="">No explicit rule</option>
+          @for (rule of availableRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field field-span-2">
+        <span>Description</span>
+        <input type="text" formControlName="description" placeholder="Optional notes for payroll team" />
+      </label>
+
+      <label class="field">
+        <span>Contribution basis</span>
+        <select formControlName="contributionBasis">
+          <option value="gross">Gross salary</option>
+          <option value="basic">Basic salary</option>
+          <option value="fixed">Fixed contribution</option>
+          <option value="component">Selected components</option>
+        </select>
+      </label>
+
+      <label class="field">
         <span>Employee contribution %</span>
         <input type="number" min="0" max="100" step="0.01" formControlName="employeeContributionPct" placeholder="0.00" />
       </label>
@@ -23,12 +80,47 @@
         <input type="number" min="0" max="100" step="0.01" formControlName="employerContributionPct" placeholder="0.00" />
       </label>
 
+      <label class="field">
+        <span>Employee fixed amount</span>
+        <input type="number" min="0" step="0.01" formControlName="employeeFixedAmount" placeholder="optional" />
+      </label>
+
+      <label class="field">
+        <span>Employer fixed amount</span>
+        <input type="number" min="0" step="0.01" formControlName="employerFixedAmount" placeholder="optional" />
+      </label>
+
+      <label class="field">
+        <span>Minimum salary limit</span>
+        <input type="number" min="0" formControlName="minSalaryLimit" placeholder="optional" />
+      </label>
+
       <label class="field field-span-2">
         <span>Max salary cap PKR</span>
         <div class="prefix-wrap">
           <strong>Rs.</strong>
           <input type="number" min="0" formControlName="maxSalaryCapPkr" placeholder="60,000" />
         </div>
+      </label>
+
+      <label class="field field-span-2">
+        <span>Metadata (JSON)</span>
+        <textarea formControlName="metadata" rows="2" placeholder='{"notes":"optional"}'></textarea>
+      </label>
+
+      <label class="field checkbox-field">
+        <input type="checkbox" formControlName="isStatutory" />
+        <span>Statutory scheme</span>
+      </label>
+
+      <label class="field checkbox-field">
+        <input type="checkbox" formControlName="allowVoluntary" />
+        <span>Allow voluntary top-up</span>
+      </label>
+
+      <label class="field checkbox-field field-span-2">
+        <input type="checkbox" formControlName="allowWithdrawal" />
+        <span>Allow withdrawal requests</span>
       </label>
 
       <label class="field">
