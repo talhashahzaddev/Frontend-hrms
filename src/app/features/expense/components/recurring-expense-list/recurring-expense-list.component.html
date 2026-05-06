@@ -17,7 +17,7 @@
   </div>
 
   <!-- View toggle: My Recurring / All Recurring (Super Admin only) -->
-  <div class="view-tabs" *ngIf="isSuperAdmin">
+  <div class="view-tabs">
     <button type="button" class="view-tab" [class.active]="activeView === 'my-recurring'"
       (click)="setActiveView('my-recurring')">
       <mat-icon>person</mat-icon>
@@ -31,7 +31,7 @@
   </div>
 
   <!-- Super Admin: sliding panels -->
-  <div class="view-content-wrapper" *ngIf="isSuperAdmin">
+  <div class="view-content-wrapper">
     <div class="view-slider" [class.slide-all]="activeView === 'all-recurring'">
       <!-- Panel 1: My Recurring -->
       <div class="view-panel view-panel-my">
@@ -117,11 +117,11 @@
                       <mat-icon>visibility</mat-icon>
                       View details
                     </button>
-                    <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
+                    <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isRecurringPending(row)">
                       <mat-icon>edit</mat-icon>
                       Edit
                     </button>
-                    <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
+                    <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isRecurringPending(row)">
                       <mat-icon>delete</mat-icon>
                       Delete
                     </button>
@@ -262,7 +262,7 @@
   </div>
 
   <!-- HR Manager: only My Recurring (no tabs) -->
-  <ng-container *ngIf="!isSuperAdmin">
+  <ng-container>
     <mat-card class="filters-card">
       <div class="filters-header">
         <h3>Search &amp; Filters</h3>
@@ -344,11 +344,11 @@
                   <mat-icon>visibility</mat-icon>
                   View details
                 </button>
-                <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
+                <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isRecurringPending(row)">
                   <mat-icon>edit</mat-icon>
                   Edit
                 </button>
-                <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
+                <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isRecurringPending(row)">
                   <mat-icon>delete</mat-icon>
                   Delete
                 </button>
@@ -382,7 +382,7 @@
   </ng-container>
 
   <!-- Recurring requests (Super Admin, All Recurring tab only) -->
-  <div class="recurring-requests-section" *ngIf="isSuperAdmin && activeView === 'all-recurring'">
+  <div class="recurring-requests-section" *ngIf="activeView === 'all-recurring'">
     <h2 class="section-title">
       <mat-icon>pending_actions</mat-icon>
       Recurring requests

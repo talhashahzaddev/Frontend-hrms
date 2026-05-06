@@ -8,12 +8,10 @@ export const assetsRoutes: Routes = [
   },
   {
     path: 'types',
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/asset-types/asset-types.component').then(m => m.AssetTypesComponent)
   },
   {
     path: 'create',
-    data: { roles: ['Super Admin', 'HR Manager', 'Manager'] },
     loadComponent: () => import('./components/create-asset/create-asset.component').then(m => m.CreateAssetComponent)
   },
 //   {
