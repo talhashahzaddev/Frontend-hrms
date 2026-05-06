@@ -510,12 +510,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (this.currentUser?.userId) {
           this.loademployeeDetails(this.currentUser.userId);
         }
-
-        if (this.currentUser?.roleName === 'Super Admin') {
-          this.loadSubscriptionDetails();
-        } else {
-          this.currentPlanName = null;
-        }
+        this.loadSubscriptionDetails();
       });
   }
 

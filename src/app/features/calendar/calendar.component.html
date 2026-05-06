@@ -176,7 +176,7 @@
 
 
             <!-- Swap Shift Request -->
-            <button mat-menu-item (click)="initiateSwapRequest()" *ngIf="!isSuperAdmin" [disabled]="!canSwapShift()">
+            <button mat-menu-item (click)="initiateSwapRequest()" [disabled]="!canSwapShift()">
                 <mat-icon>swap_horiz</mat-icon>
                 <span>Swap Shift Request</span>
             </button>
