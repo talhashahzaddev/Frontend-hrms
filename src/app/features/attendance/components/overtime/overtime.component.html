@@ -1,224 +1,254 @@
 <div class="overtime-management-container">
 
-	<div class="page-header">
-		<div class="header-left">
-			<div class="header-icon">
-				<mat-icon>access_time</mat-icon>
-			</div>
-			<div>
-				<h1 class="page-title">Overtime Requests</h1>
-				<p class="page-subtitle">Manage employee and team overtime requests</p>
-			</div>
-		</div>
-		<div class="header-actions">
-			<button *ngIf="selectedTab === 0" mat-flat-button color="accent" (click)="openEmployeeOvertime()">
-				<mat-icon>add</mat-icon>
-				Employee Overtime Request
-			</button>
-			<button *ngIf="selectedTab === 1" mat-flat-button color="primary" (click)="openManagerOvertime()">
-				<mat-icon>add</mat-icon>
-				Manager Overtime Request
-			</button>
-		</div>
-	</div>
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>access_time</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">Overtime Requests</h1>
+        <p class="page-subtitle">Manage employee and team overtime requests</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button *ngIf="selectedTab === 0" class="btn-primary" (click)="openEmployeeOvertime()">
+        <mat-icon>add</mat-icon>
+        Employee Overtime Request
+      </button>
+      <button *ngIf="selectedTab === 1" class="btn-primary" (click)="openManagerOvertime()">
+        <mat-icon>add</mat-icon>
+        Manager Overtime Request
+      </button>
+    </div>
+  </div>
 
-	<div class="page-tabs">
-		<button class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
-			<mat-icon>person</mat-icon>
-			<span>Employee</span>
-			<span class="tab-badge">{{ (employeeCreatedRequests.length + employeeAssignedRequests.length) || 0 }}</span>
-		</button>
-		<button class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
-			<mat-icon>group</mat-icon>
-			<span>Manager</span>
-			<span class="tab-badge">{{ pendingRequests.length || 0 }}</span>
-		</button>
-	</div>
+  <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
+  <!-- Today's Overtime Card -->
+  <div class="today-overtime-card" *ngIf="todayOvertime; else noTodayOvertime">
+    <div class="section-card">
+      <div class="section-header">
+        <h3>Today's Overtime</h3>
+        <div class="header-meta">
+          <span [class]="'status-badge ' + getStatusClass(todayOvertime.status)">{{ todayOvertime.status }}</span>
+        </div>
+      </div>
 
-	<div [ngSwitch]="selectedTab" class="tab-content-wrapper">
-		<!-- Employee Tab: contains two tables -->
-		<div *ngSwitchCase="0" class="tab-content">
+      <div class="table-wrap compact">
+        <div class="today-info-row">
+          <div><strong>Date:</strong> {{ todayOvertime.overtimeDate | date:'mediumDate' }}</div>
+          <div><strong>Start:</strong> {{ todayOvertime.overtimeStart }}</div>
+          <div><strong>End:</strong> {{ todayOvertime.overtimeEnd }}</div>
+          <div><strong>Requested Hours:</strong> {{ todayOvertime.requestedHours }}</div>
+        </div>
+        <div *ngIf="todayOvertime.reason" class="today-reason">
+          <strong>Reason:</strong>
+          <span class="cell-sub">{{ todayOvertime.reason }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-			<div class="overtime-table" style="margin-top:24px;">
-				<h3>Employee All Created Overtime Requests</h3>
-				<table mat-table [dataSource]="employeeCreatedRequests" class="mat-elevation-z1">
+  <ng-template #noTodayOvertime>
+    <div class="today-overtime-card empty" aria-hidden="true">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Today's Overtime</h3>
+        </div>
+        <div class="table-wrap compact empty-state small">
+          <mat-icon class="empty-icon">schedule</mat-icon>
+          <div class="empty-text">No overtime requests for today.</div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <div class="page-tabs">
+    <button class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+      <mat-icon>person</mat-icon>
+      <span>Employee</span>
+      <span class="tab-badge">{{ (employeeCreatedRequests.length + employeeAssignedRequests.length) || 0 }}</span>
+    </button>
+    <button class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+      <mat-icon>group</mat-icon>
+      <span>Manager</span>
+      <span class="tab-badge">{{ pendingRequests.length || 0 }}</span>
+    </button>
+  </div>
 
-					<ng-container matColumnDef="overtimeStart">
-						<th mat-header-cell *matHeaderCellDef>Overtime Start</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeStart }}</td>
-					</ng-container>
+  <!-- ═══ TAB CONTENT ═══════════════════════════════════════════════════ -->
+  <div [ngSwitch]="selectedTab" class="tab-content-wrapper">
 
-					<ng-container matColumnDef="overtimeEnd">
-						<th mat-header-cell *matHeaderCellDef>Overtime End</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeEnd }}</td>
-					</ng-container>
+    <!-- ─── EMPLOYEE TAB ─────────────────────────────────────────────── -->
+    <div *ngSwitchCase="0" class="tab-content">
 
-					<ng-container matColumnDef="overtimeDate">
-						<th mat-header-cell *matHeaderCellDef>Overtime Date</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeDate | date:'mediumDate' }}</td>
-					</ng-container>
+      <!-- Employee Created Overtime Requests -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>My Overtime Requests</h3>
+        </div>
 
-					<ng-container matColumnDef="overtimeType">
-						<th mat-header-cell *matHeaderCellDef>Overtime Type</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeType }}</td>
-					</ng-container>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Overtime Start</th>
+                <th>Overtime End</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Requested Hours</th>
+                <th>Status</th>
+                <th>Requested At</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of employeeCreatedRequests" class="table-row">
+                <td>{{ r.overtimeStart }}</td>
+                <td>{{ r.overtimeEnd }}</td>
+                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.overtimeType }}</td>
+                <td>{{ r.requestedHours }}</td>
+                <td>
+                  <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
+                </td>
+                <td class="date-cell">{{ r.createdAt | date:'short' }}</td>
+              </tr>
+            </tbody>
+          </table>
 
-					<ng-container matColumnDef="requestedHours">
-						<th mat-header-cell *matHeaderCellDef>Requested Hours</th>
-						<td mat-cell *matCellDef="let r">{{ r.requestedHours }}</td>
-					</ng-container>
+          <div *ngIf="!employeeCreatedRequests?.length" class="empty-state">
+            <mat-icon class="empty-icon">schedule</mat-icon>
+            <h3>No Overtime Requests</h3>
+            <p>You haven't submitted any overtime requests yet.</p>
+          </div>
+        </div>
+      </div>
 
-					<ng-container matColumnDef="status">
-						<th mat-header-cell *matHeaderCellDef>Status</th>
-						<td mat-cell *matCellDef="let r">{{ r.status }}</td>
-					</ng-container>
+      <!-- Employee Assigned Overtime Requests -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Assigned Overtime Requests</h3>
+        </div>
 
-					<ng-container matColumnDef="createdAt">
-						<th mat-header-cell *matHeaderCellDef>Requested At</th>
-						<td mat-cell *matCellDef="let r">{{ r.createdAt | date:'short' }}</td>
-					</ng-container>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Requested By</th>
+                <th>Overtime Start</th>
+                <th>Overtime End</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of employeeAssignedRequests" class="table-row">
+                <td>
+                  <div class="cell-title">{{ r.requestedByName }}</div>
+                </td>
+                <td>{{ r.overtimeStart }}</td>
+                <td>{{ r.overtimeEnd }}</td>
+                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.overtimeType }}</td>
+                <td>
+                  <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
+                </td>
+                <td class="text-right">
+                  <button mat-icon-button [matMenuTriggerFor]="menuEmployee" class="action-btn" matTooltip="Actions">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menuEmployee="matMenu">
+                    <button mat-menu-item (click)="acceptEmployeeRequest(r.requestId)">
+                      <mat-icon>check</mat-icon>
+                      <span>Accept</span>
+                    </button>
+                    <button mat-menu-item (click)="rejectEmployeeRequest(r.requestId)">
+                      <mat-icon>close</mat-icon>
+                      <span>Reject</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-					<tr mat-header-row *matHeaderRowDef="displayedCreatedColumns"></tr>
-					<tr mat-row *matRowDef="let row; columns: displayedCreatedColumns;"></tr>
-					<tr *ngIf="!employeeCreatedRequests || !employeeCreatedRequests.length">
-						<td mat-cell [attr.colspan]="displayedCreatedColumns.length">No data yet</td>
-					</tr>
-				</table>
-			</div>
+          <div *ngIf="!employeeAssignedRequests?.length" class="empty-state">
+            <mat-icon class="empty-icon">assignment</mat-icon>
+            <h3>No Assigned Requests</h3>
+            <p>No overtime requests have been assigned to you.</p>
+          </div>
+        </div>
+      </div>
 
-			<!-- Employee Assigned Overtime Requests -->
-			<div class="overtime-table" style="margin-top:24px;">
-				<h3>Employee Assigned Overtime Requests that manager sent</h3>
-				<table mat-table [dataSource]="employeeAssignedRequests" class="mat-elevation-z1">
+    </div>
 
-					<ng-container matColumnDef="requestedByName">
-						<th mat-header-cell *matHeaderCellDef>Requested By</th>
-						<td mat-cell *matCellDef="let r">{{ r.requestedByName }}</td>
-					</ng-container>
+    <!-- ─── MANAGER TAB ──────────────────────────────────────────────── -->
+    <div *ngSwitchCase="1" class="tab-content">
 
-					<ng-container matColumnDef="overtimeDate">
-						<th mat-header-cell *matHeaderCellDef>OverTime Date</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeDate | date:'mediumDate' }}</td>
-					</ng-container>
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Team Overtime Requests</h3>
+        </div>
 
-					<ng-container matColumnDef="overtimeStart">
-						<th mat-header-cell *matHeaderCellDef>Overtime Start</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeStart }}</td>
-					</ng-container>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Hours</th>
+                <th>Reason</th>
+                <th>Requested At</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of pendingRequests" class="table-row">
+                <td>
+                  <div class="cell-title">{{ r.requestedByName }}</div>
+                </td>
+                <td>{{ r.overtimeType }}</td>
+                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.requestedHours }}</td>
+                <td>
+                  <span class="cell-sub">{{ r.reason }}</span>
+                </td>
+                <td class="date-cell">{{ r.createdAt | date:'short' }}</td>
+                <td>
+                  <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
+                </td>
+                <td class="text-right">
+                  <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn" matTooltip="Actions">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menu="matMenu">
+                    <button mat-menu-item (click)="acceptRequest(r.requestId)">
+                      <mat-icon>check</mat-icon>
+                      <span>Accept</span>
+                    </button>
+                    <button mat-menu-item (click)="rejectRequest(r.requestId)">
+                      <mat-icon>close</mat-icon>
+                      <span>Reject</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-					<ng-container matColumnDef="overtimeEnd">
-						<th mat-header-cell *matHeaderCellDef>Overtime End</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeEnd }}</td>
-					</ng-container>
+          <div *ngIf="!pendingRequests?.length" class="empty-state">
+            <mat-icon class="empty-icon">group</mat-icon>
+            <h3>No Pending Requests</h3>
+            <p>There are no team overtime requests awaiting your review.</p>
+          </div>
+        </div>
+      </div>
 
-					<ng-container matColumnDef="overtimeType">
-						<th mat-header-cell *matHeaderCellDef>Overtime Type</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeType }}</td>
-					</ng-container>
+    </div>
 
-					<ng-container matColumnDef="status">
-						<th mat-header-cell *matHeaderCellDef>Status</th>
-						<td mat-cell *matCellDef="let r">{{ r.status }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="actions">
-						<th mat-header-cell *matHeaderCellDef></th>
-						<td mat-cell *matCellDef="let r">
-							<button mat-icon-button [matMenuTriggerFor]="menuEmployee" aria-label="Employee Actions" matTooltip="Actions">
-								<mat-icon>more_vert</mat-icon>
-							</button>
-							<mat-menu #menuEmployee="matMenu">
-								<button mat-menu-item (click)="acceptEmployeeRequest(r.requestId)">
-									<mat-icon>check</mat-icon>
-									<span>Accept</span>
-								</button>
-								<button mat-menu-item (click)="rejectEmployeeRequest(r.requestId)">
-									<mat-icon>close</mat-icon>
-									<span>Reject</span>
-								</button>
-							</mat-menu>
-						</td>
-					</ng-container>
-
-					<tr mat-header-row *matHeaderRowDef="displayedEmployeeColumns"></tr>
-					<tr mat-row *matRowDef="let row; columns: displayedEmployeeColumns;"></tr>
-					<tr *ngIf="!employeeAssignedRequests || !employeeAssignedRequests.length">
-						<td mat-cell [attr.colspan]="displayedEmployeeColumns.length">No data yet</td>
-					</tr>
-				</table>
-
-			</div>
-		</div>
-
-		<!-- Manager Tab: contains team overtime requests -->
-		<div *ngSwitchCase="1" class="tab-content">
-			<div class="overtime-table">
-				<h3>Team Overtime Requests for Manager</h3>
-				<table mat-table [dataSource]="pendingRequests" class="mat-elevation-z1">
-
-					<ng-container matColumnDef="requestedByName">
-						<th mat-header-cell *matHeaderCellDef>Employee</th>
-						<td mat-cell *matCellDef="let r">{{ r.requestedByName }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="overtimeType">
-						<th mat-header-cell *matHeaderCellDef>Type</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeType }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="overtimeDate">
-						<th mat-header-cell *matHeaderCellDef>Date</th>
-						<td mat-cell *matCellDef="let r">{{ r.overtimeDate | date:'mediumDate' }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="requestedHours">
-						<th mat-header-cell *matHeaderCellDef>Hours</th>
-						<td mat-cell *matCellDef="let r">{{ r.requestedHours }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="reason">
-						<th mat-header-cell *matHeaderCellDef>Reason</th>
-						<td mat-cell *matCellDef="let r">{{ r.reason }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="createdAt">
-						<th mat-header-cell *matHeaderCellDef>Requested At</th>
-						<td mat-cell *matCellDef="let r">{{ r.createdAt | date:'short' }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="status">
-						<th mat-header-cell *matHeaderCellDef>Status</th>
-						<td mat-cell *matCellDef="let r">{{ r.status }}</td>
-					</ng-container>
-
-					<ng-container matColumnDef="actions">
-						<th mat-header-cell *matHeaderCellDef></th>
-						<td mat-cell *matCellDef="let r">
-							<button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Actions" matTooltip="Actions">
-								<mat-icon>more_vert</mat-icon>
-							</button>
-							<mat-menu #menu="matMenu">
-								<button mat-menu-item (click)="acceptRequest(r.requestId)">
-									<mat-icon>check</mat-icon>
-									<span>Accept</span>
-								</button>
-								<button mat-menu-item (click)="rejectRequest(r.requestId)">
-									<mat-icon>close</mat-icon>
-									<span>Reject</span>
-								</button>
-							</mat-menu>
-						</td>
-					</ng-container>
-
-					<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-					<tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-					<tr *ngIf="!pendingRequests || !pendingRequests.length">
-						<td mat-cell [attr.colspan]="displayedColumns.length">No data yet</td>
-					</tr>
-				</table>
-			</div>
-		</div>
-
-	</div>
+  </div>
 
 </div>

@@ -219,5 +219,11 @@ export const payrollRoutes: Routes = [
     loadComponent: () =>
       import('./components/my-social-security/my-social-security.component').then(m => m.MySocialSecurityComponent),
     title: 'My Social Security - HRMS'
+  },
+  {
+    path: 'results',
+    loadComponent: () =>
+      import('./components/payroll-result/payroll-result.component').then(m => m.PayrollResultComponent),
+    title: 'Payroll Results - HRMS'
   }
 ];
