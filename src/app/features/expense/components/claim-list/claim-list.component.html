@@ -1,15 +1,15 @@
-<!-- Claims List Container -->
-<div class="claim-list-container">
+<div class="time-tracking-container">
+  <!-- Page Header -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
+    <div class="title-section">
+      <h1 class="title">
         <mat-icon>receipt_long</mat-icon>
         Expense Claims
       </h1>
-      <p class="page-subtitle">View and manage your expense claims</p>
+      <p class="subtitle">View and manage your expense claims</p>
     </div>
-    <div class="header-actions">
-      <button mat-flat-button (click)="openCreateDialog()" class="add-button">
+    <div class="actions">
+      <button class="add-btn" mat-flat-button (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Claim
       </button>
@@ -18,13 +18,11 @@
 
   <!-- View toggle: My Claims / All Claims (Super Admin only) -->
   <div class="view-tabs">
-    <button type="button" class="view-tab" [class.active]="activeView === 'my-claims'"
-      (click)="setActiveView('my-claims')">
+    <button type="button" class="tab-item" [class.active]="activeView === 'my-claims'" (click)="setActiveView('my-claims')">
       <mat-icon>person</mat-icon>
       My Claims
     </button>
-    <button type="button" class="view-tab" [class.active]="activeView === 'all-claims'"
-      (click)="setActiveView('all-claims')">
+    <button type="button" class="tab-item" [class.active]="activeView === 'all-claims'" (click)="setActiveView('all-claims')">
       <mat-icon>groups</mat-icon>
       All Claims
     </button>
@@ -34,453 +32,223 @@
   <div class="view-content-wrapper">
     <div class="view-slider" [class.slide-all]="activeView === 'all-claims'">
       <!-- Panel 1: My Claims -->
-      <div class="view-panel view-panel-my-claims">
-        <mat-card class="filters-card">
-          <div class="filters-header">
-            <h3>Search &amp; Filters</h3>
-            <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()"
-              class="clear-filters-btn">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
-          </div>
-          <div class="filters-content filters-content-all-claims">
-            <mat-form-field class="search-field">
-              <mat-label>Search claims</mat-label>
-              <input matInput [formControl]="searchControl" placeholder="Search by title, category, description...">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-            <mat-form-field class="filter-field date-field">
-              <mat-label>Start date</mat-label>
-              <input matInput [matDatepicker]="myClaimsStartPicker" [formControl]="myClaimsStartDate"
-                placeholder="From">
-              <mat-datepicker-toggle matIconSuffix [for]="myClaimsStartPicker"></mat-datepicker-toggle>
-              <mat-datepicker #myClaimsStartPicker></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field class="filter-field date-field">
-              <mat-label>End date</mat-label>
-              <input matInput [matDatepicker]="myClaimsEndPicker" [formControl]="myClaimsEndDate"
-                placeholder="To">
-              <mat-datepicker-toggle matIconSuffix [for]="myClaimsEndPicker"></mat-datepicker-toggle>
-              <mat-datepicker #myClaimsEndPicker></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="myClaimsStatus">
-                <mat-option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">
-                  {{ opt.label }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Category</mat-label>
-              <mat-select [formControl]="myClaimsCategoryId">
-                <mat-option [value]="null">All categories</mat-option>
-                <mat-option *ngFor="let cat of categories" [value]="cat.categoryId">
-                  {{ cat.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </mat-card>
-
-        <mat-card class="table-card">
-          <div *ngIf="isLoading" class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Loading claims...</p>
+      <div class="view-panel">
+        <div class="content-card">
+          <div class="toolbar">
+            <div class="filters-row">
+              <div class="search-box">
+                <mat-icon>search</mat-icon>
+                <input type="text" [formControl]="searchControl" placeholder="Search my claims...">
+              </div>
+              <div class="date-filters">
+                <mat-form-field appearance="outline" class="compact-date">
+                  <mat-label>Start</mat-label>
+                  <input matInput [matDatepicker]="myStart" [formControl]="myClaimsStartDate">
+                  <mat-datepicker-toggle matSuffix [for]="myStart"></mat-datepicker-toggle>
+                  <mat-datepicker #myStart></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="compact-date">
+                  <mat-label>End</mat-label>
+                  <input matInput [matDatepicker]="myEnd" [formControl]="myClaimsEndDate">
+                  <mat-datepicker-toggle matSuffix [for]="myEnd"></mat-datepicker-toggle>
+                  <mat-datepicker #myEnd></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <select class="filter-select" [formControl]="myClaimsStatus">
+                <option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">{{ opt.label }}</option>
+              </select>
+              <select class="filter-select" [formControl]="myClaimsCategoryId">
+                <option [value]="null">All categories</option>
+                <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.name }}</option>
+              </select>
+              <div class="filter-actions">
+                <button class="clear-btn" mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
+                  <mat-icon>clear</mat-icon> Clear
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!isLoading" class="table-container">
-            <table mat-table [dataSource]="filteredClaims" class="claim-table">
-              <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Title</th>
-                <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-              </ng-container>
-              <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="category-name">{{ row.categoryName || '—' }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="billDate">
-                <th mat-header-cell *matHeaderCellDef>Bill Date</th>
-                <td mat-cell *matCellDef="let row">{{ row.billDate | date:'MMM d, y' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let row">
-                  <mat-chip-set>
-                    <mat-chip [class]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</mat-chip>
-                  </mat-chip-set>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let row">
-                  <button mat-icon-button [matMenuTriggerFor]="actionMenu">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #actionMenu="matMenu">
-                    <button mat-menu-item (click)="viewClaimDetails(row)">
+          <div class="table-responsive">
+            <div *ngIf="isLoading" class="loading-state">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading claims...</p>
+            </div>
+            <table *ngIf="!isLoading" class="custom-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Bill Date</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of filteredClaims" class="table-row">
+                  <td class="font-semibold">{{ row.title }}</td>
+                  <td>{{ row.categoryName || '—' }}</td>
+                  <td class="font-semibold">{{ row.amount | currency:organizationCurrency }}</td>
+                  <td>{{ row.billDate | date:'MMM d, y' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
+                  </td>
+                  <td class="action-cell">
+                    <button class="action-btn hover-primary" mat-icon-button (click)="viewClaimDetails(row)">
                       <mat-icon>visibility</mat-icon>
-                      View details
                     </button>
-                    <button mat-menu-item (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
+                    <button class="action-btn hover-primary" mat-icon-button (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
                       <mat-icon>edit</mat-icon>
-                      Edit
                     </button>
-                    <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isClaimPending(row)">
+                    <button class="action-btn hover-danger" mat-icon-button (click)="deleteClaim(row)" [disabled]="!isClaimPending(row)">
                       <mat-icon>delete</mat-icon>
-                      Delete
                     </button>
-                  </mat-menu>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  </td>
+                </tr>
+              </tbody>
             </table>
             <mat-paginator *ngIf="!isLoading && myClaimsTotalCount > 0"
               [length]="myClaimsTotalCount"
               [pageSize]="myClaimsPageSize"
               [pageIndex]="myClaimsPage - 1"
               [pageSizeOptions]="[5, 10, 25, 50]"
-              (page)="onMyClaimsPageChange($event)"
-              showFirstLastButtons>
+              (page)="onMyClaimsPageChange($event)">
             </mat-paginator>
-            <div *ngIf="filteredClaims.length === 0" class="empty-state">
-              <mat-icon>receipt_long</mat-icon>
-              <h3>No Claims Found</h3>
-              <p *ngIf="hasFiltersApplied()">No claims match your search.</p>
-              <p *ngIf="!hasFiltersApplied()">Submit your first expense claim to get started.</p>
-              <button *ngIf="!hasFiltersApplied()" mat-flat-button (click)="openCreateDialog()" class="add-first-btn">
-                <mat-icon>add</mat-icon>
-                Add Claim
-              </button>
-            </div>
           </div>
-        </mat-card>
+        </div>
       </div>
 
-      <!-- Panel 2: All Claims (API-driven, no actions) -->
-      <div class="view-panel view-panel-all-claims">
-        <mat-card class="filters-card">
-          <div class="filters-header">
-            <h3>Search &amp; Filters</h3>
-            <button mat-stroked-button (click)="clearAllClaimsFilters()" [disabled]="!hasAllClaimsFiltersApplied()"
-              class="clear-filters-btn">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
-          </div>
-          <div class="filters-content filters-content-all-claims">
-            <mat-form-field class="search-field">
-              <mat-label>Search claims</mat-label>
-              <input matInput [formControl]="allClaimsSearchControl"
-                placeholder="Search by title, category, description, employee...">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-            <mat-form-field class="filter-field date-field">
-              <mat-label>Start date</mat-label>
-              <input matInput [matDatepicker]="allClaimsStartPicker" [formControl]="allClaimsStartDate"
-                placeholder="From">
-              <mat-datepicker-toggle matIconSuffix [for]="allClaimsStartPicker"></mat-datepicker-toggle>
-              <mat-datepicker #allClaimsStartPicker></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field class="filter-field date-field">
-              <mat-label>End date</mat-label>
-              <input matInput [matDatepicker]="allClaimsEndPicker" [formControl]="allClaimsEndDate"
-                placeholder="To">
-              <mat-datepicker-toggle matIconSuffix [for]="allClaimsEndPicker"></mat-datepicker-toggle>
-              <mat-datepicker #allClaimsEndPicker></mat-datepicker>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="allClaimsStatus">
-                <mat-option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">
-                  {{ opt.label }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Category</mat-label>
-              <mat-select [formControl]="allClaimsCategoryId">
-                <mat-option [value]="null">All categories</mat-option>
-                <mat-option *ngFor="let cat of categories" [value]="cat.categoryId">
-                  {{ cat.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </mat-card>
-
-        <mat-card class="table-card">
-          <div *ngIf="isLoadingAllClaims" class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Loading all claims...</p>
+      <!-- Panel 2: All Claims -->
+      <div class="view-panel">
+        <div class="content-card">
+          <div class="toolbar">
+            <div class="filters-row">
+              <div class="search-box">
+                <mat-icon>search</mat-icon>
+                <input type="text" [formControl]="allClaimsSearchControl" placeholder="Search all claims...">
+              </div>
+              <div class="date-filters">
+                <mat-form-field appearance="outline" class="compact-date">
+                  <mat-label>Start</mat-label>
+                  <input matInput [matDatepicker]="allStart" [formControl]="allClaimsStartDate">
+                  <mat-datepicker-toggle matSuffix [for]="allStart"></mat-datepicker-toggle>
+                  <mat-datepicker #allStart></mat-datepicker>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="compact-date">
+                  <mat-label>End</mat-label>
+                  <input matInput [matDatepicker]="allEnd" [formControl]="allClaimsEndDate">
+                  <mat-datepicker-toggle matSuffix [for]="allEnd"></mat-datepicker-toggle>
+                  <mat-datepicker #allEnd></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <select class="filter-select" [formControl]="allClaimsStatus">
+                <option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">{{ opt.label }}</option>
+              </select>
+              <select class="filter-select" [formControl]="allClaimsCategoryId">
+                <option [value]="null">All categories</option>
+                <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.name }}</option>
+              </select>
+              <div class="filter-actions">
+                <button class="clear-btn" mat-stroked-button (click)="clearAllClaimsFilters()" [disabled]="!hasAllClaimsFiltersApplied()">
+                  <mat-icon>clear</mat-icon> Clear
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!isLoadingAllClaims" class="table-container">
-            <table mat-table [dataSource]="filteredAllClaims" class="claim-table">
-              <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Title</th>
-                <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-              </ng-container>
-              <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="category-name">{{ row.categoryName || '—' }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="billDate">
-                <th mat-header-cell *matHeaderCellDef>Bill Date</th>
-                <td mat-cell *matCellDef="let row">{{ row.billDate | date:'MMM d, y' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let row">
-                  <mat-chip-set>
-                    <mat-chip [class]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</mat-chip>
-                  </mat-chip-set>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="details">
-                <th mat-header-cell *matHeaderCellDef>Details</th>
-                <td mat-cell *matCellDef="let row">
-                  <button mat-stroked-button class="show-details-btn" (click)="viewClaimDetails(row)">
-                    <mat-icon>visibility</mat-icon>
-                    Show details
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumnsAllClaims"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsAllClaims;"></tr>
+          <div class="table-responsive">
+            <div *ngIf="isLoadingAllClaims" class="loading-state">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading all claims...</p>
+            </div>
+            <table *ngIf="!isLoadingAllClaims" class="custom-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Bill Date</th>
+                  <th>Status</th>
+                  <th class="text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of filteredAllClaims" class="table-row">
+                  <td class="font-semibold">{{ row.title }}</td>
+                  <td>{{ row.categoryName || '—' }}</td>
+                  <td class="font-semibold">{{ row.amount | currency:organizationCurrency }}</td>
+                  <td>{{ row.billDate | date:'MMM d, y' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
+                  </td>
+                  <td class="action-cell">
+                    <button class="action-btn hover-primary" mat-icon-button (click)="viewClaimDetails(row)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
             <mat-paginator *ngIf="!isLoadingAllClaims && allClaimsTotalCount > 0"
               [length]="allClaimsTotalCount"
               [pageSize]="allClaimsPageSize"
               [pageIndex]="allClaimsPage - 1"
               [pageSizeOptions]="[5, 10, 25, 50]"
-              (page)="onAllClaimsPageChange($event)"
-              showFirstLastButtons>
+              (page)="onAllClaimsPageChange($event)">
             </mat-paginator>
-            <div *ngIf="filteredAllClaims.length === 0" class="empty-state">
-              <mat-icon>receipt_long</mat-icon>
-              <h3>No Claims Found</h3>
-              <p *ngIf="hasAllClaimsFiltersApplied()">No claims match your search.</p>
-              <p *ngIf="!hasAllClaimsFiltersApplied()">There are no expense claims in the organization.</p>
-            </div>
           </div>
-        </mat-card>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Non–Super Admin (Employee, HR, Manager): only My Claims, no tabs -->
-  <ng-container>
-    <mat-card class="filters-card">
-      <div class="filters-header">
-        <h3>Search &amp; Filters</h3>
-        <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()" class="clear-filters-btn">
-          <mat-icon>clear</mat-icon>
-          Clear
-        </button>
-      </div>
-      <div class="filters-content filters-content-all-claims">
-        <mat-form-field class="search-field">
-          <mat-label>Search claims</mat-label>
-          <input matInput [formControl]="searchControl" placeholder="Search by title, category, description...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="filter-field date-field">
-          <mat-label>Start date</mat-label>
-          <input matInput [matDatepicker]="myClaimsStartPickerNonAdmin" [formControl]="myClaimsStartDate"
-            placeholder="From">
-          <mat-datepicker-toggle matIconSuffix [for]="myClaimsStartPickerNonAdmin"></mat-datepicker-toggle>
-          <mat-datepicker #myClaimsStartPickerNonAdmin></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field class="filter-field date-field">
-          <mat-label>End date</mat-label>
-          <input matInput [matDatepicker]="myClaimsEndPickerNonAdmin" [formControl]="myClaimsEndDate"
-            placeholder="To">
-          <mat-datepicker-toggle matIconSuffix [for]="myClaimsEndPickerNonAdmin"></mat-datepicker-toggle>
-          <mat-datepicker #myClaimsEndPickerNonAdmin></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field class="filter-field">
-          <mat-label>Status</mat-label>
-          <mat-select [formControl]="myClaimsStatus">
-            <mat-option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">
-              {{ opt.label }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field class="filter-field">
-          <mat-label>Category</mat-label>
-          <mat-select [formControl]="myClaimsCategoryId">
-            <mat-option [value]="null">All categories</mat-option>
-            <mat-option *ngFor="let cat of categories" [value]="cat.categoryId">
-              {{ cat.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </mat-card>
-
-    <mat-card class="table-card">
-      <div *ngIf="isLoading" class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading claims...</p>
-      </div>
-
-      <div *ngIf="!isLoading" class="table-container">
-        <table mat-table [dataSource]="filteredClaims" class="claim-table">
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-          </ng-container>
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>Category</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="category-name">{{ row.categoryName || '—' }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="billDate">
-            <th mat-header-cell *matHeaderCellDef>Bill Date</th>
-            <td mat-cell *matCellDef="let row">{{ row.billDate | date:'MMM d, y' }}</td>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let row">
-              <mat-chip-set>
-                <mat-chip [class]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</mat-chip>
-              </mat-chip-set>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let row">
-              <button mat-icon-button [matMenuTriggerFor]="actionMenu">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #actionMenu="matMenu">
-                <button mat-menu-item (click)="viewClaimDetails(row)">
-                  <mat-icon>visibility</mat-icon>
-                  View details
-                </button>
-                <button mat-menu-item (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
-                  <mat-icon>edit</mat-icon>
-                  Edit
-                </button>
-                <button mat-menu-item (click)="deleteClaim(row)" class="danger-action" [disabled]="!isClaimPending(row)">
-                  <mat-icon>delete</mat-icon>
-                  Delete
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-        <mat-paginator *ngIf="!isLoading && myClaimsTotalCount > 0"
-          [length]="myClaimsTotalCount"
-          [pageSize]="myClaimsPageSize"
-          [pageIndex]="myClaimsPage - 1"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (page)="onMyClaimsPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-        <div *ngIf="filteredClaims.length === 0" class="empty-state">
-          <mat-icon>receipt_long</mat-icon>
-          <h3>No Claims Found</h3>
-          <p *ngIf="hasFiltersApplied()">No claims match your search.</p>
-          <p *ngIf="!hasFiltersApplied()">Submit your first expense claim to get started.</p>
-          <button *ngIf="!hasFiltersApplied()" mat-flat-button (click)="openCreateDialog()" class="add-first-btn">
-            <mat-icon>add</mat-icon>
-            Add Claim
-          </button>
-        </div>
-      </div>
-    </mat-card>
-  </ng-container>
-
-  <!-- Claim Requests (Super Admin, All Claims tab only): card-style Accept / Reject -->
+  <!-- Claim Requests Section (Super Admin, All Claims tab only) -->
   <div class="claim-requests-section" *ngIf="activeView === 'all-claims'">
-    <h2 class="section-title">
-      <mat-icon>pending_actions</mat-icon>
-      Claim requests
-    </h2>
-    <p class="section-subtitle">Approve or reject pending expense claims</p>
+    <div class="section-header">
+      <h2 class="title">Claim Requests</h2>
+      <p class="subtitle">Approve or reject pending expense claims</p>
+    </div>
 
-    <div *ngIf="isLoadingPending" class="loading-container">
+    <div *ngIf="isLoadingPending" class="loading-state">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading pending claims...</p>
     </div>
 
-    <div *ngIf="!isLoadingPending" class="pending-approvals-section">
-      <h3>Pending Approvals ({{ pendingClaims.length }})</h3>
-
+    <div *ngIf="!isLoadingPending" class="approvals-grid">
       <div *ngFor="let request of pendingClaims" class="approval-card">
-        <div class="approval-header">
-          <div class="employee-info">
-            <div class="employee-avatar">
-              {{ getInitials(request.employeeName) }}
-            </div>
-            <div class="employee-details">
-              <h4>{{ request.employeeName }}</h4>
-              <p>{{ request.categoryName || '—' }}</p>
+        <div class="card-header">
+          <div class="employee-meta">
+            <div class="avatar">{{ getInitials(request.employeeName) }}</div>
+            <div class="info">
+              <span class="name">{{ request.employeeName }}</span>
+              <span class="category">{{ request.categoryName || '—' }}</span>
             </div>
           </div>
-          <div class="claim-meta">
-            <span class="claim-title">{{ request.title }}</span>
-            <span class="amount-badge">{{ request.amount | currency:organizationCurrency }}</span>
-            <span class="bill-date">{{ request.billDate | date:'mediumDate' }}</span>
+          <div class="amount-tag">{{ request.amount | currency:organizationCurrency }}</div>
+        </div>
+        <div class="card-body">
+          <h4 class="claim-title">{{ request.title }}</h4>
+          <p class="description" *ngIf="request.description">{{ request.description }}</p>
+          <div class="meta-row">
+            <span class="date"><mat-icon>calendar_today</mat-icon> {{ request.billDate | date:'mediumDate' }}</span>
           </div>
         </div>
-
-        <div class="claim-description" *ngIf="request.description">
-          <strong>Description:</strong> {{ request.description }}
-        </div>
-
-        <div class="approval-actions">
-          <button mat-stroked-button color="warn" (click)="rejectClaim(request)">
-            <mat-icon>close</mat-icon>
-            Reject
+        <div class="card-actions">
+          <button class="btn-reject" mat-stroked-button color="warn" (click)="rejectClaim(request)">
+            <mat-icon>close</mat-icon> Reject
           </button>
-          <button mat-stroked-button class="btn-details" (click)="viewClaimDetails(request)">
-            <mat-icon>visibility</mat-icon>
-            Details
+          <button class="btn-details" mat-stroked-button (click)="viewClaimDetails(request)">
+            <mat-icon>visibility</mat-icon> Details
           </button>
-          <button mat-flat-button class="approve-button" (click)="acceptClaim(request)">
-            <mat-icon>check</mat-icon>
-            Approve
+          <button class="btn-approve" mat-flat-button color="primary" (click)="acceptClaim(request)">
+            <mat-icon>check</mat-icon> Approve
           </button>
         </div>
       </div>
-
-      <div *ngIf="pendingClaims.length === 0" class="empty-state">
+      <div *ngIf="pendingClaims.length === 0" class="empty-state-simple">
         <mat-icon>check_circle</mat-icon>
-        <h3>No Pending Approvals</h3>
-        <p>There are no expense claims waiting for approval.</p>
+        <p>No pending approvals</p>
       </div>
     </div>
   </div>
