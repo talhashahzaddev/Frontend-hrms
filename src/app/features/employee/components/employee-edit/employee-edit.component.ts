@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,6 +21,7 @@ import { SettingsService } from '../../../settings/services/settings.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
@@ -42,6 +43,8 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   isLoading = false;
   currencySymbol: string = '$';
   organizationCurrency: string = 'USD';
+  countries: { name: string; code: string; flag?: string; cca2?: string }[] = [];
+  countryFilter = '';
   private destroy$ = new Subject<void>();
 
   employmentTypes = [
@@ -114,13 +117,35 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
 
 initializeForm(): void {
   const emp = this.data.employee;
+  // Try to split international phone into country code + local number
+  let detectedCode: string | null = null;
+  let plainPhone = emp.phone || '';
+  if (plainPhone && typeof plainPhone === 'string' && plainPhone.startsWith('+')) {
+    const m = plainPhone.match(/^\+(\d{1,4})(.*)$/);
+    if (m) {
+      detectedCode = `+${m[1]}`;
+      plainPhone = m[2].replace(/[^0-9]/g, '').trim();
+    }
+  }
+
+  // Emergency contact phone split
+  let detectedEmergencyCode: string | null = null;
+  let plainEmergencyPhone = emp.emergencyContact?.phone || '';
+  if (plainEmergencyPhone && typeof plainEmergencyPhone === 'string' && plainEmergencyPhone.startsWith('+')) {
+    const em = plainEmergencyPhone.match(/^\+(\d{1,4})(.*)$/);
+    if (em) {
+      detectedEmergencyCode = `+${em[1]}`;
+      plainEmergencyPhone = em[2].replace(/[^0-9]/g, '').trim();
+    }
+  }
 
   this.employeeForm = this.fb.group({
     employeeCode: [{ value: emp.employeeCode, disabled: true }],
     firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
     lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
     email: [emp.email, [Validators.required, Validators.email]],
-    phone: [emp.phone, [Validators.pattern(/^\+?[0-9]{10,15}$/)]],
+    phoneCountryCode: [detectedCode],
+    phone: [plainPhone, [Validators.pattern(/^\+?[0-9]{6,15}$/)]],
     dateOfBirth: [emp.dateOfBirth ? new Date(emp.dateOfBirth) : null],
     gender: [emp.gender?.toLowerCase() || null],
     departmentId: [emp.departmentId || null],
@@ -142,7 +167,8 @@ initializeForm(): void {
     emergencyContact: this.fb.group({
       name: [emp.emergencyContact?.name || ''],
       email: [emp.emergencyContact?.email || ''],
-      phone: [emp.emergencyContact?.phone || ''],
+      phoneCountryCode: [detectedEmergencyCode],
+      phone: [plainEmergencyPhone, [Validators.pattern(/^\+?[0-9]{6,15}$/)]],
       relationship: [emp.emergencyContact?.relationship || '']
     })
   });
@@ -194,7 +220,8 @@ onSave(): void {
   formData.append('FirstName', formValue.firstName);
   formData.append('LastName', formValue.lastName);
   formData.append('Email', formValue.email);
-  formData.append('Phone', formValue.phone);
+  const combinedPhone = `${formValue.phoneCountryCode || ''}${formValue.phone || ''}`.trim();
+  formData.append('Phone', combinedPhone);
 
   formData.append('DepartmentId', formValue.departmentId ?? '');
   formData.append('PositionId', formValue.positionId ?? '');
@@ -269,6 +296,27 @@ private formatDate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
+  // Returns a friendly label for a country code (e.g. "Pakistan +92")
+  getCountryLabel(code?: string | null): string {
+    if (!code) return '';
+    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    if (found) return `${found.name} ${found.code}`;
+    return code;
+  }
+
+  // Returns the flag URL for a selected country code (if available)
+  getCountryFlag(code?: string | null): string | undefined {
+    if (!code) return undefined;
+    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    return found?.flag;
+  }
+
+  onCountryPanelOpen(isOpen: boolean) {
+    if (isOpen) {
+      // focus handling could be added if needed
+    }
+  }
+
 
 
   get filteredPositions(): Position[] {
@@ -284,6 +332,56 @@ private formatDate(date: Date): string {
     this.destroy$.next();
     this.destroy$.complete();
   }
+  
+  // Prevent non-digit keystrokes for phone inputs
+  public onPhoneKeydown(event: KeyboardEvent): void {
+    const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
+    if (allowedKeys.includes(event.key)) return;
+    if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x', 'A', 'C', 'V', 'X'].includes(event.key)) return;
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  // Sanitize pasted content to digits-only and insert into the input
+  public onPhonePaste(event: ClipboardEvent): void {
+    const clipboard = event.clipboardData || (window as any).clipboardData;
+    if (!clipboard) return;
+    const text = clipboard.getData('text') || '';
+    const digits = text.replace(/\D/g, '');
+    if (digits !== text) {
+      event.preventDefault();
+      const target = event.target as HTMLInputElement;
+      const start = target.selectionStart ?? 0;
+      const end = target.selectionEnd ?? 0;
+      const newVal = target.value.slice(0, start) + digits + target.value.slice(end);
+      target.value = newVal;
+      this.setPhoneControlValue(target.getAttribute('formControlName') || 'phone', newVal);
+    }
+  }
+
+  // Ensure input contains only digits (keeps value as string)
+  public onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const cleaned = input.value.replace(/\D/g, '');
+    if (input.value !== cleaned) {
+      input.value = cleaned;
+      this.setPhoneControlValue(input.getAttribute('formControlName') || 'phone', cleaned);
+    }
+  }
+
+  // Helper to set phone control value for top-level or nested emergencyContact
+  private setPhoneControlValue(controlName: string, value: string): void {
+    const top = this.employeeForm.get(controlName);
+    if (top) {
+      top.setValue(value, { emitEvent: false });
+      return;
+    }
+    const nested = this.employeeForm.get('emergencyContact.' + controlName);
+    if (nested) {
+      nested.setValue(value, { emitEvent: false });
+    }
+  }
   private loadInitialData(): void {
     // Load organization currency first
     this.settingsService.getOrganizationSettings()
@@ -293,6 +391,19 @@ private formatDate(date: Date): string {
           this.organizationCurrency = settings.currency || 'USD';
           const currency = this.settingsService.getAvailableCurrencies().find(c => c.code === this.organizationCurrency);
           this.currencySymbol = currency?.symbol || '$';
+          // Load country dial codes
+          this.employeeService.getCountryDialCodes()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (list) => {
+                this.countries = list.map((x: any) => ({ name: x.name, code: x.code, flag: x.flag, cca2: x.cca2 }));
+                // After countries load, try to resolve and patch the phone country code and local phone
+                this.resolvePhoneCountryFromEmployee();
+              },
+              error: (err) => {
+                console.error('Error loading country dial codes:', err);
+              }
+            });
         },
         error: (error) => {
           console.error('Error loading organization currency:', error);
@@ -301,6 +412,101 @@ private formatDate(date: Date): string {
           this.currencySymbol = '$';
         }
       });
+  }
+
+  // Try to match employee phone to a loaded country code and patch form controls
+  private resolvePhoneCountryFromEmployee(): void {
+    // Main phone
+    const rawPhone = (this.data?.employee?.phone || '').toString().trim();
+    if (rawPhone) {
+      const cleaned = rawPhone.replace(/[\s()\-./]/g, '');
+      let bestMatch: { code: string; flag?: string } | null = null;
+      let matchedPrefix = '';
+      for (const c of this.countries) {
+        if (!c.code) continue;
+        const codeStr = String(c.code);
+        const variants = [codeStr, `+${codeStr}`];
+        for (const v of variants) {
+          const norm = v.replace(/[^0-9+]/g, '');
+          if (cleaned.startsWith(norm)) {
+            if (!bestMatch || codeStr.length > (bestMatch.code || '').length) {
+              bestMatch = c;
+              matchedPrefix = norm;
+            }
+          }
+        }
+      }
+      if (bestMatch) {
+        let local = cleaned;
+        if (matchedPrefix && local.startsWith('+')) {
+          local = local.replace(/^\+/, '');
+        }
+        if (matchedPrefix) {
+          const prefixDigits = matchedPrefix.replace(/[^0-9]/g, '');
+          if (local.startsWith(prefixDigits)) {
+            local = local.slice(prefixDigits.length);
+          }
+        }
+        local = local.replace(/[^0-9]/g, '').trim();
+        const controlCode = bestMatch.code;
+        this.employeeForm.patchValue({ phoneCountryCode: controlCode, phone: local }, { emitEvent: false });
+      } else {
+        const currentCode = this.employeeForm.get('phoneCountryCode')?.value;
+        if (currentCode) {
+          const lookup = this.countries.find(c => c.code === currentCode || c.code === ('' + currentCode).replace(/^\+/, ''));
+          if (lookup) {
+            const cleanedPhone = cleaned.replace(/^\+?\d{1,4}/, '').replace(/[^0-9]/g, '').trim();
+            this.employeeForm.patchValue({ phoneCountryCode: lookup.code, phone: cleanedPhone }, { emitEvent: false });
+          }
+        }
+      }
+    }
+
+    // Emergency phone
+    const rawEmergency = (this.data?.employee?.emergencyContact?.phone || '').toString().trim();
+    if (rawEmergency) {
+      const cleanedE = rawEmergency.replace(/[\s()\-./]/g, '');
+      let bestMatchE: { code: string; flag?: string } | null = null;
+      let matchedPrefixE = '';
+      for (const c of this.countries) {
+        if (!c.code) continue;
+        const codeStr = String(c.code);
+        const variants = [codeStr, `+${codeStr}`];
+        for (const v of variants) {
+          const norm = v.replace(/[^0-9+]/g, '');
+          if (cleanedE.startsWith(norm)) {
+            if (!bestMatchE || codeStr.length > (bestMatchE.code || '').length) {
+              bestMatchE = c;
+              matchedPrefixE = norm;
+            }
+          }
+        }
+      }
+      if (bestMatchE) {
+        let localE = cleanedE;
+        if (matchedPrefixE && localE.startsWith('+')) {
+          localE = localE.replace(/^\+/, '');
+        }
+        if (matchedPrefixE) {
+          const prefixDigits = matchedPrefixE.replace(/[^0-9]/g, '');
+          if (localE.startsWith(prefixDigits)) {
+            localE = localE.slice(prefixDigits.length);
+          }
+        }
+        localE = localE.replace(/[^0-9]/g, '').trim();
+        const controlCodeE = bestMatchE.code;
+        this.employeeForm.patchValue({ emergencyContact: { phoneCountryCode: controlCodeE, phone: localE } }, { emitEvent: false });
+      } else {
+        const currentCodeE = this.employeeForm.get('emergencyContact.phoneCountryCode')?.value;
+        if (currentCodeE) {
+          const lookupE = this.countries.find(c => c.code === currentCodeE || c.code === ('' + currentCodeE).replace(/^\+/, ''));
+          if (lookupE) {
+            const cleanedPhoneE = cleanedE.replace(/^\+?\d{1,4}/, '').replace(/[^0-9]/g, '').trim();
+            this.employeeForm.patchValue({ emergencyContact: { phoneCountryCode: lookupE.code, phone: cleanedPhoneE } }, { emitEvent: false });
+          }
+        }
+      }
+    }
   }
 }
 

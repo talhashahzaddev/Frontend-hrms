@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +25,7 @@ import { TaxCategoryDto } from 'src/app/features/payroll/services/payroll.servic
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -51,6 +52,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   positions: Position[] = [];
   managers: Employee[] = [];
   taxCategories: TaxCategoryDto[] = [];
+  countries: { name: string; code: string; flag?: string; cca2?: string }[] = [];
+  countryFilter = '';
   organizationCurrency: string = 'USD';
   currencySymbol: string = '$';
 
@@ -153,6 +156,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
+      phoneCountryCode: ['+92'],
       phone: [''],
       dateOfBirth: ['',[Validators.required]],
       gender: [''],
@@ -174,6 +178,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       }),
       emergencyContact: this.fb.group({
         name: [''],
+        phoneCountryCode: ['+92'],
         phone: [''],
         relationship: [''],
         email: ['']
@@ -239,6 +244,20 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
           }
 
           this.isLoading = false;
+
+          // Load country dial codes separately
+          this.employeeService.getCountryDialCodes()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: (list) => {
+                // Map to shape {name, code, flag, cca2}
+                this.countries = list.map(x => ({ name: x.name, code: x.code, flag: x.flag, cca2: x.cca2 }));
+                console.log('Loaded country dial codes:', this.countries.length);
+              },
+              error: (err) => {
+                console.error('Error loading country dial codes:', err);
+              }
+            });
         },
         error: (error) => {
           console.error('Error loading initial data:', error);
@@ -249,12 +268,22 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   }
 
   private populateForm(employee: Employee): void {
+    // If phone contains an international prefix, try to split it into code + rest
+    let detectedCode: string | undefined;
+    let plainPhone = employee.phone;
+    if (employee.phone && typeof employee.phone === 'string' && employee.phone.startsWith('+')) {
+      const m = employee.phone.match(/^\+(\d{1,4})(.*)$/);
+      if (m) {
+        detectedCode = `+${m[1]}`;
+        plainPhone = m[2].replace(/[^0-9]/g, '').trim();
+      }
+    }
+
     this.employeeForm.patchValue({
       employeeCode: employee.employeeCode,
       firstName: employee.firstName,
       lastName: employee.lastName,
       email: employee.email,
-      phone: employee.phone,
       dateOfBirth: employee.dateOfBirth ? new Date(employee.dateOfBirth) : null,
       gender: employee.gender,
       maritalStatus: employee.maritalStatus,
@@ -266,6 +295,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       employmentType: employee.employmentDetails?.employmentType || 'full_time',
       basicSalary: employee.employmentDetails?.baseSalary,
       reportingManagerId: employee.employmentDetails?.managerId,
+      phoneCountryCode: detectedCode,
+      phone: plainPhone,
       workLocation: employee.employmentDetails?.workLocation,
       address: employee.address || {},
       emergencyContact: employee.emergencyContact || {}
@@ -283,12 +314,22 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       console.log('Basic Salary:', formValue.basicSalary);
       console.log('Work Location:', formValue.workLocation);
 
+      const combinedPhone = `${formValue.phoneCountryCode || ''}${formValue.phone || ''}`.trim();
+      console.log('Combined phone to submit:', combinedPhone);
+
+      // Combine emergency contact phone country code + number if provided
+      if (formValue.emergencyContact) {
+        const emCode = formValue.emergencyContact.phoneCountryCode || '';
+        const emPhone = formValue.emergencyContact.phone || '';
+        formValue.emergencyContact.phone = `${emCode}${emPhone}`.trim();
+      }
+
       const request: CreateEmployeeRequest | UpdateEmployeeRequest = {
         employeeNumber: formValue.employeeCode,
         firstName: formValue.firstName,
         lastName: formValue.lastName,
         email: formValue.email,
-        phone: formValue.phone,
+        phone: combinedPhone,
         // dateOfBirth: formValue.dateOfBirth ? formValue.dateOfBirth.toISOString().split('T')[0] : undefined,
         dateOfBirth: formValue.dateOfBirth ? this.formatDateOnly(formValue.dateOfBirth) : undefined,
 
@@ -325,7 +366,8 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
       const payload: any = {
         ...request,
         taxCategoryId: formValue.taxCategoryId || undefined,
-        reportingManagerId: formValue.reportingManagerId || undefined
+        reportingManagerId: formValue.reportingManagerId || undefined,
+        phone: combinedPhone
       };
 
       console.log('Final reportingManagerId in payload:', payload.reportingManagerId);
@@ -387,6 +429,59 @@ onDateBlur(event: FocusEvent, fieldName: 'dateOfBirth' | 'hireDate'): void {
   }
 }
 
+onCountryPanelOpen(isOpen: boolean) {
+  if (isOpen) {
+    this.countryFilter = '';
+  }
+}
+
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input) return;
+    const digits = input.value.replace(/\D+/g, '');
+    if (input.value !== digits) {
+      // update the native input value to keep caret behaviour reasonable
+      input.value = digits;
+    }
+    const control = this.employeeForm.get('phone');
+    if (control && control.value !== digits) {
+      control.setValue(digits, { emitEvent: false });
+    }
+  }
+
+  onPhonePaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const paste = event.clipboardData?.getData('text') || '';
+    const digits = paste.replace(/\D+/g, '');
+    const control = this.employeeForm.get('phone');
+    if (control) {
+      control.setValue(digits);
+    }
+  }
+
+  // Emergency contact phone handlers (mirror main phone behavior but target nested control)
+  onEmergencyPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input) return;
+    const digits = input.value.replace(/\D+/g, '');
+    if (input.value !== digits) {
+      input.value = digits;
+    }
+    const control = this.employeeForm.get('emergencyContact.phone');
+    if (control && control.value !== digits) {
+      control.setValue(digits, { emitEvent: false });
+    }
+  }
+
+  onEmergencyPhonePaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const paste = event.clipboardData?.getData('text') || '';
+    const digits = paste.replace(/\D+/g, '');
+    const control = this.employeeForm.get('emergencyContact.phone');
+    if (control) {
+      control.setValue(digits);
+    }
+  }
 
 
 
@@ -427,6 +522,21 @@ private formatDateOnly(date: Date): string {
   const year = date.getFullYear();
   return `${year}-${month}-${day}`; // format: YYYY-MM-DD
 }
+
+  // Returns a friendly label for a country code (e.g. "Pakistan +92")
+  getCountryLabel(code?: string | null): string {
+    if (!code) return '';
+    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    if (found) return `${found.name} ${found.code}`;
+    return code;
+  }
+
+  // Returns the flag URL for a selected country code (if available)
+  getCountryFlag(code?: string | null): string | undefined {
+    if (!code) return undefined;
+    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    return found?.flag;
+  }
 
 
 
