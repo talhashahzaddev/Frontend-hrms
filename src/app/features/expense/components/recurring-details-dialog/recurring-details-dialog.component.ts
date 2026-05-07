@@ -74,6 +74,12 @@ export class RecurringDetailsDialogComponent implements OnInit {
     return 'status-pending';
   }
 
+  openReceipt(): void {
+    if (this.item?.receiptUrl) {
+      window.open(this.item.receiptUrl, '_blank');
+    }
+  }
+
   close(): void {
     this.dialogRef.close();
   }

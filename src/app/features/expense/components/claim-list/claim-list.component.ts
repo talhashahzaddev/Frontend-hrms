@@ -104,7 +104,7 @@ export class ClaimListComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private notificationService: NotificationService,
     private settingsService: SettingsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadOrganizationCurrency();
@@ -193,8 +193,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
 
     this.filteredClaims = this.claims.filter((c) => {
       if (q && !(c.title || '').toLowerCase().includes(q) &&
-          !(c.categoryName || '').toLowerCase().includes(q) &&
-          !(c.description || '').toLowerCase().includes(q)) {
+        !(c.categoryName || '').toLowerCase().includes(q) &&
+        !(c.description || '').toLowerCase().includes(q)) {
         return false;
       }
       if (start) {
@@ -250,9 +250,9 @@ export class ClaimListComponent implements OnInit, OnDestroy {
 
     this.filteredAllClaims = this.allClaims.filter((c) => {
       if (q && !(c.title || '').toLowerCase().includes(q) &&
-          !(c.categoryName || '').toLowerCase().includes(q) &&
-          !(c.description || '').toLowerCase().includes(q) &&
-          !(c.employeeName || '').toLowerCase().includes(q)) {
+        !(c.categoryName || '').toLowerCase().includes(q) &&
+        !(c.description || '').toLowerCase().includes(q) &&
+        !(c.employeeName || '').toLowerCase().includes(q)) {
         return false;
       }
       if (start) {

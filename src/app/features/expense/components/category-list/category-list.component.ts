@@ -1,13 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith } from 'rxjs';
@@ -27,13 +21,7 @@ import {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatTableModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
     MatIconModule,
-    MatMenuModule,
     MatProgressSpinnerModule
   ],
   templateUrl: './category-list.component.html',

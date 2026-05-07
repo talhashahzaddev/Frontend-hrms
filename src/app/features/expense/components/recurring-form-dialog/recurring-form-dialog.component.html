@@ -1,80 +1,122 @@
 <div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>repeat</mat-icon>
-    {{ data.mode === 'create' ? 'Create Recurring Expense' : 'Edit Recurring Expense' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
+  <div class="title-section">
+    <div class="icon-wrapper">
+      <mat-icon>repeat</mat-icon>
+    </div>
+    <div>
+      <h2 class="title">{{ data.mode === 'create' ? 'Create Recurring Expense' : 'Edit Recurring Expense' }}</h2>
+      <p class="subtitle">Set up your automated recurring expense claim</p>
+    </div>
+  </div>
+  <button class="close-btn" (click)="onCancel()">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="form" class="recurring-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Category *</mat-label>
-      <mat-select formControlName="categoryId" placeholder="Select category">
-        <mat-option *ngFor="let cat of data.categories" [value]="cat.categoryId">
-          {{ cat.name }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('categoryId')?.hasError('required')">
-        Category is required
-      </mat-error>
-    </mat-form-field>
+<div class="dialog-content">
+  <form [formGroup]="form" class="form-container">
+    <div class="form-grid">
+      <!-- Category Selection -->
+      <div class="form-group full-width">
+        <label for="categoryId">Expense Category <span class="required">*</span></label>
+        <div class="select-wrapper">
+          <select id="categoryId" formControlName="categoryId">
+            <option [value]="null" disabled>Select a category</option>
+            <option *ngFor="let cat of data.categories" [value]="cat.categoryId">
+              {{ cat.name }}
+            </option>
+          </select>
+          <mat-icon class="select-icon">expand_more</mat-icon>
+        </div>
+        <div class="error-msg" *ngIf="form.get('categoryId')?.touched && form.get('categoryId')?.hasError('required')">
+          Please select a category
+        </div>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Title *</mat-label>
-      <input matInput formControlName="title" placeholder="e.g. Internet subscription" maxlength="150">
-      <mat-hint>Max 150 characters</mat-hint>
-      <mat-error *ngIf="form.get('title')?.hasError('required')">Title is required</mat-error>
-      <mat-error *ngIf="form.get('title')?.hasError('maxlength')">Max 150 characters</mat-error>
-    </mat-form-field>
+      <!-- Title -->
+      <div class="form-group full-width">
+        <label for="title">Expense Title <span class="required">*</span></label>
+        <input id="title" type="text" formControlName="title" placeholder="e.g. Internet subscription" />
+        <div class="error-msg" *ngIf="form.get('title')?.touched && form.get('title')?.hasError('required')">
+          Title is required
+        </div>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Description</mat-label>
-      <textarea matInput formControlName="description" placeholder="Optional details" rows="3" maxlength="500"></textarea>
-    </mat-form-field>
+      <!-- Description -->
+      <div class="form-group full-width">
+        <label for="description">Description</label>
+        <textarea id="description" formControlName="description" rows="3" placeholder="Provide details about this recurring expense..."></textarea>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Amount *</mat-label>
-      <input matInput type="number" formControlName="amount" placeholder="0.00" min="0.01" step="0.01">
-      <mat-error *ngIf="form.get('amount')?.hasError('required')">Amount is required</mat-error>
-      <mat-error *ngIf="form.get('amount')?.hasError('min')">Amount must be at least 0.01</mat-error>
-    </mat-form-field>
+      <!-- Amount -->
+      <div class="form-group">
+        <label for="amount">Amount <span class="required">*</span></label>
+        <div class="input-with-icon">
+          <mat-icon>payments</mat-icon>
+          <input id="amount" type="number" formControlName="amount" placeholder="0.00" step="0.01" />
+        </div>
+        <div class="error-msg" *ngIf="form.get('amount')?.touched && (form.get('amount')?.hasError('required') || form.get('amount')?.hasError('min'))">
+          Enter a valid amount (min 0.01)
+        </div>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Rotation *</mat-label>
-      <mat-select formControlName="rotation" placeholder="e.g. Monthly">
-        <mat-option *ngFor="let opt of rotationOptions" [value]="opt.value">
-          {{ opt.label }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('rotation')?.hasError('required')">Rotation is required</mat-error>
-    </mat-form-field>
+      <!-- Rotation -->
+      <div class="form-group">
+        <label for="rotation">Rotation / Frequency <span class="required">*</span></label>
+        <div class="select-wrapper">
+          <select id="rotation" formControlName="rotation">
+            <option value="" disabled>Select frequency</option>
+            <option *ngFor="let opt of rotationOptions" [value]="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+          <mat-icon class="select-icon">expand_more</mat-icon>
+        </div>
+        <div class="error-msg" *ngIf="form.get('rotation')?.touched && form.get('rotation')?.hasError('required')">
+          Please select a rotation
+        </div>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Day of month</mat-label>
-      <input matInput formControlName="dayOfMonth" placeholder="e.g. 1, 15 (optional)" maxlength="20">
-      <mat-hint>Optional – e.g. 1 for 1st of month</mat-hint>
-    </mat-form-field>
+      <!-- Day of Month -->
+      <div class="form-group">
+        <label for="dayOfMonth">Day of Month</label>
+        <div class="input-with-icon">
+          <mat-icon>event</mat-icon>
+          <input id="dayOfMonth" type="text" formControlName="dayOfMonth" placeholder="e.g. 1st, 15th" />
+        </div>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Payment Method</mat-label>
-      <input matInput formControlName="paymentMethod" placeholder="e.g. Card, Direct debit" maxlength="50">
-    </mat-form-field>
+      <!-- Merchant -->
+      <div class="form-group">
+        <label for="merchant">Merchant / Vendor</label>
+        <div class="input-with-icon">
+          <mat-icon>store</mat-icon>
+          <input id="merchant" type="text" formControlName="merchant" placeholder="Vendor name" />
+        </div>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Merchant</mat-label>
-      <input matInput formControlName="merchant" placeholder="Vendor name" maxlength="150">
-    </mat-form-field>
+      <!-- Payment Method -->
+      <div class="form-group full-width">
+        <label for="paymentMethod">Payment Method</label>
+        <div class="input-with-icon">
+          <mat-icon>credit_card</mat-icon>
+          <input id="paymentMethod" type="text" formControlName="paymentMethod" placeholder="e.g. Card, Direct Debit" />
+        </div>
+      </div>
+    </div>
   </form>
-</mat-dialog-content>
+</div>
 
-<mat-dialog-actions class="dialog-actions">
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isSubmitting" class="submit-btn">
-    <mat-spinner *ngIf="isSubmitting" diameter="20" class="btn-spinner"></mat-spinner>
-    <mat-icon *ngIf="!isSubmitting">{{ data.mode === 'create' ? 'add' : 'save' }}</mat-icon>
-    {{ isSubmitting ? (data.mode === 'create' ? 'Creating...' : 'Saving...') : (data.mode === 'create' ? 'Create Recurring' : 'Save Changes') }}
+<div class="dialog-footer">
+  <button class="cancel-btn" (click)="onCancel()">Cancel</button>
+  <button class="submit-btn" [disabled]="form.invalid || isSubmitting" (click)="onSubmit()">
+    <ng-container *ngIf="isSubmitting; else normalBtn">
+      <mat-spinner diameter="20"></mat-spinner>
+      <span>{{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}</span>
+    </ng-container>
+    <ng-template #normalBtn>
+      <mat-icon>{{ data.mode === 'create' ? 'add' : 'check' }}</mat-icon>
+      <span>{{ data.mode === 'create' ? 'Create Recurring' : 'Update Changes' }}</span>
+    </ng-template>
   </button>
-</mat-dialog-actions>
+</div>

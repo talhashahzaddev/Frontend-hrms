@@ -347,7 +347,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
 
   viewRecurringDetails(item: RecurringExpenseDto): void {
     this.dialog.open(RecurringDetailsDialogComponent, {
-      width: '520px',
+      width: '650px',
       maxHeight: '90vh',
       data: { recurringExpenseId: item.recurringExpenseId }
     });
@@ -355,7 +355,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(RecurringFormDialogComponent, {
-      width: '520px',
+      width: '650px',
       maxHeight: '90vh',
       data: { mode: 'create', categories: this.categories }
     });
@@ -370,7 +370,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
 
   editRecurring(item: RecurringExpenseDto): void {
     const dialogRef = this.dialog.open(RecurringFormDialogComponent, {
-      width: '520px',
+      width: '650px',
       maxHeight: '90vh',
       data: { mode: 'edit', recurring: item, categories: this.categories }
     });
