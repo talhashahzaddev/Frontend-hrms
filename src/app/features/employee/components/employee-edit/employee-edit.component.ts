@@ -221,6 +221,7 @@ onSave(): void {
   formData.append('LastName', formValue.lastName);
   formData.append('Email', formValue.email);
   const combinedPhone = `${formValue.phoneCountryCode || ''}${formValue.phone || ''}`.trim();
+
   formData.append('Phone', combinedPhone);
 
   formData.append('DepartmentId', formValue.departmentId ?? '');
@@ -238,7 +239,10 @@ formData.append('HireDate', formValue.hireDate ? this.formatDate(formValue.hireD
 formData.append('Status', formValue.status ?? '');
 formData.append('EmployeeNumber', formValue.employeeCode ?? '');
   formData.append('Address', JSON.stringify(formValue.address));
-  formData.append('EmergencyContact', JSON.stringify(formValue.emergencyContact));
+  // Combine emergency contact country code + local phone like main phone
+  const combinedEmergencyPhone = `${formValue.emergencyContact?.phoneCountryCode || ''}${formValue.emergencyContact?.phone || ''}`.trim();
+  const emergencyPayload = { ...formValue.emergencyContact, phone: combinedEmergencyPhone };
+  formData.append('EmergencyContact', JSON.stringify(emergencyPayload));
 
   // 👇 same trick as profile
   formData.append('profileurl', new Blob(), '');
@@ -299,15 +303,17 @@ private formatDate(date: Date): string {
   // Returns a friendly label for a country code (e.g. "Pakistan +92")
   getCountryLabel(code?: string | null): string {
     if (!code) return '';
-    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    const norm = code.startsWith('+') ? code : `+${code}`;
+    const found = this.countries.find(c => c.code === code || c.code === norm);
     if (found) return `${found.name} ${found.code}`;
-    return code;
+    return norm;
   }
 
   // Returns the flag URL for a selected country code (if available)
   getCountryFlag(code?: string | null): string | undefined {
     if (!code) return undefined;
-    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    const norm = code.startsWith('+') ? code : `+${code}`;
+    const found = this.countries.find(c => c.code === code || c.code === norm);
     return found?.flag;
   }
 
@@ -396,7 +402,12 @@ private formatDate(date: Date): string {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: (list) => {
-                this.countries = list.map((x: any) => ({ name: x.name, code: x.code, flag: x.flag, cca2: x.cca2 }));
+                // Normalize country codes to always include a leading '+' so lookups are consistent
+                this.countries = list.map((x: any) => {
+                  let code = x.code || '';
+                  if (code && !code.startsWith('+')) code = `+${code}`;
+                  return { name: x.name, code, flag: x.flag, cca2: x.cca2 };
+                });
                 // After countries load, try to resolve and patch the phone country code and local phone
                 this.resolvePhoneCountryFromEmployee();
               },
