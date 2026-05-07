@@ -439,6 +439,49 @@ getEmployeesByPosition(positionId: string): Observable<PositionEmployeesMainDto>
       );
   }
 
+  // Fetch country dialing codes from restcountries API (includes flags and cca2)
+  getCountryDialCodes(): Observable<{ name: string; code: string; flag?: string; cca2?: string }[]> {
+    const url = 'https://restcountries.com/v3.1/all?fields=name,idd,flags,cca2';
+    return this.http.get<any[]>(url).pipe(
+      map((items: any[]) => {
+        const list: { name: string; code: string; flag?: string; cca2?: string }[] = [];
+        items.forEach(item => {
+          const name = item?.name?.common || item?.name?.official || 'Unknown';
+          const idd = item?.idd;
+          const flags = item?.flags;
+          const cca2 = item?.cca2;
+          if (!idd) return;
+          const root: string = idd.root || '';
+          const suffixes: string[] = Array.isArray(idd.suffixes) ? idd.suffixes : [];
+
+          // prefer SVG flag if available, otherwise PNG
+          const flagUrl: string | undefined = flags?.svg || flags?.png || undefined;
+
+          if (root) {
+            if (suffixes && suffixes.length > 0) {
+              suffixes.forEach(suf => {
+                const code = `${root}${suf || ''}`.replace(/\s+/g, '');
+                list.push({ name, code, flag: flagUrl, cca2 });
+              });
+            } else {
+              list.push({ name, code: root.replace(/\s+/g, ''), flag: flagUrl, cca2 });
+            }
+          }
+        });
+
+        // Deduplicate codes for same country
+        const dedup = list.reduce((acc: { name: string; code: string; flag?: string; cca2?: string }[], cur) => {
+          if (!acc.find(x => x.name === cur.name && x.code === cur.code)) acc.push(cur);
+          return acc;
+        }, []);
+
+        // Sort by country name
+        dedup.sort((a, b) => a.name.localeCompare(b.name));
+        return dedup;
+      })
+    );
+  }
+
   getEmployeesByDepartment(departmentId: string): Observable<Employee[]> {
     const params = new HttpParams().set('departmentId', departmentId);
     return this.http.get<ApiResponse<Employee[]>>(`${this.apiUrl}`, { params })
