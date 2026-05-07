@@ -71,7 +71,7 @@
       <label class="field">
         <span>Actual salary</span>
         <div class="prefix-wrap">
-          <strong>PKR</strong>
+          <strong>{{ currencySymbol() }}</strong>
           <input type="number" min="0" formControlName="actualSalary" placeholder="0" />
         </div>
       </label>
@@ -97,10 +97,10 @@
 
       <div class="estimate-box field-span-2">
         <p class="line">Calculated contribution</p>
-        <strong>PKR {{ totalAmount | number:'1.2-2' }}</strong>
+        <strong>{{ currencySymbol() }} {{ totalAmount | number:'1.2-2' }}</strong>
         @if (selectedConfig || selectedRule) {
           <small>
-            Salary capped: PKR {{ salaryCapped | number:'1.2-2' }} | Employee: {{ employeeAmount | number:'1.2-2' }} | Employer: {{ employerAmount | number:'1.2-2' }}
+            Salary capped: {{ currencySymbol() }} {{ salaryCapped | number:'1.2-2' }} | Employee: {{ employeeAmount | number:'1.2-2' }} | Employer: {{ employerAmount | number:'1.2-2' }}
           </small>
         }
       </div>

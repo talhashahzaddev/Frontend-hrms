@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
 
 import {
   CreateSocialSecurityEnrollmentRequestPayload,
@@ -10,6 +11,7 @@ import {
   SocialSecurityEnrollment,
   SocialSecurityRequestDocumentInput
 } from '../../../services/payroll.service';
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 interface RequestSocialSecurityChangeDialogData {
   currentEnrollment: SocialSecurityEnrollment | null;
@@ -31,7 +33,10 @@ interface UploadedDoc extends SocialSecurityRequestDocumentInput {
 export class RequestSocialSecurityChangeDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly payrollService = inject(PayrollService);
+  private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<RequestSocialSecurityChangeDialogComponent, CreateSocialSecurityEnrollmentRequestPayload | undefined>);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly hasCurrentEnrollment: boolean;
   readonly defaultRequestType: string;
@@ -53,6 +58,13 @@ export class RequestSocialSecurityChangeDialogComponent {
     this.hasCurrentEnrollment = !!data?.currentEnrollment;
     this.defaultRequestType = this.hasCurrentEnrollment ? 'update' : 'enrollment';
     this.form.patchValue({ requestType: this.defaultRequestType });
+
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
   }
 
   get dialogTitle(): string {

@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
+
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 export interface SocialSecurityTransactionEmployeeOption {
   id: string;
@@ -70,6 +73,9 @@ interface SocialSecurityTransactionDialogData {
 export class AddSocialSecurityTransactionDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AddSocialSecurityTransactionDialogComponent, SocialSecurityTransactionDialogPayload | undefined>);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   readonly employees = this.data?.employees ?? [];
@@ -91,6 +97,13 @@ export class AddSocialSecurityTransactionDialogComponent {
   );
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityTransactionDialogData) {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
+
     if (this.data?.initialValue) {
       this.form.patchValue({
         employeeId: this.data.initialValue.employeeId ?? '',

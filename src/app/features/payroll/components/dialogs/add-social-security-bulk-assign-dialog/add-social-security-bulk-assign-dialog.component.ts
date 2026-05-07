@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
 
 import {
   SocialSecurityTransactionConfigOption,
@@ -10,6 +11,7 @@ import {
   SocialSecurityTransactionPeriodOption,
   SocialSecurityTransactionRuleOption
 } from '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component';
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 export interface SocialSecurityBulkAssignDialogPayload {
   employeeIds: string[];
@@ -39,6 +41,9 @@ interface SocialSecurityBulkAssignDialogData {
 export class AddSocialSecurityBulkAssignDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AddSocialSecurityBulkAssignDialogComponent, SocialSecurityBulkAssignDialogPayload | undefined>);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly employees = this.data?.employees ?? [];
   readonly periods = this.data?.periods ?? [];
@@ -59,6 +64,13 @@ export class AddSocialSecurityBulkAssignDialogComponent {
   );
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityBulkAssignDialogData) {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
+
     this.form.get('configId')?.valueChanges.subscribe((configId) => {
       const selectedConfig = this.configs.find((config) => config.id === String(configId ?? ''));
       if (!selectedConfig) {

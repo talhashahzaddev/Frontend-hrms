@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewEncapsulation, inject } from '@angular/core';
+import { Component, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
 
 import {
   CreateSocialSecurityClaimPayload,
   PayrollService,
   SocialSecurityRequestDocumentInput
 } from '../../../services/payroll.service';
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 interface UploadedDoc extends SocialSecurityRequestDocumentInput {
   uploading: boolean;
@@ -26,7 +28,11 @@ interface UploadedDoc extends SocialSecurityRequestDocumentInput {
 export class SocialSecurityClaimDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly payrollService = inject(PayrollService);
+  private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<SocialSecurityClaimDialogComponent, CreateSocialSecurityClaimPayload | undefined>);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+  private readonly currencyCode = signal(this.settingsService.getOrganizationCurrencyCode() || 'USD');
 
   documents: UploadedDoc[] = [];
   uploadError: string | null = null;
@@ -35,7 +41,6 @@ export class SocialSecurityClaimDialogComponent {
     {
       claimType: ['retirement', Validators.required],
       claimedAmount: [0, [Validators.required, Validators.min(0)]],
-      currency: ['USD'],
       incidentDate: [''],
       periodFrom: [''],
       periodTo: [''],
@@ -43,6 +48,20 @@ export class SocialSecurityClaimDialogComponent {
     },
     { validators: [this.periodRangeValidator()] }
   );
+
+  constructor() {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => {
+          this.currencyCode.set(code || 'USD');
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
+  }
 
   get showRangeError(): boolean {
     return this.form.hasError('invalidPeriodRange') &&
@@ -110,7 +129,7 @@ export class SocialSecurityClaimDialogComponent {
     const payload: CreateSocialSecurityClaimPayload = {
       claimType: String(raw.claimType ?? 'retirement'),
       claimedAmount: Number(raw.claimedAmount ?? 0),
-      currency: raw.currency ? String(raw.currency).trim() : 'USD',
+      currency: this.currencyCode(),
       incidentDate: raw.incidentDate ? String(raw.incidentDate) : null,
       periodFrom: raw.periodFrom ? String(raw.periodFrom) : null,
       periodTo: raw.periodTo ? String(raw.periodTo) : null,
