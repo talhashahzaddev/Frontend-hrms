@@ -203,33 +203,69 @@
         .date-filters {
           display: flex;
           gap: 0.5rem;
+          align-items: center;
 
           .compact-date {
-            width: 160px;
-            font-size: 0.8125rem;
+            width: 148px;
+            margin: 0;
+            font-size: 0.8rem;
+            --mat-form-field-container-height: 36px;
+            --mat-form-field-container-vertical-padding: 6px;
+            --mdc-outlined-text-field-container-shape: 8px;
+            --mdc-outlined-text-field-input-text-size: 13px;
+            --mdc-outlined-text-field-label-text-size: 12px;
 
-            ::v-deep .mat-mdc-text-field-wrapper {
+            ::ng-deep .mat-mdc-text-field-wrapper {
               background-color: #f8fafc !important;
               border-radius: 0.5rem !important;
-              padding: 0 0.75rem !important;
-              height: 40px !important;
+              padding: 0 0.625rem !important;
+              height: 36px !important;
+              border: 1px solid #e2e8f0 !important;
             }
-            ::v-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
-            ::v-deep .mat-mdc-form-field-infix { 
-              padding-top: 8px !important; 
-              padding-bottom: 8px !important; 
-              min-height: 40px !important;
+            ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+            ::ng-deep .mat-mdc-form-field-bottom-align::before { display: none !important; }
+            ::ng-deep .mat-mdc-form-field-infix { 
+              padding-top: 6px !important; 
+              padding-bottom: 6px !important; 
+              min-height: 36px !important;
               display: flex;
               align-items: center;
             }
-            ::v-deep .mat-mdc-form-field-flex {
+            ::ng-deep .mat-mdc-form-field-flex {
               align-items: center !important;
             }
-            ::v-deep .mat-mdc-floating-label {
-              top: 20px !important;
+            ::ng-deep .mat-mdc-input-element {
+              font-size: 0.8125rem !important;
             }
-            ::v-deep .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
-              transform: translateY(-24px) scale(0.75) !important;
+            ::ng-deep .mat-datepicker-toggle {
+              width: 2rem;
+              height: 2rem;
+              padding: 0;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            }
+            ::ng-deep .mat-datepicker-toggle-default-icon {
+              width: 1.125rem;
+              height: 1.125rem;
+            }
+            ::ng-deep .mat-mdc-icon-button {
+              padding: 0 !important;
+              display: inline-flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            ::ng-deep .mat-mdc-icon-button .mat-mdc-button-touch-target {
+              width: 2rem;
+              height: 2rem;
+            }
+            ::ng-deep .mat-mdc-floating-label {
+              color: #64748b !important;
+            }
+            ::ng-deep .mdc-notched-outline__leading,
+            ::ng-deep .mdc-notched-outline__notch,
+            ::ng-deep .mdc-notched-outline__trailing {
+              border-color: transparent !important;
             }
           }
         }
@@ -392,7 +428,7 @@
       }
     }
 
-    ::v-deep .mat-mdc-paginator {
+    ::ng-deep .mat-mdc-paginator {
       background: transparent !important;
       border-top: 1px solid #f1f5f9;
     }
