@@ -63,9 +63,10 @@
       <!-- Bill Date -->
       <div class="form-group">
         <label for="billDate">Bill Date <span class="required">*</span></label>
-        <div class="input-with-icon clickable" (click)="picker.open()">
+        <div class="input-with-icon clickable date-input-wrapper" (click)="picker.open()">
           <mat-icon>calendar_today</mat-icon>
           <input id="billDate" [matDatepicker]="picker" formControlName="billDate" placeholder="Select date" readonly />
+          <mat-datepicker-toggle matSuffix [for]="picker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </div>
         <div class="error-msg" *ngIf="claimForm.get('billDate')?.touched && claimForm.get('billDate')?.hasError('required')">
@@ -76,13 +77,19 @@
       <!-- Payment Method -->
       <div class="form-group">
         <label for="paymentMethod">Payment Method</label>
-        <input id="paymentMethod" type="text" formControlName="paymentMethod" placeholder="e.g. Credit Card, Cash" />
+        <div class="input-with-icon">
+          <mat-icon>credit_card</mat-icon>
+          <input id="paymentMethod" type="text" formControlName="paymentMethod" placeholder="e.g. Credit Card, Cash" />
+        </div>
       </div>
 
       <!-- Merchant -->
       <div class="form-group">
         <label for="merchant">Merchant / Vendor</label>
-        <input id="merchant" type="text" formControlName="merchant" placeholder="e.g. Amazon, Local Store" />
+        <div class="input-with-icon">
+          <mat-icon>store</mat-icon>
+          <input id="merchant" type="text" formControlName="merchant" placeholder="e.g. Amazon, Local Store" />
+        </div>
       </div>
 
       <!-- Receipt Upload -->

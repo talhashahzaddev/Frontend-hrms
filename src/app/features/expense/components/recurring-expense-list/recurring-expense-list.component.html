@@ -9,7 +9,7 @@
       <p class="subtitle">View and manage recurring expense requests</p>
     </div>
     <div class="actions">
-      <button class="add-btn" (click)="openCreateDialog()">
+      <button class="add-btn" *ngIf="hasPermission('add_recurring')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Recurring
       </button>
@@ -18,11 +18,11 @@
 
   <!-- View toggle: My Recurring / All Recurring (Super Admin only) -->
   <div class="view-tabs">
-    <button type="button" class="tab-item" [class.active]="activeView === 'my-recurring'" (click)="setActiveView('my-recurring')">
+    <button *ngIf="hasPermission('my_rescurring_expenses')" type="button" class="tab-item" [class.active]="activeView === 'my-recurring'" (click)="setActiveView('my-recurring')">
       <mat-icon>person</mat-icon>
       My Recurring
     </button>
-    <button type="button" class="tab-item" [class.active]="activeView === 'all-recurring'" (click)="setActiveView('all-recurring')">
+    <button *ngIf="hasPermission('all_recurring')" type="button" class="tab-item" [class.active]="activeView === 'all-recurring'" (click)="setActiveView('all-recurring')">
       <mat-icon>groups</mat-icon>
       All Recurring
     </button>
@@ -32,7 +32,7 @@
   <div class="view-content-wrapper">
     <div class="view-slider" [class.slide-all]="activeView === 'all-recurring'">
       <!-- Panel 1: My Recurring -->
-      <div class="view-panel">
+      <div class="view-panel" *ngIf="hasPermission('my_rescurring_expenses')">
         <div class="content-card">
           <div class="toolbar">
             <div class="filters-row">
@@ -82,13 +82,13 @@
                     <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
                   </td>
                   <td class="action-cell">
-                    <button class="action-btn hover-primary" (click)="viewRecurringDetails(row)">
+                    <button class="action-btn hover-primary" *ngIf="hasPermission('recurring_view_details')" (click)="viewRecurringDetails(row)">
                       <mat-icon>visibility</mat-icon>
                     </button>
-                    <button class="action-btn hover-primary" (click)="editRecurring(row)" [disabled]="!isRecurringPending(row)">
+                    <button class="action-btn hover-primary" *ngIf="hasPermission('recurring_edit')" (click)="editRecurring(row)" [disabled]="!isRecurringPending(row)">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button class="action-btn hover-danger" (click)="deleteRecurring(row)" [disabled]="!isRecurringPending(row)">
+                    <button class="action-btn hover-danger" *ngIf="hasPermission('recurring_delete')" (click)="deleteRecurring(row)" [disabled]="!isRecurringPending(row)">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>
@@ -107,7 +107,7 @@
       </div>
 
       <!-- Panel 2: All Recurring -->
-      <div class="view-panel">
+      <div class="view-panel" *ngIf="hasPermission('all_recurring')">
         <div class="content-card">
           <div class="toolbar">
             <div class="filters-row">
@@ -157,7 +157,7 @@
                     <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
                   </td>
                   <td class="action-cell">
-                    <button class="action-btn hover-primary" (click)="viewRecurringDetails(row)">
+                    <button class="action-btn hover-primary" *ngIf="hasPermission('recurring_view_details')" (click)="viewRecurringDetails(row)">
                       <mat-icon>visibility</mat-icon>
                     </button>
                   </td>
@@ -178,7 +178,7 @@
   </div>
 
   <!-- Recurring requests Section (Super Admin, All Recurring tab only) -->
-  <div class="recurring-requests-section" *ngIf="activeView === 'all-recurring'">
+  <div class="recurring-requests-section" *ngIf="activeView === 'all-recurring' && hasPermission('all_recurring') && hasPermission('recurring_request_action')">
     <div class="section-header">
       <h2 class="title">Recurring Requests</h2>
       <p class="subtitle">Approve or reject pending recurring expense requests</p>
@@ -209,13 +209,13 @@
           </div>
         </div>
         <div class="card-actions">
-          <button class="btn-reject" mat-stroked-button color="warn" (click)="rejectRecurring(request)">
+          <button class="btn-reject" mat-stroked-button color="warn" *ngIf="hasPermission('recurring_request_action')" (click)="rejectRecurring(request)">
             <mat-icon>close</mat-icon> Reject
           </button>
-          <button class="btn-details" mat-stroked-button (click)="viewRecurringDetails(request)">
+          <button class="btn-details" mat-stroked-button *ngIf="hasPermission('recurring_view_details')" (click)="viewRecurringDetails(request)">
             <mat-icon>visibility</mat-icon> Details
           </button>
-          <button class="btn-approve" mat-flat-button color="primary" (click)="acceptRecurring(request)">
+          <button class="btn-approve" mat-flat-button color="primary" *ngIf="hasPermission('recurring_request_action')" (click)="acceptRecurring(request)">
             <mat-icon>check</mat-icon> Approve
           </button>
         </div>

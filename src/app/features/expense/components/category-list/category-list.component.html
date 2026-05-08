@@ -6,7 +6,7 @@
       <p class="subtitle">Manage and track organizational expense categories</p>
     </div>
     <div class="actions">
-      <button class="add-btn" (click)="openCreateDialog()">
+      <button class="add-btn" *ngIf="hasPermission('expense_category_add')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Category
       </button>
@@ -55,10 +55,10 @@
                 <td class="font-semibold">{{ cat.name }}</td>
                 <td>{{ cat.createdAt | date:'MMM d, y' }}</td>
                 <td class="action-cell">
-                  <button class="action-btn hover-primary" (click)="editCategory(cat)">
+                  <button class="action-btn hover-primary" *ngIf="hasPermission('expense_category_edit')" (click)="editCategory(cat)">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button class="action-btn hover-danger" (click)="deleteCategory(cat)">
+                  <button class="action-btn hover-danger" *ngIf="hasPermission('expense_category_delete')" (click)="deleteCategory(cat)">
                     <mat-icon>delete</mat-icon>
                   </button>
                 </td>
@@ -74,7 +74,7 @@
         </div>
         <h3>No categories found</h3>
         <p>{{ hasFiltersApplied() ? 'No categories match your search filters.' : 'Add your first expense category to get started.' }}</p>
-        @if (!hasFiltersApplied()) {
+        @if (!hasFiltersApplied() && hasPermission('expense_category_add')) {
           <button class="create-period-btnn" (click)="openCreateDialog()">
             <mat-icon>add</mat-icon>
             Add Category
