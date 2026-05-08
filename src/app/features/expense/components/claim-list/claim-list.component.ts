@@ -21,6 +21,7 @@ import { ExpenseDto, ExpenseCategoryDto } from '../../../../core/models/expense.
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ClaimFormDialogComponent } from '../claim-form-dialog/claim-form-dialog.component';
 import { ClaimDetailsDialogComponent } from '../claim-details-dialog/claim-details-dialog.component';
 import {
@@ -103,15 +104,25 @@ export class ClaimListComponent implements OnInit, OnDestroy {
     private expenseService: ExpenseService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
-    private settingsService: SettingsService
-  ) {}
+    private settingsService: SettingsService,
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void {
+    this.initializeViewByPermission();
     this.loadOrganizationCurrency();
-    this.loadCategories();
-    this.loadClaims();
-    this.loadAllClaims();
-    this.loadPendingClaims();
+    if (this.hasCategoryPermission('expense_category_view')) {
+      this.loadCategories();
+    }
+    if (this.hasPermission('my_claims')) {
+      this.loadClaims();
+    }
+    if (this.hasPermission('all_claims')) {
+      this.loadAllClaims();
+      if (this.hasPermission('claims_request_action')) {
+        this.loadPendingClaims();
+      }
+    }
     merge(
       this.searchControl.valueChanges.pipe(startWith('')),
       this.myClaimsStartDate.valueChanges.pipe(startWith(this.myClaimsStartDate.value)),
@@ -193,8 +204,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
 
     this.filteredClaims = this.claims.filter((c) => {
       if (q && !(c.title || '').toLowerCase().includes(q) &&
-          !(c.categoryName || '').toLowerCase().includes(q) &&
-          !(c.description || '').toLowerCase().includes(q)) {
+        !(c.categoryName || '').toLowerCase().includes(q) &&
+        !(c.description || '').toLowerCase().includes(q)) {
         return false;
       }
       if (start) {
@@ -250,9 +261,9 @@ export class ClaimListComponent implements OnInit, OnDestroy {
 
     this.filteredAllClaims = this.allClaims.filter((c) => {
       if (q && !(c.title || '').toLowerCase().includes(q) &&
-          !(c.categoryName || '').toLowerCase().includes(q) &&
-          !(c.description || '').toLowerCase().includes(q) &&
-          !(c.employeeName || '').toLowerCase().includes(q)) {
+        !(c.categoryName || '').toLowerCase().includes(q) &&
+        !(c.description || '').toLowerCase().includes(q) &&
+        !(c.employeeName || '').toLowerCase().includes(q)) {
         return false;
       }
       if (start) {
@@ -308,6 +319,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   private loadPendingClaims(): void {
+    if (!this.hasPermission('all_claims') || !this.hasPermission('claims_request_action')) return;
+
     this.isLoadingPending = true;
     this.expenseService
       .getExpenses(null, 'Pending', 1, 500)
@@ -327,6 +340,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   acceptClaim(claim: ExpenseDto): void {
+    if (!this.hasPermission('claims_request_action')) return;
+
     this.expenseService
       .requestAction(claim.expenseId, 'approve')
       .pipe(takeUntil(this.destroy$))
@@ -345,6 +360,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   rejectClaim(claim: ExpenseDto): void {
+    if (!this.hasPermission('claims_request_action')) return;
+
     this.expenseService
       .requestAction(claim.expenseId, 'reject')
       .pipe(takeUntil(this.destroy$))
@@ -363,6 +380,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   setActiveView(view: ClaimListView): void {
+    if (view === 'my-claims' && !this.hasPermission('my_claims')) return;
+    if (view === 'all-claims' && !this.hasPermission('all_claims')) return;
     this.activeView = view;
   }
 
@@ -389,6 +408,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   viewClaimDetails(claim: ExpenseDto): void {
+    if (!this.hasPermission('claims_view_details')) return;
+
     this.dialog.open(ClaimDetailsDialogComponent, {
       width: '520px',
       maxHeight: '90vh',
@@ -397,6 +418,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   openCreateDialog(): void {
+    if (!this.hasPermission('claims_add_claims')) return;
+
     const dialogRef = this.dialog.open(ClaimFormDialogComponent, {
       width: '520px',
       maxHeight: '90vh',
@@ -408,6 +431,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   editClaim(claim: ExpenseDto): void {
+    if (!this.hasPermission('claims_edit')) return;
+
     const dialogRef = this.dialog.open(ClaimFormDialogComponent, {
       width: '520px',
       maxHeight: '90vh',
@@ -419,6 +444,8 @@ export class ClaimListComponent implements OnInit, OnDestroy {
   }
 
   deleteClaim(claim: ExpenseDto): void {
+    if (!this.hasPermission('claims_delete')) return;
+
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Claim',
       message: `Are you sure you want to delete "${claim.title}"?`,
@@ -448,5 +475,27 @@ export class ClaimListComponent implements OnInit, OnDestroy {
           });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Expense', 'Claims', actionKey);
+  }
+
+  hasCategoryPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Expense', 'Category', actionKey);
+  }
+
+  private initializeViewByPermission(): void {
+    const canViewMyClaims = this.hasPermission('my_claims');
+    const canViewAllClaims = this.hasPermission('all_claims');
+
+    if (canViewMyClaims) {
+      this.activeView = 'my-claims';
+      return;
+    }
+
+    if (canViewAllClaims) {
+      this.activeView = 'all-claims';
+    }
   }
 }

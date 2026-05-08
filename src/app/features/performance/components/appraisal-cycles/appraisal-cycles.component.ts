@@ -228,9 +228,9 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
     this.loadAppraisalCycles();
   }
 
-  // hasHRRole(): boolean {
-  //   return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
-  // }
+ hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Performance', 'Appraisal Cycles', actionKey);
+  }
 
   onPageChange(event: PageEvent): void {
     this.pageIndex = event.pageIndex;

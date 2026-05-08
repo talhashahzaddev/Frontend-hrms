@@ -19,6 +19,7 @@ import { RecurringExpenseDto, ExpenseCategoryDto } from '../../../../core/models
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { RecurringDetailsDialogComponent } from '../recurring-details-dialog/recurring-details-dialog.component';
 import { RecurringFormDialogComponent } from '../recurring-form-dialog/recurring-form-dialog.component';
 import {
@@ -95,15 +96,19 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
     private expenseService: ExpenseService,
     private dialog: MatDialog,
     private notificationService: NotificationService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.initializeViewByPermission();
     this.loadOrganizationCurrency();
     this.loadCategories();
     this.loadMyRecurring();
     this.loadAllRecurring();
-    this.loadPendingRecurring();
+    if (this.hasPermission('recurring_request_action')) {
+      this.loadPendingRecurring();
+    }
     merge(
       this.searchControl.valueChanges.pipe(startWith('')),
       this.myStatus.valueChanges.pipe(startWith(this.myStatus.value)),
@@ -265,6 +270,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   private loadPendingRecurring(): void {
+    if (!this.hasPermission('all_recurring') || !this.hasPermission('recurring_request_action')) return;
+
     this.isLoadingPending = true;
     this.expenseService
       .getRecurringExpenses(null, 'Pending', 1, 500)
@@ -284,6 +291,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   acceptRecurring(item: RecurringExpenseDto): void {
+    if (!this.hasPermission('recurring_request_action')) return;
+
     this.expenseService
       .recurringRequestAction(item.recurringExpenseId, 'approve')
       .pipe(takeUntil(this.destroy$))
@@ -302,6 +311,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   rejectRecurring(item: RecurringExpenseDto): void {
+    if (!this.hasPermission('recurring_request_action')) return;
+
     this.expenseService
       .recurringRequestAction(item.recurringExpenseId, 'reject')
       .pipe(takeUntil(this.destroy$))
@@ -320,6 +331,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   setActiveView(view: RecurringListView): void {
+    if (view === 'my-recurring' && !this.hasPermission('my_rescurring_expenses')) return;
+    if (view === 'all-recurring' && !this.hasPermission('all_recurring')) return;
     this.activeView = view;
   }
 
@@ -346,16 +359,20 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   viewRecurringDetails(item: RecurringExpenseDto): void {
+    if (!this.hasPermission('recurring_view_details')) return;
+
     this.dialog.open(RecurringDetailsDialogComponent, {
-      width: '520px',
+      width: '650px',
       maxHeight: '90vh',
       data: { recurringExpenseId: item.recurringExpenseId }
     });
   }
 
   openCreateDialog(): void {
+    if (!this.hasPermission('add_recurring')) return;
+
     const dialogRef = this.dialog.open(RecurringFormDialogComponent, {
-      width: '520px',
+      width: '650px',
       maxHeight: '90vh',
       data: { mode: 'create', categories: this.categories }
     });
@@ -369,8 +386,10 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   editRecurring(item: RecurringExpenseDto): void {
+    if (!this.hasPermission('recurring_edit')) return;
+
     const dialogRef = this.dialog.open(RecurringFormDialogComponent, {
-      width: '520px',
+      width: '650px',
       maxHeight: '90vh',
       data: { mode: 'edit', recurring: item, categories: this.categories }
     });
@@ -384,6 +403,8 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   deleteRecurring(item: RecurringExpenseDto): void {
+    if (!this.hasPermission('recurring_delete')) return;
+
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Recurring Expense',
       message: `Are you sure you want to delete "${item.title}"?`,
@@ -415,5 +436,23 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
           });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Expense', 'Recurring Expenses', actionKey);
+  }
+
+  private initializeViewByPermission(): void {
+    const canViewMyRecurring = this.hasPermission('my_rescurring_expenses');
+    const canViewAllRecurring = this.hasPermission('all_recurring');
+
+    if (canViewMyRecurring) {
+      this.activeView = 'my-recurring';
+      return;
+    }
+
+    if (canViewAllRecurring) {
+      this.activeView = 'all-recurring';
+    }
   }
 }

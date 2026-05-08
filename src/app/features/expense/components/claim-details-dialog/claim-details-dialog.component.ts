@@ -1,7 +1,6 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -20,15 +19,13 @@ export interface ClaimDetailsDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule
   ],
   templateUrl: './claim-details-dialog.component.html',
   styleUrls: ['./claim-details-dialog.component.scss']
 })
-export class ClaimDetailsDialogComponent implements OnInit {
+export class ClaimDetailsDialogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   claim: ExpenseDto | null = null;
@@ -67,11 +64,22 @@ export class ClaimDetailsDialogComponent implements OnInit {
       });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   getStatusClass(status: string): string {
     const s = (status || '').toLowerCase();
-    if (s === 'approved' || s === 'paid') return 'status-success';
-    if (s === 'rejected') return 'status-warn';
-    return 'status-pending';
+    if (s === 'approved' || s === 'paid') return 'type-approved';
+    if (s === 'rejected') return 'type-rejected';
+    return 'type-pending';
+  }
+
+  openReceipt(): void {
+    if (this.claim?.receiptUrl) {
+      window.open(this.claim.receiptUrl, '_blank');
+    }
   }
 
   close(): void {

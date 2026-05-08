@@ -179,6 +179,94 @@
           mat-error { font-size: 12px; font-weight: 500; color: #dc2626; }
           mat-hint { font-size: 12px; color: #9ca3af; }
         }
+
+        // ── Phone field: flag select prefix + number input ────
+        &.phone-field {
+          ::ng-deep {
+            // Wrapper: row layout
+            .mat-mdc-text-field-wrapper {
+              display: flex;
+              align-items: center;
+            }
+
+            // Prefix container
+            .mat-mdc-form-field-prefix {
+              display: inline-flex !important;
+              align-items: center !important;
+              padding: 0 !important;
+              margin-right: 0 !important;
+              flex-shrink: 0 !important;
+              height: 100% !important;
+            }
+
+            // The select inside prefix
+            .mat-mdc-select {
+              min-width: 52px !important;
+              max-width: 72px !important;
+              width: auto !important;
+            }
+
+            // Trigger row: flag + arrow side by side
+            .mat-mdc-select-trigger {
+              display: inline-flex !important;
+              align-items: center !important;
+              gap: 3px !important;
+              white-space: nowrap;
+              padding-right: 2px;
+            }
+
+            .mat-mdc-select-arrow-wrapper {
+              display: flex !important;
+              align-items: center !important;
+              height: auto !important;
+            }
+
+            // Vertical divider between select and phone input
+            .mat-mdc-form-field-prefix::after {
+              content: '';
+              display: inline-block;
+              width: 1px;
+              height: 20px;
+              background: #e5e7eb;
+              margin: 0 10px 0 8px;
+              flex-shrink: 0;
+              align-self: center;
+            }
+
+            // Flag image in the trigger (selected state)
+            .mat-mdc-select-trigger img.opt-flag-img,
+            .mat-mdc-select-value img.opt-flag-img {
+              width: 22px !important;
+              height: 15px !important;
+              min-width: 22px !important;
+              min-height: 15px !important;
+              max-width: 22px !important;
+              max-height: 15px !important;
+              object-fit: cover !important;
+              border-radius: 2px !important;
+              display: inline-block !important;
+              vertical-align: middle !important;
+              flex-shrink: 0 !important;
+              border: 1px solid rgba(0, 0, 0, 0.08) !important;
+              overflow: hidden !important;
+              align-self: center !important;
+            }
+
+            // Country code text in trigger (+1, +92 etc.)
+            .mat-mdc-select-trigger .opt-code {
+              font-size: 12.5px;
+              font-weight: 600;
+              color: #374151;
+            }
+
+            // Phone number input text
+            input {
+              font-size: 13.5px;
+              color: #111827;
+              font-weight: 500;
+            }
+          }
+        }
       }
 
       // ── Salary wrapper ───────────────────────────────────────
@@ -361,6 +449,205 @@
   }
 }
 
+// ─── Phone Field (global scope) ───────────────────────────────
+.phone-field {
+  ::ng-deep {
+    .mat-mdc-form-field-prefix {
+      display: inline-flex !important;
+      align-items: center !important;
+      height: auto !important;
+      padding: 0 !important;
+      flex-shrink: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    .mat-mdc-select {
+      min-width: 52px !important;
+      max-width: 72px !important;
+      width: auto !important;
+    }
+
+    .mat-mdc-select-trigger {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 3px !important;
+      white-space: nowrap;
+      padding-right: 2px;
+    }
+
+    .mat-mdc-select-arrow-wrapper {
+      display: flex !important;
+      align-items: center !important;
+      height: auto !important;
+    }
+
+    // Vertical divider after the flag select
+    .mat-mdc-form-field-prefix::after {
+      content: '';
+      display: inline-block;
+      width: 1px;
+      height: 20px;
+      background: #e5e7eb;
+      margin: 0 10px 0 8px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    // Flag in trigger
+    .mat-mdc-select-trigger img.opt-flag-img,
+    .mat-mdc-select-value img.opt-flag-img {
+      width: 22px !important;
+      height: 15px !important;
+      min-width: 22px !important;
+      min-height: 15px !important;
+      max-width: 22px !important;
+      max-height: 15px !important;
+      object-fit: cover !important;
+      border-radius: 2px !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      flex-shrink: 0 !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      overflow: hidden !important;
+      align-self: center !important;
+    }
+
+    // Code text in trigger (+1, +92 etc.)
+    .mat-mdc-select-trigger .opt-code {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #374151;
+    }
+  }
+}
+
+// ─── Country Dropdown Panel ────────────────────────────────────
+::ng-deep .country-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14) !important;
+  border: 1px solid #e5e7eb !important;
+  min-width: 320px !important;
+  max-width: 360px !important;
+  max-height: 380px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+
+  // Sticky search wrapper
+  .country-search-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fff;
+    border-bottom: 1px solid #f0f1f5;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+    mat-icon {
+      color: #9ca3af;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .country-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13.5px;
+      font-family: 'Inter', 'DM Sans', sans-serif;
+      color: #111827;
+      font-weight: 400;
+
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
+    }
+  }
+
+  // Scrollable options area
+  .mat-mdc-select-panel {
+    overflow-y: auto !important;
+    flex: 1;
+    padding: 6px !important;
+  }
+
+  // Each option row
+  .mat-mdc-option {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    border-radius: 7px !important;
+    margin: 2px 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 12px !important;
+    font-size: 13.5px !important;
+
+    &:hover { background: #f5f3ff !important; }
+    &.mdc-list-item--selected,
+    &.mat-mdc-option-active {
+      background: #eef2ff !important;
+      color: #6366f1 !important;
+    }
+
+    // Flag inside dropdown options
+    .opt-flag {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+      width: 22px !important;
+      height: 16px !important;
+      overflow: hidden !important;
+    }
+
+    img.opt-flag-img {
+      width: 22px !important;
+      height: 15px !important;
+      min-width: 22px !important;
+      min-height: 15px !important;
+      max-width: 22px !important;
+      max-height: 15px !important;
+      object-fit: cover !important;
+      border-radius: 2px !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      flex-shrink: 0 !important;
+      border: 1px solid rgba(0, 0, 0, 0.07) !important;
+      overflow: hidden !important;
+    }
+
+    .opt-name {
+      flex: 1;
+      font-weight: 500;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .opt-code {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6366f1;
+      background: #eef2ff;
+      padding: 2px 7px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+  }
+}
+
 // ─── Responsive ───────────────────────────────────────────────
 
 // ── Tablet: drop to 2-col ─────────────────────────────────────
@@ -369,7 +656,7 @@
     padding: 10px 14px 32px;
 
     .form-section .form-grid {
-      grid-template-columns: repeat(2, 1fr) !important; // override both 3-col and 4-col
+      grid-template-columns: repeat(2, 1fr) !important;
       padding: 14px 18px 4px;
       column-gap: 14px;
     }
@@ -494,6 +781,32 @@
   }
 }
 
+// ─── Mobile: country panel ────────────────────────────────────
+@media (max-width: 768px) {
+  ::ng-deep .country-panel {
+    min-width: 280px !important;
+    max-width: 320px !important;
+
+    .mat-mdc-option {
+      height: 38px !important;
+      min-height: 38px !important;
+      font-size: 12.5px !important;
+
+      img.opt-flag-img {
+        width: 20px !important;
+        height: 13px !important;
+        min-width: 20px !important;
+        max-width: 20px !important;
+      }
+
+      .opt-code {
+        font-size: 11px;
+        padding: 2px 5px;
+      }
+    }
+  }
+}
+
 // ── Very small phones ─────────────────────────────────────────
 @media (max-width: 400px) {
   .employee-form-container {
@@ -512,6 +825,117 @@
     .form-actions {
       padding: 10px 12px;
       .btn-cancel { padding: 0 10px !important; }
+    }
+  }
+}
+
+
+
+
+
+// ─── Phone Field — custom layout (no mat-form-field wrapper) ──
+.phone-field {
+  margin-bottom: 12px;
+
+  .phone-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f8f9fc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    height: 46px;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+
+    &:hover {
+      background: white;
+      border-color: #c4b5fd;
+    }
+
+    &:focus-within {
+      background: white;
+      border-color: #6366f1;
+      border-width: 2px;
+    }
+
+    // ── Left: flag + code + arrow ──
+    .phone-prefix {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 10px 0 12px;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      height: 100%;
+
+      .prefix-flag {
+        width: 24px;
+        height: 16px;
+        object-fit: cover;
+        border-radius: 2px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        flex-shrink: 0;
+      }
+
+      .prefix-code {
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        white-space: nowrap;
+      }
+
+      .prefix-arrow {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #9ca3af;
+        flex-shrink: 0;
+      }
+
+      // The actual mat-select is hidden — just opens the panel
+      .hidden-select {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        pointer-events: none;
+
+        ::ng-deep .mat-mdc-select-trigger {
+          opacity: 0;
+          pointer-events: none;
+        }
+      }
+    }
+
+    // ── Divider ──
+    .phone-divider {
+      width: 1px;
+      height: 20px;
+      background: #e5e7eb;
+      flex-shrink: 0;
+      margin: 0 2px;
+    }
+
+    // ── Right: number input ──
+    .phone-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #111827;
+      padding: 0 14px;
+      height: 100%;
+      font-family: 'Inter', 'DM Sans', sans-serif;
+
+      &::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+      }
     }
   }
 }

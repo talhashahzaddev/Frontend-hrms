@@ -20,8 +20,9 @@
                        class="appraisals-tabs">
 
           <!-- Manager Appraisals Tab -->
-          <mat-tab label="Manager Appraisals">
-            <ng-template matTabContent>
+          <ng-container *ngIf="hasPermission('MANAGER_APPRAISAL_SECTION')">
+            <mat-tab label="Manager Appraisals">
+              <ng-template matTabContent>
               <!-- Manager Reviews Section -->
               <div class="tab-content-wrapper">
                 <div class="content-card">
@@ -130,7 +131,7 @@
                   <div class="section-divider"></div>
 
                   <!-- All Manager Reviews Section -->
-<section class="card-section">
+                  <section class="card-section" *ngIf="hasPermission('ALL_MANAGERS_REVIEWS_TABLE')">
   <div class="section-header">
     <h2>All Manager Reviews  table  onlny for hr</h2>
     <span class="section-meta">{{ allManagerReviewTotalItems }} Total Reviews</span>
@@ -259,16 +260,18 @@
                 </div>
               </div>
             </ng-template>
-          </mat-tab>
+            </mat-tab>
+          </ng-container>
 
           <!-- Self Assessment Tab -->
-          <mat-tab label="Self Assessment">
-            <ng-template matTabContent>
+          <ng-container *ngIf="hasPermission('SELF_ASSESSMENT_SECTION')">
+            <mat-tab label="Self Assessment">
+              <ng-template matTabContent>
               <div class="tab-content-wrapper">
                 <div class="content-card">
 
                   <!-- Your Self Assessment -->
-                  <section class="card-section">
+                  <section class="card-section" *ngIf="hasPermission('YOUR_SELF_ASSESSMENT_TABLE')">
                     <div class="section-header">
                       <h2>Your Self Assessment</h2>
                       <span class="section-meta">Draft Saved 2h ago</span>
@@ -374,7 +377,7 @@
                   <div class="section-divider"></div>
 
                   <!-- Team's Self Assessments -->
-                  <section class="card-section">
+                  <section class="card-section" *ngIf="hasPermission('TEAMS_SELF_ASSESSMENT_TABLE')">
                     <div class="section-header">
                       <h2>Team's Self Assessments</h2>
                     </div>
@@ -499,21 +502,23 @@
                 </div>
               </div>
             </ng-template>
-          </mat-tab>
+            </mat-tab>
+          </ng-container>
 
           <!-- HR Review Tab -->
-          <mat-tab label="HR Review">
-            <ng-template matTabContent>
+          <ng-container *ngIf="hasPermission('HR_REVIEWS_SECTION')">
+            <mat-tab label="HR Review">
+              <ng-template matTabContent>
               <div class="tab-content-wrapper">
                 <div class="content-card">
 
                   <!-- HR Reviews -->
-                  <section class="card-section">
-                    <div class="section-header">
+                  <section class="card-section" *ngIf="hasPermission('MY_HR_REVIEWS_TABLE')">
+                            <div class="section-header">
                       <h2>HR Reviews</h2>
                       <div class="section-header-right">
                         <span class="section-meta">{{ hrReviewsDataSource.data.length }} Total Reviews</span>
-                        <button mat-raised-button color="primary" (click)="openHrReviewDialog()" class="header-action-button">
+                        <button *ngIf="hasPermission('CREATE_HR_APPRAISAL_BUTTON')" mat-raised-button color="primary" (click)="openHrReviewDialog()" class="header-action-button">
                           <mat-icon>rate_review</mat-icon>
                           <span>Create HR Appraisal</span>
                         </button>
@@ -521,12 +526,12 @@
                     </div>
 
                     <div *ngIf="isLoadingHrReviews" class="loading-container">
-                      <mat-spinner diameter="40"></mat-spinner>
+                                          <mat-spinner diameter="40"></mat-spinner>
                       <p>Loading HR reviews...</p>
                     </div>
 
                     <div *ngIf="!isLoadingHrReviews" class="table-wrapper">
-                      <table mat-table [dataSource]="hrReviewsDataSource" class="ref-table">
+                                          <table mat-table [dataSource]="hrReviewsDataSource" class="ref-table">
 
                         <ng-container matColumnDef="cycleName">
                           <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
@@ -603,19 +608,19 @@
                   <div class="section-divider"></div>
 
                   <!-- HR Reviews Given to Me -->
-                  <section class="card-section">
+                  <section class="card-section" *ngIf="hasPermission('HR_REVIEWS_GIVEN_TO_ME_TABLE')">
                     <div class="section-header">
-                      <h2>HR Reviews Given to Me</h2>
+                                          <h2>HR Reviews Given to Me</h2>
                       <span class="section-meta">{{ employeeHrReviewsDataSource.data.length }} Total Reviews</span>
                     </div>
 
                     <div *ngIf="isLoadingEmployeeHrReviews" class="loading-container">
-                      <mat-spinner diameter="40"></mat-spinner>
+                                          <mat-spinner diameter="40"></mat-spinner>
                       <p>Loading HR reviews...</p>
                     </div>
 
                     <div *ngIf="!isLoadingEmployeeHrReviews" class="table-wrapper">
-                      <table mat-table [dataSource]="employeeHrReviewsDataSource" class="ref-table">
+                                          <table mat-table [dataSource]="employeeHrReviewsDataSource" class="ref-table">
 
                         <ng-container matColumnDef="cycleName">
                           <th mat-header-cell *matHeaderCellDef>Cycle Name</th>
@@ -687,7 +692,8 @@
                 </div>
               </div>
             </ng-template>
-          </mat-tab>
+            </mat-tab>
+          </ng-container>
 
         </mat-tab-group>
       </div>

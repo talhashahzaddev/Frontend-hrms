@@ -1,521 +1,590 @@
-// Claims List - same style as category-list
-.claim-list-container {
-  padding: 24px;
-  max-width: 1600px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+.time-tracking-container {
+  width: 100%;
+  color: #0b1c30;
+  background-color: #f8fafc;
+  padding: 2rem;
+  font-family: 'Public Sans', 'Inter', sans-serif;
   min-height: 100vh;
 
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
-    padding: 24px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    .header-content {
-      flex: 1;
-      .page-title {
+    align-items: flex-end;
+    margin-bottom: 2rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .title-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .title {
+        font-family: inherit;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.025em;
+        margin: 0;
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 0 0 8px;
-        font-size: 32px;
-        font-weight: 700;
-        color: #1f2937;
-        letter-spacing: -0.5px;
-        mat-icon { font-size: 36px; width: 36px; height: 36px; color: #667eea; }
+        gap: 0.75rem;
+
+        mat-icon {
+          font-size: 2rem;
+          width: 2rem;
+          height: 2rem;
+          color: #2563eb;
+        }
       }
-      .page-subtitle { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
+
+      .subtitle {
+        color: #64748b;
+        font-size: 1rem;
+        margin: 0;
+        max-width: 42rem;
+      }
     }
-    .header-actions .add-button {
-      height: 48px;
-      padding: 0 28px !important;
-      border-radius: 12px !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-      transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-      mat-icon { margin-right: 8px; }
-      &:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important; }
+
+    .actions {
+      .add-btn {
+        background-color: #004ac6;
+        color: #ffffff;
+        padding: 0.625rem 1.25rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 15px -3px rgba(0, 74, 198, 0.2);
+        transition: all 0.2s;
+
+        &:hover {
+          background-color: rgba(0, 74, 198, 0.9);
+        }
+
+        mat-icon {
+          font-size: 1.125rem;
+          width: 1.125rem;
+          height: 1.125rem;
+        }
+      }
     }
   }
 
-  // View tabs: My Claims (left) / All Claims (right)
   .view-tabs {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    gap: 24px;
-    margin-bottom: 28px;
-    padding: 12px 20px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    width: 100%;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-sizing: border-box;
+    display: inline-flex;
+    background: #f1f5f9;
+    padding: 0.375rem;
+    border-radius: 0.875rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
 
-    .view-tab {
-      display: inline-flex;
+    .tab-item {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 14px 32px;
-      min-height: 48px;
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 15px;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.625rem;
+      font-size: 0.875rem;
       font-weight: 600;
-      color: #6b7280;
-      background: #f9fafb;
+      color: #64748b;
+      background: transparent;
+      border: none;
       cursor: pointer;
-      outline: none;
-      transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-      -webkit-appearance: none;
-      appearance: none;
-      font-family: inherit;
+      transition: all 0.2s;
 
       mat-icon {
-        font-size: 22px;
-        width: 22px;
-        height: 22px;
-        color: inherit;
+        font-size: 1.125rem;
+        width: 1.125rem;
+        height: 1.125rem;
       }
 
-      &:hover {
-        color: #667eea;
-        background: rgba(102, 126, 234, 0.08);
-        border-color: rgba(102, 126, 234, 0.4);
+      &:hover:not(.active) {
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.5);
       }
 
       &.active {
-        color: white !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        border-color: transparent !important;
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-
-        mat-icon {
-          color: white !important;
-        }
-
-        &:hover {
-          box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
-        }
+        background: white;
+        color: #2563eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
     }
   }
 
-  // Sliding content area
   .view-content-wrapper {
-    overflow: hidden;
-    position: relative;
     width: 100%;
-  }
-
-  .view-slider {
-    display: flex;
-    width: 200%;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &.slide-all {
-      transform: translateX(-50%);
-    }
-  }
-
-  .view-panel {
-    flex: 0 0 50%;
-    width: 50%;
-    min-width: 50%;
-  }
-
-  // Claim Requests (Super Admin) – card style like leave Team Requests
-  .claim-requests-section {
-    margin-top: 40px;
-    padding-top: 32px;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0 0 8px;
-      font-size: 24px;
-      font-weight: 700;
-      color: #1f2937;
-      mat-icon {
-        font-size: 28px;
-        width: 28px;
-        height: 28px;
-        color: #667eea;
-      }
-    }
-    .section-subtitle {
-      margin: 0 0 24px;
-      font-size: 14px;
-      color: #6b7280;
-      font-weight: 500;
-    }
-
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px 24px;
-      gap: 16px;
-      p { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
-    }
-  }
-
-  .pending-approvals-section {
-    h3 {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1f2937;
-      margin: 0 0 24px;
-    }
-  }
-
-  .approval-card {
-    padding: 24px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: white;
-    margin-bottom: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
     position: relative;
-    overflow: hidden;
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border-color: #667eea;
-      transform: translateY(-2px);
-      &::before {
-        transform: scaleX(1);
-      }
-    }
-
-    .approval-header {
+    .view-slider {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 16px;
+      width: 200%;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-      .employee-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-
-        .employee-avatar {
-          width: 56px;
-          height: 56px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 600;
-          font-size: 20px;
-          flex-shrink: 0;
-          box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        .employee-details {
-          h4 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin: 0 0 4px;
-          }
-          p {
-            font-size: 14px;
-            color: #6b7280;
-            margin: 0;
-            font-weight: 500;
-          }
-        }
+      &.slide-all {
+        transform: translateX(-50%);
       }
 
-      .claim-meta {
+      .view-panel {
+        width: 50%;
+        padding-right: 0.5rem;
+      }
+    }
+  }
+
+  .content-card {
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 2rem;
+
+    .toolbar {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+
+      .filters-row {
         display: flex;
-        align-items: center;
-        gap: 12px;
         flex-wrap: wrap;
-        font-size: 14px;
-        color: #374151;
-        font-weight: 500;
+        align-items: center;
+        gap: 0.625rem;
 
-        .claim-title {
-          font-weight: 600;
-          color: #1f2937;
-        }
-        .amount-badge {
-          padding: 6px 12px;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
-          color: #667eea;
-          border-radius: 20px;
-          font-weight: 600;
-          border: 1px solid rgba(102, 126, 234, 0.2);
-        }
-        .bill-date {
-          color: #6b7280;
-        }
-      }
-    }
+        .search-box {
+          position: relative;
+          min-width: 220px;
 
-    .claim-description {
-      padding: 16px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-radius: 8px;
-      border-left: 3px solid #667eea;
-      margin-bottom: 16px;
-      font-size: 14px;
-      color: #374151;
-      line-height: 1.6;
-      strong {
-        color: #1f2937;
-        font-weight: 600;
-      }
-    }
-
-    .approval-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-
-      button {
-        font-weight: 600;
-        border-radius: 8px;
-        height: 40px;
-        padding: 0 20px !important;
-        font-size: 14px !important;
-        transition: all 0.3s ease;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        line-height: 1 !important;
-        mat-icon {
-          margin-right: 6px;
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-
-      .btn-details {
-        color: #b45309 !important;
-        border-color: rgba(245, 158, 11, 0.5) !important;
-        background: rgba(245, 158, 11, 0.08) !important;
-        &:hover {
-          background: rgba(245, 158, 11, 0.15) !important;
-        }
-      }
-
-      .approve-button {
-        height: 40px !important;
-        padding: 0 24px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        border: none !important;
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
-        }
-        mat-icon {
-          color: white !important;
-          margin-right: 8px;
-        }
-      }
-    }
-  }
-
-  .claim-requests-section .empty-state {
-    text-align: center;
-    padding: 48px 24px;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    mat-icon { font-size: 64px; width: 64px; height: 64px; color: #cbd5e1; margin-bottom: 16px; }
-    h3 { margin: 0 0 8px; font-size: 20px; font-weight: 600; color: #1f2937; }
-    p { margin: 0; font-size: 14px; color: #6b7280; }
-  }
-
-  .filters-card {
-    margin-bottom: 24px;
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    .filters-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-      h3 { margin: 0; font-size: 18px; font-weight: 600; color: #1f2937; }
-      .clear-filters-btn {
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        color: #667eea !important;
-        border-color: rgba(102, 126, 234, 0.3) !important;
-      }
-    }
-    .filters-content {
-      padding: 24px;
-      .search-field { width: 100%; max-width: 400px; }
-      ::ng-deep .mat-mdc-text-field-wrapper { background: white; border-radius: 12px; }
-      mat-icon { color: #667eea !important; }
-    }
-    .filters-content-all-claims {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      gap: 20px;
-      .search-field { max-width: 280px; min-width: 200px; flex: 1 1 auto; }
-      .filter-field {
-        min-width: 140px;
-        &.date-field { min-width: 160px; }
-      }
-      ::ng-deep .mat-mdc-form-field {
-        .mat-mdc-text-field-wrapper { background: white; border-radius: 12px; }
-        .mat-mdc-select-value, .mat-mdc-floating-label { color: #374151; }
-      }
-      mat-icon { color: #667eea !important; }
-    }
-  }
-
-  .table-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
-    .loading-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-      gap: 20px;
-      p { margin: 0; font-size: 15px; color: #6b7280; font-weight: 500; }
-    }
-    .table-container {
-      overflow-x: auto;
-      .claim-table {
-        width: 100%;
-        .category-name { font-weight: 500; color: #374151; }
-        .show-details-btn {
-          border-radius: 8px !important;
-          font-weight: 600 !important;
-          font-size: 13px !important;
-          color: #b45309 !important;
-          background: rgba(245, 158, 11, 0.12) !important;
-          border: 1px solid rgba(245, 158, 11, 0.4) !important;
           mat-icon {
-            font-size: 18px;
-            width: 18px;
-            height: 18px;
-            margin-right: 6px;
-            color: #b45309 !important;
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.125rem;
+            width: 1.125rem;
+            height: 1.125rem;
+            pointer-events: none;
           }
-          &:hover {
-            background: rgba(245, 158, 11, 0.2) !important;
-            border-color: rgba(245, 158, 11, 0.6) !important;
+
+          input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: #334155;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s, box-shadow 0.2s;
+
+            &::placeholder {
+              color: #94a3b8;
+            }
+
+            &:focus {
+              border-color: #004ac6;
+              box-shadow: 0 0 0 2px rgba(0, 74, 198, 0.15);
+            }
           }
         }
-        .amount { font-weight: 600; color: #1f2937; }
-        ::ng-deep .mat-mdc-header-row {
-          background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-          .mat-mdc-header-cell {
+
+        .date-filters {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+
+          .compact-date {
+            width: 148px;
+            margin: 0;
+            font-size: 0.8rem;
+            --mat-form-field-container-height: 36px;
+            --mat-form-field-container-vertical-padding: 6px;
+            --mdc-outlined-text-field-container-shape: 8px;
+            --mdc-outlined-text-field-input-text-size: 13px;
+            --mdc-outlined-text-field-label-text-size: 12px;
+
+            ::ng-deep .mat-mdc-text-field-wrapper {
+              background-color: #f8fafc !important;
+              border-radius: 0.5rem !important;
+              padding: 0 0.625rem !important;
+              height: 36px !important;
+              border: 1px solid #e2e8f0 !important;
+            }
+            ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+            ::ng-deep .mat-mdc-form-field-bottom-align::before { display: none !important; }
+            ::ng-deep .mat-mdc-form-field-infix { 
+              padding-top: 6px !important; 
+              padding-bottom: 6px !important; 
+              min-height: 36px !important;
+              display: flex;
+              align-items: center;
+            }
+            ::ng-deep .mat-mdc-form-field-flex {
+              align-items: center !important;
+            }
+            ::ng-deep .mat-mdc-input-element {
+              font-size: 0.8125rem !important;
+            }
+            ::ng-deep .mat-datepicker-toggle {
+              width: 2rem;
+              height: 2rem;
+              padding: 0;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+            }
+            ::ng-deep .mat-datepicker-toggle-default-icon {
+              width: 1.125rem;
+              height: 1.125rem;
+            }
+            ::ng-deep .mat-mdc-icon-button {
+              padding: 0 !important;
+              display: inline-flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            }
+            ::ng-deep .mat-mdc-icon-button .mat-mdc-button-touch-target {
+              width: 2rem;
+              height: 2rem;
+            }
+            ::ng-deep .mat-mdc-floating-label {
+              color: #64748b !important;
+            }
+            ::ng-deep .mdc-notched-outline__leading,
+            ::ng-deep .mdc-notched-outline__notch,
+            ::ng-deep .mdc-notched-outline__trailing {
+              border-color: transparent !important;
+            }
+          }
+        }
+
+        .filter-select {
+          padding: 0.5rem 1rem;
+          background-color: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          color: #334155;
+          outline: none;
+          cursor: pointer;
+          min-width: 140px;
+
+          &:focus {
+            border-color: #004ac6;
+          }
+        }
+
+        .filter-actions {
+          .clear-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.5rem;
+            font-size: 0.8125rem;
             font-weight: 600;
-            color: #1f2937;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e5e7eb;
-            padding: 16px 12px;
+            background-color: #fff;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            mat-icon {
+              font-size: 1rem;
+              width: 1rem;
+              height: 1rem;
+            }
+
+            &:not(:disabled):hover {
+              background-color: #f8fafc;
+              color: #ef4444;
+              border-color: #fca5a5;
+            }
           }
         }
-        ::ng-deep .mat-mdc-row {
+      }
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .custom-table {
+      width: 100%;
+      text-align: left;
+      border-collapse: collapse;
+
+      thead {
+        tr {
+          background-color: #f8fafc;
+        }
+      }
+
+      th {
+        padding: 1rem 1.5rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+
+        &.text-right {
+          text-align: right;
+        }
+      }
+
+      tbody {
+        .table-row {
+          transition: background-color 0.2s;
+          border-top: 1px solid #f1f5f9;
+
           &:hover {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+            background-color: #f8fafc;
           }
-          .mat-mdc-cell { padding: 20px 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; color: #374151; }
+
+          td {
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: #475569;
+            white-space: nowrap;
+
+            &.font-semibold {
+              font-weight: 600;
+              color: #0f172a;
+            }
+
+            &.text-right {
+              text-align: right;
+            }
+
+            .badge {
+              display: inline-flex;
+              align-items: center;
+              padding: 0.25rem 0.75rem;
+              border-radius: 2rem;
+              font-size: 0.75rem;
+              font-weight: 700;
+
+              &.status-success { background-color: #dcfce7; color: #166534; }
+              &.status-warn { background-color: #fee2e2; color: #991b1b; }
+              &.status-pending { background-color: #fef3c7; color: #92400e; }
+            }
+
+            .action-cell {
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
+              gap: 0.5rem;
+            }
+
+            .action-btn {
+              width: 28px;
+              height: 28px;
+              padding: 4px;
+              color: #94a3b8;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              border: none;
+              background: transparent;
+              border-radius: 4px;
+              cursor: pointer;
+              transition: all 0.2s;
+
+              mat-icon {
+                font-size: 1.125rem;
+                width: 1.125rem;
+                height: 1.125rem;
+              }
+
+              &:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+              }
+
+              &.hover-primary:hover {
+                color: #004ac6;
+                background-color: rgba(0, 74, 198, 0.05);
+              }
+
+              &.hover-danger:hover {
+                color: #ef4444;
+                background-color: rgba(239, 68, 68, 0.05);
+              }
+            }
+          }
         }
       }
-      .empty-state {
-        text-align: center;
-        padding: 80px 24px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        mat-icon { font-size: 64px; width: 64px; height: 64px; color: #cbd5e1; margin-bottom: 16px; }
-        h3 { margin: 0 0 8px; font-size: 20px; font-weight: 600; color: #1f2937; }
-        p { margin: 0 0 24px; font-size: 14px; color: #6b7280; }
-        .add-first-btn {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-          color: white !important;
-          mat-icon { margin-right: 8px; }
+    }
+
+    ::ng-deep .mat-mdc-paginator {
+      background: transparent !important;
+      border-top: 1px solid #f1f5f9;
+    }
+  }
+
+  .claim-requests-section {
+    margin-top: 3rem;
+
+    .section-header {
+      margin-bottom: 1.5rem;
+      .title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+      }
+      .subtitle {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0.25rem 0 0 0;
+      }
+    }
+
+    .approvals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+
+      .approval-card {
+        background: white;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        padding: 1.25rem;
+        transition: all 0.2s;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1.25rem;
+
+          .employee-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            .avatar {
+              width: 2.75rem;
+              height: 2.75rem;
+              background: #eff6ff;
+              color: #2563eb;
+              border-radius: 0.5rem;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 700;
+            }
+
+            .info {
+              display: flex;
+              flex-direction: column;
+              .name { font-weight: 700; color: #0f172a; font-size: 0.9375rem; }
+              .category { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+            }
+          }
+
+          .amount-tag {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+          }
+        }
+
+        .card-body {
+          margin-bottom: 1.25rem;
+          .claim-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem 0; }
+          .description { font-size: 0.875rem; color: #64748b; line-height: 1.5; margin: 0 0 1rem 0; }
+          .meta-row {
+            .date {
+              display: flex;
+              align-items: center;
+              gap: 0.375rem;
+              font-size: 0.75rem;
+              color: #94a3b8;
+              mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+            }
+          }
+        }
+
+        .card-actions {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.75rem;
+
+          button {
+            height: 2.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+          }
         }
       }
     }
   }
 
-  ::ng-deep mat-chip {
-    font-size: 12px !important;
-    font-weight: 600 !important;
-    &.status-pending {
-      background: rgba(245, 158, 11, 0.15) !important;
-      color: #d97706 !important;
-    }
-    &.status-success {
-      background: rgba(16, 185, 129, 0.15) !important;
-      color: #059669 !important;
-    }
-    &.status-warn {
-      background: rgba(239, 68, 68, 0.15) !important;
-      color: #dc2626 !important;
-    }
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    color: #64748b;
+    mat-spinner { margin-bottom: 1rem; }
   }
 
-  ::ng-deep .mat-mdc-menu-panel {
-    border-radius: 12px !important;
-    .mat-mdc-menu-item {
-      border-radius: 8px !important;
-      mat-icon { margin-right: 12px; color: #667eea; }
-      &.danger-action { color: #dc2626 !important; mat-icon { color: #dc2626 !important; } }
-    }
-  }
-}
+  .empty-state-simple {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem;
+    color: #64748b;
+    width: 100%;
+    text-align: center;
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px dashed #e2e8f0;
+    margin-top: 1rem;
 
-@media (max-width: 768px) {
-  .claim-list-container {
-    padding: 16px;
-    .page-header { flex-direction: column; gap: 16px; .header-actions .add-button { width: 100%; } }
-    .view-tabs {
-      flex-direction: column;
-      .view-tab { width: 100%; padding: 12px 20px; font-size: 14px; }
+    mat-icon {
+      font-size: 3.5rem;
+      width: 3.5rem;
+      height: 3.5rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.4;
+      color: #94a3b8;
+    }
+
+    p {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin: 0;
     }
   }
 }

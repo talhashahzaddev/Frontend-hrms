@@ -53,10 +53,36 @@
             <mat-error *ngIf="employeeForm.get('email')?.hasError('email')">Invalid email</mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="field">
+          <mat-form-field appearance="outline" class="field phone-field">
             <mat-label>Phone</mat-label>
-            <input matInput formControlName="phone">
-            <mat-error *ngIf="employeeForm.get('phone')?.hasError('pattern')">10–15 digits only</mat-error>
+            <mat-select matPrefix formControlName="phoneCountryCode" panelClass="country-panel" (openedChange)="onCountryPanelOpen($event)">
+              <mat-select-trigger>
+                <ng-container *ngIf="employeeForm.get('phoneCountryCode')?.value as selCode">
+                  <img *ngIf="getCountryFlag(selCode)" class="opt-flag-img" [src]="getCountryFlag(selCode)" [alt]="getCountryLabel(selCode) + ' flag'" />
+                  <span class="opt-code">{{ selCode }}</span>
+                </ng-container>
+              </mat-select-trigger>
+
+              <div class="country-search-wrapper" (click)="$event.stopPropagation()">
+                <mat-icon>search</mat-icon>
+                <input class="country-search-input" placeholder="Search country..." [(ngModel)]="countryFilter" [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" />
+              </div>
+
+              <ng-container *ngFor="let c of countries">
+                <mat-option *ngIf="!countryFilter || (c.name | lowercase).includes(countryFilter.toLowerCase())" [value]="c.code">
+                  <img *ngIf="c.flag" class="opt-flag-img" [src]="c.flag" [alt]="c.name + ' flag'" />
+                  <span class="opt-name">{{ c.name }}</span>
+                  <span class="opt-code">{{ c.code }}</span>
+                </mat-option>
+              </ng-container>
+            </mat-select>
+
+                 <input matInput formControlName="phone" inputmode="numeric" pattern="[0-9]*"
+                   (keydown)="onPhoneKeydown($event)"
+                   (paste)="onPhonePaste($event)"
+                   (input)="onPhoneInput($event)"
+                   (click)="$event.stopPropagation()" (focus)="$event.stopPropagation()">
+            <mat-error *ngIf="employeeForm.get('phone')?.hasError('pattern')">6–15 digits only</mat-error>
           </mat-form-field>
         </div>
       </div>
@@ -260,9 +286,37 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="field">
+          <mat-form-field appearance="outline" class="field phone-field">
             <mat-label>Phone</mat-label>
-            <input matInput formControlName="phone">
+
+            <mat-select matPrefix formControlName="phoneCountryCode" panelClass="country-panel" (openedChange)="onCountryPanelOpen($event)">
+              <mat-select-trigger>
+                <ng-container *ngIf="employeeForm.get('emergencyContact.phoneCountryCode')?.value as selCode">
+                  <img *ngIf="getCountryFlag(selCode)" class="opt-flag-img" [src]="getCountryFlag(selCode)" [alt]="getCountryLabel(selCode) + ' flag'" />
+                  <span class="opt-code">{{ selCode }}</span>
+                </ng-container>
+              </mat-select-trigger>
+
+              <div class="country-search-wrapper" (click)="$event.stopPropagation()">
+                <mat-icon>search</mat-icon>
+                <input class="country-search-input" placeholder="Search country..." [(ngModel)]="countryFilter" [ngModelOptions]="{standalone: true}" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" />
+              </div>
+
+              <ng-container *ngFor="let c of countries">
+                <mat-option *ngIf="!countryFilter || (c.name | lowercase).includes(countryFilter.toLowerCase())" [value]="c.code">
+                  <img *ngIf="c.flag" class="opt-flag-img" [src]="c.flag" [alt]="c.name + ' flag'" />
+                  <span class="opt-name">{{ c.name }}</span>
+                  <span class="opt-code">{{ c.code }}</span>
+                </mat-option>
+              </ng-container>
+            </mat-select>
+
+            <input matInput formControlName="phone" inputmode="numeric" pattern="[0-9]*"
+                   (keydown)="onPhoneKeydown($event)"
+                   (paste)="onPhonePaste($event)"
+                   (input)="onPhoneInput($event)"
+                   (click)="$event.stopPropagation()" (focus)="$event.stopPropagation()">
+            <mat-error *ngIf="employeeForm.get('emergencyContact.phone')?.hasError('pattern')">6–15 digits only</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="field">

@@ -97,6 +97,10 @@ export class RecurringFormDialogComponent implements OnDestroy {
     this.destroy$.complete();
   }
 
+  onCancel(): void {
+    this.dialogRef.close();
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
