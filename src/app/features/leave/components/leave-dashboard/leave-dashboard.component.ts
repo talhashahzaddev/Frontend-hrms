@@ -209,6 +209,10 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
     return leaveType?.color || '#2196F3';
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Leave Management', 'My Leaves', actionKey);
+  }
+
   getUsagePercentage(balance: LeaveBalance): number {
     return balance.totalDays > 0 ? (balance.usedDays / balance.totalDays) * 100 : 0;
   }

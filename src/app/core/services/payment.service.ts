@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '@environments/environment';
+import {
+  CreateCheckoutSessionRequest,
+  CheckoutSessionResponse,
+  VerifyPaymentRequest,
+  PaymentConfirmationDto,
+  TransactionDto,
+  InvoiceDto,
+  PagedResult
+} from '@core/models/payment-management.models';
 
 export interface SubscriptionPlanDto {
   planId: string;
@@ -121,6 +130,96 @@ export class PaymentService {
             throw new Error(response.message || 'Failed to fetch company subscription details');
           }
           return response.data!;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  // ========== CHECKOUT & PAYMENT FLOW ==========
+
+  /**
+   * Create a checkout session (initiates payment flow)
+   */
+  createCheckoutSession(request: CreateCheckoutSessionRequest): Observable<CheckoutSessionResponse> {
+    return this.http.post<ServiceResponse<CheckoutSessionResponse>>(`${this.API_URL}/create-checkout-session`, request)
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Failed to create checkout session');
+          }
+          return response.data;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Verify payment after gateway redirect
+   */
+  verifyPayment(request: VerifyPaymentRequest): Observable<PaymentConfirmationDto> {
+    return this.http.post<ServiceResponse<PaymentConfirmationDto>>(`${this.API_URL}/verify-payment`, request)
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Payment verification failed');
+          }
+          return response.data;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Get transactions for the current company (org-side)
+   */
+  getMyTransactions(page: number = 1, pageSize: number = 10): Observable<PagedResult<TransactionDto>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<ServiceResponse<PagedResult<TransactionDto>>>(`${this.API_URL}/transactions`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Failed to fetch transactions');
+          }
+          return response.data;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Get invoices for the current company (org-side)
+   */
+  getMyInvoices(page: number = 1, pageSize: number = 10): Observable<PagedResult<InvoiceDto>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<ServiceResponse<PagedResult<InvoiceDto>>>(`${this.API_URL}/invoices`, { params })
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Failed to fetch invoices');
+          }
+          return response.data;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Get a specific invoice by ID
+   */
+  getInvoiceById(invoiceId: string): Observable<InvoiceDto> {
+    return this.http.get<ServiceResponse<InvoiceDto>>(`${this.API_URL}/invoices/${invoiceId}`)
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Failed to fetch invoice');
+          }
+          return response.data;
         }),
         catchError(this.handleError)
       );

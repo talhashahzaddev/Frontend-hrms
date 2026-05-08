@@ -234,38 +234,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       roles: ['Super Admin', 'HR Manager']
     },
 
-    // Payroll - Super Admin only
-    {
-      name: 'Payroll Periods',
-      route: '/payroll/periods',
-      keywords: ['payroll periods', 'payroll period', 'periods', 'pay period', 'salary period'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Process Payroll',
-      route: '/payroll/process',
-      keywords: ['process payroll', 'payroll process', 'run payroll', 'calculate payroll', 'generate payroll'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Salary Components',
-      route: '/payroll/salary-component',
-      keywords: ['salary components', 'salary component', 'components', 'pay components', 'salary structure'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Payroll Reports',
-      route: '/payroll/reports',
-      keywords: ['payroll reports', 'payroll report', 'salary reports', 'payroll analytics'],
-      roles: ['Super Admin']
-    },
-    {
-      name: 'Salary Slips',
-      route: '/payroll/slips',
-      keywords: ['salary slips', 'salary slip', 'payslips', 'payslip', 'pay slip', 'pay slips'],
-      roles: ['Super Admin']
-    },
-
     // Profile & Settings
     {
       name: 'My Profile',
@@ -278,6 +246,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
       route: '/change-password',
       keywords: ['settings', 'preferences', 'configuration', 'config'],
       roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee']
+    },
+
+    // Payroll
+    {
+      name: 'Bonus Pay',
+      route: '/payroll/bonus',
+      keywords: ['payroll', 'bonus', 'bonus pay', 'incentive', 'bonus ledger'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Performance Pay',
+      route: '/payroll/performance',
+      keywords: ['payroll', 'performance pay', 'performance bonus', 'performance ledger'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Loans & Salary Advances',
+      route: '/payroll/loans',
+      keywords: ['payroll', 'loan', 'loans', 'salary advance', 'salary advances', 'loan payments'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
+    },
+    {
+      name: 'Payroll Policies',
+      route: '/payroll/policies',
+      keywords: ['payroll policies', 'policy', 'rules', 'salary policy'],
+      roles: ['Super Admin', 'HR Manager', 'Manager']
     },
 
     // AI Assistant
@@ -516,12 +510,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (this.currentUser?.userId) {
           this.loademployeeDetails(this.currentUser.userId);
         }
-
-        if (this.currentUser?.roleName === 'Super Admin') {
-          this.loadSubscriptionDetails();
-        } else {
-          this.currentPlanName = null;
-        }
+        this.loadSubscriptionDetails();
       });
   }
 

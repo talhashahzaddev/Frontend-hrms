@@ -1,0 +1,207 @@
+<div class="time-tracking-container payroll-result-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Payroll Results</h1>
+    </div>
+    <div class="ledger-switch">
+      <a routerLink="/payroll/calculation" routerLinkActive="active">Payroll calculation</a>
+      <a routerLink="/payroll/results" routerLinkActive="active">Payroll results</a>
+    </div>
+  </div>
+
+  <!-- Toolbar & Filters -->
+  <div class="toolbar">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>Payroll Period <span class="required">*</span></label>
+        <select class="filter-select" [(ngModel)]="selectedPeriodId">
+          <option value="">Select Payroll Period</option>
+          @for (p of periods; track p.periodId) {
+            <option [value]="p.periodId">{{ p.periodName }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Department</label>
+        <select class="filter-select" [(ngModel)]="selectedDepartmentId">
+          <option value="">All Departments</option>
+          @for (dept of departments; track dept.departmentId) {
+            <option [value]="dept.departmentId">{{ dept.departmentName }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Search Employee</label>
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Name or ID" [(ngModel)]="searchTerm" />
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="apply-btn"
+          [disabled]="!hasActiveFilters && !hasAppliedFilters"
+          (click)="applyFilters()">
+          <mat-icon>filter_list</mat-icon>
+          Apply
+        </button>
+        <button class="clear-btn"
+          [disabled]="!hasActiveFilters && !hasAppliedFilters"
+          (click)="clearFilters()">
+          <mat-icon>close</mat-icon>
+          Clear
+        </button>
+      </div>
+    </div>
+    <div class="export-action">
+      <button class="export-btn">
+        <mat-icon>download</mat-icon> Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="icon-wrapper bg-primary"><mat-icon>group</mat-icon></div>
+      <div class="info">
+        <div class="label">Total Employees</div>
+        <div class="value">{{ totalEmployees }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="icon-wrapper bg-surface"><mat-icon>payments</mat-icon></div>
+      <div class="info">
+        <div class="label">Total Gross Salary</div>
+        <div class="value">PKR {{ totalGrossSalary | number }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="icon-wrapper bg-error"><mat-icon>remove</mat-icon></div>
+      <div class="info">
+        <div class="label">Total Deductions</div>
+        <div class="value">PKR {{ totalDeductions | number }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="icon-wrapper bg-tertiary"><mat-icon>featured_seasonal_and_gifts</mat-icon></div>
+      <div class="info">
+        <div class="label">Total Bonuses</div>
+        <div class="value">PKR {{ totalBonuses | number }}</div>
+      </div>
+    </div>
+    <div class="card highlight">
+      <div class="icon-wrapper"><mat-icon>check</mat-icon></div>
+      <div class="info">
+        <div class="label">Total Net Payable</div>
+        <div class="value">PKR {{ totalNetPayable | number }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="content-card">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr class="category-row">
+            <th class="col-emp sticky-left" colspan="2">Employee Info</th>
+            <th class="col-earn text-center" colspan="5">Earnings</th>
+            <th class="col-deduct text-center" colspan="8">Deductions</th>
+            <th class="col-contrib text-center" colspan="2">Employer Contributions</th>
+            <th class="col-net sticky-right-1" colspan="2">Net Payable</th>
+          </tr>
+          <tr class="header-row">
+            <th class="sticky-left">Employee</th>
+            <th>Department</th>
+            <th class="text-right">Basic</th>
+            <th class="text-right">OT</th>
+            <th class="text-right">Perf. Bonus</th>
+            <th class="text-right">Bonus</th>
+            <th class="text-right font-semibold">Gross</th>
+            <th class="text-right">Attendance</th>
+            <th class="text-right">Late</th>
+            <th class="text-right">Leave</th>
+            <th class="text-right">Loan</th>
+            <th class="text-right">Advance</th>
+            <th class="text-right">PF (Emp)</th>
+            <th class="text-right">Tax</th>
+            <th class="text-right text-error font-semibold">Total Deductions</th>
+            <th class="text-right">PF (Employer)</th>
+            <th class="text-right">Gratuity</th>
+            <th class="text-right text-primary font-semibold sticky-right-1">Net Payable</th>
+            <th class="text-center sticky-right-0">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (emp of employees; track emp.id; let last = $last) {
+            <tr class="table-row">
+              <td class="sticky-left">
+                <div class="employee-info">
+                  <img [src]="emp.avatar" alt="Avatar">
+                  <div class="emp-details">
+                    <span class="emp-name">{{ emp.name }}</span>
+                    <span class="emp-id">{{ emp.id }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ emp.department }}</td>
+              <td class="text-right">{{ emp.earnings.basic | number }}</td>
+              <td class="text-right">{{ emp.earnings.ot | number }}</td>
+              <td class="text-right">{{ emp.earnings.perfBonus | number }}</td>
+              <td class="text-right">{{ emp.earnings.bonus | number }}</td>
+              <td class="text-right font-semibold">{{ emp.earnings.gross | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.attendance > 0">{{ emp.deductions.attendance | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.late > 0">{{ emp.deductions.late | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.leave > 0">{{ emp.deductions.leave | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.loan > 0">{{ emp.deductions.loan | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.advance > 0">{{ emp.deductions.advance | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.pfEmp > 0">{{ emp.deductions.pfEmp | number }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.tax > 0">{{ emp.deductions.tax | number }}</td>
+              <td class="text-right text-error font-semibold">{{ emp.deductions.total | number }}</td>
+              <td class="text-right">{{ emp.contributions.pfEmployer | number }}</td>
+              <td class="text-right">{{ emp.contributions.gratuity | number }}</td>
+              <td class="text-right font-bold text-primary sticky-right-1">{{ emp.netPayable | number }}</td>
+              <td class="sticky-right-0">
+                <div class="action-group">
+                  <button><mat-icon>visibility</mat-icon></button>
+                  <button><mat-icon>download</mat-icon></button>
+                </div>
+              </td>
+            </tr>
+            @if (!last) {
+              <tr class="spacer-row"><td colspan="19"></td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (totalRecords === 0) {
+          No records found
+        } @else {
+          Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalRecords }} records
+        }
+      </p>
+      <div class="pagination">
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="currentPage === 1" [disabled]="currentPage === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+          <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Next -->
+        <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -23,7 +23,6 @@ import {
   DashboardSummary,
   AttendanceStats,
   LeaveStats,
-  PayrollStats,
   PerformanceStats,
   RecentActivity,
   DepartmentStats,
@@ -80,7 +79,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   dashboardSummary: DashboardSummary | null = null;
   attendanceStats: AttendanceStats | null = null;
   leaveStats: LeaveStats | null = null;
-  payrollStats: PayrollStats | null = null;
   performanceStats: PerformanceStats | null = null;
   
   recentActivities: RecentActivity[] = [];
@@ -129,12 +127,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       description: 'Add leave types and start tracking employee time-off',
       completed: false
     },
-    {
-      id: 5,
-      title: 'Process Payroll',
-      description: 'Define salary structures and process payroll with just a single click',
-      completed: false
-    }
   ];
 
   get onboardingProgress(): number {
@@ -170,9 +162,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: user => {
           this.currentUser = user;
           // Load onboarding status if Super Admin
-          if (this.isSuperAdmin) {
-            this.loadOnboardingStatus();
-          }
+          // if (this.isSuperAdmin) {
+          //   this.loadOnboardingStatus();
+          // }
         },
         error: () => {
           this.currentUser = null;
@@ -192,7 +184,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.onboardingSteps[1].completed = status.createTeam;
           this.onboardingSteps[2].completed = status.markAttendance;
           this.onboardingSteps[3].completed = status.defineLeaveTypes;
-          this.onboardingSteps[4].completed = status.processPayroll;
           this.cdr.markForCheck();
         },
         error: (error) => {
@@ -203,34 +194,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // Role helpers for DashboardComponent (or any component)
-get isAdmin(): boolean {
-  return this.authService.hasRole('Admin');
-}
-get isSuperAdmin(): boolean {
-  return this.authService.hasRole('Super Admin');
-}
+// get isAdmin(): boolean {
+//   return this.authService.hasRole('Admin');
+// }
+// get isSuperAdmin(): boolean {
+//   return this.authService.hasRole('Super Admin');
+// }
 
-get isHR(): boolean {
-  return this.authService.hasRole('HR');
-}
+// get isHR(): boolean {
+//   return this.authService.hasRole('HR');
+// }
 
-get isManager(): boolean {
-  return this.authService.hasRole('Manager');
-}
+// get isManager(): boolean {
+//   return this.authService.hasRole('Manager');
+// }
 
-get isEmployee(): boolean {
-  return this.authService.hasRole('Employee');
-}
+// get isEmployee(): boolean {
+//   return this.authService.hasRole('Employee');
+// }
 
-// Generic function if you want to check any role dynamically
-hasRole(role: string): boolean {
-  return this.authService.hasRole(role);
-}
-
-// Check multiple roles at once
-hasAnyRole(roles: string[]): boolean {
-  return this.authService.hasAnyRole(roles);
-  }
+// (role helpers removed)
   
   
   
@@ -254,12 +237,6 @@ hasAnyRole(roles: string[]): boolean {
       leaveStats: this.dashboardService.getLeaveStats(this.selectedPeriod).pipe(
         catchError(error => {
           this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load leave stats'));
-          return of(null);
-        })
-      ),
-      payrollStats: this.dashboardService.getPayrollStats(this.selectedPeriod).pipe(
-        catchError(error => {
-          this.notificationService.showError(this.extractErrorMessage(error, 'Failed to load payroll stats'));
           return of(null);
         })
       ),
@@ -303,7 +280,6 @@ hasAnyRole(roles: string[]): boolean {
         this.dashboardSummary = data.summary;
         this.attendanceStats = data.attendanceStats;
         this.leaveStats = data.leaveStats;
-        this.payrollStats = data.payrollStats;
         this.performanceStats = data.performanceStats;
         
         this.recentActivities = data.recentActivities;

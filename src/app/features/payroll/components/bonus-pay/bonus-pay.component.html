@@ -1,0 +1,183 @@
+<div class="time-tracking-container bonus-pay-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Bonus & Performance Pay</h1>
+      <p class="subtitle">Manage bonus payouts and performance-based compensation for the current period</p>
+    </div>
+    <div class="ledger-switch">
+      <a routerLink="/payroll/bonus" routerLinkActive="active">Bonus</a>
+      <a routerLink="/payroll/performance" routerLinkActive="active">Performance pay</a>
+    </div>
+  </div>
+
+  <!-- Summary Stat Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Bonus</span>
+          <span class="value">{{ currencySymbol() }} {{ totalPayout | number }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">this period</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Employees</span>
+          <span class="value">{{ rows.length }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>groups</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">receiving bonus</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Avg Bonus</span>
+          <span class="value">{{ currencySymbol() }} {{ averageBonus | number }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>analytics</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">per employee</p>
+    </div>
+  </div>
+
+  <!-- Content Area (Table + Toolbar) -->
+  <div class="content-card">
+    <div class="toolbar">
+      <!-- Filter row -->
+      <div class="filters-row">
+        <!-- Search -->
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
+        </div>
+
+        <!-- Rule filter -->
+        <select class="filter-select" [(ngModel)]="pendingRule">
+          <option value="">All rules</option>
+          @for (rule of bonusRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriod">
+          <option value="">All periods</option>
+          @for (p of periods; track p.periodId) {
+            <option [value]="p.periodId">{{ p.periodName }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Add button -->
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="openAddBonusDialog()">
+          <mat-icon>add</mat-icon>
+          Add Bonus Pay
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive" [class.loading]="isLoading">
+      <!-- Loading Overlay -->
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p>Loading bonus records...</p>
+        </div>
+      }
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Period</th>
+            <th class="text-right">Amount</th>
+            <th>Description</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (rows.length === 0) {
+            <tr>
+              <td class="empty-row" colspan="5">No bonus records found.</td>
+            </tr>
+          } @else {
+            @for (row of rows; track trackById($index, row)) {
+              <tr class="table-row">
+                <td>
+                  <div class="employee-info">
+                    <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
+                    <span class="font-semibold">{{ row.employeeName }}</span>
+                  </div>
+                </td>
+                <td>{{ row.period }}</td>
+                <td class="text-right font-semibold highlight-val">{{ currencySymbol() }} {{ row.amount | number }}</td>
+                <td class="text-sm italic text-gray-500">{{ row.description }}</td>
+                <td class="action-cell">
+                  <button class="action-btn hover-primary" aria-label="Edit" (click)="openEditBonusDialog(row)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="action-btn hover-danger" aria-label="Delete" (click)="requestDeleteRow(row)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        @if (totalRecords === 0) {
+          No records found
+        } @else {
+          Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalRecords }} records
+        }
+      </p>
+      <div class="pagination">
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="currentPage === 1" [disabled]="currentPage === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+          <button class="page-btn" [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Next -->
+        <button class="page-btn" [class.disabled]="currentPage === totalPages" [disabled]="currentPage === totalPages"
+          (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

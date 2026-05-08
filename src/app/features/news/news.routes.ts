@@ -14,7 +14,6 @@ export const newsRoutes: Routes = [
   {
     path: 'create-news',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadComponent: () => import('./components/create-news/create-news.component')
       .then(m => m.CreateNewsComponent),
   },

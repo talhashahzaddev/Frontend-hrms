@@ -200,7 +200,7 @@ export interface ReceivedJobApplicationsFilterParams {
   applyDateFrom?: string | null; // ISO date string
   applyDateTo?: string | null;   // ISO date string
   stageId?: string | null;
-  jobId?: string | null;
+  jobIds?: string[] | null;
 }
 
 /** Application stage (movement of a job application to a stage) */

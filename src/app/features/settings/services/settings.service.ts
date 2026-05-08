@@ -10,10 +10,18 @@ export interface OrganizationSettings {
   organizationId: string;
   currency: string | null;
   organizationName: string;
+  timeZone: string | null;
+  culture: string | null;
 }
 
 export interface UpdateCurrencyRequest {
   currency: string;
+}
+
+export interface UpdateLocalizationRequest {
+  currency: string;
+  timeZone: string;
+  culture: string;
 }
 
 export interface CareerPageSettings {
@@ -97,6 +105,13 @@ export class SettingsService {
     });
   }
 
+  //Getting all timezones
+getAllTimeZones() {
+  return this.http.get<any[]>(
+    'https://restcountries.com/v3.1/all?fields=name,capital,timezones,region'
+  );
+}
+
   updateCurrency(currency: string): Observable<boolean> {
     const request: UpdateCurrencyRequest = { currency };
     return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/currency`, request)
@@ -109,6 +124,19 @@ export class SettingsService {
         })
       );
   }
+
+  updateLocalization(request: UpdateLocalizationRequest): Observable<boolean> {
+  return this.http
+    .put<ApiResponse<boolean>>(`${this.apiUrl}/localization`, request)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to update localization settings');
+        }
+        return response.data!;
+      })
+    );
+}
 
   getAvailableCurrencies(): Array<{ code: string; name: string; symbol: string }> {
     return [

@@ -1,68 +1,81 @@
-// ─── Dialog container ─────────────────────────────────────────────────────
-.application-detail-dialog-panel .mat-mdc-dialog-container,
+::ng-deep .application-detail-dialog-panel .mat-mdc-dialog-container,
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 18px !important;
+  border-radius: 12px !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  font-family: 'Public Sans', sans-serif;
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────
-.dialog-header {
+.modal-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  flex-direction: column;
+  max-height: 90vh;
+  width: 100%;
+  background-color: #ffffff;
+  overflow: hidden;
+}
 
-  h2 {
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #ffffff;
+
+  .header-content {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: white !important;
-    letter-spacing: -0.3px;
+    gap: 12px;
 
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-      color: white !important;
+    .icon-wrapper {
+      background-color: rgba(37, 99, 235, 0.1);
+      padding: 8px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2563eb;
+
+      .header-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    h2 {
+      color: #0f172a;
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin: 0;
     }
   }
 
-  ::ng-deep .mat-mdc-dialog-title,
-  ::ng-deep [mat-dialog-title] {
-    color: white !important;
-  }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-  .close-button {
-    color: white;
-    opacity: 0.85;
-    transition: opacity 0.2s, transform 0.25s;
+    .close-btn {
+      color: #94a3b8;
+      transition: color 0.2s;
 
-    &:hover {
-      opacity: 1;
-      transform: rotate(90deg);
-      background: rgba(255, 255, 255, 0.15);
+      &:hover {
+        color: #475569;
+      }
     }
   }
 }
 
-// ─── Content scroll ────────────────────────────────────────────────────────
-.dialog-content {
-  padding: 28px !important;
-  max-height: 82vh;
+.modal-body {
+  flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
-  background: #f7f8fc;
-  box-sizing: border-box;
+  padding-bottom: 16px;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
 
   &::-webkit-scrollbar-track {
@@ -70,213 +83,158 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.3);
-    border-radius: 4px;
+    background: #cbd5e1;
+    border-radius: 10px;
   }
 }
 
-// ─── States ───────────────────────────────────────────────────────────────
-.loading-state,
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 48px 24px;
-  color: #6b7280;
-  background: white;
-  border-radius: 12px;
+// ─── Job / Application title header ────────────────────────────────────────
+.job-header {
+  padding: 24px;
+  border-bottom: 1px solid #f8fafc;
 
-  mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    color: #9ca3af;
+  h1 {
+    color: #0f172a;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0 0 12px 0;
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .badge {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+    }
+
+    .badge-code {
+      background-color: #f1f5f9;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-stage {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .badge-source {
+      background-color: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+    }
   }
 }
 
-// ─── Application details ───────────────────────────────────────────────────
-.application-details {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-// ─── Hero section ─────────────────────────────────────────────────────────
-.hero-section {
-  background: white;
-  border-radius: 14px;
-  padding: 20px 22px;
-  border: 1px solid #ecedf5;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
-}
-
-.detail-title-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.detail-title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
-  letter-spacing: -0.3px;
-}
-
-.job-code-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.08) 100%);
-  border: 1px solid rgba(102, 126, 234, 0.25);
-  color: #667eea;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.hero-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.detail-meta {
-  margin: 0;
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.status-chip {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  background: #f3f4f6;
-  color: #6b7280;
-
-  &.status-applied {
-    background: rgba(16, 185, 129, 0.12);
-    color: #059669;
-  }
-}
-
-// ─── Detail grid ──────────────────────────────────────────────────────────
-.detail-grid {
+// ─── Info grid ─────────────────────────────────────────────────────────────
+.info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
-  background: white;
-  border-radius: 14px;
-  border: 1px solid #ecedf5;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
-}
+  padding: 16px 24px;
 
-.detail-row {
-  padding: 12px 18px;
-  border-bottom: 1px solid #f0f0f8;
-
-  &:nth-last-child(-n+2) {
-    border-bottom: none;
-  }
-
-  .detail-label {
-    display: block;
-    font-size: 10.5px;
-    font-weight: 700;
-    color: #6b7a9e;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 4px;
-  }
-
-  .detail-value {
-    display: block;
-    font-size: 13px;
-    font-weight: 500;
-    color: #1f2937;
-    word-break: break-word;
-  }
-
-  .detail-link {
-    font-size: 13px;
-    color: #667eea;
-    font-weight: 600;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-// ─── Content panel (cover letter) ─────────────────────────────────────────
-.content-panel {
-  border: 1.5px solid #e8eaf6;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
-
-  .content-panel-header {
+  .info-cell {
     display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 14px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    width: 100%;
-    box-sizing: border-box;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
 
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      color: white;
-      flex-shrink: 0;
+    &:nth-child(odd) {
+      padding-right: 16px;
     }
 
-    span {
+    &:nth-child(even) {
+      padding-left: 16px;
+    }
+
+    .info-label {
+      color: #94a3b8;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: white;
+      letter-spacing: 0.1em;
+      margin: 0;
     }
-  }
 
-  .content-panel-body {
-    padding: 16px 18px;
-    font-size: 14px;
-    color: #374151;
-    line-height: 1.7;
-    min-height: 40px;
+    .info-value {
+      color: #334155;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+
+      &.external-link {
+        color: #2563eb;
+        text-decoration: underline;
+        word-break: break-all;
+      }
+    }
   }
 }
 
-// Quill rendered content
-::ng-deep .ql-content {
-  p {
-    margin: 0 0 8px;
+// ─── Content tabs (Cover letter) ───────────────────────────────────────────
+.content-tabs {
+  margin-top: 16px;
 
-    &:last-child {
-      margin-bottom: 0;
+  .tab-headers {
+    display: flex;
+    padding: 0 24px;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 24px;
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 0 0 12px 0;
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        color: #334155;
+      }
+
+      &.active {
+        border-bottom-color: #2563eb;
+        color: #2563eb;
+        font-weight: 700;
+      }
     }
+  }
+
+  .tab-content {
+    padding: 24px;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.625;
+  }
+}
+
+// ─── Quill content ─────────────────────────────────────────────────────────
+::ng-deep .ql-content {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.625;
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
   }
 
   strong {
     font-weight: 700;
-    color: #1f2937;
+    color: #1e293b;
   }
 
   em {
@@ -287,69 +245,79 @@
     text-decoration: underline;
   }
 
-  h1,
-  h2,
-  h3 {
+  s {
+    text-decoration: line-through;
+  }
+
+  h1, h2, h3 {
     margin: 10px 0 6px;
     font-weight: 700;
-    color: #1f2937;
+    color: #1e293b;
     line-height: 1.3;
   }
 
-  h1 {
-    font-size: 18px;
-  }
+  h1 { font-size: 18px; }
+  h2 { font-size: 16px; }
+  h3 { font-size: 14px; }
 
-  h2 {
-    font-size: 16px;
-  }
-
-  h3 {
-    font-size: 14px;
-  }
-
-  ol,
-  ul {
-    margin: 4px 0 8px;
+  ol, ul {
+    margin: 4px 0 12px;
     padding-left: 22px;
   }
 
-  ol {
-    list-style: decimal;
-  }
+  ol { list-style: decimal; }
+  ul { list-style: disc; }
 
-  ul {
-    list-style: disc;
-  }
-
-  li {
-    margin-bottom: 4px;
-  }
+  li { margin-bottom: 4px; }
 
   a {
-    color: #667eea;
+    color: #2563eb;
     text-decoration: underline;
     word-break: break-all;
   }
 }
 
-// ─── Dialog actions ────────────────────────────────────────────────────────
-.dialog-actions {
-  padding: 16px 28px !important;
-  background: #fff;
-  border-top: 1px solid #ecedf5;
+// ─── Loading / Error states ────────────────────────────────────────────────
+.loading-state,
+.error-state {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  color: #64748b;
 
-  .close-btn {
-    height: 40px;
-    padding: 0 24px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-    border: none !important;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35) !important;
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #94a3b8;
+  }
+}
+
+// ─── Footer ────────────────────────────────────────────────────────────────
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+
+  .btn-close {
+    padding: 10px 24px;
+    border: 1px solid #cbd5e1;
+    background-color: transparent;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f1f5f9;
+    }
   }
 }

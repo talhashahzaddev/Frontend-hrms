@@ -1,0 +1,126 @@
+<div class="cg-overlay" (click)="closeOnBackdropClick($event)">
+  <div class="cg-modal">
+
+    <!-- Header -->
+    <header class="cg-header">
+      <h2 class="cg-title">{{ isEditMode ? 'Edit Agent Group' : 'Create Agent Group' }}</h2>
+      <button class="cg-close" type="button" (click)="cancel()">✕</button>
+    </header>
+
+    <!-- Body -->
+    <form [formGroup]="groupForm" (ngSubmit)="submit()" class="cg-body">
+
+      <!-- Title -->
+      <div class="cg-field">
+        <label class="cg-label">Group Title *</label>
+        <input class="cg-input"
+               formControlName="groupTitle"
+               placeholder="Enter group title" />
+      </div>
+
+      <!-- Department -->
+      <div class="cg-field">
+        <label class="cg-label">Department</label>
+        <select class="cg-select" formControlName="departmentId">
+          <option value="">Select</option>
+          <option *ngFor="let d of departments" [value]="d.departmentId">
+            {{ d.departmentName }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Category Dropdown -->
+      <div class="cg-field" data-dropdown="category">
+
+        <label class="cg-label">Category</label>
+
+        <div class="cg-dropdown-trigger"
+             (click)="toggleCategoryDropdown($event)"
+             [class.cg-dropdown-trigger--open]="categoryDropdownOpen">
+          <span class="cg-dropdown-text">{{ getCategoryDisplay }}</span>
+          <span class="cg-dropdown-arrow">▼</span>
+        </div>
+
+        <!-- DROPDOWN -->
+        <div class="cg-dropdown-menu" *ngIf="categoryDropdownOpen">
+
+          <div class="cg-dropdown-scroll">
+
+            <div *ngIf="filteredCategories.length === 0" class="cg-no-items">
+              No categories available
+            </div>
+
+            <div *ngFor="let cat of filteredCategories"
+                 class="cg-dropdown-item"
+                 (click)="$event.stopPropagation(); selectCategory(cat.categoryId)">
+              {{ cat.categoryName }}
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Employee Dropdown -->
+      <div class="cg-field" data-dropdown="employee">
+
+        <label class="cg-label">Employees *</label>
+
+        <div class="cg-search-row"
+             (click)="toggleEmployeeDropdown($event)"
+             [class.cg-search-row--open]="employeeDropdownOpen">
+
+          <input class="cg-search-input"
+                 [placeholder]="employeeDropdownOpen ? 'Search...' : 'Select employees'"
+                 [value]="employeeDropdownOpen ? employeeFilter : ''"
+                 (input)="onEmployeeSearch($any($event.target).value)" />
+
+          <input type="checkbox"
+                 *ngIf="employeeDropdownOpen"
+                 [checked]="isAllVisibleSelected()"
+                 (click)="$event.stopPropagation(); toggleSelectAll()" />
+
+        </div>
+
+        <!-- DROPDOWN -->
+        <div class="cg-checklist-box" *ngIf="employeeDropdownOpen">
+
+          <div class="cg-checklist-scroll">
+
+            <div *ngIf="filteredEmployees.length === 0">
+              No employees found
+            </div>
+
+            <div *ngFor="let emp of filteredEmployees"
+                 class="cg-emp-row"
+                 (click)="$event.stopPropagation(); toggleEmployee(emp)">
+
+              <input type="checkbox"
+                     [checked]="isEmployeeSelected(emp.id)" />
+
+              <span>{{ emp.name }}</span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Selected Employees -->
+        <p class="cg-count-text">
+          {{ getSelectedEmployeeNames() }}
+        </p>
+
+      </div>
+
+    </form>
+
+    <!-- Footer -->
+    <footer class="cg-footer">
+      <button class="cg-btn cg-btn--cancel" (click)="cancel()">Cancel</button>
+      <button class="cg-btn cg-btn--submit" (click)="submit()">{{ isEditMode ? 'Update' : 'Create' }}</button>
+    </footer>
+
+  </div>
+</div>

@@ -22,7 +22,7 @@
     <!-- Search Section -->
     <div class="search-container">
       <!-- Toolbar search icon -->
-      <button mat-icon-button class="search-trigger-button" *ngIf="!isHandset && !isSearchOpen" matTooltip="Search"
+      <button mat-icon-button class="search-trigger-button" *ngIf="!isSearchOpen" matTooltip="Search"
         aria-label="Search" (click)="toggleSearch()">
         <mat-icon>search</mat-icon>
       </button>
@@ -143,7 +143,7 @@
               <span>{{ currentUser?.roleName }}</span>
             </div>
             <div class="user-plan" [class.expired]="isSubscriptionExpired"
-              *ngIf="currentPlanName && currentUser?.roleName === 'Super Admin'">
+              *ngIf="currentPlanName">
               <mat-icon>{{ isSubscriptionExpired ? 'error' : 'workspace_premium' }}</mat-icon>
               <span>{{ isSubscriptionExpired ? 'Expired: ' : '' }}{{ currentPlanName }}</span>
               <span class="plan-cycle" *ngIf="currentBillingCycle">({{ currentBillingCycle | titlecase }})</span>

@@ -1,0 +1,89 @@
+<div class="confirmation-page">
+  <div class="confirmation-container">
+    @if (isSuccess) {
+      <!-- Success State -->
+      <mat-card class="confirmation-card success">
+        <div class="status-icon success-icon">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h1>Payment Successful!</h1>
+        <p class="subtitle">Your subscription has been activated</p>
+
+        <div class="details-section">
+          <div class="detail-row">
+            <span class="label">Plan</span>
+            <span class="value highlight">{{ planName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Amount</span>
+            <span class="value">{{ formattedAmount }} {{ currency }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Billing Cycle</span>
+            <span class="value">{{ billingCycle === 'annual' ? 'Annual' : 'Monthly' }}</span>
+          </div>
+          @if (invoiceNumber) {
+            <div class="detail-row">
+              <span class="label">Invoice</span>
+              <span class="value invoice-num">{{ invoiceNumber }}</span>
+            </div>
+          }
+          @if (transactionId) {
+            <div class="detail-row">
+              <span class="label">Transaction ID</span>
+              <span class="value txn-id">{{ transactionId | slice:0:18 }}...</span>
+            </div>
+          }
+        </div>
+
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" (click)="goToDashboard()">
+            <mat-icon>dashboard</mat-icon>
+            Go to Dashboard
+          </button>
+          <button mat-stroked-button (click)="goToBillingHistory()">
+            <mat-icon>receipt_long</mat-icon>
+            View Billing History
+          </button>
+        </div>
+      </mat-card>
+    } @else {
+      <!-- Failed State -->
+      <mat-card class="confirmation-card failed">
+        <div class="status-icon failed-icon">
+          <mat-icon>error</mat-icon>
+        </div>
+        <h1>Payment Failed</h1>
+        <p class="subtitle">
+          {{ errorMessage || 'There was an issue processing your payment. Please try again.' }}
+        </p>
+
+        @if (planName) {
+          <div class="details-section">
+            <div class="detail-row">
+              <span class="label">Plan</span>
+              <span class="value">{{ planName }}</span>
+            </div>
+            @if (amount > 0) {
+              <div class="detail-row">
+                <span class="label">Amount</span>
+                <span class="value">{{ formattedAmount }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" (click)="retryPayment()">
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+          <button mat-stroked-button (click)="goToDashboard()">
+            <mat-icon>dashboard</mat-icon>
+            Go to Dashboard
+          </button>
+        </div>
+      </mat-card>
+    }
+  </div>
+</div>

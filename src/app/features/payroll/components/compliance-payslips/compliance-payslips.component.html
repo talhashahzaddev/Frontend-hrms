@@ -1,0 +1,238 @@
+<div class="time-tracking-container payslips-page">
+    <!-- Header -->
+    <header class="page-header">
+        <div class="title-section">
+            <h1 class="title">Payslips</h1>
+            <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.</p>
+        </div>
+        <div class="header-actions">
+            <button class="ghost-btn" (click)="openBulkGenerateDialog()">Bulk Generate</button>
+            <button class="green-btn" (click)="openBulkEmailDialog()">
+                <mat-icon>mail</mat-icon>
+                Bulk Email
+            </button>
+            <button class="primary-btn" (click)="openBulkGenerateDialog()">
+                <mat-icon>add</mat-icon>
+                Generate Payslip
+            </button>
+        </div>
+    </header>
+
+    <!-- Summary Stats -->
+    <section class="summary-cards">
+        <div class="card">
+            <div class="card-content">
+                <div class="info">
+                    <span class="label">Total Payslips</span>
+                    <span class="value">{{ totalPayslips }}</span>
+                </div>
+                <div class="icon-wrapper color-blue">
+                    <mat-icon>account_balance_wallet</mat-icon>
+                </div>
+            </div>
+            <p class="card-footer">{{ activePeriodLabel }}</p>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="info">
+                    <span class="label">Generated</span>
+                    <span class="value">{{ generatedCount }}</span>
+                </div>
+                <div class="icon-wrapper color-green">
+                    <mat-icon>check_circle</mat-icon>
+                </div>
+            </div>
+            <p class="card-footer">{{ pendingCount }} pending</p>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="info">
+                    <span class="label">Sent to Employees</span>
+                    <span class="value">{{ sentCount }}</span>
+                </div>
+                <div class="icon-wrapper color-amber">
+                    <mat-icon>send</mat-icon>
+                </div>
+            </div>
+            <p class="card-footer">via email distribution</p>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="info">
+                    <span class="label">Reissued</span>
+                    <span class="value">{{ reissuedCount }}</span>
+                </div>
+                <div class="icon-wrapper color-purple">
+                    <mat-icon>history</mat-icon>
+                </div>
+            </div>
+            <p class="card-footer">this period</p>
+        </div>
+    </section>
+
+    <!-- Filters & Table -->
+    <div class="content-card">
+        <div class="toolbar">
+            <div class="filters-row">
+                <!-- Search -->
+                <div class="search-box">
+                    <mat-icon>search</mat-icon>
+                    <input type="text" placeholder="Search employees or ID..." [(ngModel)]="pendingSearchKeyword" (ngModelChange)="onFiltersChanged()" />
+                </div>
+
+                <!-- Period Filter -->
+                <select class="filter-select" [(ngModel)]="pendingPeriodId" (ngModelChange)="onFiltersChanged()">
+                    <option value="">All Periods</option>
+                    @for (period of periods; track period.id) {
+                    <option [value]="period.id">{{ period.label }}</option>
+                    }
+                </select>
+
+                <!-- Status Filter -->
+                <select class="filter-select" [(ngModel)]="pendingStatus" (ngModelChange)="onFiltersChanged()">
+                    <option value="">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="generated">Generated</option>
+                    <option value="sent">Sent</option>
+                    <option value="viewed">Viewed</option>
+                </select>
+
+                <!-- Department Filter -->
+                <select class="filter-select" [(ngModel)]="pendingDepartmentId" (ngModelChange)="onFiltersChanged()">
+                    <option value="">All Departments</option>
+                    @for (department of departments; track department.departmentId) {
+                    <option [value]="department.departmentId">{{ department.departmentName }}</option>
+                    }
+                </select>
+
+                <div class="filter-actions">
+                    <button class="apply-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="applyFilters()">
+                        <mat-icon>filter_list</mat-icon>
+                        Apply
+                    </button>
+                    <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+                        <mat-icon>close</mat-icon>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-col">
+                            <input type="checkbox" [checked]="allVisibleSelected" (change)="toggleAllVisible($any($event.target).checked)" />
+                        </th>
+                        <th>Employee</th>
+                        <th>Period</th>
+                        <th class="text-right">Gross Salary</th>
+                        <th class="text-right">Deductions</th>
+                        <th class="text-right">Net Salary</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Version</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (pagedPayslips.length === 0) {
+                    <tr>
+                        <td colspan="9" class="empty-row" style="text-align: center; padding: 3rem; color: #64748b; font-style: italic;">
+                            No payslip records found.
+                        </td>
+                    </tr>
+                    } @else {
+                    @for (row of pagedPayslips; track row.id) {
+                    <tr>
+                        <td class="checkbox-col">
+                            <input type="checkbox" [checked]="isSelected(row.id)" (change)="toggleRowSelection(row.id, $any($event.target).checked)" />
+                        </td>
+                        <td>
+                            <div class="employee-cell">
+                                <div class="avatar">{{ row.employeeName.charAt(0) }}{{ row.employeeName.split(' ').length > 1 ? row.employeeName.split(' ')[1].charAt(0) : '' }}</div>
+                                <div class="detail">
+                                    <strong>{{ row.employeeName }}</strong>
+                                    <small>ID: {{ row.employeeCode }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ row.periodLabel }}</td>
+                        <td class="text-right">{{ row.grossSalaryPkr | number }}</td>
+                        <td class="text-right danger">{{ row.deductionsPkr | number }}</td>
+                        <td class="text-right success">{{ row.netSalaryPkr | number }}</td>
+                        <td class="text-center">
+                            <span class="status-pill" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="version-chip">v{{ row.versionNo }}</span>
+                        </td>
+                        <td class="text-right">
+                            @if (row.status === 'draft') {
+                            <button class="generate-btn" (click)="generateSinglePayslip(row)">Generate</button>
+                            } @else {
+                            <div class="action-icons">
+                                <button type="button" (click)="openViewPayslip(row)" title="View Payslip">
+                                    <mat-icon>visibility</mat-icon>
+                                </button>
+                                <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
+                                    <mat-icon>alternate_email</mat-icon>
+                                </button>
+                                <button type="button" (click)="openReissueDialog(row)" title="Reissue Payslip">
+                                    <mat-icon>refresh</mat-icon>
+                                </button>
+                            </div>
+                            }
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <footer class="table-footer">
+            <p>
+                @if (totalRecords === 0) {
+                Showing 0 records
+                } @else {
+                Showing {{ fromRecord }} - {{ toRecord }} of {{ totalRecords }} records
+                }
+            </p>
+
+            <div class="pagination-wrap">
+                <button [disabled]="currentPage <= 1" (click)="prevPage()">
+                    <mat-icon>chevron_left</mat-icon>
+                </button>
+                <span>Page {{ currentPage }} / {{ totalPages }}</span>
+                <button [disabled]="currentPage >= totalPages" (click)="nextPage()">
+                    <mat-icon>chevron_right</mat-icon>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Quick Insights -->
+    <aside class="insight-card">
+        <h4>
+            <span class="pulse"></span>
+            Quick Insights
+        </h4>
+        <div class="line">
+            <span>Pending Emails</span>
+            <strong>{{ pendingEmailsCount }} employees</strong>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="distributionPercent"></div>
+        </div>
+        <div class="line tiny">
+            <span>{{ sentCount }}/{{ totalPayslips }} distributed</span>
+            <span>{{ distributionPercent }}% complete</span>
+        </div>
+        <button type="button">View Distribution Report</button>
+    </aside>
+</div>

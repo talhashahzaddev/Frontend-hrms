@@ -41,6 +41,7 @@ export interface LeaveType {
   minDaysNotice?: number;
   advanceNoticeDays?: number;
   isPaid: boolean;
+  isHalfPaid?: boolean;
   carryForwardAllowed: boolean; // API uses 'carryForwardAllowed' not 'allowCarryForward'
   maxCarryForwardDays?: number;
   requiresApproval?: boolean;
@@ -299,6 +300,7 @@ export interface CreateLeaveTypeRequest {
   maxDaysPerRequest?: number;
   advanceNoticeDays?: number;
   isPaid: boolean;
+  isHalfPaid?: boolean;
   carryForwardAllowed: boolean;
   maxCarryForwardDays?: number;
   requiresApproval: boolean;

@@ -1,980 +1,1096 @@
-// Time Tracker Component - Professional & Beautiful Styling
+// ============================================================
+// Time Tracker — Reference Design Mirror
+// Color palette: white cards, slate text, #5a4ee4 primary,
+// #22c55e accent-green, #f97316 accent-orange
+// ============================================================
+
+$primary:       #5a4ee4;
+$green:         #22c55e;
+$orange:        #f97316;
+$bg:            #f4f5f7;
+$white:         #ffffff;
+$slate-900:     #0f172a;
+$slate-700:     #334155;
+$slate-600:     #475569;
+$slate-500:     #64748b;
+$slate-400:     #94a3b8;
+$slate-300:     #cbd5e1;
+$slate-200:     #e2e8f0;
+$slate-100:     #f1f5f9;
+$slate-50:      #f8fafc;
+$border:        #e5e7eb;
+$radius-xl:     1rem;
+$radius-lg:     0.75rem;
+$radius-md:     0.5rem;
+
+// ─── Pulse animation ────────────────────────────────────────
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba($green, 0.5); }
+  50%       { box-shadow: 0 0 0 6px rgba($green, 0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+// ─── Container ──────────────────────────────────────────────
 .time-tracker-container {
-  padding: 24px;
-  max-width: 1600px;
+  padding: 10px;
+  max-width: 98%;
   margin: 0 auto;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  // background: $bg;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Inter', sans-serif;
+}
 
-  // Page Header
-  .page-header {
+// ─── 1. Header ──────────────────────────────────────────────
+.tracker-header {
+  background: $white;
+  border-radius: $radius-xl;
+  border: 1px solid $border;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+
+  // Brand
+  .header-brand {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 32px;
-    padding: 24px;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
 
-    .header-content {
-      flex: 1;
-
-      .page-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin: 0 0 8px;
-        font-size: 32px;
-        font-weight: 700;
-        color: #1f2937;
-        letter-spacing: -0.5px;
-
-        mat-icon {
-          font-size: 36px;
-          width: 36px;
-          height: 36px;
-          color: #667eea;
-        }
-      }
-
-      .page-subtitle {
-        margin: 0;
-        font-size: 15px;
-        color: #6b7280;
-        font-weight: 500;
-      }
-    }
-
-    .current-time {
-      text-align: right;
-
-      .time-display {
-        font-size: 32px;
-        font-weight: 700;
-        color: #667eea;
-        font-family: 'Courier New', monospace;
-        margin-bottom: 4px;
-      }
-
-      .date-display {
-        font-size: 14px;
-        color: #6b7280;
-        font-weight: 500;
-      }
-    }
-  }
-
-  // Clock Card
-  .clock-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    margin-bottom: 32px;
-    overflow: hidden;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
-
-    ::ng-deep mat-card-content {
-      padding: 32px !important;
-    }
-
-    .clock-section {
+    .brand-icon {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba($green, 0.1);
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 32px;
+      justify-content: center;
 
-      .clock-status {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 24px;
-
-        .status-indicator {
-          width: 80px;
-          height: 80px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f3f4f6;
-          border: 4px solid #e5e7eb;
-          transition: all 0.3s ease;
-
-          mat-icon {
-            font-size: 40px;
-            width: 40px;
-            height: 40px;
-            color: #9ca3af;
-          }
-
-          &.active {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-color: #10b981;
-            animation: pulse 2s infinite;
-
-            mat-icon {
-              color: white;
-            }
-          }
-        }
-
-        .status-text {
-          flex: 1;
-
-          h3 {
-            margin: 0 0 8px;
-            font-size: 24px;
-            font-weight: 700;
-            color: #1f2937;
-          }
-
-          p {
-            margin: 0 0 4px;
-            font-size: 14px;
-            color: #6b7280;
-            font-weight: 500;
-          }
-        }
+      mat-icon {
+        color: $green;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
       }
 
-      .clock-actions {
-        display: flex;
-        gap: 16px;
+      .brand-dot {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: $slate-300;
+        border: 2px solid $white;
+        transition: background 0.3s;
 
-        button {
-          height: 56px;
-          padding: 0 32px !important;
-          border-radius: 12px !important;
-          font-size: 16px !important;
-          font-weight: 600 !important;
-          text-transform: none !important;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-          min-width: 150px;
-
-          mat-icon {
-            margin-right: 8px;
-            font-size: 24px;
-            width: 24px;
-            height: 24px;
-          }
-
-          &.clock-in-button:not([disabled]) {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-            color: white !important;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
-
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
-            }
-          }
-
-          &.clock-out-button:not([disabled]) {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-            color: white !important;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
-
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4) !important;
-            }
-          }
-
-          &[disabled] {
-            background: #f3f4f6 !important;
-            color: #9ca3af !important;
-            border: 1px solid #e5e7eb !important;
-            box-shadow: none !important;
-          }
-
-          mat-spinner {
-            display: inline-block;
-            margin-right: 8px;
-
-            ::ng-deep circle {
-              stroke: white !important;
-            }
-          }
+        &.active {
+          background: $green;
+          animation: pulse-dot 2s infinite;
         }
       }
     }
-  }
 
-  // Today's Summary Card
-  .summary-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
-    margin-bottom: 32px;
-
-    ::ng-deep mat-card-header {
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-      .mat-mdc-card-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+    .brand-text {
+      .brand-title {
         margin: 0;
         font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-
-        mat-icon {
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-          color: #667eea;
-        }
+        font-weight: 800;
+        color: $slate-900;
+        letter-spacing: -0.3px;
+        line-height: 1.2;
       }
-    }
 
-    ::ng-deep mat-card-content {
-      padding: 24px !important;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-
-      .summary-item {
-        text-align: center;
-        padding: 20px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
-        border-radius: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.1);
-
-        .summary-label {
-          font-size: 12px;
-          font-weight: 600;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: #6b7280;
-          margin-bottom: 8px;
-        }
-
-        .summary-value {
-          font-size: 24px;
-          font-weight: 700;
-          color: #1f2937;
-          font-family: 'Courier New', monospace;
-
-          .status-chip {
-            font-size: 12px !important;
-            font-weight: 600 !important;
-            height: 28px !important;
-            border-radius: 14px !important;
-          }
-        }
+      .brand-sub {
+        margin: 0;
+        font-size: 11px;
+        color: $slate-400;
+        font-weight: 500;
       }
     }
   }
 
-  // Quick Actions Grid (Dashboard Style)
-  .quick-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    margin-bottom: 32px;
+  // Working status (middle)
+  .header-status {
+    padding: 0 20px;
+    border-left: 1px solid $border;
+    border-right: 1px solid $border;
+    flex-shrink: 0;
 
-    .action-card {
-      border-radius: 16px;
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      border: none;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
-      cursor: pointer;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.04) 100%);
+    .working-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
 
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.06) 100%);
+      .working-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: $green;
+        animation: pulse-dot 2s infinite;
       }
 
-      ::ng-deep mat-card-content {
-        padding: 28px !important;
+      .working-label {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: $green;
       }
+    }
 
-      .action-content {
-        text-align: center;
+    .working-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
 
-        mat-icon {
-          font-size: 48px;
-          width: 48px;
-          height: 48px;
-          color: #667eea;
-          margin-bottom: 16px;
-        }
+      .meta-item {
+        display: flex;
+        flex-direction: column;
 
-        h3 {
-          margin: 0 0 8px;
-          font-size: 18px;
+        .meta-label {
+          font-size: 9px;
           font-weight: 700;
-          color: #1f2937;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: $slate-400;
+          line-height: 1;
+          margin-bottom: 2px;
         }
 
-        p {
-          margin: 0;
-          font-size: 13px;
-          color: #6b7280;
+        .meta-value {
+          font-size: 12px;
+          font-weight: 800;
+          color: $slate-700;
+          line-height: 1;
+        }
+      }
+
+      .meta-divider {
+        width: 1px;
+        height: 24px;
+        background: $border;
+      }
+    }
+  }
+
+  // Right side: time + buttons
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+
+    .time-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+
+      .time-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .live-time {
+          font-size: 20px;
+          font-weight: 800;
+          color: $primary;
+          font-variant-numeric: tabular-nums;
+          letter-spacing: -0.5px;
+          line-height: 1;
+        }
+
+        .live-date {
+          font-size: 10px;
+          font-weight: 700;
+          color: $slate-400;
+          background: $slate-100;
+          padding: 2px 6px;
+          border-radius: 4px;
           line-height: 1.4;
         }
       }
+
+      .elapsed-label {
+        font-size: 9px;
+        font-weight: 700;
+        color: $slate-400;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 2px;
+      }
     }
-  }
 
-  // Recent Activity Card
-  .recent-activity-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
+    .header-actions {
+      display: flex;
+      gap: 8px;
 
-    ::ng-deep mat-card-header {
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-      .mat-mdc-card-title {
+      button {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: $radius-md;
+        font-size: 12px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-
-        mat-icon {
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-          color: #667eea;
-        }
-      }
-    }
-
-    ::ng-deep mat-card-content {
-      padding: 24px !important;
-    }
-
-    .activity-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-height: 500px;
-      overflow-y: auto;
-
-      &::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 10px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-
-        &:hover {
-          background: #94a3b8;
-        }
-      }
-
-      .activity-item {
-        display: flex;
-        gap: 16px;
-        padding: 16px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        border: 1px solid transparent;
+        gap: 6px;
         transition: all 0.2s ease;
+        outline: none;
 
-        &:hover {
-          background: #f1f5f9;
-          border-color: rgba(102, 126, 234, 0.2);
-          transform: translateX(4px);
+        ::ng-deep circle { stroke: currentColor !important; }
+
+        &:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+          transform: none !important;
         }
+      }
 
-        .activity-date {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          width: 60px;
-          padding: 12px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-          flex-shrink: 0;
+      .btn-clock-in {
+        background: $white;
+        color: $slate-700;
+        border: 1px solid $border;
 
-          .day {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-            line-height: 1;
-            margin-bottom: 4px;
-          }
-
-          .month {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1;
-          }
+        &:not(:disabled):hover {
+          background: $slate-50;
+          border-color: $slate-300;
         }
+      }
 
-        .activity-details {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+      .btn-clock-out {
+        background: $orange;
+        color: $white;
+        box-shadow: 0 4px 12px rgba($orange, 0.25);
 
-          .activity-time {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-
-            .check-in,
-            .check-out {
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              font-size: 15px;
-              font-weight: 600;
-              color: #1f2937;
-              font-family: 'Courier New', monospace;
-
-              mat-icon {
-                font-size: 18px;
-                width: 18px;
-                height: 18px;
-              }
-            }
-
-            .check-in mat-icon {
-              color: #10b981;
-            }
-
-            .check-out mat-icon {
-              color: #f59e0b;
-            }
-
-            .separator {
-              color: #d1d5db;
-              font-weight: 400;
-            }
-          }
-
-          .activity-summary {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-
-            .hours {
-              font-size: 14px;
-              font-weight: 600;
-              color: #667eea;
-              padding: 6px 12px;
-              background: rgba(102, 126, 234, 0.1);
-              border-radius: 8px;
-            }
-
-            .status-chip {
-              font-size: 11px !important;
-              font-weight: 600 !important;
-              height: 24px !important;
-              border-radius: 12px !important;
-            }
-          }
+        &:not(:disabled):hover {
+          background: darken($orange, 6%);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba($orange, 0.3);
         }
       }
     }
+  }
+}
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 24px;
-      color: #9ca3af;
+// ─── 2. Summary Strip ───────────────────────────────────────
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 
-      mat-icon {
-        font-size: 56px;
-        width: 56px;
-        height: 56px;
-        margin-bottom: 12px;
-        opacity: 0.5;
+  .strip-item {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius-xl;
+    padding: 20px 20px 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .strip-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: $slate-400;
+    }
+
+    .strip-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: $slate-900;
+      letter-spacing: -0.5px;
+      line-height: 1;
+
+      &.muted {
+        color: $slate-300;
+      }
+    }
+
+    .strip-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      width: fit-content;
+    }
+  }
+}
+
+// ─── 3. Quick Actions ───────────────────────────────────────
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+
+  .action-tile {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: $radius-xl;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
+      color: $primary;
+      flex-shrink: 0;
+    }
+
+    div {
+      h3 {
+        margin: 0 0 3px;
+        font-size: 13px;
+        font-weight: 700;
+        color: $slate-900;
       }
 
       p {
         margin: 0;
-        font-size: 14px;
+        font-size: 11px;
+        color: $slate-400;
+        line-height: 1.4;
       }
+    }
+
+    &:hover {
+      border-color: rgba($primary, 0.3);
+      box-shadow: 0 4px 16px rgba($primary, 0.1);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// ─── 4. Main Grid ───────────────────────────────────────────
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Panel (shared) ─────────────────────────────────────────
+.panel {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-xl;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid $border;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .panel-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $primary;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: $slate-900;
     }
   }
 
-  // Loading Container
-  .loading-container {
+  .panel-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 24px;
-    gap: 20px;
+    padding: 48px 20px;
+    gap: 12px;
+    color: $slate-400;
+    font-size: 13px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: $slate-400;
+
+    mat-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      opacity: 0.4;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: $slate-700;
+    }
 
     p {
       margin: 0;
-      font-size: 15px;
-      color: #6b7280;
-      font-weight: 500;
+      font-size: 12px;
     }
   }
 }
 
-// Status Chips
-::ng-deep mat-chip {
-  &.status-present {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
-    color: #059669 !important;
-    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+// ─── Panel Filters ──────────────────────────────────────────
+.panel-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba($slate-50, 0.6);
+  border-bottom: 1px solid $border;
+  flex-wrap: wrap;
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    .filter-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: $slate-400;
+      white-space: nowrap;
+    }
   }
 
-  &.status-absent {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
-    color: #dc2626 !important;
-    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  .btn-apply {
+    margin-left: auto;
+    height: 32px;
+    padding: 0 16px;
+    background: $primary;
+    color: $white;
+    border: none;
+    border-radius: $radius-md;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: darken($primary, 6%);
+      transform: translateY(-1px);
+    }
   }
 
-  &.status-late {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
-    color: #d97706 !important;
-    border: 1px solid rgba(245, 158, 11, 0.3) !important;
-  }
+  // Compact Material datepicker overrides
+  .compact-field {
+    width: 130px;
 
-  &.status-half_day {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%) !important;
-    color: #2563eb !important;
-    border: 1px solid rgba(59, 130, 246, 0.3) !important;
-  }
+    ::ng-deep {
+      .mat-mdc-text-field-wrapper {
+        background: $white !important;
+        border-radius: $radius-md !important;
+        padding: 0 8px !important;
+      }
 
-  &.status-on_leave {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
-    color: #8b5cf6 !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
-  }
-}
+      .mat-mdc-form-field-flex {
+        height: 32px;
+        align-items: center;
+      }
 
-// Pulse Animation
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
-  }
-}
+      .mat-mdc-form-field-infix {
+        padding: 0 !important;
+        min-height: unset !important;
+        height: 32px;
+        display: flex;
+        align-items: center;
+      }
 
-// Spinner Styling
-::ng-deep mat-spinner circle {
-  stroke: #667eea !important;
-}
-
-
-
-
-
-
-// Time Tracker Component - Matches KRA Styling
-.time-tracker-container {
-  padding: 24px;
-  max-width: 1600px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  min-height: 100vh;
-
-  // Filters Card
-  .filters-card {
-    margin-bottom: 24px;
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
-
-    .filters-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-      h3 {
-        margin: 0;
-        font-size: 18px;
+      input.mat-mdc-input-element {
+        font-size: 11px !important;
         font-weight: 600;
-        color: #1f2937;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        color: $slate-700;
+        caret-color: $primary;
+      }
 
-        &::before {
-          content: '';
-          width: 4px;
-          height: 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 2px;
+      .mat-mdc-notch-piece {
+        border-color: $border !important;
+        border-radius: $radius-md !important;
+      }
+
+      .mdc-notched-outline__leading {
+        border-radius: $radius-md 0 0 $radius-md !important;
+      }
+
+      .mdc-notched-outline__trailing {
+        border-radius: 0 $radius-md $radius-md 0 !important;
+      }
+
+      &:hover .mat-mdc-notch-piece {
+        border-color: $primary !important;
+      }
+
+      .mat-mdc-form-field-icon-suffix {
+        .mat-datepicker-toggle button {
+          width: 28px;
+          height: 28px;
+          padding: 0;
+
+          .mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+            color: $slate-400;
+          }
         }
+      }
+
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+
+      .mat-mdc-floating-label {
+        display: none;
+      }
+
+      .mdc-notched-outline__notch {
+        border: none !important;
+      }
+    }
+  }
+}
+
+// ─── Compact Table ──────────────────────────────────────────
+.table-wrap {
+  overflow-x: auto;
+  flex: 1;
+}
+
+.compact-table {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-header-row {
+      background: rgba($slate-50, 0.5);
+    }
+
+    .mat-mdc-header-cell {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: $slate-400;
+      padding: 10px 20px;
+      border-bottom: 1px solid $border;
+      background: transparent;
+    }
+
+    .mat-mdc-cell {
+      font-size: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba($border, 0.6);
+      color: $slate-700;
+
+      &:first-child {
+        font-weight: 700;
+        color: $slate-900;
       }
     }
 
-    .filters-content {
-      display: grid;
-      grid-template-columns: 2fr 2fr auto;
-      gap: 16px;
-      padding: 24px;
-      align-items: flex-start;
+    .mat-mdc-row {
+      transition: background 0.15s ease;
 
-      .filter-field {
-        grid-column: span 1;
+      &:hover {
+        background: rgba($slate-50, 0.6);
       }
 
-      .filter-actions-container {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-
-        button.add-button {
-          height: 48px;
-          padding: 0 24px !important;
-          border-radius: 12px !important;
-          font-weight: 600 !important;
-          font-size: 15px !important;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-          color: white !important;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          gap: 8px !important;
-
-          mat-icon {
-            font-size: 20px !important;
-            width: 20px !important;
-            height: 20px !important;
-          }
-
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-          }
-        }
-      }
-
-      ::ng-deep mat-form-field {
-        &.mat-form-field-appearance-outline {
-          .mat-mdc-text-field-wrapper {
-            background: white;
-            border-radius: 12px;
-          }
-
-          .mat-mdc-form-field-flex {
-            padding: 0 16px;
-          }
-
-          .mat-mdc-notch-piece {
-            border-color: #e5e7eb !important;
-          }
-
-          &:hover .mat-mdc-text-field-wrapper {
-            background: #f9fafb;
-          }
-
-          &:hover .mat-mdc-notch-piece {
-            border-color: #667eea !important;
-          }
-
-          &.mat-focused {
-            .mat-mdc-text-field-wrapper {
-              background: white;
-              box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-
-            .mat-mdc-notch-piece {
-              border-color: #667eea !important;
-              border-width: 2px !important;
-            }
-          }
-
-          .mat-mdc-form-field-icon-prefix mat-icon {
-            color: #667eea;
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-          }
-
-          .mat-mdc-form-field-infix {
-            min-height: 48px;
-          }
-        }
+      &:last-child .mat-mdc-cell {
+        border-bottom: none;
       }
     }
   }
 
-  // Table Card
-  .table-card {
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
+  .col-right {
+    text-align: right;
+  }
+}
 
-    .table-header {
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+// ─── Table Badge ────────────────────────────────────────────
+.table-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 
-      h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+// ─── Sessions Panel ─────────────────────────────────────────
+.sessions-panel {
+  .sessions-list {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 380px;
+    overflow-y: auto;
 
-        &::before {
-          content: '';
-          width: 4px;
-          height: 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 2px;
-        }
-      }
+    &::-webkit-scrollbar {
+      width: 4px;
     }
-
-    .table-container {
-      overflow-x: auto;
-      min-height: 200px;
+    &::-webkit-scrollbar-track {
+      background: $slate-100;
+      border-radius: 10px;
     }
-
-    .attendance-table {
-      width: 100%;
-
-      ::ng-deep {
-        .mat-mdc-header-cell {
-          background: #f9fafb;
-          font-weight: 600;
-          color: #374151;
-          font-size: 14px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          padding: 16px;
-          border-bottom: 2px solid #e5e7eb;
-        }
-
-        .mat-mdc-cell {
-          padding: 16px;
-          border-bottom: 1px solid #f3f4f6;
-          color: #1f2937;
-          font-size: 14px;
-        }
-
-        .mat-mdc-row {
-          transition: all 0.2s ease;
-
-          &:hover {
-            background: #f9fafb;
-          }
-
-          &:last-child .mat-mdc-cell {
-            border-bottom: none;
-          }
-        }
-      }
-
-      .status-active {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
-        color: #059669;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-      }
-
-      .status-inactive {
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
-        color: #dc2626;
-        border: 1px solid rgba(239, 68, 68, 0.3);
-      }
+    &::-webkit-scrollbar-thumb {
+      background: $slate-300;
+      border-radius: 10px;
     }
+  }
+}
 
-    // Empty State
-    .empty-state {
-      text-align: center;
-      padding: 80px 24px;
+.session-row {
+  background: $slate-50;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+
+  &.dim {
+    opacity: 0.65;
+  }
+
+  &:hover {
+    border-color: rgba($primary, 0.2);
+    background: rgba($primary, 0.02);
+  }
+
+  .session-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .session-date-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: $radius-md;
+      background: $primary;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+
+      .day {
+        font-size: 15px;
+        font-weight: 800;
+        color: $white;
+        line-height: 1;
+      }
+
+      .month {
+        font-size: 8px;
+        font-weight: 700;
+        color: rgba($white, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        margin-top: 1px;
+      }
+
+      &.inactive {
+        background: $slate-200;
+
+        .day { color: $slate-600; }
+        .month { color: $slate-400; }
+      }
+    }
+
+    .session-time {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      color: $green;
 
       mat-icon {
-        font-size: 64px;
-        width: 64px;
-        height: 64px;
-        color: #cbd5e1;
-        margin-bottom: 16px;
-      }
-
-      h3 {
-        margin: 0 0 8px;
-        font-size: 20px;
-        font-weight: 600;
-        color: #1f2937;
-      }
-
-      p {
-        margin: 0 0 24px;
-        font-size: 14px;
-        color: #6b7280;
-      }
-    }
-
-    // Loading Spinner
-    .loading-spinner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-      gap: 16px;
-
-      p {
-        margin: 0;
-        color: #6b7280;
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      ::ng-deep mat-spinner circle {
-        stroke: #667eea !important;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
       }
     }
   }
 
-  // Pagination
-  ::ng-deep mat-paginator {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-top: 1px solid #e5e7eb;
-    border-radius: 0 0 16px 16px;
+  .session-duration {
+    background: $white;
+    border: 1px solid $border;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: $slate-500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
 
-    .mat-mdc-paginator-container {
-      padding: 12px 24px;
+// ─── Status badge colours ────────────────────────────────────
+.badge-present {
+  background: rgba($green, 0.1);
+  color: darken($green, 10%);
+}
+
+.badge-absent {
+  background: rgba(#ef4444, 0.1);
+  color: #dc2626;
+}
+
+.badge-late {
+  background: rgba($orange, 0.1);
+  color: darken($orange, 8%);
+}
+
+.badge-half_day {
+  background: rgba(#3b82f6, 0.1);
+  color: #2563eb;
+}
+
+.badge-on_leave {
+  background: rgba(#8b5cf6, 0.1);
+  color: #7c3aed;
+}
+// ── Overlay backdrop 
+.geo-gate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+.geo-gate-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+// ── Card header ──────────────────────────────────────────────────────────────
+.geo-gate-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  .geo-gate-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #5c6bc0;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a237e;
+  }
+
+  .geo-gate-sub {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  .geo-close-btn {
+    margin-left: auto;
+    color: #9e9e9e;
+    flex-shrink: 0;
+  }
+}
+
+// ── Step row 
+.gate-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  border-left: 4px solid #e0e0e0;
+  transition: border-color 0.3s, background 0.3s;
+
+  &.step-loading {
+    border-left-color: #5c6bc0;
+    background: #ede7f6;
+  }
+
+  &.step-success {
+    border-left-color: #4caf50;
+    background: #f1f8e9;
+  }
+
+  &.step-error {
+    border-left-color: #f44336;
+    background: #fce4ec;
+  }
+}
+
+.step-indicator {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-spinner { flex-shrink: 0; }
+
+  .step-icon-ok  { color: #4caf50; font-size: 24px; }
+  .step-icon-err { color: #f44336; font-size: 24px; }
+  .step-icon-idle { color: #9e9e9e; font-size: 24px; }
+}
+
+.step-body {
+  display: flex;
+  flex-direction: column;
+
+  .step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .step-msg {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+    word-break: break-word;
+  }
+}
+
+// ── Webcam 
+.webcam-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 4 / 3;
+
+  .webcam-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scaleX(-1); // mirror
+  }
+
+  .webcam-overlay-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid rgba(92, 107, 192, 0.5);
+    border-radius: 12px;
+    pointer-events: none;
+    box-shadow: inset 0 0 30px rgba(92, 107, 192, 0.15);
+  }
+}
+
+// ── Confidence ring 
+.confidence-ring-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  .confidence-ring {
+    width: 80px;
+    height: 80px;
+
+    .ring-progress {
+      transition: stroke-dasharray 0.6s ease;
+    }
+
+    .ring-text {
+      font-size: 13px;
+      font-weight: 700;
+      fill: #374151;
     }
   }
 
-  // Responsive
-  @media (max-width: 1024px) {
-    .filters-content {
-      grid-template-columns: 1fr 1fr !important;
-      grid-template-rows: auto auto;
-      .filter-actions-container {
-        grid-column: 1 / -1;
-        justify-content: stretch;
-      }
-    }
+  .confidence-label {
+    font-size: 13px;
+    font-weight: 600;
   }
+}
 
-  @media (max-width: 768px) {
-    padding: 16px;
+// ── Retry button 
+.retry-btn {
+  align-self: center;
+  width: fit-content;
 
-    .filters-content {
-      grid-template-columns: 1fr !important;
-      grid-template-rows: auto;
-      .filter-actions-container {
-        grid-column: 1 / -1;
-      }
+  mat-icon { font-size: 18px; margin-right: 4px; }
+}
+
+// ── Gate action buttons ────────────────────────────────────────────────────
+.geo-gate-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 4px;
+
+  button {
+    min-width: 120px;
+
+    .btn-spinner {
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      margin-right: 4px;
+      vertical-align: middle;
     }
   }
 }
 
+// ── Geo-secured badge in header ────────────────────────────────────────────
+.geofence-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: #e8eaf6;
+  border-radius: 20px;
+  color: #3949ab;
+  font-size: 12px;
+  font-weight: 600;
 
-
-
-
-
-
-
-
-
-
-
-
-/* =======================================================
-   Responsive Adjustments
-======================================================= */
-@media (max-width: 768px) {
-  .date-filter {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .date-filter .filter-field {
-    width: 100%;
-  }
-
-  .date-filter button {
-    width: 100%;
-  }
-
-  .attendance-card {
-    padding: 20px;
-  }
-
-  ::ng-deep .attendance-table .mat-mdc-header-cell,
-  ::ng-deep .attendance-table .mat-mdc-cell {
-    padding: 12px 8px;
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
   }
 }
 
 
+// ─── Spinner tint ────────────────────────────────────────────
+::ng-deep mat-spinner circle {
+  stroke: $primary !important;
+}
 
-
-// Responsive Design
+// ─── Responsive ─────────────────────────────────────────────
 @media (max-width: 768px) {
   .time-tracker-container {
-    padding: 16px;
+    padding: 16px 12px;
+    gap: 14px;
+  }
 
-    .page-header {
-      flex-direction: column;
-      gap: 16px;
+  .tracker-header {
+    flex-wrap: wrap;
 
-      .current-time {
-        text-align: left;
+    .header-status {
+      border: none;
+      padding: 8px 0 0;
+      width: 100%;
+    }
+
+    .header-right {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      .time-block {
+        align-items: flex-start;
+      }
+
+      .header-actions {
+        margin-left: auto;
       }
     }
+  }
 
-    .clock-card .clock-section {
-      flex-direction: column;
+  .summary-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
 
-      .clock-actions {
-        width: 100%;
-        flex-direction: column;
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
 
-        button {
-          width: 100%;
-        }
-      }
+  .panel-filters {
+    .compact-field {
+      width: 110px;
     }
+  }
+}
 
-    .summary-card .summary-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+@media (max-width: 480px) {
+  .summary-strip {
+    grid-template-columns: 1fr 1fr;
 
-    .quick-actions-grid {
-      grid-template-columns: 1fr;
+    .strip-value {
+      font-size: 22px;
     }
   }
 }

@@ -1,0 +1,246 @@
+.request-loan-dialog-panel .mat-mdc-dialog-container {
+  padding: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 22px 42px rgba(0, 25, 80, 0.2);
+}
+
+.request-loan-dialog-panel .mdc-dialog__surface {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.request-loan-dialog {
+  background: #ffffff;
+  color: #0f172a;
+  width: min(560px, 94vw);
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid #e2e8f0;
+
+    h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .close-btn {
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+  }
+
+  .dialog-content {
+    padding: 1.2rem 1.4rem 1.3rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.95rem;
+
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    span {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 2.7rem;
+      border: 1px solid #dbe3ef;
+      border-radius: 0.7rem;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 0.9rem;
+      padding: 0.65rem 0.75rem;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+      }
+    }
+
+    textarea {
+      min-height: 5.8rem;
+      resize: vertical;
+    }
+
+    &.full-span {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .full-span {
+    grid-column: 1 / -1;
+  }
+
+  .prefix-input {
+    position: relative;
+
+    strong {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-size: 0.78rem;
+      letter-spacing: 0.01em;
+    }
+
+    input {
+      padding-left: 2.45rem;
+    }
+  }
+
+  .error-text {
+    margin: 0.1rem 0 0;
+    font-size: 0.76rem;
+    color: #b91c1c;
+    line-height: 1.4;
+
+    &.full-span {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .rule-hint {
+    margin-top: 0.25rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.5rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    span {
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: normal;
+      color: inherit;
+    }
+  }
+
+  .info-box {
+    margin-top: 1rem;
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.7rem;
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+
+    mat-icon {
+      margin-top: 0.05rem;
+      font-size: 1.05rem;
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+  }
+
+  .dialog-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+
+    button {
+      border: none;
+      border-radius: 0.62rem;
+      height: 2.45rem;
+      padding: 0 1.1rem;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cancel-btn {
+      color: #1d4ed8;
+      background: transparent;
+
+      &:hover {
+        background: rgba(29, 78, 216, 0.1);
+      }
+    }
+
+    .submit-btn {
+      color: #ffffff;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.26);
+
+      &:hover {
+        filter: brightness(1.04);
+      }
+
+      &:disabled {
+        background: #cbd5e1;
+        box-shadow: none;
+        cursor: not-allowed;
+        color: #94a3b8;
+      }
+    }
+  }
+}

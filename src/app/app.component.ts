@@ -196,12 +196,11 @@ export class AppComponent implements OnInit, OnDestroy {
         if (!user) return; // user not logged in, let guards handle it
 
         const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
-        const isAdmin = user.roleName === 'Super Admin' || user.roleName === 'HR Manager';
 
-      // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
-      if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
-        this.router.navigate(['/employee/dashboard']);
-      }
+      // // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
+      // if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
+      //   this.router.navigate(['/employee/dashboard']);
+      // }
     });
 }
 
@@ -213,7 +212,6 @@ export class AppComponent implements OnInit, OnDestroy {
       '/employees': 'Employee Management',
       '/attendance': 'Attendance Tracking',
       '/leave': 'Leave Management',
-      '/payroll': 'Payroll Management',
       '/performance': 'Performance Management',
       '/settings': 'Settings',
       '/profile': 'My Profile'

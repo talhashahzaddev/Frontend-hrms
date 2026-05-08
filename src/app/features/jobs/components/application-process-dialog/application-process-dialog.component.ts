@@ -77,6 +77,7 @@ export class ApplicationProcessDialogComponent implements OnInit {
       next: (list) => {
         this.stages = list ?? [];
         this.stagesLoading = false;
+        this.setDefaultStage();
       },
       error: () => {
         this.stagesLoading = false;
@@ -92,6 +93,7 @@ export class ApplicationProcessDialogComponent implements OnInit {
         this.applicationStages = list ?? [];
         this.stagesDataSource.data = this.applicationStages;
         this.applicationStagesLoading = false;
+        this.setDefaultStage();
       },
       error: () => {
         this.applicationStages = [];
@@ -101,10 +103,42 @@ export class ApplicationProcessDialogComponent implements OnInit {
     });
   }
 
+  setDefaultStage(): void {
+    if (this.stagesLoading || this.applicationStagesLoading || !this.stages.length) return;
+    
+    const completedStageIds = new Set(this.applicationStages.map(s => s.stageId));
+    const nextStage = this.stages.find(s => !completedStageIds.has(s.stageId));
+    
+    if (nextStage) {
+      this.selectedStageId.setValue(nextStage.stageId);
+    } else {
+      this.selectedStageId.setValue(this.stages[this.stages.length - 1].stageId);
+    }
+  }
+
   getInterviewersDisplay(stage: ApplicationStageDto): string {
     const interviewers = stage.interviewers;
     if (!interviewers?.length) return '—';
     return interviewers.map((i) => i.employeeName || '—').join(', ');
+  }
+
+  isStageCompleted(stageId: string): boolean {
+    return this.applicationStages.some(s => s.stageId === stageId);
+  }
+
+  getCompletionPercentage(): number {
+    if (!this.stages || this.stages.length <= 1) return 0;
+
+    // Find highest completed stage index
+    let highestCompletedIndex = -1;
+    this.stages.forEach((stage, index) => {
+      if (this.isStageCompleted(stage.stageId)) {
+        highestCompletedIndex = Math.max(highestCompletedIndex, index);
+      }
+    });
+
+    if (highestCompletedIndex <= 0) return 0;
+    return (highestCompletedIndex / (this.stages.length - 1)) * 100;
   }
 
   formatUpdatedOn(updatedOn: string | null | undefined): string {

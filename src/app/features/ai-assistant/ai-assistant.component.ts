@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } fr
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { ChatService, ChatMessage } from '../../shared/services/chat.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -15,9 +16,9 @@ interface FormattedMessagePart {
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './ai-assistant.component.html',
-  styleUrls: ['./ai-assistant.component.scss']
+  styleUrl: './ai-assistant.component.scss'
 })
 export class AiAssistantComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('chatInput') chatInput!: ElementRef<HTMLTextAreaElement>;

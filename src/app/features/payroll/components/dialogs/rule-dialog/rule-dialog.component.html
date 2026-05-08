@@ -1,0 +1,996 @@
+<div class="rd-container">
+  <!-- ── Header ── -->
+  <header class="rd-header">
+    <div class="rd-header-left">
+      <div class="rd-header-icon">
+        <mat-icon>rule</mat-icon>
+      </div>
+      <div>
+        <h2>{{ data.policyId === 1 ? (isEditMode ? 'Edit Overtime Rule' : 'Create Overtime Rule') :
+          data.policyId === 2 ? (isEditMode ? 'Edit Attendance Rule' : 'Create Attendance Rule') :
+          data.policyId === 3 ? (isEditMode ? 'Edit Late Arrival Rule' : 'Create Late Arrival Rule') :
+          data.policyId === 4 ? (isEditMode ? 'Edit Leave Rule' : 'Create Leave Rule') :
+          data.policyId === 5 ? (isEditMode ? 'Edit Performance Rule' : 'Create Performance Rule') :
+          data.policyId === 6 ? (isEditMode ? 'Edit Bonus Rule' : 'Create Bonus Rule') :
+          data.policyId === 7 ? (isEditMode ? 'Edit Loan Rule' : 'Create Loan Rule') :
+          data.policyId === 9 ? (isEditMode ? 'Edit Provident Fund Rule' : 'Create Provident Fund Rule') :
+          data.policyId === 8 ? (isEditMode ? 'Edit Salary Advance Rule' : 'Create Salary Advance Rule') :
+          data.policyId === 10 ? (isEditMode ? 'Edit Tax Regime Rule' : 'Create Tax Regime Rule') :
+          data.policyId === 11 ? (isEditMode ? 'Edit Social Security Policy' : 'Create Social Security Policy') :
+          data.policyId === 12 ? (isEditMode ? 'Edit Gratuity Rule' : 'Create Gratuity Rule') :
+          (isEditMode ? 'Edit Policy' : 'Create Policy') }}
+        </h2>
+        <p class="rd-header-sub">{{ data.policyId ? 'Configure a new rule' : 'Configure a new Policy' }}</p>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="rd-close-btn" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <!-- ── Body ── -->
+  <div class="rd-body">
+    <form [formGroup]="ruleForm" class="rd-form" (ngSubmit)="onSubmit(); $event.preventDefault()">
+
+      <!-- Section: Select Policy -->
+      <section class="rd-section" *ngIf="!data.policyId">
+        <div class="rd-section-title">
+          <h3>Policy Selection</h3>
+        </div>
+
+        <div class="rd-field">
+          <label>Select Policy *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <mat-select formControlName="selectedPolicy" placeholder="Choose a policy">
+              <mat-option *ngFor="let policy of policies" [value]="policy.id">
+                {{ policy.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="ruleForm.get('selectedPolicy')?.hasError('required')">Policy selection is
+              required</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Overtime Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 1">
+        <div class="rd-section-title">
+          <h3>Overtime Configuration</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Rule Name -->
+          <div class="rd-field">
+            <label>Rule Name *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="ruleName" placeholder="e.g. Weekend OT Bonus" maxlength="100">
+              <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Overtime Type -->
+          <div class="rd-field">
+            <label>Overtime Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="overtimeType" placeholder="Select type">
+                <mat-option *ngFor="let type of overtimeTypes" [value]="type">
+                  {{ type | titlecase }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="ruleForm.get('overtimeType')?.hasError('required')">Overtime type is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Value Type -->
+          <div class="rd-field">
+            <label>Value Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="amountType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Fixed Amount -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'fixed'">
+            <label>Fixed Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="fixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('fixedAmount')?.hasError('required')">Fixed amount is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Percentage -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'percentage'">
+            <label>Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="percentage" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('percentage')?.hasError('required')">Percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description" placeholder="Enter rule description"></textarea>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Attendance Deduction Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 2">
+        <div class="rd-section-title">
+          <h3>Deduction Rule Details</h3>
+        </div>
+
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Absent Deduction" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain the logic for this deduction rule..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Value Type -->
+          <div class="rd-field">
+            <label>Value Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="amountType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Fixed Amount -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'fixed'">
+            <label>Fixed Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="fixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('fixedAmount')?.hasError('required')">Fixed amount is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Percentage -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'percentage'">
+            <label>Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="percentage" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('percentage')?.hasError('required')">Percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Half Day Multiplier -->
+        <div class="rd-field">
+          <label>Half day multiplier *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput type="number" formControlName="halfDayMultiplier" step="0.1" placeholder="0.5">
+            <mat-hint>Value multiplied by the daily rate for 4-hour shifts.</mat-hint>
+            <mat-error *ngIf="ruleForm.get('halfDayMultiplier')?.hasError('required')">Multiplier is
+              required</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Late Arrival Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 3">
+        <div class="rd-section-title">
+          <h3>Late Arrival Rule Details</h3>
+        </div>
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Standard Late Rule" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain the logic for this late arrival rule..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Value Type -->
+          <div class="rd-field">
+            <label>Value Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="amountType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Fixed Amount -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'fixed'">
+            <label>Fixed Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="fixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('fixedAmount')?.hasError('required')">Fixed amount is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Percentage -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'percentage'">
+            <label>Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="percentage" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('percentage')?.hasError('required')">Percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Grace Minutes -->
+        <div class="rd-field">
+          <label>Grace Minutes *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput type="number" formControlName="graceMinutes" placeholder="10">
+            <mat-hint>Allowed late arrival time before rule applies.</mat-hint>
+            <mat-error *ngIf="ruleForm.get('graceMinutes')?.hasError('required')">Grace minutes are
+              required</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Leave Deduction Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 4">
+        <div class="rd-section-title">
+          <h3>Leave Deduction Rule Details</h3>
+        </div>
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Standard Leave Policy" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain when this leave deduction policy applies..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Unpaid Multiplier -->
+          <div class="rd-field">
+            <label>Unpaid Multiplier *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="unpaidMultiplier" step="0.1" placeholder="1.0">
+              <mat-hint>Salary deduction multiplier for unpaid leaves (e.g., 1.0 for full day).</mat-hint>
+              <mat-error *ngIf="ruleForm.get('unpaidMultiplier')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Half Paid Multiplier -->
+          <div class="rd-field">
+            <label>Half Paid Multiplier *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="halfPaidMultiplier" step="0.1" placeholder="0.5">
+              <mat-hint>Salary deduction multiplier for half-paid leaves (e.g., 0.5 for half day).</mat-hint>
+              <mat-error *ngIf="ruleForm.get('halfPaidMultiplier')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Performance Bonus Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 5">
+        <div class="rd-section-title">
+          <h3>Performance Bonus Rule Details</h3>
+        </div>
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Exceptional Performance" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain when this performance bonus applies..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Min Score -->
+          <div class="rd-field">
+            <label>Min Score *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="minScore" step="0.01" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('minScore')?.hasError('required')">Min score is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Max Score -->
+          <div class="rd-field">
+            <label>Max Score *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="maxScore" step="0.01" placeholder="5.00">
+              <mat-error *ngIf="ruleForm.get('maxScore')?.hasError('required')">Max score is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Value Type -->
+          <div class="rd-field">
+            <label>Value Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="amountType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Fixed Amount -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'fixed'">
+            <label>Fixed Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="fixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('fixedAmount')?.hasError('required')">Fixed amount is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Percentage -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'percentage'">
+            <label>Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="percentage" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('percentage')?.hasError('required')">Percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Bonus Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 6">
+        <div class="rd-section-title">
+          <h3>Bonus Configuration</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Rule Name -->
+          <div class="rd-field">
+            <label>Rule Name *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="ruleName" placeholder="e.g. Eid Bonus" maxlength="100">
+              <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Value Type -->
+          <div class="rd-field">
+            <label>Value Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="amountType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+              <mat-error *ngIf="ruleForm.get('amountType')?.hasError('required')">Value type is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Fixed Amount -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'fixed'">
+            <label>Fixed Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="fixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('fixedAmount')?.hasError('required')">Fixed amount is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Percentage -->
+          <div class="rd-field" *ngIf="ruleForm.get('amountType')?.value === 'percentage'">
+            <label>Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="percentage" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('percentage')?.hasError('required')">Percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description" placeholder="Enter bonus rule description"></textarea>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Loan Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 7">
+        <div class="rd-section-title">
+          <h3>Loan Rule Details</h3>
+        </div>
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Employee Housing Loan" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain the eligibility or terms for this loan..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Max Loan Amount -->
+          <div class="rd-field">
+            <label>Max Loan Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="maxLoanAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('maxLoanAmount')?.hasError('required')">Max loan amount is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Repayment Type -->
+          <div class="rd-field">
+            <label>Repayment Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="repaymentType">
+                <mat-option value="installment">Installment</mat-option>
+                <mat-option value="full">Full Payment</mat-option>
+              </mat-select>
+              <mat-error *ngIf="ruleForm.get('repaymentType')?.hasError('required')">Repayment type is
+                required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Max Installments (Conditional) -->
+        <div class="rd-field" *ngIf="ruleForm.get('repaymentType')?.value === 'installment'">
+          <label>Max Installments *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput type="number" formControlName="maxInstallments" placeholder="12">
+            <mat-hint>Maximum number of monthly repayments.</mat-hint>
+            <mat-error *ngIf="ruleForm.get('maxInstallments')?.hasError('required')">Max installments is
+              required</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Provident Fund Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 9">
+        <div class="rd-section-title">
+          <h3>Provident Fund Rule Details</h3>
+        </div>
+
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Standard PF 2024" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Define and manage statutory contribution rules..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Basis *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="basis">
+                <mat-option value="basic">Basic</mat-option>
+                <mat-option value="gross">Gross</mat-option>
+                <mat-option value="fixed">Fixed</mat-option>
+              </mat-select>
+              <mat-error *ngIf="ruleForm.get('basis')?.hasError('required')">Basis is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Vesting (Months) *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="vestingMonths" placeholder="0">
+              <mat-error *ngIf="ruleForm.get('vestingMonths')?.hasError('required')">Vesting months are required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Employee % *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="employeePercentage" placeholder="12.00">
+              <mat-error *ngIf="ruleForm.get('employeePercentage')?.hasError('required')">Employee percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Employer % *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="employerPercentage" placeholder="12.00">
+              <mat-error *ngIf="ruleForm.get('employerPercentage')?.hasError('required')">Employer percentage is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-field">
+          <label>Allow Partial Withdraw *</label>
+          <div class="pf-toggle-wrap">
+            <mat-checkbox formControlName="allowPartialWithdraw" class="pf-toggle-checkbox">
+              Enable temporary/permanent withdrawal rules
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <div class="pf-withdrawal-block" *ngIf="ruleForm.get('allowPartialWithdraw')?.value">
+          <div class="rd-section-title">
+            <h3>Temporary Withdrawal Rules</h3>
+          </div>
+          <div formArrayName="temporaryWithdrawals" class="pf-withdrawal-list">
+            <div class="pf-withdrawal-row" *ngFor="let entry of temporaryWithdrawals.controls; let i = index" [formGroupName]="i">
+              <div class="rd-field pf-reason-field">
+                <label>Reason *</label>
+                <mat-form-field appearance="outline" class="rd-mat-field">
+                  <input matInput formControlName="reason" placeholder="e.g. Medical">
+                </mat-form-field>
+              </div>
+              <div class="pf-range-grid">
+                <div class="rd-field">
+                  <label>Min % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="min_pct" placeholder="0">
+                  </mat-form-field>
+                </div>
+                <div class="rd-field">
+                  <label>Max % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="max_pct" placeholder="50">
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="pf-row-action">
+                <button class="pf-remove-btn" type="button" (click)="removeTemporaryWithdrawal(i)">Remove</button>
+              </div>
+            </div>
+          </div>
+          <div class="pf-action-row">
+            <button class="pf-add-btn" type="button" (click)="addTemporaryWithdrawal()">+ Add Temporary Reason</button>
+          </div>
+
+          <div class="rd-section-title">
+            <h3>Permanent Withdrawal Rules</h3>
+          </div>
+          <div formArrayName="permanentWithdrawals" class="pf-withdrawal-list">
+            <div class="pf-withdrawal-row" *ngFor="let entry of permanentWithdrawals.controls; let i = index" [formGroupName]="i">
+              <div class="rd-field pf-reason-field">
+                <label>Reason *</label>
+                <mat-form-field appearance="outline" class="rd-mat-field">
+                  <input matInput formControlName="reason" placeholder="e.g. Resignation">
+                </mat-form-field>
+              </div>
+              <div class="pf-range-grid">
+                <div class="rd-field">
+                  <label>Min % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="min_pct" placeholder="80">
+                  </mat-form-field>
+                </div>
+                <div class="rd-field">
+                  <label>Max % *</label>
+                  <mat-form-field appearance="outline" class="rd-mat-field">
+                    <input matInput type="number" formControlName="max_pct" placeholder="100">
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="pf-row-action">
+                <button class="pf-remove-btn" type="button" (click)="removePermanentWithdrawal(i)">Remove</button>
+              </div>
+            </div>
+          </div>
+          <div class="pf-action-row">
+            <button class="pf-add-btn" type="button" (click)="addPermanentWithdrawal()">+ Add Permanent Reason</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Salary Advance Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 8">
+        <div class="rd-section-title">
+          <h3>Salary Advance Rule Details</h3>
+        </div>
+
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Standard Salary Advance Policy" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Explain the eligibility or terms for this salary advance..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Max Percentage of Salary (%) *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput type="number" formControlName="maxPercentage" step="0.01" placeholder="50">
+            <mat-hint>Maximum percentage of salary an employee can request as advance.</mat-hint>
+            <mat-error *ngIf="ruleForm.get('maxPercentage')?.hasError('required')">Max percentage is required</mat-error>
+            <mat-error *ngIf="ruleForm.get('maxPercentage')?.hasError('min')">Value cannot be below 0</mat-error>
+            <mat-error *ngIf="ruleForm.get('maxPercentage')?.hasError('max')">Value cannot exceed 100</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <!-- Section: Gratuity Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 10">
+        <div class="rd-section-title">
+          <h3>Tax Regime Details</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Country *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="taxCountry" placeholder="e.g. Pakistan" maxlength="50">
+              <mat-error *ngIf="ruleForm.get('taxCountry')?.hasError('required')">Country is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Regime Name *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="taxRegimeName" placeholder="e.g. Finance Act 2026" maxlength="100">
+              <mat-error *ngIf="ruleForm.get('taxRegimeName')?.hasError('required')">Regime name is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Start Date *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="date" formControlName="taxStartDate">
+              <mat-error *ngIf="ruleForm.get('taxStartDate')?.hasError('required')">Start date is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>End Date *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="date" formControlName="taxEndDate">
+              <mat-error *ngIf="ruleForm.get('taxEndDate')?.hasError('required')">End date is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Gratuity Policy Configuration -->
+      <section class="rd-section" *ngIf="selectedPolicy === 12">
+        <div class="rd-section-title">
+          <h3>Gratuity Rule Details</h3>
+        </div>
+
+        <!-- Rule Name -->
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. Standard Gratuity Policy" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <div class="rd-field">
+          <label>Description (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <textarea matInput formControlName="description"
+              placeholder="Describe the gratuity entitlement terms..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <!-- Minimum Years of Service -->
+          <div class="rd-field">
+            <label>Minimum Years of Service *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="yearsRequired" placeholder="5" min="0">
+              <mat-hint>Minimum tenure required to be eligible for gratuity.</mat-hint>
+              <mat-error *ngIf="ruleForm.get('yearsRequired')?.hasError('required')">Required</mat-error>
+              <mat-error *ngIf="ruleForm.get('yearsRequired')?.hasError('min')">Must be 0 or more</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Calculation Type -->
+          <div class="rd-field">
+            <label>Calculation Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="calculationType">
+                <mat-option value="peryear">Per Year of Service</mat-option>
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage of Last Salary</mat-option>
+              </mat-select>
+              <mat-error *ngIf="ruleForm.get('calculationType')?.hasError('required')">Calculation type is required</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Calculation Value -->
+        <div class="rd-field">
+          <label>
+            {{ ruleForm.get('calculationType')?.value === 'peryear' ? 'Amount Per Year of Service *' :
+               ruleForm.get('calculationType')?.value === 'percentage' ? 'Percentage of Last Salary *' :
+               'Fixed Amount *' }}
+          </label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <span matTextPrefix *ngIf="ruleForm.get('calculationType')?.value !== 'percentage'">{{ currencySymbol() }}&nbsp;</span>
+            <input matInput type="number" formControlName="calculationValue" placeholder="0.00" min="0">
+            <span matTextSuffix *ngIf="ruleForm.get('calculationType')?.value === 'percentage'">%</span>
+            <mat-hint>
+              {{ ruleForm.get('calculationType')?.value === 'peryear' ? 'Multiplied by years worked to get total gratuity.' :
+                 ruleForm.get('calculationType')?.value === 'percentage' ? 'Applied to the last drawn salary.' :
+                 'One-time fixed amount paid as gratuity.' }}
+            </mat-hint>
+            <mat-error *ngIf="ruleForm.get('calculationValue')?.hasError('required')">Value is required</mat-error>
+            <mat-error *ngIf="ruleForm.get('calculationValue')?.hasError('min')">Must be 0 or more</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="rd-section" *ngIf="selectedPolicy === 11">
+        <div class="rd-section-title">
+          <h3>Social Security Rule Details</h3>
+        </div>
+
+        <div class="rd-field">
+          <label>Rule Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="ruleName" placeholder="e.g. ESSI Contribution Rule" maxlength="100">
+            <mat-error *ngIf="ruleForm.get('ruleName')?.hasError('required')">Rule name is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Jurisdiction *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <mat-select formControlName="socialJurisdictionId" placeholder="Select jurisdiction">
+              <mat-option *ngFor="let jurisdiction of socialSecurityJurisdictions()" [value]="jurisdiction.jurisdictionId">
+                {{ jurisdiction.jurisdictionName }} ({{ jurisdiction.jurisdictionCode }})
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="ruleForm.get('socialJurisdictionId')?.hasError('required')">Jurisdiction is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Authority (Optional)</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <mat-select formControlName="socialAuthorityId" placeholder="Select authority">
+              <mat-option value="">All Authorities</mat-option>
+              <mat-option *ngFor="let authority of availableSocialAuthorities" [value]="authority.authorityId">
+                {{ authority.authorityName }} ({{ authority.authorityCode }})
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Scheme *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <mat-select formControlName="socialSchemeId" placeholder="Select social security scheme">
+              <mat-option *ngFor="let scheme of availableSocialSchemes" [value]="scheme.schemeId">
+                {{ scheme.schemeName }} ({{ scheme.schemeCode }})
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="ruleForm.get('socialSchemeId')?.hasError('required')">Scheme is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Contribution Basis *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="socialContributionBasis">
+                <mat-option value="gross">Gross Salary</mat-option>
+                <mat-option value="basic">Basic Salary</mat-option>
+                <mat-option value="fixed">Fixed Contribution</mat-option>
+                <mat-option value="component">Selected Components</mat-option>
+              </mat-select>
+              <mat-error *ngIf="ruleForm.get('socialContributionBasis')?.hasError('required')">Contribution basis is required</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Description (Optional)</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <textarea matInput formControlName="description" placeholder="Describe this social security rule..."></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Employee Default %</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="socialEmployeeDefaultPct" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialEmployeeDefaultPct')?.hasError('required')">Employee default % is required</mat-error>
+              <mat-error *ngIf="ruleForm.get('socialEmployeeDefaultPct')?.hasError('min')">Cannot be less than 0</mat-error>
+              <mat-error *ngIf="ruleForm.get('socialEmployeeDefaultPct')?.hasError('max')">Cannot exceed 100</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Employer Default %</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="socialEmployerDefaultPct" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialEmployerDefaultPct')?.hasError('required')">Employer default % is required</mat-error>
+              <mat-error *ngIf="ruleForm.get('socialEmployerDefaultPct')?.hasError('min')">Cannot be less than 0</mat-error>
+              <mat-error *ngIf="ruleForm.get('socialEmployerDefaultPct')?.hasError('max')">Cannot exceed 100</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Employee Fixed Amount</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="socialEmployeeFixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialEmployeeFixedAmount')?.hasError('min')">Cannot be less than 0</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Employer Fixed Amount</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="socialEmployerFixedAmount" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialEmployerFixedAmount')?.hasError('min')">Cannot be less than 0</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Minimum Salary Limit</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="socialMinSalaryLimit" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialMinSalaryLimit')?.hasError('min')">Cannot be less than 0</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Maximum Salary Limit</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="socialMaxSalaryLimit" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialMaxSalaryLimit')?.hasError('min')">Cannot be less than 0</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Annual Salary Cap</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <span matTextPrefix>{{ currencySymbol() }}&nbsp;</span>
+              <input matInput type="number" formControlName="socialAnnualSalaryCap" placeholder="0.00">
+              <mat-error *ngIf="ruleForm.get('socialAnnualSalaryCap')?.hasError('min')">Cannot be less than 0</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Effective From</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput [matDatepicker]="socialFromPicker" formControlName="socialEffectiveFrom" placeholder="Select date" readonly (click)="socialFromPicker.open()">
+              <mat-datepicker-toggle matSuffix [for]="socialFromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #socialFromPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-field">
+          <label>Effective To</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput [matDatepicker]="socialToPicker" formControlName="socialEffectiveTo" placeholder="Select date" readonly (click)="socialToPicker.open()">
+            <mat-datepicker-toggle matSuffix [for]="socialToPicker"></mat-datepicker-toggle>
+            <mat-datepicker #socialToPicker></mat-datepicker>
+            <mat-error *ngIf="ruleForm.hasError('socialInvalidDateRange') && (ruleForm.get('socialEffectiveTo')?.touched || ruleForm.get('socialEffectiveFrom')?.touched)">
+              Effective To must be on or after Effective From
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+
+      <section class="rd-section" *ngIf="selectedPolicy === 10">
+        <div style="padding: 16px; background: #eff6ff; color: #1e40af; border-radius: 8px; border: 1px solid #bfdbfe;">
+          <mat-icon style="vertical-align: middle; margin-right: 8px;">open_in_new</mat-icon>
+          {{ selectedPolicy === 10
+            ? 'Income Tax rules are managed in the dedicated Income Tax Policy page (slabs and transactions).'
+            : '' }}
+          Click Continue to open that page.
+        </div>
+      </section>
+
+      <!-- Alert when feature is not yet implemented for other policies -->
+      <section class="rd-section"
+        *ngIf="selectedPolicy && selectedPolicy !== 1 && selectedPolicy !== 2 && selectedPolicy !== 3 && selectedPolicy !== 4 && selectedPolicy !== 5 && selectedPolicy !== 6 && selectedPolicy !== 7 && selectedPolicy !== 8 && selectedPolicy !== 9 && selectedPolicy !== 10 && selectedPolicy !== 11 && selectedPolicy !== 12">
+        <div style="padding: 16px; background: #fffbeb; color: #b45309; border-radius: 8px; border: 1px solid #fde68a;">
+          <mat-icon style="vertical-align: middle; margin-right: 8px;">construction</mat-icon>
+          Configuration for this policy will be implemented later.
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer class="rd-footer">
+    <button class="rd-btn-cancel" type="button" (click)="onCancel()">Cancel</button>
+    <button class="rd-btn-submit" type="button" [disabled]="ruleForm.invalid || isSubmitting()" (click)="onSubmit()">
+      <mat-spinner *ngIf="isSubmitting()" diameter="18"></mat-spinner>
+      <span *ngIf="!isSubmitting()">{{ selectedPolicy === 10 ? 'Continue' : 'Save Rule' }}</span>
+      <span *ngIf="isSubmitting()">Saving...</span>
+    </button>
+  </footer>
+</div>

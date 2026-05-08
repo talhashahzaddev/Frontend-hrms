@@ -77,7 +77,9 @@ export interface CreateRoleRequest {
   menus: CreateRoleMenuPayload[];
 }
 
-export interface UpdateRoleRequest extends CreateRoleRequest {}
+export interface UpdateRoleRequest extends CreateRoleRequest {
+  roleId: string;   // maps to Guid RoleId in the C# UpdateRoleRequest
+}
 
 // ── Role List Response Model ──────────────────────────────────────────────────
 
@@ -109,3 +111,4 @@ export interface Role {
   createdAt: string;
   menus?: RoleMenuResponse[];
 }
+

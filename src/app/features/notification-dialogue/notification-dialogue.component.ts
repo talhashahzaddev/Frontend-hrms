@@ -10,12 +10,13 @@ import { ServerNotificationService } from '@core/services/server-notification';
 import { AuthService } from '@core/services/auth.service';
 import { ServerNotification } from '../../core/models/common.models';
 import { LeaveService } from '../leave/services/leave.service';
-import { AttendanceService } from '../attendance/services/attendance.service'
+import { AttendanceService } from '../attendance/services/attendance.service';
 import { Output, EventEmitter } from '@angular/core';
 import { RejectLeaveDialogComponent } from '../leave/components/reject-leave-dialog/reject-leave-dialog.component';
 import { NotificationService } from '../../core/services/notification.service';
 import { LeaveRequest } from '../../core/models/leave.models';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
 @Component({
   selector: 'app-notification-dialogue',
   standalone: true,
@@ -30,7 +31,10 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   notification: ServerNotification[] = [];
   currentUser: any = null;
-  actionProcessed = new Set<string>(); // Track which notifications had actions clicked
+
+  // ✅ REMOVED: actionProcessed Set — no longer needed
+  // actionProcessed = new Set<string>();
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -46,11 +50,7 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUserValue();
-    // if (this.isOpen) {
-    //   this.loadNotifications();
-    // }
 
-    // Subscribe to notifications observable
     this.serverNotificationService.notifications$
       .pipe(takeUntil(this.destroy$))
       .subscribe((notifications: ServerNotification[]) => {
@@ -58,9 +58,8 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
         this.unreadCountChange.emit(this.unreadCount);
       });
 
-    // If dialogue opens initially
     if (this.isOpen) {
-      this.loadNotifications(); // optional: to refresh
+      this.loadNotifications();
     }
   }
 
@@ -70,15 +69,13 @@ export class NotificationDialogueComponent implements OnInit, OnDestroy, OnChang
     }
   }
 
-
-
-getSafeHtml(message: string): SafeHtml {
-  return this.sanitizer.bypassSecurityTrustHtml(message);
-}
+  getSafeHtml(message: string): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(message);
+  }
 
   get unreadCount(): number {
     const count = this.notification.filter(n => !n.isRead).length;
-    this.unreadCountChange.emit(count); // emit count whenever accessed
+    this.unreadCountChange.emit(count);
     return count;
   }
 
@@ -87,9 +84,7 @@ getSafeHtml(message: string): SafeHtml {
     this.serverNotificationService.loadNotifications(this.currentUser.userId);
   }
 
-
   onNotificationClick(notification: ServerNotification): void {
-    // If unread, mark as read and then redirect if needed
     if (!notification.isRead) {
       this.serverNotificationService.markAsRead(notification.notificationid)
         .pipe(takeUntil(this.destroy$))
@@ -103,19 +98,15 @@ getSafeHtml(message: string): SafeHtml {
           },
           error: (err) => {
             console.error('Failed to mark as read', err);
-            // Still redirect if marking as read fails
             if (notification.redirectUrl) {
               this.router.navigateByUrl(notification.redirectUrl);
             }
           }
         });
     } else if (notification.redirectUrl) {
-      // If already read, just redirect
       this.router.navigateByUrl(notification.redirectUrl);
     }
   }
-
-
 
   markAllAsRead(): void {
     this.notification.forEach(notification => {
@@ -125,7 +116,7 @@ getSafeHtml(message: string): SafeHtml {
           .subscribe({
             next: () => {
               notification.isRead = true;
-              this.unreadCountChange.emit(this.unreadCount); // emit after marking read
+              this.unreadCountChange.emit(this.unreadCount);
             },
             error: (err) => console.error('Failed to mark all as read', err)
           });
@@ -134,39 +125,32 @@ getSafeHtml(message: string): SafeHtml {
   }
 
   // -------------------------------------------------------
-  // 🚀 NEW SWITCH-CASE FUNCTION FOR MODULE TYPE HANDLING
+  // SWITCH-CASE FUNCTION FOR MODULE TYPE HANDLING
   // -------------------------------------------------------
   handleAction(n: ServerNotification, action: 'accept' | 'reject'): void {
-    // Mark action as processed immediately to hide buttons
-    this.actionProcessed.add(n.notificationid);
-
+    // ✅ REMOVED: actionProcessed.add() — no longer needed
     const moduleType = n.moduletype?.toLowerCase();
 
     switch (moduleType) {
-
-      // LEAVE MODULE
       case 'leave':
         this.handleLeave(n, action);
         break;
 
-      // ATTENDANCE MODULE
       case 'attendance':
         this.handleAttendance(n, action);
         break;
 
       default:
         console.warn("Unknown module type:", moduleType);
-        // Remove from processed if unknown module
-        this.actionProcessed.delete(n.notificationid);
+        // ✅ REMOVED: actionProcessed.delete() — no longer needed
         break;
     }
   }
 
   // -------------------------------------------------------
-  // 🚀 LEAVE HANDLING API CALLS
+  // LEAVE HANDLING
   // -------------------------------------------------------
   private handleLeave(notification: ServerNotification, action: 'accept' | 'reject'): void {
-    // Use requestid instead of notificationid for leave operations
     const requestId = notification.requestid;
 
     if (!requestId) {
@@ -180,9 +164,11 @@ getSafeHtml(message: string): SafeHtml {
         .subscribe({
           next: () => {
             this.notificationService.showSuccess('Leave request approved successfully');
+            // ✅ CHANGED: Set requestStatus instead of relying on isRead/actionProcessed
+            notification.requestStatus = 'approved';
             notification.isRead = true;
             this.unreadCountChange.emit(this.unreadCount);
-            this.loadNotifications(); // Reload to refresh the list
+            this.loadNotifications();
           },
           error: (err) => {
             console.error("Approve failed", err);
@@ -190,7 +176,6 @@ getSafeHtml(message: string): SafeHtml {
           }
         });
     } else {
-      // For reject, fetch leave request details and open dialog
       this.leaveService.getLeaveRequest(requestId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -226,9 +211,11 @@ getSafeHtml(message: string): SafeHtml {
             .subscribe({
               next: () => {
                 this.notificationService.showSuccess('Leave request rejected successfully');
+                // ✅ CHANGED: Set requestStatus
+                notification.requestStatus = 'rejected';
                 notification.isRead = true;
                 this.unreadCountChange.emit(this.unreadCount);
-                this.loadNotifications(); // Reload to refresh the list
+                this.loadNotifications();
               },
               error: (err) => {
                 console.error("Reject failed", err);
@@ -240,22 +227,12 @@ getSafeHtml(message: string): SafeHtml {
   }
 
   // -------------------------------------------------------
-  // 🚀 ATTENDANCE MODULE HANDLING
+  // ATTENDANCE / SHIFT SWAP HANDLING
   // -------------------------------------------------------
-  // private handleAttendance(notificationid: string | undefined, action: 'accept' | 'reject'): void {
-  //   if (!notificationid) return;
-
-  //   console.log("Attendance module:", action, notificationid);
-  //   // Add attendance approve/reject APIs here
-  // }
-
-
   private handleAttendance(
     notification: ServerNotification,
     action: 'accept' | 'reject'
   ): void {
-
-    // shift swap request id notification se
     const requestId = notification.requestid;
 
     if (!requestId) {
@@ -282,6 +259,8 @@ getSafeHtml(message: string): SafeHtml {
           next: (res: any) => {
             if (res.success) {
               this.notificationService.showSuccess('Shift swap approved successfully');
+              // ✅ CHANGED: Set requestStatus
+              notification.requestStatus = 'approved';
               notification.isRead = true;
               this.unreadCountChange.emit(this.unreadCount);
               this.loadNotifications();
@@ -296,7 +275,6 @@ getSafeHtml(message: string): SafeHtml {
         });
 
     } else {
-      // 🔴 Reject flow
       const rejectionReason =
         prompt('Enter rejection reason:', 'Not suitable for schedule') || '';
 
@@ -313,6 +291,8 @@ getSafeHtml(message: string): SafeHtml {
           next: (res: any) => {
             if (res.success) {
               this.notificationService.showSuccess('Shift swap rejected');
+              // ✅ CHANGED: Set requestStatus
+              notification.requestStatus = 'rejected';
               notification.isRead = true;
               this.unreadCountChange.emit(this.unreadCount);
               this.loadNotifications();
@@ -327,7 +307,6 @@ getSafeHtml(message: string): SafeHtml {
         });
     }
   }
-
 
   ngOnDestroy(): void {
     this.destroy$.next();

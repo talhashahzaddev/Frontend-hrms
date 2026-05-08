@@ -1,0 +1,157 @@
+<div class="restricted-holiday-picker">
+  <!-- Header -->
+  <div class="picker-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2>My Restricted Holidays</h2>
+        <p class="subtitle">
+          Select from the available restricted holidays for {{ currentYear }}.
+          These are optional holidays you can choose to observe.
+        </p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-chip selected">
+          <mat-icon>check_circle</mat-icon>
+          <span>{{ selectedCount() }} Selected</span>
+        </div>
+        <div class="stat-chip available">
+          <mat-icon>event_available</mat-icon>
+          <span>{{ availableHolidays().length }} Available</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading holidays...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && availableHolidays().length === 0) {
+    <div class="empty-state">
+      <mat-icon>beach_access</mat-icon>
+      <h3>No Restricted Holidays</h3>
+      <p>There are no restricted holidays available for selection this year.</p>
+    </div>
+  }
+
+  <!-- Holiday List -->
+  @if (!loading() && availableHolidays().length > 0) {
+    <!-- Upcoming Holidays -->
+    @if (upcomingHolidays().length > 0) {
+      <div class="section">
+        <h3 class="section-title">
+          <mat-icon>upcoming</mat-icon>
+          Upcoming Holidays
+        </h3>
+        <div class="holiday-cards">
+          @for (holiday of upcomingHolidays(); track holiday.holidayId) {
+            <mat-card class="holiday-card" [class.selected]="isSelected(holiday.holidayId)">
+              <div class="card-left">
+                <div class="date-badge">
+                  <span class="day">{{ holiday.holidayDate | date:'dd' }}</span>
+                  <span class="month">{{ holiday.holidayDate | date:'MMM' }}</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <h4 class="holiday-name">{{ holiday.holidayName }}</h4>
+                <div class="holiday-meta">
+                  <span class="day-of-week">{{ getDayOfWeek(holiday.holidayDate) }}</span>
+                  @if (holiday.isHalfDay) {
+                    <mat-chip class="half-day-chip">Half Day</mat-chip>
+                  }
+                </div>
+                @if (holiday.description) {
+                  <p class="holiday-desc">{{ holiday.description }}</p>
+                }
+                <div class="days-until">
+                  @if (getDaysUntil(holiday.holidayDate) === 0) {
+                    <span class="today">Today!</span>
+                  } @else if (getDaysUntil(holiday.holidayDate) === 1) {
+                    <span>Tomorrow</span>
+                  } @else {
+                    <span>{{ getDaysUntil(holiday.holidayDate) }} days away</span>
+                  }
+                </div>
+              </div>
+              <div class="card-actions">
+                @if (isSelected(holiday.holidayId)) {
+                  <button
+                    mat-stroked-button
+                    color="warn"
+                    (click)="cancelHoliday(getSelectionId(holiday.holidayId)!)"
+                    [disabled]="actionLoading() === getSelectionId(holiday.holidayId)">
+                    @if (actionLoading() === getSelectionId(holiday.holidayId)) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                    } @else {
+                      <ng-container>
+                        <mat-icon>remove_circle_outline</mat-icon>
+                        Cancel
+                      </ng-container>
+                    }
+                  </button>
+                } @else {
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    (click)="selectHoliday(holiday.holidayId)"
+                    [disabled]="actionLoading() === holiday.holidayId">
+                    @if (actionLoading() === holiday.holidayId) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                    } @else {
+                      <ng-container>
+                        <mat-icon>add_circle_outline</mat-icon>
+                        Select
+                      </ng-container>
+                    }
+                  </button>
+                }
+              </div>
+            </mat-card>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Past Holidays -->
+    @if (pastHolidays().length > 0) {
+      <div class="section past-section">
+        <h3 class="section-title">
+          <mat-icon>history</mat-icon>
+          Past Holidays
+        </h3>
+        <div class="holiday-cards">
+          @for (holiday of pastHolidays(); track holiday.holidayId) {
+            <mat-card class="holiday-card past" [class.selected]="isSelected(holiday.holidayId)">
+              <div class="card-left">
+                <div class="date-badge past">
+                  <span class="day">{{ holiday.holidayDate | date:'dd' }}</span>
+                  <span class="month">{{ holiday.holidayDate | date:'MMM' }}</span>
+                </div>
+              </div>
+              <div class="card-content">
+                <h4 class="holiday-name">{{ holiday.holidayName }}</h4>
+                <div class="holiday-meta">
+                  <span class="day-of-week">{{ getDayOfWeek(holiday.holidayDate) }}</span>
+                  @if (isSelected(holiday.holidayId)) {
+                    <mat-chip class="was-selected-chip">Was Selected</mat-chip>
+                  }
+                </div>
+                @if (holiday.description) {
+                  <p class="holiday-desc">{{ holiday.description }}</p>
+                }
+              </div>
+              <div class="card-actions">
+                <span class="past-label">Past</span>
+              </div>
+            </mat-card>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

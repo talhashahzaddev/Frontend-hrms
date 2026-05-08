@@ -14,10 +14,11 @@
       <mat-icon class="notification-icon">notifications</mat-icon>
       <div class="content">
         <div class="title">{{ n.title }}</div>
-        <!-- <div class="message">{{ n.message }}</div> -->
-         <div class="message" [innerHTML]="getSafeHtml(n.message)"></div>
+        <div class="message" [innerHTML]="getSafeHtml(n.message)"></div>
         <div class="time">{{ n.createdAt | date:'dd-MM-yyyy HH:mm' }}</div>
-        <div *ngIf="n.notificationType === 'Request' && n.moduletype && !n.isRead && !actionProcessed.has(n.notificationid)"
+
+        <!-- ✅ CHANGED: Show buttons only when requestStatus is 'pending' -->
+        <div *ngIf="n.notificationType === 'Request' && n.moduletype && n.requestStatus === 'pending'"
              class="action-buttons">
           <button mat-button color="primary"
                   (click)="handleAction(n, 'accept'); $event.stopPropagation()">
@@ -28,6 +29,14 @@
             Reject
           </button>
         </div>
+
+        <!-- ✅ NEW: Show status badge when already actioned -->
+        <div *ngIf="n.notificationType === 'Request' && n.moduletype && n.requestStatus && n.requestStatus !== 'pending'"
+             class="status-badge" [ngClass]="n.requestStatus.toLowerCase()">
+          <mat-icon>{{ n.requestStatus === 'approved' ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ n.requestStatus === 'approved' ? 'Approved' : 'Rejected' }}
+        </div>
+
       </div>
     </div>
   </div>

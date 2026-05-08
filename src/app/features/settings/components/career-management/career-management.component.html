@@ -1,47 +1,48 @@
-<div class="career-container">
+<div class="cm-page">
 
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- PAGE HEADER                                                  -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <div class="page-header">
-        <div class="header-left">
-            <div class="header-icon-wrap">
+    <div class="cm-page-header">
+        <div class="cm-page-header-left">
+            <div class="cm-page-icon">
                 <mat-icon>business_center</mat-icon>
             </div>
             <div>
-                <h1 class="page-title">Career Management</h1>
-                <p class="page-subtitle">Manage your public career page — logo, background &amp; content</p>
+                <h1 class="cm-page-title">Career Management</h1>
+                <p class="cm-page-subtitle">Configure and manage your organization's public career page and employer
+                    branding.</p>
             </div>
         </div>
-        <button mat-flat-button class="action-btn primary-btn"
-            *ngIf="!isLoading && isSuperAdmin && !isEditMode && hasAnyData()" (click)="enterEditMode()"
-            id="career-edit-btn">
-            <mat-icon>edit</mat-icon>
-            Edit
-        </button>
-        <button mat-flat-button class="action-btn primary-btn"
-            *ngIf="!isLoading && isSuperAdmin && !isEditMode && !hasAnyData() && savedData !== null"
-            (click)="enterEditMode()" id="career-setup-btn">
-            <mat-icon>add</mat-icon>
-            Set Up Career Page
-        </button>
+        <div class="cm-page-header-right">
+            <button mat-flat-button class="cm-btn cm-btn--primary"
+                *ngIf="!isLoading && !isEditMode && hasAnyData()" (click)="enterEditMode()"
+                id="career-edit-btn">
+                <mat-icon>edit</mat-icon>
+                Edit
+            </button>
+            <button mat-flat-button class="cm-btn cm-btn--primary"
+                *ngIf="!isLoading && !isEditMode && !hasAnyData() && savedData !== null"
+                (click)="enterEditMode()" id="career-setup-btn">
+                <mat-icon>add</mat-icon>
+                Set Up Career Page
+            </button>
+        </div>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- ACCESS DENIED                                                -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <mat-card class="empty-card" *ngIf="!isSuperAdmin">
-        <mat-card-content>
-            <div class="empty-icon-wrap lock"><mat-icon>lock</mat-icon></div>
-            <p class="empty-text">Access Restricted</p>
-            <p class="empty-subtext">Only Super Admins can manage career page settings.</p>
-        </mat-card-content>
-    </mat-card>
+    <div class="cm-state-card">
+        <div class="cm-state-icon cm-state-icon--lock"><mat-icon>lock</mat-icon></div>
+        <p class="cm-state-title">Access Restricted</p>
+        <p class="cm-state-sub">Only Super Admins can manage career page settings.</p>
+    </div>
 
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- LOADING                                                      -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <div class="career-loading" *ngIf="isSuperAdmin && isLoading">
+    <div class="cm-loading" *ngIf="isLoading">
         <mat-spinner diameter="36"></mat-spinner>
         <span>Loading career page settings…</span>
     </div>
@@ -49,107 +50,97 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- VIEW MODE                                                    -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <ng-container *ngIf="isSuperAdmin && !isLoading && !isEditMode">
+    <ng-container *ngIf="!isLoading && !isEditMode">
 
         <!-- Empty state -->
-        <mat-card class="empty-card setup-card" *ngIf="!hasAnyData()">
-            <mat-card-content>
-                <div class="empty-icon-wrap"><mat-icon>rocket_launch</mat-icon></div>
-                <p class="empty-text">Your career page isn't configured yet</p>
-                <p class="empty-subtext">Add a logo, background image, header and description to make it shine for
-                    applicants.</p>
-                <button mat-flat-button class="action-btn primary-btn" (click)="enterEditMode()">
-                    <mat-icon>add</mat-icon>Set Up Career Page
-                </button>
-            </mat-card-content>
-        </mat-card>
+        <div class="cm-state-card cm-state-card--dashed" *ngIf="!hasAnyData()">
+            <div class="cm-state-icon"><mat-icon>rocket_launch</mat-icon></div>
+            <p class="cm-state-title">Your career page isn't configured yet</p>
+            <p class="cm-state-sub">Add a logo, background image, header and description to make it shine for
+                applicants.</p>
+            <button mat-flat-button class="cm-btn cm-btn--primary" (click)="enterEditMode()">
+                <mat-icon>add</mat-icon>Set Up Career Page
+            </button>
+        </div>
 
-        <!-- Data view -->
+        <!-- Live Career Page Preview -->
         <ng-container *ngIf="hasAnyData()">
 
-            <!-- Hero: bg image + logo + header -->
-            <div class="hero-preview" *ngIf="savedData?.careerBgImageUrl || savedData?.logoUrl">
-                <div class="hero-bg"
+            <!-- Preview Label -->
+            <div class="cm-preview-label">
+                <mat-icon>visibility</mat-icon>
+                <span>Career Page Preview</span>
+            </div>
+
+            <!-- Hero Banner Preview (mirrors public career page) -->
+            <div class="cm-live-preview">
+                <section class="cm-preview-hero"
                     [style.backgroundImage]="savedData?.careerBgImageUrl ? 'url(' + savedData!.careerBgImageUrl + ')' : 'none'"
-                    [class.no-bg]="!savedData?.careerBgImageUrl">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-content">
-                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo" class="hero-logo">
-                        <h2 class="hero-header" *ngIf="savedData?.careerHeaderText"
-                            [innerHTML]="savedData!.careerHeaderText"></h2>
-                        <span class="hero-badge" *ngIf="!savedData?.careerBgImageUrl">No background image set</span>
+                    [class.cm-preview-hero--no-bg]="!savedData?.careerBgImageUrl">
+                    <div class="cm-preview-hero-overlay"></div>
+                    <div class="cm-preview-hero-content">
+                        <img *ngIf="savedData?.logoUrl" [src]="savedData!.logoUrl" alt="Org Logo"
+                            class="cm-preview-logo">
+                        <h1 class="cm-preview-headline" [innerHTML]="savedData?.careerHeaderText || 'Join Our Team'">
+                        </h1>
+                        <div class="cm-preview-subtext" *ngIf="savedData?.careerDescription"
+                            [innerHTML]="savedData!.careerDescription"></div>
+                    </div>
+                </section>
+            </div>
+
+
+            <!-- Page Settings section (view mode) -->
+            <div class="cm-section">
+                <div class="cm-section-header">
+                    <span class="cm-section-num">3</span>
+                    <h2 class="cm-section-title">Page Settings</h2>
+                </div>
+                <div class="cm-section-body cm-section-body--settings">
+                    <div class="cm-toggle-row">
+                        <div class="cm-toggle-info">
+                            <p class="cm-toggle-title">Public Accessibility</p>
+                            <p class="cm-toggle-sub">Allow anyone with the link to view your career page.</p>
+                        </div>
+                        <label class="cm-toggle-switch">
+                            <input type="checkbox" checked disabled id="view-toggle-public-access">
+                            <span class="cm-toggle-track"></span>
+                        </label>
+                    </div>
+                    <div class="cm-toggle-row">
+                        <div class="cm-toggle-info">
+                            <p class="cm-toggle-title">Index on Search Engines</p>
+                            <p class="cm-toggle-sub">Allow Google and other search engines to crawl your page.</p>
+                        </div>
+                        <label class="cm-toggle-switch">
+                            <input type="checkbox" disabled id="view-toggle-search-index">
+                            <span class="cm-toggle-track"></span>
+                        </label>
+                    </div>
+                    <div class="cm-toggle-row">
+                        <div class="cm-toggle-info">
+                            <p class="cm-toggle-title">Social Media Sharing</p>
+                            <p class="cm-toggle-sub">Show preview image and description when link is shared.</p>
+                        </div>
+                        <label class="cm-toggle-switch">
+                            <input type="checkbox" checked disabled id="view-toggle-social-sharing">
+                            <span class="cm-toggle-track"></span>
+                        </label>
+                    </div>
+                    <div class="cm-url-block">
+                        <p class="cm-url-label">PUBLIC CAREER URL</p>
+                        <div class="cm-url-row">
+                            <div class="cm-url-field">careers.briskpeople.com/organization/your-company</div>
+                            <button type="button" class="cm-url-icon-btn" matTooltip="Copy URL">
+                                <mat-icon>content_copy</mat-icon>
+                            </button>
+                            <button type="button" class="cm-url-icon-btn" matTooltip="Open in new tab">
+                                <mat-icon>open_in_new</mat-icon>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Image info grid -->
-            <div class="info-grid">
-                <mat-card class="info-card">
-                    <mat-card-content>
-                        <div class="info-card-header">
-                            <div class="info-icon logo-icon"><mat-icon>image</mat-icon></div>
-                            <span class="info-label">Organization Logo</span>
-                        </div>
-                        <div class="info-value-wrap">
-                            <ng-container *ngIf="savedData?.logoUrl; else noLogo">
-                                <div class="logo-thumb-wrap"><img [src]="savedData!.logoUrl" alt="Logo"
-                                        class="logo-thumb"></div>
-                                <a [href]="savedData!.logoUrl" target="_blank" rel="noopener" class="view-link">
-                                    <mat-icon>open_in_new</mat-icon> View full image
-                                </a>
-                            </ng-container>
-                            <ng-template #noLogo><span class="no-value">Not set</span></ng-template>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
-
-                <mat-card class="info-card">
-                    <mat-card-content>
-                        <div class="info-card-header">
-                            <div class="info-icon bg-icon"><mat-icon>wallpaper</mat-icon></div>
-                            <span class="info-label">Career Background Image</span>
-                        </div>
-                        <div class="info-value-wrap">
-                            <ng-container *ngIf="savedData?.careerBgImageUrl; else noBg">
-                                <div class="bg-thumb-wrap"><img [src]="savedData!.careerBgImageUrl" alt="Background"
-                                        class="bg-thumb"></div>
-                                <a [href]="savedData!.careerBgImageUrl" target="_blank" rel="noopener"
-                                    class="view-link">
-                                    <mat-icon>open_in_new</mat-icon> View full image
-                                </a>
-                            </ng-container>
-                            <ng-template #noBg><span class="no-value">Not set</span></ng-template>
-                        </div>
-                    </mat-card-content>
-                </mat-card>
-            </div>
-
-            <!-- Text content card -->
-            <mat-card class="info-card text-card">
-                <mat-card-content>
-                    <div class="text-card-body">
-                        <div class="text-field-block">
-                            <div class="text-field-meta">
-                                <div class="info-icon header-icon"><mat-icon>title</mat-icon></div>
-                                <span class="info-label">Page Header</span>
-                            </div>
-                            <p class="text-value header-value" *ngIf="savedData?.careerHeaderText; else noHeader"
-                                [innerHTML]="savedData!.careerHeaderText"></p>
-                            <ng-template #noHeader><span class="no-value">Not set</span></ng-template>
-                        </div>
-                        <mat-divider class="text-divider"></mat-divider>
-                        <div class="text-field-block">
-                            <div class="text-field-meta">
-                                <div class="info-icon desc-icon"><mat-icon>subject</mat-icon></div>
-                                <span class="info-label">Career Description</span>
-                            </div>
-                            <div class="text-value desc-value" *ngIf="savedData?.careerDescription; else noDesc"
-                                [innerHTML]="savedData!.careerDescription"></div>
-                            <ng-template #noDesc><span class="no-value">Not set</span></ng-template>
-                        </div>
-                    </div>
-                </mat-card-content>
-            </mat-card>
 
         </ng-container>
     </ng-container>
@@ -157,169 +148,184 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- EDIT MODE                                                    -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="isSuperAdmin && !isLoading && isEditMode" class="edit-form">
+    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="!isLoading && isEditMode"
+        class="cm-edit-form">
 
-        <!-- ── Section 1: Branding Images ─────────────────────────── -->
-        <div class="edit-section">
-            <div class="edit-section-label">
-                <div class="section-step">1</div>
-                <div>
-                    <h2 class="section-title">Branding Images</h2>
-                    <p class="section-sub">Upload your organization logo and the career page background.</p>
-                </div>
+        <!-- Section 1: Branding -->
+        <div class="cm-section">
+            <div class="cm-section-header">
+                <span class="cm-section-num">1</span>
+                <h2 class="cm-section-title">Organization Branding</h2>
             </div>
+            <div class="cm-section-body">
+                <div class="cm-two-col">
 
-            <div class="edit-fields-panel">
-
-                <!-- Logo upload field -->
-                <div class="two-col-grid">
-
-                    <!-- Logo upload field -->
-                    <div class="upload-field">
-                        <div class="upload-field-header">
-                            <div class="upload-field-icon logo-icon"><mat-icon>image</mat-icon></div>
-                            <div>
-                                <span class="upload-field-title">Organization Logo</span>
-                                <span class="upload-field-hint">JPG, PNG, SVG, WEBP · Max {{ maxFileMb }} MB</span>
-                            </div>
-                        </div>
+                    <!-- Logo upload -->
+                    <div>
+                        <p class="cm-field-label">Organization Logo</p>
                         <input #logoInput type="file" [accept]="acceptedImageTypes"
                             (change)="onLogoSelected($event, logoInput)" hidden>
-                        <div class="upload-actions">
-                            <button mat-stroked-button type="button" (click)="triggerLogoInput(logoInput)"
-                                [disabled]="isUploadingLogo" class="upload-btn">
-                                <mat-icon>cloud_upload</mat-icon>
-                                {{ isUploadingLogo ? 'Uploading…' : (currentLogoUrl ? 'Replace Logo' : 'Upload Logo') }}
-                            </button>
-                            <mat-spinner *ngIf="isUploadingLogo" diameter="22" class="inline-spinner"></mat-spinner>
-                            <button mat-icon-button type="button" *ngIf="currentLogoUrl && !isUploadingLogo"
-                                (click)="clearLogo()" matTooltip="Remove logo" class="remove-btn">
-                                <mat-icon>delete_outline</mat-icon>
-                            </button>
-                        </div>
-                        <div class="image-preview-wrap" *ngIf="currentLogoUrl && !isUploadingLogo">
-                            <div class="preview-img-row">
-                                <img [src]="currentLogoUrl" alt="Logo preview" class="logo-preview">
-                                <a [href]="currentLogoUrl" target="_blank" rel="noopener" class="preview-open-btn"
-                                    matTooltip="Open in new tab">
-                                    <mat-icon>open_in_new</mat-icon>
-                                </a>
-                            </div>
-                            <p class="preview-filename"><mat-icon>attach_file</mat-icon>{{ logoFileName || 'logo' }}</p>
+                        <div class="cm-drop-zone" [class.cm-drop-zone--has-file]="currentLogoUrl && !isUploadingLogo"
+                            (click)="!isUploadingLogo && !currentLogoUrl && triggerLogoInput(logoInput)">
+                            <ng-container *ngIf="!currentLogoUrl || isUploadingLogo">
+                                <div class="cm-drop-icon-wrap">
+                                    <mat-icon>image</mat-icon>
+                                </div>
+                                <p class="cm-drop-filename">logo_file.png</p>
+                                <p class="cm-drop-hint">PNG, JPG up to {{ maxFileMb }} MB</p>
+                                <mat-spinner *ngIf="isUploadingLogo" diameter="24"></mat-spinner>
+                            </ng-container>
+                            <ng-container *ngIf="currentLogoUrl && !isUploadingLogo">
+                                <div class="cm-drop-icon-wrap">
+                                    <img [src]="currentLogoUrl" alt="Logo" class="cm-logo-preview">
+                                </div>
+                                <p class="cm-drop-filename">{{ logoFileName || 'logo' }}</p>
+                                <p class="cm-drop-hint">PNG, JPG up to {{ maxFileMb }} MB</p>
+                                <div class="cm-drop-file-actions">
+                                    <button type="button" class="cm-link-btn cm-link-btn--primary"
+                                        (click)="triggerLogoInput(logoInput); $event.stopPropagation()">Replace</button>
+                                    <button type="button" class="cm-link-btn cm-link-btn--danger"
+                                        (click)="clearLogo(); $event.stopPropagation()">Delete</button>
+                                </div>
+                            </ng-container>
                         </div>
                     </div>
 
-                    <!-- Background image upload field -->
-                    <div class="upload-field">
-                        <div class="upload-field-header">
-                            <div class="upload-field-icon bg-icon"><mat-icon>wallpaper</mat-icon></div>
-                            <div>
-                                <span class="upload-field-title">Career Page Background</span>
-                                <span class="upload-field-hint">JPG, PNG, WEBP · Max {{ maxFileMb }} MB · Recommended:
-                                    1920×480px</span>
-                            </div>
-                        </div>
+                    <!-- Background upload -->
+                    <div>
+                        <p class="cm-field-label">Career Page Background</p>
                         <input #bgInput type="file" [accept]="acceptedImageTypes"
                             (change)="onBgSelected($event, bgInput)" hidden>
-                        <div class="upload-actions">
-                            <button mat-stroked-button type="button" (click)="triggerBgInput(bgInput)"
-                                [disabled]="isUploadingBg" class="upload-btn">
-                                <mat-icon>cloud_upload</mat-icon>
-                                {{ isUploadingBg ? 'Uploading…' : (currentBgUrl ? 'Replace Background' : 'Upload
-                                Background') }}
-                            </button>
-                            <mat-spinner *ngIf="isUploadingBg" diameter="22" class="inline-spinner"></mat-spinner>
-                            <button mat-icon-button type="button" *ngIf="currentBgUrl && !isUploadingBg"
-                                (click)="clearBg()" matTooltip="Remove background" class="remove-btn">
-                                <mat-icon>delete_outline</mat-icon>
-                            </button>
-                        </div>
-                        <div class="bg-preview-wrap" *ngIf="currentBgUrl && !isUploadingBg">
-                            <img [src]="currentBgUrl" alt="Background preview" class="bg-preview">
-                            <div class="bg-preview-footer">
-                                <p class="preview-filename"><mat-icon>attach_file</mat-icon>{{ bgFileName ||
-                                    'background' }}</p>
-                                <a [href]="currentBgUrl" target="_blank" rel="noopener" class="preview-open-btn"
-                                    matTooltip="Open in new tab">
-                                    <mat-icon>open_in_new</mat-icon>
-                                </a>
-                            </div>
+                        <div class="cm-drop-zone" [class.cm-drop-zone--has-file]="currentBgUrl && !isUploadingBg"
+                            (click)="!isUploadingBg && !currentBgUrl && triggerBgInput(bgInput)">
+                            <ng-container *ngIf="!currentBgUrl || isUploadingBg">
+                                <mat-icon class="cm-upload-cloud">cloud_upload</mat-icon>
+                                <p class="cm-drop-hint">Click to upload or drag &amp; drop</p>
+                                <p class="cm-drop-sub">Recommended: 1920×1080px</p>
+                                <mat-spinner *ngIf="isUploadingBg" diameter="24"></mat-spinner>
+                                <button type="button" class="cm-select-file-btn"
+                                    (click)="triggerBgInput(bgInput); $event.stopPropagation()">Select File</button>
+                            </ng-container>
+                            <ng-container *ngIf="currentBgUrl && !isUploadingBg">
+                                <img [src]="currentBgUrl" alt="Background" class="cm-bg-preview">
+                                <p class="cm-drop-filename">{{ bgFileName || 'background' }}</p>
+                                <div class="cm-drop-file-actions">
+                                    <button type="button" class="cm-link-btn cm-link-btn--primary"
+                                        (click)="triggerBgInput(bgInput); $event.stopPropagation()">Replace</button>
+                                    <button type="button" class="cm-link-btn cm-link-btn--danger"
+                                        (click)="clearBg(); $event.stopPropagation()">Delete</button>
+                                </div>
+                            </ng-container>
                         </div>
                     </div>
 
-                </div><!-- /two-col-grid -->
-
-            </div>
-        </div>
-
-        <!-- ── Section 2: Page Content ────────────────────────────── -->
-        <div class="edit-section">
-            <div class="edit-section-label">
-                <div class="section-step">2</div>
-                <div>
-                    <h2 class="section-title">Page Content</h2>
-                    <p class="section-sub">Set the headline and description shown on your public career page.</p>
                 </div>
             </div>
+        </div>
 
-            <div class="edit-fields-panel">
+        <!-- Section 2: Page Content -->
+        <div class="cm-section">
+            <div class="cm-section-header">
+                <span class="cm-section-num">2</span>
+                <h2 class="cm-section-title">Page Content</h2>
+            </div>
+            <div class="cm-section-body">
 
-                <div class="two-col-grid">
-
-                    <!-- Header Text (quill, minimal toolbar) -->
-                    <div class="quill-field">
-                        <label class="quill-field-label">
-                            <mat-icon>title</mat-icon>
-                            Header Text
-                            <span class="quill-field-hint">Main headline — keep it short and inspiring</span>
-                        </label>
-                        <div class="quill-editor-wrap">
-                            <quill-editor formControlName="careerHeaderText" [modules]="quillHeaderConfig"
-                                placeholder="e.g. Join Our Team and Build Something Amazing" theme="snow"
-                                id="career-header-text">
-                            </quill-editor>
-                        </div>
+                <div class="cm-quill-field">
+                    <p class="cm-field-label">Hero Header Text</p>
+                    <div class="cm-quill-wrap">
+                        <quill-editor formControlName="careerHeaderText" [modules]="quillHeaderConfig"
+                            placeholder="Enter headline..." theme="snow" id="career-header-text">
+                        </quill-editor>
                     </div>
+                </div>
 
-                    <!-- Description (quill, full toolbar) -->
-                    <div class="quill-field">
-                        <label class="quill-field-label">
-                            <mat-icon>subject</mat-icon>
-                            Career Description
-                            <span class="quill-field-hint">Describe your culture, values and benefits. Supports rich
-                                text.</span>
-                        </label>
-                        <div class="quill-editor-wrap">
-                            <quill-editor formControlName="careerDescription" [modules]="quillDescConfig"
-                                placeholder="Describe your company culture, values, and why people should join…"
-                                theme="snow" id="career-description">
-                            </quill-editor>
-                        </div>
+                <div class="cm-quill-field">
+                    <p class="cm-field-label">Career Description</p>
+                    <div class="cm-quill-wrap">
+                        <quill-editor formControlName="careerDescription" [modules]="quillDescConfig"
+                            placeholder="Describe your company culture and benefits..." theme="snow"
+                            id="career-description">
+                        </quill-editor>
                     </div>
-
-                </div><!-- /two-col-grid -->
+                </div>
 
             </div>
         </div>
 
-        <!-- ── Footer ─────────────────────────────────────────────── -->
-        <div class="edit-footer">
-            <div class="edit-footer-left">
-                <p class="upload-wait-hint" *ngIf="isUploadingLogo || isUploadingBg">
-                    <mat-icon>hourglass_top</mat-icon>
-                    Please wait for all uploads to complete before saving.
-                </p>
+        <!-- Section 3: Page Settings -->
+        <div class="cm-section">
+            <div class="cm-section-header">
+                <span class="cm-section-num">3</span>
+                <h2 class="cm-section-title">Page Settings</h2>
             </div>
-            <div class="edit-footer-actions">
-                <button mat-stroked-button type="button" class="action-btn cancel-btn" [disabled]="isSaving"
-                    (click)="cancelEdit()" id="career-cancel-btn">
-                    <mat-icon>close</mat-icon>
-                    Cancel
+            <div class="cm-section-body cm-section-body--settings">
+
+                <!-- Toggle rows -->
+                <div class="cm-toggle-row">
+                    <div class="cm-toggle-info">
+                        <p class="cm-toggle-title">Public Accessibility</p>
+                        <p class="cm-toggle-sub">Allow anyone with the link to view your career page.</p>
+                    </div>
+                    <label class="cm-toggle-switch">
+                        <input type="checkbox" checked id="toggle-public-access">
+                        <span class="cm-toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="cm-toggle-row">
+                    <div class="cm-toggle-info">
+                        <p class="cm-toggle-title">Index on Search Engines</p>
+                        <p class="cm-toggle-sub">Allow Google and other search engines to crawl your page.</p>
+                    </div>
+                    <label class="cm-toggle-switch">
+                        <input type="checkbox" id="toggle-search-index">
+                        <span class="cm-toggle-track"></span>
+                    </label>
+                </div>
+
+                <div class="cm-toggle-row">
+                    <div class="cm-toggle-info">
+                        <p class="cm-toggle-title">Social Media Sharing</p>
+                        <p class="cm-toggle-sub">Show preview image and description when link is shared.</p>
+                    </div>
+                    <label class="cm-toggle-switch">
+                        <input type="checkbox" checked id="toggle-social-sharing">
+                        <span class="cm-toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Public Career URL -->
+                <div class="cm-url-block">
+                    <p class="cm-url-label">PUBLIC CAREER URL</p>
+                    <div class="cm-url-row">
+                        <div class="cm-url-field">careers.briskpeople.com/organization/your-company</div>
+                        <button type="button" class="cm-url-icon-btn" matTooltip="Copy URL">
+                            <mat-icon>content_copy</mat-icon>
+                        </button>
+                        <button type="button" class="cm-url-icon-btn" matTooltip="Open in new tab">
+                            <mat-icon>open_in_new</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sticky Bottom Action Bar -->
+        <div class="cm-action-bar">
+            <div class="cm-action-bar-right">
+                <span class="cm-save-hint" *ngIf="isUploadingLogo || isUploadingBg">
+                    <mat-icon>hourglass_top</mat-icon>
+                    Waiting for uploads…
+                </span>
+                <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving" (click)="cancelEdit()"
+                    id="career-cancel-btn">
+                    Discard Changes
                 </button>
-                <button mat-flat-button type="submit" class="action-btn primary-btn"
+                <button type="submit" class="cm-btn cm-btn--primary"
                     [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
-                    <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
-                    <mat-icon *ngIf="!isSaving">save</mat-icon>
+                    <mat-spinner *ngIf="isSaving" diameter="18" class="cm-btn-spinner"></mat-spinner>
                     {{ isSaving ? 'Saving…' : 'Save Changes' }}
                 </button>
             </div>

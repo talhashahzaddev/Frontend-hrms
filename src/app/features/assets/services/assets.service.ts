@@ -84,24 +84,30 @@ export class AssetsService {
     console.log('mapToAsset - incoming item:', item);
     console.log('mapToAsset - item keys:', Object.keys(item));
     
-    const typeId = item.typeId || item.TypeId || item.typeID || '';
+    // Extract typeId/AssetTypeId - backend returns AssetTypeId (PascalCase)
+    const typeId = item.typeId || item.TypeId || item.typeID || item.AssetTypeId || item.assetTypeId || '';
     const type = typeId ? this.assetTypeService.getById(typeId) : null;
     
-    // Try multiple field name variations for ID
+    // Try multiple field name variations for ID - backend returns AssetId (PascalCase)
     const assetId = item.id || item.Id || item.ID || item.assetId || item.AssetId || item.assetID || '';
     if (!assetId) {
       console.warn('Asset ID is missing from backend response. Item:', item);
     }
     
+    // Handle SerialNumber from backend - map to code
+    const code = item.code || item.Code || item.SerialNumber || item.assetTag || item.AssetTag || '';
+    
+    console.log('✅ Mapped - ID:', assetId, ', TypeId:', typeId, ', Code:', code);
+    
     return {
       id: assetId,
       name: item.name || item.Name || '',
-      code: item.code || item.Code || item.assetTag || item.AssetTag || '',
+      code: code,
       assetTypeId: typeId,
       typeName: item.typeName || item.TypeName || item.assetTypeName || item.AssetTypeName || type?.name || '',
       purchaseDate: item.purchaseDate || item.PurchaseDate,
       status: item.status || item.Status,
-      notes: item.notes || item.Notes,
+      notes: item.notes || item.Notes || item.Description,
       createdAt: item.createdAt || item.CreatedAt || new Date().toISOString(),
       updatedAt: item.updatedAt || item.UpdatedAt
     };
@@ -372,12 +378,13 @@ export class AssetsService {
     );
   }
 
-  returnAsset(assignmentId: string, returnedAt?: string, notes?: string): Observable<any> {
+  returnAsset(assignmentId: string, returnedAt?: string, notes?: string, condition?: string): Observable<any> {
     if (!assignmentId) return throwError(() => new Error('AssignmentId is required'));
     const payload: any = {
       AssignmentId: assignmentId,
       ReturnedAt: returnedAt || new Date().toISOString(),
-      Notes: notes || null
+      Notes: notes || null,
+      Condition: condition || null
     };
     const endpoint = `${this.apiUrl}/asset-assignments/return`;
     return this.http.post<any>(endpoint, payload).pipe(

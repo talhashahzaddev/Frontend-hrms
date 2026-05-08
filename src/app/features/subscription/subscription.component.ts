@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subject, takeUntil, forkJoin, catchError } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -55,7 +56,8 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   constructor(
     private paymentService: PaymentService,
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -91,10 +93,6 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  get isSuperAdmin(): boolean {
-    return this.authService.hasRole('Super Admin');
   }
 
   loadSubscriptionPlans(): void {
@@ -371,53 +369,14 @@ export class SubscriptionComponent implements OnInit, OnDestroy {
   selectPlan(plan: PricingPlan): void {
     if (plan.isCustom) return;
 
-    this.isLoading = true;
-    this.error = null;
-
-    const startDate = new Date();
-    const endDate = new Date(startDate);
-
-    if (this.billingCycle === 'monthly') {
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    }
-
-    // Set time to 11:59:59 PM
-    endDate.setHours(23, 59, 59, 0);
-
-    // Format billing cycle to match backend expectation (Title Case)
-    // The component uses 'monthly'/'annual' (lowercase)
-    // The backend comparison wasn't strict case-wise in my memory, but API usually prefers 'Monthly'/'Annual' or exact string.
-    // The prompt said: "if the Annual is selected... then the cycle will go annual and if monthly then monthly will go".
-    // I will capitalize it just in case, or send as is if backend handles it.
-    // Backend controller didn't seem to enforce enum, just string. I'll send Title Case as it looks nicer in DB.
-    // Actually user said "if monthly then monthly will go", so I will keep it as 'monthly'.
-    // Wait, let's re-read carefully: "if monthly then monthly will go".
-    // I will keep it as is.
-
-    const request = {
-      planId: plan.id,
-      status: 'active', // Lowercase to match typical DB conventions if needed
-      billingCycle: this.billingCycle, // 'monthly' or 'annual'
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString()
-    };
-
-    this.paymentService.createCompanySubscription(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.notificationService.success({
-            message: 'Subscription created successfully!',
-            duration: 1000
-          });
-          this.loadSubscriptionPlans();
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.notificationService.error(err.message || 'Failed to create subscription');
-        }
-      });
+    // Navigate to checkout page with plan details
+    this.router.navigate(['/subscription/checkout'], {
+      queryParams: {
+        planId: plan.id,
+        planName: plan.name,
+        billingCycle: this.billingCycle,
+        amount: plan.price
+      }
+    });
   }
 }

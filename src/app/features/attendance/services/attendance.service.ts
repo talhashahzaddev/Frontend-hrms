@@ -1,6 +1,6 @@
 ﻿import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
@@ -16,6 +16,8 @@ import {
   DailyAttendanceStats,
   AttendanceSessionDto,
   ShiftDto,
+  TimeZoneDto,
+  ShiftSummary,
   AttendanceSession,
   DepartmentEmployee,
   UpdateShiftDto,
@@ -36,12 +38,16 @@ import {
   ProcessAttendanceRequestDto,
   PendingAttendanceRequest,
   EmployeeSubmissionPackage,
+  EmployeeOverTimeDto,
   CorrectionRecord,
   EmployeeReviewPackage,
   DailyReviewRecord,
   ManagerOverrideDto,
   OrgSubmissionProgress,
-  ManualAttendanceUpdateDto
+  ManualAttendanceUpdateDto,
+  TimesheetPayrollSummaryDto,
+  TimesheetPeriodLinkDto,
+  LockTimesheetRequestDto
 } from '../../../core/models/attendance.models';
 import { ApiResponse } from '../../../core/models/auth.models';
 import { FinalizeBatchRequestDto } from '../models/finalize-batch-request.dto';
@@ -79,6 +85,7 @@ export class AttendanceService {
       );
   }
 
+
   getCurrentSession(): Observable<TimeTrackingSession | null> {
     return this.http.get<ApiResponse<TimeTrackingSession>>(`${this.apiUrl}/current-session`)
       .pipe(
@@ -94,7 +101,7 @@ export class AttendanceService {
 
   getAttendances(searchRequest: AttendanceSearchRequest): Observable<AttendanceListResponse> {
     let params = new HttpParams();
-
+    if(searchRequest.SearchTerm) params=params.set('searchTerm', searchRequest.SearchTerm);
     if (searchRequest.employeeId) params = params.set('employeeId', searchRequest.employeeId);
     if (searchRequest.departmentId) params = params.set('departmentId', searchRequest.departmentId);
     if (searchRequest.status) params = params.set('status', searchRequest.status);
@@ -209,41 +216,83 @@ export class AttendanceService {
 
 getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
   return this.http
-    .get<ApiResponse<{ shiftId: string }>>(
-      `${this.apiUrl}/CurrentShift/${employeeId}`
-    )
+    .get<any>(`${this.apiUrl}/CurrentShift/${employeeId}`)
     .pipe(
-      map(res => {
-        if (!res.success) {
-          throw new Error(res.message || 'Failed to load shift');
+      map((res: any) => {
+        // ApiResponse wrapper
+        if (res && typeof res === 'object' && 'success' in res) {
+          if (!res.success) {
+            throw new Error(res.message || 'Failed to load shift');
+          }
+          if (typeof res.data === 'string') return res.data;
+          return res.data?.shiftId ?? null;
         }
-        return res.data?.shiftId ?? null;
+        // Raw payload variants
+        if (typeof res === 'string') return res;
+        return res?.shiftId ?? null;
       })
     );
 }
 
-
+//Getting all timezones
+getAllTimeZones() {
+  return this.http.get<any[]>(
+    'https://restcountries.com/v3.1/all?fields=name,capital,timezones,region'
+  );
+}
 
 
   getMyAttendanceSummary(startDate: string, endDate: string): Observable<AttendanceSummary> {
     const params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate);
+    const options = {
+      params,
+      headers: { 'X-Skip-Global-Error': 'true' }
+    };
 
-    return this.http.get<ApiResponse<AttendanceSummary>>(`${this.apiUrl}/my-summary`, { params })
+    return this.http.get<ApiResponse<AttendanceSummary>>(`${this.apiUrl}/summary`, options)
       .pipe(
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Failed to fetch attendance summary');
           }
           return response.data!;
-        })
+        }),
+        // Backward compatibility: some backend builds expose /my-summary only.
+        catchError(() => this.http.get<ApiResponse<AttendanceSummary>>(`${this.apiUrl}/my-summary`, options).pipe(
+          map(response => {
+            if (!response.success) {
+              throw new Error(response.message || 'Failed to fetch attendance summary');
+            }
+            return response.data!;
+          }),
+          catchError(() => of({
+            totalWorkDays: 0,
+            presentDays: 0,
+            absentDays: 0,
+            lateDays: 0,
+            totalHours: 0,
+            overtimeHours: 0,
+            averageHoursPerDay: 0
+          } as AttendanceSummary))
+        ))
       );
   }
 
   getTodaySessions(): Observable<AttendanceSessionDto[]> {
     return this.http.get<ApiResponse<AttendanceSessionDto[]>>(`${this.apiUrl}/employeeSession`)
       .pipe(map(res => res.data || []));
+  }
+
+  // Get all overtime requests created by the current employee
+  getAllEmployeeCreatedOvertime(): Observable<EmployeeOverTimeDto[]> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto[]>>(`${this.apiUrl}/getall/EmployeeCreated/overtime`)
+      .pipe(
+        map(response => {
+          return response.data || [];
+        })
+      );
   }
 
 
@@ -445,6 +494,19 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         })
       );
   }
+
+  //Shift-summary
+  getShiftSummary(): Observable<ShiftSummary | null> {
+  return this.http.get<ApiResponse<ShiftSummary>>(`${this.apiUrl}/shift-summary`)
+    .pipe(
+      map(response => {
+        if (!response.success) {
+          return null;
+        }
+        return response.data || null;
+      })
+    );
+}
 
 
   getEmployeesByShift(shiftId: string): Observable<EmployeeShift[]> {
@@ -748,6 +810,177 @@ getCurrentShiftByEmployee(employeeId?: string): Observable<string | null> {
         return response.data || true;
       })
     );
+  }
+
+  /**
+   * Create a manager overtime request
+   * POST /Attendance/create/manager/overtime
+   */
+  createManagerOvertime(request: any): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/create/manager/overtime`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create manager overtime');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  /**
+   * Create an employee overtime request
+   * POST /Attendance/create/employee/overtime
+   */
+  createEmployeeOvertime(request: any): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/create/employee/overtime`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to create employee overtime');
+          }
+          return response.data!;
+        })
+      );
+  }
+
+  /**
+   * Get employee overtime requests pending for manager approval
+   * GET /Attendance/manager/overtime/pending
+   */
+  getManagerPendingOvertime(): Observable<EmployeeOverTimeDto[]> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto[]>>(`${this.apiUrl}/manager/overtime/pending`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch manager pending overtime requests');
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  /**
+   * Approve an overtime request as manager
+   * POST /Attendance/manager/overtime/approve
+   */
+  approveManagerOvertime(requestId: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/manager/overtime/approve`, { requestId })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to approve overtime request');
+          }
+          return response.data || true;
+        })
+      );
+  }
+
+  /**
+   * Reject an overtime request as manager
+   * POST /Attendance/manager/overtime/reject
+   */
+  rejectManagerOvertime(requestId: string, reason?: string): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/manager/overtime/reject`, { requestId, reason })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to reject overtime request');
+          }
+          return response.data || true;
+        })
+      );
+  }
+
+  /**
+   * Get employee overtime requests assigned to the manager
+   * GET /Attendance/employee/overtime/assigned
+   */
+  getEmployeeAssignedOvertime(): Observable<EmployeeOverTimeDto[]> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto[]>>(`${this.apiUrl}/employee/overtime/assigned`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to fetch employee assigned overtime requests');
+          }
+          return response.data || [];
+        })
+      );
+  }
+
+  /**
+   * Get today's overtime request for the current employee
+   * GET /Attendance/employee/today/overtime
+   */
+  getEmployeeTodayOvertime(): Observable<EmployeeOverTimeDto | null> {
+    return this.http.get<ApiResponse<EmployeeOverTimeDto>>(`${this.apiUrl}/employee/today/overtime`)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            return null;
+          }
+          return response.data || null;
+        }),
+        // In case backend returns raw payload without ApiResponse wrapper
+        catchError(() => this.http.get<EmployeeOverTimeDto | null>(`${this.apiUrl}/employee/today/overtime`).pipe(
+          map((r: any) => r || null),
+          catchError(() => of(null))
+        ))
+      );
+  }
+
+  /**
+   * Respond to an employee overtime request that was assigned to a manager
+   * POST /Attendance/employee/overtime/respond/{requestId}?response=accept|reject
+   */
+  respondToAssignedOvertime(requestId: string, response: 'accept' | 'reject'): Observable<boolean> {
+    const params = new HttpParams().set('response', response);
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/employee/overtime/respond/${requestId}`, null, { params })
+      .pipe(
+        map(res => {
+          if (!res.success) {
+            throw new Error(res.message || 'Failed to respond to assigned overtime request');
+          }
+          return res.data || true;
+        })
+      );
+  }
+
+  /**
+   * Approve an employee overtime request (manager action)
+   * POST /Attendance/employee/overtime/approve
+   */
+  approveEmployeeOvertime(requestId: string): Observable<boolean> {
+    // Backend supports POST /Attendance/employee/overtime/{requestId}?status=approved
+    const params = new HttpParams().set('status', 'approved');
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/employee/overtime/${requestId}`, null, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to approve employee overtime request');
+          }
+          return response.data || true;
+        })
+      );
+  }
+
+  /**
+   * Reject an employee overtime request (manager action)
+   * POST /Attendance/employee/overtime/reject
+   */
+  rejectEmployeeOvertime(requestId: string, reason?: string): Observable<boolean> {
+    // Backend supports POST /Attendance/employee/overtime/{requestId}?status=rejected
+    let params = new HttpParams().set('status', 'rejected');
+    if (reason) params = params.set('reason', reason);
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/employee/overtime/${requestId}`, null, { params })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to reject employee overtime request');
+          }
+          return response.data || true;
+        })
+      );
   }
 
   finalizeBatch(timesheetId: string, employeeId?: string): Observable<boolean> {
@@ -1063,6 +1296,55 @@ submitTimesheetBatch(timesheetId: string): Observable<{ submittedCount: number }
           throw new Error(response.message || 'Failed to finalize timesheet batch');
         }
         return response.data || { finalizedCount: 0 };
+      })
+    );
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // PAYROLL BRIDGE
+  // ──────────────────────────────────────────────────────────────────────────
+
+  /** Returns the lightweight list of finalized timesheets (for payroll dropdowns). */
+  getFinalizedTimesheetLinks(): Observable<TimesheetPeriodLinkDto[]> {
+    return this.http.get<ApiResponse<TimesheetPeriodLinkDto[]>>(
+      `${this.apiUrl}/timesheet/finalized-links`
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch finalized timesheets');
+        }
+        return response.data || [];
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  /** Returns the full payroll-ready summary for one finalized timesheet. */
+  getTimesheetPayrollSummary(timesheetId: string): Observable<TimesheetPayrollSummaryDto> {
+    return this.http.get<ApiResponse<TimesheetPayrollSummaryDto>>(
+      `${this.apiUrl}/timesheet/payroll-summary`,
+      { params: new HttpParams().set('timesheetId', timesheetId) }
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to fetch payroll summary');
+        }
+        return response.data!;
+      })
+    );
+  }
+
+  /** Locks a finalized timesheet so payroll can claim it as the source of truth. */
+  lockTimesheet(dto: LockTimesheetRequestDto): Observable<boolean> {
+    return this.http.post<ApiResponse<boolean>>(
+      `${this.apiUrl}/timesheet/lock`,
+      dto
+    ).pipe(
+      map(response => {
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to lock timesheet');
+        }
+        return response.data || false;
       })
     );
   }

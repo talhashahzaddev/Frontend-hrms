@@ -343,22 +343,65 @@
 
           <div class="cad-grid cad-grid-1">
 
-            <!-- Employee autocomplete field -->
-            <mat-form-field appearance="outline" class="cad-field">
-              <mat-label>Employee *</mat-label>
-              <input matInput 
-                     [formControl]="employeeSearchControl"
-                     [matAutocomplete]="autoEmployee"
-                     placeholder="Search by name or email">
-              <mat-autocomplete #autoEmployee="matAutocomplete" (optionSelected)="onEmployeeSelected($event.option.value)">
-                <mat-option *ngFor="let emp of filteredEmployees$ | async" [value]="emp">
-                  {{ emp.firstName }} {{ emp.lastName }} — {{ emp.email }}
-                </mat-option>
-              </mat-autocomplete>
-              <mat-error *ngIf="assignForm.get('employeeId')?.hasError('required')">
-                Employee is required
-              </mat-error>
-            </mat-form-field>
+            <!-- Employee custom dropdown field (matching Assign Shift pattern) -->
+            <label class="field-label">Employee <span class="required">*</span></label>
+
+<div class="employee-dropdown-container"
+     [class.is-open]="employeeDropdownOpen"
+     [class.has-error]="assignForm.get('employeeId')?.invalid && assignForm.get('employeeId')?.dirty">
+
+  <!-- Input Box -->
+  <div class="employee-input-box">
+    <input
+      class="employee-search-input"
+      type="text"
+      [placeholder]="selectedEmployeeId ? displaySelectedEmployee() : 'Select an employee'"
+      [value]="employeeDropdownOpen ? employeeFilter : displaySelectedEmployee()"
+      (click)="openEmployeeDropdown()"
+      (input)="onEmployeeSearch($any($event.target).value)"
+      autocomplete="off">
+  </div>
+
+  <!-- Dropdown Panel -->
+  <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+
+    <!-- No Results -->
+    <div *ngIf="filteredEmployees.length === 0" class="employee-no-results">
+      No employees found
+    </div>
+
+    <!-- Employee List -->
+    <div class="employee-list-container">
+      <div *ngFor="let emp of filteredEmployees"
+           class="employee-item"
+           [class.is-selected]="isEmployeeSelected(emp.employeeId)"
+           (mousedown)="$event.preventDefault(); toggleEmployee(emp)">
+
+        <input type="radio"
+               class="employee-radio"
+               [checked]="isEmployeeSelected(emp.employeeId)"
+               readonly>
+
+        <div class="employee-info">
+          <div class="employee-name">
+            {{ emp.firstName }} {{ emp.lastName }}
+          </div>
+          <div class="employee-email">
+            {{ emp.email }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Error -->
+<span *ngIf="assignForm.get('employeeId')?.invalid && assignForm.get('employeeId')?.dirty"
+      class="employee-error">
+  Employee is required
+</span>
 
             <!-- Date row — calendar icon as SUFFIX only (right side) -->
             <div class="cad-grid cad-grid-2">
@@ -431,12 +474,8 @@
             <span class="view-value">{{ selectedAsset.name }}</span>
           </div>
           <div class="view-row">
-            <span class="view-label">Asset Code</span>
+            <span class="view-label">Asset Code/Tag</span>
             <span class="view-value">{{ selectedAsset.code || '—' }}</span>
-          </div>
-          <div class="view-row">
-            <span class="view-label">Asset Tag</span>
-            <span class="view-value">{{ selectedAsset.assetTag || '—' }}</span>
           </div>
           <div class="view-row">
             <span class="view-label">Asset Type</span>

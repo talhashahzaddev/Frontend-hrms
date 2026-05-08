@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -54,6 +54,10 @@ import { EditApplicationStageDialogComponent } from '../edit-application-stage-d
   styleUrls: ['./applied-jobs.component.scss']
 })
 export class AppliedJobsComponent implements OnInit {
+  @HostListener('document:click') onDocumentClick(): void {
+    this.closeAllDropdowns();
+  }
+
   applications: JobApplicationDto[] = [];
   stages: StageMasterDto[] = [];
   isLoading = false;
@@ -62,6 +66,14 @@ export class AppliedJobsComponent implements OnInit {
   pageSize = 10;
   totalCount = 0;
   totalPages = 0;
+
+  /** My Applications (Self) – Employee / Manager */
+  myApps: JobApplicationDto[] = [];
+  myAppsFilterForm: FormGroup;
+  myAppsPage = 1;
+  myAppsPageSize = 10;
+  myAppsTotalCount = 0;
+  myAppsIsLoading = false;
 
   /** Received Application By My Job Post – HR Manager + Super Admin */
   postedByMeApplications: JobApplicationDto[] = [];
@@ -80,8 +92,13 @@ export class AppliedJobsComponent implements OnInit {
   receivedIsLoading = false;
 
   stageOptions: { value: string; label: string }[] = [];
-  jobOptions: { value: string; label: string }[] = [];
+  jobOptions: { value: string; label: string; status: string }[] = [];
   allJobs: JobOpeningDto[] = [];
+
+  /** Multi-select job filter state */
+  selectedJobIds: string[] = [];
+  postedByMeJobDropdownOpen = false;
+  receivedJobDropdownOpen = false;
 
   /** Mutable per-column arrays for CDK DnD – Posted By Me board */
   postedByMeColumnData: { col: { stageId: string | null; stageName: string }; apps: JobApplicationDto[] }[] = [];
@@ -110,19 +127,22 @@ export class AppliedJobsComponent implements OnInit {
       stageId: [''],
       status: ['']
     });
+    this.myAppsFilterForm = this.fb.group({
+      search: [''],
+      stageId: [''],
+      status: ['']
+    });
     this.postedByMeFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: [''],
-      jobId: ['']
+      stageId: ['']
     });
     this.receivedFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
-      stageId: [''],
-      jobId: ['']
+      stageId: ['']
     });
   }
 
@@ -134,6 +154,28 @@ export class AppliedJobsComponent implements OnInit {
   /** Show "All Job Applications" tab only for Super Admin */
   get canSeeAllApplicationsTab(): boolean {
     return this.authService.hasRole('Super Admin');
+  }
+
+  // --- Summary Dashboards for Super Admin ---
+  get inProgressStat(): number {
+    return this.receivedApplications.filter(a => 
+      !['Rejected', 'Selected', 'Hired'].includes(a.status || '') &&
+      !['Rejected', 'Selected', 'Hired'].includes(a.currentStageName || '')
+    ).length;
+  }
+
+  get selectedStat(): number {
+    return this.receivedApplications.filter(a => 
+      ['Selected', 'Hired'].includes(a.status || '') || 
+      ['Selected', 'Hired'].includes(a.currentStageName || '')
+    ).length;
+  }
+
+  get rejectedStat(): number {
+    return this.receivedApplications.filter(a => 
+      a.status === 'Rejected' || 
+      a.currentStageName === 'Rejected'
+    ).length;
   }
 
   ngOnInit(): void {
@@ -150,13 +192,18 @@ export class AppliedJobsComponent implements OnInit {
     this.jobsService.getJobOpeningsPaged({ pageSize: 100 }).subscribe({
       next: (result) => {
         this.allJobs = result.data ?? [];
-        this.jobOptions = [
-          { value: '', label: 'All jobs' },
-          ...this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName }))
-        ];
+        this.jobOptions = this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName, status: j.status || 'Open' }));
       }
     });
     this.loadApplications();
+
+    if (!this.canSeeReceivedTab) {
+      this.loadMySelfApplications();
+    }
+
+    if (this.canSeeAllApplicationsTab) {
+      this.loadReceivedApplications();
+    }
   }
 
   loadApplications(): void {
@@ -208,6 +255,61 @@ export class AppliedJobsComponent implements OnInit {
     this.loadApplications();
   }
 
+  // ==================== My Applications (Self) – Employee / Manager ====================
+
+  loadMySelfApplications(): void {
+    this.myAppsIsLoading = true;
+    const search = this.myAppsFilterForm.get('search')?.value;
+    const stageId = this.myAppsFilterForm.get('stageId')?.value;
+    const status = this.myAppsFilterForm.get('status')?.value;
+    this.jobsService.getMySelfJobApplicationsPaged({
+      page: this.myAppsPage,
+      pageSize: this.myAppsPageSize,
+      search: search?.trim() || undefined,
+      stageId: stageId || undefined,
+      status: status || undefined
+    }).subscribe({
+      next: (result: PagedResult<JobApplicationDto>) => {
+        this.myApps = result.data ?? [];
+        this.myAppsTotalCount = result.totalCount ?? 0;
+        this.myAppsIsLoading = false;
+      },
+      error: () => {
+        this.myApps = [];
+        this.myAppsTotalCount = 0;
+        this.myAppsIsLoading = false;
+      }
+    });
+  }
+
+  applyMyAppsFilters(): void {
+    this.myAppsPage = 1;
+    this.loadMySelfApplications();
+  }
+
+  clearMyAppsFilters(): void {
+    this.myAppsFilterForm.patchValue({ search: '', stageId: '', status: '' });
+    this.myAppsPage = 1;
+    this.loadMySelfApplications();
+  }
+
+  hasMyAppsFiltersApplied(): boolean {
+    const v = this.myAppsFilterForm.value;
+    return !!(v.search?.trim() || v.stageId || v.status);
+  }
+
+  onMyAppsPageChange(event: PageEvent): void {
+    this.myAppsPage = event.pageIndex + 1;
+    this.myAppsPageSize = event.pageSize;
+    this.loadMySelfApplications();
+  }
+
+  onEmployeeTabChange(index: number): void {
+    if (index === 1) {
+      this.loadMySelfApplications();
+    }
+  }
+
   loadPostedByMeApplications(): void {
     if (!this.canSeeReceivedTab) return;
     this.postedByMeIsLoading = true;
@@ -221,7 +323,7 @@ export class AppliedJobsComponent implements OnInit {
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
       stageId: v.stageId || undefined,
-      jobId: v.jobId || undefined
+      jobIds: this.selectedJobIds.length > 0 ? this.selectedJobIds : undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.postedByMeApplications = result.data ?? [];
@@ -248,9 +350,9 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: '',
-      jobId: ''
+      stageId: ''
     });
+    this.selectedJobIds = [];
     this.postedByMePage = 1;
     this.loadPostedByMeApplications();
   }
@@ -259,7 +361,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.postedByMeFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || this.selectedJobIds.length > 0);
   }
 
   onPostedByMePageChange(event: PageEvent): void {
@@ -281,7 +383,7 @@ export class AppliedJobsComponent implements OnInit {
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
       stageId: v.stageId || undefined,
-      jobId: v.jobId || undefined
+      jobIds: this.selectedJobIds.length > 0 ? this.selectedJobIds : undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.receivedApplications = result.data ?? [];
@@ -308,9 +410,9 @@ export class AppliedJobsComponent implements OnInit {
       search: '',
       applyDateFrom: null,
       applyDateTo: null,
-      stageId: '',
-      jobId: ''
+      stageId: ''
     });
+    this.selectedJobIds = [];
     this.receivedPage = 1;
     this.loadReceivedApplications();
   }
@@ -319,13 +421,71 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.receivedFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || v.jobId);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.stageId || this.selectedJobIds.length > 0);
   }
 
   onReceivedPageChange(event: PageEvent): void {
     this.receivedPage = event.pageIndex + 1;
     this.receivedPageSize = event.pageSize;
     this.loadReceivedApplications();
+  }
+
+  // ==================== Multi-select Job Filter Helpers ====================
+
+  toggleJobSelection(jobId: string): void {
+    const idx = this.selectedJobIds.indexOf(jobId);
+    if (idx === -1) {
+      this.selectedJobIds = [...this.selectedJobIds, jobId];
+    } else {
+      this.selectedJobIds = this.selectedJobIds.filter(id => id !== jobId);
+    }
+  }
+
+  toggleSelectAllJobs(): void {
+    if (this.areAllJobsSelected()) {
+      this.selectedJobIds = [];
+    } else {
+      this.selectedJobIds = this.jobOptions.map(j => j.value);
+    }
+  }
+
+  areAllJobsSelected(): boolean {
+    return this.jobOptions.length > 0 && this.selectedJobIds.length === this.jobOptions.length;
+  }
+
+  isJobSelected(jobId: string): boolean {
+    return this.selectedJobIds.includes(jobId);
+  }
+
+  getSelectedJobsDisplayText(): string {
+    if (this.selectedJobIds.length === 0) return 'Select Jobs';
+    if (this.areAllJobsSelected()) return 'All Jobs';
+    if (this.selectedJobIds.length === 1) {
+      const job = this.jobOptions.find(j => j.value === this.selectedJobIds[0]);
+      return job ? job.label : '1 Job';
+    }
+    return `${this.selectedJobIds.length} Jobs Selected`;
+  }
+
+  togglePostedByMeJobDropdown(event: Event): void {
+    event.stopPropagation();
+    this.postedByMeJobDropdownOpen = !this.postedByMeJobDropdownOpen;
+    this.receivedJobDropdownOpen = false;
+  }
+
+  toggleReceivedJobDropdown(event: Event): void {
+    event.stopPropagation();
+    this.receivedJobDropdownOpen = !this.receivedJobDropdownOpen;
+    this.postedByMeJobDropdownOpen = false;
+  }
+
+  onDropdownItemClick(event: Event): void {
+    event.stopPropagation();
+  }
+
+  closeAllDropdowns(): void {
+    this.postedByMeJobDropdownOpen = false;
+    this.receivedJobDropdownOpen = false;
   }
 
   onTabChange(index: number): void {

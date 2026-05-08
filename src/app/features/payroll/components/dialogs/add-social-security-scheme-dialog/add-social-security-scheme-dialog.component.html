@@ -1,0 +1,85 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+      <label class="field">
+        <span>Jurisdiction</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">public</mat-icon>
+          <select formControlName="jurisdictionId">
+            <option value="" disabled>Select jurisdiction</option>
+            @for (item of jurisdictions; track item.jurisdictionId) {
+              <option [value]="item.jurisdictionId">{{ item.jurisdictionName }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Authority</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">apartment</mat-icon>
+          <select formControlName="authorityId">
+            <option value="">Any authority</option>
+            @for (item of filteredAuthorities; track item.authorityId) {
+              <option [value]="item.authorityId">{{ item.authorityName }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Scheme code</span>
+        <input type="text" formControlName="schemeCode" placeholder="ESSI-REG" />
+      </label>
+
+      <label class="field">
+        <span>Scheme name</span>
+        <input type="text" formControlName="schemeName" placeholder="Employee Social Security" />
+      </label>
+
+      <label class="field">
+        <span>Scheme type</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">category</mat-icon>
+          <select formControlName="schemeType">
+            <option value="">Select type</option>
+            <option value="social_insurance">Social insurance</option>
+            <option value="retirement_fund">Retirement fund</option>
+            <option value="health_insurance">Health insurance</option>
+            <option value="unemployment_insurance">Unemployment insurance</option>
+            <option value="mixed">Mixed</option>
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Mandatory mode</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">verified_user</mat-icon>
+          <select formControlName="mandatoryMode">
+            <option value="">Select mode</option>
+            <option value="mandatory">Mandatory</option>
+            <option value="optional">Optional</option>
+            <option value="mixed">Mixed</option>
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

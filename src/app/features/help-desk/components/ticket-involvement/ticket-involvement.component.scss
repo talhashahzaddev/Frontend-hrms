@@ -1,0 +1,310 @@
+/* ============================================================
+   TICKET INVOLVEMENT — FULL CSS
+   Ready to paste ✅
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ---- Page wrapper ---- */
+.tickets-page {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #0f172a;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   FILTER CARD
+   ============================================================ */
+.filter-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  padding: 20px 24px;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Grid */
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .filters-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .filters-grid { grid-template-columns: 1fr; }
+}
+
+/* Fields */
+.filter-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* INPUT (NEW) */
+.filter-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2394a3b8' stroke-width='1.5' d='M8.5 15a6.5 6.5 0 1 1 4.9-10.8A6.5 6.5 0 0 1 8.5 15zm0 0l5 5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 16px;
+}
+
+.filter-input:focus {
+  border-color: #0066CC;
+  box-shadow: 0 0 0 3px rgba(0,102,204,0.12);
+}
+
+/* SELECT */
+.filter-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 36px 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13px;
+  background-color: #ffffff;
+  appearance: none;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  border-color: #0066CC;
+  box-shadow: 0 0 0 3px rgba(0,102,204,0.12);
+}
+
+/* ============================================================
+   LOADER
+   ============================================================ */
+.loader-wrapper {
+  text-align: center;
+  padding: 48px 0;
+  color: #64748b;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Table */
+.tickets-table {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+}
+
+.tickets-table thead {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tickets-table th {
+  padding: 14px 20px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tickets-table td {
+  padding: 14px 20px;
+  color: #475569;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.row-alt {
+  background: #fafbfc;
+}
+
+.tickets-table tbody tr:hover {
+  background: #eff6ff;
+}
+
+.td-title {
+  color: #0f172a;
+}
+
+.td-date {
+  color: #64748b;
+}
+
+/* ============================================================
+   ACTION MENU (FIXED NICE LOOK 🔥)
+   ============================================================ */
+.action-wrapper {
+  position: relative;
+}
+
+.btn-dots {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.btn-dots:hover {
+  background: #f3f4f6;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background: #555;
+  border-radius: 50%;
+}
+
+/* Dropdown */
+.action-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  min-width: 140px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  border: 1px solid #eee;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.action-item {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.action-item:hover {
+  background: #f5f7fa;
+}
+
+.action-item--delete {
+  color: #dc2626;
+}
+
+.action-item--delete:hover {
+  background: #fee2e2;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.badge-status-open { background: #dbeafe; color: #1e40af; }
+.badge-status-inprogress { background: #fef9c3; color: #854d0e; }
+.badge-status-resolved { background: #dcfce7; color: #166534; }
+.badge-status-pending { background: #e0e7ff; color: #3730a3; }
+.badge-status-closed { background: #f1f5f9; color: #475569; }
+
+.badge-priority-high { background: #fee2e2; color: #b91c1c; }
+.badge-priority-medium { background: #ffedd5; color: #c2410c; }
+.badge-priority-low { background: #dcfce7; color: #15803d; }
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.pagination-section {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pagination-select {
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.btn-page {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-page:hover {
+  background: #f1f5f9;
+}
+
+/* ============================================================
+   NO DATA
+   ============================================================ */
+.no-data {
+  text-align: center;
+  padding: 48px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .tickets-page { padding: 16px; }
+  .pagination-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

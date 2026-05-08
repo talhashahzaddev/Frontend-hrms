@@ -1,0 +1,57 @@
+<div class="attendance-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button class="close-btn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="dialog-body" [formGroup]="form">
+    <!-- Row 1: Employee + Period -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Employee</label>
+        <select class="form-control" formControlName="employeeId">
+          <option value="" disabled selected>Select employee</option>
+          @for (emp of employees; track emp.employeeId) {
+            <option [value]="emp.employeeId">{{ emp.firstName }} {{ emp.lastName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Payroll Period</label>
+        <select class="form-control" formControlName="periodId">
+          <option value="" disabled selected>Select period</option>
+          @for (period of periods; track period.periodId) {
+            <option [value]="period.periodId">{{ period.periodName }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 2: Rule + Amount -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Bonus Rule</label>
+        <select class="form-control" formControlName="ruleId">
+          <option value="" disabled selected>Select rule</option>
+          @for (rule of bonusRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount ({{ currencySymbol() }})</label>
+        <input type="number" class="form-control" formControlName="amount" placeholder="e.g. 5000" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="close()">Cancel</button>
+    <button class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
+</div>

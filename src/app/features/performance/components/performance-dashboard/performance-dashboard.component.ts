@@ -1,40 +1,44 @@
-
-
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  inject,
+  ChangeDetectorRef
+} from '@angular/core';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+
 import { NgChartsModule } from 'ng2-charts';
 import { Subject, takeUntil, forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+
 import { PerformanceService } from '../../services/performance.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { MatMenuModule } from '@angular/material/menu';
-
 import { NotificationService } from '../../../../core/services/notification.service';
-import { 
-  EmployeeAppraisal, 
-  AppraisalCycle, 
-  PerformanceSummary,
-  EmployeeSkill,
-  PerformanceMetrics,
-  TeamPerformanceOverview
-} from '../../../../core/models/performance.models';
-import { User } from '../../../../core/models/auth.models';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTableDataSource } from '@angular/material/table';
 
-import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
-import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import {
+  AppraisalCycle,
+  EmployeeSkill,
+  HrReviewDto,
+  ManagerReviewDto
+} from '../../../../core/models/performance.models';
+
+import { User } from '../../../../core/models/auth.models';
+
 @Component({
   selector: 'app-performance-dashboard',
   standalone: true,
@@ -58,43 +62,54 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../sha
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PerformanceDashboardComponent implements OnInit, OnDestroy {
+
   private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
 
-  // ⭐ UI state
+  // UI State
   isLoading = false;
-  selectedTab = 0;
 
-  // ⭐ Data models
+  // User
   currentUser: User | null = null;
-  myPerformanceMetrics: PerformanceMetrics | null = null;
+
+  // Data
   mySkills: EmployeeSkill[] = [];
   assessedSkills: EmployeeSkill[] = [];
-  myAppraisals: EmployeeAppraisal[] = [];
-  teamPerformanceSummary: PerformanceSummary | null = null;
-  teamPerformanceOverview: TeamPerformanceOverview | null = null;
-  isLoadingTeamPerformance = false;
   appraisalCycles: AppraisalCycle[] = [];
-  employeeAppraisals: EmployeeAppraisal[] = [];
-  selectedCycleId: string | null = null;
-  
-  // Team Performance Table
-  teamPerformanceDataSource = new MatTableDataSource<any>([]);
-  displayedTeamColumns: string[] = ['employeeName', 'cycleRatings', 'assessedSkills'];
 
-  overallRating: number = 0;
-  currentRating: number = 0;
+  // HR Reviews
+  employeeHrReviews: HrReviewDto[] = [];
 
-  // ⭐ For rating stars
+  // Ratings
+  overallRating = 0;
+  currentRating = 0;
+
+  // Pagination
+  pageSize = 10;
+  pageIndex = 0;
+  totalItems = 0;
+  pageSizeOptions = [5, 10, 25, 50];
+
+  // Stars
   starRatings = [1, 2, 3, 4, 5];
 
-  // ⭐ Table Data Sources
-  appraisalsDataSource = new MatTableDataSource<EmployeeAppraisal>([]);
-  cyclesDataSource = new MatTableDataSource<AppraisalCycle>([]);
-  skillsDataSource = new MatTableDataSource<EmployeeSkill>([]);
-  displayedColumns: string[] = ['cycleName', 'reviewType', 'reviewerName', 'overallRating', 'feedback'];
-  displayedCycleColumns: string[] = ['cycleName', 'dates', 'status', 'appraisals'];
-  displayedSkillColumns: string[] = ['skillName', 'skillCategory', 'proficiencyLevel', 'assessorName'];
+  // Table
+  hrReviewsDataSource = new MatTableDataSource<HrReviewDto>([]);
+
+  displayedColumns: string[] = [
+    'cycleName',
+    'employeeName',
+    'kraName',
+    'finalRating',
+    'status',
+    'hrComments'
+  ];
+
+  // Reviews Received by Employee from Managers
+  receivedReviews: ManagerReviewDto[] = [];
+  isLoadingReceivedReviews = false;
+  receivedReviewsDataSource = new MatTableDataSource<ManagerReviewDto>([]);
+  receivedReviewDisplayedColumns: string[] = ['cycleName', 'employeeName', 'kraName', 'goalName', 'rating', 'actions'];
 
   constructor(
     private performanceService: PerformanceService,
@@ -106,6 +121,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCurrentUser();
+    this.loadReceivedReviews();
   }
 
   ngOnDestroy(): void {
@@ -113,308 +129,137 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  getSkillLevelClass(level: number): string {
-    if (level >= 4) return 'level-expert';
-    if (level >= 3) return 'level-advanced';
-    if (level >= 2) return 'level-intermediate';
-    return 'level-beginner';
+  hasHRRole(): boolean {
+    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
   }
 
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
-    console.log('CurrentUser:', this.currentUser);
-    // Load data after user is available
     if (this.currentUser) {
       this.loadInitialData();
     }
   }
 
-  // ✅ Load all data initially
-  private loadInitialData(): void {
-    if (!this.currentUser?.userId) {
-      return;
-    }
-    
-    this.isLoading = true;
-
-    const requests: any[] = [];
-    
-    // Get current user's employee skills
-    requests.push(
-      this.performanceService.getEmployeeSkillsByEmployee(this.currentUser.userId).pipe(
-        catchError((err) => {
-          console.error('getEmployeeSkillsByEmployee failed:', err);
-          return of({ success: false, data: [] });
-        }),
-        map((response: any) => {
-          // Extract data from ApiResponse structure
-          if (response && response.data) {
-            return response.data;
-          }
-          return response || [];
-        })
-      )
-    );
-
-  
-    requests.push(
-      this.performanceService.getAppraisalCycles().pipe(
-        catchError((err) => {
-          console.error('getAppraisalCycles failed:', err);
-          return of({ data: [] });
-        })
-      )
-    );
-
-    forkJoin(requests)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (results: any[]) => {
-          // Results array: [skills, appraisalCycles]
-          // Skills are already extracted from ApiResponse in the map operator
-          this.mySkills = Array.isArray(results[0]) ? results[0] : [];
-          
-          // Filter only assessed skills - must have assessorName (not null, not empty, not just whitespace)
-          this.assessedSkills = this.mySkills.filter(skill => {
-            const assessorName = skill.assessorName;
-            // Check if assessorName exists and is not empty/whitespace
-            if (!assessorName) return false;
-            const trimmed = assessorName.trim();
-            return trimmed !== '' && trimmed.length > 0;
-          });
-          
-          this.skillsDataSource.data = this.assessedSkills;
-          
-          // Appraisal cycles
-          const cyclesResponse = results[1];
-          this.appraisalCycles = (cyclesResponse?.data) || [];
-          this.cyclesDataSource.data = this.appraisalCycles;
-          
-          this.isLoading = false;
-          this.cdr.markForCheck();
-          
-          console.log('My Skills (all):', this.mySkills);
-          console.log('Assessed Skills (filtered):', this.assessedSkills);
-
-          // ✅ Automatically select the latest active or first cycle
-          if (this.appraisalCycles.length > 0) {
-            const activeCycle = this.appraisalCycles.find(c => c.status?.toLowerCase() === 'active');
-            const firstCycle = this.appraisalCycles[0];
-            this.selectedCycleId = activeCycle?.cycleId || firstCycle?.cycleId;
-
-            // Automatically load goals for that cycle
-            if (this.selectedCycleId) {
-              this.onCycleChange(this.selectedCycleId);
-            }
-          }
-
-          // Load team performance overview if user is a manager
-          if (this.hasManagerRole()) {
-            this.loadTeamPerformanceOverview();
-          }
-
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: (error) => {
-          console.error('Unexpected error in forkJoin:', error);
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-      });
-  }
-
-  // ✅ When user selects a cycle
-  onCycleChange(cycleId: string): void {
-    this.selectedCycleId = cycleId;
-
-    if (!cycleId || !this.currentUser?.userId) return;
-
-    this.isLoading = true;
-
-    this.performanceService
-      .getEmployeeAppraisalsByCycle(cycleId, this.currentUser.userId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.employeeAppraisals = res.data || [];
-            this.appraisalsDataSource.data = this.employeeAppraisals;
-            console.log('Employee Appraisals:', this.employeeAppraisals);
-
-            if (this.employeeAppraisals.length > 0) {
-              this.currentRating = this.employeeAppraisals[0].currentRating || 0;
-              this.overallRating = this.employeeAppraisals[0].overallRating || 0;
-            } else {
-              this.currentRating = 0;
-              this.overallRating = 0;
-            }
-          } else {
-            this.employeeAppraisals = [];
-            this.appraisalsDataSource.data = [];
-          }
-
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error('Error fetching appraisals by cycle:', err);
-          this.employeeAppraisals = [];
-          this.appraisalsDataSource.data = [];
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-      });
-  }
-
-  
-  // ✅ Open popup for creating new cycle
-  openCreateCycleDialog(): void {
-    const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '600px',
-      disableClose: true,
-      data: {}
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((result) => {
-        if (result === 'saved') {
-          this.loadInitialData();
-          this.notificationService.showSuccess('Appraisal cycle created successfully');
-          this.cdr.markForCheck();
-        }
-      });
-  }
-
-  editCycle(cycle: AppraisalCycle): void {
-    const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '600px',
-      disableClose: true,
-      data: { cycle: cycle }
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((result) => {
-        if (result === 'saved') {
-          this.loadInitialData();
-          this.notificationService.showSuccess('Appraisal cycle updated successfully');
-          this.cdr.markForCheck();
-        }
-      });
-  }
-
-  deleteCycle(cycle: AppraisalCycle): void {
-    const dialogData: ConfirmDeleteData = {
-      title: 'Delete Appraisal Cycle',
-      message: 'Are you sure you want to delete this appraisal cycle?',
-      itemName: cycle.cycleName
-    };
-
-    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '450px',
-      data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
-    });
-
-    dialogRef.afterClosed()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(result => {
-        if (result === true) {
-          this.performanceService.deleteAppraisalCycle(cycle.cycleId)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-              next: (response) => {
-                if (response.success) {
-                  this.notificationService.showSuccess('Appraisal cycle deleted successfully');
-                  this.loadInitialData();
-                } else {
-                  this.notificationService.showError(response.message || 'Failed to delete cycle');
-                }
-                this.cdr.markForCheck();
-              },
-              error: (error) => {
-                console.error('Error deleting cycle:', error);
-                this.notificationService.showError(error.error?.message || 'Failed to delete appraisal cycle');
-                this.cdr.markForCheck();
-              }
-            });
-        }
-      });
-  }
-
-
-
-
-
-
-
-
-
-
-
-  hasManagerRole(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager', 'Manager']);
-  }
-
-  private loadTeamPerformanceOverview(): void {
-    this.isLoadingTeamPerformance = true;
-    this.performanceService.getTeamPerformanceOverview()
+  loadReceivedReviews(): void {
+    this.isLoadingReceivedReviews = true;
+    this.performanceService.getEmployeeReceivedReviews()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
-            this.teamPerformanceOverview = response.data;
-            // Set data directly for table display
-            this.teamPerformanceDataSource.data = response.data.employees || [];
+            this.receivedReviews = response.data || [];
+            this.receivedReviewsDataSource.data = this.receivedReviews;
+          } else {
+            this.receivedReviews = [];
+            this.receivedReviewsDataSource.data = [];
           }
-          this.isLoadingTeamPerformance = false;
+          this.isLoadingReceivedReviews = false;
           this.cdr.markForCheck();
         },
         error: (error) => {
-          console.error('Error loading team performance overview:', error);
-          this.notificationService.showError('Failed to load team performance overview');
-          this.isLoadingTeamPerformance = false;
+          console.error('Error loading received reviews:', error);
+          this.receivedReviews = [];
+          this.receivedReviewsDataSource.data = [];
+          this.isLoadingReceivedReviews = false;
           this.cdr.markForCheck();
         }
       });
   }
 
-  hasHRRole(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  private loadInitialData(): void {
+    if (!this.currentUser?.userId) return;
+
+    this.isLoading = true;
+
+    forkJoin([
+      // Skills
+      this.performanceService.getEmployeeSkillsByEmployee(this.currentUser.userId).pipe(
+        catchError(() => of({ success: false, data: [] })),
+        map((r: any) => r?.data || [])
+      ),
+
+      // Cycles
+      this.performanceService.getAppraisalCycles().pipe(
+        catchError(() => of({ data: [] }))
+      ),
+
+      // Summary
+      this.performanceService.getMyPerformanceSummary().pipe(
+        catchError(() => of({ data: null }))
+      ),
+
+      // HR Reviews
+      this.performanceService.getEmployeeHrReviews().pipe(
+        catchError(() => of({ success: false, data: [] })),
+        map((r: any) => r?.data || [])
+      )
+    ])
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (results: any[]) => {
+        // Skills
+        this.mySkills = results[0] || [];
+        this.assessedSkills = this.mySkills.filter(s => s.assessorName?.trim());
+
+        // Cycles
+        const cyclesResponse = results[1];
+        this.appraisalCycles = cyclesResponse?.data || [];
+
+        // Summary ratings
+        const summary = results[2]?.data;
+        if (summary) {
+          this.currentRating = summary.currentCycleRating || 0;
+          this.overallRating = summary.overallRating || 0;
+        }
+
+        // HR Reviews
+        this.employeeHrReviews = results[3] || [];
+        this.hrReviewsDataSource.data = this.employeeHrReviews;
+
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
-  getTrendIcon(trend: 'up' | 'down' | 'stable'): string {
-    switch (trend) {
-      case 'up': return 'trending_up';
-      case 'down': return 'trending_down';
-      case 'stable': return 'trending_flat';
-      default: return 'remove';
-    }
-  }
-
-  getSkillLevelColor(level: number): 'primary' | 'accent' | 'warn' {
-    if (level >= 4) return 'primary';
-    if (level >= 3) return 'accent';
-    return 'warn';
-  }
-
-  getCycleStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
+  getStatusChipClass(status: string): string {
     switch (status?.toLowerCase()) {
-      case 'active': return 'primary';
-      case 'completed': return 'accent';
-      case 'cancelled': return 'warn';
-      default: return undefined;
+      case 'completed':      return 'status-completed';
+      case 'submitted':      return 'status-submitted';
+      case 'under_review':   return 'status-under-review';
+      case 'draft':          return 'status-draft';
+      case 'rejected':       return 'status-rejected';
+      default:               return 'status-draft';
     }
   }
 
-  getStatusIcon(status: string): string {
-    switch (status?.toLowerCase()) {
-      case 'active': return 'check_circle';
-      case 'completed': return 'done_all';
-      case 'cancelled': return 'cancel';
-      default: return 'help_outline';
+  getKraChipClass(kraName: string): string {
+    if (!kraName) return 'kra-productivity';
+
+    const kraLower = kraName.toLowerCase();
+
+    if (kraLower.includes('productivity') || kraLower.includes('efficiency')) {
+      return 'kra-productivity';
+    } else if (kraLower.includes('revenue') || kraLower.includes('sales') || kraLower.includes('growth')) {
+      return 'kra-revenue';
+    } else if (kraLower.includes('experience') || kraLower.includes('ux') || kraLower.includes('user')) {
+      return 'kra-experience';
     }
+
+    return 'kra-productivity';
+  }
+
+  // Aligned exactly with appraisals reference getStarClass
+  getStarClass(starNumber: number, rating: number | undefined): string {
+    const numericRating = Number(rating);
+
+    if (!numericRating || numericRating <= 0) return 'empty';
+    if (starNumber <= numericRating) return 'filled';
+    if (starNumber - 1 < numericRating && numericRating < starNumber) return 'half';
+    return 'empty';
   }
 }

@@ -1,0 +1,1407 @@
+// /* ================================================================
+//    CREATE REQUEST TICKET - COMPLETE CSS STYLING
+//    Matches reference design exactly
+//    ================================================================ */
+
+// /* ================================================================
+//    MATERIAL DIALOG OVERRIDES
+//    ================================================================ */
+
+// ::ng-deep .mat-mdc-dialog-container {
+//   padding: 0 !important;
+//   border-radius: 0.5rem !important;
+//   overflow: hidden !important;
+// }
+
+// ::ng-deep .mat-mdc-dialog-surface {
+//   padding: 0 !important;
+//   border-radius: 0.5rem !important;
+//   overflow: hidden !important;
+// }
+
+// /* ================================================================
+//    DIALOG WRAPPER
+//    ================================================================ */
+
+// .dialog-wrapper {
+//   display: flex;
+//   flex-direction: column;
+//   width: 100%;
+//   max-width: 600px;
+//   max-height: 92vh;
+//   background-color: #ffffff;
+//   border-radius: 0.5rem;
+//   overflow: hidden;
+//   font-family: 'Inter', sans-serif;
+// }
+
+// /* ================================================================
+//    DIALOG HEADER
+//    ================================================================ */
+
+// .dialog-header {
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   padding: 1rem 1.5rem;
+//   border-bottom: 1px solid #e2e8f0;
+//   flex-shrink: 0;
+// }
+
+// .dialog-title {
+//   font-size: 18px;
+//   font-weight: 700;
+//   color: #0f172a;
+//   margin: 0;
+//   padding: 0;
+//   line-height: 1.3;
+// }
+
+// .dialog-close {
+//   background: none;
+//   border: none;
+//   cursor: pointer;
+//   color: #94a3b8;
+//   padding: 4px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   border-radius: 0.25rem;
+//   transition: color 0.15s ease;
+//   line-height: 1;
+// }
+
+// .dialog-close:hover {
+//   color: #475569;
+// }
+
+// .dialog-close .material-symbols-outlined {
+//   font-size: 22px;
+// }
+
+// /* ================================================================
+//    DIALOG BODY
+//    ================================================================ */
+
+// .dialog-body {
+//   flex: 1;
+//   overflow-y: auto;
+//   padding: 1.25rem 1.5rem;
+//   background-color: #ffffff;
+// }
+
+// .custom-scrollbar::-webkit-scrollbar {
+//   width: 6px;
+// }
+
+// .custom-scrollbar::-webkit-scrollbar-track {
+//   background: transparent;
+// }
+
+// .custom-scrollbar::-webkit-scrollbar-thumb {
+//   background: #cbd5e1;
+//   border-radius: 10px;
+// }
+
+// /* ================================================================
+//    FORM CONTAINER
+//    ================================================================ */
+
+// .ticket-form {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 0.875rem;
+// }
+
+// /* ================================================================
+//    FORM GROUP
+//    ================================================================ */
+
+// .form-group {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 0.25rem;
+// }
+
+// /* ================================================================
+//    LABEL ROW
+//    ================================================================ */
+
+// .label-row {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+// }
+
+// /* ================================================================
+//    FORM LABELS
+//    ================================================================ */
+
+// .form-label {
+//   font-size: 12px;
+//   font-weight: 500;
+//   color: #334155;
+//   display: block;
+//   margin: 0;
+//   padding: 0;
+//   line-height: 1.4;
+// }
+
+// .required-mark {
+//   color: #ef4444;
+//   margin-left: 1px;
+// }
+
+// /* ================================================================
+//    CHARACTER COUNTER
+//    ================================================================ */
+
+// .char-counter {
+//   font-size: 11px;
+//   color: #64748b;
+//   font-weight: 400;
+// }
+
+// /* ================================================================
+//    TEXT INPUTS
+//    ================================================================ */
+
+// .form-input {
+//   width: 100%;
+//   height: 36px;
+//   padding: 0 0.75rem;
+//   font-size: 13px;
+//   color: #0f172a;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 0.25rem;
+//   background-color: #ffffff;
+//   font-family: inherit;
+//   box-sizing: border-box;
+//   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+// }
+
+// .form-input::placeholder {
+//   color: #94a3b8;
+// }
+
+// .form-input:focus {
+//   outline: none;
+//   border-color: #0066cc;
+//   box-shadow: 0 0 0 1px #0066cc;
+// }
+
+// /* ================================================================
+//    SELECT DROPDOWNS
+//    ================================================================ */
+
+// .form-select {
+//   width: 100%;
+//   height: 36px;
+//   padding: 0 2.5rem 0 0.75rem;
+//   font-size: 13px;
+//   color: #0f172a;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 0.25rem;
+//   background-color: #ffffff;
+//   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+//   background-position: right 0.75rem center;
+//   background-repeat: no-repeat;
+//   background-size: 1.5em 1.5em;
+//   font-family: inherit;
+//   box-sizing: border-box;
+//   appearance: none;
+//   -webkit-appearance: none;
+//   cursor: pointer;
+//   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+// }
+
+// .form-select--gray {
+//   background-color: #f8f9fa;
+// }
+
+// .form-select:focus {
+//   outline: none;
+//   border-color: #0066cc;
+//   box-shadow: 0 0 0 1px #0066cc;
+// }
+
+// /* ================================================================
+//    TEXTAREA
+//    ================================================================ */
+
+// .form-textarea {
+//   width: 100%;
+//   min-height: 90px;
+//   padding: 0.625rem 0.75rem;
+//   font-size: 13px;
+//   color: #0f172a;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 0.25rem;
+//   background-color: #ffffff;
+//   font-family: inherit;
+//   box-sizing: border-box;
+//   resize: vertical;
+//   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+//   line-height: 1.5;
+// }
+
+// .form-textarea::placeholder {
+//   color: #94a3b8;
+// }
+
+// .form-textarea:focus {
+//   outline: none;
+//   border-color: #0066cc;
+//   box-shadow: 0 0 0 1px #0066cc;
+// }
+
+// .form-textarea::-webkit-scrollbar {
+//   width: 6px;
+// }
+
+// .form-textarea::-webkit-scrollbar-track {
+//   background: transparent;
+// }
+
+// .form-textarea::-webkit-scrollbar-thumb {
+//   background: #cbd5e1;
+//   border-radius: 10px;
+// }
+
+// /* ================================================================
+//    HELPER TEXT
+//    ================================================================ */
+
+// .helper-text {
+//   font-size: 11px;
+//   color: #64748b;
+//   margin: 0;
+//   padding: 0;
+//   line-height: 1.4;
+// }
+
+// .helper-text.error-text {
+//   color: #dc2626;
+//   font-weight: 500;
+// }
+
+// /* ================================================================
+//    FORM ROW (Priority & Department side-by-side)
+//    ================================================================ */
+
+// .form-row {
+//   display: grid;
+//   grid-template-columns: 1fr 1fr;
+//   gap: 1rem;
+//   width: 100%;
+// }
+
+// @media (max-width: 480px) {
+//   .form-row {
+//     grid-template-columns: 1fr;
+//     gap: 0.75rem;
+//   }
+// }
+
+// /* ================================================================
+//    ATTACHMENT ZONE
+//    ================================================================ */
+
+// .attachment-zone {
+//   border: 2px dashed #cbd5e1;
+//   border-radius: 0.5rem;
+//   background-color: #f8fafc;
+//   padding: 1.25rem 1rem;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   gap: 0.375rem;
+//   cursor: pointer;
+//   transition: background-color 0.15s ease, border-color 0.15s ease;
+// }
+
+// .attachment-zone:hover {
+//   background-color: #f1f5f9;
+//   border-color: #94a3b8;
+// }
+
+// .attachment-content {
+//   display: flex;
+//   align-items: center;
+//   gap: 0.375rem;
+//   justify-content: center;
+// }
+
+// .attachment-icon {
+//   font-size: 20px;
+//   color: #0066cc;
+//   flex-shrink: 0;
+// }
+
+// .attachment-label {
+//   font-size: 13px;
+//   font-weight: 600;
+//   color: #0066cc;
+//   text-align: center;
+// }
+
+// .attachment-hint {
+//   font-size: 11px;
+//   color: #64748b;
+//   text-align: center;
+//   text-transform: uppercase;
+//   letter-spacing: 0.04em;
+//   margin: 0;
+//   font-weight: 400;
+// }
+
+// /* ================================================================
+//    DIALOG FOOTER
+//    ================================================================ */
+
+// .dialog-footer {
+//   display: flex;
+//   align-items: center;
+//   justify-content: flex-end;
+//   gap: 0.75rem;
+//   padding: 0.875rem 1.5rem;
+//   border-top: 1px solid #e2e8f0;
+//   background-color: rgba(248, 250, 252, 0.5);
+//   flex-shrink: 0;
+// }
+
+// /* ================================================================
+//    CANCEL BUTTON
+//    ================================================================ */
+
+// .btn-cancel {
+//   width: 100px;
+//   padding: 0.5rem 0.75rem;
+//   font-size: 13px;
+//   font-weight: 500;
+//   color: #475569;
+//   background-color: #ffffff;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 0.25rem;
+//   cursor: pointer;
+//   transition: background-color 0.15s ease, color 0.15s ease;
+//   font-family: inherit;
+//   line-height: 1.4;
+// }
+
+// .btn-cancel:hover {
+//   background-color: #ffffff;
+//   border-color: #cbd5e1;
+//   color: #0f172a;
+// }
+
+// .btn-cancel:focus {
+//   outline: none;
+//   box-shadow: 0 0 0 2px #0066cc;
+// }
+
+// /* ================================================================
+//    SUBMIT BUTTON
+//    ================================================================ */
+
+// .btn-submit {
+//   width: 140px;
+//   padding: 0.5rem 0.75rem;
+//   font-size: 13px;
+//   font-weight: 600;
+//   color: #ffffff;
+//   background-color: #0066cc;
+//   border: none;
+//   border-radius: 0.25rem;
+//   cursor: pointer;
+//   transition: background-color 0.15s ease;
+//   font-family: inherit;
+//   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+//   line-height: 1.4;
+// }
+
+// .btn-submit:hover:not(:disabled) {
+//   background-color: #0052a3;
+// }
+
+// .btn-submit:focus {
+//   outline: none;
+//   box-shadow: 0 0 0 2px #0066cc;
+// }
+
+// .btn-submit:disabled {
+//   background-color: #cbd5e1;
+//   color: #94a3b8;
+//   cursor: not-allowed;
+//   opacity: 0.7;
+//   box-shadow: none;
+// }
+
+// /* ================================================================
+//    FOCUS STATES & ACCESSIBILITY
+//    ================================================================ */
+
+// .form-input:focus-visible,
+// .form-textarea:focus-visible,
+// .form-select:focus-visible {
+//   outline: 2px solid #0066cc;
+//   outline-offset: 1px;
+// }
+
+// button:focus-visible {
+//   outline: 2px solid #0066cc;
+//   outline-offset: 2px;
+// }
+
+// /* ================================================================
+//    RESPONSIVE
+//    ================================================================ */
+
+// @media (max-width: 640px) {
+//   .dialog-header {
+//     padding: 0.875rem 1rem;
+//   }
+
+//   .dialog-title {
+//     font-size: 15px;
+//   }
+
+//   .dialog-body {
+//     padding: 1rem;
+//   }
+
+//   .dialog-footer {
+//     padding: 0.75rem 1rem;
+//     gap: 0.5rem;
+//   }
+
+//   .btn-cancel {
+//     width: auto;
+//     min-width: 80px;
+//   }
+
+//   .btn-submit {
+//     width: auto;
+//     min-width: 110px;
+//   }
+// }
+
+// /* ================================================================
+//    DARK MODE
+//    ================================================================ */
+
+// @media (prefers-color-scheme: dark) {
+//   .dialog-wrapper {
+//     background-color: #1e293b;
+//   }
+
+//   .dialog-header {
+//     border-bottom-color: #334155;
+//     background-color: #1e293b;
+//   }
+
+//   .dialog-title {
+//     color: #f1f5f9;
+//   }
+
+//   .dialog-close {
+//     color: #64748b;
+//   }
+
+//   .dialog-close:hover {
+//     color: #94a3b8;
+//   }
+
+//   .dialog-body {
+//     background-color: #1e293b;
+//   }
+
+//   .form-label {
+//     color: #cbd5e1;
+//   }
+
+//   .form-input,
+//   .form-textarea {
+//     background-color: #0f172a;
+//     border-color: #334155;
+//     color: #f1f5f9;
+//   }
+
+//   .form-input::placeholder,
+//   .form-textarea::placeholder {
+//     color: #64748b;
+//   }
+
+//   .form-select {
+//     background-color: #0f172a;
+//     border-color: #334155;
+//     color: #f1f5f9;
+//     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+//   }
+
+//   .form-select--gray {
+//     background-color: #162032;
+//   }
+
+//   .attachment-zone {
+//     background-color: #0f172a;
+//     border-color: #334155;
+//   }
+
+//   .attachment-zone:hover {
+//     background-color: #1e293b;
+//   }
+
+//   .helper-text {
+//     color: #64748b;
+//   }
+
+//   .char-counter {
+//     color: #64748b;
+//   }
+
+//   .dialog-footer {
+//     border-top-color: #334155;
+//     background-color: rgba(15, 23, 42, 0.5);
+//   }
+
+//   .btn-cancel {
+//     background-color: #1e293b;
+//     color: #cbd5e1;
+//     border-color: #334155;
+//   }
+
+//   .btn-cancel:hover {
+//     background-color: #334155;
+//     color: #f1f5f9;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /* ================================================================
+//    MAT DIALOG OVERRIDES - Remove all default padding/margin
+//    ================================================================ */
+
+// ::ng-deep .mat-mdc-dialog-container {
+//   padding: 0 !important;
+//   border-radius: 0.375rem !important;
+//   overflow: hidden !important;
+//   box-shadow: 0 20px 60px rgba(0,0,0,0.18) !important;
+// }
+
+// ::ng-deep .mat-mdc-dialog-surface {
+//   padding: 0 !important;
+//   border-radius: 0.375rem !important;
+//   overflow: hidden !important;
+//   box-shadow: none !important;
+// }
+
+// ::ng-deep .cdk-overlay-pane {
+//   max-width: 520px !important;
+//   width: 520px !important;
+// }
+
+// /* ================================================================
+//    DIALOG WRAPPER
+//    ================================================================ */
+
+// .dialog-wrapper {
+//   display: flex;
+//   flex-direction: column;
+//   width: 100%;
+//   background: #ffffff;
+//   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+//   font-size: 13px;
+// }
+
+// /* ================================================================
+//    HEADER
+//    ================================================================ */
+
+// .dialog-header {
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   padding: 12px 16px 12px 16px;
+//   border-bottom: 1px solid #e2e8f0;
+// }
+
+// .dialog-title {
+//   font-size: 15px;
+//   font-weight: 700;
+//   color: #0f172a;
+//   line-height: 1.3;
+// }
+
+// .dialog-close {
+//   background: none;
+//   border: none;
+//   cursor: pointer;
+//   color: #94a3b8;
+//   font-size: 16px;
+//   padding: 2px 4px;
+//   line-height: 1;
+//   border-radius: 3px;
+//   transition: color 0.15s;
+
+//   &:hover {
+//     color: #475569;
+//   }
+// }
+
+// /* ================================================================
+//    BODY
+//    ================================================================ */
+
+// .dialog-body {
+//   padding: 12px 16px;
+//   background: #ffffff;
+//   overflow: visible;
+// }
+
+// /* ================================================================
+//    FORM
+//    ================================================================ */
+
+// form {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 8px;
+// }
+
+// .form-group {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 3px;
+// }
+
+// /* ================================================================
+//    LABEL ROW
+//    ================================================================ */
+
+// .label-row {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+// }
+
+// .form-label {
+//   font-size: 11px;
+//   font-weight: 600;
+//   color: #334155;
+//   line-height: 1.4;
+// }
+
+// .req {
+//   color: #ef4444;
+// }
+
+// .counter {
+//   font-size: 10px;
+//   color: #94a3b8;
+// }
+
+// /* ================================================================
+//    INPUTS
+//    ================================================================ */
+
+// .form-input {
+//   width: 100%;
+//   height: 32px;
+//   padding: 0 10px;
+//   font-size: 12px;
+//   color: #0f172a;
+//   background: #ffffff;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 3px;
+//   font-family: inherit;
+//   box-sizing: border-box;
+//   transition: border-color 0.15s, box-shadow 0.15s;
+
+//   &::placeholder {
+//     color: #94a3b8;
+//   }
+
+//   &:focus {
+//     outline: none;
+//     border-color: #0066cc;
+//     box-shadow: 0 0 0 1px #0066cc;
+//   }
+// }
+
+// /* ================================================================
+//    SELECTS
+//    ================================================================ */
+
+// .form-select {
+//   width: 100%;
+//   height: 32px;
+//   padding: 0 28px 0 10px;
+//   font-size: 12px;
+//   color: #0f172a;
+//   background: #ffffff;
+//   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+//   background-position: right 8px center;
+//   background-repeat: no-repeat;
+//   background-size: 16px 16px;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 3px;
+//   font-family: inherit;
+//   box-sizing: border-box;
+//   appearance: none;
+//   -webkit-appearance: none;
+//   cursor: pointer;
+//   transition: border-color 0.15s, box-shadow 0.15s;
+
+//   &:focus {
+//     outline: none;
+//     border-color: #0066cc;
+//     box-shadow: 0 0 0 1px #0066cc;
+//   }
+// }
+
+// .select-gray {
+//   background-color: #f8f9fa;
+// }
+
+// /* ================================================================
+//    FORM ROW (2 columns)
+//    ================================================================ */
+
+// .form-row {
+//   display: grid;
+//   grid-template-columns: 1fr 1fr;
+//   gap: 10px;
+// }
+
+// /* ================================================================
+//    TEXTAREA
+//    ================================================================ */
+
+// .form-textarea {
+//   width: 100%;
+//   height: 72px;
+//   padding: 7px 10px;
+//   font-size: 12px;
+//   color: #0f172a;
+//   background: #ffffff;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 3px;
+//   font-family: inherit;
+//   box-sizing: border-box;
+//   resize: none;
+//   transition: border-color 0.15s, box-shadow 0.15s;
+
+//   &::placeholder {
+//     color: #94a3b8;
+//   }
+
+//   &:focus {
+//     outline: none;
+//     border-color: #0066cc;
+//     box-shadow: 0 0 0 1px #0066cc;
+//   }
+// }
+
+// /* ================================================================
+//    HINT TEXT
+//    ================================================================ */
+
+// .hint {
+//   font-size: 10px;
+//   color: #64748b;
+//   margin: 0;
+//   line-height: 1.3;
+
+//   &.error {
+//     color: #dc2626;
+//     font-weight: 500;
+//   }
+// }
+
+// /* ================================================================
+//    ATTACHMENT ZONE
+//    ================================================================ */
+
+// .attachment-zone {
+//   border: 2px dashed #cbd5e1;
+//   border-radius: 4px;
+//   background: #f8fafc;
+//   padding: 10px 12px;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   gap: 4px;
+//   cursor: pointer;
+//   transition: background 0.15s, border-color 0.15s;
+
+//   &:hover {
+//     background: #f1f5f9;
+//     border-color: #94a3b8;
+//   }
+// }
+
+// .attachment-inner {
+//   display: flex;
+//   align-items: center;
+//   gap: 6px;
+// }
+
+// .attach-icon {
+//   font-size: 16px;
+//   color: #0066cc;
+// }
+
+// .attach-text {
+//   font-size: 12px;
+//   font-weight: 600;
+//   color: #0066cc;
+// }
+
+// .attach-hint {
+//   font-size: 10px;
+//   color: #94a3b8;
+//   text-transform: uppercase;
+//   letter-spacing: 0.03em;
+//   margin: 0;
+//   text-align: center;
+// }
+
+// /* ================================================================
+//    FOOTER
+//    ================================================================ */
+
+// .dialog-footer {
+//   display: flex;
+//   align-items: center;
+//   justify-content: flex-end;
+//   gap: 8px;
+//   padding: 10px 16px;
+//   border-top: 1px solid #e2e8f0;
+//   background: #f8fafc;
+// }
+
+// /* ================================================================
+//    BUTTONS
+//    ================================================================ */
+
+// .btn-cancel {
+//   height: 32px;
+//   padding: 0 16px;
+//   font-size: 12px;
+//   font-weight: 500;
+//   color: #475569;
+//   background: #ffffff;
+//   border: 1px solid #cbd5e1;
+//   border-radius: 3px;
+//   cursor: pointer;
+//   font-family: inherit;
+//   transition: background 0.15s, color 0.15s;
+
+//   &:hover {
+//     background: #f8fafc;
+//     color: #1e293b;
+//   }
+// }
+
+// .btn-submit {
+//   height: 32px;
+//   padding: 0 20px;
+//   font-size: 12px;
+//   font-weight: 600;
+//   color: #ffffff;
+//   background: #0066cc;
+//   border: none;
+//   border-radius: 3px;
+//   cursor: pointer;
+//   font-family: inherit;
+//   transition: background 0.15s;
+
+//   &:hover:not(:disabled) {
+//     background: #0052a3;
+//   }
+
+//   &:disabled {
+//     background: #cbd5e1;
+//     color: #94a3b8;
+//     cursor: not-allowed;
+//   }
+// }
+
+
+
+
+
+
+
+/* ================================================================
+   MAT DIALOG - Force compact size
+   ================================================================ */
+
+::ng-deep .mat-mdc-dialog-container {
+  padding: 0 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  max-height: none !important;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+  padding: 0 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+}
+
+::ng-deep .cdk-overlay-pane {
+  width: 420px !important;
+  max-width: 420px !important;
+}
+
+/* ================================================================
+   WRAPPER
+   ================================================================ */
+
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  background: #fff;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.dialog-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dialog-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 13px;
+  padding: 2px 4px;
+  line-height: 1;
+  border-radius: 3px;
+
+  &:hover { color: #475569; }
+}
+
+/* ================================================================
+   BODY
+   ================================================================ */
+
+.dialog-body {
+  padding: 10px 14px;
+  background: #fff;
+  overflow: hidden;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ================================================================
+   FORM GROUP
+   ================================================================ */
+
+.fg {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lbl {
+  font-size: 10px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.3;
+}
+
+.req { color: #ef4444; }
+
+.cnt {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+/* ================================================================
+   INPUT
+   ================================================================ */
+
+.fi {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder { color: #94a3b8; }
+
+  &:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 1px #0066cc;
+  }
+}
+
+/* ================================================================
+   SELECT
+   ================================================================ */
+
+.fs {
+  width: 100%;
+  height: 28px;
+  padding: 0 24px 0 8px;
+  font-size: 11px;
+  color: #0f172a;
+  background: #fff;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 6px center;
+  background-repeat: no-repeat;
+  background-size: 14px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  font-family: inherit;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 1px #0066cc;
+  }
+}
+
+.fg-gray { background-color: #f8f9fa; }
+
+/* ================================================================
+   TWO COLUMN ROW
+   ================================================================ */
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* ================================================================
+   TEXTAREA
+   ================================================================ */
+
+.fta {
+  width: 100%;
+  height: 56px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  font-family: inherit;
+  box-sizing: border-box;
+  resize: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder { color: #94a3b8; }
+
+  &:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 1px #0066cc;
+  }
+}
+
+/* ================================================================
+   HINT
+   ================================================================ */
+
+.ht {
+  font-size: 9px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.3;
+
+  &.err {
+    color: #dc2626;
+    font-weight: 600;
+  }
+}
+
+/* ================================================================
+   ATTACHMENT
+   ================================================================ */
+
+.att-zone {
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 4px;
+  background: #f8fafc;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+}
+
+.att-ico {
+  font-size: 14px;
+  color: #0066cc;
+}
+
+.att-txt {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0066cc;
+}
+
+.att-hint {
+  font-size: 9px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
+  text-align: center;
+}
+
+.att-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &::before {
+    content: '×';
+    font-size: 20px;
+    color: #cbd5e1;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  &:hover::before {
+    color: #94a3b8;
+  }
+
+  &:active::before {
+    color: #64748b;
+  }
+}
+
+.att-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.att-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+
+  &.att-uploading {
+    opacity: 0.7;
+  }
+
+  &.att-error {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+}
+
+.att-file-ico {
+  font-size: 16px;
+  color: #0066cc;
+  flex-shrink: 0;
+}
+
+.att-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.att-name {
+  font-size: 10px;
+  font-weight: 500;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.att-size {
+  font-size: 8px;
+  color: #94a3b8;
+}
+
+.att-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.att-spin {
+  font-size: 14px;
+  color: #0066cc;
+}
+
+.att-ok {
+  font-size: 16px;
+  color: #16a34a;
+}
+
+.att-err-txt {
+  font-size: 8px;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.att-retry {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: #0066cc;
+  transition: color 0.2s ease;
+
+  .material-symbols-outlined {
+    font-size: 14px;
+  }
+
+  &:hover {
+    color: #0052a3;
+  }
+}
+
+.att-limit {
+  margin-top: 6px !important;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 14px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   BUTTONS
+   ================================================================ */
+
+.btn-cancel {
+  height: 28px;
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover { background: #f8fafc; color: #1e293b; }
+}
+
+.btn-submit {
+  height: 28px;
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: #0066cc;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:hover:not(:disabled) { background: #0052a3; }
+
+  &:disabled {
+    background: #cbd5e1;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+}

@@ -1,46 +1,45 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>category</mat-icon>
-    {{ data.mode === 'create' ? 'Create Expense Category' : 'Edit Expense Category' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
+<div class="attendance-dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">category</mat-icon>
+      <div class="header-text">
+        <h2>{{ data.mode === 'create' ? 'Add Category' : 'Edit Category' }}</h2>
+        <p>{{ data.mode === 'create' ? 'Create a new expense category' : 'Update the expense category details' }}</p>
+      </div>
+    </div>
+    <button class="close-btn" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="categoryForm" class="category-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Category Name *</mat-label>
-      <input matInput
+  <!-- Body -->
+  <div class="dialog-body" [formGroup]="categoryForm">
+    <div class="form-group">
+      <label>Category Name</label>
+      <input type="text"
+             class="form-control"
              formControlName="name"
-             placeholder="e.g. Travel, Meals, Office Supplies"
-             maxlength="100">
-      <mat-hint>Required, max 100 characters</mat-hint>
-      <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
-        Category name is required
-      </mat-error>
-      <mat-error *ngIf="categoryForm.get('name')?.hasError('maxlength')">
-        Name cannot exceed 100 characters
-      </mat-error>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
+             placeholder="e.g. Travel, Meals, etc." />
+      <div class="error-msg" *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+        <span *ngIf="categoryForm.get('name')?.errors?.['required']">Category name is required</span>
+        <span *ngIf="categoryForm.get('name')?.errors?.['minlength']">Minimum 3 characters required</span>
+      </div>
+    </div>
 
-<mat-dialog-actions class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close type="button">
-    Cancel
-  </button>
-  <button mat-flat-button
-          [disabled]="categoryForm.invalid || isSubmitting"
-          (click)="onSubmit()"
-          class="submit-button">
-    <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-    <span *ngIf="!isSubmitting">
-      {{ data.mode === 'create' ? 'Create Category' : 'Update Category' }}
-    </span>
-    <span *ngIf="isSubmitting">
-      {{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}
-    </span>
-  </button>
-</mat-dialog-actions>
+    <div class="alert-info">
+      <mat-icon>info</mat-icon>
+      <p>Expense categories are used to classify employee claims for better tracking.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="cancel-btn" (click)="onCancel()">Cancel</button>
+    <button class="save-btn"
+            [disabled]="categoryForm.invalid || isSubmitting"
+            (click)="onSubmit()">
+      {{ isSubmitting ? 'Saving...' : (data.mode === 'create' ? 'Create Category' : 'Save Changes') }}
+    </button>
+  </div>
+</div>

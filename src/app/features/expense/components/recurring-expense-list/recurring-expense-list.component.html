@@ -1,15 +1,15 @@
-<!-- Recurring Expenses List - same layout as Claims -->
-<div class="recurring-list-container">
+<div class="time-tracking-container">
+  <!-- Page Header -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
+    <div class="title-section">
+      <h1 class="title">
         <mat-icon>repeat</mat-icon>
         Recurring Expenses
       </h1>
-      <p class="page-subtitle">View and manage recurring expense requests</p>
+      <p class="subtitle">View and manage recurring expense requests</p>
     </div>
-    <div class="header-actions">
-      <button mat-flat-button (click)="openCreateDialog()" class="add-button">
+    <div class="actions">
+      <button class="add-btn" *ngIf="hasPermission('add_recurring')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Recurring
       </button>
@@ -17,428 +17,212 @@
   </div>
 
   <!-- View toggle: My Recurring / All Recurring (Super Admin only) -->
-  <div class="view-tabs" *ngIf="isSuperAdmin">
-    <button type="button" class="view-tab" [class.active]="activeView === 'my-recurring'"
-      (click)="setActiveView('my-recurring')">
+  <div class="view-tabs">
+    <button *ngIf="hasPermission('my_rescurring_expenses')" type="button" class="tab-item" [class.active]="activeView === 'my-recurring'" (click)="setActiveView('my-recurring')">
       <mat-icon>person</mat-icon>
-      My Recurring Expenses
+      My Recurring
     </button>
-    <button type="button" class="view-tab" [class.active]="activeView === 'all-recurring'"
-      (click)="setActiveView('all-recurring')">
+    <button *ngIf="hasPermission('all_recurring')" type="button" class="tab-item" [class.active]="activeView === 'all-recurring'" (click)="setActiveView('all-recurring')">
       <mat-icon>groups</mat-icon>
       All Recurring
     </button>
   </div>
 
-  <!-- Super Admin: sliding panels -->
-  <div class="view-content-wrapper" *ngIf="isSuperAdmin">
+  <!-- Sliding panels -->
+  <div class="view-content-wrapper">
     <div class="view-slider" [class.slide-all]="activeView === 'all-recurring'">
       <!-- Panel 1: My Recurring -->
-      <div class="view-panel view-panel-my">
-        <mat-card class="filters-card">
-          <div class="filters-header">
-            <h3>Search &amp; Filters</h3>
-            <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()"
-              class="clear-filters-btn">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
-          </div>
-          <div class="filters-content">
-            <mat-form-field class="search-field">
-              <mat-label>Search</mat-label>
-              <input matInput [formControl]="searchControl" placeholder="Title, category, description...">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="myStatus">
-                <mat-option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">
-                  {{ opt.label }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Category</mat-label>
-              <mat-select [formControl]="myCategoryId">
-                <mat-option [value]="null">All categories</mat-option>
-                <mat-option *ngFor="let cat of categories" [value]="cat.categoryId">
-                  {{ cat.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </mat-card>
-
-        <mat-card class="table-card">
-          <div *ngIf="isLoading" class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Loading recurring expenses...</p>
+      <div class="view-panel" *ngIf="hasPermission('my_rescurring_expenses')">
+        <div class="content-card">
+          <div class="toolbar">
+            <div class="filters-row">
+              <div class="search-box">
+                <mat-icon>search</mat-icon>
+                <input type="text" [formControl]="searchControl" placeholder="Search my recurring...">
+              </div>
+              <select class="filter-select" [formControl]="myStatus">
+                <option [value]="null">All Statuses</option>
+                <option *ngFor="let opt of statusOptions.slice(1)" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+              <select class="filter-select" [formControl]="myCategoryId">
+                <option [value]="null">All Categories</option>
+                <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.name }}</option>
+              </select>
+              <div class="filter-actions">
+                <button class="clear-btn" (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
+                  <mat-icon>clear</mat-icon> Clear
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!isLoading" class="table-container">
-            <table mat-table [dataSource]="filteredList" class="recurring-table">
-              <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Title</th>
-                <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-              </ng-container>
-              <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="category-name">{{ row.categoryName || '—' }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="rotation">
-                <th mat-header-cell *matHeaderCellDef>Rotation</th>
-                <td mat-cell *matCellDef="let row">{{ row.rotation }}{{ row.dayOfMonth ? ' (day ' + row.dayOfMonth + ')' : '' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let row">
-                  <mat-chip-set>
-                    <mat-chip [class]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</mat-chip>
-                  </mat-chip-set>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let row">
-                  <button mat-icon-button [matMenuTriggerFor]="actionMenu">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #actionMenu="matMenu">
-                    <button mat-menu-item (click)="viewRecurringDetails(row)">
+          <div class="table-responsive">
+            <div *ngIf="isLoading" class="loading-state">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading recurring expenses...</p>
+            </div>
+            <table *ngIf="!isLoading" class="custom-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Rotation</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of filteredList" class="table-row">
+                  <td class="font-semibold">{{ row.title }}</td>
+                  <td>{{ row.categoryName || '—' }}</td>
+                  <td class="font-semibold">{{ row.amount | currency:organizationCurrency }}</td>
+                  <td>{{ row.rotation }}{{ row.dayOfMonth ? ' (day ' + row.dayOfMonth + ')' : '' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
+                  </td>
+                  <td class="action-cell">
+                    <button class="action-btn hover-primary" *ngIf="hasPermission('recurring_view_details')" (click)="viewRecurringDetails(row)">
                       <mat-icon>visibility</mat-icon>
-                      View details
                     </button>
-                    <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
+                    <button class="action-btn hover-primary" *ngIf="hasPermission('recurring_edit')" (click)="editRecurring(row)" [disabled]="!isRecurringPending(row)">
                       <mat-icon>edit</mat-icon>
-                      Edit
                     </button>
-                    <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
+                    <button class="action-btn hover-danger" *ngIf="hasPermission('recurring_delete')" (click)="deleteRecurring(row)" [disabled]="!isRecurringPending(row)">
                       <mat-icon>delete</mat-icon>
-                      Delete
                     </button>
-                  </mat-menu>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  </td>
+                </tr>
+              </tbody>
             </table>
             <mat-paginator *ngIf="!isLoading && myTotalCount > 0"
               [length]="myTotalCount"
               [pageSize]="myPageSize"
               [pageIndex]="myPage - 1"
               [pageSizeOptions]="[5, 10, 25, 50]"
-              (page)="onMyPageChange($event)"
-              showFirstLastButtons>
+              (page)="onMyPageChange($event)">
             </mat-paginator>
-            <div *ngIf="filteredList.length === 0" class="empty-state">
-              <mat-icon>repeat</mat-icon>
-              <h3>No Recurring Expenses Found</h3>
-              <p *ngIf="hasFiltersApplied()">No items match your search.</p>
-              <p *ngIf="!hasFiltersApplied()">You have no recurring expenses.</p>
-              <button *ngIf="!hasFiltersApplied()" mat-flat-button (click)="openCreateDialog()" class="add-first-btn">
-                <mat-icon>add</mat-icon>
-                Add Recurring
-              </button>
-            </div>
           </div>
-        </mat-card>
+        </div>
       </div>
 
       <!-- Panel 2: All Recurring -->
-      <div class="view-panel view-panel-all">
-        <mat-card class="filters-card">
-          <div class="filters-header">
-            <h3>Search &amp; Filters</h3>
-            <button mat-stroked-button (click)="clearAllFilters()" [disabled]="!hasAllFiltersApplied()"
-              class="clear-filters-btn">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
-          </div>
-          <div class="filters-content">
-            <mat-form-field class="search-field">
-              <mat-label>Search</mat-label>
-              <input matInput [formControl]="allSearchControl"
-                placeholder="Title, category, description, employee...">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="allStatus">
-                <mat-option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">
-                  {{ opt.label }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field class="filter-field">
-              <mat-label>Category</mat-label>
-              <mat-select [formControl]="allCategoryId">
-                <mat-option [value]="null">All categories</mat-option>
-                <mat-option *ngFor="let cat of categories" [value]="cat.categoryId">
-                  {{ cat.name }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-        </mat-card>
-
-        <mat-card class="table-card">
-          <div *ngIf="isLoadingAll" class="loading-container">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Loading all recurring expenses...</p>
+      <div class="view-panel" *ngIf="hasPermission('all_recurring')">
+        <div class="content-card">
+          <div class="toolbar">
+            <div class="filters-row">
+              <div class="search-box">
+                <mat-icon>search</mat-icon>
+                <input type="text" [formControl]="allSearchControl" placeholder="Search all recurring...">
+              </div>
+              <select class="filter-select" [formControl]="allStatus">
+                <option [value]="null">All Statuses</option>
+                <option *ngFor="let opt of statusOptions.slice(1)" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+              <select class="filter-select" [formControl]="allCategoryId">
+                <option [value]="null">All Categories</option>
+                <option *ngFor="let cat of categories" [value]="cat.categoryId">{{ cat.name }}</option>
+              </select>
+              <div class="filter-actions">
+                <button class="clear-btn" (click)="clearAllFilters()" [disabled]="!hasAllFiltersApplied()">
+                  <mat-icon>clear</mat-icon> Clear
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div *ngIf="!isLoadingAll" class="table-container">
-            <table mat-table [dataSource]="filteredAllList" class="recurring-table">
-              <ng-container matColumnDef="title">
-                <th mat-header-cell *matHeaderCellDef>Title</th>
-                <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-              </ng-container>
-              <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="category-name">{{ row.categoryName || '—' }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let row">
-                  <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="rotation">
-                <th mat-header-cell *matHeaderCellDef>Rotation</th>
-                <td mat-cell *matCellDef="let row">{{ row.rotation }}{{ row.dayOfMonth ? ' (day ' + row.dayOfMonth + ')' : '' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let row">
-                  <mat-chip-set>
-                    <mat-chip [class]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</mat-chip>
-                  </mat-chip-set>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="details">
-                <th mat-header-cell *matHeaderCellDef>Details</th>
-                <td mat-cell *matCellDef="let row">
-                  <button mat-stroked-button class="show-details-btn" (click)="viewRecurringDetails(row)">
-                    <mat-icon>visibility</mat-icon>
-                    Show details
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumnsAll"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsAll;"></tr>
+          <div class="table-responsive">
+            <div *ngIf="isLoadingAll" class="loading-state">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading all recurring expenses...</p>
+            </div>
+            <table *ngIf="!isLoadingAll" class="custom-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Rotation</th>
+                  <th>Status</th>
+                  <th class="text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of filteredAllList" class="table-row">
+                  <td class="font-semibold">{{ row.title }}</td>
+                  <td>{{ row.categoryName || '—' }}</td>
+                  <td class="font-semibold">{{ row.amount | currency:organizationCurrency }}</td>
+                  <td>{{ row.rotation }}{{ row.dayOfMonth ? ' (day ' + row.dayOfMonth + ')' : '' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
+                  </td>
+                  <td class="action-cell">
+                    <button class="action-btn hover-primary" *ngIf="hasPermission('recurring_view_details')" (click)="viewRecurringDetails(row)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
             </table>
             <mat-paginator *ngIf="!isLoadingAll && allTotalCount > 0"
               [length]="allTotalCount"
               [pageSize]="allPageSize"
               [pageIndex]="allPage - 1"
               [pageSizeOptions]="[5, 10, 25, 50]"
-              (page)="onAllPageChange($event)"
-              showFirstLastButtons>
+              (page)="onAllPageChange($event)">
             </mat-paginator>
-            <div *ngIf="filteredAllList.length === 0" class="empty-state">
-              <mat-icon>repeat</mat-icon>
-              <h3>No Recurring Expenses Found</h3>
-              <p *ngIf="hasAllFiltersApplied()">No items match your search.</p>
-              <p *ngIf="!hasAllFiltersApplied()">There are no recurring expenses in the organization.</p>
-            </div>
           </div>
-        </mat-card>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- HR Manager: only My Recurring (no tabs) -->
-  <ng-container *ngIf="!isSuperAdmin">
-    <mat-card class="filters-card">
-      <div class="filters-header">
-        <h3>Search &amp; Filters</h3>
-        <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()" class="clear-filters-btn">
-          <mat-icon>clear</mat-icon>
-          Clear
-        </button>
-      </div>
-      <div class="filters-content">
-        <mat-form-field class="search-field">
-          <mat-label>Search</mat-label>
-          <input matInput [formControl]="searchControl" placeholder="Title, category, description...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="filter-field">
-          <mat-label>Status</mat-label>
-          <mat-select [formControl]="myStatus">
-            <mat-option *ngFor="let opt of statusOptions" [value]="opt.value === '' ? null : opt.value">
-              {{ opt.label }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field class="filter-field">
-          <mat-label>Category</mat-label>
-          <mat-select [formControl]="myCategoryId">
-            <mat-option [value]="null">All categories</mat-option>
-            <mat-option *ngFor="let cat of categories" [value]="cat.categoryId">
-              {{ cat.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </mat-card>
+  <!-- Recurring requests Section (Super Admin, All Recurring tab only) -->
+  <div class="recurring-requests-section" *ngIf="activeView === 'all-recurring' && hasPermission('all_recurring') && hasPermission('recurring_request_action')">
+    <div class="section-header">
+      <h2 class="title">Recurring Requests</h2>
+      <p class="subtitle">Approve or reject pending recurring expense requests</p>
+    </div>
 
-    <mat-card class="table-card">
-      <div *ngIf="isLoading" class="loading-container">
-        <mat-spinner diameter="40"></mat-spinner>
-        <p>Loading recurring expenses...</p>
-      </div>
-
-      <div *ngIf="!isLoading" class="table-container">
-        <table mat-table [dataSource]="filteredList" class="recurring-table">
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef>Title</th>
-            <td mat-cell *matCellDef="let row">{{ row.title }}</td>
-          </ng-container>
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef>Category</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="category-name">{{ row.categoryName || '—' }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="amount">{{ row.amount | currency:organizationCurrency }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="rotation">
-            <th mat-header-cell *matHeaderCellDef>Rotation</th>
-            <td mat-cell *matCellDef="let row">{{ row.rotation }}{{ row.dayOfMonth ? ' (day ' + row.dayOfMonth + ')' : '' }}</td>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let row">
-              <mat-chip-set>
-                <mat-chip [class]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</mat-chip>
-              </mat-chip-set>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let row">
-              <button mat-icon-button [matMenuTriggerFor]="actionMenuNonAdmin">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #actionMenuNonAdmin="matMenu">
-                <button mat-menu-item (click)="viewRecurringDetails(row)">
-                  <mat-icon>visibility</mat-icon>
-                  View details
-                </button>
-                <button mat-menu-item (click)="editRecurring(row)" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
-                  <mat-icon>edit</mat-icon>
-                  Edit
-                </button>
-                <button mat-menu-item (click)="deleteRecurring(row)" class="danger-action" [disabled]="!isSuperAdmin && !isRecurringPending(row)">
-                  <mat-icon>delete</mat-icon>
-                  Delete
-                </button>
-              </mat-menu>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-        <mat-paginator *ngIf="!isLoading && myTotalCount > 0"
-          [length]="myTotalCount"
-          [pageSize]="myPageSize"
-          [pageIndex]="myPage - 1"
-          [pageSizeOptions]="[5, 10, 25, 50]"
-          (page)="onMyPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-        <div *ngIf="filteredList.length === 0" class="empty-state">
-          <mat-icon>repeat</mat-icon>
-          <h3>No Recurring Expenses Found</h3>
-          <p *ngIf="hasFiltersApplied()">No items match your search.</p>
-          <p *ngIf="!hasFiltersApplied()">You have no recurring expenses.</p>
-          <button *ngIf="!hasFiltersApplied()" mat-flat-button (click)="openCreateDialog()" class="add-first-btn">
-            <mat-icon>add</mat-icon>
-            Add Recurring
-          </button>
-        </div>
-      </div>
-    </mat-card>
-  </ng-container>
-
-  <!-- Recurring requests (Super Admin, All Recurring tab only) -->
-  <div class="recurring-requests-section" *ngIf="isSuperAdmin && activeView === 'all-recurring'">
-    <h2 class="section-title">
-      <mat-icon>pending_actions</mat-icon>
-      Recurring requests
-    </h2>
-    <p class="section-subtitle">Approve or reject pending recurring expense requests</p>
-
-    <div *ngIf="isLoadingPending" class="loading-container">
+    <div *ngIf="isLoadingPending" class="loading-state">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading pending requests...</p>
     </div>
 
-    <div *ngIf="!isLoadingPending" class="pending-approvals-section">
-      <h3>Pending Approvals ({{ pendingRecurring.length }})</h3>
-
+    <div *ngIf="!isLoadingPending" class="approvals-grid">
       <div *ngFor="let request of pendingRecurring" class="approval-card">
-        <div class="approval-header">
-          <div class="employee-info">
-            <div class="employee-avatar">
-              {{ getInitials(request.employeeName) }}
-            </div>
-            <div class="employee-details">
-              <h4>{{ request.employeeName }}</h4>
-              <p>{{ request.categoryName || '—' }}</p>
+        <div class="card-header">
+          <div class="employee-meta">
+            <div class="avatar">{{ getInitials(request.employeeName) }}</div>
+            <div class="info">
+              <span class="name">{{ request.employeeName }}</span>
+              <span class="category">{{ request.categoryName || '—' }}</span>
             </div>
           </div>
-          <div class="claim-meta">
-            <span class="claim-title">{{ request.title }}</span>
-            <span class="amount-badge">{{ request.amount | currency:organizationCurrency }}</span>
-            <span class="rotation-badge">{{ request.rotation }}{{ request.dayOfMonth ? ' (day ' + request.dayOfMonth + ')' : '' }}</span>
+          <div class="amount-tag">{{ request.amount | currency:organizationCurrency }}</div>
+        </div>
+        <div class="card-body">
+          <h4 class="claim-title">{{ request.title }}</h4>
+          <p class="description" *ngIf="request.description">{{ request.description }}</p>
+          <div class="meta-row">
+            <span class="date"><mat-icon>repeat</mat-icon> {{ request.rotation }}</span>
           </div>
         </div>
-
-        <div class="claim-description" *ngIf="request.description">
-          <strong>Description:</strong> {{ request.description }}
-        </div>
-
-        <div class="approval-actions">
-          <button mat-stroked-button color="warn" (click)="rejectRecurring(request)">
-            <mat-icon>close</mat-icon>
-            Reject
+        <div class="card-actions">
+          <button class="btn-reject" mat-stroked-button color="warn" *ngIf="hasPermission('recurring_request_action')" (click)="rejectRecurring(request)">
+            <mat-icon>close</mat-icon> Reject
           </button>
-          <button mat-stroked-button class="btn-details" (click)="viewRecurringDetails(request)">
-            <mat-icon>visibility</mat-icon>
-            Details
+          <button class="btn-details" mat-stroked-button *ngIf="hasPermission('recurring_view_details')" (click)="viewRecurringDetails(request)">
+            <mat-icon>visibility</mat-icon> Details
           </button>
-          <button mat-flat-button class="approve-button" (click)="acceptRecurring(request)">
-            <mat-icon>check</mat-icon>
-            Approve
+          <button class="btn-approve" mat-flat-button color="primary" *ngIf="hasPermission('recurring_request_action')" (click)="acceptRecurring(request)">
+            <mat-icon>check</mat-icon> Approve
           </button>
         </div>
       </div>
-
-      <div *ngIf="pendingRecurring.length === 0" class="empty-state">
+      <div *ngIf="pendingRecurring.length === 0" class="empty-state-simple">
         <mat-icon>check_circle</mat-icon>
-        <h3>No Pending Approvals</h3>
-        <p>There are no recurring expense requests waiting for approval.</p>
+        <p>No pending approvals</p>
       </div>
     </div>
   </div>

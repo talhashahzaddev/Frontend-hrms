@@ -1,0 +1,30 @@
+@use '../loans/loans.component.scss' as *;
+
+// Provident fund admin request cards:
+// Keep two cards per row on laptop/small-laptop, collapse only on small screens.
+.time-tracking-container.loans-advances-page.provident-fund-page {
+  .admin-requests-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    justify-items: stretch;
+
+    .request-row-card {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  // Keep two columns on small laptop screens as requested.
+  @media (max-width: 992px) and (min-width: 681px) {
+    .admin-requests-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  // Mobile: switch to one column for readability.
+  @media (max-width: 680px) {
+    .admin-requests-list {
+      grid-template-columns: 1fr;
+    }
+  }
+}

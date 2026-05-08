@@ -1,0 +1,323 @@
+<div class="time-tracking-container loans-advances-page gratuity-page">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Gratuity</h1>
+      <p class="subtitle">Manage employee gratuity entitlements — configure rules, track active records, and process payments.</p>
+    </div>
+    <div class="header-actions">
+      @if (currentTab === 'active') {
+        <button class="add-btn" (click)="openAddRecordDialog()">
+          <mat-icon>add</mat-icon>
+          Add record
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tab navigation -->
+  <div class="tab-navigation">
+    <button class="tab" [class.active]="currentTab === 'active'" (click)="setTab('active')">
+      Active gratuity
+    </button>
+    <button class="tab" [class.active]="currentTab === 'history'" (click)="setTab('history')">
+      History
+    </button>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Active</span>
+          <span class="value">{{ activeCount }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>people</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">calculated + approved</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Pending approval</span>
+          <span class="value">{{ pendingApprovalCount }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">awaiting HR approval</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total liability</span>
+          <span class="value">{{ currencySymbol() }} {{ totalLiability | number }}</span>
+        </div>
+        <div class="icon-wrapper color-purple">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">outstanding gratuity</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total paid</span>
+          <span class="value">{{ currencySymbol() }} {{ totalPaidAmount | number }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">settled gratuity</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════  ACTIVE TAB  ══════════════════════ -->
+  @if (currentTab === 'active') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="pendingActiveSearch" />
+          </div>
+          <div class="filter-actions">
+            <button class="apply-btn"
+              [disabled]="!hasActiveSearch && !hasAppliedActiveSearch"
+              (click)="applyActiveSearch()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn"
+              [disabled]="!hasActiveSearch && !hasAppliedActiveSearch"
+              (click)="clearActiveSearch()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-cards-view">
+        @if (activeView.length === 0) {
+          <div class="empty-state">No active gratuity records found.</div>
+        } @else {
+          @for (record of activeView; track trackById($index, record)) {
+            <article class="record-card">
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="employee-info">
+                    <div class="avatar" [ngClass]="'bg-' + (((record.employeeName || 'A').charCodeAt(0) % 5) + 1)">
+                      {{ (record.employeeName || 'A').substring(0, 1).toUpperCase() }}
+                    </div>
+                    <div class="employee-detail">
+                      <span class="name">{{ record.employeeName }}</span>
+                      <span class="designation">{{ record.department || '—' }}</span>
+                    </div>
+                  </div>
+                  <span class="status-pill" [ngClass]="getStatusClass(record.paymentStatus)">
+                    {{ getStatusLabel(record.paymentStatus) }}
+                  </span>
+                </div>
+
+                <div class="main-stats">
+                  <div class="stat-item">
+                    <label>Gratuity amount</label>
+                    <strong>{{ currencySymbol() }} {{ record.totalAmount | number }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <label>Years of service</label>
+                    <strong>{{ record.yearsWorked | number:'1.1-2' }} yrs</strong>
+                  </div>
+                  <div class="stat-item">
+                    <label>Last salary</label>
+                    <strong>{{ currencySymbol() }} {{ record.lastSalary | number }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <label>Rule applied</label>
+                    <strong>{{ record.configRuleName || 'Manual' }}</strong>
+                  </div>
+                </div>
+
+                <div class="card-note lifecycle-note">
+                  <mat-icon>timeline</mat-icon>
+                  <p>{{ getLifecycleLabel(record) }}</p>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="request-actions">
+                  @if (record.paymentStatus === 'calculated') {
+                    <button class="approve-btn" (click)="approveRecord(record)">
+                      <mat-icon>check_circle</mat-icon>
+                      Approve
+                    </button>
+                  } @else if (record.paymentStatus === 'approved') {
+                    <button class="approve-btn disburse-btn" (click)="markPaid(record)">
+                      <mat-icon>payments</mat-icon>
+                      Mark paid
+                    </button>
+                  }
+                  <button class="action-icon-btn edit" (click)="openEditRecordDialog(record)" title="Edit record">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="action-icon-btn danger" (click)="requestDeleteRecord(record)" title="Delete record">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        }
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (activeTotalRecords === 0) {
+            No records found
+          } @else {
+            Showing {{ activeFrom }}&ndash;{{ activeTo }} of {{ activeTotalRecords }} records
+          }
+        </p>
+        <div class="pagination">
+          <button class="page-btn" [class.disabled]="activePage === 1" [disabled]="activePage === 1" (click)="prevActivePage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          @for (p of activePageRange; track p) {
+            @if (p === -1) {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn" [class.active]="p === activePage" (click)="goToActivePage(p)">{{ p }}</button>
+            }
+          }
+          <button class="page-btn" [class.disabled]="activePage === activeTotalPages" [disabled]="activePage === activeTotalPages" (click)="nextActivePage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════  HISTORY TAB  ══════════════════════ -->
+  @if (currentTab === 'history') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="pendingHistorySearch" />
+          </div>
+          <div class="filter-actions">
+            <button class="apply-btn"
+              [disabled]="!hasHistorySearch && !hasAppliedHistorySearch"
+              (click)="applyHistorySearch()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn"
+              [disabled]="!hasHistorySearch && !hasAppliedHistorySearch"
+              (click)="clearHistorySearch()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-cards-view">
+        @if (historyView.length === 0) {
+          <div class="empty-state">No completed gratuity records found.</div>
+        } @else {
+          @for (record of historyView; track trackById($index, record)) {
+            <article class="record-card record-card--history">
+              <div class="card-body">
+                <div class="card-top">
+                  <div class="employee-info">
+                    <div class="avatar" [ngClass]="'bg-' + (((record.employeeName || 'A').charCodeAt(0) % 5) + 1)">
+                      {{ (record.employeeName || 'A').substring(0, 1).toUpperCase() }}
+                    </div>
+                    <div class="employee-detail">
+                      <span class="name">{{ record.employeeName }}</span>
+                      <span class="designation">{{ record.department || '—' }}</span>
+                    </div>
+                  </div>
+                  <span class="status-pill" [ngClass]="getStatusClass(record.paymentStatus)">
+                    {{ getStatusLabel(record.paymentStatus) }}
+                  </span>
+                </div>
+
+                <div class="main-stats">
+                  <div class="stat-item">
+                    <label>Gratuity amount</label>
+                    <strong>{{ currencySymbol() }} {{ record.totalAmount | number }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <label>Years of service</label>
+                    <strong>{{ record.yearsWorked | number:'1.1-2' }} yrs</strong>
+                  </div>
+                  <div class="stat-item">
+                    <label>Last salary</label>
+                    <strong>{{ currencySymbol() }} {{ record.lastSalary | number }}</strong>
+                  </div>
+                  <div class="stat-item">
+                    <label>Rule applied</label>
+                    <strong>{{ record.configRuleName || 'Manual' }}</strong>
+                  </div>
+                </div>
+
+                <div class="card-note lifecycle-note">
+                  <mat-icon>history</mat-icon>
+                  <p>{{ getLifecycleLabel(record) }}</p>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="request-actions">
+                  <button class="action-icon-btn danger" (click)="requestDeleteRecord(record)" title="Delete record">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        }
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (historyTotalRecords === 0) {
+            No records found
+          } @else {
+            Showing {{ historyFrom }}&ndash;{{ historyTo }} of {{ historyTotalRecords }} records
+          }
+        </p>
+        <div class="pagination">
+          <button class="page-btn" [class.disabled]="historyPage === 1" [disabled]="historyPage === 1" (click)="prevHistoryPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          @for (p of historyPageRange; track p) {
+            @if (p === -1) {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn" [class.active]="p === historyPage" (click)="goToHistoryPage(p)">{{ p }}</button>
+            }
+          }
+          <button class="page-btn" [class.disabled]="historyPage === historyTotalPages" [disabled]="historyPage === historyTotalPages" (click)="nextHistoryPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+
+</div>

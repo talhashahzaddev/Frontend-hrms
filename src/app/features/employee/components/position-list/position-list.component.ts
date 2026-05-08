@@ -25,6 +25,7 @@ import { PositionFormDialogComponent } from '../position-form-dialog/position-fo
 import { PositionDetailsViewComponent } from '../position-form-dialog/position-details-view.component';
 import { PositionEmployeeViewComponent, PositionEmployeesViewData } from '../position-form-dialog/position-employee-viewDetails.component';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-position-list',
@@ -95,7 +96,8 @@ export class PositionListComponent implements OnInit, OnDestroy {
   constructor(
     private employeeService: EmployeeService,
     private dialog: MatDialog,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -190,6 +192,10 @@ export class PositionListComponent implements OnInit, OnDestroy {
       this.departmentControl.value ||
       this.statusControl.value
     );
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Employee Management', 'Positions', actionKey);
   }
 
   openCreateDialog(): void {

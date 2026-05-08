@@ -1,134 +1,150 @@
-<div class="apply-job-dialog">
-  <div class="dialog-header">
-    <h2 mat-dialog-title>
-      <mat-icon>how_to_reg</mat-icon>
-      {{ isEditMode ? 'Edit application' : (applyForSelf ? 'Apply for' : 'Refer for') }} {{ job.jobRoleName }}
-    </h2>
-    <button mat-icon-button mat-dialog-close class="close-button">
+<div class="ajd-container">
+
+  <!-- Hidden native file input -->
+  <input #resumeInput type="file" [accept]="acceptedResumeTypes"
+    (change)="$event.preventDefault(); $event.stopPropagation(); onResumeFileSelected($event, resumeInput)"
+    class="resume-file-input-hidden" tabindex="-1" aria-hidden="true">
+
+  <!-- ── Header ── -->
+  <header class="ajd-header">
+    <div class="ajd-header-left">
+      <div class="ajd-header-icon">
+        <mat-icon>person_add</mat-icon>
+      </div>
+      <div>
+        <h2>{{ isEditMode ? 'Edit Application' : (applyForSelf ? 'Apply for Job' : 'Refer Candidate') }}</h2>
+        <p class="ajd-header-sub">{{ applyForSelf ? 'Applying for:' : 'Referring for:' }}
+          <span>{{ job.jobRoleName }}</span>
+        </p>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="ajd-close-btn" aria-label="Close">
       <mat-icon>close</mat-icon>
     </button>
-  </div>
+  </header>
 
-  <mat-dialog-content class="dialog-content">
-    <!-- Hidden native file input — outside form to prevent submit on select -->
-    <input #resumeInput type="file" [accept]="acceptedResumeTypes"
-      (change)="$event.preventDefault(); $event.stopPropagation(); onResumeFileSelected($event, resumeInput)"
-      class="resume-file-input-hidden" tabindex="-1" aria-hidden="true">
+  <!-- ── Body ── -->
+  <div class="ajd-body">
+    <form [formGroup]="applyForm" class="ajd-form" (ngSubmit)="onSubmit(); $event.preventDefault()">
 
-    <p class="dialog-subtitle">Fields marked with * are required.</p>
-
-    <form [formGroup]="applyForm" class="apply-form" (ngSubmit)="onSubmit(); $event.preventDefault()">
-
-      <!-- ── Section: Candidate Info (hidden for self-apply) ── -->
-      <div class="form-section" *ngIf="!applyForSelf">
-        <div class="section-header">
-          <mat-icon class="section-icon">person</mat-icon>
-          <span class="section-title">Candidate Information</span>
+      <!-- Section: Candidate Information (hidden for self-apply) -->
+      <section class="ajd-section" *ngIf="!applyForSelf">
+        <div class="ajd-section-title">
+          <h3>Candidate Information</h3>
         </div>
 
         <!-- Name + Email -->
-        <div class="form-row two-col">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Candidate name *</mat-label>
-            <input matInput formControlName="candidateName" placeholder="Full name" maxlength="200">
-            <mat-error *ngIf="applyForm.get('candidateName')?.hasError('required')">Name is required</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email *</mat-label>
-            <input matInput type="email" formControlName="candidateEmail" placeholder="email@example.com"
-              maxlength="200">
-            <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('required')">Email is required</mat-error>
-            <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('email')">Invalid email</mat-error>
-          </mat-form-field>
+        <div class="ajd-grid-2">
+          <div class="ajd-field">
+            <label>Candidate Name *</label>
+            <mat-form-field appearance="outline" class="ajd-mat-field">
+              <input matInput formControlName="candidateName" placeholder="Enter full name" maxlength="200">
+              <mat-error *ngIf="applyForm.get('candidateName')?.hasError('required')">Name is required</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="ajd-field">
+            <label>Email *</label>
+            <mat-form-field appearance="outline" class="ajd-mat-field">
+              <input matInput type="email" formControlName="candidateEmail" placeholder="email@example.com"
+                maxlength="200">
+              <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('required')">Email is required</mat-error>
+              <mat-error *ngIf="applyForm.get('candidateEmail')?.hasError('email')">Invalid email format</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="ajd-field">
+            <label>Phone *</label>
+            <mat-form-field appearance="outline" class="ajd-mat-field">
+              <input matInput formControlName="phone" placeholder="+1 (555) 000-0000" maxlength="50">
+              <mat-error *ngIf="applyForm.get('phone')?.hasError('required')">Phone is required</mat-error>
+            </mat-form-field>
+          </div>
         </div>
+      </section>
 
-        <!-- Phone -->
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Phone *</mat-label>
-            <input matInput formControlName="phone" placeholder="Phone number" maxlength="50">
-            <mat-error *ngIf="applyForm.get('phone')?.hasError('required')">Phone is required</mat-error>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <!-- ── Section: Links & Resume ── -->
-      <div class="form-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">link</mat-icon>
-          <span class="section-title">Links & Resume</span>
+      <!-- Section: Links & Resume -->
+      <section class="ajd-section">
+        <div class="ajd-section-title">
+          <h3>Links &amp; Resume</h3>
         </div>
 
         <!-- LinkedIn -->
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>LinkedIn profile URL</mat-label>
-            <input matInput formControlName="linkedInUrl" placeholder="https://linkedin.com/in/..." maxlength="500">
+        <div class="ajd-field">
+          <label>LinkedIn Profile URL</label>
+          <mat-form-field appearance="outline" class="ajd-mat-field">
+            <mat-icon matPrefix class="ajd-prefix-icon">link</mat-icon>
+            <input matInput formControlName="linkedInUrl" placeholder="https://linkedin.com/in/username"
+              maxlength="500">
           </mat-form-field>
         </div>
 
         <!-- Resume upload -->
-        <div class="resume-upload full-width" [class.resume-upload-loading]="isUploadingResume">
-          <label class="resume-label">Resume *</label>
-          <p class="resume-hint">PDF, JPG, JPEG, PNG or GIF. Max {{ maxResumeSizeMb }} MB.</p>
-          <div class="resume-actions">
-            <button mat-stroked-button type="button" (click)="triggerResumeInput(resumeInput); $event.preventDefault()"
-              [disabled]="isUploadingResume">
-              <mat-icon>upload_file</mat-icon>
-              {{ isUploadingResume ? 'Uploading...' : (currentResumeUrl ? 'Replace resume' : 'Choose resume') }}
-            </button>
-            <button mat-icon-button type="button" *ngIf="currentResumeUrl && !isUploadingResume"
-              (click)="clearResume(); $event.preventDefault()" matTooltip="Remove resume">
+        <div class="ajd-field">
+          <label>Resume *</label>
+
+          <!-- Drop zone (when no resume) -->
+          <div class="ajd-drop-zone" *ngIf="!currentResumeUrl && !isUploadingResume"
+            (click)="triggerResumeInput(resumeInput)">
+            <div class="ajd-drop-icon">
+              <mat-icon>cloud_upload</mat-icon>
+            </div>
+            <p class="ajd-drop-text">Drag &amp; drop resume here or <span class="ajd-drop-browse">Browse Files</span>
+            </p>
+            <p class="ajd-drop-hint">PDF, JPG, JPEG, PNG or GIF. Max {{ maxResumeSizeMb }} MB.</p>
+          </div>
+
+          <!-- Uploading state -->
+          <div class="ajd-resume-uploading" *ngIf="isUploadingResume">
+            <mat-spinner diameter="28"></mat-spinner>
+            <span>Uploading resume...</span>
+          </div>
+
+          <!-- Uploaded resume chip -->
+          <div class="ajd-resume-chip" *ngIf="currentResumeUrl && !isUploadingResume">
+            <mat-icon class="ajd-chip-icon">attach_file</mat-icon>
+            <span class="ajd-chip-name">{{ resumeFileName || 'Resume' }}</span>
+            <a [href]="currentResumeUrl" target="_blank" rel="noopener" class="ajd-chip-link">Open</a>
+            <button mat-icon-button type="button" (click)="clearResume(); $event.preventDefault()"
+              class="ajd-chip-remove" matTooltip="Remove resume">
               <mat-icon>close</mat-icon>
             </button>
           </div>
-          <div class="resume-loading-overlay" *ngIf="isUploadingResume">
-            <mat-spinner diameter="32"></mat-spinner>
-            <span class="resume-loading-text">Uploading resume...</span>
-          </div>
-          <div class="resume-current" *ngIf="currentResumeUrl && !isUploadingResume">
-            <mat-icon>attach_file</mat-icon>
-            <span class="resume-name">{{ resumeFileName || 'Resume' }}</span>
-            <a [href]="currentResumeUrl" target="_blank" rel="noopener" class="resume-link">Open</a>
-          </div>
-          <mat-error *ngIf="applyForm.get('resumeUrl')?.invalid && applyForm.get('resumeUrl')?.touched">
+
+          <mat-error class="ajd-resume-error"
+            *ngIf="applyForm.get('resumeUrl')?.invalid && applyForm.get('resumeUrl')?.touched">
             Resume is required
           </mat-error>
         </div>
-      </div>
+      </section>
 
-      <!-- ── Section: Cover Letter ── -->
-      <div class="form-section last-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">description</mat-icon>
-          <span class="section-title">Cover Letter</span>
+      <!-- Section: Cover Letter -->
+      <section class="ajd-section ajd-section-last">
+        <div class="ajd-section-title">
+          <h3>Cover Letter</h3>
+          <span class="ajd-optional-badge">Optional</span>
         </div>
 
-        <div class="full-width quill-wrapper-container">
-          <label class="quill-label">
-            Write a short cover letter
-            <span style="font-weight:400; text-transform:none; letter-spacing:0; color:#9ca3af; font-size:11px;">
-              (optional)</span>
-          </label>
+        <div class="ajd-field">
           <div class="quill-editor-wrap">
             <quill-editor formControlName="coverLetter" [modules]="quillConfig"
-              placeholder="Why you're a good fit for this role..." theme="snow">
+              placeholder="Why are you a good fit for this role?" theme="snow">
             </quill-editor>
           </div>
         </div>
-      </div>
+      </section>
 
     </form>
-  </mat-dialog-content>
+  </div>
 
-  <mat-dialog-actions class="dialog-actions">
-    <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
-    <button mat-flat-button type="button" [disabled]="applyForm.invalid || isSubmitting" (click)="onSubmit()"
-      class="submit-button">
-      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
-      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update application' : (applyForSelf ? 'Apply' : 'Submit application')
-        }}</span>
+  <!-- ── Footer ── -->
+  <footer class="ajd-footer">
+    <button class="ajd-btn-cancel" type="button" (click)="onCancel()">Cancel</button>
+    <button class="ajd-btn-submit" type="button" [disabled]="applyForm.invalid || isSubmitting" (click)="onSubmit()">
+      <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
+      <span *ngIf="!isSubmitting">
+        {{ isEditMode ? 'Update Application' : (applyForSelf ? 'Apply' : 'Submit Referral') }}
+      </span>
       <span *ngIf="isSubmitting">{{ isEditMode ? 'Updating...' : 'Submitting...' }}</span>
     </button>
-  </mat-dialog-actions>
+  </footer>
+
 </div>

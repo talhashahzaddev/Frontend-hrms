@@ -35,7 +35,7 @@ export const appRoutes: Routes = [
   {
     path: 'employee/dashboard',
     canActivate: [AuthGuard],
-    data: { roles: ['Employee','Manager'] },
+    //data: { roles: ['Employee','Manager'] },
     loadComponent: () =>
       import('./features/employee-dashboard/employee-dashboard.component').then(m => m.EmployeeDashboardComponent),
     pathMatch: 'full'
@@ -68,7 +68,6 @@ export const appRoutes: Routes = [
   {
     path: 'employees',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin', 'HR Manager'] },
     loadChildren: () =>
       import('./features/employee/employee.routes').then(m => m.employeeRoutes)
   },
@@ -96,21 +95,21 @@ export const appRoutes: Routes = [
       import('./features/leave/leave.routes').then(m => m.leaveRoutes)
   },
 
-  // Payroll Management Routes (SuperAdmin only)
-  {
-    path: 'payroll',
-    canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
-    loadChildren: () =>
-      import('./features/payroll/payroll.routes').then(m => m.payrollRoutes)
-  },
-
   // Performance Management Routes
   {
     path: 'performance',
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./features/performance/performance.routes').then(m => m.performanceRoutes)
+  },
+
+  // Holiday Management Routes
+  {
+    path: 'holidays',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/holiday/holiday.routes').then(m => m.holidayRoutes),
+    title: 'Holidays - HRMS'
   },
 
   // Calendar Route (Unified View)
@@ -138,6 +137,15 @@ export const appRoutes: Routes = [
     title: 'Jobs - HRMS'
   },
 
+  // Payroll Management Routes
+  {
+    path: 'payroll',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./features/payroll/payroll.routes').then(m => m.payrollRoutes),
+    title: 'Payroll - HRMS'
+  },
+
   // Public Career Routes (no authentication required)
   {
     path: 'career',
@@ -154,15 +162,41 @@ export const appRoutes: Routes = [
       import('./features/ai-assistant/ai-assistant.component').then(m => m.AiAssistantComponent),
     title: 'AI Assistant - HRMS'
   },
+  {
+    path:'help-desk',
+    canActivate:[AuthGuard],
+     loadChildren: () =>
+      import('./features/help-desk/help-desk.routes').then(m => m.helpdeskRoutes) ,
+    title:'help-desk-HRMS'},
 
   // Subscription Route (Super Admin only)
   {
     path: 'subscription',
     canActivate: [AuthGuard],
-    data: { roles: ['Super Admin'] },
     loadComponent: () =>
       import('./features/subscription/subscription.component').then(m => m.SubscriptionComponent),
     title: 'Subscription Plans - HRMS'
+  },
+  {
+    path: 'subscription/checkout',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./features/subscription/payment-checkout/payment-checkout.component').then(m => m.PaymentCheckoutComponent),
+    title: 'Checkout - HRMS'
+  },
+  {
+    path: 'subscription/confirmation',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./features/subscription/payment-confirmation/payment-confirmation.component').then(m => m.PaymentConfirmationComponent),
+    title: 'Payment Confirmation - HRMS'
+  },
+  {
+    path: 'subscription/billing',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./features/subscription/billing-history/billing-history.component').then(m => m.BillingHistoryComponent),
+    title: 'Billing History - HRMS'
   },
 
   // Expense Management Routes (HR Manager, Employee)
@@ -240,6 +274,12 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/platform-admin/components/inquiry-list/inquiry-list.component').then(m => m.InquiryListComponent),
         title: 'Demo Inquiries - Brisk People'
+      },
+      {
+        path: 'payments',
+        loadComponent: () =>
+          import('./features/platform-admin/components/payment-management/payment-management.component').then(m => m.PaymentManagementComponent),
+        title: 'Payment Management - Brisk People'
       }
     ]
   },

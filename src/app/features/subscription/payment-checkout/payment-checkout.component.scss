@@ -1,0 +1,280 @@
+.checkout-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.checkout-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 0;
+  margin-bottom: 24px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #1e293b;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Order Summary
+.order-summary {
+  border-radius: 16px;
+  overflow: hidden;
+
+  mat-card-header {
+    padding: 20px 24px 12px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 24px 24px;
+  }
+
+  .summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .label {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .value {
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    .plan-name {
+      font-weight: 600;
+      color: #3b82f6;
+    }
+
+    .billing-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: #0284c7;
+
+      &.annual {
+        background: #dcfce7;
+        color: #16a34a;
+      }
+    }
+
+    &.subtotal {
+      padding-top: 8px;
+    }
+
+    &.total {
+      padding-top: 8px;
+
+      .label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      .value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #3b82f6;
+
+        small {
+          font-size: 0.7rem;
+          font-weight: 400;
+          color: #94a3b8;
+        }
+      }
+    }
+  }
+
+  mat-divider {
+    margin: 4px 0;
+  }
+}
+
+// Gateway Selection
+.gateway-selection {
+  border-radius: 16px;
+  overflow: hidden;
+
+  mat-card-header {
+    padding: 20px 24px 12px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 24px 24px;
+  }
+}
+
+.gateway-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.gateway-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #93c5fd;
+    background: #f0f9ff;
+  }
+
+  &.selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    box-shadow: 0 0 0 1px #3b82f6;
+  }
+
+  .gateway-radio {
+    .radio-icon {
+      color: #cbd5e1;
+    }
+  }
+
+  &.selected .gateway-radio .radio-icon {
+    color: #3b82f6;
+  }
+
+  .gateway-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 12px;
+
+    mat-icon {
+      font-size: 24px;
+      color: #475569;
+    }
+  }
+
+  &.selected .gateway-icon {
+    background: #dbeafe;
+
+    mat-icon {
+      color: #3b82f6;
+    }
+  }
+
+  .gateway-info {
+    flex: 1;
+
+    h4 {
+      margin: 0 0 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  }
+}
+
+.pay-btn {
+  width: 100%;
+  height: 52px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  .btn-spinner {
+    display: inline-block;
+  }
+}
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 0.8rem;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #22c55e;
+  }
+}

@@ -579,8 +579,8 @@
 
       .records-thead {
         display: grid;
-        grid-template-columns: 128px 82px 82px 68px 104px 118px minmax(80px, 1fr) 84px;
-        min-width: 740px;
+        grid-template-columns: 128px 82px 82px 150px 104px 118px minmax(80px, 1fr) 84px;
+        min-width: 820px;
         align-items: center;
         padding: 0 16px;
         height: 36px;
@@ -598,8 +598,8 @@
 
       .record-row {
         display: grid;
-        grid-template-columns: 128px 82px 82px 68px 104px 118px minmax(80px, 1fr) 84px;
-        min-width: 740px;
+        grid-template-columns: 128px 82px 82px 150px 104px 118px minmax(80px, 1fr) 84px;
+        min-width: 820px;
         align-items: center;
         padding: 0 16px;
         min-height: 46px;
@@ -619,13 +619,25 @@
         &.weekend             { border-left-color: #cbd5e1; background: #f8fafc; opacity: 0.82; }
       }
 
-      .rc-date, .rc-checkin, .rc-checkout, .rc-hours,
+      .rc-date, .rc-checkin, .rc-checkout,
       .rc-status, .rc-state, .rc-notes, .rc-actions {
         display: flex;
         align-items: center;
         padding: 0 5px;
         min-width: 0;
         overflow: hidden;
+      }
+
+      // Hours cell is wider and allows wrapping so OT/late chips can sit cleanly
+      // next to the hours value (or wrap below when very narrow).
+      .rc-hours {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 6px;
+        min-width: 0;
+        overflow: visible;
       }
 
       .rc-actions { justify-content: flex-end; gap: 4px; padding: 0 10px 0 6px; overflow: visible; }
@@ -843,6 +855,95 @@
 
       }
 
+      /* ─── Pending/Draft request annotation (next to actual time) ─── */
+      .requested-annotation {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-left: 6px;
+        color: #b45309;
+        font-weight: 500;
+        font-size: 11px;
+        white-space: nowrap;
+
+        small {
+          font-size: 11px;
+          line-height: 1;
+        }
+
+        .requested-icon {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          line-height: 13px;
+          vertical-align: middle;
+        }
+      }
+
+      /* ─── Per-day late minutes chip in the Hours column ─── */
+      .late-min-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 7px;
+        border-radius: 9px;
+        background: #fef3c7;
+        color: #92400e;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+
+      /* ─── Per-day overtime chip in the Hours column ─── */
+      .ot-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 7px;
+        border-radius: 9px;
+        background: #dbeafe;
+        color: #1e40af;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+
+      /* ─── Leave-type chip in the Status column ─── */
+      .leave-type-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-left: 6px;
+        padding: 2px 7px;
+        border-radius: 9px;
+        background: #ede9fe;
+        color: #5b21b6;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.1;
+        white-space: nowrap;
+
+        small {
+          font-size: 10px;
+          opacity: 0.8;
+        }
+      }
+
+      /* ─── Draft/pending request variant on top of an existing chip ─── */
+      .requested-chip {
+        background: #fff7ed;
+        color: #9a3412;
+        border: 1px dashed #fdba74;
+
+        .requested-icon {
+          font-size: 12px;
+          width: 12px;
+          height: 12px;
+          line-height: 12px;
+          margin-right: 2px;
+        }
+      }
+
 
 
 
@@ -882,6 +983,18 @@
       .status-badge.weekend { background: #6b7280; color: #fff; }
 
       .status-badge.leave   { background: #f59e0b; color: #fff; }
+
+      .status-badge.holiday {
+
+        background: #fdf2f8;
+
+        color: #be185d;
+
+        border: 1.5px solid #fbcfe8;
+
+        box-shadow: 0 1px 3px rgba(190,24,93,0.16);
+
+      }
 
       .status-badge.late {
 

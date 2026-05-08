@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, throwError, map, of } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, throwError, map, of, forkJoin } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
 import {
@@ -13,7 +13,9 @@ import {
   RegisterRequest,
   ForgotPasswordRequest,
   UpdateProfileRequest,
-  ChangePasswordRequest
+  ChangePasswordRequest,
+  UserPermissions,
+  UserPermissionsResponse
 } from '@core/models/auth.models';
 
 @Injectable({
@@ -25,11 +27,13 @@ export class AuthService {
   private readonly TOKEN_KEY = environment.auth.tokenKey;
   private readonly REFRESH_TOKEN_KEY = environment.auth.refreshTokenKey;
   private readonly USER_KEY = environment.auth.userKey;
+  private readonly PERMISSIONS_KEY = 'userPermissions';
   private readonly PENDING_AUTH_KEY = 'pendingAuthData';
   private readonly LOGOUT_REDIRECT_KEY = 'logoutRedirect';
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenSubject = new BehaviorSubject<string | null>(null);
+  private permissionsSubject = new BehaviorSubject<UserPermissions | null>(null);
   private isRedirecting = false;
   private isLoggingOut = false;
   private isLoggingOutSubject = new BehaviorSubject<boolean>(false);
@@ -38,6 +42,7 @@ export class AuthService {
 
   public currentUser$ = this.currentUserSubject.asObservable();
   public token$ = this.tokenSubject.asObservable();
+  public permissions$ = this.permissionsSubject.asObservable();
   public isAuthenticated$ = this.currentUserSubject.asObservable().pipe(
     map(user => !!user)
   );
@@ -52,6 +57,12 @@ export class AuthService {
 
     // Then load any existing auth from localStorage
     this.loadStoredAuth();
+
+    // Delay permission fetch to avoid circular dependency with HTTP interceptors
+    // The service must be fully constructed and injected before making HTTP calls
+    queueMicrotask(() => {
+      this.initializePermissionsIfNeeded();
+    });
   }
 
   /**
@@ -62,7 +73,6 @@ export class AuthService {
 
     // Check for logout action
     if (urlParams.get('action') === 'logout') {
-      console.log('Logout redirect detected');
       this.clearAuthData();
       this.removeUrlParam('action');
       return;
@@ -89,16 +99,17 @@ export class AuthService {
         localStorage.setItem(this.REFRESH_TOKEN_KEY, authResponse.refreshToken);
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
 
-        console.log('Completed login after subdomain redirect for user:', user.firstName);
-
         // Clean up URL
         this.removeUrlParam('auth_transfer');
 
         // Update subject immediately
         this.currentUserSubject.next(user);
         this.tokenSubject.next(authResponse.token);
+
+        // Fetch user permissions after subdomain redirect
+        this.fetchAndStoreUserPermissions(user.userId).subscribe();
       } catch (error) {
-        console.error('Failed to complete pending login from URL:', error);
+        // Failed to complete pending login
       }
     }
 
@@ -125,10 +136,35 @@ export class AuthService {
         sessionStorage.removeItem(this.PENDING_AUTH_KEY);
         this.currentUserSubject.next(user);
         this.tokenSubject.next(authResponse.token);
+
+        // Fetch user permissions from sessionStorage redirect path
+        this.fetchAndStoreUserPermissions(user.userId).subscribe();
       } catch (error) {
         sessionStorage.removeItem(this.PENDING_AUTH_KEY);
       }
     }
+  }
+
+  /**
+   * Fetches user permissions from the API and stores in localStorage and subject
+   */
+  private fetchAndStoreUserPermissions(userId: string): Observable<UserPermissions | null> {
+    const endpoint = `${this.API_URL}/get-user-permissions/${userId}`;
+    
+    return this.http.get<UserPermissionsResponse>(endpoint)
+      .pipe(
+        tap(response => {
+          if (response.success && response.data) {
+            const permissions = response.data;
+            localStorage.setItem(this.PERMISSIONS_KEY, JSON.stringify(permissions));
+            this.permissionsSubject.next(permissions);
+          }
+        }),
+        map(response => response.data || null),
+        catchError(error => {
+          return of(null);
+        })
+      );
   }
 
   private removeUrlParam(param: string): void {
@@ -140,6 +176,12 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.API_URL}/login`, credentials)
       .pipe(
+        tap(response => {
+          if (response.success && response.data) {
+            // Fetch permissions immediately after successful login
+            this.fetchAndStoreUserPermissions(response.data.userId).subscribe();
+          }
+        }),
         map(response => {
           if (!response.success) {
             throw new Error(response.message || 'Login failed');
@@ -228,8 +270,6 @@ export class AuthService {
     // Construct login subdomain URL with logout action
     const loginUrl = `${currentProtocol}//${loginHost}${currentPort}/login?action=logout`;
 
-    console.log(`Redirecting to login subdomain: ${loginUrl}`);
-
     // Use replace instead of href for faster, smoother redirect without adding to history
     window.location.replace(loginUrl);
   }
@@ -265,6 +305,8 @@ export class AuthService {
         tap(response => {
           if (response.success && response.data) {
             this.setAuthData(response.data);
+            // Fetch permissions after token refresh
+            this.fetchAndStoreUserPermissions(response.data.userId).subscribe();
           }
         }),
         map(response => {
@@ -300,7 +342,6 @@ export class AuthService {
         this.setAuthData(authResponse);
         sessionStorage.removeItem(this.PENDING_AUTH_KEY);
       } catch (error) {
-        console.error('Failed to complete login:', error);
         sessionStorage.removeItem(this.PENDING_AUTH_KEY);
       }
     }
@@ -390,6 +431,8 @@ export class AuthService {
         tap(response => {
           if (response.success && response.data) {
             this.setAuthData(response.data);
+            // Fetch permissions immediately after successful registration
+            this.fetchAndStoreUserPermissions(response.data.userId).subscribe();
           }
         }),
         map(response => {
@@ -492,9 +535,11 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.PERMISSIONS_KEY);
 
     this.currentUserSubject.next(null);
     this.tokenSubject.next(null);
+    this.permissionsSubject.next(null);
   }
 
   private loadStoredAuth(): void {
@@ -505,6 +550,7 @@ export class AuthService {
 
     const token = localStorage.getItem(this.TOKEN_KEY);
     const userJson = localStorage.getItem(this.USER_KEY);
+    const permissionsJson = localStorage.getItem(this.PERMISSIONS_KEY);
 
     if (token && userJson) {
       try {
@@ -512,6 +558,16 @@ export class AuthService {
         if (!this.isTokenExpired(token)) {
           this.currentUserSubject.next(user);
           this.tokenSubject.next(token);
+          
+          // Load permissions if available
+          if (permissionsJson) {
+            try {
+              const permissions: UserPermissions = JSON.parse(permissionsJson);
+              this.permissionsSubject.next(permissions);
+            } catch (e) {
+              // Failed to parse stored permissions, will be fetched later
+            }
+          }
         } else {
           this.clearAuthData();
         }
@@ -522,6 +578,17 @@ export class AuthService {
       // Ensure we explicitly set the state as not authenticated
       this.currentUserSubject.next(null);
       this.tokenSubject.next(null);
+      this.permissionsSubject.next(null);
+    }
+  }
+
+  private initializePermissionsIfNeeded(): void {
+    const permissionsJson = localStorage.getItem(this.PERMISSIONS_KEY);
+    const user = this.currentUserSubject.value;
+
+    // If we have a user logged in but no permissions yet, fetch them
+    if (user && !permissionsJson) {
+      this.fetchAndStoreUserPermissions(user.userId).subscribe();
     }
   }
 
@@ -556,6 +623,129 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Gets the current user permissions value
+   */
+  getUserPermissionsValue(): UserPermissions | null {
+    return this.permissionsSubject.value;
+  }
+
+  /**
+   * Checks if user has permission for a specific action under a menu/submenu
+   * @param menuName - Name of the menu
+   * @param subMenuName - Name of the submenu
+   * @param actionKey - Key of the action to check
+   * @returns true if user has permission, false otherwise
+   */
+  hasMenuPermission(menuName: string, subMenuName: string, actionKey: string): boolean {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return false;
+
+    const menu = permissions.menus.find(m => 
+      m.menuName.toLowerCase() === menuName.toLowerCase()
+    );
+    if (!menu) return false;
+
+    const subMenu = menu.subMenus.find(sm => 
+      sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
+    );
+    if (!subMenu) return false;
+
+    const action = subMenu.actions.find(act => 
+      act.actionKey.toLowerCase() === actionKey.toLowerCase()
+    );
+    
+    return action ? action.hasPermission : false;
+  }
+
+  /**
+   * Checks if user has any permission under a specific submenu
+   * @param menuName - Name of the menu
+   * @param subMenuName - Name of the submenu
+   * @returns true if user has at least one permission, false otherwise
+   */
+  hasSubMenuPermission(menuName: string, subMenuName: string): boolean {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) {
+      return false;
+    }
+
+    const menu = permissions.menus.find(m => 
+      m.menuName.toLowerCase() === menuName.toLowerCase()
+    );
+    if (!menu) {
+      return false;
+    }
+
+    const subMenu = menu.subMenus.find(sm => 
+      sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
+    );
+    if (!subMenu) {
+      return false;
+    }
+
+    // Check if any action has permission
+    return subMenu.actions.some(action => action.hasPermission);
+  }
+
+  /**
+   * Checks if user has any permission under a specific menu
+   * @param menuName - Name of the menu
+   * @returns true if user has at least one permission, false otherwise
+   */
+  hasMenuParentPermission(menuName: string): boolean {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) {
+      return false;
+    }
+
+    const menu = permissions.menus.find(m => 
+      m.menuName.toLowerCase() === menuName.toLowerCase()
+    );
+    if (!menu) {
+      return false;
+    }
+
+    // Check if any submenu has any action with permission
+    return menu.subMenus.some(subMenu => 
+      subMenu.actions.some(action => action.hasPermission)
+    );
+  }
+
+  /**
+   * Checks if user has a specific action permission
+   * @param menuName - Name of the parent menu
+   * @param subMenuName - Name of the submenu
+   * @param actionKey - Key of the action
+   * @returns true if user has permission for this specific action
+   */
+  hasActionPermission(menuName: string, subMenuName: string, actionKey: string): boolean {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) {
+      return false;
+    }
+
+    const menu = permissions.menus.find(m => 
+      m.menuName.toLowerCase() === menuName.toLowerCase()
+    );
+    if (!menu) {
+      return false;
+    }
+
+    const subMenu = menu.subMenus.find(sm => 
+      sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
+    );
+    if (!subMenu) {
+      return false;
+    }
+
+    const action = subMenu.actions.find(a => 
+      a.actionKey.toLowerCase() === actionKey.toLowerCase()
+    );
+    
+    return action ? action.hasPermission : false;
   }
 
   private isTokenExpired(token: string): boolean {

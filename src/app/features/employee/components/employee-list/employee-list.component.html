@@ -9,11 +9,13 @@
     </div>
 
     <div class="header-actions">
-      <button mat-flat-button *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeAction"
+      <ng-container *ngIf="hasPermission('add_employee')">
+        <button mat-flat-button *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeAction"
         (click)="onAddEmployeeClick()" class="add-button">
         <mat-icon>person_add</mat-icon>
         Add Employee
       </button>
+      </ng-container>
       <ng-template #upgradeAction>
         <button mat-flat-button routerLink="/subscription" class="upgrade-button" [class.renew]="isSubscriptionExpired">
           <mat-icon>{{ isSubscriptionExpired ? 'history' : 'workspace_premium' }}</mat-icon>
@@ -227,20 +229,20 @@
             </button>
 
             <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="viewEmployee(employee)">
+              <button mat-menu-item *ngIf="hasPermission('view_employee_details')" (click)="viewEmployee(employee)">
                 <mat-icon>visibility</mat-icon>
                 <span>View Details</span>
               </button>
-              <button mat-menu-item (click)="openEditDialog(employee)">
+              <button mat-menu-item *ngIf="hasPermission('edit_employee')" (click)="openEditDialog(employee)">
                 <mat-icon>edit</mat-icon>
                 <span>Edit Employee</span>
               </button>
-              <button mat-menu-item *ngIf="employee.status !== 'deleted'" (click)="toggleEmployeeStatus(employee)">
+              <button mat-menu-item *ngIf="hasPermission('activate/deactivate_employee') && employee.status !== 'deleted'" (click)="toggleEmployeeStatus(employee)">
                 <mat-icon>{{ employee.status === 'active' ? 'block' : 'check_circle' }}</mat-icon>
                 <span>{{ employee.status === 'active' ? 'Deactivate' : 'Activate' }}</span>
               </button>
               <mat-divider></mat-divider>
-              <button mat-menu-item (click)="deleteEmployee(employee)"
+              <button mat-menu-item *ngIf="hasPermission('delete_employee')" (click)="deleteEmployee(employee)"
                 [ngClass]="employee.status === 'deleted' ? 'recover-action' : 'danger-action'">
                 <mat-icon>{{ employee.status === 'deleted' ? 'restore' : 'delete' }}</mat-icon>
                 <span>{{ employee.status === 'deleted' ? 'Recover' : 'Delete' }}</span>
@@ -262,7 +264,7 @@
         </div>
         <h3>No Employees Found</h3>
         <p>No employees match your current filters.</p>
-        <button mat-flat-button *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeActionEmpty"
+        <button mat-flat-button *ngIf="hasPermission('add_employee') && hasActiveSubscription && !isSubscriptionExpired; else upgradeActionEmpty"
           routerLink="/employees/add" class="add-first-employee">
           <mat-icon>person_add</mat-icon>
           Add Your First Employee

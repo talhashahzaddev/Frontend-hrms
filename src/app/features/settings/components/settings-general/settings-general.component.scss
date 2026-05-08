@@ -1,442 +1,339 @@
-// Settings General Component Styles (Hubstaff-inspired)
+/* ===============================
+   GENERAL SETTINGS CONTAINER
+================================*/
 .settings-general-container {
-  padding: var(--spacing-sm);
+  padding: 20px; /* increased padding */
   min-height: calc(100vh - 64px);
-  background: var(--gray-50);
-  max-width: 1200px;
-  margin: 0 auto;
+  background: #f9fafb;
+  max-width: 1100px;
+  margin: auto;
 }
 
-// Header Section
+
+/* ===============================
+   HEADER
+================================*/
 .settings-header {
-  margin-bottom: var(--spacing-sm);
-  
+  margin-bottom: 10px;
+
   .settings-title {
-    font-size: 2rem;
+    font-size: 28px;
     font-weight: 700;
-    color: var(--gray-900);
-    margin: 0 0 var(--spacing-sm);
-    letter-spacing: -0.025em;
+    color: #111827;
+    margin-bottom: 6px;
   }
-  
-  .settings-subtitle {
-    font-size: 1.125rem;
-    color: var(--gray-600);
-    margin: 0;
-    line-height: 1.5;
+
+  .settings-description {
+    font-size: 15px;
+    color: #6b7280;
+    max-width: 600px;
   }
 }
 
-// Access Denied
+
+/* ===============================
+   ACCESS DENIED
+================================*/
 .access-denied {
-  text-align: center;
-  padding: var(--spacing-2xl);
   background: white;
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--gray-200);
-  
+  border-radius: 14px;
+  padding: 40px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+
   .access-denied-icon {
-    font-size: 4rem;
-    width: 4rem;
-    height: 4rem;
-    color: var(--gray-400);
-    margin-bottom: var(--spacing-lg);
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: #9ca3af;
+    margin-bottom: 16px;
   }
-  
+
   h2 {
-    font-size: 1.5rem;
+    font-size: 22px;
     font-weight: 600;
-    color: var(--gray-900);
-    margin: 0 0 var(--spacing-md);
+    margin-bottom: 6px;
+    color: #111827;
   }
-  
+
   p {
-    font-size: 1rem;
-    color: var(--gray-600);
-    margin: 0;
+    color: #6b7280;
   }
 }
 
-// Settings Content
+
+/* ===============================
+   SETTINGS CONTENT
+================================*/
 .settings-content {
   display: flex;
+  padding: 0px;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: 24px;
 }
 
-// Settings Card
+
+/* ===============================
+   SETTINGS CARD
+================================*/
 .settings-card {
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  border-radius: 16px !important;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
   background: white;
-  padding: 1rem;
+
   ::ng-deep .mat-mdc-card-content {
-    padding: 0;
+    padding: 20px;
   }
 }
 
-// Card Header
+
+/* ===============================
+   CARD HEADER
+================================*/
 .card-header {
-  padding: var(--spacing-xl);
-  background: linear-gradient(135deg, var(--primary-50) 0%, var(--purple-50) 100%);
-  border-bottom: 1px solid var(--gray-200);
-  
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg,#eef2ff,#f5f3ff);
+
   .header-content {
     display: flex;
     align-items: center;
-    gap: var(--spacing-lg);
-    
+    gap: 16px;
+
     .header-icon {
-      font-size: 2.5rem;
-      width: 2.5rem;
-      height: 2.5rem;
-      color: var(--primary-600);
+      font-size: 34px;
+      width: 34px;
+      height: 34px;
+      color: #4f46e5;
     }
-    
+
     .header-text {
-      flex: 1;
-      
+
       .card-title {
-        font-size: 1.5rem;
+        font-size: 20px;
         font-weight: 600;
-        color: var(--gray-900);
-        margin: 0 0 var(--spacing-xs);
+        color: #111827;
       }
-      
+
       .card-subtitle {
-        font-size: 0.875rem;
-        color: var(--gray-600);
-        margin: 0;
+        font-size: 13px;
+        color: #6b7280;
       }
     }
   }
 }
 
-// Card Content
+
+/* ===============================
+   CARD CONTENT
+================================*/
 .card-content {
-  padding: var(--spacing-xl);
+  padding: 24px;
 }
 
-// Currency Section
-.currency-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xl);
+
+/* ===============================
+   FORM GRID
+================================*/
+
+.settings-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* two equal columns */
+  gap: 20px;
 }
 
-// Current Currency Display
-.current-currency-display {
-  padding: var(--spacing-lg);
-  background: var(--gray-50);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--gray-200);
-  
-  .currency-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    
-    .currency-label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--gray-600);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .currency-value {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      
-      .currency-symbol {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary-600);
-      }
-      
-      .currency-code {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--gray-900);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        background: white;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--gray-300);
-      }
-      
-      .currency-name {
-        font-size: 1rem;
-        color: var(--gray-700);
-      }
-      
-      &.no-currency {
-        .no-currency-text {
-          font-size: 1rem;
-          color: var(--gray-500);
-          font-style: italic;
-        }
-      }
-    }
-  }
-}
-
-// Currency Form
-.currency-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-// Form Field Styling
-::ng-deep .currency-field {
+.section-row {
   width: 100%;
-  
-  .mat-mdc-form-field {
-    &.mat-form-field-appearance-outline {
-      .mat-mdc-form-field-outline {
-        border-radius: var(--radius-lg);
-        border-color: var(--gray-300) !important;
-      }
-      
-      .mat-mdc-form-field-outline-thick {
-        border-color: var(--primary-600) !important;
-      }
-      
-      &:not(.mat-form-field-disabled) {
-        .mat-mdc-form-field-outline {
-          color: var(--gray-300);
-        }
-        
-        &.mat-focused .mat-mdc-form-field-outline-thick {
-          color: var(--primary-600) !important;
-          border-color: var(--primary-600) !important;
-        }
-        
-        &:hover .mat-mdc-form-field-outline {
-          color: var(--gray-400);
-          border-color: var(--gray-400) !important;
-        }
-      }
-      
-      .mat-mdc-form-field-label {
-        color: var(--gray-600) !important;
-      }
-      
-      &.mat-focused .mat-mdc-form-field-label {
-        color: var(--primary-600) !important;
-      }
-    }
-    
-    .mat-mdc-form-field-hint {
-      color: var(--gray-500) !important;
-      font-size: 0.75rem;
-    }
-  }
 }
 
-// Currency Option in Dropdown
-::ng-deep .currency-option {
+.full-width {
+  width: 100%;
+}
+
+
+/* ===============================
+   OPTION ROWS
+================================*/
+.option-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-xs) 0;
-  
-  .currency-option-symbol {
-    font-size: 1.25rem;
+  gap: 10px;
+
+  .code-badge {
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--primary-600);
-    min-width: 2rem;
+    padding: 4px 8px;
+    border-radius: 6px;
   }
-  
-  .currency-option-code {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--gray-900);
-    min-width: 3rem;
-  }
-  
-  .currency-option-name {
-    font-size: 0.875rem;
-    color: var(--gray-600);
-    flex: 1;
+
+  .name-text {
+    font-size: 14px;
+    color: #374151;
   }
 }
 
-// Select Dropdown Styling
-::ng-deep .mat-mdc-select-panel {
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-xl) !important;
-  border: 1px solid var(--gray-200) !important;
-  max-height: 400px !important;
-  background: white !important;
-  margin-top: var(--spacing-xs) !important;
-}
 
-::ng-deep .mat-mdc-option {
-  padding: var(--spacing-md) var(--spacing-lg) !important;
-  min-height: 56px !important;
-  
-  &:hover {
-    background: var(--gray-50) !important;
-  }
-  
-  &.mdc-list-item--selected {
-    background: var(--primary-50) !important;
-    
-    .mdc-list-item__primary-text {
-      color: var(--primary-700) !important;
+/* ===============================
+   CULTURE DROPDOWN OPTION
+================================*/
+.culture-option-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .culture-main {
+    display: flex;
+    gap: 6px;
+
+    .culture-code {
+      font-weight: 600;
+      color: #111827;
+      font-size: 14px;
+    }
+
+    .culture-name {
+      color: #6b7280;
+      font-size: 13px;
     }
   }
+
+  .culture-preview {
+    font-size: 12px;
+    color: #9ca3af;
+  }
 }
 
-// Form Actions
+
+/* ===============================
+   ANGULAR MATERIAL FIELD STYLE
+================================*/
+::ng-deep .mat-mdc-form-field {
+
+  .mat-mdc-text-field-wrapper {
+    border-radius: 10px;
+  }
+
+  .mat-mdc-form-field-hint {
+    font-size: 12px;
+    color: #9ca3af;
+  }
+}
+
+
+/* ===============================
+   DROPDOWN PANEL
+================================*/
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+  max-height: 280px !important;
+}
+
+::ng-deep .mat-mdc-option:hover {
+  background: #f9fafb !important;
+}
+
+
+/* ===============================
+   FORM ACTIONS
+================================*/
 .form-actions {
   display: flex;
-  gap: var(--spacing-md);
-  align-items: center;
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--gray-200);
-  
-  .save-button {
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  grid-column: span 2;
+
+  button {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-xl);
-    font-weight: 500;
-    border-radius: var(--radius-lg);
-    background: var(--gradient-primary);
-    color: white;
-    transition: all 0.2s ease;
-    width: 11.9rem;
-    height: 3rem;
-    
-    &:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-lg);
-    }
-    
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .button-spinner {
-      display: inline-block;
-    }
-    
-    mat-icon {
-      margin-right: 0;
-    }
-  }
-  
-  .cancel-button {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-xl);
-    font-weight: 500;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--gray-300);
-    color: var(--gray-700);
-    background: white;
-    transition: all 0.2s ease;
-    width: 11.9rem;
-    height: 3rem;
-    
-    &:hover:not(:disabled) {
-      background: var(--gray-50);
-      border-color: var(--gray-400);
-    }
-    
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    gap: 8px;
   }
 }
 
-// Loading Container
+
+/* SAVE BUTTON */
+.save-button {
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-weight: 600;
+  background: linear-gradient(135deg,#4f46e5,#6366f1);
+  color: white;
+  transition: all .2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(79,70,229,.25);
+  }
+
+  &:disabled {
+    opacity: .6;
+  }
+}
+
+
+/* RESET BUTTON */
+.cancel-button {
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  background: white;
+
+  &:hover:not(:disabled) {
+    background: #f9fafb;
+  }
+}
+
+
+/* ===============================
+   LOADING STATE
+================================*/
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: var(--spacing-2xl);
-  min-height: 400px;
-  
+  padding: 60px;
+
   .loading-text {
-    margin-top: var(--spacing-lg);
-    color: var(--gray-600);
-    font-size: 1rem;
+    margin-top: 16px;
+    color: #6b7280;
   }
 }
 
-// Responsive Design
+
+/* ===============================
+   RESPONSIVE
+================================*/
 @media (max-width: 768px) {
+
   .settings-general-container {
-    padding: var(--spacing-lg);
+    padding: 20px;
   }
-  
-  .settings-header {
-    .settings-title {
-      font-size: 1.5rem;
-    }
-    
-    .settings-subtitle {
-      font-size: 1rem;
-    }
+
+  .settings-title {
+    font-size: 22px;
   }
-  
-  .card-header {
-    padding: var(--spacing-lg);
-    
-    .header-content {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--spacing-md);
-      
-      .header-icon {
-        font-size: 2rem;
-        width: 2rem;
-        height: 2rem;
-      }
-    }
+
+  .settings-form {
+    grid-template-columns: 1fr;
   }
-  
-  .card-content {
-    padding: var(--spacing-lg);
-  }
-  
+
   .form-actions {
     flex-direction: column;
-    
+    grid-column: span 1;
+
     .save-button,
     .cancel-button {
       width: 100%;
       justify-content: center;
     }
   }
-  
-  .currency-value {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

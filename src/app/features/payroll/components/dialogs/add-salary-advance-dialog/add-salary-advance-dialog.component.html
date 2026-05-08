@@ -1,0 +1,91 @@
+<div class="salary-advance-dialog-container">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="close-btn" (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body" [formGroup]="form">
+    <div class="form-group full-width">
+      <label>Employee</label>
+      <select class="form-control" formControlName="employeeId">
+        <option value="" disabled selected>Select an employee</option>
+        @for (employee of employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        }
+      </select>
+      @if (form.get('employeeId')?.touched && form.get('employeeId')?.hasError('required')) {
+        <p class="field-error">Employee is required.</p>
+      }
+    </div>
+
+    @if (isEditMode) {
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select class="form-control" formControlName="status">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="disbursed">Disbursed</option>
+            <option value="rejected">Rejected</option>
+            <option value="deducted">Deducted</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deduction payroll period</label>
+          <select class="form-control" formControlName="deductedPeriodId">
+            <option value="" disabled selected>Select period</option>
+            @for (period of periods; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+          @if (showDeductedPeriodError) {
+            <p class="field-error">Deduction payroll period is required for deducted status.</p>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Amount PKR</label>
+        <div class="currency-input">
+          <span>Rs.</span>
+          <input type="number" class="form-control align-right" formControlName="amount" min="1" placeholder="0.00" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group full-width">
+      <label>Reason</label>
+      <textarea class="form-control text-area" rows="3" formControlName="reason" placeholder="Explain the reason for this advance..."></textarea>
+      @if (form.get('reason')?.touched && form.get('reason')?.invalid) {
+        <p class="field-error">Reason is required (max 500 characters).</p>
+      }
+    </div>
+
+    @if (showRejectedReasonField) {
+      <div class="form-group full-width">
+        <label>Rejection reason</label>
+        <textarea class="form-control text-area" rows="2" formControlName="rejectionReason" placeholder="Why is this request rejected?"></textarea>
+        @if (showRejectedReasonError) {
+          <p class="field-error">Rejection reason is required for rejected status.</p>
+        }
+      </div>
+    }
+
+    @if (showDisbursementNoteField) {
+      <div class="form-group full-width">
+        <label>Disbursement note</label>
+        <textarea class="form-control text-area" rows="2" formControlName="disbursementNote" placeholder="Optional disbursement notes..."></textarea>
+      </div>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
+</div>

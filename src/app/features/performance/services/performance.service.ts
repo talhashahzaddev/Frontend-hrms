@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   PerformanceSummary,
@@ -8,6 +8,7 @@ import {
   EmployeeSkill,
   AppraisalCycle,
   EmployeeAppraisal,
+  AppraisalCycleDto,
   KRA,
   CreateSkillSetRequest,
   UpdateSkillSetRequest,
@@ -28,17 +29,27 @@ import {
   CreateSelfAssessmentRequest,
   ManagerReview,
   ManagerReviewRequest,
+  ManagerReviewDto,
   ConsolidateAppraisalRequest,
   EmployeePerformanceHistory,
   EmployeeAppraisalForEmployee,
   TeamPerformanceOverview,
   Goal,
-  CreateGoalRequest
+  CreateGoalRequest,
+  UpdateGoalRequest,
+  HrReviewDto,
+  SkillWithEmployees,
+  EmployeeSkillSummary,
+  EmployeeSkillFullDetail,
+  PagedResult
 } from '../../../core/models/performance.models';
 import { ApiResponse, PaginatedResponse } from '../../../core/models/common.models';
 
-
-
+export interface ServiceResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +66,11 @@ export class PerformanceService {
   getPerformanceSummary(cycleId:string): Observable<ApiResponse<PerformanceSummary>> {
     return this.http.get<ApiResponse<PerformanceSummary>>(`${this.apiUrl}/performance/summary/?cycleId=${cycleId}`);
   }
+//My performance service
+getMyPerformanceSummary(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/Performance/My/summary`);
+}
+
 
   refreshPerformanceSummary(cycleId:string): void {
     this.getPerformanceSummary(cycleId).subscribe({
@@ -70,22 +86,32 @@ export class PerformanceService {
   }
 
   // Skill Sets Management
-  getSkillSets(filter?: SkillSetFilter, page: number = 1, limit: number = 20): Observable<ApiResponse<PaginatedResponse<SkillSet>>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+  getSkillSets(params?: {
+    search?: string;
+    category?: string;
+    isActive?: boolean;
+    page?: number;
+    limit?: number;
+  }): Observable<ServiceResponse<PagedResult<SkillSet>>> {
+    let httpParams = new HttpParams();
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.category) httpParams = httpParams.set('category', params.category);
+    if (params?.isActive !== undefined) httpParams = httpParams.set('isActive', String(params.isActive));
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    return this.http.get<ServiceResponse<PagedResult<SkillSet>>>(`${this.apiUrl}/Performance/skills`, { params: httpParams });
+  }
 
-    if (filter) {
-      if (filter.category) params = params.set('category', filter.category);
-      if (filter.isActive !== undefined) params = params.set('isActive', filter.isActive.toString());
-      if (filter.search) params = params.set('search', filter.search);
-    }
+  getSkillWithEmployees(skillId: string): Observable<ServiceResponse<SkillWithEmployees>> {
+    return this.http.get<ServiceResponse<SkillWithEmployees>>(`${this.apiUrl}/Performance/skills/${skillId}`);
+  }
 
-    return this.http.get<ApiResponse<PaginatedResponse<SkillSet>>>(`${this.apiUrl}/performance/skillsets`, { params });
+  toggleSkillStatus(skillId: string): Observable<ServiceResponse<SkillSet>> {
+    return this.http.patch<ServiceResponse<SkillSet>>(`${this.apiUrl}/Performance/skills/${skillId}/toggle-status`, {});
   }
 
   getSkillSetById(id: string): Observable<ApiResponse<SkillSet>> {
-    return this.http.get<ApiResponse<SkillSet>>(`${this.apiUrl}/performance/skillsets/${id}`);
+    return this.http.get<ApiResponse<SkillSet>>(`${this.apiUrl}/Performance/skillsets/${id}`);
   }
 
   // createSkillSet(request: CreateSkillSetRequest): Observable<ApiResponse<SkillSet>> {
@@ -96,8 +122,8 @@ export class PerformanceService {
     return this.http.put<ApiResponse<SkillSet>>(`${this.apiUrl}/performance/skillsets/${id}`, request);
   }
 
-  deleteSkillSet(id: string): Observable<ApiResponse<void>> {
-    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/performance/skillsets/${id}`);
+  deleteSkill(skillId: string): Observable<ServiceResponse<boolean>> {
+    return this.http.delete<ServiceResponse<boolean>>(`${this.apiUrl}/Performance/skills/${skillId}`);
   }
 
   // Employee Skills Management
@@ -156,46 +182,78 @@ export class PerformanceService {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/performance/employee-skills/${id}`);
   }
 
-  // KRA Management
-  getKRAs(page: number = 1, limit: number = 20, search?: string): Observable<ApiResponse<PaginatedResponse<KRA>>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
 
-    if (search) {
-      params = params.set('search', search);
-    }
+getKRAs(
+  page: number = 1,
+  limit: number = 20,
+  search?: string
+): Observable<ApiResponse<PaginatedResponse<KRA>>> {
 
-    return this.http.get<ApiResponse<PaginatedResponse<KRA>>>(`${this.apiUrl}/Performance/Kra`, { params });
+  let params = new HttpParams()
+    .set('page', page.toString())
+    .set('limit', limit.toString());
+
+  if (search && search.trim()) {
+    params = params.set('search', search.trim());
   }
+
+  return this.http.get<ApiResponse<PaginatedResponse<KRA>>>(
+    `${this.apiUrl}/Performance/get-allKra`,
+    { params }
+  );
+}
+
 
   getKRAById(id: string): Observable<ApiResponse<KRA>> {
     return this.http.get<ApiResponse<KRA>>(`${this.apiUrl}/Performance/KraById/${id}`);
   }
 
-  createKRA(request: CreateKRARequest): Observable<ApiResponse<KRA>> {
-    let params = new HttpParams();
-    params = params.set('PositionId', request.positionId);
-    params = params.set('Title', request.title);
-    if (request.description) params = params.set('Description', request.description);
-    params = params.set('Weight', request.weight.toString());
-    if (request.measurementCriteria) params = params.set('MeasurementCriteria', request.measurementCriteria);
-    if (request.isActive !== undefined) params = params.set('IsActive', request.isActive.toString());
-    
-    return this.http.post<ApiResponse<KRA>>(`${this.apiUrl}/Performance/Kra`, {}, { params });
+  getAllKRAs(): Observable<ApiResponse<KRA[]>> {
+    return this.http.get<ApiResponse<KRA[]>>(`${this.apiUrl}/Performance/get-allKra?page=1&limit=1000`);
   }
 
-  updateKRA(id: string, request: UpdateKRARequest): Observable<ApiResponse<KRA>> {
-    let params = new HttpParams();
-    params = params.set('kraId', id);
-    if (request.title) params = params.set('Title', request.title);
-    if (request.description) params = params.set('Description', request.description);
-    if (request.weight !== undefined) params = params.set('Weight', request.weight.toString());
-    if (request.measurementCriteria) params = params.set('MeasurementCriteria', request.measurementCriteria);
-    if (request.isActive !== undefined) params = params.set('IsActive', request.isActive.toString());
-    
-    return this.http.put<ApiResponse<KRA>>(`${this.apiUrl}/Performance/KraUpdate`, {}, { params });
+  createKRA(request: CreateKRARequest): Observable<ApiResponse<KRA>> {
+  let params = new HttpParams();
+
+  params = params.set('Title', request.title);
+
+  if (request.kraDescription) {
+    params = params.set('KraDescription', request.kraDescription);
   }
+
+  params = params.set('CycleId', request.cycleId);
+
+  if (request.isActive !== undefined) {
+    params = params.set('IsActive', request.isActive.toString());
+  }
+
+  return this.http.post<ApiResponse<KRA>>(
+    `${this.apiUrl}/Performance/create-Kra`,
+    {},
+    { params }
+  );
+}
+
+updateKRA(id: string, request: UpdateKRARequest): Observable<ApiResponse<KRA>> {
+  let params = new HttpParams();
+
+  params = params.set('kraId', id);
+  params = params.set('Title', request.title);
+
+  if (request.kraDescription) {
+    params = params.set('KraDescription', request.kraDescription);
+  }
+
+  params = params.set('CycleId', request.cycleId);
+  params = params.set('IsActive', request.isActive.toString());
+
+  return this.http.put<ApiResponse<KRA>>(
+    `${this.apiUrl}/Performance/KraUpdate`,
+    {},
+    { params }
+  );
+}
+
 
   updateKRAStatus(id: string, isActive: boolean): Observable<ApiResponse<string>> {
     return this.http.patch<ApiResponse<string>>(`${this.apiUrl}/Performance/KRAStatus/${id}?isActive=${isActive}`, {});
@@ -207,7 +265,7 @@ export class PerformanceService {
 
   // Appraisal Cycles Management
   getAppraisalCycles(): Observable<ApiResponse<AppraisalCycle[]>> {
-    return this.http.get<ApiResponse<AppraisalCycle[]>>(`${this.apiUrl}/Performance/cycles`);
+    return this.http.get<ApiResponse<AppraisalCycle[]>>(`${this.apiUrl}/Performance/get-allcycles`);
   }
 
   getAppraisalCycleById(id: string): Observable<ApiResponse<AppraisalCycle>> {
@@ -218,16 +276,17 @@ export class PerformanceService {
     return this.http.get<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/Performance/cycles/active`);
   }
 
-  createAppraisalCycle(request: CreateAppraisalCycleRequest): Observable<ApiResponse<AppraisalCycle>> {
-    return this.http.post<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/Performance/cycles`, request);
-  }
+ createAppraisalCycle(request: CreateAppraisalCycleRequest): Observable<ApiResponse<AppraisalCycle>> {
+    return this.http.post<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/Performance/create-cycles`, request);
+}
 
-  updateAppraisalCycle(id: string, request: UpdateAppraisalCycleRequest): Observable<ApiResponse<AppraisalCycle>> {
-    return this.http.put<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/Performance/cycles/${id}`, request);
+
+  updateAppraisalCycle(cycleId: string, request: UpdateAppraisalCycleRequest): Observable<ApiResponse<AppraisalCycle>> {
+    return this.http.put<ApiResponse<AppraisalCycle>>(`${this.apiUrl}/Performance/cycles/${cycleId}`, request);
   }
 
   deleteAppraisalCycle(id: string): Observable<ApiResponse<boolean>> {
-    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/Performance/cycles/${id}`);
+    return this.http.delete<ApiResponse<boolean>>(`${this.apiUrl}/Performance/delete-cycle/${id}`);
   }
 
 // Create Employee Appraisal
@@ -329,14 +388,6 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     this.refreshPerformanceSummary(cycleId);
   }
 
-
-
-
-
-
-
-
-
   // Additional methods for dashboard
   getTeamPerformanceSummary(): Observable<ApiResponse<PerformanceSummary>> {
     return this.http.get<ApiResponse<PerformanceSummary>>(`${this.apiUrl}/performance/team-summary`);
@@ -346,10 +397,48 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/performance/my-metrics`);
   }
 
-  getMySkills(): Observable<ApiResponse<EmployeeSkill[]>> {
-    return this.http.get<ApiResponse<EmployeeSkill[]>>(`${this.apiUrl}/performance/skills`);
+  getMySkills(): Observable<ServiceResponse<EmployeeSkill[]>> {
+    return this.http.get<ServiceResponse<EmployeeSkill[]>>(`${this.apiUrl}/Performance/my-skills`);
   }
 
+  addMySkill(request: CreateEmployeeSkillRequest): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/Performance/my-skills`, request);
+  }
+
+  updateMySkill(employeeSkillId: string, request: UpdateEmployeeSkillRequest): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/Performance/my-skills/${employeeSkillId}`, request);
+  }
+
+  deleteMySkill(employeeSkillId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/Performance/my-skills/${employeeSkillId}`);
+  }
+
+  getAllEmployeeSkills(params?: {
+    employeeId?: string;
+    skillSetId?: string;
+    department?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Observable<ServiceResponse<PagedResult<EmployeeSkillSummary>>> {
+    let httpParams = new HttpParams();
+    if (params?.employeeId) httpParams = httpParams.set('employeeId', params.employeeId);
+    if (params?.skillSetId) httpParams = httpParams.set('skillSetId', params.skillSetId);
+    if (params?.department) httpParams = httpParams.set('department', params.department);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.page) httpParams = httpParams.set('page', String(params.page));
+    if (params?.limit) httpParams = httpParams.set('limit', String(params.limit));
+    return this.http.get<ServiceResponse<PagedResult<EmployeeSkillSummary>>>(`${this.apiUrl}/Performance/employee-skills`, { params: httpParams });
+  }
+
+  getEmployeeSkillDetail(employeeId: string): Observable<ServiceResponse<EmployeeSkillFullDetail>> {
+    return this.http.get<ServiceResponse<EmployeeSkillFullDetail>>(`${this.apiUrl}/Performance/employee-skills/detail/${employeeId}`);
+  }
+
+  assessEmployeeSkill(employeeSkillId: string, request: UpdateEmployeeSkillRequest): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/employee-skills/${employeeSkillId}/assess`, request);
+  }
+  
   // Skills Matrix
   // getSkillsMatrix(): Observable<{ data: SkillSet[]; success: boolean; message: string; errors: any }> {
   //   return this.http.get<{ data: SkillSet[]; success: boolean; message: string; errors: any }>(`${this.apiUrl}/Performance/skills`);
@@ -358,16 +447,13 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<{ data: SkillSet[]; success: boolean; message: string; errors: any }>(`${this.apiUrl}/Performance/skills`);
   }
 
-  createSkillSet(request: CreateSkillSetRequest): Observable<{ data: SkillSet; success: boolean; message: string; errors: any }> {
-    return this.http.post<{ data: SkillSet; success: boolean; message: string; errors: any }>(
-      `${this.apiUrl}/Performance/skills`,
-      request
-    );
+  createSkillSet(request: CreateSkillSetRequest): Observable<ServiceResponse<SkillSet>> {
+    return this.http.post<ServiceResponse<SkillSet>>(`${this.apiUrl}/Performance/skills`, request);
   }
 
   // Self-Assessment Management
   createSelfAssessment(request: CreateSelfAssessmentRequest): Observable<ApiResponse<SelfAssessment>> {
-    return this.http.post<ApiResponse<SelfAssessment>>(`${this.apiUrl}/Performance/SelfAssessment`, request);
+    return this.http.post<ApiResponse<SelfAssessment>>(`${this.apiUrl}/Performance/create-selfassessment`, request);
   }
 
   getSelfAssessments(employeeId: string, cycleId: string): Observable<ApiResponse<SelfAssessment[]>> {
@@ -381,7 +467,7 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
       if (filter.kraId) params = params.set('kraId', filter.kraId);
       if (filter.search) params = params.set('search', filter.search);
     }
-    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-assessments`, { params });
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/SelfAssessment/my`, { params });
   }
 
   getMyAppraisals(filter?: { cycleId?: string; kraId?: string; search?: string; status?: string }): Observable<ApiResponse<EmployeeAppraisalForEmployee[]>> {
@@ -433,8 +519,9 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
       if (filter.kraId) params = params.set('kraId', filter.kraId);
       if (filter.search) params = params.set('search', filter.search);
     }
-    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/all-employee-assessments`, { params });
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/selfassessment/my`, { params });
   }
+
 
   getMyTeamSelfAssessments(filter?: { cycleId?: string; employeeId?: string; kraId?: string; search?: string }): Observable<ApiResponse<SelfAssessment[]>> {
     let params = new HttpParams();
@@ -444,12 +531,16 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
       if (filter.kraId) params = params.set('kraId', filter.kraId);
       if (filter.search) params = params.set('search', filter.search);
     }
-    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/SelfAssessment/my-team-assessments`, { params });
+    return this.http.get<ApiResponse<SelfAssessment[]>>(`${this.apiUrl}/Performance/selfassessment/team`, { params });
   }
 
   // Manager Review Management
   submitManagerReview(request: ManagerReviewRequest): Observable<ApiResponse<ManagerReview>> {
     return this.http.post<ApiResponse<ManagerReview>>(`${this.apiUrl}/Performance/Manager/Review`, request);
+  }
+//routee name chnageeieng here
+  getMyManagerReviews(): Observable<ApiResponse<ManagerReviewDto[]>> {
+    return this.http.get<ApiResponse<ManagerReviewDto[]>>(`${this.apiUrl}/Performance/getall/created/Manager/Reviews`);
   }
 
   getEmployeeSelfAssessment(employeeId: string, cycleId: string): Observable<ApiResponse<SelfAssessment[]>> {
@@ -476,20 +567,85 @@ getEmployeeAppraisalsByCycle(cycleId: string, employeeId: string): Observable<Ap
     return this.http.get<ApiResponse<TeamPerformanceOverview>>(`${this.apiUrl}/Performance/team-performance-overview`);
   }
 
-  // Goals (stub until backend API is available)
+  // Goals Management
   getAllGoals(): Observable<ApiResponse<Goal[]>> {
-    return of({ success: true, data: [], message: '' });
+    return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/Performance/goals`);
   }
 
   getGoalsByEmployeeId(employeeId: string): Observable<ApiResponse<Goal[]>> {
-    return of({ success: true, data: [], message: '' });
+    return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/Performance/goals/employee/${employeeId}`);
   }
 
-  completeGoal(goalId: string): Observable<ApiResponse<Goal>> {
-    return of({ success: true, data: {} as Goal, message: '' });
+  getEmployeeGoals(): Observable<ApiResponse<Goal[]>> {
+    return this.http.get<ApiResponse<Goal[]>>(`${this.apiUrl}/Performance/employee/Assigned/goals`);
+  }
+
+  getGoalById(goalId: string): Observable<ApiResponse<Goal>> {
+    return this.http.get<ApiResponse<Goal>>(`${this.apiUrl}/Performance/goals/${goalId}`);
   }
 
   createGoal(request: CreateGoalRequest): Observable<ApiResponse<Goal>> {
-    return of({ success: true, data: {} as Goal, message: '' });
+    return this.http.post<ApiResponse<Goal>>(`${this.apiUrl}/Performance/create-goal`, request);
   }
+
+  updateGoal(goalId: string, request: UpdateGoalRequest): Observable<ApiResponse<Goal>> {
+    return this.http.put<ApiResponse<Goal>>(`${this.apiUrl}/Performance/update-goal`, request);
+  }
+
+  completeGoal(goalId: string): Observable<ApiResponse<Goal>> {
+    return this.http.patch<ApiResponse<Goal>>(`${this.apiUrl}/Performance/goals/${goalId}/complete`, {});
+  }
+
+  deleteGoal(goalId: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/Performance/delete-goal/${goalId}`);
+  }
+
+  assignGoal(payload: { goalId: string; assignedTo: string }): Observable<ApiResponse<boolean>> {
+    const params = new HttpParams()
+      .set('goalId', payload.goalId)
+      .set('assignedTo', payload.assignedTo);
+    return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/Performance/goals/assign-employee`, {}, { params });
+  }
+
+  updateGoalStatus(goalId: string, status: string): Observable<ApiResponse<Goal>> {
+    const params = new HttpParams().set('status', status);
+    return this.http.patch<ApiResponse<Goal>>(`${this.apiUrl}/Performance/GoalStatus/${goalId}`, {}, { params });
+  }
+
+  // Get reviews received by employee from their managers
+  getEmployeeReceivedReviews(): Observable<ApiResponse<ManagerReviewDto[]>> {
+    return this.http.get<ApiResponse<ManagerReviewDto[]>>(`${this.apiUrl}/Performance/employee/manager-reviews`);
+  }
+
+  // Get all HR reviews given to other employees by this HR
+  getHrReviews(): Observable<ApiResponse<HrReviewDto[]>> {
+    return this.http.get<ApiResponse<HrReviewDto[]>>(`${this.apiUrl}/Performance/HR/Reviews`);
+  }
+
+  // Get employee's own HR reviews (reviews given to the employee by HR)
+  getEmployeeHrReviews(): Observable<ApiResponse<HrReviewDto[]>> {
+    return this.http.get<ApiResponse<HrReviewDto[]>>(`${this.apiUrl}/Performance/Employee/HR/Reviews`);
+  }
+
+  // Submit HR Review
+  submitHrReview(request: {
+    employeeId: string;
+    cycleId: string;
+    finalRating: number;
+    hrComments?: string;
+    improvementArea?: string;
+    feedback?: string;
+    status?: string;
+  }): Observable<ApiResponse<HrReviewDto>> {
+    return this.http.post<ApiResponse<HrReviewDto>>(`${this.apiUrl}/Performance/Create/HR/Appraisal`, request);
+  }
+  
+  //Getting overall managers reviews
+  getAllManagerReviews(search?: any): Observable<ApiResponse<ManagerReviewDto[]>> {
+  return this.http.get<ApiResponse<ManagerReviewDto[]>>(
+    `${this.apiUrl}/Performance/getAllManagers/Reviews`,
+    { params: search }
+  );
+}
+
 }

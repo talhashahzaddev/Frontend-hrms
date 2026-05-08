@@ -48,7 +48,8 @@ export class PlatformLayoutComponent implements OnInit, OnDestroy {
   navItems: NavItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/platform-admin/dashboard' },
     { label: 'Organizations', icon: 'business', route: '/platform-admin/organizations' },
-    { label: 'Demo Inquiries', icon: 'contact_mail', route: '/platform-admin/inquiries' }
+    { label: 'Demo Inquiries', icon: 'contact_mail', route: '/platform-admin/inquiries' },
+    { label: 'Payments', icon: 'payments', route: '/platform-admin/payments' }
   ];
 
   private destroy$ = new Subject<void>();

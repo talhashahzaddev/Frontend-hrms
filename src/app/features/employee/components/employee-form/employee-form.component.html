@@ -53,10 +53,56 @@
           <mat-error *ngIf="employeeForm.get('lastName')?.hasError('required')">Required</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="field">
-          <mat-label>Phone</mat-label>
-          <input matInput formControlName="phone" placeholder="+1 (555) 123-4567">
-        </mat-form-field>
+        <mat-form-field appearance="outline" class="field phone-field">
+              <mat-label>Phone</mat-label>
+
+  <mat-select matPrefix formControlName="phoneCountryCode" 
+              panelClass="country-panel" 
+              (openedChange)="onCountryPanelOpen($event)">
+    
+    <mat-select-trigger>
+      <ng-container *ngIf="employeeForm.get('phoneCountryCode')?.value as selCode">
+        <img *ngIf="getCountryFlag(selCode)"
+             class="opt-flag-img"
+             [src]="getCountryFlag(selCode)"
+             [alt]="getCountryLabel(selCode) + ' flag'" />
+        <span class="opt-code">{{ selCode }}</span>
+      </ng-container>
+    </mat-select-trigger>
+
+    <!-- Sticky search inside panel -->
+    <div class="country-search-wrapper" (click)="$event.stopPropagation()">
+      <mat-icon>search</mat-icon>
+      <input 
+        #countrySearchInput
+        class="country-search-input"
+        placeholder="Search country..."
+        [(ngModel)]="countryFilter"
+        [ngModelOptions]="{standalone: true}"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()" />
+    </div>
+
+    <ng-container *ngFor="let c of countries">
+      <mat-option 
+        *ngIf="!countryFilter || (c.name | lowercase).includes(countryFilter.toLowerCase())" 
+        [value]="c.code">
+        <img *ngIf="c.flag" class="opt-flag-img" [src]="c.flag" [alt]="c.name + ' flag'" />
+        <span class="opt-name">{{ c.name }}</span>
+        <span class="opt-code">{{ c.code }}</span>
+      </mat-option>
+    </ng-container>
+
+  </mat-select>
+
+    <input matInput formControlName="phone" 
+      (click)="$event.stopPropagation()"
+      (mousedown)="$event.stopPropagation()"
+      (touchstart)="$event.stopPropagation()"
+      inputmode="numeric" pattern="[0-9]*"
+      (input)="onPhoneInput($event)"
+      (paste)="onPhonePaste($event)">
+</mat-form-field>
 
         <mat-form-field appearance="outline" class="field">
           <mat-label>Date of Birth *</mat-label>
@@ -168,6 +214,16 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="field">
+          <mat-label>Tax Category</mat-label>
+          <mat-select formControlName="taxCategoryId">
+            <mat-option value="">Not Set</mat-option>
+            <mat-option *ngFor="let cat of taxCategories" [value]="cat.categoryId">
+              {{ cat.categoryName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
           <mat-label>Work Location</mat-label>
           <input matInput formControlName="workLocation" placeholder="New York Office">
         </mat-form-field>
@@ -227,10 +283,56 @@
           <input matInput formControlName="name" placeholder="Jane Doe">
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="field">
+        <mat-form-field appearance="outline" class="field phone-field">
           <mat-label>Contact Phone</mat-label>
-          <input matInput formControlName="phone" placeholder="+1 (555) 987-6543">
-        </mat-form-field>
+
+  <mat-select matPrefix formControlName="phoneCountryCode" 
+              panelClass="country-panel" 
+              (openedChange)="onCountryPanelOpen($event)">
+    
+    <mat-select-trigger>
+      <ng-container *ngIf="employeeForm.get('emergencyContact.phoneCountryCode')?.value as selCode">
+        <img *ngIf="getCountryFlag(selCode)"
+             class="opt-flag-img"
+             [src]="getCountryFlag(selCode)"
+             [alt]="getCountryLabel(selCode) + ' flag'" />
+        <span class="opt-code">{{ selCode }}</span>
+      </ng-container>
+    </mat-select-trigger>
+
+    <!-- Sticky search inside panel -->
+    <div class="country-search-wrapper" (click)="$event.stopPropagation()">
+      <mat-icon>search</mat-icon>
+      <input 
+        #countrySearchInput
+        class="country-search-input"
+        placeholder="Search country..."
+        [(ngModel)]="countryFilter"
+        [ngModelOptions]="{standalone: true}"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()" />
+    </div>
+
+    <ng-container *ngFor="let c of countries">
+      <mat-option 
+        *ngIf="!countryFilter || (c.name | lowercase).includes(countryFilter.toLowerCase())" 
+        [value]="c.code">
+        <img *ngIf="c.flag" class="opt-flag-img" [src]="c.flag" [alt]="c.name + ' flag'" />
+        <span class="opt-name">{{ c.name }}</span>
+        <span class="opt-code">{{ c.code }}</span>
+      </mat-option>
+    </ng-container>
+
+  </mat-select>
+
+    <input matInput formControlName="phone" 
+      (click)="$event.stopPropagation()"
+      (mousedown)="$event.stopPropagation()"
+      (touchstart)="$event.stopPropagation()"
+      inputmode="numeric" pattern="[0-9]*"
+      (input)="onEmergencyPhoneInput($event)"
+      (paste)="onEmergencyPhonePaste($event)">
+</mat-form-field>
 
         <mat-form-field appearance="outline" class="field">
           <mat-label>Relationship</mat-label>
@@ -279,3 +381,7 @@
 
   </form>
 </div>
+
+
+
+

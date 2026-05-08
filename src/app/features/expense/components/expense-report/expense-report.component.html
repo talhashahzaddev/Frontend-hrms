@@ -1,227 +1,209 @@
-<div class="expense-report-container">
+<div class="time-tracking-container">
+  <!-- Page Header -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
+    <div class="title-section">
+      <h1 class="title">
         <mat-icon>assessment</mat-icon>
-        Reports
+        Expense Reports
       </h1>
-      <p class="page-subtitle">Expense and recurring cost by category, month, or year</p>
+      <p class="subtitle">Comprehensive analysis of your expense and recurring cost trends</p>
     </div>
   </div>
 
-  <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)" class="reports-tabs">
-    <!-- Tab 1: Expense by category -->
-    <mat-tab label="Expense by Category">
-      <div class="tab-content">
-        <mat-card class="filters-card">
-          <mat-card-content>
-            <form [formGroup]="filterForm" class="filters-form">
-              <div class="filters-row filters-row-dates">
-                <mat-form-field appearance="outline" class="date-field">
-                  <mat-label>From Date</mat-label>
-                  <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" (dateChange)="onDateChange()">
-                  <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-                  <mat-datepicker #fromPicker></mat-datepicker>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="date-field">
-                  <mat-label>To Date</mat-label>
-                  <input matInput [matDatepicker]="toPicker" formControlName="toDate" (dateChange)="onDateChange()">
-                  <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-                  <mat-datepicker #toPicker></mat-datepicker>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="preset-field">
-                  <mat-label>Period</mat-label>
-                  <mat-select formControlName="preset" (selectionChange)="onPresetChange()">
-                    <mat-option *ngFor="let opt of presetOptions" [value]="opt.value">{{ opt.label }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="filters-row filters-row-checks">
-                <mat-checkbox formControlName="claims">Claims</mat-checkbox>
-                <mat-checkbox formControlName="recurringExpenses">Recurring Expenses</mat-checkbox>
-              </div>
-              <div class="filter-actions">
-                <button mat-flat-button (click)="applyFilters()" [disabled]="isLoadingCategory || isBothUnchecked" class="add-button">
-                  <mat-icon>search</mat-icon>
-                  Apply
-                </button>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
+  <!-- Premium Tabs -->
+  <div class="view-tabs">
+    <button type="button" class="tab-item" [class.active]="selectedTabIndex === 0" (click)="selectedTabIndex = 0; onTabChange(0)">
+      <mat-icon>pie_chart</mat-icon>
+      By Category
+    </button>
+    <button type="button" class="tab-item" [class.active]="selectedTabIndex === 1" (click)="selectedTabIndex = 1; onTabChange(1)">
+      <mat-icon>show_chart</mat-icon>
+      By Month
+    </button>
+    <button type="button" class="tab-item" [class.active]="selectedTabIndex === 2" (click)="selectedTabIndex = 2; onTabChange(2)">
+      <mat-icon>bar_chart</mat-icon>
+      By Year
+    </button>
+  </div>
 
-        <div class="legend-card" *ngIf="reportData.length > 0">
-          <h3 class="legend-title">Categories</h3>
-          <div class="legend-list">
-            <div class="legend-item" *ngFor="let item of reportData">
-              <span class="legend-dot" [style.background-color]="getColor(item.categoryId)"></span>
-              <span class="legend-name">{{ item.categoryName }}</span>
-              <span class="legend-cost">{{ item.totalCost | currency:organizationCurrency }}</span>
+  <div class="reports-content">
+    <!-- Tab 1: Expense by Category -->
+    <div class="report-panel" *ngIf="selectedTabIndex === 0">
+      <div class="content-card">
+        <div class="toolbar">
+          <form [formGroup]="filterForm" class="filters-row">
+            <div class="date-filters">
+              <mat-form-field appearance="outline" class="compact-date">
+                <mat-label>From</mat-label>
+                <input matInput [matDatepicker]="fromPicker" formControlName="fromDate" (dateChange)="onDateChange()">
+                <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fromPicker></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="compact-date">
+                <mat-label>To</mat-label>
+                <input matInput [matDatepicker]="toPicker" formControlName="toDate" (dateChange)="onDateChange()">
+                <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                <mat-datepicker #toPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+
+            <select class="filter-select" formControlName="preset" (selectionChange)="onPresetChange()">
+              <option *ngFor="let opt of presetOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+
+            <div class="checkbox-group">
+              <mat-checkbox formControlName="claims">Claims</mat-checkbox>
+              <mat-checkbox formControlName="recurringExpenses">Recurring</mat-checkbox>
+            </div>
+
+            <div class="filter-actions">
+              <button class="add-btn" (click)="applyFilters()" [disabled]="isLoadingCategory || isBothUnchecked">
+                <mat-icon>refresh</mat-icon> Update
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="report-body">
+          <div *ngIf="isLoadingCategory" class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Generating report...</p>
+          </div>
+
+          <div *ngIf="!isLoadingCategory && reportData.length === 0" class="empty-state-simple">
+            <mat-icon>pie_chart</mat-icon>
+            <p>No data found for the selected period</p>
+          </div>
+
+          <div class="report-visuals" *ngIf="!isLoadingCategory && reportData.length > 0">
+            <div class="legend-side">
+              <h3 class="side-title">Breakdown by Category</h3>
+              <div class="legend-grid">
+                <div class="legend-card-item" *ngFor="let item of reportData">
+                  <div class="item-header">
+                    <span class="dot" [style.background-color]="getColor(item.categoryId)"></span>
+                    <span class="name">{{ item.categoryName }}</span>
+                  </div>
+                  <div class="item-value">{{ item.totalCost | currency:organizationCurrency }}</div>
+                </div>
+              </div>
+              <div class="total-summary-card">
+                <span class="label">Grand Total</span>
+                <span class="value">{{ totalCost | currency:organizationCurrency }}</span>
+              </div>
+            </div>
+            <div class="chart-side">
+              <div class="chart-wrapper">
+                <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType"></canvas>
+              </div>
             </div>
           </div>
         </div>
-
-        <mat-card class="chart-card" *ngIf="reportData.length > 0 && !isLoadingCategory">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">pie_chart</mat-icon>
-                <span>Cost by Category</span>
-              </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="chart-container">
-              <canvas baseChart [data]="pieChartData" [options]="pieChartOptions" [type]="pieChartType"></canvas>
-            </div>
-            <div class="chart-total">
-              <span class="chart-total-label">Total Cost</span>
-              <span class="chart-total-value">{{ totalCost | currency:organizationCurrency }}</span>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <div *ngIf="!isLoadingCategory && reportData.length === 0" class="empty-state">
-          <mat-icon>pie_chart</mat-icon>
-          <h3>No data</h3>
-          <p>Select date range and type (Claims / Recurring) then click Apply.</p>
-        </div>
-
-        <div *ngIf="isLoadingCategory" class="loading-container">
-          <mat-spinner diameter="48"></mat-spinner>
-          <p>Loading report...</p>
-        </div>
       </div>
-    </mat-tab>
+    </div>
 
-    <!-- Tab 2: Expense by month (line chart) -->
-    <mat-tab label="Expense by Month">
-      <div class="tab-content">
-        <mat-card class="filters-card">
-          <mat-card-content>
-            <form [formGroup]="monthForm" class="filters-form">
-              <div class="filters-row filters-row-dates">
-                <mat-form-field appearance="outline" class="date-field">
-                  <mat-label>Year</mat-label>
-                  <mat-select formControlName="year">
-                    <mat-option *ngFor="let y of yearOptions" [value]="y">{{ y }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="filters-row filters-row-checks">
-                <mat-checkbox formControlName="claims">Claims</mat-checkbox>
-                <mat-checkbox formControlName="recurringExpenses">Recurring Expenses</mat-checkbox>
-              </div>
-              <div class="filter-actions">
-                <button mat-flat-button (click)="loadLineChart()" [disabled]="isLoadingMonth || isMonthBothUnchecked" class="add-button">
-                  <mat-icon>search</mat-icon>
-                  Apply
-                </button>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
+    <!-- Tab 2: Expense by Month -->
+    <div class="report-panel" *ngIf="selectedTabIndex === 1">
+      <div class="content-card">
+        <div class="toolbar">
+          <form [formGroup]="monthForm" class="filters-row">
+            <select class="filter-select" formControlName="year">
+              <option *ngFor="let y of yearOptions" [value]="y">{{ y }}</option>
+            </select>
 
-        <mat-card class="chart-card" *ngIf="lineChartData.length > 0 && !isLoadingMonth">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">show_chart</mat-icon>
-                <span>Cost by Month</span>
+            <div class="checkbox-group">
+              <mat-checkbox formControlName="claims">Claims</mat-checkbox>
+              <mat-checkbox formControlName="recurringExpenses">Recurring</mat-checkbox>
+            </div>
+
+            <div class="filter-actions">
+              <button class="add-btn" (click)="loadLineChart()" [disabled]="isLoadingMonth || isMonthBothUnchecked">
+                <mat-icon>refresh</mat-icon> Update
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="report-body">
+          <div *ngIf="isLoadingMonth" class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Analyzing monthly trends...</p>
+          </div>
+
+          <div *ngIf="!isLoadingMonth && lineChartData.length === 0" class="empty-state-simple">
+            <mat-icon>show_chart</mat-icon>
+            <p>No monthly data available for the selected year</p>
+          </div>
+
+          <div class="report-visuals line-report" *ngIf="!isLoadingMonth && lineChartData.length > 0">
+            <div class="total-bar">
+              <div class="stat-card">
+                <span class="label">Annual Total</span>
+                <span class="value">{{ lineChartTotalCost | currency:organizationCurrency }}</span>
               </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="chart-container chart-container-line">
+            </div>
+            <div class="chart-wrapper-full">
               <canvas baseChart
                 [data]="lineChartDataConfig"
                 [options]="lineChartOptions"
                 [type]="lineChartType">
               </canvas>
             </div>
-            <div class="chart-total">
-              <span class="chart-total-label">Total Cost</span>
-              <span class="chart-total-value">{{ lineChartTotalCost | currency:organizationCurrency }}</span>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <div *ngIf="!isLoadingMonth && lineChartData.length === 0" class="empty-state">
-          <mat-icon>show_chart</mat-icon>
-          <h3>No data</h3>
-          <p>Select year and type (Claims / Recurring) then click Apply.</p>
-        </div>
-
-        <div *ngIf="isLoadingMonth" class="loading-container">
-          <mat-spinner diameter="48"></mat-spinner>
-          <p>Loading report...</p>
+          </div>
         </div>
       </div>
-    </mat-tab>
+    </div>
 
-    <!-- Tab 3: Expense by year (bar chart) -->
-    <mat-tab label="Expense by Year">
-      <div class="tab-content">
-        <mat-card class="filters-card">
-          <mat-card-content>
-            <form [formGroup]="yearForm" class="filters-form">
-              <div class="filters-row filters-row-dates">
-                <mat-form-field appearance="outline" class="date-field">
-                  <mat-label>Years</mat-label>
-                  <mat-select formControlName="years">
-                    <mat-option *ngFor="let n of yearsOptions" [value]="n">{{ n }} year{{ n > 1 ? 's' : '' }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="filters-row filters-row-checks">
-                <mat-checkbox formControlName="claims">Claims</mat-checkbox>
-                <mat-checkbox formControlName="recurringExpenses">Recurring Expenses</mat-checkbox>
-              </div>
-              <div class="filter-actions">
-                <button mat-flat-button (click)="loadBarChart()" [disabled]="isLoadingYear || isYearBothUnchecked" class="add-button">
-                  <mat-icon>search</mat-icon>
-                  Apply
-                </button>
-              </div>
-            </form>
-          </mat-card-content>
-        </mat-card>
+    <!-- Tab 3: Expense by Year -->
+    <div class="report-panel" *ngIf="selectedTabIndex === 2">
+      <div class="content-card">
+        <div class="toolbar">
+          <form [formGroup]="yearForm" class="filters-row">
+            <select class="filter-select" formControlName="years">
+              <option *ngFor="let n of yearsOptions" [value]="n">{{ n }} Year{{ n > 1 ? 's' : '' }}</option>
+            </select>
 
-        <mat-card class="chart-card" *ngIf="barChartData.length > 0 && !isLoadingYear">
-          <mat-card-header>
-            <mat-card-title>
-              <div class="card-title-wrapper">
-                <mat-icon class="title-icon">bar_chart</mat-icon>
-                <span>Cost by Year</span>
+            <div class="checkbox-group">
+              <mat-checkbox formControlName="claims">Claims</mat-checkbox>
+              <mat-checkbox formControlName="recurringExpenses">Recurring</mat-checkbox>
+            </div>
+
+            <div class="filter-actions">
+              <button class="add-btn" (click)="loadBarChart()" [disabled]="isLoadingYear || isYearBothUnchecked">
+                <mat-icon>refresh</mat-icon> Update
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="report-body">
+          <div *ngIf="isLoadingYear" class="loading-state">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Comparing annual data...</p>
+          </div>
+
+          <div *ngIf="!isLoadingYear && barChartData.length === 0" class="empty-state-simple">
+            <mat-icon>bar_chart</mat-icon>
+            <p>No annual data found for comparison</p>
+          </div>
+
+          <div class="report-visuals bar-report" *ngIf="!isLoadingYear && barChartData.length > 0">
+            <div class="total-bar">
+              <div class="stat-card">
+                <span class="label">Cumulative Total</span>
+                <span class="value">{{ barChartTotalCost | currency:organizationCurrency }}</span>
               </div>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="chart-container chart-container-bar">
+            </div>
+            <div class="chart-wrapper-full">
               <canvas baseChart
                 [data]="barChartDataConfig"
                 [options]="barChartOptions"
                 [type]="barChartType">
               </canvas>
             </div>
-            <div class="chart-total">
-              <span class="chart-total-label">Total Cost</span>
-              <span class="chart-total-value">{{ barChartTotalCost | currency:organizationCurrency }}</span>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <div *ngIf="!isLoadingYear && barChartData.length === 0" class="empty-state">
-          <mat-icon>bar_chart</mat-icon>
-          <h3>No data</h3>
-          <p>Select years and type (Claims / Recurring) then click Apply.</p>
-        </div>
-
-        <div *ngIf="isLoadingYear" class="loading-container">
-          <mat-spinner diameter="48"></mat-spinner>
-          <p>Loading report...</p>
+          </div>
         </div>
       </div>
-    </mat-tab>
-  </mat-tab-group>
+    </div>
+  </div>
 </div>

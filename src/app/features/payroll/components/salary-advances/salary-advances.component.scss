@@ -1,0 +1,52 @@
+@use '../loans-advances/loans-advances.component.scss';
+
+.time-tracking-container.loans-advances-page {
+	.admin-cards-view {
+		.empty-state {
+			grid-column: 1 / -1;
+			background: #ffffff;
+			border: 1px dashed #cbd5e1;
+			border-radius: 0.75rem;
+			padding: 2rem 1rem;
+			text-align: center;
+			color: #64748b;
+			font-size: 0.92rem;
+			font-weight: 600;
+		}
+
+		.record-card {
+			.card-body {
+				.card-note.lifecycle-note {
+					p {
+						white-space: normal;
+						overflow: visible;
+						text-overflow: clip;
+					}
+				}
+			}
+
+			.card-footer {
+				.request-actions {
+					flex-wrap: wrap;
+				}
+			}
+		}
+	}
+
+	.status-pill {
+		&.status-disbursed {
+			background: #dbeafe;
+			color: #1d4ed8;
+		}
+
+		&.status-rejected {
+			background: #fee2e2;
+			color: #991b1b;
+		}
+
+		&.status-deducted {
+			background: #dcfce7;
+			color: #166534;
+		}
+	}
+}

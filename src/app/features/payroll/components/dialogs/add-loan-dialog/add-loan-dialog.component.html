@@ -1,0 +1,70 @@
+<div class="loan-dialog-container">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="close-btn" (click)="close()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body" [formGroup]="form">
+    <div class="form-group full-width">
+      <label>Employee</label>
+      <select class="form-control" formControlName="employeeId">
+        <option value="" disabled selected>Select employee</option>
+        @for (employee of employees; track employee.id) {
+          <option [value]="employee.id">{{ employee.name }}</option>
+        }
+      </select>
+      @if (form.get('employeeId')?.touched && form.get('employeeId')?.hasError('required')) {
+        <p class="field-error">Employee is required.</p>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Total amount</label>
+        <input type="number" class="form-control" formControlName="totalAmount" min="1" placeholder="0.00" />
+        @if (form.get('totalAmount')?.touched && form.get('totalAmount')?.invalid) {
+          <p class="field-error">Enter a valid amount greater than 0.</p>
+        }
+      </div>
+      <div class="form-group">
+        <label>Monthly installment</label>
+        <input type="number" class="form-control" formControlName="monthlyInstallment" min="1" placeholder="0.00" />
+        @if (showInstallmentError) {
+          <p class="field-error">Installment must be greater than 0 and not exceed total amount.</p>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Start date</label>
+        <input type="date" class="form-control" formControlName="startDate" />
+      </div>
+      <div class="form-group">
+        <label>End date</label>
+        <input type="date" class="form-control" formControlName="endDate" />
+      </div>
+    </div>
+
+    @if (showDateRangeError) {
+      <p class="field-error field-error-spaced">End date cannot be before start date.</p>
+    }
+
+    <div class="form-group full-width">
+      <label>Status</label>
+      <select class="form-control" formControlName="status">
+        <option value="active">Active</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+    <button type="button" class="save-btn" (click)="save()">{{ submitLabel }}</button>
+  </div>
+</div>

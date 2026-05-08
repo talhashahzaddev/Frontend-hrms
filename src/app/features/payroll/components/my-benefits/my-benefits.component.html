@@ -1,0 +1,197 @@
+<div class="my-benefits-container">
+  @if (isLoading()) {
+  <div class="loading-overlay">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading benefits...</p>
+  </div>
+  }
+
+  <header class="page-header">
+    <div class="title">
+      <mat-icon>card_giftcard</mat-icon>
+      <h1>My Benefits</h1>
+    </div>
+    <p class="subtitle">View and request your workplace benefits</p>
+  </header>
+
+  <!-- Summary Stat Cards -->
+  <section class="summary-cards">
+    <!-- Active Loan -->
+    @if (isModuleActive('Loan')) {
+    <div class="card active-card">
+      <div class="card-content">
+        <span class="label">Active loan</span>
+        <div class="value-row">
+          <span class="value">{{ currencySymbol() }} 140,000</span>
+        </div>
+      </div>
+      <div class="progress-footer">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 66%"></div>
+        </div>
+        <span class="footer-text">remaining</span>
+      </div>
+    </div>
+    }
+
+    <!-- Salary Advance -->
+    @if (isModuleActive('Advance Salary')) {
+    <div class="card active-card">
+      <div class="card-content">
+        <span class="label">Salary advance</span>
+        <div class="value-row">
+          <span class="value">{{ currencySymbol() }} 35,000</span>
+        </div>
+      </div>
+      <div class="footer-row">
+        <mat-icon class="icon text-tertiary">pending_actions</mat-icon>
+        <span class="footer-text text-tertiary">outstanding</span>
+      </div>
+    </div>
+    }
+
+    <!-- PF Balance -->
+    @if (isModuleActive('Provident Fund')) {
+    <div class="card active-card">
+      <div class="card-content">
+        <span class="label">PF balance</span>
+        <div class="value-row">
+          <span class="value">{{ currencySymbol() }} 48,000</span>
+        </div>
+      </div>
+      <div class="footer-row">
+        <mat-icon class="icon text-secondary">account_balance_wallet</mat-icon>
+        <span class="footer-text">total contributed</span>
+      </div>
+    </div>
+    }
+
+    <!-- Gratuity -->
+    @if (isModuleActive('Gratuity')) {
+    <div class="card active-card">
+      <div class="card-content">
+        <span class="label">Gratuity</span>
+        <div class="value-row">
+          <span class="value">{{ currencySymbol() }} 92,000</span>
+        </div>
+      </div>
+      <div class="footer-row">
+        <mat-icon class="icon text-primary-fixed-dim">verified</mat-icon>
+        <span class="footer-text">estimated</span>
+      </div>
+    </div>
+    }
+  </section>
+
+  <!-- Benefit Cards Grid -->
+  <section class="benefits-grid">
+    <!-- Card 1 (Loan) -->
+    @if (isModuleActive('Loan')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Loan')" (keydown)="onBenefitCardKeydown($event, 'Loan')">
+      <div class="card-header">
+        <div class="icon-wrapper color-primary">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <span class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span class="status-text">1 active</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Loan</h3>
+      <p class="benefit-desc">Request a salary loan with monthly installments</p>
+      <p class="card-link">Open loan requests <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+    <!-- Card 2 (Salary Advance) -->
+    @if (isModuleActive('Advance Salary')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Advance Salary')" (keydown)="onBenefitCardKeydown($event, 'Advance Salary')">
+      <div class="card-header">
+        <div class="icon-wrapper color-amber">
+          <mat-icon>fast_forward</mat-icon>
+        </div>
+        <span class="status-badge status-pending">
+          <span class="status-dot"></span>
+          <span class="status-text">1 pending</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Salary Advance</h3>
+      <p class="benefit-desc">Request an advance on your upcoming salary</p>
+      <p class="card-link">Open salary advance requests <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+    <!-- Card 3 (Provident Fund) -->
+    @if (isModuleActive('Provident Fund')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Provident Fund')" (keydown)="onBenefitCardKeydown($event, 'Provident Fund')">
+      <div class="card-header">
+        <div class="icon-wrapper color-secondary">
+          <mat-icon>savings</mat-icon>
+        </div>
+        <span class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span class="status-text">Enrolled</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Provident Fund</h3>
+      <p class="benefit-desc">Track and request your provident fund benefits and settlement history</p>
+      <p class="card-link">Open provident fund benefits <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+    <!-- Card 4 (Social Security) -->
+    @if (isModuleActive('Income Tax')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Income Tax')" (keydown)="onBenefitCardKeydown($event, 'Income Tax')">
+      <div class="card-header">
+        <div class="icon-wrapper color-secondary">
+          <mat-icon>request_quote</mat-icon>
+        </div>
+        <span class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span class="status-text">Active</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Income Tax</h3>
+      <p class="benefit-desc">Track your monthly tax deductions and applied slab details</p>
+      <p class="card-link">Open tax transactions <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+    <!-- Card 4 (Social Security) -->
+    @if (isModuleActive('Social Security')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Social Security')" (keydown)="onBenefitCardKeydown($event, 'Social Security')">
+      <div class="card-header">
+        <div class="icon-wrapper color-teal">
+          <mat-icon>group</mat-icon>
+        </div>
+        <span class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span class="status-text">Enrolled</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Social Security</h3>
+      <p class="benefit-desc">EOBI / ESSI enrollment and contribution history</p>
+      <p class="card-link">Open social security status <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+    <!-- Card 5 (Gratuity) -->
+    @if (isModuleActive('Gratuity')) {
+    <div class="benefit-card benefit-card-link" role="link" tabindex="0" (click)="openBenefit('Gratuity')" (keydown)="onBenefitCardKeydown($event, 'Gratuity')">
+      <div class="card-header">
+        <div class="icon-wrapper color-purple">
+          <mat-icon>emoji_events</mat-icon>
+        </div>
+        <span class="status-badge status-active">
+          <span class="status-dot"></span>
+          <span class="status-text">Eligible</span>
+        </span>
+      </div>
+      <h3 class="benefit-title">Gratuity</h3>
+      <p class="benefit-desc">View your gratuity entitlement based on service years</p>
+      <p class="card-link">View gratuity status <mat-icon>arrow_forward</mat-icon></p>
+    </div>
+    }
+
+  </section>
+</div>

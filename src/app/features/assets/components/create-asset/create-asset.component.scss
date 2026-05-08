@@ -963,6 +963,174 @@
 
 
 // ═══════════════════════════════════════════════
+//  EMPLOYEE DROPDOWN STYLES
+//  Custom state-driven dropdown (matching Assign Shift)
+// ═══════════════════════════════════════════════
+
+// Field label styling
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  
+  .required {
+    color: #ef4444;
+  }
+}
+
+// Dropdown container with focus/error states
+.employee-dropdown-container {
+  position: relative;
+  background: white;
+  border: 1px solid #e2e4ea;
+  border-radius: 8px;
+  transition: border-color 0.15s ease;
+  
+  &.is-open {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08), 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  &.has-error {
+    border-color: #ef4444;
+    &.is-open {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08), 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+// Input box wrapper
+.employee-input-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+// Search input field
+.employee-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: #111827;
+  font-weight: 500;
+  outline: none;
+  padding: 12px 0;
+  
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+// Dropdown panel (positioned below input)
+.employee-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e4ea;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+// Employee list container
+.employee-list-container {
+  display: flex;
+  flex-direction: column;
+}
+
+// Individual employee item
+.employee-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.1s ease;
+  user-select: none;
+  
+  &:hover {
+    background: #f5f6fa;
+  }
+  
+  &.is-selected {
+    background: #f3f4f6;
+    .employee-checkbox { accent-color: #7c3aed; }
+  }
+}
+
+// Checkbox styling
+.employee-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+// Employee info section
+.employee-info {
+  flex: 1;
+  min-width: 0;
+}
+
+// Employee name
+.employee-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+// Employee email
+.employee-email {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+// No results message
+.employee-no-results {
+  padding: 20px 12px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+// Error message
+.employee-error {
+  display: block;
+  font-size: 11px;
+  color: #ef4444;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.view-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.view-notes {
+  margin: 0;
+  font-size: 13.5px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+
+// ═══════════════════════════════════════════════
 //  HISTORY DIALOG
 // ═══════════════════════════════════════════════
 .history-asset-strip {

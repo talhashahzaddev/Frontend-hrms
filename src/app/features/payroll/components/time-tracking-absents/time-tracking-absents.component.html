@@ -1,0 +1,195 @@
+<div class="absents-container">
+  <!-- Stat Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Absents</span>
+          <span class="value">{{ totalAbsents() }}</span>
+        </div>
+        <div class="icon-wrapper color-blue">
+          <mat-icon>event_busy</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Current pay cycle</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Total Deduction</span>
+          <span class="value">{{ currencySymbol() }} {{ totalDeduction() | number:'1.0-0' }}</span>
+        </div>
+        <div class="icon-wrapper color-green">
+          <mat-icon>payments</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Deductions Applied</p>
+    </div>
+
+    <div class="card">
+      <div class="card-content">
+        <div class="info">
+          <span class="label">Employees Affected</span>
+          <span class="value">{{ employeesAffected() }}</span>
+        </div>
+        <div class="icon-wrapper color-amber">
+          <mat-icon>group</mat-icon>
+        </div>
+      </div>
+      <p class="card-footer">Unique staff records</p>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="content-card">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="filters-row">
+        <!-- Search -->
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
+        </div>
+
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriod">
+          <option value="">All periods</option>
+          @for (p of periods; track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+
+        <select class="filter-select" [(ngModel)]="pendingRule">
+          <option value="">All rules</option>
+          @for (r of deductionRules; track r.ruleId) {
+          <option [value]="r.ruleId">{{ r.ruleName }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="add-btn-wrap">
+        <button class="add-btn" (click)="logAbsent()">
+          <mat-icon>add</mat-icon>
+          Log Absent
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="text-left">Employee</th>
+            <th class="text-center">Absent Days</th>
+            <th class="text-center">Half Days</th>
+            <th class="text-center">Effective Absents</th>
+            <th class="text-center">Deductible</th>
+            <th class="text-right">Deduction ({{ currencySymbol() }})</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+          <tr>
+            <td colspan="7" class="text-center" style="padding: 3rem;">
+              <div class="spinner-container">
+                <mat-spinner diameter="30"></mat-spinner>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          @for (record of records(); track record.id) {
+          <tr class="table-row">
+            <td>
+              <div class="employee-info">
+                <div class="avatar" [ngClass]="'bg-' + record.avatarColor">{{ record.initials }}</div>
+                <div class="flex-col">
+                  <span class="font-semibold">{{ record.employeeName }}</span>
+                  <span class="subtitle">{{ record.positionName }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="text-center font-medium muted">{{ record.absentDays }}</td>
+            <td class="text-center font-medium muted">{{ record.halfDays }}</td>
+            <td class="text-center font-bold">{{ record.effectiveAbsents | number:'1.1-1' }}</td>
+            <td class="text-center">
+              <span class="font-medium" [ngClass]="record.deductibleDays > 0 ? 'text-slate-600' : 'text-emerald-600'">
+                {{ record.deductibleDays | number:'1.1-1' }}
+              </span>
+            </td>
+            <td class="text-right font-bold" [ngClass]="record.deductionAmount > 0 ? 'text-red-600' : 'text-emerald-600'">
+              {{ record.deductionAmount | number:'1.0-0' }}
+            </td>
+            <td class="action-cell">
+              <button class="action-btn hover-primary" (click)="editRecord(record)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-btn hover-danger" (click)="deleteRecord(record)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="7" class="text-center" style="padding: 3rem;">
+              <div class="empty-state">
+                <mat-icon>inbox</mat-icon>
+                <p>No absent records found.</p>
+              </div>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer / Pagination -->
+    <div class="table-footer">
+      <div class="info-group">
+        <div class="formula-hint">
+          <mat-icon>info</mat-icon>
+          <span>Effective absents = absent days + (half days × 0.5)</span>
+        </div>
+        @if (totalCount() > 0) {
+        <div class="page-entries">
+          Showing <b>{{ fromRecord }}</b> to <b>{{ toRecord }}</b> of <b>{{ totalCount() }}</b> entries
+        </div>
+        }
+      </div>
+
+      @if (totalPages > 1 || totalCount() > 0) {
+      <div class="pagination">
+        <button class="page-btn" [class.disabled]="page() === 1" [disabled]="page() === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === page()" (click)="goToPage(p)">
+          {{ p }}
+        </button>
+        }
+
+        <button class="page-btn" [class.disabled]="page() === totalPages" [disabled]="page() === totalPages"
+          (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      }
+    </div>
+  </div>
+</div>

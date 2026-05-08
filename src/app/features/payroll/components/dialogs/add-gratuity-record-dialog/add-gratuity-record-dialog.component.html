@@ -1,0 +1,120 @@
+<div class="gratuity-record-dialog">
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="dialog-form">
+    <div class="form-grid">
+
+      <label class="field field-span-2">
+        <span>Gratuity rule</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">workspace_premium</mat-icon>
+          <select formControlName="configId">
+            <option value="" disabled>Select a gratuity rule...</option>
+            @for (cfg of configs; track cfg.id) {
+              <option [value]="cfg.id">{{ cfg.configRuleName }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+        @if (calcHint) {
+          <small class="calc-hint"><mat-icon>calculate</mat-icon> {{ calcHint }}</small>
+        }
+      </label>
+
+      <label class="field field-span-2">
+        <span>Employee</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">badge</mat-icon>
+          <select formControlName="employeeId">
+            <option value="" disabled>Select an employee...</option>
+            @for (employee of employees; track employee.id) {
+              <option [value]="employee.id">{{ employee.name }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Payroll period</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">calendar_month</mat-icon>
+          <select formControlName="periodId">
+            <option value="">Off-cycle / manual</option>
+            @for (period of periods; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Payment method</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">payments</mat-icon>
+          <select formControlName="paymentMethod">
+            <option value="payroll_credit">Payroll credit</option>
+            <option value="bank_transfer">Bank transfer</option>
+            <option value="cash">Cash</option>
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Years worked</span>
+        <input type="number" min="0" step="0.1" formControlName="yearsWorked" placeholder="e.g. 5" />
+      </label>
+
+      <label class="field">
+        <span>Last salary PKR</span>
+        <div class="prefix-wrap">
+          <strong>PKR</strong>
+          <input type="number" min="0" formControlName="lastSalary" placeholder="0" />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Gratuity amount</span>
+        <div class="prefix-wrap">
+          <strong>PKR</strong>
+          <input type="number" formControlName="gratuityAmount" readonly />
+        </div>
+      </label>
+
+      <label class="field">
+        <span>Status</span>
+        <div class="select-wrap">
+          <mat-icon class="leading">fact_check</mat-icon>
+          <select formControlName="status">
+            <option value="calculated">Calculated</option>
+            <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <mat-icon class="trailing">expand_more</mat-icon>
+        </div>
+      </label>
+
+      <label class="field field-span-2">
+        <span>Paid date</span>
+        <div class="date-wrap">
+          <mat-icon class="leading">event</mat-icon>
+          <input type="date" formControlName="paidDate" [disabled]="!isPaidStatus" />
+        </div>
+      </label>
+
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+      <button type="submit" class="btn primary">{{ submitLabel }}</button>
+    </div>
+  </form>
+</div>

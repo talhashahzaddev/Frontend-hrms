@@ -1,339 +1,361 @@
-.payroll-calculation-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+// Variables for consistency with other modules
+$bg-color: #f8fafc;
+$card-bg: #ffffff;
+$border-color: #e2e8f0;
+$title-color: #0f172a;
+$subtitle-color: #64748b;
+$primary-color: #004ac6;
+$primary-hover: #003ba3;
 
-  .calculation-header {
-    text-align: center;
-    margin-bottom: 32px;
+:host {
+    display: block;
+    min-height: 100vh;
+    background-color: $bg-color;
+}
 
-    .page-title {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin: 0 0 8px 0;
-      font-size: 2.5rem;
-      font-weight: 300;
-      color: #1a1a1a;
+.time-tracking-container.payroll-calculation-page {
+    width: 100%;
+    padding: 2rem;
+    font-family: 'Public Sans', 'Inter', sans-serif;
 
-      mat-icon {
-        font-size: 2.5rem;
-        width: 2.5rem;
-        height: 2.5rem;
-        color: #1976d2;
-      }
+    @media (max-width: 768px) {
+        padding: 1.25rem;
     }
 
-    .page-subtitle {
-      margin: 0;
-      color: #666;
-      font-size: 1.1rem;
-    }
-  }
-
-  .period-selection-card,
-  .calculation-progress-card,
-  .calculation-results-card {
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
-
-    .period-status {
-      float: right;
-      font-size: 0.8rem;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-weight: 500;
-
-      &.status-draft {
-        background-color: #fff3cd;
-        color: #856404;
-      }
-
-      &.status-calculated {
-        background-color: #d1ecf1;
-        color: #0c5460;
-      }
-    }
-
-    .period-details {
-      margin-top: 24px;
-      padding: 16px;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-
-      h4 {
-        margin: 0 0 16px 0;
-        color: #333;
-        font-weight: 500;
-      }
-
-      .details-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-
-        .detail-item {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-
-          label {
-            font-weight: 500;
-            color: #666;
-            font-size: 0.9rem;
-          }
-
-          span {
-            color: #333;
-            font-size: 1rem;
-          }
-        }
-      }
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-      justify-content: flex-end;
-    }
-  }
-
-  .calculation-progress-card {
-    .progress-container {
-      margin-bottom: 32px;
-
-      .progress-bar {
-        height: 8px;
-        border-radius: 4px;
-        margin-bottom: 8px;
-      }
-
-      .progress-text {
-        text-align: center;
-        font-weight: 500;
-        color: #1976d2;
-        margin: 0;
-      }
-    }
-
-    .steps-container {
-      .step-item {
+    .page-header {
         display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        padding: 16px 0;
-        border-bottom: 1px solid #e0e0e0;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        margin-bottom: 2rem;
 
-        &:last-child {
-          border-bottom: none;
+        @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: stretch;
         }
 
-        &.completed {
-          .step-icon {
-            color: #4caf50;
-          }
-        }
-
-        &.in-progress {
-          .step-icon {
-            color: #1976d2;
-          }
-        }
-
-        &.error {
-          .step-icon {
-            color: #f44336;
-          }
-        }
-
-        .step-icon {
-          flex-shrink: 0;
-          margin-top: 2px;
-
-          mat-icon {
-            font-size: 24px;
-            width: 24px;
-            height: 24px;
-          }
-        }
-
-        .step-content {
-          flex: 1;
-
-          h4 {
-            margin: 0 0 4px 0;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #333;
-          }
-
-          p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9rem;
-            line-height: 1.4;
-
-            &.error-message {
-              color: #f44336;
-              font-weight: 500;
+        .title-section {
+            .title {
+                font-size: 1.75rem;
+                font-weight: 700;
+                letter-spacing: -0.025em;
+                margin: 0;
+                color: $title-color;
             }
-          }
+
+            .subtitle {
+                margin: 0.5rem 0 0;
+                color: $subtitle-color;
+                font-size: 1rem;
+                max-width: 42rem;
+            }
         }
-      }
+
+        .ledger-switch {
+            display: inline-flex;
+            gap: 0.25rem;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            padding: 0.25rem;
+            border: 1px solid #e2e8f0;
+
+            a {
+                text-decoration: none;
+                color: #64748b;
+                border-radius: 0.6rem;
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+                font-weight: 600;
+                transition: all 0.2s;
+
+                &.active {
+                    color: #004ac6;
+                    background: #fff;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                }
+
+                &:hover:not(.active) {
+                    color: #334155;
+                }
+            }
+        }
     }
-  }
 
-  .calculation-results-card {
-    .summary-section {
-      margin-bottom: 24px;
+    // Scope Selection Section (Styled like a content card)
+    .scope-section {
+        background-color: $card-bg;
+        border: 1px solid $border-color;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: opacity 0.3s ease;
 
-      h3 {
-        margin: 0 0 16px 0;
-        color: #333;
-        font-weight: 500;
-      }
+        &.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
 
-      .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 16px;
-
-        .summary-item {
-          text-align: center;
-          padding: 16px;
-          background-color: #f8f9fa;
-          border-radius: 8px;
-          border: 1px solid #e9ecef;
-
-          .summary-value {
-            font-size: 1.5rem;
+        .section-title {
+            font-size: 0.8125rem;
             font-weight: 600;
-            color: #1976d2;
-            margin-bottom: 4px;
-          }
-
-          .summary-label {
-            font-size: 0.9rem;
-            color: #666;
-            font-weight: 500;
-          }
+            color: $subtitle-color;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 1.25rem;
+            display: block;
         }
-      }
+
+        .scope-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 1.5rem;
+
+            @media (min-width: 768px) {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .scope-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .scope-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+
+            .required { color: #ef4444; }
+            .optional { font-weight: 400; color: #94a3b8; }
+        }
     }
 
-    .breakdown-section {
-      margin-bottom: 24px;
+    // Custom Select Styling to match other modules
+    .input-wrapper {
+        position: relative;
 
-      h3 {
-        margin: 0 0 16px 0;
-        color: #333;
-        font-weight: 500;
-      }
+        .select-input {
+            width: 100%;
+            height: 2.75rem;
+            border-radius: 0.6rem;
+            border: 1px solid $border-color;
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0 2.5rem 0 1rem;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25rem;
 
-      .department-panel {
-        margin-bottom: 8px;
+            &:focus {
+                background-color: #ffffff;
+                border-color: $primary-color;
+                box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+            }
+        }
+    }
 
-        .department-details {
-          padding: 16px 0;
+    // Policy Grid
+    .policy-section-title {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: $subtitle-color;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        margin-bottom: 1.25rem;
+        display: block;
+    }
 
-          .detail-row {
-            display: flex;
+    .policy-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+
+        @media (min-width: 1024px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    // Policy Card (Matching .request-row-card style)
+    .policy-card {
+        background-color: $card-bg;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        border: 1px solid $border-color;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            border-color: #cbd5e1;
+        }
+
+        &.card-row {
+            flex-direction: row;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-
-            &:last-child {
-              border-bottom: none;
-            }
-
-            span:first-child {
-              font-weight: 500;
-              color: #666;
-            }
-
-            span:last-child {
-              color: #333;
-              font-weight: 500;
-            }
-          }
         }
-      }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .policy-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            .icon-wrapper {
+                width: 3rem;
+                height: 3rem;
+                border-radius: 0.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                mat-icon {
+                    font-size: 1.5rem;
+                    width: 1.5rem;
+                    height: 1.5rem;
+                }
+
+                &.blue { background-color: #eff6ff; color: #2563eb; }
+                &.amber { background-color: #fffbeb; color: #d97706; }
+                &.rose { background-color: #fff1f2; color: #e11d48; }
+                &.indigo { background-color: #eef2ff; color: #4f46e5; }
+            }
+
+            .detail {
+                h4 {
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: $title-color;
+                    margin: 0;
+                }
+                p {
+                    font-size: 0.8rem;
+                    color: $subtitle-color;
+                    margin: 0.25rem 0 0;
+                }
+            }
+        }
+
+        .status-pill {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+
+            &.configured { background-color: #f0fdf4; color: #16a34a; }
+            &.skipped { background-color: #f1f5f9; color: #64748b; }
+        }
     }
 
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-  }
+    // Toggle Switch (Custom to match app aesthetic)
+    .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
 
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px;
-    text-align: center;
+        .toggle-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            
+            &.enabled { color: #16a34a; }
+            &.disabled { color: #94a3b8; }
+        }
 
-    p {
-      margin-top: 16px;
-      color: #666;
-      font-size: 1.1rem;
+        .switch {
+            width: 2.75rem;
+            height: 1.5rem;
+            border-radius: 999px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &.active { background-color: #16a34a; }
+            &.inactive { background-color: #e2e8f0; }
+
+            .dot {
+                width: 1.125rem;
+                height: 1.125rem;
+                background-color: #ffffff;
+                border-radius: 50%;
+                position: absolute;
+                top: 0.1875rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+                &.right { transform: translateX(1.4rem); }
+                &.left { transform: translateX(0.1875rem); }
+            }
+        }
     }
-  }
+    // Form Actions at bottom
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 2rem;
+        border-top: 1px solid $border-color;
+
+        button {
+            height: 2.75rem;
+            padding: 0 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            border-radius: 0.625rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+
+            &.btn-preview {
+                background-color: #ffffff;
+                color: $primary-color;
+                border: 1px solid #dbe3ef;
+
+                &:hover {
+                    background-color: #f8fafc;
+                    border-color: #bfd0f8;
+                }
+            }
+
+            &.btn-calculate {
+                background-color: $primary-color;
+                color: #ffffff;
+                border: none;
+                box-shadow: 0 4px 14px rgba(0, 74, 198, 0.2);
+
+                &:hover {
+                    background-color: $primary-hover;
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 20px rgba(0, 74, 198, 0.3);
+                }
+
+                mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+            }
+        }
+    }
 }
-
-// Responsive design
-@media (max-width: 768px) {
-  .payroll-calculation-container {
-    padding: 16px;
-
-    .calculation-header {
-      .page-title {
-        font-size: 2rem;
-        flex-direction: column;
-        gap: 8px;
-      }
-    }
-
-    .summary-grid {
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
-    }
-
-    .action-buttons {
-      flex-direction: column;
-      align-items: stretch;
-
-      button {
-        width: 100%;
-      }
-    }
-  }
-}
-
-// Animation for progress
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.step-item.in-progress {
-  animation: pulse 1.5s ease-in-out infinite;
-}
-

@@ -1,0 +1,562 @@
+
+// ── Overlay ────────────────────────────────────────────────────
+.cg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 12px;
+}
+
+// ── Modal box ──────────────────────────────────────────────────
+.cg-modal {
+  background: #fff;
+  width: 100%;
+  max-width: 480px;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  overflow: hidden;
+}
+
+// ── Header ─────────────────────────────────────────────────────
+.cg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.cg-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.cg-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s;
+
+  &:hover {
+    color: #6b7280;
+  }
+}
+
+// ── Body / Form ────────────────────────────────────────────────
+.cg-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+}
+
+// ── Field wrapper ──────────────────────────────────────────────
+.cg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cg-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.cg-required {
+  color: #ef4444;
+  margin-left: 1px;
+}
+
+// ── Text input ─────────────────────────────────────────────────
+.cg-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #111827;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
+  }
+
+  &--error {
+    border-color: #ef4444;
+
+    &:focus {
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.08);
+    }
+  }
+}
+
+// ── Select ─────────────────────────────────────────────────────
+.cg-select-wrap {
+  position: relative;
+}
+
+.cg-select {
+  width: 100%;
+  padding: 7px 28px 7px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #111827;
+  background: #fff;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
+  }
+}
+
+.cg-select-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+}
+
+// ── Search row (trigger) ───────────────────────────────────────
+.cg-search-row {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #fff;
+  padding: 0 10px;
+  min-height: 34px;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.15s;
+  position: relative;
+
+  &:hover {
+    background: #fafbfc;
+  }
+
+  &:focus-within,
+  &--open {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
+    background: #fff;
+  }
+
+  &--error {
+    border-color: #ef4444;
+
+    &:focus-within {
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.08);
+    }
+  }
+}
+
+.cg-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  color: #111827;
+  background: transparent;
+  min-width: 0;
+  padding: 6px 0;
+  cursor: pointer;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    cursor: text;
+  }
+}
+
+// ── Select-all inside search row ───────────────────────────────
+.cg-select-all {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cg-divider-v {
+  width: 1px;
+  height: 16px;
+  background: #e5e7eb;
+}
+
+.cg-select-all-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #0066cc;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+// ── Dropdown chevron ───────────────────────────────────────────
+.cg-dropdown-chevron {
+  color: #6b7280;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+  pointer-events: none;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+// ── Checkbox shared style ──────────────────────────────────────
+.cg-checkbox {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: #0066cc;
+  flex-shrink: 0;
+}
+
+// ── Checklist box (dropdown panel) ────────────────────────────
+.cg-checklist-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-top: -2px;
+  position: relative;
+  z-index: 10;
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cg-checklist-scroll {
+  max-height: 200px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+}
+
+// ── Employee row ───────────────────────────────────────────────
+.cg-emp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.12s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &--selected {
+    background: #eff6ff;
+
+    &:hover {
+      background: #dbeafe;
+    }
+  }
+}
+
+// ── Avatar ─────────────────────────────────────────────────────
+.cg-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+// ── Employee info ──────────────────────────────────────────────
+.cg-emp-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cg-emp-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cg-emp-meta {
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 1px;
+}
+
+// ── No results ─────────────────────────────────────────────────
+.cg-no-results {
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+// ── Chips area ─────────────────────────────────────────────────
+.cg-chips-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.cg-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 24px;
+}
+
+// ── Count text ─────────────────────────────────────────────────
+.cg-count-text {
+  font-size: 10px;
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0;
+  margin-top: -2px;
+}
+
+// ── Error message ──────────────────────────────────────────────
+.cg-error-msg {
+  font-size: 10px;
+  color: #dc3545;
+  margin-top: 2px;
+}
+
+// ── Dropdown trigger (single select) ───────────────────────────
+.cg-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #fff;
+  padding: 7px 10px;
+  min-height: 34px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.15s;
+
+  &:hover {
+    background: #fafbfc;
+  }
+
+  &--open {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
+    background: #fff;
+  }
+}
+
+.cg-dropdown-text {
+  font-size: 12px;
+  color: #111827;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cg-dropdown-arrow {
+  font-size: 10px;
+  color: #6b7280;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  
+  .cg-dropdown-trigger--open & {
+    transform: rotate(180deg);
+  }
+}
+
+// ── Dropdown menu ──────────────────────────────────────────────
+.cg-dropdown-menu {
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.15s ease-out;
+  position: relative;
+  z-index: 10;
+  margin-top: -2px;
+}
+
+.cg-dropdown-scroll {
+  max-height: 200px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  &::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+}
+
+.cg-dropdown-item {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #111827;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.12s;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: #f8fafc;
+  }
+}
+
+.cg-no-items {
+  padding: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+// ── Footer ─────────────────────────────────────────────────────
+.cg-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+// ── Buttons ────────────────────────────────────────────────────
+.cg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  min-width: 80px;
+
+  &--cancel {
+    background: #fff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    font-weight: 500;
+
+    &:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+  }
+
+  &--submit {
+    background: #0066cc;
+    color: #fff;
+    font-weight: 600;
+    min-width: 100px;
+
+    &:hover:not(:disabled) {
+      background: #0052a3;
+    }
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ── Spinner ────────────────────────────────────────────────────
+.cg-spinner {
+  width: 14px;
+  height: 14px;
+  animation: cg-spin 0.8s linear infinite;
+}
+
+.cg-spinner-track {
+  opacity: 0.25;
+}
+
+.cg-spinner-arc {
+  opacity: 0.8;
+}
+
+@keyframes cg-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

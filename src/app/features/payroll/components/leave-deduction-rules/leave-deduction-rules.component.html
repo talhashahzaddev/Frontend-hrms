@@ -1,0 +1,92 @@
+<div class="leave-deduction-rules-container">
+  <!-- Page Header -->
+  <div class="page-header-wrapper">
+    <div class="page-header">
+      <div class="title-section">
+        <button class="icon-button back-btn" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="title-text-group">
+          <h1 class="title">Leave Deduction Rule</h1>
+          <p class="subtitle">Configure unpaid and half-paid leave deduction rules</p>
+        </div>
+      </div>
+      <button class="create-rule-btn" (click)="openRuleDialog()">
+        <mat-icon>add</mat-icon>
+        <span>Create rule</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="text-left">Rule name</th>
+            <th class="text-right">Unpaid Multiplier</th>
+            <th class="text-right">Half Paid Multiplier</th>
+            <th class="text-center">Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+          <tr>
+            <td colspan="5" class="text-center" style="padding: 3rem;">
+              <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
+            </td>
+          </tr>
+          } @else if (leaveRules().length === 0) {
+          <tr>
+            <td colspan="5" class="text-center" style="padding: 4rem;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                <h3 style="color: #64748b; font-weight: 500; margin: 0;">Configure rules for unpaid and half-paid leave
+                  deductions.</h3>
+                <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+                  <mat-icon>add</mat-icon>
+                  <span>Create rule</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @else {
+          @for (rule of leaveRules(); track rule.ruleId) {
+          <tr class="table-row" [class.inactive-row]="!rule.isActive">
+            <td class="text-left font-semibold">{{ rule.ruleName }}</td>
+            <td class="text-right font-mono">{{ rule.unpaidMultiplier | number:'1.2-2' }}</td>
+            <td class="text-right font-mono">{{ rule.halfPaidMultiplier | number:'1.2-2' }}</td>
+            <td class="text-center">
+              <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
+                {{ rule.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="text-right action-cell">
+              <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
+                (click)="editRule(rule)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule.ruleId)"
+                [title]="rule.isActive ? 'Deactivate' : 'Activate'">
+                <mat-icon>{{ rule.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn text-muted hover-danger"
+                (click)="onDelete(rule.ruleId, rule.ruleName)" title="Delete Rule">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer Details -->
+    <div class="table-footer">
+      <p>Showing {{ leaveRules().length }} of {{ leaveRules().length }} leave deduction rules</p>
+    </div>
+  </div>
+
+</div>

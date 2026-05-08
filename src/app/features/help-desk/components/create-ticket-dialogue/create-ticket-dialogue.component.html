@@ -1,0 +1,178 @@
+<div class="dialog-wrapper">
+
+  <div class="dialog-header">
+    <span class="dialog-title">Create Request Ticket</span>
+    <button class="dialog-close" type="button" (click)="cancel()">&#10005;</button>
+  </div>
+
+  <div class="dialog-body">
+    <form [formGroup]="ticketForm">
+
+      <!-- Ticket Title -->
+      <div class="fg">
+        <div class="lr">
+          <label class="lbl">Ticket Title <span class="req">*</span></label>
+          <span class="cnt">{{ ticketForm.get('ticketTitle')?.value?.length || 0 }}/100</span>
+        </div>
+        <input type="text" class="fi" placeholder="Enter ticket title..." formControlName="ticketTitle" maxlength="100" />
+        <p class="ht">Brief description of your issue</p>
+      </div>
+
+      <!-- Ticket Type -->
+      <div class="fg">
+        <label class="lbl">Ticket Type <span class="req">*</span></label>
+        <select class="fs fg-gray" formControlName="ticketType">
+          <option [ngValue]="null" disabled>Select type...</option>
+          <option *ngFor="let type of ticketTypes" [value]="type">{{ type }}</option>
+        </select>
+        <p class="ht">Select the type of your ticket</p>
+      </div>
+
+      <!-- Category -->
+      <div class="fg">
+        <label class="lbl">Category</label>
+        <select class="fs fg-gray" formControlName="categoryId">
+          <option [ngValue]="null" disabled>Select category...</option>
+          <option *ngFor="let cat of categories" [value]="cat.categoryId">
+            {{ cat.categoryName }}
+          </option>
+        </select>
+        <p class="ht">Select a category for your request</p>
+      </div>
+
+      <!-- Ticket Group -->
+      <div class="fg">
+        <label class="lbl">Ticket Group</label>
+        <select class="fs fg-gray" formControlName="assignedGroup">
+          <option [ngValue]="null">Select group...</option>
+          <option *ngFor="let group of groups" [value]="group.groupId">
+            {{ group.groupTitle }}
+          </option>
+        </select>
+        <p class="ht">Select the team responsible for this request</p>
+      </div>
+
+      <!-- Priority & Department -->
+      <div class="two-col">
+        <div class="fg">
+          <label class="lbl">Priority</label>
+          <select class="fs" formControlName="priority">
+            <option [ngValue]="null" disabled>Select priority...</option>
+            <option *ngFor="let p of priorities" [value]="p">{{ p }}</option>
+          </select>
+          <p class="ht">Set urgency level</p>
+        </div>
+
+        <div class="fg">
+          <label class="lbl">Department <span class="req">*</span></label>
+          <select class="fs" formControlName="departmentId">
+            <option [ngValue]="null" disabled>Select dept...</option>
+            <option *ngFor="let dept of departments" [value]="dept.departmentId">
+              {{ dept.departmentName }}
+            </option>
+          </select>
+          <p class="ht">Can be changed if needed</p>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="fg">
+        <div class="lr">
+          <label class="lbl">Description</label>
+          <span class="cnt">{{ ticketForm.get('description')?.value?.length || 0 }}/1000</span>
+        </div>
+        <textarea class="fta" placeholder="Describe your issue in detail..." formControlName="description" maxlength="1000"></textarea>
+      </div>
+
+      <!-- ── Attachment ─────────────────────────────────────────────────── -->
+      <div class="fg">
+        <label class="lbl">Attachment</label>
+
+        <!-- Drop zone (only shown when no files are attached) -->
+        <div
+          *ngIf="attachedFiles.length === 0"
+          class="att-zone"
+          [class.drag-over]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()"
+        >
+          <span class="material-symbols-outlined att-ico">attach_file</span>
+          <span class="att-txt">Drag files here or click to browse</span>
+          <p class="att-hint">PDF, DOCX, JPG, PNG &bull; MAX 5MB &bull; UP TO 3 FILES</p>
+        </div>
+
+        <!-- Hidden native file input -->
+        <input
+          #fileInput
+          type="file"
+          style="display:none"
+          multiple
+          accept=".pdf,.docx,.jpg,.jpeg,.png"
+          (change)="onFileInputChange($event)"
+        />
+
+        <!-- File list -->
+        <div class="att-list" *ngIf="attachedFiles.length > 0">
+          <div
+            class="att-item"
+            *ngFor="let entry of attachedFiles; let i = index"
+            [class.att-uploading]="entry.uploading"
+            [class.att-error]="entry.error"
+          >
+            <!-- Icon -->
+            <span class="material-symbols-outlined att-file-ico">{{ getFileIcon(entry.file) }}</span>
+
+            <!-- Info -->
+            <div class="att-info">
+              <span class="att-name">{{ entry.file.name }}</span>
+              <span class="att-size">{{ formatFileSize(entry.file.size) }}</span>
+            </div>
+
+            <!-- Status -->
+            <div class="att-status">
+              <!-- Uploading spinner -->
+              <!-- <span *ngIf="entry.uploading" class="material-symbols-outlined att-spin">progress_activity</span> -->
+
+              <!-- Success check -->
+              <!-- <span *ngIf="!entry.uploading && !entry.error && entry.url" class="material-symbols-outlined att-ok">check_circle</span> -->
+
+              <!-- Error + retry -->
+              <ng-container *ngIf="entry.error">
+                <span class="att-err-txt">Failed</span>
+                <button type="button" class="att-retry" (click)="retryUpload(i)">
+                  <span class="material-symbols-outlined">refresh</span>
+                </button>
+              </ng-container>
+
+              <!-- Remove -->
+              <button type="button" class="att-remove" (click)="removeFile(i)" title="Remove file">
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Limit reached message -->
+        <p class="att-hint att-limit" *ngIf="!canAddMore && attachedFiles.length > 0">
+          Maximum of {{ MAX_FILES }} files reached.
+        </p>
+      </div>
+      <!-- ── /Attachment ──────────────────────────────────────────────────── -->
+
+    </form>
+  </div>
+
+  <div class="dialog-footer">
+    <button class="btn-cancel" type="button" (click)="cancel()">Cancel</button>
+    <button
+      class="btn-submit"
+      type="button"
+      (click)="submit()"
+      [disabled]="ticketForm.invalid || loading || hasUploading"
+    >
+      <span *ngIf="loading" class="material-symbols-outlined btn-spin">progress_activity</span>
+      {{ loading ? 'Submitting…' : 'Submit Ticket' }}
+    </button>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,7 +17,6 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { RoleService } from '../../services/role.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Role } from '../../../../core/models/role.models';
-import { RoleDialogComponent } from '../role-dialog/role-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
@@ -54,7 +54,9 @@ export class RoleListComponent implements OnInit, OnDestroy {
   constructor(
     private roleService: RoleService,
     private notificationService: NotificationService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -106,48 +108,30 @@ export class RoleListComponent implements OnInit, OnDestroy {
       });
   }
 
-  openAddRoleDialog(): void {
-    const dialogRef = this.dialog.open(RoleDialogComponent, {
-       width: '92%',
-    maxWidth: '1260px',
-    height: '90vh',
-      disableClose: false,
-      data: { mode: 'add' }
-    });
+  // ─── Navigation to full-page form ─────────────────────────────
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadRoles();
-        this.notificationService.showSuccess('Role created successfully');
-      }
+  openAddRoleDialog(): void {
+    this.router.navigate(['add'], {
+      relativeTo: this.route,
+      state: { mode: 'add' }
     });
   }
 
   viewRole(role: Role): void {
-    this.dialog.open(RoleDialogComponent, {
-      width: '92%',
-    maxWidth: '1260px',
-    height: '90vh',
-      data: { mode: 'view', role }
+    this.router.navigate([role.roleId, 'view'], {
+      relativeTo: this.route,
+      state: { mode: 'view', role }
     });
   }
 
   editRole(role: Role): void {
-    const dialogRef = this.dialog.open(RoleDialogComponent, {
-       width: '92%',
-    maxWidth: '1260px',
-    height: '90vh',
-      disableClose: false,
-      data: { mode: 'edit', role }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadRoles();
-        this.notificationService.showSuccess('Role updated successfully');
-      }
+    this.router.navigate([role.roleId, 'edit'], {
+      relativeTo: this.route,
+      state: { mode: 'edit', role }
     });
   }
+
+  // ─── Delete (keep as dialog) ───────────────────────────────────
 
   deleteRole(role: Role): void {
     const dialogData: ConfirmDeleteData = {

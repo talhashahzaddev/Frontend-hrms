@@ -15,6 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AttendanceService } from '../../services/attendance.service';
@@ -51,7 +52,7 @@ export class ReportsComponent implements OnInit, OnDestroy {
   reportData: AttendanceReport | null = null;
   departments: Department[] = [];
   employees: Employee[] = [];
-departmentEmployees: DepartmentEmployee[] = [];
+  departmentEmployees: DepartmentEmployee[] = [];
   displayedColumns: string[] = [
     'employee',
     'date',
@@ -66,6 +67,9 @@ departmentEmployees: DepartmentEmployee[] = [];
   pageSize = 10;
   pageIndex = 0;
   pageSizeOptions = [5, 10, 25, 50, 100];
+
+  // Track which date range button is active
+  selectedDateRange: string = 'month';
 
   startDateControl = new FormControl(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   endDateControl = new FormControl(new Date());
@@ -87,7 +91,8 @@ departmentEmployees: DepartmentEmployee[] = [];
   constructor(
     private attendanceService: AttendanceService,
     private employeeService: EmployeeService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -124,22 +129,18 @@ departmentEmployees: DepartmentEmployee[] = [];
       return;
     }
 
-this.attendanceService.getDepartmentEmployees(departmentId)
-  .pipe(takeUntil(this.destroy$))
-  .subscribe({
-    next: (deptEmployees) => {
-      this.departmentEmployees = deptEmployees;
-      this.employeeControl.setValue('');
-    },
-    error: (err) => {
-      const errorMessage = err?.error?.message || err?.message || 'Failed to load employees for department';
-      this.notification.showError(errorMessage);
-    }
-  });
-
-
-
-
+    this.attendanceService.getDepartmentEmployees(departmentId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (deptEmployees) => {
+          this.departmentEmployees = deptEmployees;
+          this.employeeControl.setValue('');
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || err?.message || 'Failed to load employees for department';
+          this.notification.showError(errorMessage);
+        }
+      });
   }
 
   generateReport(): void {
@@ -210,6 +211,9 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     const today = new Date();
     let startDate: Date;
 
+    // Update the selected date range for active state
+    this.selectedDateRange = range;
+
     switch (range) {
       case 'today':
         startDate = new Date(today);
@@ -273,6 +277,8 @@ this.attendanceService.getDepartmentEmployees(departmentId)
     const mins = Math.round((hours - hrs) * 60);
     return `${hrs}h ${mins}m`;
   }
-
+   hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Reports', actionKey);
+  }
 
 }

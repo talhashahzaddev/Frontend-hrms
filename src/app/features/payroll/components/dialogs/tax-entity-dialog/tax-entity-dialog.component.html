@@ -1,0 +1,204 @@
+<div class="rd-container tax-entity-dialog">
+  <header class="rd-header">
+    <div class="rd-header-left">
+      <div class="rd-header-icon">
+        <mat-icon>account_tree</mat-icon>
+      </div>
+      <div>
+        <h2>{{ dialogTitle }}</h2>
+        <p class="rd-header-sub">Configure payroll tax data</p>
+      </div>
+    </div>
+    <button mat-icon-button type="button" class="rd-close-btn" aria-label="Close" (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="rd-body">
+    <form [formGroup]="form" class="rd-form">
+      @if (isCategory) {
+      <section class="rd-section">
+        <div class="rd-section-title">
+          <h3>Tax Category Details</h3>
+        </div>
+
+        <div class="rd-field">
+          <label>Tax Regime *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <mat-select formControlName="regimeId">
+              @for (option of data.regimes || []; track option.id) {
+              <mat-option [value]="option.id">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <label>Category Name *</label>
+          <mat-form-field appearance="outline" class="rd-mat-field">
+            <input matInput formControlName="categoryName" maxlength="100" />
+          </mat-form-field>
+        </div>
+
+        <div class="rd-field">
+          <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+        </div>
+      </section>
+      }
+
+      @if (isSlab) {
+      <section class="rd-section">
+        <div class="rd-section-title">
+          <h3>Tax Slab Details</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Tax Category *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="categoryId">
+                @for (option of data.categories || []; track option.id) {
+                <mat-option [value]="option.id">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Value Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="amountType">
+                <mat-option value="fixed">Fixed Amount</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Slab Order *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="slabOrder" />
+            </mat-form-field>
+          </div>
+          @if (form.get('amountType')?.value === 'percentage') {
+          <div class="rd-field">
+            <label>Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="percentage" />
+            </mat-form-field>
+          </div>
+          } @else {
+          <div class="rd-field">
+            <label>Fixed Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="fixedAmount" />
+            </mat-form-field>
+          </div>
+          }
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Min Income *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="minIncome" />
+            </mat-form-field>
+          </div>
+          <div class="rd-field">
+            <label>Max Income</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="maxIncome" />
+            </mat-form-field>
+          </div>
+        </div>
+      </section>
+      }
+
+      @if (isRule) {
+      <section class="rd-section">
+        <div class="rd-section-title">
+          <h3>Tax Rule Details</h3>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Tax Regime *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="regimeId">
+                @for (option of data.regimes || []; track option.id) {
+                <mat-option [value]="option.id">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="rd-field">
+            <label>Component Name *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput formControlName="componentName" maxlength="100" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Taxability *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="taxability">
+                <mat-option value="FullyTaxable">FullyTaxable</mat-option>
+                <mat-option value="Exempt">Exempt</mat-option>
+                <mat-option value="PartiallyExempt">PartiallyExempt</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="rd-field">
+            <label>Apply On *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="applyStage">
+                <mat-option value="ProvidentFunds">Provident Funds</mat-option>
+                <mat-option value="SocialSecurity">Social Security</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        @if (form.get('taxability')?.value === 'PartiallyExempt') {
+        <div class="rd-grid-2">
+          <div class="rd-field">
+            <label>Limit Type *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="limitType">
+                <mat-option value="fixed">Fixed</mat-option>
+                <mat-option value="percentage">Percentage</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          @if (form.get('limitType')?.value === 'percentage') {
+          <div class="rd-field">
+            <label>Limit Percentage *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="limitPercentage" />
+            </mat-form-field>
+          </div>
+          } @else {
+          <div class="rd-field">
+            <label>Limit Amount *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <input matInput type="number" formControlName="limitAmount" />
+            </mat-form-field>
+          </div>
+          }
+        </div>
+        }
+      </section>
+      }
+    </form>
+  </div>
+
+  <footer class="rd-footer">
+    <button class="rd-btn-cancel" type="button" (click)="onCancel()">Cancel</button>
+    <button class="rd-btn-submit" type="button" (click)="onSubmit()">{{ submitText }}</button>
+  </footer>
+</div>

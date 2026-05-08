@@ -1,0 +1,48 @@
+<div class="disburse-loan-dialog">
+  <div class="dialog-header">
+    <h2>Disburse Loan</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="save()">
+    <div class="employee-summary">
+      <mat-icon>person</mat-icon>
+      <div>
+        <label>Employee</label>
+        <strong>{{ data.employeeName }}</strong>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <label class="field">
+        <span>Start Date</span>
+        <input type="date" formControlName="startDate" />
+        @if (form.get('startDate')?.touched && form.get('startDate')?.errors?.['required']) {
+          <small class="error-text">Start date is required.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>End Date</span>
+        <input type="date" formControlName="endDate" />
+        @if (form.get('endDate')?.touched && form.get('endDate')?.errors?.['required']) {
+          <small class="error-text">End date is required.</small>
+        }
+      </label>
+    </div>
+
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <p>Please select the repayment period for this loan. This will determine when the installments start and end.</p>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn" [disabled]="form.invalid || isSubmitting">
+        {{ isSubmitting ? 'Processing...' : 'Disburse Loan' }}
+      </button>
+    </div>
+  </form>
+</div>

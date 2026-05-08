@@ -1,0 +1,101 @@
+<div class="request-loan-dialog">
+  <div class="dialog-header">
+    <h2>Request a loan</h2>
+    <button type="button" class="close-btn" aria-label="Close dialog" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form class="dialog-content" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-grid">
+      <label class="field">
+        <span>Loan amount {{ currencySymbol }}</span>
+        <div class="prefix-input">
+          <strong>{{ currencySymbol }}.</strong>
+          <input type="number" formControlName="totalAmount" min="1" placeholder="0.00" />
+        </div>
+        @if (showAmountError) {
+        @if (form.hasError('maxAmountExceeded')) {
+        <small class="error-text">Amount exceeds the maximum allowed ({{ currencySymbol }} {{
+          selectedRule?.maxLoanAmount | number }}).</small>
+        } @else {
+        <small class="error-text">Please enter a valid loan amount.</small>
+        }
+        }
+      </label>
+
+      <label class="field">
+        <span>Repayment type</span>
+        <select formControlName="repaymentType">
+          <option value="installment">Installment</option>
+          <option value="full">Full repayment</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Monthly installment {{ currencySymbol }}</span>
+        <div class="prefix-input">
+          <strong>Rs.</strong>
+          <input type="number" formControlName="monthlyInstallment" min="1" placeholder="0.00" />
+        </div>
+        @if (showInstallmentError) {
+        <small class="error-text">Installment should be valid and cannot exceed total amount.</small>
+        }
+      </label>
+
+      <label class="field">
+        <span>Total installments</span>
+        <input type="number" formControlName="totalInstallments" min="1" placeholder="12" />
+      </label>
+
+      <div [class.form-grid]="isFullRepayment" class="full-span">
+        <label class="field" [class.full-span]="!isFullRepayment">
+          <span>Loan types</span>
+          <select formControlName="loanRuleId">
+            <option [value]="null" disabled>Select loan type</option>
+            @for (rule of filteredLoanRules; track rule.ruleId) {
+            <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
+            }
+          </select>
+          @if (showLoanRuleError) {
+          <small class="error-text">Please select a loan type.</small>
+          }
+        </label>
+
+        @if (isFullRepayment) {
+        <label class="field">
+          <span>Return Date</span>
+          <input type="date" formControlName="returnDate" />
+          @if (showReturnDateError) {
+          <small class="error-text">Return date is required.</small>
+          }
+        </label>
+        }
+      </div>
+
+      @if (selectedRule && (selectedRule.maxLoanAmount !== null && selectedRule.maxLoanAmount !== undefined)) {
+      <div class="rule-hint full-span">
+        <mat-icon>info_outline</mat-icon>
+        <span>Maximum allowed: {{ currencySymbol }} {{ selectedRule.maxLoanAmount | number:'1.2-2' }}</span>
+      </div>
+      }
+
+      <label class="field full-span">
+        <span>Description / reason</span>
+        <textarea formControlName="reason" rows="3" placeholder="Explain the purpose of the loan..."></textarea>
+      </label>
+    </div>
+
+    <div class="info-box">
+      <mat-icon>info</mat-icon>
+      <p>Your loan request will be reviewed by HR before approval.</p>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="cancel-btn" (click)="close()">Cancel</button>
+      <button type="submit" class="submit-btn" [disabled]="form.invalid || isSubmitting">
+        {{ isSubmitting ? 'Submitting...' : 'Submit request' }}
+      </button>
+    </div>
+  </form>
+</div>

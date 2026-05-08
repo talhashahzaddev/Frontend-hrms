@@ -1,0 +1,277 @@
+<div class="loan-requests-page my-social-security-page">
+  <div class="requests-headline">
+    <div class="title-section">
+      <button class="icon-button back-btn" type="button" aria-label="Back to My Benefits" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-text-group">
+        <h1 class="title">My Social Security</h1>
+        <p class="subtitle">Manage your enrollment, view contributions, and submit benefit claims.</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="add-btn" type="button" (click)="openRequestDialog()">
+        <mat-icon>edit_note</mat-icon>
+        {{ enrollment ? 'Request enrollment change' : 'Request enrollment' }}
+      </button>
+      <button class="add-btn" type="button" (click)="openClaimDialog()" [disabled]="!enrollment">
+        <mat-icon>medical_services</mat-icon>
+        File a claim
+      </button>
+    </div>
+  </div>
+
+  <!-- Enrollment status panel -->
+  @if (!enrollmentLoading) {
+    <div class="status-panel" [class.no-enrollment]="!enrollment">
+      @if (enrollment) {
+        <div class="status-grid">
+          <div class="status-cell">
+            <span class="label">Enrollment status</span>
+            <span class="status-pill" [ngClass]="statusBadgeClass">{{ enrollment.enrollmentStatus }}</span>
+          </div>
+          <div class="status-cell">
+            <span class="label">Rule</span>
+            <span class="value">{{ enrollment.ruleName || '-' }}</span>
+          </div>
+          <div class="status-cell">
+            <span class="label">Scheme</span>
+            <span class="value">{{ enrollment.schemeName || '-' }}</span>
+          </div>
+          <div class="status-cell">
+            <span class="label">Employee %</span>
+            <span class="value">{{ effectiveEmployeePct ?? 0 | number:'1.0-2' }}%</span>
+          </div>
+          <div class="status-cell">
+            <span class="label">Employer %</span>
+            <span class="value">{{ effectiveEmployerPct ?? 0 | number:'1.0-2' }}%</span>
+          </div>
+          <div class="status-cell">
+            <span class="label">Effective from</span>
+            <span class="value">{{ enrollment.effectiveDate | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      } @else {
+        <div class="empty-state">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>You're not currently enrolled in social security.</strong>
+            <p>Click "Request enrollment" to submit a request to HR.</p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your social security records...</p>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Employee contribution</span>
+            <span class="value">{{ currencySymbol() }} {{ totalEmployeeContribution | number:'1.0-0' }}</span>
+          </div>
+          <div class="icon-wrapper color-amber"><mat-icon>person</mat-icon></div>
+        </div>
+        <p class="card-footer">your contribution total</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Employer contribution</span>
+            <span class="value">{{ currencySymbol() }} {{ totalEmployerContribution | number:'1.0-0' }}</span>
+          </div>
+          <div class="icon-wrapper color-blue"><mat-icon>business</mat-icon></div>
+        </div>
+        <p class="card-footer">company contribution total</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total contribution</span>
+            <span class="value">{{ currencySymbol() }} {{ totalContribution | number:'1.0-0' }}</span>
+          </div>
+          <div class="icon-wrapper color-green"><mat-icon>payments</mat-icon></div>
+        </div>
+        <p class="card-footer">combined employee + employer</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Enrolled periods</span>
+            <span class="value">{{ enrolledPeriodsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-purple"><mat-icon>date_range</mat-icon></div>
+        </div>
+        <p class="card-footer">periods with enrollment</p>
+      </div>
+    </div>
+
+    <div class="section-tabs with-tools">
+      <div>
+        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
+        <button type="button" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">My requests</button>
+        <button type="button" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">My claims</button>
+      </div>
+
+      @if (currentTab === 'transactions') {
+        <div class="filters">
+          <select class="filter-select" [(ngModel)]="selectedPeriodId">
+            <option value="">All periods</option>
+            @for (period of periodOptions; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+
+          <select class="filter-select" [(ngModel)]="selectedStatus">
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="deducted">Deducted</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search config or period..." [(ngModel)]="searchTerm" />
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (currentTab === 'transactions') {
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>Rule</th>
+                <th class="text-right">Actual salary</th>
+                <th class="text-right">Capped salary</th>
+                <th class="text-right">Employee</th>
+                <th class="text-right">Employer</th>
+                <th class="text-right">Total</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (visibleTransactions.length === 0) {
+                <tr><td colspan="8" class="empty-row">No social security records found for the selected filters.</td></tr>
+              } @else {
+                @for (row of visibleTransactions; track row.id) {
+                  <tr>
+                    <td>{{ row.periodName }}</td>
+                    <td>{{ row.configName }}</td>
+                    <td class="text-right">{{ currencySymbol() }} {{ row.actualSalary | number:'1.0-0' }}</td>
+                    <td class="text-right">{{ currencySymbol() }} {{ row.salaryCapped | number:'1.0-0' }}</td>
+                    <td class="text-right">{{ currencySymbol() }} {{ row.employeeAmount | number:'1.0-0' }}</td>
+                    <td class="text-right">{{ currencySymbol() }} {{ row.employerAmount | number:'1.0-0' }}</td>
+                    <td class="text-right strong">{{ currencySymbol() }} {{ row.totalAmount | number:'1.0-0' }}</td>
+                    <td class="text-center">
+                      <span class="status-pill" [ngClass]="getStatusClass(row.requestStatus)">{{ row.requestStatus }}</span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'requests') {
+      <div class="table-card">
+        <div class="table-wrap">
+          @if (requestsLoading) {
+            <div class="loading-state"><mat-spinner diameter="32"></mat-spinner><p>Loading your requests...</p></div>
+          } @else {
+            <table>
+              <thead>
+                <tr>
+                  <th>Submitted</th>
+                  <th>Type</th>
+                  <th>Reason</th>
+                  <th>Documents</th>
+                  <th class="text-center">Status</th>
+                  <th>Decision</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (requests.length === 0) {
+                  <tr><td colspan="6" class="empty-row">You haven't submitted any requests yet.</td></tr>
+                } @else {
+                  @for (req of requests; track req.requestId) {
+                    <tr>
+                      <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                      <td><span class="type-pill">{{ req.requestType }}</span></td>
+                      <td class="truncate">{{ req.reason || '-' }}</td>
+                      <td>{{ req.documentCount }} file(s)</td>
+                      <td class="text-center">
+                        <span class="status-pill" [ngClass]="getStatusClass(req.requestStatus)">{{ req.requestStatus }}</span>
+                      </td>
+                      <td class="truncate">{{ req.rejectionReason || req.remarks || '-' }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    }
+
+    @if (currentTab === 'claims') {
+      <div class="table-card">
+        <div class="table-wrap">
+          @if (claimsLoading) {
+            <div class="loading-state"><mat-spinner diameter="32"></mat-spinner><p>Loading your claims...</p></div>
+          } @else {
+            <table>
+              <thead>
+                <tr>
+                  <th>Claim date</th>
+                  <th>Type</th>
+                  <th class="text-right">Claimed</th>
+                  <th class="text-right">Approved</th>
+                  <th class="text-right">Paid</th>
+                  <th class="text-center">Status</th>
+                  <th>Decision notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (claims.length === 0) {
+                  <tr><td colspan="7" class="empty-row">You haven't filed any claims yet.</td></tr>
+                } @else {
+                  @for (claim of claims; track claim.claimId) {
+                    <tr>
+                      <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                      <td><span class="type-pill">{{ claim.claimType }}</span></td>
+                      <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
+                      <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>
+                      <td class="text-right">{{ claim.paidAmount != null ? (currencySymbol() + ' ' + (claim.paidAmount | number:'1.0-2')) : '-' }}</td>
+                      <td class="text-center">
+                        <span class="status-pill" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
+                      </td>
+                      <td class="truncate">{{ claim.rejectionReason || claim.decisionNotes || '-' }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

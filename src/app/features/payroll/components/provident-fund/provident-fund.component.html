@@ -1,0 +1,553 @@
+<div class="time-tracking-container loans-advances-page provident-fund-page">
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">Provident Funds</h1>
+      <p class="subtitle">Manage provident fund requests, provident fund payments, and repayment records from one place.</p>
+    </div>
+    <div class="header-actions">
+      <button class="add-btn" (click)="openManualEnrollmentDialog()">
+        <mat-icon>person_add</mat-icon>
+        Enroll employee
+      </button>
+    </div>
+  </div>
+
+  <div class="tab-navigation">
+    <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Provident fund requests</button>
+    <button class="tab" [class.active]="currentTab === 'payments'" (click)="setTab('payments')">Provident fund payments</button>
+    <button class="tab" [class.active]="currentTab === 'repayments'" (click)="setTab('repayments')">Repayments</button>
+  </div>
+
+  @if (currentTab === 'requests') {
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total requests</span>
+            <span class="value">{{ totalRequestsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>payments</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">all provident fund requests</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Pending requests</span>
+            <span class="value">{{ pendingRequestsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-amber">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">awaiting decision</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Approved requests</span>
+            <span class="value">{{ approvedRequestsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-green">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">approved and active</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Rejected requests</span>
+            <span class="value">{{ rejectedRequestsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-purple">
+            <mat-icon>calendar_today</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">declined requests</p>
+      </div>
+    </div>
+
+    <div class="content-card requests-section-card">
+      <div class="toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Filter by employee name..." [(ngModel)]="pendingSearch" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="pendingStatus">
+            <option value="">All status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="applyFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="isLoadingRequests">
+        @if (isLoadingRequests) {
+          <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading provident fund requests...</p>
+          </div>
+        }
+        <div class="admin-requests-list">
+          @if (requestView.length === 0) {
+            <div class="empty-state">No provident fund requests found.</div>
+          } @else {
+            @for (row of requestView; track row.id) {
+              <article class="request-row-card">
+                <div class="card-left">
+                  <div class="employee-info">
+                    <div class="avatar" [ngClass]="'bg-' + row.avatarTone">{{ row.initials }}</div>
+                    <div class="employee-detail">
+                      <span class="name">{{ row.employeeName }}</span>
+                    </div>
+                  </div>
+                  <span class="status-pill" [ngClass]="getFundStatusClass(row.status)">
+                    {{ getFundStatusLabel(row.status) }}
+                  </span>
+                </div>
+
+                <div class="card-middle">
+                  <div class="main-stats">
+                    <div class="stat-item">
+                      <label>Request type</label>
+                      <strong>{{ getRequestTypeLabel(row.requestType) }}</strong>
+                    </div>
+                    <div class="stat-item">
+                      <label>
+                        @if (row.requestType === 'withdrawal') { Amount } @else { Employee % }
+                      </label>
+                      <strong>
+                        @if (row.requestType === 'withdrawal') {
+                          {{ currencySymbol() }} {{ row.requestedAmount | number }}
+                        } @else {
+                          {{ row.employeePct | number:'1.0-2' }}%
+                        }
+                      </strong>
+                    </div>
+                    <div class="stat-item">
+                      <label>
+                        @if (row.requestType === 'withdrawal') { Withdrawal type } @else { Employer % }
+                      </label>
+                      <strong>
+                        @if (row.requestType === 'withdrawal') {
+                          {{ row.withdrawalType ? (row.withdrawalType | titlecase) : 'N/A' }}
+                        } @else {
+                          {{ row.employerPct | number:'1.0-2' }}%
+                        }
+                      </strong>
+                    </div>
+                    <div class="stat-item">
+                      <label>Rule</label>
+                      <strong>{{ row.ruleName || 'N/A' }}</strong>
+                    </div>
+                  </div>
+
+                  @if (row.requestType === 'withdrawal' && row.reason) {
+                    <div class="card-note">
+                      <mat-icon>notes</mat-icon>
+                      <p [title]="row.reason">Reason: {{ row.reason }}</p>
+                    </div>
+                  } @else if (row.rejectionReason || row.remarks) {
+                    <div class="card-note">
+                      <mat-icon>notes</mat-icon>
+                      <p [title]="row.rejectionReason || row.remarks">
+                        {{ row.rejectionReason ? ('Rejection reason: ' + row.rejectionReason) : row.remarks }}
+                      </p>
+                    </div>
+                  }
+                </div>
+
+                <div class="card-right">
+                  <div class="request-actions">
+                    @if (row.status === 'pending') {
+                      <button class="approve-btn" (click)="approveRequest(row)">
+                        <mat-icon>check_circle</mat-icon>
+                        Approve
+                      </button>
+                      <button class="reject-btn" (click)="rejectRequest(row)">
+                        <mat-icon>cancel</mat-icon>
+                        Reject
+                      </button>
+                    } @else if (row.status === 'approved') {
+                      <button class="disburse-btn" disabled>
+                        <mat-icon>check_circle</mat-icon>
+                        Approved
+                      </button>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (requestTotalCount === 0) {
+            No records found
+          } @else {
+            Showing {{ requestsFromRecord }}&ndash;{{ requestsToRecord }} of {{ requestTotalCount }} records
+          }
+        </p>
+        <div class="pagination">
+          <button class="page-btn" [class.disabled]="requestPage === 1" [disabled]="requestPage === 1" (click)="prevRequestPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          @for (p of requestPageRange; track p) {
+            <button class="page-btn" [class.active]="p === requestPage" (click)="goToRequestPage(p)">{{ p }}</button>
+          }
+
+          <button class="page-btn" [class.disabled]="requestPage === requestTotalPages" [disabled]="requestPage === requestTotalPages" (click)="nextRequestPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else if (currentTab === 'payments') {
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total profiles</span>
+            <span class="value">{{ totalPaymentProfilesCount }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>payments</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">approved, active, and completed requests</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Approved profiles</span>
+            <span class="value">{{ approvedPaymentProfilesCount }}</span>
+          </div>
+          <div class="icon-wrapper color-amber">
+            <mat-icon>hourglass_empty</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">waiting for monthly transactions</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Active funds</span>
+            <span class="value">{{ activeFundsCount }}</span>
+          </div>
+          <div class="icon-wrapper color-green">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">still under deductions</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Completed profiles</span>
+            <span class="value">{{ completedPaymentProfilesCount }}</span>
+          </div>
+          <div class="icon-wrapper color-purple">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">completed provident fund cycles</p>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="pendingPaymentSearch" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="pendingPaymentStatus">
+            <option value="">All fund status</option>
+            <option value="active">Active</option>
+            <option value="closed">Closed</option>
+            <option value="pending">Pending</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" [disabled]="!hasActivePaymentFilters && !hasAppliedPaymentFilters" (click)="applyPaymentFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" [disabled]="!hasActivePaymentFilters && !hasAppliedPaymentFilters" (click)="clearPaymentFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="add-btn-wrap">
+          <button class="add-btn" (click)="openAddPfFundsDialog()">
+            <mat-icon>add</mat-icon>
+            Add PF funds
+          </button>
+        </div>
+
+      </div>
+
+      <div class="table-responsive">
+        <table class="compact-table loan-payments-table">
+          <colgroup>
+            <col class="col-employee" />
+            <col class="col-remaining" />
+            <col class="col-status" />
+            <col class="col-total" />
+            <col class="col-paid" />
+            <col class="col-action" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="col-employee">Employee</th>
+              <th class="col-remaining">Basic salary</th>
+              <th class="col-status">Employee %</th>
+              <th class="col-total">Employer %</th>
+              <th class="col-paid">Effective from</th>
+              <th class="col-action">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (paymentView.length === 0) {
+              <tr>
+                <td class="empty-row" colspan="6">No provident fund payment profiles available.</td>
+              </tr>
+            } @else {
+              @for (payment of paymentView; track payment.id) {
+                <tr>
+                  <td>{{ payment.employeeName }}</td>
+                  <td>{{ currencySymbol() }} {{ payment.basicSalary | number }}</td>
+                  <td>{{ payment.employeePct | number:'1.0-2' }}%</td>
+                  <td>{{ payment.employerPct | number:'1.0-2' }}%</td>
+                  <td>{{ formatDateLabel(payment.effectiveFrom) }}</td>
+                  <td>
+                    <span class="status-pill" [ngClass]="getFundStatusClass(payment.status)">
+                      {{ getFundStatusLabel(payment.status) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (paymentTotalCount === 0) {
+            No records found
+          } @else {
+            Showing {{ paymentsFromRecord }}&ndash;{{ paymentsToRecord }} of {{ paymentTotalCount }} records
+          }
+        </p>
+        <div class="pagination">
+          <button class="page-btn" [class.disabled]="paymentsPage === 1" [disabled]="paymentsPage === 1" (click)="prevPaymentPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          @for (p of paymentPageRange; track p) {
+            <button class="page-btn" [class.active]="p === paymentsPage" (click)="goToPaymentPage(p)">{{ p }}</button>
+          }
+
+          <button class="page-btn" [class.disabled]="paymentsPage === paymentsTotalPages" [disabled]="paymentsPage === paymentsTotalPages" (click)="nextPaymentPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Total transaction amount</span>
+            <span class="value">{{ currencySymbol() }} {{ totalRepaymentCollected | number }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>request_quote</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">current page totals</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Running balance</span>
+            <span class="value">{{ currencySymbol() }} {{ pendingRepaymentAmount | number }}</span>
+          </div>
+          <div class="icon-wrapper color-amber">
+            <mat-icon>schedule</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">sum of running balances</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Monthly transactions</span>
+            <span class="value">{{ installmentRepaymentCount }}</span>
+          </div>
+          <div class="icon-wrapper color-green">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">monthly contribution entries</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Settlement transactions</span>
+            <span class="value">{{ fullRepaymentCount }}</span>
+          </div>
+          <div class="icon-wrapper color-purple">
+            <mat-icon>done_all</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">settlement type entries</p>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search by employee name..." [(ngModel)]="pendingRepaymentSearch" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="pendingRepaymentPeriodId">
+            <option value="">All payroll periods</option>
+            @for (period of periods; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+
+          <select class="filter-select" [(ngModel)]="pendingRepaymentTransactionTypeFilter">
+            <option value="">All transaction types</option>
+            <option value="monthly">Monthly</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="settlement">Settlement</option>
+            <option value="profit">Profit</option>
+            <option value="adjustment">Adjustment</option>
+          </select>
+
+          <select class="filter-select" [(ngModel)]="pendingRepaymentPfStatusFilter">
+            <option value="">All fund status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="active">Active</option>
+            <option value="rejected">Rejected</option>
+            <option value="closed">Closed</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" [disabled]="!hasActiveRepaymentFilters && !hasAppliedRepaymentFilters" (click)="applyRepaymentFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" [disabled]="!hasActiveRepaymentFilters && !hasAppliedRepaymentFilters" (click)="clearRepaymentFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="isLoadingRepayments">
+        @if (isLoadingRepayments) {
+          <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading provident fund repayments...</p>
+          </div>
+        }
+        <table class="compact-table repayments-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Employee amount / %</th>
+              <th>Employer amount / %</th>
+              <th class="text-right">Running balance</th>
+              <th class="text-right">Total amount</th>
+              <th>Payroll period</th>
+              <th>Transaction type</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (repaymentView.length === 0) {
+              <tr>
+                <td class="empty-row" colspan="7">No repayment records available.</td>
+              </tr>
+            } @else {
+              @for (row of repaymentView; track row.transactionId) {
+                <tr>
+                  <td>{{ row.employeeName }}</td>
+                  <td>{{ currencySymbol() }} {{ row.employeeAmount | number }} / {{ row.employeePct | number:'1.0-2' }}%</td>
+                  <td>{{ currencySymbol() }} {{ row.employerAmount | number }} / {{ row.employerPct | number:'1.0-2' }}%</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.runningBalance | number }}</td>
+                  <td class="text-right">{{ currencySymbol() }} {{ row.totalAmount | number }}</td>
+                  <td>{{ row.periodName }}</td>
+                  <td>{{ row.transactionType | titlecase }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <p>
+          @if (repaymentTotalCount === 0) {
+            No records found
+          } @else {
+            Showing {{ repaymentsFromRecord }}&ndash;{{ repaymentsToRecord }} of {{ repaymentTotalCount }} records
+          }
+        </p>
+        <div class="pagination">
+          <button class="page-btn" [class.disabled]="repaymentsPage === 1" [disabled]="repaymentsPage === 1" (click)="prevRepaymentPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          @for (p of repaymentPageRange; track p) {
+            <button class="page-btn" [class.active]="p === repaymentsPage" (click)="goToRepaymentPage(p)">{{ p }}</button>
+          }
+
+          <button class="page-btn" [class.disabled]="repaymentsPage === repaymentsTotalPages" [disabled]="repaymentsPage === repaymentsTotalPages" (click)="nextRepaymentPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

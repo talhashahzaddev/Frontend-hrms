@@ -1,188 +1,220 @@
+// ══════════════════════════════════════════════════════════════
+// IMPORT FONTS
+// ══════════════════════════════════════════════════════════════
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-
-/* Swap Shift Dialog - Exact Same Create Shift Style */
-::ng-deep .mat-mdc-dialog-container {
-  border-radius: 16px !important;
-  padding: 0 !important;
-  overflow: hidden;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12) !important;
-  max-width: 520px !important;
+// ══════════════════════════════════════════════════════════════
+// GLOBAL CENTERING FIX
+// ══════════════════════════════════════════════════════════════
+::ng-deep .cdk-overlay-pane {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-/* Header */
+// ══════════════════════════════════════════════════════════════
+// DIALOG CONTAINER
+// ══════════════════════════════════════════════════════════════
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  width: 420px !important; 
+  font-family: 'Inter', sans-serif !important;
+  background: #ffffff !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+::ng-deep .mat-mdc-dialog-content {
+  overflow: visible !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+// ══════════════════════════════════════════════════════════════
+// HEADER
+// ══════════════════════════════════════════════════════════════
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: 12px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
 
   h2 {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     margin: 0;
-    font-size: 20px;
+    font-size: 15px;
     font-weight: 700;
+    color: #1e293b;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+
+  // FIXED ALIGNMENT FOR CLOSE BUTTON
+  .close-button {
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #94a3b8;
+    padding: 0 !important;
+    min-width: 32px !important;
+    border-radius: 50% !important; // Ensures hover is a perfect circle
 
     mat-icon {
-      font-size: 26px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-  }
 
-  .close-button {
-    color: white;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(90deg);
+    &:hover { 
+      background: #f1f5f9 !important; 
+      color: #64748b;
     }
   }
 }
 
-/* Content */
+// ══════════════════════════════════════════════════════════════
+// CONTENT
+// ══════════════════════════════════════════════════════════════
 .dialog-content {
-  padding: 22px !important;
-  min-width: 420px;
-  max-width: 520px;
+  padding: 14px 18px !important;
+}
 
-  .period-form {
+.swap-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ══════════════════════════════════════════════════════════════
+// CURRENT SHIFT BANNER
+// ══════════════════════════════════════════════════════════════
+.current-shift-banner {
+  background: #f0f7ff;
+  border: 1px solid #e0e7ff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .shift-info-left {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-
-    .full-width {
-      width: 100%;
+    gap: 2px;
+    .shift-label { font-size: 10px; font-weight: 700; color: #6366f1; text-transform: uppercase; }
+    .shift-name {
+      background: #6366f1;
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      width: fit-content;
     }
+  }
 
-    .date-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    ::ng-deep mat-form-field.mat-form-field-appearance-outline {
-      .mat-mdc-text-field-wrapper {
-        background: #f9fafb;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-      }
-
-      &:hover .mat-mdc-text-field-wrapper {
-        background: white;
-      }
-
-      &.mat-focused .mat-mdc-text-field-wrapper {
-        background: white;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-
-      .mat-mdc-form-field-label {
-        color: #6b7280;
-        font-weight: 500;
-      }
-
-      &.mat-focused .mat-mdc-form-field-label {
-        color: #667eea;
-      }
-
-      input,
-      mat-select,
-      textarea {
-        color: #1f2937;
-        font-weight: 500;
-      }
-    }
+  .shift-info-right .shift-time {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
   }
 }
 
-/* Actions */
-.dialog-actions {
-  padding: 16px 22px !important;
-  background: #fafafa;
-  border-top: 1px solid #e5e7eb;
+// ══════════════════════════════════════════════════════════════
+// FORM GROUPS
+// ══════════════════════════════════════════════════════════════
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    .required { color: #ef4444; }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAT-FORM-FIELD CUSTOMIZATION
+// ══════════════════════════════════════════════════════════════
+::ng-deep mat-form-field.custom-field {
+  width: 100%;
+
+  .mat-mdc-text-field-wrapper {
+    min-height: 36px !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: 36px !important;
+    padding: 6px 12px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  // TALL REASON BOX
+  &.textarea-field {
+    .mat-mdc-text-field-wrapper {
+      min-height: 90px !important;
+    }
+    .mat-mdc-form-field-infix {
+      align-items: flex-start !important;
+    }
+    textarea.mat-mdc-input-element {
+      min-height: 80px !important; 
+      margin-top: 4px !important;
+      line-height: 1.5 !important;
+    }
+  }
+
+  .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+
+  .mat-mdc-select-value-text, input.mat-mdc-input-element {
+    font-size: 13px !important;
+  }
+
+  .mdc-notched-outline__leading { border-radius: 8px 0 0 8px !important; }
+  .mdc-notched-outline__trailing { border-radius: 0 8px 8px 0 !important; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// FOOTER
+// ══════════════════════════════════════════════════════════════
+.dialog-footer {
+  padding: 10px 18px 18px 18px !important;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 
   button {
-    height: 40px;
+    height: 38px;
     padding: 0 24px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
-    text-transform: none !important;
-    transition: all 0.3s ease !important;
-
-    &[mat-stroked-button] {
-      background: white !important;
-      color: #6b7280 !important;
-      border: 2px solid #e5e7eb !important;
-
-      &:hover:not([disabled]) {
-        background: #f9fafb !important;
-        border-color: #cbd5e1 !important;
-        color: #374151 !important;
-      }
-    }
-
-    /* ✅ Exact Create Shift Gradient Button Style */
-    &[mat-flat-button],
-    &.submit-button {
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%) !important;
-      color: white !important;
-      box-shadow: 0 3px 10px rgba(102, 126, 234, 0.35) !important;
-      font-weight: 600 !important;
-      position: relative;
-      overflow: hidden;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 16px rgba(102, 126, 234, 0.45) !important;
-        background: linear-gradient(135deg, #5b0db5 0%, #1f5ae0 100%) !important;
-      }
-
-      &:disabled {
-        background: #cbd5e1 !important;
-        color: #f1f5f9 !important;
-        box-shadow: none !important;
-        cursor: not-allowed;
-      }
-    }
-  }
-}
-
-/* Error */
-::ng-deep mat-error {
-  font-size: 12px;
-  color: #dc2626;
-  margin-top: 2px;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .dialog-content {
-    min-width: unset;
-    padding: 16px !important;
-
-    .period-form .date-row {
-      grid-template-columns: 1fr;
-    }
+    border-radius: 8px !important;
   }
 
-  .dialog-actions {
-    flex-direction: column;
-    gap: 10px;
-
-    button {
-      width: 100%;
-    }
+  .btn-cancel { 
+    color: #64748b !important; 
+    border: 1px solid #e2e8f0 !important; 
+    background: transparent !important;
   }
-}
-
-/* Ensure Timepicker Above Dialog */
-::ng-deep ngx-material-timepicker-dialog {
-  z-index: 2000 !important;
+  
+  .btn-submit { 
+    background: #6366f1 !important; 
+    color: white !important;
+  }
 }

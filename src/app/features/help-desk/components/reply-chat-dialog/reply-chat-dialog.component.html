@@ -1,0 +1,88 @@
+<div class="reply-dialog">
+
+  <!-- Header -->
+  <div class="reply-dialog-header">
+    <h2 class="reply-dialog-title">Reply to Ticket</h2>
+    <button class="reply-dialog-close" type="button" (click)="closeDialog()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="replyForm" (ngSubmit)="sendReply()">
+    <div class="reply-dialog-body">
+
+      <!-- From -->
+      <div class="detail-field">
+        <label class="field-label">From</label>
+        <input
+          class="field-input"
+          formControlName="senderEmail"
+          readonly
+          type="email"
+        />
+      </div>
+
+      <!-- To -->
+      <div class="detail-field">
+        <label class="field-label">To</label>
+        <input
+          class="field-input"
+          [value]="recipientEmails.join(', ')"
+          readonly
+          type="text"
+        />
+      </div>
+
+      <!-- Subject -->
+      <div class="detail-field">
+        <label class="field-label">Subject</label>
+        <input
+          class="field-input"
+          formControlName="subject"
+          placeholder="Enter subject (optional)"
+          type="text"
+        />
+      </div>
+
+      <!-- Message -->
+      <div class="detail-field">
+        <label class="field-label">Message <span class="field-required">*</span></label>
+        <textarea
+          class="reply-textarea reply-textarea--tall"
+          formControlName="message"
+          placeholder="Type your message..."
+        ></textarea>
+        <span
+          class="field-error"
+          *ngIf="replyForm.controls['message'].hasError('required') && replyForm.controls['message'].touched"
+        >
+          Message is required
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="reply-dialog-footer">
+      <button
+        class="btn btn-secondary"
+        type="button"
+        (click)="closeDialog()"
+        [disabled]="sending"
+      >
+        Cancel
+      </button>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        [disabled]="sending || replyForm.invalid"
+      >
+        {{ sending ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+
+  </form>
+</div>

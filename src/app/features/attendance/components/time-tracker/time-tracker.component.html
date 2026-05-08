@@ -1,281 +1,320 @@
 <!-- Time Tracker Container -->
 <div class="time-tracker-container">
-  
-  <!-- Header Section -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">
-        <mat-icon>timer</mat-icon>
-        Time Tracker
-      </h1>
-      <p class="page-subtitle">Track your working hours and manage your time</p>
-    </div>
-    
-    <div class="current-time">
-      <div class="time-display">{{ currentTime | date:'HH:mm:ss' }}</div>
-      <div class="date-display">{{ currentTime | date:'dd-MM-yyyy' }}</div>
-    </div>
-  </div>
 
-  <!-- Clock In/Out Section -->
-  <mat-card class="clock-card">
-    <mat-card-content>
-      <div class="clock-section">
-        <div class="clock-status">
-          <div class="status-indicator" [class.active]="currentSession?.isActive">
-            <mat-icon>{{ currentSession?.isActive ? 'radio_button_checked' : 'radio_button_unchecked' }}</mat-icon>
-          </div>
-          <div class="status-text">
-            <h3>{{ currentSession?.isActive ? 'Currently Working' : 'Not Clocked In' }}</h3>
-            <p *ngIf="currentSession?.isActive && currentSession?.checkInTime">
-              Started at: {{ currentSession?.checkInTime | date:'HH:mm' }}
-            </p>
-            <p *ngIf="currentSession?.isActive">
-              Duration: {{ formatElapsedTime(currentSession?.elapsedHours || 0) }}
-            </p>
-            <p *ngIf="!currentSession?.isActive">Ready to start your workday?</p>
-          </div>
+  <div class="geo-gate-overlay" *ngIf="showCameraPanel">
+    <div class="geo-gate-card">
+
+      <!-- Header -->
+      <div class="geo-gate-header">
+        <mat-icon class="geo-gate-icon">security</mat-icon>
+        <div>
+          <h2>Secure Clock {{ pendingClockAction === 'in' ? 'In' : 'Out' }}</h2>
+          <p class="geo-gate-sub">GPS &amp; Face verification required for your shift</p>
         </div>
+        <button mat-icon-button class="geo-close-btn" (click)="cancelGeoFlow()" matTooltip="Cancel">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
 
-        <div class="clock-actions">
-          <button mat-flat-button 
-                  (click)="clockIn()" 
-                  [disabled]="currentSession?.isActive || isClockActionLoading"
-                  class="clock-in-button">
-            <mat-spinner *ngIf="isClockActionLoading && !currentSession?.isActive" diameter="20"></mat-spinner>
-            <mat-icon *ngIf="!isClockActionLoading">login</mat-icon>
-            Clock In
-          </button>
-          
-          <button mat-flat-button 
-                  (click)="clockOut()" 
-                  [disabled]="!currentSession?.isActive || isClockActionLoading"
-                  class="clock-out-button">
-            <mat-spinner *ngIf="isClockActionLoading && currentSession?.isActive" diameter="20"></mat-spinner>
-            <mat-icon *ngIf="!isClockActionLoading">logout</mat-icon>
-            Clock Out
-          </button>
+      <!-- Step 1 — GPS -->
+      <div class="gate-step" [class.step-success]="gpsState === 'success'"
+           [class.step-error]="gpsState === 'error'" [class.step-loading]="gpsState === 'loading'">
+        <div class="step-indicator">
+          <mat-spinner *ngIf="gpsState === 'loading'" diameter="24"></mat-spinner>
+          <mat-icon *ngIf="gpsState === 'success'" class="step-icon-ok">check_circle</mat-icon>
+          <mat-icon *ngIf="gpsState === 'error'" class="step-icon-err">cancel</mat-icon>
+          <mat-icon *ngIf="gpsState === 'idle'" class="step-icon-idle">location_on</mat-icon>
+        </div>
+        <div class="step-body">
+          <span class="step-label">GPS Location</span>
+          <span class="step-msg">{{ gpsMessage || 'Waiting…' }}</span>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Today's Summary -->
-  <mat-card class="summary-card" *ngIf="todayAttendance">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>today</mat-icon>
-        Today's Summary
-      </mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="summary-grid">
-        <div class="summary-item">
-          <div class="summary-label">Check In</div>
-          <div class="summary-value">
-            {{ todayAttendance.checkInTime ? (todayAttendance.checkInTime | date:'HH:mm') : '--:--' }}
-          </div>
+      <!-- Step 2 — Camera -->
+      <div class="gate-step" [class.step-success]="cameraState === 'success'"
+           [class.step-error]="cameraState === 'error'" [class.step-loading]="cameraState === 'loading'">
+        <div class="step-indicator">
+          <mat-spinner *ngIf="cameraState === 'loading'" diameter="24"></mat-spinner>
+          <mat-icon *ngIf="cameraState === 'success'" class="step-icon-ok">check_circle</mat-icon>
+          <mat-icon *ngIf="cameraState === 'error'" class="step-icon-err">cancel</mat-icon>
+          <mat-icon *ngIf="cameraState === 'idle'" class="step-icon-idle">videocam</mat-icon>
         </div>
-        <div class="summary-item">
-          <div class="summary-label">Check Out</div>
-          <div class="summary-value">
-            {{ todayAttendance.checkOutTime ? (todayAttendance.checkOutTime | date:'HH:mm') : '--:--' }}
-          </div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Total Hours</div>
-          <div class="summary-value">{{ formatHours(todayAttendance.totalHours) }}</div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-label">Status</div>
-          <div class="summary-value">
-            <mat-chip [class]="'status-' + todayAttendance.status">
-              {{ todayAttendance.status | titlecase }}
-            </mat-chip>
-          </div>
+        <div class="step-body">
+          <span class="step-label">Camera</span>
+          <span class="step-msg">{{ cameraState === 'idle' ? 'Waiting for GPS…' : (cameraState === 'loading' ? 'Opening camera…' : (cameraState === 'success' ? 'Camera ready' : 'Camera permission denied')) }}</span>
         </div>
       </div>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Quick Actions -->
-  <div class="quick-actions-grid">
-    <mat-card class="action-card" routerLink="/attendance/dashboard">
-      <mat-card-content>
-        <div class="action-content">
-          <mat-icon>calendar_today</mat-icon>
-          <h3>My Attendance</h3>
-          <p>View your attendance history and calendar</p>
+      <!-- Live video feed (shown once camera is open) -->
+      <div class="webcam-wrapper" *ngIf="cameraState === 'success'">
+        <video #videoEl autoplay muted playsinline class="webcam-feed"></video>
+        <canvas #canvasEl class="webcam-canvas" style="display:none;"></canvas>
+        <div class="webcam-overlay-ring"></div>
+      </div>
+
+      <!-- Step 3 — Face Recognition -->
+      <div class="gate-step" [class.step-success]="faceState === 'success'"
+           [class.step-error]="faceState === 'error'" [class.step-loading]="faceState === 'loading'">
+        <div class="step-indicator">
+          <mat-spinner *ngIf="faceState === 'loading'" diameter="24"></mat-spinner>
+          <mat-icon *ngIf="faceState === 'success'" class="step-icon-ok">check_circle</mat-icon>
+          <mat-icon *ngIf="faceState === 'error'" class="step-icon-err">cancel</mat-icon>
+          <mat-icon *ngIf="faceState === 'idle'" class="step-icon-idle">face</mat-icon>
         </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="action-card" routerLink="/attendance/reports" *ngIf="!isEmployee">
-      <mat-card-content>
-        <div class="action-content">
-          <mat-icon>assessment</mat-icon>
-          <h3>Reports</h3>
-          <p>Generate and export attendance reports</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card class="action-card" routerLink="/attendance/team-attendance" *ngIf="canViewTeamAttendance">
-      <mat-card-content>
-        <div class="action-content">
-          <mat-icon>groups</mat-icon>
-          <h3>Team Attendance</h3>
-          <p>Monitor your team's attendance</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-
- <!-- Today's Sessions -->
-<mat-card class="recent-activity-card today-sessions-card">
-  <mat-card-header>
-    <mat-card-title>
-      <mat-icon>today</mat-icon>
-      Today's Sessions
-    </mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <!-- Loading State -->
-    <div *ngIf="isLoadingSessions" class="loading-container">
-      <mat-spinner diameter="30"></mat-spinner>
-      <p>Loading today's sessions...</p>
-    </div>
-
-    <!-- Session List -->
-    <div *ngIf="!isLoadingSessions && todaySessions.length > 0" class="activity-list">
-      <div class="activity-item" *ngFor="let session of todaySessions">
-        <div class="activity-date">
-          <div class="day">{{ session.checkInTime | date:'d' }}</div>
-          <div class="month">{{ session.checkInTime | date:'MMM' }}</div>
-        </div>
-        <div class="activity-details">
-          <div class="activity-time">
-            <span class="check-in">
-              <mat-icon>login</mat-icon>
-              {{ session.checkInTime | date:'HH:mm' }}
-            </span>
-            <span class="separator">→</span>
-            <span class="check-out">
-              <mat-icon>logout</mat-icon>
-              {{ session.checkOutTime ? (session.checkOutTime | date:'HH:mm') : '--:--' }}
-            </span>
-          </div>
-          <div class="activity-summary">
-            <span class="hours">{{ formatSessionDuration(session.checkInTime, session.checkOutTime) }}</span>
-            <!-- <mat-chip [class]="'status-' + session.status" class="status-chip">
-              {{ session.status | titlecase }}
-            </mat-chip> -->
-          </div>
+        <div class="step-body">
+          <span class="step-label">Face Recognition</span>
+          <span class="step-msg">{{ faceMessage || 'Waiting for camera…' }}</span>
         </div>
       </div>
-    </div>
 
-    <!-- Empty State -->
-    <div *ngIf="!isLoadingSessions && todaySessions.length === 0" class="empty-state">
-      <mat-icon>schedule</mat-icon>
-      <p>No sessions recorded for today</p>
-    </div>
-  </mat-card-content>
-</mat-card>
+      <!-- Confidence Ring (shown after face scan completes) -->
+      <div class="confidence-ring-wrapper" *ngIf="faceConfidence > 0">
+        <svg class="confidence-ring" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="28" fill="none" stroke="#e0e0e0" stroke-width="6"/>
+          <circle cx="36" cy="36" r="28" fill="none"
+                  [attr.stroke]="confidenceRingColor"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="confidenceRingDashArray"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 36 36)"
+                  class="ring-progress"/>
+          <text x="36" y="40" text-anchor="middle" class="ring-text">{{ faceConfidence }}%</text>
+        </svg>
+        <span class="confidence-label" [style.color]="confidenceRingColor">
+          {{ faceState === 'success' ? 'Verified' : 'Mismatch' }}
+        </span>
+      </div>
 
-
-<!-- Filters Section (Date Filter) -->
-<mat-card class="filters-card">
-  <div class="filters-header">
-    <h3>Filter Attendance</h3>
- 
-  </div>
-
-  <div class="filters-content">
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Start Date</mat-label>
-      <input matInput [matDatepicker]="startPicker" [(ngModel)]="filterStartDate" placeholder="Choose start date">
-      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-      <mat-datepicker #startPicker></mat-datepicker>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>End Date</mat-label>
-      <input matInput [matDatepicker]="endPicker" [(ngModel)]="filterEndDate" placeholder="Choose end date">
-      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-      <mat-datepicker #endPicker></mat-datepicker>
-    </mat-form-field>
-
-    <div class="filter-actions-container">
-      <button mat-flat-button color="primary" (click)="applyDateFilter()" class="add-button">
-        <mat-icon>filter_list</mat-icon>
-        Apply Filter
+      <!-- Retry button on face error -->
+      <button mat-raised-button color="primary" class="retry-btn"
+              *ngIf="cameraState === 'success' && faceState === 'idle'"
+          (click)="startFaceScan()">
+        <mat-icon>face_retouching_natural</mat-icon> Scan Face
       </button>
+
+      <button mat-stroked-button color="accent" class="retry-btn"
+              *ngIf="faceState === 'error' && cameraState === 'success'"
+              (click)="retryFaceScan()">
+        <mat-icon>refresh</mat-icon> Retry Face Scan
+      </button>
+
+      <!-- Action Buttons -->
+      <div class="geo-gate-actions">
+        <button mat-stroked-button (click)="cancelGeoFlow()">Cancel</button>
+        <button mat-raised-button color="primary"
+                [disabled]="!geoFaceGateOpen || isClockActionLoading"
+                (click)="confirmGeoClock()">
+          <mat-spinner *ngIf="isClockActionLoading" diameter="18" class="btn-spinner"></mat-spinner>
+          <mat-icon *ngIf="!isClockActionLoading">{{ pendingClockAction === 'in' ? 'login' : 'logout' }}</mat-icon>
+          Confirm Clock {{ pendingClockAction === 'in' ? 'In' : 'Out' }}
+        </button>
+      </div>
+
     </div>
   </div>
-</mat-card>
 
-<!-- Attendance Table -->
-<mat-card class="table-card">
-  <div class="table-header">
-    <h3>Recent Attendance ({{ recentAttendance.length }})</h3>
-  </div>
-
-  <div class="table-container">
-    <mat-spinner *ngIf="isLoading" diameter="50"></mat-spinner>
-
-    <table mat-table [dataSource]="recentAttendance" *ngIf="!isLoading && recentAttendance.length > 0" class="attendance-table">
-
-      <!-- Date Column -->
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef> Date </th>
-        <td mat-cell *matCellDef="let record"> {{ record.workDate | date:'dd-MM-yyyy' }} </td>
-      </ng-container>
-
-      <!-- Check-in Column -->
-      <ng-container matColumnDef="checkIn">
-        <th mat-header-cell *matHeaderCellDef> Check-in </th>
-        <td mat-cell *matCellDef="let record">
-          {{ record.checkInTime ? (record.checkInTime | date:'HH:mm') : '--:--' }}
-        </td>
-      </ng-container>
-
-      <!-- Check-out Column -->
-      <ng-container matColumnDef="checkOut">
-        <th mat-header-cell *matHeaderCellDef> Check-out </th>
-        <td mat-cell *matCellDef="let record">
-          {{ record.checkOutTime ? (record.checkOutTime | date:'HH:mm') : '--:--' }}
-        </td>
-      </ng-container>
-
-      <!-- Hours Column -->
-      <ng-container matColumnDef="hours">
-        <th mat-header-cell *matHeaderCellDef> Hours </th>
-        <td mat-cell *matCellDef="let record"> {{ formatHours(record.totalHours) }} </td>
-      </ng-container>
-
-      <!-- Status Column -->
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef> Status </th>
-        <td mat-cell *matCellDef="let record">
-          <mat-chip [class]="'status-' + record.status">{{ record.status | titlecase }}</mat-chip>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="['date','checkIn','checkOut','hours','status']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['date','checkIn','checkOut','hours','status'];"></tr>
-    </table>
-
-    <!-- Empty State -->
-    <div *ngIf="!isLoading && recentAttendance.length === 0" class="empty-state">
-      <mat-icon>schedule</mat-icon>
-      <h3>No Attendance Records Found</h3>
-      <p>No attendance records match the current filter.</p>
+  <!-- 1. Top Header Bar -->
+  <header class="tracker-header">
+    <div class="header-brand">
+      <div class="brand-icon">
+        <mat-icon>timer</mat-icon>
+        <span class="brand-dot" [class.active]="currentSession?.isActive"></span>
+      </div>
+      <div class="brand-text">
+        <h1 class="brand-title">Time Tracker</h1>
+        <p class="brand-sub">Track your working hours</p>
+      </div>
     </div>
+
+    <div class="header-status" *ngIf="currentSession?.isActive">
+      <div class="working-badge">
+        <span class="working-dot"></span>
+        <span class="working-label">Currently Working</span>
+      </div>
+      <div class="working-meta">
+        <div class="meta-item">
+          <span class="meta-label">Started at</span>
+          <span class="meta-value">{{ currentSession?.checkInTime | date:'HH:mm' }}</span>
+        </div>
+        <div class="meta-divider"></div>
+        <div class="meta-item">
+          <span class="meta-label">Duration</span>
+          <span class="meta-value">{{ formatElapsedTime(currentSession?.elapsedHours || 0) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <!-- Geo-fence badge indicator -->
+      <div class="geofence-badge" *ngIf="shiftHasGeoFence" matTooltip="This shift requires GPS + Face verification">
+        <mat-icon>location_on</mat-icon>
+        <span>Geo-Secured</span>
+      </div>
+
+      <div class="time-block">
+        <div class="time-row">
+          <span class="live-time">{{ currentTime | date:'HH:mm:ss' }}</span>
+          <span class="live-date">{{ currentTime | date:'dd-MM-yyyy' }}</span>
+        </div>
+        <span class="elapsed-label">Elapsed Time</span>
+      </div>
+
+      <div class="header-actions">
+        <button
+          class="btn-clock-in"
+          (click)="clockIn()"
+          [disabled]="currentSession?.isActive || isClockActionLoading || !hasPermission('time_tracket_clock_in')"
+          *ngIf="hasPermission('time_tracket_clock_in')">
+          <mat-spinner *ngIf="isClockActionLoading && !currentSession?.isActive" diameter="14"></mat-spinner>
+          Clock In
+        </button>
+
+        <button
+          class="btn-clock-out"
+          (click)="clockOut()"
+          [disabled]="!currentSession?.isActive || isClockActionLoading || !hasPermission('time_tracket_clock_out')"
+          *ngIf="hasPermission('time_tracket_clock_out')">
+          <mat-spinner *ngIf="isClockActionLoading && currentSession?.isActive" diameter="14"></mat-spinner>
+          Clock Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2. Today's Summary Strip -->
+  <section class="summary-strip" *ngIf="todayAttendance">
+    <div class="strip-item">
+      <span class="strip-label">Check In</span>
+      <span class="strip-value">
+        {{ todayAttendance.checkInTime ? (todayAttendance.checkInTime | date:'HH:mm') : '--:--' }}
+      </span>
+    </div>
+    <div class="strip-item">
+      <span class="strip-label">Check Out</span>
+      <span class="strip-value muted">
+        {{ todayAttendance.checkOutTime ? (todayAttendance.checkOutTime | date:'HH:mm') : '--:--' }}
+      </span>
+    </div>
+    <div class="strip-item">
+      <span class="strip-label">Total Hours</span>
+      <span class="strip-value">{{ formatHours(todayAttendance.totalHours) }}</span>
+    </div>
+    <div class="strip-item">
+      <span class="strip-label">Status</span>
+      <span class="strip-badge" [class]="'badge-' + todayAttendance.status">
+        {{ todayAttendance.status | titlecase }}
+      </span>
+    </div>
+  </section>
+
+  <!-- 4. Main Content Grid -->
+  <div class="main-grid">
+
+    <!-- Recent Attendance -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title">Recent Attendance ({{ recentAttendance.length }})</h3>
+      </div>
+
+      <div class="panel-filters">
+        <div class="filter-group">
+          <label class="filter-label">From</label>
+          <mat-form-field appearance="outline" class="compact-field">
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="filterStartDate" placeholder="mm/dd/yyyy">
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">To</label>
+          <mat-form-field appearance="outline" class="compact-field">
+            <input matInput [matDatepicker]="endPicker" [(ngModel)]="filterEndDate" placeholder="mm/dd/yyyy">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <button class="btn-apply" (click)="applyDateFilter()">Apply</button>
+      </div>
+
+      <div class="table-wrap">
+        <div *ngIf="isLoading" class="panel-loading">
+          <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <table *ngIf="!isLoading && recentAttendance.length > 0"
+               mat-table [dataSource]="recentAttendance" class="compact-table">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let r">{{ r.workDate | date:'dd-MM-yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="checkIn">
+            <th mat-header-cell *matHeaderCellDef>Check-In</th>
+            <td mat-cell *matCellDef="let r">{{ r.checkInTime ? (r.checkInTime | date:'hh:mm a') : '--:--' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="checkOut">
+            <th mat-header-cell *matHeaderCellDef>Check-Out</th>
+            <td mat-cell *matCellDef="let r">{{ r.checkOutTime ? (r.checkOutTime | date:'hh:mm a') : '--:--' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="hours">
+            <th mat-header-cell *matHeaderCellDef>Hours</th>
+            <td mat-cell *matCellDef="let r">{{ formatHours(r.totalHours) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="col-right">Status</th>
+            <td mat-cell *matCellDef="let r" class="col-right">
+              <span class="table-badge" [class]="'badge-' + r.status">{{ r.status | titlecase }}</span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['date','checkIn','checkOut','hours','status']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['date','checkIn','checkOut','hours','status'];"></tr>
+        </table>
+
+        <div *ngIf="!isLoading && recentAttendance.length === 0" class="empty-state">
+          <mat-icon>schedule</mat-icon>
+          <h3>No Attendance Records Found</h3>
+          <p>No attendance records match the current filter.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Sessions -->
+    <div class="panel sessions-panel">
+      <div class="panel-header">
+        <mat-icon class="panel-icon">event_available</mat-icon>
+        <h3 class="panel-title">Today's Sessions</h3>
+      </div>
+
+      <div *ngIf="isLoadingSessions" class="panel-loading">
+        <mat-spinner diameter="28"></mat-spinner>
+        <p>Loading today's sessions...</p>
+      </div>
+
+      <div *ngIf="!isLoadingSessions && todaySessions.length > 0" class="sessions-list">
+        <div class="session-row" *ngFor="let session of todaySessions; let i = index" [class.dim]="i > 0">
+          <div class="session-left">
+            <div class="session-date-badge" [class.inactive]="i > 0">
+              <span class="day">{{ session.checkInTime | date:'d' }}</span>
+              <span class="month">{{ session.checkInTime | date:'MMM' }}</span>
+            </div>
+            <div class="session-time">
+              <mat-icon>login</mat-icon>
+              {{ session.checkInTime | date:'hh:mm a' }}
+            </div>
+          </div>
+          <div class="session-duration">
+            {{ formatSessionDuration(session.checkInTime, session.checkOutTime) }}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoadingSessions && todaySessions.length === 0" class="empty-state">
+        <mat-icon>schedule</mat-icon>
+        <p>No sessions recorded for today</p>
+      </div>
+    </div>
+
   </div>
-</mat-card>
-
-
 
 </div>

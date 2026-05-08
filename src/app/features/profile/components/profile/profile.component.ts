@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -30,6 +30,7 @@ import { User } from '../../../../core/models/auth.models';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -61,6 +62,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   departments: any[] = [];
   positions: any[] = [];
   managers: any[] = [];
+  countries: { name: string; code: string; flag?: string; cca2?: string }[] = [];
+  countryFilter = '';
 
   selectedProfileFile: File | null = null;
   profilePreviewUrl: string | ArrayBuffer | null = null;
@@ -91,6 +94,7 @@ isUploadingProfileImage: boolean = false;
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
+      phoneCountryCode: [''],
       phone: [''],
       address: this.formBuilder.group({
         street: [''],
@@ -108,7 +112,8 @@ isUploadingProfileImage: boolean = false;
         name: [''],
         phone: [''],
         relationship: [''],
-        email: ['']
+        email: [''],
+        emergencyPhoneCountryCode: ['']
       }),
       workLocation: [''],
       departmentId: [''],
@@ -153,6 +158,19 @@ isUploadingProfileImage: boolean = false;
     });
   }
 
+  // Load country dial codes for phone selection
+  private loadCountryDialCodes(): void {
+    this.employeeService.getCountryDialCodes().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (list) => {
+        this.countries = list.map((x: any) => ({ name: x.name, code: x.code, flag: x.flag, cca2: x.cca2 }));
+        // attempt to normalise existing phone values (main + emergency)
+        this.resolvePhoneCountryFromEmployee();
+        this.resolveEmergencyPhoneCountryFromEmployee();
+      },
+      error: (err) => console.error('Failed to load country dial codes', err)
+    });
+  }
+
   private loadCurrentUser(): void {
     this.authService.getCurrentUser()
       .pipe(takeUntil(this.destroy$))
@@ -193,13 +211,38 @@ isUploadingProfileImage: boolean = false;
           const selectedDepartment = this.departments.find(d => d.departmentId === employee.departmentId);
           const selectedPosition = this.positions.find(p => p.positionId === employee.positionId);
 
+          // Try to split international phone into country code + local number (align with employee-edit)
+          let detectedCode: string | null = null;
+          let plainPhone = employee.phone || '';
+          if (plainPhone && typeof plainPhone === 'string' && plainPhone.startsWith('+')) {
+            const m = plainPhone.match(/^\+(\d{1,4})(.*)$/);
+            if (m) {
+              // keep the plus to match other components (e.g. '+92')
+              detectedCode = `+${m[1]}`;
+              plainPhone = m[2].replace(/[^0-9]/g, '').trim();
+            }
+          }
+
+          // Also try to split emergency contact phone into country code + local number
+          let detectedEmCode: string | null = null;
+          let emPlainPhone = employee.emergencycontact?.phone || '';
+          if (emPlainPhone && typeof emPlainPhone === 'string' && emPlainPhone.startsWith('+')) {
+            const em = emPlainPhone.match(/^\+(\d{1,4})(.*)$/);
+            if (em) {
+              detectedEmCode = `+${em[1]}`;
+              emPlainPhone = em[2].replace(/[^0-9]/g, '').trim();
+            }
+          }
+
           // Patch form values with proper mapping
           this.profileForm.patchValue({
             employeeNumber: employee.employeeNumber,
             firstName: employee.firstName,
             lastName: employee.lastName,
             email: employee.email,
-            phone: employee.phone,
+            // if we detected a country code, set phoneCountryCode and trimmed local phone
+            phoneCountryCode: detectedCode || '',
+            phone: detectedCode ? plainPhone : employee.phone,
             dateOfBirth: employee.dateOfBirth ? new Date(employee.dateOfBirth) : '',
             hireDate: employee.hireDate ? new Date(employee.hireDate) : '',
             gender: employee.gender,
@@ -217,7 +260,9 @@ isUploadingProfileImage: boolean = false;
 
             emergencyContact: {
               name: employee.emergencycontact?.name || '',
-              phone: employee.emergencycontact?.phone || '',
+              // if we detected an international prefix, set the emergency country code and local phone
+              emergencyPhoneCountryCode: detectedEmCode || '',
+              phone: detectedEmCode ? emPlainPhone : (employee.emergencycontact?.phone || ''),
               relationship: employee.emergencycontact?.relationship || '',
               email: employee.emergencycontact?.email || ''
             },
@@ -245,6 +290,167 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
           this.notificationService.showError('Failed to load employee details');
         }
       });
+
+    // load countries for phone handling
+    this.loadCountryDialCodes();
+  }
+
+  // Try to match emergency contact phone to a loaded country code and patch nested controls
+  private resolveEmergencyPhoneCountryFromEmployee(): void {
+    const rawPhone = (this.profileForm?.get('emergencyContact.phone')?.value || '').toString().trim();
+    if (!rawPhone || !this.countries || this.countries.length === 0) return;
+
+    const cleaned = rawPhone.replace(/[\s()\-.\/]/g, '');
+
+    let bestMatch: { code: string; flag?: string } | null = null;
+    let matchedPrefix = '';
+
+    for (const c of this.countries) {
+      if (!c.code) continue;
+      const codeStr = String(c.code);
+      const variants = [codeStr, `+${codeStr}`];
+      for (const v of variants) {
+        const norm = v.replace(/[^0-9+]/g, '');
+        if (cleaned.startsWith(norm)) {
+          if (!bestMatch || codeStr.length > (bestMatch.code || '').length) {
+            bestMatch = c;
+            matchedPrefix = norm;
+          }
+        }
+      }
+    }
+
+    if (bestMatch) {
+      let local = cleaned;
+      if (matchedPrefix && local.startsWith('+')) {
+        local = local.replace(/^\+/, '');
+      }
+      if (matchedPrefix) {
+        const prefixDigits = matchedPrefix.replace(/[^0-9]/g, '');
+        if (local.startsWith(prefixDigits)) {
+          local = local.slice(prefixDigits.length);
+        }
+      }
+      local = local.replace(/[^0-9]/g, '').trim();
+
+      const controlCode = bestMatch.code;
+      this.profileForm.patchValue({ emergencyContact: { emergencyPhoneCountryCode: controlCode, phone: local } }, { emitEvent: false });
+    }
+  }
+
+  // Returns the flag URL for a selected country code (if available)
+  getCountryFlag(code?: string | null): string | undefined {
+    if (!code) return undefined;
+    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    return found?.flag;
+  }
+
+  // Returns a friendly label for a country code
+  getCountryLabel(code?: string | null): string {
+    if (!code) return '';
+    const found = this.countries.find(c => c.code === code || c.code === (code + ''));
+    if (found) return `${found.name} ${found.code}`;
+    return code;
+  }
+
+  onCountryPanelOpen(isOpen: boolean) {
+    if (isOpen) {
+      // focus handling could be added
+    }
+  }
+
+  // Try to match profile phone to a loaded country code and patch form controls
+  private resolvePhoneCountryFromEmployee(): void {
+    const rawPhone = (this.profileForm?.get('phone')?.value || '').toString().trim();
+    if (!rawPhone || !this.countries || this.countries.length === 0) return;
+
+    const cleaned = rawPhone.replace(/[\s()\-.\/]/g, '');
+
+    let bestMatch: { code: string; flag?: string } | null = null;
+    let matchedPrefix = '';
+
+    for (const c of this.countries) {
+      if (!c.code) continue;
+      const codeStr = String(c.code);
+      const variants = [codeStr, `+${codeStr}`];
+      for (const v of variants) {
+        const norm = v.replace(/[^0-9+]/g, '');
+        if (cleaned.startsWith(norm)) {
+          if (!bestMatch || codeStr.length > (bestMatch.code || '').length) {
+            bestMatch = c;
+            matchedPrefix = norm;
+          }
+        }
+      }
+    }
+
+    if (bestMatch) {
+      let local = cleaned;
+      if (matchedPrefix && local.startsWith('+')) {
+        local = local.replace(/^\+/, '');
+      }
+      if (matchedPrefix) {
+        const prefixDigits = matchedPrefix.replace(/[^0-9]/g, '');
+        if (local.startsWith(prefixDigits)) {
+          local = local.slice(prefixDigits.length);
+        }
+      }
+      local = local.replace(/[^0-9]/g, '').trim();
+
+      const controlCode = bestMatch.code;
+      this.profileForm.patchValue({ phoneCountryCode: controlCode, phone: local }, { emitEvent: false });
+      return;
+    }
+  }
+
+  // Prevent non-digit keystrokes for phone inputs
+  public onPhoneKeydown(event: KeyboardEvent): void {
+    const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
+    if (allowedKeys.includes(event.key)) return;
+    if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x', 'A', 'C', 'V', 'X'].includes(event.key)) return;
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  // Sanitize pasted content to digits-only and insert into the input
+  public onPhonePaste(event: ClipboardEvent): void {
+    const clipboard = event.clipboardData || (window as any).clipboardData;
+    if (!clipboard) return;
+    const text = clipboard.getData('text') || '';
+    const digits = text.replace(/\D/g, '');
+    if (digits !== text) {
+      event.preventDefault();
+      const target = event.target as HTMLInputElement;
+      const start = target.selectionStart ?? 0;
+      const end = target.selectionEnd ?? 0;
+      const newVal = target.value.slice(0, start) + digits + target.value.slice(end);
+      target.value = newVal;
+      this.setPhoneControlValue(target.getAttribute('formControlName') || 'phone', newVal);
+    }
+  }
+
+  // Ensure input contains only digits (keeps value as string)
+  public onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const cleaned = input.value.replace(/\D/g, '');
+    if (input.value !== cleaned) {
+      input.value = cleaned;
+      this.setPhoneControlValue(input.getAttribute('formControlName') || 'phone', cleaned);
+    }
+  }
+
+  // Helper to set phone control value for top-level or nested emergencyContact
+  private setPhoneControlValue(controlName: string, value: string): void {
+    const top = this.profileForm.get(controlName);
+    if (top) {
+      top.setValue(value, { emitEvent: false });
+      return;
+    }
+    const nested = this.profileForm.get('emergencyContact.' + controlName);
+    if (nested) {
+      nested.setValue(value, { emitEvent: false });
+    }
   }
 
   // onFileSelected(event: Event): void {
@@ -312,7 +518,14 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
     formData.append('FirstName', formValue.firstName || '');
     formData.append('LastName', formValue.lastName || '');
     formData.append('Email', formValue.email || '');
-    formData.append('Phone', formValue.phone || '');
+
+    // Combine selected country code with phone digits (e.g. "+92 3012345678")
+    const rawCountry = formValue.phoneCountryCode ? String(formValue.phoneCountryCode) : '';
+    const normalizedCountry = rawCountry ? (rawCountry.startsWith('+') ? rawCountry : `+${rawCountry}`) : '';
+    const phoneDigits = (formValue.phone || '').toString().replace(/\D/g, '');
+    const combinedPhone = normalizedCountry ? `${normalizedCountry} ${phoneDigits}` : phoneDigits;
+    formData.append('Phone', combinedPhone || '');
+
     formData.append('Gender', formValue.gender || '');
     formData.append('MaritalStatus', formValue.maritalStatus || '');
     formData.append('Nationality', formValue.nationality || '');
@@ -327,7 +540,15 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
 
     // Nested objects
     formData.append('Address', JSON.stringify(formValue.address || {}));
-    formData.append('EmergencyContact', JSON.stringify(formValue.emergencyContact || {}));
+
+    // Emergency contact (leave phone as-is; there's no separate country selector for it)
+    // Combine emergency country code with phone digits if provided
+    const emCountryRaw = formValue.emergencyContact?.emergencyPhoneCountryCode ? String(formValue.emergencyContact.emergencyPhoneCountryCode) : '';
+    const emNormalizedCountry = emCountryRaw ? (emCountryRaw.startsWith('+') ? emCountryRaw : `+${emCountryRaw}`) : '';
+    const emPhoneDigits = (formValue.emergencyContact?.phone || '').toString().replace(/\D/g, '');
+    const emCombinedPhone = emNormalizedCountry ? `${emNormalizedCountry} ${emPhoneDigits}` : emPhoneDigits;
+    const emergencyObj = { ...(formValue.emergencyContact || {}), phone: emCombinedPhone };
+    formData.append('EmergencyContact', JSON.stringify(emergencyObj));
 
     // Dates
     if (formValue.hireDate) formData.append('HireDate', new Date(formValue.hireDate).toISOString());

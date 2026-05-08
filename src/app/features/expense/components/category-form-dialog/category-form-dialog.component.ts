@@ -2,11 +2,7 @@ import { Component, Inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, takeUntil } from 'rxjs';
 
 import { ExpenseCategoryDto, CreateExpenseCategoryRequest, UpdateExpenseCategoryRequest } from '../../../../core/models/expense.models';
@@ -25,11 +21,7 @@ export interface CategoryDialogData {
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule
+    MatIconModule
   ],
   templateUrl: './category-form-dialog.component.html',
   styleUrls: ['./category-form-dialog.component.scss']
@@ -48,7 +40,7 @@ export class CategoryFormDialogComponent implements OnDestroy {
     private notificationService: NotificationService
   ) {
     this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]]
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]]
     });
 
     if (data.mode === 'edit' && data.category) {
@@ -91,5 +83,9 @@ export class CategoryFormDialogComponent implements OnDestroy {
         this.isSubmitting = false;
       }
     });
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
   }
 }

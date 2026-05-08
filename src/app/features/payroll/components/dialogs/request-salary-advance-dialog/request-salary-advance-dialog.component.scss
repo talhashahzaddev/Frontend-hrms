@@ -1,0 +1,235 @@
+.request-salary-advance-dialog-panel .mat-mdc-dialog-container {
+  padding: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 22px 42px rgba(0, 25, 80, 0.2);
+}
+
+.request-salary-advance-dialog-panel .mdc-dialog__surface {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.request-advance-dialog {
+  background: #ffffff;
+  color: #0f172a;
+  width: min(500px, 94vw);
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.35rem;
+    border-bottom: 1px solid #e2e8f0;
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .close-btn {
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+
+      mat-icon {
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+  }
+
+  .dialog-content {
+    padding: 1.15rem 1.35rem 1.25rem;
+  }
+
+  .info-box {
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    border-radius: 0.7rem;
+    padding: 0.8rem 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+
+    mat-icon {
+      margin-top: 0.06rem;
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+      color: #b45309;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      color: #9a3412;
+      font-weight: 600;
+    }
+  }
+
+  .field-stack {
+    display: grid;
+    gap: 0.95rem;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 210px;
+    gap: 0.75rem;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .amount-field {
+    min-width: 0;
+  }
+
+  .rule-field {
+    min-width: 0;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+
+    span {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 2.7rem;
+      border: 1px solid #dbe3ef;
+      border-radius: 0.7rem;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 0.9rem;
+      padding: 0.65rem 0.75rem;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        background: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+      }
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.55rem center;
+      background-repeat: no-repeat;
+      background-size: 1.3em 1.3em;
+      padding-right: 2.1rem;
+    }
+
+    textarea {
+      min-height: 5.9rem;
+      resize: vertical;
+    }
+  }
+
+  .prefix-input {
+    position: relative;
+
+    strong {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      font-size: 0.78rem;
+      letter-spacing: 0.01em;
+    }
+
+    input {
+      padding-left: 2.45rem;
+    }
+  }
+
+  .error-text {
+    margin: 0.1rem 0 0;
+    font-size: 0.76rem;
+    color: #b91c1c;
+    line-height: 1.35;
+  }
+
+  .rule-hint {
+    margin: -0.3rem 0 0.1rem;
+    font-size: 0.78rem;
+    color: #1e3a8a;
+    line-height: 1.35;
+
+    strong {
+      font-weight: 700;
+    }
+  }
+
+  .dialog-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+
+    button {
+      border: none;
+      border-radius: 0.62rem;
+      height: 2.45rem;
+      padding: 0 1.1rem;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cancel-btn {
+      color: #1d4ed8;
+      background: transparent;
+
+      &:hover {
+        background: rgba(29, 78, 216, 0.1);
+      }
+    }
+
+    .submit-btn {
+      color: #ffffff;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.26);
+
+      &:hover {
+        filter: brightness(1.04);
+      }
+    }
+  }
+}

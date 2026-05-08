@@ -1,0 +1,105 @@
+<div class="payslip-view-modal">
+  <header class="modal-header">
+    <h1>{{ data.title }}</h1>
+    <div class="header-actions">
+      <button type="button" class="ghost-btn" (click)="requestDownload()">
+        <mat-icon>download</mat-icon>
+        Download PDF
+      </button>
+      <button type="button" class="icon-btn" aria-label="Close dialog" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <section class="employee-strip">
+    <div class="left">
+      <div class="avatar">{{ data.initials }}</div>
+      <div>
+        <h2>{{ data.employeeName }}</h2>
+        <p>{{ data.designation }} · {{ data.employeeCode }} · {{ data.departmentName }}</p>
+        <small>
+          Joining date: {{ data.joiningDate || '-' }} · Bank: {{ data.bankName }} · A/C: {{ data.bankAccountNo }}
+        </small>
+      </div>
+    </div>
+
+    <div class="right">
+      <strong>{{ data.periodLabel }}</strong>
+      <span>{{ data.periodStart }} - {{ data.periodEnd }}</span>
+    </div>
+  </section>
+
+  <div class="content-grid">
+    <section>
+      <h3>Earnings</h3>
+      <div class="line-list">
+        @for (item of data.earnings; track item.label) {
+          <div class="line-row">
+            <span>{{ item.label }}</span>
+            <strong [ngClass]="toneClass(item.tone)">{{ item.amount | number }}</strong>
+          </div>
+        }
+      </div>
+
+      <div class="total-box">
+        <span>Total earnings</span>
+        <strong>{{ totalEarnings | number }}</strong>
+      </div>
+
+      <h3 class="section-offset">Attendance</h3>
+      <div class="attendance-grid">
+        <div><span>Scheduled days</span><strong>{{ data.attendance.scheduledDays }}</strong></div>
+        <div><span>Present</span><strong class="tone-primary">{{ data.attendance.presentDays }}</strong></div>
+        <div><span>Absents</span><strong class="tone-danger">{{ data.attendance.absentDays }}</strong></div>
+        <div><span>Late</span><strong>{{ data.attendance.lateCount }}</strong></div>
+        <div class="full"><span>OT hours</span><strong>{{ data.attendance.overtimeHours }} hrs</strong></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>Deductions</h3>
+      <div class="line-list">
+        @for (item of data.deductions; track item.label) {
+          <div class="line-row">
+            <span class="tone-danger">{{ item.label }}</span>
+            <strong class="tone-danger">{{ item.amount | number }}</strong>
+          </div>
+        }
+      </div>
+
+      <div class="total-box danger">
+        <span>Total deductions</span>
+        <strong>{{ totalDeductions | number }}</strong>
+      </div>
+
+      <div class="mini-card section-offset">
+        <h4>Employer contributions</h4>
+        @for (item of data.employerContributions; track item.label) {
+          <div class="line-row">
+            <span>{{ item.label }}</span>
+            <strong class="tone-primary">{{ item.amount | number }}</strong>
+          </div>
+        }
+      </div>
+
+      <div class="mini-card ytd">
+        <h4>Year to date (YTD)</h4>
+        <div class="line-row"><span>YTD gross</span><strong>{{ data.ytd.grossPkr | number }}</strong></div>
+        <div class="line-row"><span>YTD tax</span><strong>{{ data.ytd.taxPkr | number }}</strong></div>
+        <div class="line-row strong"><span>YTD net</span><strong class="tone-primary">{{ data.ytd.netPkr | number }}</strong></div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="payable-bar">
+    <div class="label-wrap">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <span>Net salary payable</span>
+    </div>
+    <div class="amount-wrap">
+      <small>Amount disbursed</small>
+      <strong>{{ formatMoney(data.netPayablePkr) }}</strong>
+    </div>
+  </footer>
+</div>

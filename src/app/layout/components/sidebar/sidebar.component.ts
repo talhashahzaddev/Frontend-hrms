@@ -11,14 +11,17 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 // Services
 import { AuthService } from '@core/services/auth.service';
-import { User } from '@core/models/auth.models';
+import { User, UserPermissions } from '@core/models/auth.models';
 
 interface MenuItem {
   label: string;
   icon: string;
   route?: string;
+  activeRoutes?: string[];
   children?: MenuItem[];
-  roles?: string[];
+  menuName?: string;
+  subMenuName?: string;
+  permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
   exact?: boolean;
@@ -53,158 +56,285 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Dashboard',
       icon: 'dashboard',
       route: '/dashboard',
-      roles: ['Super Admin', 'HR Manager']
+      menuName: 'Admin Dashboard',
     },
     {
       label: 'Dashboard',
       icon: 'dashboard',
       route: '/employee/dashboard',
-      roles: ['Manager', 'Employee']
-    }
-    ,
+      menuName: 'Employee Dashboard',
+    },
     {
       label: 'Employee Management',
       icon: 'people',
-      roles: ['Super Admin', 'HR Manager'],
+      menuName: 'Employee Management',
       children: [
-        { label: 'All Employees', icon: 'group', route: '/employees', exact: true },
-        { label: 'Add Employee', icon: 'person_add', route: '/employees/add', roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Departments', icon: 'apartment', route: '/employees/departments', roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Positions', icon: 'work', route: '/employees/positions', roles: ['Super Admin', 'HR Manager'] }
+        { label: 'All Employees', icon: 'group', route: '/employees', menuName: 'Employee Management', subMenuName: 'All Employees', exact: true },
+        { label: 'Add Employee', icon: 'person_add', route: '/employees/add', menuName: 'Employee Management', subMenuName: 'All Employees' },
+        { label: 'Departments', icon: 'apartment', route: '/employees/departments', menuName: 'Employee Management', subMenuName: 'Department' },
+        { label: 'Positions', icon: 'work', route: '/employees/positions', menuName: 'Employee Management', subMenuName: 'Positions' }
       ]
     },
     {
       label: 'Attendance',
       icon: 'schedule',
+      menuName: 'Attendance',
       children: [
-        { label: 'My Attendance', icon: 'access_time', route: '/attendance/dashboard' },
-        { label: 'Time Tracker', icon: 'timer', route: '/attendance/time-tracker' },
-        { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', roles: ['Super Admin', 'HR Manager', 'Manager'] },
-        { label: 'Timesheet', icon: 'date_range', route: '/attendance/timesheet' },
-        { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', roles: ['Super Admin', 'HR Manager', 'Manager'] },
-        { label: 'Reports', icon: 'assessment', route: '/attendance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] },
-        { label: 'Shifts', icon: 'access_time', route: '/attendance/shift' },
+        { label: 'My Attendance', icon: 'access_time', route: '/attendance/dashboard', menuName: 'Attendance', subMenuName: 'My Attendance' },
+        {
+          label: 'Time Tracker',
+          icon: 'timer',
+          route: '/attendance/time-tracker',
+          menuName: 'Attendance',
+          subMenuName: 'Time Tracker',
+          permissionAliases: ['TimeTracker']
+        },
+        { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', menuName: 'Attendance', subMenuName: 'Team Attendance' },
+        { label: 'Timesheet', icon: 'date_range', route: '/attendance/timesheet', menuName: 'Attendance', subMenuName: 'Timesheet' },
+        { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', menuName: 'Attendance', subMenuName: 'Timesheet Dashboard' },
+        { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
+        { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts' },
+        { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime' },
+
+        {
+          label: 'Geo-Fences',
+          icon: 'fence',
+          route: '/attendance/geo-fences',
+          menuName: 'Attendance',
+          subMenuName: 'Geo-Fences',
+          permissionAliases: ['Geo Fences', 'GeoFence', 'Geo Fence', 'Geofence']
+        },
+        {
+          label: 'Geo Violations',
+          icon: 'warning',
+          route: '/attendance/geo-violations',
+          menuName: 'Attendance',
+          subMenuName: 'Geo Violations',
+          permissionAliases: ['Geo-Fence Violations', 'GeoFence Violations', 'Geofence Violations']
+        },
       ]
     },
     {
       label: 'Leave Management',
       icon: 'event_available',
+      menuName: 'Leave Management',
       children: [
         {
           label: 'My Leaves',
           icon: 'event',
-          route: '/leave/dashboard'
+          route: '/leave/dashboard',
+          menuName: 'Leave Management',
+          subMenuName: 'My Leaves'
         },
         {
-          // Existing page — unchanged
           label: 'Team Leaves',
           icon: 'groups',
           route: '/leave/team',
-          roles: ['Super Admin', 'HR Manager', 'Manager']
+          menuName: 'Leave Management',
+          subMenuName: 'Team Leaves'
         },
         {
-          // NEW page — pending approvals + team remaining leave balances
           label: 'Team Requests',
           icon: 'group_work',
           route: '/leave/team-requests',
-          roles: ['Super Admin', 'HR Manager', 'Manager']
+          menuName: 'Leave Management',
+          subMenuName: 'Team Requests'
         },
         {
           label: 'Leave Types',
           icon: 'category',
           route: '/leave/types',
-          roles: ['Super Admin', 'HR Manager']
+          menuName: 'Leave Management',
+          subMenuName: 'Leave Types'
         }
       ]
     },
     {
-      label: 'Payroll',
-      icon: 'payments',
-      roles: ['Super Admin'],
+      label: 'Holidays',
+      icon: 'celebration',
+      menuName: 'Holidays',
       children: [
-        { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods' },
-        { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process' },
-        { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component' },
-        { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports' },
-        { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips' }
+        { label: 'Holiday Management', icon: 'event', route: '/holidays', menuName: 'Holidays', subMenuName: 'Holiday Management', exact: true },
+        { label: 'My Holidays', icon: 'beach_access', route: '/holidays/my-holidays', menuName: 'Holidays', subMenuName: 'My Holidays' },
       ]
     },
+    // {
+    //   label: 'Payroll',
+    //   icon: 'payments',
+    //   menuName: 'Payroll',
+    //   children: [
+    //     { label: 'Payroll Periods', icon: 'date_range', route: '/payroll/periods', menuName: 'Payroll', subMenuName: 'Payroll Periods' },
+    //     { label: 'Process Payroll', icon: 'calculate', route: '/payroll/process', menuName: 'Payroll', subMenuName: 'Process Payroll' },
+    //     { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation', menuName: 'Payroll', subMenuName: 'Payroll Calculation' },
+    //     { label: 'Salary Components', icon: 'tune', route: '/payroll/salary-component', menuName: 'Payroll', subMenuName: 'Salary Components' },
+    //     { label: 'Payroll Reports', icon: 'summarize', route: '/payroll/reports', menuName: 'Payroll', subMenuName: 'Payroll Reports' },
+    //     { label: 'Salary Slips', icon: 'receipt', route: '/payroll/slips', menuName: 'Payroll', subMenuName: 'Salary Slips' }
+    //   ]
+    // },
     {
       label: 'Assets Management',
       icon: 'inventory_2',
-      roles: ['Super Admin', 'HR Manager', 'Manager'],
+      menuName: 'Assets Management',
       children: [
-        { label: 'Types of Assets', icon: 'category', route: '/assets/types', roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Assets', icon: 'add_box', route: '/assets/create', roles: ['Super Admin', 'HR Manager', 'Manager'] }
+        { label: 'Types of Assets', icon: 'category', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
+        { label: 'Assets', icon: 'add_box', route: '/assets/create', menuName: 'Assets Management', subMenuName: 'Assets' }
       ]
     },
     {
       label: 'Performance',
       icon: 'trending_up',
+      menuName: 'Performance',
       children: [
-        { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', roles: ['Employee'] },
-        { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', roles: ['Manager'] },
-        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/dashboard', roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals' },
-        { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills' },
-        { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals' },
-        { label: 'Performance Reports', icon: 'analytics', route: '/performance/reports', roles: ['Super Admin', 'HR Manager', 'Manager'] }
+
+        { label: 'My Performance', icon: 'person_outline', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'My Performance' },
+        { label: 'Performance', icon: 'assessment', route: '/performance/dashboard', menuName: 'Performance', subMenuName: 'Performance' },
+        { label: 'Appraisal Cycles', icon: 'assessment', route: '/performance/cycles', menuName: 'Performance', subMenuName: 'Appraisal Cycles' },
+        { label: 'Appraisals', icon: 'rate_review', route: '/performance/appraisals', menuName: 'Performance', subMenuName: 'Appraisals' },
+        { label: 'Skills Matrix', icon: 'psychology', route: '/performance/skills', menuName: 'Performance', subMenuName: 'Skill Matrix' },
+        { label: 'Goals & KRAs', icon: 'flag', route: '/performance/goals', menuName: 'Performance', subMenuName: 'Goals & KRAs' },
+        { label: 'Performance Reports', icon: 'analytics', route: '/performance/reports', menuName: 'Performance', subMenuName: 'Performance Reports' }
       ]
     },
     {
       label: 'Calendar',
       icon: 'calendar_month',
-      route: '/calendar'
+      route: '/calendar',
+      menuName: 'Calendar'
     },
     {
       label: 'AI Assistant',
       icon: 'smart_toy',
-      route: '/ai-assistant'
+      route: '/ai-assistant',
+      menuName: 'AI Assistant'
     },
     {
       label: 'Subscription',
       icon: 'subscriptions',
       route: '/subscription',
-      roles: ['Super Admin']
+      menuName: 'Subscription'
+    },
+    {
+      label: 'Billing',
+      icon: 'receipt_long',
+      route: '/subscription/billing',
+      menuName: 'Billings'
     },
     {
       label: 'Expense',
       icon: 'receipt_long',
-      roles: ['Super Admin', 'HR Manager', 'Manager', 'Employee'],
+      menuName: 'Expense',
       children: [
-        { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true },
-        { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, roles: ['Super Admin', 'HR Manager'] },
-        { label: 'Reports', icon: 'summarize', route: '/expense/expense-report', exact: true, roles: ['Super Admin'] }
+        { label: 'Category', icon: 'category', route: '/expense/categories', exact: true, menuName: 'Expense', subMenuName: 'Category' },
+        { label: 'Claims', icon: 'receipt_long', route: '/expense/claims', exact: true, menuName: 'Expense', subMenuName: 'Claims' },
+        { label: 'Recurring Expenses', icon: 'repeat', route: '/expense/recurring', exact: true, menuName: 'Expense', subMenuName: 'Recurring Expenses' },
+        { label: 'Reports', icon: 'summarize', route: '/expense/expense-report', exact: true, menuName: 'Expense', subMenuName: 'Reports' }
       ]
     },
     {
       label: 'News',
       icon: 'event_available',
+      menuName: 'News',
       children: [
-        { label: 'News Dashboard', icon: 'event', route: '/news/dashboard' },
-        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, roles: ['Super Admin', 'HR Manager'] }
+        { label: 'News Dashboard', icon: 'event', route: '/news/dashboard', menuName: 'News', subMenuName: 'New Dashboard' },
+        { label: 'Create News', icon: 'event', route: '/news/create-news', exact: true, menuName: 'News', subMenuName: 'New Dashboard' }
 
+      ]
+    },
+    {
+      label: 'Help Desk',
+      icon: 'event_available',
+      menuName: 'Help Desk',
+      children: [
+        { label: 'Tickets Dashbaord', icon: 'event', menuName: 'Help Desk', subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
+        { label: 'Agent Group', icon: 'event', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
+        { label: 'Ticket Involvement', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Involvement', route: '/help-desk/ticket-involvement' },
+        { label: 'Ticket Category', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Category', route: '/help-desk/ticket-category', exact: true }
       ]
     },
     {
       label: 'Jobs',
       icon: 'work',
+      menuName: 'Jobs',
       children: [
-        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings' },
-        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied' },
-        { label: 'My Applications', icon: 'person_pin', route: '/jobs/my-applications', roles: ['Manager', 'Employee'] },
-        { label: 'Stage', icon: 'label', route: '/jobs/stage', roles: ['Super Admin'] }
+        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings' },
+        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications' },
+        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage' }
+      ]
+    },
+    {
+      label: 'Payroll',
+      icon: 'payments',
+      children: [
+        {
+          label: 'Bonus & Performance',
+          icon: 'card_giftcard',
+          route: '/payroll/bonus',
+          activeRoutes: ['/payroll/performance']
+        },
+        {
+          label: 'Loans',
+          icon: 'account_balance',
+          route: '/payroll/loans',
+          exact: true
+        },
+        {
+          label: 'Provident Funds',
+          icon: 'account_balance_wallet',
+          route: '/payroll/provident-fund',
+          exact: true
+        },
+        {
+          label: 'Tax Ledger',
+          icon: 'history_edu',
+          route: '/payroll/tax-ledger',
+          exact: true
+        },
+        {
+          label: 'Salary Advances',
+          icon: 'savings',
+          route: '/payroll/salary-advances',
+          exact: true
+        },
+        {
+          label: 'Gratuity',
+          icon: 'emoji_events',
+          route: '/payroll/gratuity',
+          exact: true
+        },
+        {
+          label: 'Income Tax',
+          icon: 'request_quote',
+          route: '/payroll/tax-management',
+          exact: true
+        },
+        {
+          label: 'Social Security',
+          icon: 'shield_person',
+          route: '/payroll/social-security',
+          exact: true
+        },
+        {
+          label: 'Payslip Management',
+          icon: 'receipt_long',
+          route: '/payroll/payslips',
+          exact: true
+        },
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
+        { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
+        { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
+        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
+        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
       ]
     },
     {
       label: 'Settings',
       icon: 'settings',
+      menuName: 'Settings',
       children: [
-        { label: 'Currency Settings', icon: 'work_outline', route: '/settings/general' },
-        { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address' },
-        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', roles: ['Super Admin'] },
-        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', roles: ['Super Admin'] }
+        { label: 'Company Settings', icon: 'work_outline', route: '/settings/general', menuName: 'Settings', subMenuName: 'Company Name' },
+        { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management' },
+        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' }
       ]
     }
   ];
@@ -248,10 +378,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   isParentActive(item: MenuItem): boolean {
     if (!item.children) return false;
-    return item.children.some(child => {
-      if (!child.route) return false;
-      return this.activeRoute === child.route || this.activeRoute.startsWith(child.route + '/');
-    });
+    return item.children.some(child => this.isItemRouteMatch(child, this.activeRoute));
   }
 
   isGroupContainsActive(item: MenuItem): boolean {
@@ -260,8 +387,38 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(item: MenuItem): boolean {
-    if (!item.roles || item.roles.length === 0) return true;
-    return this.authService.hasAnyRole(item.roles);
+    // If the item has no menuName, it either has no permission requirements or is a standalone item
+    if (!item.menuName) {
+      return true;
+    }
+
+    // For parent menu items (those with children), check if the menu has any visible submenus
+    if (item.children && item.children.length > 0) {
+      return this.authService.hasMenuParentPermission(item.menuName);
+    }
+
+    // For child menu items, check if the specific submenu has permissions
+    if (item.subMenuName) {
+      const candidateNames = [item.subMenuName, ...(item.permissionAliases ?? [])];
+      const hasAnySubMenuPermission = candidateNames.some(name =>
+        this.authService.hasSubMenuPermission(item.menuName!, name)
+      );
+
+      if (hasAnySubMenuPermission) {
+        return true;
+      }
+
+      const route = item.route?.toLowerCase() ?? '';
+      const isGeoRoute = route.startsWith('/attendance/geo-') || route === '/attendance/monitoring';
+      if (item.menuName === 'Attendance' && isGeoRoute) {
+        return this.authService.hasMenuParentPermission('Attendance');
+      }
+
+      return false;
+    }
+
+    // Fallback: allow if we can't determine permissions
+    return this.authService.hasMenuParentPermission(item.menuName);
   }
 
   getFilteredMenuItems(): MenuItem[] {
@@ -280,7 +437,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const visibleItems = this.getFilteredMenuItems();
     for (const item of visibleItems) {
       if (!item.children || item.children.length === 0) {
-        if (item.route && this.isActiveRoute(item.route, true)) {
+        if (this.isItemRouteMatch(item, url, true)) {
           this.activeItemKey = this.getItemKey(item);
           return;
         }
@@ -289,7 +446,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     for (const parent of visibleItems) {
       const children = parent.children ? this.getFilteredChildren(parent.children) : [];
       for (const child of children) {
-        if (child.route && this.isActiveRoute(child.route, !!child.exact)) {
+        if (this.isItemRouteMatch(child, url, !!child.exact)) {
           this.activeItemKey = this.getItemKey(child);
           return;
         }
@@ -297,6 +454,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
     this.activeItemKey = null;
   }
+
 
   private subscribeToUser(): void {
     this.authService.currentUser$
@@ -311,6 +469,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.activeRoute = (event as NavigationEnd).url;
         this.setActiveItemByRoute(this.activeRoute);
       });
+  }
+
+  private isItemRouteMatch(item: MenuItem, url: string, exact = false): boolean {
+    const primaryMatch = item.route
+      ? (exact
+        ? url === item.route
+        : (url === item.route || url.startsWith(item.route + '/')))
+      : false;
+
+    if (primaryMatch) {
+      return true;
+    }
+
+    const aliases = item.activeRoutes ?? [];
+    return aliases.some(alias => url === alias || url.startsWith(alias + '/'));
   }
 
   private collapseAllGroups(): void {

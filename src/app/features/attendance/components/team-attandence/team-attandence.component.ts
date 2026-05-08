@@ -93,7 +93,8 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   endDateControl = new FormControl(new Date());
   departmentControl = new FormControl('');
   statusControl = new FormControl('');
-
+  searchTermControl = new FormControl('');
+  
   statusOptions = [
     { value: '', label: 'All Statuses' },
     { value: 'present', label: 'Present' },
@@ -125,27 +126,9 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  get isSuperAdmin(): boolean {
-    return this.authService.hasRole('Super Admin');
-  }
-  get isManager(): boolean {
-    return this.authService.hasRole('Manager');
-  }
-
-  get isHRManager(): boolean {
-    return this.authService.hasRole('HR Manager');
-  }
 
   get isAdminOrHR(): boolean {
     return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
-  }
-
-  get isEmployee(): boolean {
-    return this.authService.hasRole('Employee');
-  }
-
-  hasRole(role: string): boolean {
-    return this.authService.hasRole(role);
   }
 
   private getCurrentUser(): void {
@@ -191,9 +174,65 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   }
 
   private setupFilters(): void {
+    // Listen to search term changes with debounce
+    this.searchTermControl.valueChanges
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadAttendanceData();
+      });
+
+    // Listen to department changes
+    this.departmentControl.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadAttendanceData();
+      });
+
+    // Listen to status changes
+    this.statusControl.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadAttendanceData();
+      });
+
+    // Listen to start date changes
+    this.startDateControl.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadAttendanceData();
+      });
+
+    // Listen to end date changes
+    this.endDateControl.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.loadAttendanceData();
+      });
   }
 
   applyFilters(): void {
+    this.currentPage = 1;
     this.loadAttendanceData();
   }
 
@@ -212,6 +251,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     const endDate = formatLocalDate(this.endDateControl.value);
 
     const searchRequest: AttendanceSearchRequest = {
+      SearchTerm: this.searchTermControl.value || undefined,
       startDate,
       endDate,
       departmentId: this.departmentControl.value || undefined,
@@ -247,6 +287,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     this.endDateControl.setValue(new Date());
     this.departmentControl.setValue('');
     this.statusControl.setValue('');
+    this.searchTermControl.setValue('');
   }
 
   viewAttendanceDetails(attendance: Attendance): void {
@@ -321,7 +362,9 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       return ipString || null;
     }
   }
-
-
+  
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Team Attendance', actionKey);
+  }
 
 }

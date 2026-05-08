@@ -1,176 +1,195 @@
-
-
-// Create Shift Dialog - Compact Version (same payroll style)
+// ══════════════════════════════════════════════════════════════
+// DIALOG SHELL (Figma Style - Hug Content)
+// ══════════════════════════════════════════════════════════════
 ::ng-deep .mat-mdc-dialog-container {
   border-radius: 16px !important;
   padding: 0 !important;
-  overflow: hidden;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden !important;
   max-width: 520px !important;
+  background: #ffffff !important;
 }
 
-// Header
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important; // Allow height to grow with content
+  max-height: 95vh !important; 
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .mat-mdc-dialog-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: calc(95vh - 140px) !important;
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+// ══════════════════════════════════════════════════════════════
+// HEADER
+// ══════════════════════════════════════════════════════════════
 .dialog-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 18px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
 
-  h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: white !important; // ✅ Ensure title text is white
-
-    mat-icon {
-      font-size: 26px;
-      color: white !important; // ✅ Ensure icon is white
-    }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(108, 92, 231, 0.1);
+    display: flex; align-items: center; justify-content: center;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #6C5CE7; }
   }
+  .header-title { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; }
+  .close-button { color: #94a3b8; }
+}
 
-  .close-button {
-    color: white;
-    transition: all 0.2s ease;
+// ══════════════════════════════════════════════════════════════
+// BODY
+// ══════════════════════════════════════════════════════════════
+.dialog-body {
+  padding: 20px !important;
+  max-height: calc(95vh - 140px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  form { display: flex; flex-direction: column; gap: 14px; } // Slightly tighter gap
+}
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(90deg);
+.field-label {
+  display: block; font-size: 13px; font-weight: 600; color: #475569;
+  margin-bottom: 6px; line-height: 1;
+  .required { color: #ef4444; margin-left: 2px; }
+}
+
+.form-row { width: 100%; display: flex; flex-direction: column; }
+
+.form-row-grid { 
+  display: flex; 
+  gap: 16px; 
+  width: 100%;
+  .form-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MAT-FIELD (Uniform 40px Height)
+// ══════════════════════════════════════════════════════════════
+.mat-field {
+  width: 100%;
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: #f1f5f9 !important; border-radius: 10px !important;
+      padding: 0 !important;
+    }
+    .mdc-notched-outline { display: none !important; }
+    .mat-mdc-form-field-infix {
+      min-height: 40px !important;
+      padding: 0 12px !important;
+      display: flex; align-items: center; border: none !important;
+    }
+    input.mat-mdc-input-element {
+      font-size: 13.5px; height: 40px !important; padding: 0; color: #0f172a;
+    }
+    .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+  }
+}
+
+.time-field ::ng-deep .mat-mdc-form-field-icon-prefix { 
+  margin-right: 8px;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #64748b; } 
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEPPER
+// ══════════════════════════════════════════════════════════════
+.stepper-wrapper {
+  display: flex; align-items: center; background: #f1f5f9; border-radius: 10px; 
+  height: 40px; overflow: hidden;
+  .stepper-btn {
+    width: 38px; height: 40px; border: none; background: transparent; color: #64748b; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    &:hover { color: #6C5CE7; background: rgba(108, 92, 231, 0.05); }
+    mat-icon { font-size: 18px; }
+  }
+  .stepper-input { 
+    flex: 1; text-align: center; font-size: 13.5px; font-weight: 700; 
+    border: none; background: transparent; color: #0f172a; width: 100%;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// MARGIN CARD (Matches Figma spacing)
+// ══════════════════════════════════════════════════════════════
+.margin-card {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle-label { font-size: 13.5px; font-weight: 700; color: #0f172a; }
+  ::ng-deep .mat-mdc-slide-toggle { transform: scale(0.85); }
+
+  .margin-hours-inner {
+    margin-top: 4px;
+    .margin-hours-field ::ng-deep .mat-mdc-text-field-wrapper {
+      background: #ffffff !important; border: 1px solid #cbd5e1 !important;
     }
   }
 }
 
-// Content
-.dialog-content {
-  padding: 22px !important;
-  min-width: 420px;
-  max-width: 520px;
-
-  .period-form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-
-    .full-width {
-      width: 100%;
-    }
-
-    .date-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    ::ng-deep mat-form-field.mat-form-field-appearance-outline {
-      .mat-mdc-text-field-wrapper {
-        background: #f9fafb;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-      }
-
-      &:hover .mat-mdc-text-field-wrapper {
-        background: white;
-      }
-
-      &.mat-focused .mat-mdc-text-field-wrapper {
-        background: white;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-
-      .mat-mdc-form-field-label {
-        color: #6b7280;
-        font-weight: 500;
-      }
-
-      &.mat-focused .mat-mdc-form-field-label {
-        color: #667eea;
-      }
-
-      input, mat-select {
-        color: #1f2937;
-        font-weight: 500;
-      }
-    }
+// ══════════════════════════════════════════════════════════════
+// DAYS OF WEEK
+// ══════════════════════════════════════════════════════════════
+.days-chips-row {
+  display: flex; flex-direction: row; gap: 6px; width: 100%;
+  .day-chip {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    height: 36px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    cursor: pointer; transition: 0.2s; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b;
+    &.active { background: #6C5CE7; border-color: #6C5CE7; color: #ffffff; }
   }
 }
-
-// Actions
-.dialog-actions {
-  padding: 16px 22px !important;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-
-  button {
-    height: 40px;
-    padding: 0 22px !important;
-    border-radius: 10px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    text-transform: none !important;
-    transition: all 0.3s ease !important;
-
-    &[mat-stroked-button] {
-      background: white !important;
-      color: #6b7280 !important;
-      border: 2px solid #e5e7eb !important;
-
-      &:hover:not([disabled]) {
-        background: #f9fafb !important;
-        border-color: #cbd5e1 !important;
-        color: #374151 !important;
-      }
-    }
-
-    &.submit-button:not([disabled]) {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3) !important;
-      position: relative;
-      overflow: hidden;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 16px rgba(102, 126, 234, 0.4) !important;
-      }
-    }
-  }
+.fence-preview-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px;
+  background: #f8fafc;
 }
 
-// Error
-::ng-deep mat-error {
+.fence-preview-map {
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.fence-preview-meta {
+  margin: 8px 4px 2px;
   font-size: 12px;
-  color: #dc2626;
-  margin-top: 2px;
+  color: #64748b;
 }
 
-// Responsive
-@media (max-width: 600px) {
-  .dialog-content {
-    min-width: unset;
-    padding: 16px !important;
-
-    .period-form .date-row {
-      grid-template-columns: 1fr;
-    }
+// ══════════════════════════════════════════════════════════════
+// FOOTER
+// ══════════════════════════════════════════════════════════════
+.dialog-footer {
+  display: flex; justify-content: flex-end; gap: 12px;
+  padding: 16px 20px; border-top: 1px solid #f1f5f9;
+  flex-shrink: 0;
+  
+  .btn-cancel { height: 40px; border-radius: 10px; font-weight: 600; color: #64748b; }
+  .btn-save {
+    height: 40px; border-radius: 10px; font-weight: 700;
+    background: #6C5CE7 !important; color: #ffffff !important;
+    padding: 0 24px !important;
   }
-
-  .dialog-actions {
-    flex-direction: column;
-    gap: 10px;
-
-    button {
-      width: 100%;
-    }
-  }
-}
-
-::ng-deep ngx-material-timepicker-dialog {
-  z-index: 2000 !important;
 }

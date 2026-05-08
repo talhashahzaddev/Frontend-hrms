@@ -18,10 +18,33 @@ export const settingsRoutes: Routes = [
     path: 'career-management',
     loadComponent: () => import('./components/career-management/career-management.component').then(m => m.CareerManagementComponent)
   },
- {
+  {
     path: 'roles',
-    loadComponent: () => import('./components/roles/role-list.component.').then(m => m.RoleListComponent),
-    title: 'Roles & Permissions - HRMS'
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('../settings/components/roles/role-list.component.').then(m => m.RoleListComponent),
+        title: 'Roles & Permissions - HRMS'
+      },
+      {
+        path: 'add',
+        loadComponent: () => import('../settings/components/role-form/role-form.component').then(m => m.RoleFormComponent),
+        title: 'Add New Role - HRMS',
+        data: { mode: 'add' }
+      },
+      {
+        path: ':id/edit',
+        loadComponent: () => import('../settings/components/role-form/role-form.component').then(m => m.RoleFormComponent),
+        title: 'Edit Role - HRMS',
+        data: { mode: 'edit' }
+      },
+      {
+        path: ':id/view',
+        loadComponent: () => import('../settings/components/role-form/role-form.component').then(m => m.RoleFormComponent),
+        title: 'View Role - HRMS',
+        data: { mode: 'view' }
+      }
+    ]
   }
 ];
 

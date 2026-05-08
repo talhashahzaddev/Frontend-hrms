@@ -32,15 +32,6 @@ export interface LeaveTypeUsage {
   totalDays: number;
 }
 
-export interface PayrollStats {
-  totalPayroll: number;
-  averageSalary: number;
-  processedEmployees: number;
-  totalTaxes: number;
-  totalDeductions: number;
-  currency: string;
-}
-
 export interface TopPerformer {
   employeeId: number;   // or whatever ID your backend uses
   name: string;         // employee name
@@ -99,5 +90,4 @@ export interface OnboardingStatus {
   createTeam: boolean;
   defineLeaveTypes: boolean;
   markAttendance: boolean;
-  processPayroll: boolean;
 }

@@ -103,6 +103,7 @@
             <div class="calendar-body">
                 <div *ngFor="let day of calendarDays" class="calendar-day" [class.other-month]="!day.isCurrentMonth"
                     [class.today]="day.isToday" [class.weekend]="day.isWeekend" [class.has-holiday]="hasHoliday(day)"
+                    (click)="onDayClick($event, day)"
                     (contextmenu)="onRightClick($event, day)">
 
                     <div class="day-number">{{ day.dayNumber }}</div>
@@ -175,7 +176,7 @@
 
 
             <!-- Swap Shift Request -->
-            <button mat-menu-item (click)="initiateSwapRequest()" *ngIf="!isSuperAdmin" [disabled]="!canSwapShift()">
+            <button mat-menu-item (click)="initiateSwapRequest()" [disabled]="!canSwapShift()">
                 <mat-icon>swap_horiz</mat-icon>
                 <span>Swap Shift Request</span>
             </button>

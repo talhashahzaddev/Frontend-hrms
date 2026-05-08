@@ -1,60 +1,130 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
-    {{ data.mode === 'create' ? 'Add stage' : 'Edit stage' }} — {{ stageName || 'Stage' }}
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
+<ng-container *ngIf="showExtraFields">
+  <div class="edit-stage-dialog">
+    <header class="minimal-header">
+      <div class="header-left">
+        <div class="icon-box">
+          <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
+        </div>
+        <div class="title-group">
+          <h2 class="title">{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }} — {{ stageName || 'Stage' }}</h2>
+          <p class="subtitle">Interview stage details · Schedule and interviewers</p>
+        </div>
+      </div>
+      <button class="close-button" mat-dialog-close>
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
 
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="form" class="edit-stage-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Notes</mat-label>
-      <textarea matInput formControlName="notes" rows="3" placeholder="Notes for this stage"></textarea>
-    </mat-form-field>
+    <div class="dialog-body custom-scrollbar">
+      <form [formGroup]="form" class="edit-stage-form">
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <div class="input-container">
+            <input type="text" formControlName="type" class="custom-input" placeholder="e.g. Technical, HR"
+              maxlength="50">
+          </div>
+        </div>
 
-    <ng-container *ngIf="showExtraFields">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Type</mat-label>
-        <input matInput formControlName="type" placeholder="e.g. Technical, HR" maxlength="50">
-      </mat-form-field>
+        <div class="grid-row">
+          <div class="form-group">
+            <label class="form-label">Interview date</label>
+            <div class="input-container mat-form-field-container icon-right">
+              <mat-form-field appearance="outline" class="custom-mat-form-field">
+                <input matInput [matDatepicker]="interviewDatePicker" formControlName="interviewDate"
+                  [min]="minInterviewDate" class="cursor-pointer" placeholder="Select date"
+                  (click)="interviewDatePicker.open()" readonly>
+                <mat-datepicker #interviewDatePicker></mat-datepicker>
+              </mat-form-field>
+              <mat-icon class="input-icon pointer-events-none">calendar_today</mat-icon>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Interview time</label>
+            <div class="input-container">
+              <input type="time" formControlName="interviewTime" [min]="minInterviewTime" class="custom-input"
+                placeholder="HH:mm">
+            </div>
+          </div>
+        </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interview date</mat-label>
-        <input matInput [matDatepicker]="interviewDatePicker" formControlName="interviewDate" [min]="minInterviewDate"
-          placeholder="Select date">
-        <mat-datepicker-toggle matIconSuffix [for]="interviewDatePicker"></mat-datepicker-toggle>
-        <mat-datepicker #interviewDatePicker></mat-datepicker>
-      </mat-form-field>
+        <div class="form-group">
+          <label class="form-label">Interview place</label>
+          <div class="input-container">
+            <input type="text" formControlName="interviewPlace" class="custom-input"
+              placeholder="e.g. Room 101, Video Call" maxlength="200">
+          </div>
+        </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interview time</mat-label>
-        <input matInput type="time" formControlName="interviewTime" [min]="minInterviewTime" placeholder="HH:mm">
-      </mat-form-field>
+        <div class="form-group">
+          <label class="form-label">Interviewers</label>
+          <div class="input-container mat-form-field-container">
+            <mat-form-field appearance="outline" class="custom-mat-form-field">
+              <mat-select formControlName="interviewerIds" multiple placeholder="Select interviewers">
+                <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
+                  {{ getEmployeeDisplay(emp) }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-spinner *ngIf="employeesLoading" class="spinner-icon" diameter="20"></mat-spinner>
+          </div>
+        </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interview place</mat-label>
-        <input matInput formControlName="interviewPlace" placeholder="e.g. Room 101, Video Call" maxlength="200">
-      </mat-form-field>
+          <div class="minimal-form-group" style="margin-top: 8px;">
+          <label class="minimal-label">Notes</label>
+          <div class="relative-container">
+            <textarea formControlName="notes" class="minimal-textarea custom-scrollbar" placeholder="Notes for this stage"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Interviewers</mat-label>
-        <mat-select formControlName="interviewerIds" multiple placeholder="Select interviewers">
-          <mat-option *ngFor="let emp of employees" [value]="emp.employeeId">
-            {{ getEmployeeDisplay(emp) }}
-          </mat-option>
-        </mat-select>
-        <mat-spinner *ngIf="employeesLoading" matSuffix diameter="20"></mat-spinner>
-      </mat-form-field>
-    </ng-container>
-  </form>
-</mat-dialog-content>
+    <footer class="dialog-footer">
+      <button type="button" class="btn-cancel" mat-dialog-close>Cancel</button>
+      <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save Stage' }}
+      </button>
+    </footer>
+  </div>
+</ng-container>
 
-<mat-dialog-actions class="dialog-actions">
-  <button mat-button mat-dialog-close class="cancel-btn">Cancel</button>
-  <button mat-flat-button class="save-btn" (click)="save()" [disabled]="saving">
-    {{ saving ? 'Saving...' : 'Save' }}
-  </button>
-</mat-dialog-actions>
+<ng-container *ngIf="!showExtraFields">
+  <div class="minimal-stage-dialog">
+    <header class="minimal-header">
+      <div class="header-left">
+        <div class="icon-box">
+          <mat-icon>{{ data.mode === 'create' ? 'add' : 'edit' }}</mat-icon>
+        </div>
+        <div class="title-group">
+          <h2 class="title">{{ data.mode === 'create' ? 'Add Stage' : 'Edit Stage' }} — {{ stageName || 'Stage' }}</h2>
+          <p class="subtitle">Assessment stage · Add notes for this candidate</p>
+        </div>
+      </div>
+      <button class="close-button" mat-dialog-close>
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="minimal-body">
+      <div class="info-chip">
+        <mat-icon>content_paste_search</mat-icon>
+        <span>{{ stageName || 'Stage' }} · Assessment Stage</span>
+      </div>
+
+      <form [formGroup]="form" class="minimal-form">
+        <div class="minimal-form-group">
+          <label class="minimal-label">Notes</label>
+          <div class="relative-container">
+            <textarea formControlName="notes" class="minimal-textarea custom-scrollbar" placeholder="Add evaluation notes, test results, observations..."></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <footer class="minimal-footer">
+      <button type="button" class="btn-cancel" mat-dialog-close>Cancel</button>
+      <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save Stage' }}
+      </button>
+    </footer>
+  </div>
+</ng-container>

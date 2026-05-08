@@ -1,11 +1,11 @@
-import { Component, OnInit, ViewChild, TemplateRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon'; 
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -75,6 +75,12 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
   filteredEmployees: any[] = [];
   filteredEmployees$!: Observable<any[]>;
   employeeSearchControl = new FormControl('');
+  
+  // Employee dropdown state (custom, non-Observable pattern)
+  employeeDropdownOpen = false;
+  employeeFilter = '';
+  selectedEmployeeId: string | null = null;
+  
   selectedAsset: any;
   selectedAssignment: any;
   editingAssetId: string | null = null;
@@ -128,6 +134,15 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
     private dialog: MatDialog
   ) {}
 
+  // Auto-close dropdown when clicking outside
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.employee-dropdown-container')) {
+      this.employeeDropdownOpen = false;
+    }
+  }
+
   ngOnInit(): void {
     this.initializeForms();
     this.loadAssetTypes();
@@ -143,6 +158,7 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
   private initializeForms(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
+      code: ['', [Validators.maxLength(100)]],
       assetTag: ['', [Validators.required, Validators.maxLength(100)]],
       typeId: ['', Validators.required],
       purchaseDate: [null],
@@ -304,9 +320,41 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
   }
 
   editAsset(asset: any): void {
+    if (!asset || !asset.id) {
+      this.notification.error('Asset information is missing');
+      return;
+    }
+
     this.isEditMode = true;
     this.editingAssetId = asset.id;
-    this.form.patchValue(asset);
+    
+    console.log('📝 Loading asset for edit from table:', asset);
+    console.log('Asset ID:', asset.id);
+    console.log('Asset from table - assetTypeId:', asset.assetTypeId);
+    console.log('Asset from table - typeId:', asset.typeId);
+    console.log('Asset from table properties:', Object.keys(asset));
+    
+    // Get the complete asset from the service (may have more complete data than table item)
+    const fullAsset = this.assetsService.getById(asset.id) || asset;
+    
+    console.log('📝 Full asset from service:', fullAsset);
+    console.log('Full asset - assetTypeId:', fullAsset?.assetTypeId);
+    console.log('Full asset - typeId:', fullAsset?.typeId);
+    
+    // Map asset properties to form field names (handle property name mismatches)
+    // assetTypeId in Asset maps to typeId in form
+    const formData = {
+      name: fullAsset.name || '',
+      assetTag: fullAsset.assetTag || fullAsset.code || '', // Handle both assetTag and code from backend
+      code: fullAsset.code || '',
+      typeId: fullAsset.assetTypeId || fullAsset.typeId || '',
+      purchaseDate: fullAsset.purchaseDate ? new Date(fullAsset.purchaseDate) : null,
+      status: fullAsset.status || '',
+      notes: fullAsset.notes || ''
+    };
+    
+    console.log('✅ Patching form with mapped data:', formData);
+    this.form.patchValue(formData);
     this.dialogRef = this.dialog.open(this.assetDialogTemplate, { width: '500px' });
   }
 
@@ -452,6 +500,11 @@ deleteAsset(asset: Asset): void {
     this.assignForm.reset({ employeeId: '', assignDate: new Date(), returnDate: null, condition: 'Good' });
     this.employeeSearchControl.reset('');
     
+    // Reset employee dropdown state - keep it CLOSED when dialog opens
+    this.employeeDropdownOpen = false;
+    this.employeeFilter = '';
+    this.selectedEmployeeId = null;
+    
     // Set up the autocomplete filtered employees Observable
     this.filteredEmployees$ = this.employeeSearchControl.valueChanges.pipe(
       startWith(''),
@@ -478,6 +531,54 @@ deleteAsset(asset: Asset): void {
       employee.lastName?.toLowerCase().includes(term) ||
       employee.email?.toLowerCase().includes(term)
     );
+  }
+
+  // ===== EMPLOYEE DROPDOWN METHODS (Custom State-Driven Pattern) =====
+  
+  openEmployeeDropdown(): void {
+    this.employeeDropdownOpen = true;
+    this.employeeFilter = '';
+    this.applyEmployeeFilter();
+  }
+
+  onEmployeeSearch(searchTerm: string): void {
+    this.employeeFilter = searchTerm;
+    this.applyEmployeeFilter();
+  }
+
+  private applyEmployeeFilter(): void {
+    if (!this.employeeFilter) {
+      this.filteredEmployees = [...this.employees];
+      return;
+    }
+    const term = this.employeeFilter.toLowerCase();
+    this.filteredEmployees = this.employees.filter(employee =>
+      (employee.firstName || '').toLowerCase().includes(term) ||
+      (employee.lastName || '').toLowerCase().includes(term) ||
+      (employee.email || '').toLowerCase().includes(term)
+    );
+  }
+
+  toggleEmployee(employee: any): void {
+    if (!employee || !employee.employeeId) return;
+    if (this.selectedEmployeeId === employee.employeeId) {
+      this.selectedEmployeeId = null;
+      this.assignForm.patchValue({ employeeId: '' });
+    } else {
+      this.selectedEmployeeId = employee.employeeId;
+      this.assignForm.patchValue({ employeeId: employee.employeeId });
+    }
+  }
+
+  isEmployeeSelected(employeeId: string): boolean {
+    return this.selectedEmployeeId === employeeId;
+  }
+
+  displaySelectedEmployee(): string {
+    if (!this.selectedEmployeeId) return '';
+    const employee = this.employees.find(emp => emp.employeeId === this.selectedEmployeeId);
+    if (!employee) return '';
+    return `${employee.firstName} ${employee.lastName} — ${employee.email}`;
   }
 
   displayEmployeeInAutocomplete(employee: any): string {
@@ -559,10 +660,10 @@ deleteAsset(asset: Asset): void {
     }
 
     this.loading.show();
-    const notesSuffix = `\n[Returned ${new Date().toISOString()}] Condition: ${condition}`;
-    const notes = (this.selectedAsset.notes || '') + notesSuffix;
+    const returnedDate = new Date().toISOString();
+    const notes = this.selectedAsset.notes || ''; // Keep original notes, don't modify
 
-    this.assetsService.returnAsset(assignmentId, new Date().toISOString(), notes).subscribe({
+    this.assetsService.returnAsset(assignmentId, returnedDate, notes, condition).subscribe({
       next: (resp) => {
         this.notification.success('Asset returned successfully');
         this.returnDialogRef.close();
@@ -713,4 +814,5 @@ deleteAsset(asset: Asset): void {
     this.pageIndex = 0;
     this.applyPagination();
   }
+  
 }

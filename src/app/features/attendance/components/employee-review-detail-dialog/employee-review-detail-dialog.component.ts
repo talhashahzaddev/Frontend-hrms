@@ -77,6 +77,7 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = [
     'day',
     'original',
+    'totalHours',
     'requested',
     'reason',
     'status',
@@ -158,8 +159,8 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
           const allEmployeePackages = (submissions as EmployeeSubmissionPackage[]).filter(
             s => s.employeeId === this.data.employeeId
           );
-          const pkgMonth = pkg.month;
-          const pkgYear  = pkg.year;
+          const pkgMonth = pkg.month ?? new Date().getMonth() + 1;
+          const pkgYear  = pkg.year  ?? new Date().getFullYear();
           const matchingCorrections = allEmployeePackages
             .flatMap(s => s.corrections || [])
             .filter((c: CorrectionRecord) => {
@@ -235,13 +236,9 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   private buildMonthlyRecords(): void {
-    if (!this.pkg.month || !this.pkg.year) {
-      console.error('Ã¢Å¡Â Ã¯Â¸Â Package has no valid month/year:', { month: this.pkg.month, year: this.pkg.year });
-      return;
-    }
-
-    const month = this.pkg.month;
-    const year = this.pkg.year;
+    const today = new Date();
+    const month = this.pkg.month ?? (today.getMonth() + 1);
+    const year  = this.pkg.year  ?? today.getFullYear();
     const daysInMonth = new Date(year, month, 0).getDate();
 
     this.monthlyRecords = [];
@@ -591,13 +588,34 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
     return requestId ? this.processingRequestIds.has(requestId) : false;
   }
 
-  formatTime(dateTime?: string): string {
-    if (!dateTime) return '--';
-    const date = new Date(dateTime);
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  /**
+   * Format an ISO timestamp as "h:mm AM/PM" in the viewer's local timezone.
+   * Same logic as timesheet-detail-dialog.formatTime — keeps both dialogs in
+   * sync for a given record. The DB column is timestamptz, so the wire value
+   * identifies an absolute instant; toLocaleTimeString turns it into clock-time
+   * for the browser's timezone.
+   */
+  formatTime(timeStr?: string | null): string {
+    if (!timeStr) return '--';
+    if (typeof timeStr === 'string' && timeStr.includes('T')) {
+      const d = new Date(timeStr);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    }
+    if (typeof timeStr === 'string' && /^\d{2}:\d{2}$/.test(timeStr)) {
+      const [h, m] = timeStr.split(':');
+      let hour = parseInt(h, 10);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12;
+      if (hour === 0) hour = 12;
+      return `${hour}:${m} ${ampm}`;
+    }
+    return timeStr;
   }
 
   formatDisplayDate(date?: string): string {
@@ -613,7 +631,9 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
   getMonthYearDisplay(): string {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'];
-    return `${monthNames[this.pkg.month - 1]} ${this.pkg.year}`;
+    const month = this.pkg.month ?? new Date().getMonth() + 1;
+    const year  = this.pkg.year  ?? new Date().getFullYear();
+    return `${monthNames[month - 1]} ${year}`;
   }
 
   getStatusClass(status: string): string {

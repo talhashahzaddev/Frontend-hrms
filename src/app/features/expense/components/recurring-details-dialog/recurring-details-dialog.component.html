@@ -1,104 +1,121 @@
 <div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>repeat</mat-icon>
-    Recurring Expense Details
-  </h2>
-  <button mat-icon-button (click)="close()" class="close-button">
+  <div class="title-section">
+    <div class="icon-wrapper">
+      <mat-icon>repeat</mat-icon>
+    </div>
+    <div>
+      <h2 class="title">Recurring Expense Details</h2>
+      <p class="subtitle">Full overview of the recurring subscription</p>
+    </div>
+  </div>
+  <button class="close-btn" (click)="close()">
     <mat-icon>close</mat-icon>
   </button>
 </div>
 
-<mat-dialog-content class="dialog-content">
-  <div *ngIf="loading" class="loading">
+<div class="dialog-content">
+  <div *ngIf="loading" class="loading-state">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading details...</p>
+    <p>Fetching recurring details...</p>
   </div>
 
-  <div *ngIf="error" class="error">
+  <div *ngIf="error" class="error-state">
     <mat-icon>error_outline</mat-icon>
     <p>{{ error }}</p>
   </div>
 
-  <div *ngIf="item && !loading" class="details">
-    <div class="amount-card">
-      <span class="amount-label">Amount</span>
-      <span class="amount-value">{{ item.amount | currency:organizationCurrency }}</span>
+  <div *ngIf="item && !loading" class="details-container">
+    <!-- Highlight Header -->
+    <div class="amount-highlight">
+      <div class="info">
+        <span class="label">Recurring Amount</span>
+        <h1 class="value">{{ item.amount | currency:organizationCurrency }}</h1>
+      </div>
+      <div class="status-badge" [ngClass]="getStatusClass(item.status)">
+        {{ item.status || 'Pending' }}
+      </div>
     </div>
 
-    <section class="detail-section">
-      <h3 class="section-title">Overview</h3>
-      <div class="detail-row">
-        <span class="label">Title</span>
-        <span class="value">{{ item.title }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">Category</span>
-        <span class="value">{{ item.categoryName || '—' }}</span>
-      </div>
-      <div class="detail-row" *ngIf="item.description">
-        <span class="label">Description</span>
-        <span class="value description-text">{{ item.description }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">Rotation</span>
-        <span class="value">{{ item.rotation }}</span>
-      </div>
-      <div class="detail-row" *ngIf="item.dayOfMonth">
-        <span class="label">Day of month</span>
-        <span class="value">{{ item.dayOfMonth }}</span>
-      </div>
-    </section>
+    <!-- Information Sections -->
+    <div class="details-grid">
+      <section class="info-section">
+        <h3 class="section-title"><mat-icon>info</mat-icon> General Information</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span class="label">Title</span>
+            <span class="value">{{ item.title }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Category</span>
+            <span class="value">{{ item.categoryName || 'General' }}</span>
+          </div>
+          <div class="info-item full-width" *ngIf="item.description">
+            <span class="label">Description</span>
+            <span class="value description">{{ item.description }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Rotation</span>
+            <span class="value">{{ item.rotation }}</span>
+          </div>
+          <div class="info-item" *ngIf="item.dayOfMonth">
+            <span class="label">Day of Month</span>
+            <span class="value">{{ item.dayOfMonth }}</span>
+          </div>
+        </div>
+      </section>
 
-    <section class="detail-section" *ngIf="item.paymentMethod || item.merchant">
-      <h3 class="section-title">Payment</h3>
-      <div class="detail-row" *ngIf="item.paymentMethod">
-        <span class="label">Payment method</span>
-        <span class="value">{{ item.paymentMethod }}</span>
-      </div>
-      <div class="detail-row" *ngIf="item.merchant">
-        <span class="label">Merchant</span>
-        <span class="value">{{ item.merchant }}</span>
-      </div>
-    </section>
+      <section class="info-section" *ngIf="item.paymentMethod || item.merchant">
+        <h3 class="section-title"><mat-icon>payments</mat-icon> Payment & Merchant</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span class="label">Payment Method</span>
+            <span class="value">{{ item.paymentMethod || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Merchant</span>
+            <span class="value">{{ item.merchant || '—' }}</span>
+          </div>
+        </div>
+      </section>
 
-    <section class="detail-section">
-      <h3 class="section-title">Status</h3>
-      <div class="detail-row">
-        <span class="label">Status</span>
-        <span class="value">
-          <span [class]="'status-chip ' + getStatusClass(item.status)">{{ item.status || 'Pending' }}</span>
-        </span>
-      </div>
-      <div class="detail-row" *ngIf="item.employeeName">
-        <span class="label">Employee</span>
-        <span class="value">{{ item.employeeName }}</span>
-      </div>
-      <div class="detail-row" *ngIf="item.approvedByName">
-        <span class="label">Approved by</span>
-        <span class="value">{{ item.approvedByName }}</span>
-      </div>
-    </section>
+      <section class="info-section">
+        <h3 class="section-title"><mat-icon>assignment_ind</mat-icon> Approval Details</h3>
+        <div class="info-list">
+          <div class="info-item">
+            <span class="label">Submitted By</span>
+            <span class="value">{{ item.employeeName || '—' }}</span>
+          </div>
+          <div class="info-item" *ngIf="item.status !== 'Pending'">
+            <span class="label">{{ item.status === 'Approved' ? 'Approved By' : 'Rejected By' }}</span>
+            <span class="value">{{ item.approvedByName || '—' }}</span>
+          </div>
+        </div>
+      </section>
 
-    <section class="detail-section" *ngIf="item.receiptUrl || item.createdAt || item.updatedAt">
-      <h3 class="section-title">Receipt &amp; dates</h3>
-      <div class="detail-row" *ngIf="item.receiptUrl">
-        <span class="label">Receipt</span>
-        <span class="value">
-          <a [href]="item.receiptUrl" target="_blank" rel="noopener" class="receipt-link">Open receipt</a>
-        </span>
-      </div>
-      <div class="detail-row" *ngIf="item.createdAt">
-        <span class="label">Created</span>
-        <span class="value">{{ item.createdAt | date:'medium' }}</span>
-      </div>
-      <div class="detail-row" *ngIf="item.updatedAt">
-        <span class="label">Updated</span>
-        <span class="value">{{ item.updatedAt | date:'medium' }}</span>
-      </div>
-    </section>
+      <section class="info-section" *ngIf="item.receiptUrl">
+        <h3 class="section-title"><mat-icon>attachment</mat-icon> Attachment</h3>
+        <div class="attachment-card" (click)="openReceipt()">
+          <mat-icon>description</mat-icon>
+          <div class="file-info">
+            <span class="name">Receipt Attachment</span>
+            <span class="action">Click to view document</span>
+          </div>
+          <mat-icon class="arrow">open_in_new</mat-icon>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <div class="timestamps">
+          <span>Created on {{ item.createdAt | date:'medium' }}</span>
+          <span *ngIf="item.updatedAt && item.updatedAt !== item.createdAt">
+            • Last updated {{ item.updatedAt | date:'medium' }}
+          </span>
+        </div>
+      </section>
+    </div>
   </div>
-</mat-dialog-content>
+</div>
 
-<mat-dialog-actions class="dialog-actions">
-  <button mat-flat-button (click)="close()" class="close-btn">Close</button>
-</mat-dialog-actions>
+<div class="dialog-footer">
+  <button class="close-btn-footer" (click)="close()">Close</button>
+</div>
