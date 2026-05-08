@@ -12,10 +12,10 @@
       </div>
     </div>
     <div class="header-actions">
-      <button *ngIf="selectedTab === 0" (click)="openCreateDialog()" class="btn-primary">
+      <button *ngIf="selectedTab === 0 && hasPermission('CREATE_KRA_BUTTON')" (click)="openCreateDialog()" class="btn-primary">
         <mat-icon>add</mat-icon> New KRA
       </button>
-      <button *ngIf="selectedTab === 1" (click)="openCreateGoalDialog()" class="btn-primary">
+      <button *ngIf="selectedTab === 1 && hasPermission('CREATE_GOAL_BUTTON')" (click)="openCreateGoalDialog()" class="btn-primary">
         <mat-icon>add</mat-icon> Add Goal
       </button>
     </div>
@@ -23,12 +23,12 @@
 
   <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
   <div class="page-tabs">
-    <button class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+    <button *ngIf="hasPermission('KRA_MANAGEMENT_SECTION')" class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
       <mat-icon>category</mat-icon>
       <span>KRA Management</span>
       <span class="tab-badge" *ngIf="filteredKRAs.length > 0">{{ filteredKRAs.length }}</span>
     </button>
-    <button class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+    <button *ngIf="hasPermission('GOAL_MANAGEMENT_SECTION')" class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
       <mat-icon>flag</mat-icon>
       <span>Goals</span>
       <span class="tab-badge" *ngIf="goals.length > 0">{{ goals.length }}</span>
@@ -121,24 +121,24 @@
                 <span style="font-weight: normal; font-size: 20px;">⋮</span>
               </button>
               <mat-menu #kraMenu="matMenu">
-                <button mat-menu-item (click)="viewKRADetails(kra)">
+                <button mat-menu-item *ngIf="hasPermission('KRA_VIEW')" (click)="viewKRADetails(kra)">
                   <mat-icon>visibility</mat-icon>
                   <span>View Details</span>
                 </button>
 
-                <button mat-menu-item (click)="openEditDialog(kra)">
+                <button mat-menu-item *ngIf="hasPermission('KRA_EDIT_BUTTON')" (click)="openEditDialog(kra)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
 
-                <button mat-menu-item (click)="toggleKRAStatus(kra)">
+                <button mat-menu-item *ngIf="hasPermission('KRA_ACTIVATE_DEACTIVATE_BUTTON')" (click)="toggleKRAStatus(kra)">
                   <mat-icon>{{ kra.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
                   <span>{{ kra.isActive ? 'Deactivate' : 'Activate' }}</span>
                 </button>
 
                 <mat-divider></mat-divider>
 
-                <button mat-menu-item (click)="deleteKRA(kra)">
+                <button mat-menu-item *ngIf="hasPermission('KRA_DELETE_BUTTON')" (click)="deleteKRA(kra)">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
@@ -149,11 +149,11 @@
       </table>
 
       <!-- Empty State -->
-      <div *ngIf="filteredKRAs.length === 0" class="empty-state">
+        <div *ngIf="filteredKRAs.length === 0" class="empty-state">
         <span class="material-icon empty-icon">inbox</span>
         <h3>No KRAs Found</h3>
         <p>No KRAs match your current filters.</p>
-        <button class="btn-primary" (click)="openCreateDialog()">
+        <button *ngIf="hasPermission('CREATE_KRA_BUTTON')" class="btn-primary" (click)="openCreateDialog()">
           <span class="material-icon">add</span>
           Create Your First KRA
         </button>
@@ -186,7 +186,7 @@
     <div *ngSwitchCase="1" class="tab-content">
 
     <!-- Goals Management Section -->
-    <div class="section-card">
+    <div class="section-card" *ngIf="hasPermission('HR_GOAL_TABLE')">
 
       <div class="section-header">
         <h3>All Goals <span class="count-badge">{{ goals.length }}</span></h3>
@@ -256,27 +256,27 @@
                     <span>View Details</span>
                   </button>
 
-                  <button mat-menu-item (click)="openAssignGoalDialog(goal)">
-                    <mat-icon>person_add</mat-icon>
-                    <span>Assign Goal</span>
-                  </button>
+                    <button mat-menu-item *ngIf="hasPermission('ASSIGN_GOAL_BUTTON')" (click)="openAssignGoalDialog(goal)">
+                      <mat-icon>person_add</mat-icon>
+                      <span>Assign Goal</span>
+                    </button>
 
-                  <button mat-menu-item (click)="openEditGoalDialog(goal)">
-                    <mat-icon>edit</mat-icon>
-                    <span>Edit</span>
-                  </button>
+                    <button mat-menu-item *ngIf="hasPermission('EDIT_GOAL_BUTTON')" (click)="openEditGoalDialog(goal)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit</span>
+                    </button>
 
-                  <button mat-menu-item (click)="toggleGoalStatus(goal)">
-                    <mat-icon>{{ goal.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-                    <span>{{ goal.isActive ? 'Deactivate' : 'Activate' }}</span>
-                  </button>
+                    <button mat-menu-item (click)="toggleGoalStatus(goal)">
+                      <mat-icon>{{ goal.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                      <span>{{ goal.isActive ? 'Deactivate' : 'Activate' }}</span>
+                    </button>
 
-                  <mat-divider></mat-divider>
+                    <mat-divider></mat-divider>
 
-                  <button mat-menu-item (click)="deleteGoal(goal)">
-                    <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
-                  </button>
+                    <button mat-menu-item *ngIf="hasPermission('DELETE_GOAL_BUTTON')" (click)="deleteGoal(goal)">
+                      <mat-icon>delete</mat-icon>
+                      <span>Delete</span>
+                    </button>
                 </mat-menu>
               </td>
             </tr>
@@ -287,7 +287,7 @@
           <span class="material-icon empty-icon">flag</span>
           <h3>No Goals Found</h3>
           <p>Create your first goal to get started.</p>
-          <button class="btn-primary" (click)="openCreateGoalDialog()">
+          <button *ngIf="hasPermission('CREATE_GOAL_BUTTON')" class="btn-primary" (click)="openCreateGoalDialog()">
             <span class="material-icon">add</span>
             Create Your First Goal
           </button>
@@ -312,7 +312,7 @@
     </div>
 
     <!-- Employee Goals Section -->
-    <div class="section-card" style="margin-top: 24px;">
+    <div class="section-card" *ngIf="hasPermission('EMPLOYEE_GOAL_TABLE')" style="margin-top: 24px;">
 
       <div class="section-header">
         <h3>Employee Goals <span class="count-badge">{{ employeeGoals.length }}</span></h3>

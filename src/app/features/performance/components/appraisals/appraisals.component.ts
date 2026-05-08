@@ -1299,6 +1299,13 @@ onAllManagerReviewPageChange(event: PageEvent): void {
       });
   }
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Performance', 'Appraisals', actionKey);
+  }
+
+
+
+
   onCyclePageChange(event: PageEvent): void {
     this.cyclePageIndex = event.pageIndex;
     this.cyclePageSize = event.pageSize;
