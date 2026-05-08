@@ -9,7 +9,7 @@
       <p class="subtitle">View and manage your expense claims</p>
     </div>
     <div class="actions">
-      <button class="add-btn" mat-flat-button (click)="openCreateDialog()">
+      <button class="add-btn" mat-flat-button *ngIf="hasPermission('claims_add_claims')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Claim
       </button>
@@ -18,11 +18,11 @@
 
   <!-- View toggle: My Claims / All Claims (Super Admin only) -->
   <div class="view-tabs">
-    <button type="button" class="tab-item" [class.active]="activeView === 'my-claims'" (click)="setActiveView('my-claims')">
+    <button *ngIf="hasPermission('my_claims')" type="button" class="tab-item" [class.active]="activeView === 'my-claims'" (click)="setActiveView('my-claims')">
       <mat-icon>person</mat-icon>
       My Claims
     </button>
-    <button type="button" class="tab-item" [class.active]="activeView === 'all-claims'" (click)="setActiveView('all-claims')">
+    <button *ngIf="hasPermission('all_claims')" type="button" class="tab-item" [class.active]="activeView === 'all-claims'" (click)="setActiveView('all-claims')">
       <mat-icon>groups</mat-icon>
       All Claims
     </button>
@@ -32,7 +32,7 @@
   <div class="view-content-wrapper">
     <div class="view-slider" [class.slide-all]="activeView === 'all-claims'">
       <!-- Panel 1: My Claims -->
-      <div class="view-panel">
+      <div class="view-panel" *ngIf="hasPermission('my_claims')">
         <div class="content-card">
           <div class="toolbar">
             <div class="filters-row">
@@ -95,13 +95,13 @@
                     <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
                   </td>
                   <td class="action-cell">
-                    <button class="action-btn hover-primary" mat-icon-button (click)="viewClaimDetails(row)">
+                    <button class="action-btn hover-primary" mat-icon-button *ngIf="hasPermission('claims_view_details')" (click)="viewClaimDetails(row)">
                       <mat-icon>visibility</mat-icon>
                     </button>
-                    <button class="action-btn hover-primary" mat-icon-button (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
+                    <button class="action-btn hover-primary" mat-icon-button *ngIf="hasPermission('claims_edit')" (click)="editClaim(row)" [disabled]="!isClaimPending(row)">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button class="action-btn hover-danger" mat-icon-button (click)="deleteClaim(row)" [disabled]="!isClaimPending(row)">
+                    <button class="action-btn hover-danger" mat-icon-button *ngIf="hasPermission('claims_delete')" (click)="deleteClaim(row)" [disabled]="!isClaimPending(row)">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>
@@ -120,7 +120,7 @@
       </div>
 
       <!-- Panel 2: All Claims -->
-      <div class="view-panel">
+      <div class="view-panel" *ngIf="hasPermission('all_claims')">
         <div class="content-card">
           <div class="toolbar">
             <div class="filters-row">
@@ -183,7 +183,7 @@
                     <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
                   </td>
                   <td class="action-cell">
-                    <button class="action-btn hover-primary" mat-icon-button (click)="viewClaimDetails(row)">
+                    <button class="action-btn hover-primary" mat-icon-button *ngIf="hasPermission('claims_view_details')" (click)="viewClaimDetails(row)">
                       <mat-icon>visibility</mat-icon>
                     </button>
                   </td>
@@ -204,7 +204,7 @@
   </div>
 
   <!-- Claim Requests Section (Super Admin, All Claims tab only) -->
-  <div class="claim-requests-section" *ngIf="activeView === 'all-claims'">
+  <div class="claim-requests-section" *ngIf="activeView === 'all-claims' && hasPermission('all_claims') && hasPermission('claims_request_action')">
     <div class="section-header">
       <h2 class="title">Claim Requests</h2>
       <p class="subtitle">Approve or reject pending expense claims</p>
@@ -235,13 +235,13 @@
           </div>
         </div>
         <div class="card-actions">
-          <button class="btn-reject" mat-stroked-button color="warn" (click)="rejectClaim(request)">
+          <button class="btn-reject" mat-stroked-button color="warn" *ngIf="hasPermission('claims_request_action')" (click)="rejectClaim(request)">
             <mat-icon>close</mat-icon> Reject
           </button>
-          <button class="btn-details" mat-stroked-button (click)="viewClaimDetails(request)">
+          <button class="btn-details" mat-stroked-button *ngIf="hasPermission('claims_view_details')" (click)="viewClaimDetails(request)">
             <mat-icon>visibility</mat-icon> Details
           </button>
-          <button class="btn-approve" mat-flat-button color="primary" (click)="acceptClaim(request)">
+          <button class="btn-approve" mat-flat-button color="primary" *ngIf="hasPermission('claims_request_action')" (click)="acceptClaim(request)">
             <mat-icon>check</mat-icon> Approve
           </button>
         </div>

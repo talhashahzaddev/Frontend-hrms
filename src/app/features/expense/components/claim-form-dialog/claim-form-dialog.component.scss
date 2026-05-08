@@ -103,8 +103,7 @@
         }
       }
 
-      input[type="text"],
-      input[type="number"],
+      input,
       textarea,
       select {
         width: 100%;
@@ -159,25 +158,89 @@
       .input-with-icon {
         position: relative;
         width: 100%;
+        display: flex;
+        align-items: center;
 
-        mat-icon {
+        mat-icon:not(.mat-datepicker-toggle-icon) {
           position: absolute;
-          left: 0.75rem;
+          left: 0.875rem;
           top: 50%;
           transform: translateY(-50%);
           color: #64748b;
           font-size: 1.125rem;
           width: 1.125rem;
           height: 1.125rem;
+          pointer-events: none;
+          z-index: 2;
+          transition: color 0.2s;
         }
 
         input {
-          padding-left: 2.5rem;
+          padding-left: 2.75rem;
+          
+          &:focus + mat-icon {
+            color: #2563eb;
+          }
         }
 
         &.clickable {
           cursor: pointer;
-          input { cursor: pointer; }
+          
+          input { 
+            cursor: pointer;
+            
+            &:hover {
+              background: #ffffff;
+              border-color: #cbd5e1;
+            }
+          }
+
+          &:hover {
+            mat-icon:not(.mat-datepicker-toggle-icon) {
+              color: #2563eb;
+            }
+          }
+        }
+
+        &.date-input-wrapper {
+          mat-datepicker-toggle {
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+
+            ::ng-deep {
+              .mat-mdc-icon-button {
+                width: 2.25rem !important;
+                height: 2.25rem !important;
+                padding: 0 !important;
+                color: #64748b !important;
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+
+                &:hover {
+                  background: #f1f5f9 !important;
+                  color: #2563eb !important;
+                }
+                
+                &:focus, &:active {
+                  outline: none !important;
+                  box-shadow: none !important;
+                }
+
+                .mat-mdc-button-touch-target {
+                  display: none;
+                }
+
+                // Remove Material's default focus ring
+                .mat-mdc-button-persistent-ripple::before {
+                  display: none !important;
+                }
+              }
+            }
+          }
         }
       }
 

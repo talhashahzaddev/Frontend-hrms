@@ -9,6 +9,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, startWith } fro
 import { ExpenseCategoryDto } from '../../../../core/models/expense.models';
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CategoryFormDialogComponent } from '../category-form-dialog/category-form-dialog.component';
 import {
   ConfirmDeleteDialogComponent,
@@ -39,11 +40,14 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   constructor(
     private expenseService: ExpenseService,
     private dialog: MatDialog,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.loadCategories();
+    if (this.hasPermission('expense_category_view')) {
+      this.loadCategories();
+    }
     this.searchControl.valueChanges
       .pipe(
         startWith(''),
@@ -60,6 +64,8 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   }
 
   private loadCategories(): void {
+    if (!this.hasPermission('expense_category_view')) return;
+
     this.isLoading = true;
     this.expenseService
       .getExpenseCategories()
@@ -99,6 +105,8 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   }
 
   openCreateDialog(): void {
+    if (!this.hasPermission('expense_category_add')) return;
+
     const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
       width: '500px',
       data: { mode: 'create' }
@@ -109,6 +117,8 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   }
 
   editCategory(category: ExpenseCategoryDto): void {
+    if (!this.hasPermission('expense_category_edit')) return;
+
     const dialogRef = this.dialog.open(CategoryFormDialogComponent, {
       width: '500px',
       data: { mode: 'edit', category }
@@ -119,6 +129,8 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   }
 
   deleteCategory(category: ExpenseCategoryDto): void {
+    if (!this.hasPermission('expense_category_delete')) return;
+
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Expense Category',
       message: `Are you sure you want to delete "${category.name}"?`,
@@ -148,5 +160,9 @@ export class CategoryListComponent implements OnInit, OnDestroy {
           });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Expense', 'Category', actionKey);
   }
 }
