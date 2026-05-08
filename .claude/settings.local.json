@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"E:\\\\HRMS code\\\\HRMS_backend\\\\HRMS.Script\" && grep -nE \"configid|fk_sstrx|fk_ssconfig|socialsecurityconfig\" 02_create_tables.sql 04_alter_tax_social_flow.sql 05_global_social_security_schema.sql 2>&1 | grep -iE \"configid|fk_\" | head -20)",
+      "Read(//e/HRMS code/HRMS_backend/HRMS.Script/**)",
+      "Read(//e/HRMS code/HRMS_backend/HRMS.API/Repositories/**)",
+      "Bash(npx ng *)",
+      "Bash(tee /tmp/build.log)"
+    ]
+  }
+}

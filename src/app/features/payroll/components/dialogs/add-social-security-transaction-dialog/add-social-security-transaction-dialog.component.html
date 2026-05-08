@@ -37,25 +37,11 @@
       </label>
 
       <label class="field">
-        <span>Config</span>
-        <div class="select-wrap">
-          <mat-icon class="leading">shield_person</mat-icon>
-          <select formControlName="configId">
-            <option value="">No config</option>
-            @for (config of configs; track config.id) {
-              <option [value]="config.id">{{ config.configName }}</option>
-            }
-          </select>
-          <mat-icon class="trailing">expand_more</mat-icon>
-        </div>
-      </label>
-
-      <label class="field">
         <span>Rule</span>
         <div class="select-wrap">
           <mat-icon class="leading">policy</mat-icon>
           <select formControlName="ruleId">
-            <option value="">No explicit rule</option>
+            <option value="" disabled>Select rule...</option>
             @for (rule of availableRules; track rule.ruleId) {
               <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
             }
@@ -63,10 +49,6 @@
           <mat-icon class="trailing">expand_more</mat-icon>
         </div>
       </label>
-
-      @if (showConfigOrRuleError) {
-        <p class="error field-span-2">Select a config or a rule before saving this transaction.</p>
-      }
 
       <label class="field">
         <span>Actual salary</span>
@@ -98,7 +80,7 @@
       <div class="estimate-box field-span-2">
         <p class="line">Calculated contribution</p>
         <strong>{{ currencySymbol() }} {{ totalAmount | number:'1.2-2' }}</strong>
-        @if (selectedConfig || selectedRule) {
+        @if (selectedRule) {
           <small>
             Salary capped: {{ currencySymbol() }} {{ salaryCapped | number:'1.2-2' }} | Employee: {{ employeeAmount | number:'1.2-2' }} | Employer: {{ employerAmount | number:'1.2-2' }}
           </small>

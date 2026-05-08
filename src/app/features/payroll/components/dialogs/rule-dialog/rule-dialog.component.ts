@@ -122,6 +122,8 @@ export class RuleDialogComponent implements OnInit {
   readonly socialSecurityJurisdictions = signal<SocialSecurityJurisdictionOption[]>([]);
   readonly socialSecurityAuthorities = signal<SocialSecurityAuthorityOption[]>([]);
   readonly socialSecuritySchemes = signal<SocialSecuritySchemeOption[]>([]);
+  readonly socialSecurityRulesList = signal<any[]>([]);
+  readonly socialMode = signal<'select-existing' | 'create-new'>('select-existing');
 
   get isEditMode(): boolean {
     return this.data?.mode === 'edit';
@@ -179,10 +181,15 @@ export class RuleDialogComponent implements OnInit {
     socialMaxSalaryLimit: [null as number | null],
     socialAnnualSalaryCap: [null as number | null],
     socialEffectiveFrom: [null as Date | null],
-    socialEffectiveTo: [null as Date | null]
+    socialEffectiveTo: [null as Date | null],
+    socialSelectedRuleId: ['']
   }, {
     validators: [this.socialSecurityDateRangeValidator()]
   });
+
+  setSocialMode(mode: 'select-existing' | 'create-new'): void {
+    this.socialMode.set(mode);
+  }
 
   ngOnInit(): void {
     this.settingsService.getOrganizationCurrency()
@@ -628,6 +635,21 @@ export class RuleDialogComponent implements OnInit {
       error: () => {
         this.socialSecuritySchemes.set([]);
         this.notification.showError('Unable to load social security schemes.');
+      }
+    });
+
+    this.payrollService.getSocialSecurityRules().pipe(take(1)).subscribe({
+      next: (rules) => {
+        const list = (rules ?? []).filter((r: any) => (r?.isActive ?? true));
+        this.socialSecurityRulesList.set(list);
+        // If no existing rules, default to create mode so admins aren't stuck on an empty dropdown.
+        if (list.length === 0) {
+          this.socialMode.set('create-new');
+        }
+      },
+      error: () => {
+        this.socialSecurityRulesList.set([]);
+        this.socialMode.set('create-new');
       }
     });
   }
@@ -1151,6 +1173,21 @@ export class RuleDialogComponent implements OnInit {
           }
         });
     } else if (formValue.selectedPolicy === 11) { // 11 is Social Security Policy
+      if (this.socialMode() === 'select-existing') {
+        const existingRuleId = String(formValue.socialSelectedRuleId ?? '').trim();
+        if (!existingRuleId) {
+          this.isSubmitting.set(false);
+          this.notification.showError('Please pick an existing rule or switch to "Create new rule".');
+          return;
+        }
+        const selected = this.socialSecurityRulesList().find((r) => String(r.ruleId) === existingRuleId);
+        this.isSubmitting.set(false);
+        this.notification.showSuccess('Social security policy linked to existing rule.');
+        this.dialogRef.close({ success: true, data: selected, policyId: 11, mode: 'existing' });
+        return;
+      }
+
+      // create-new mode: re-use the existing form fields and the same create endpoint
       if (this.ruleForm.hasError('socialInvalidDateRange')) {
         this.ruleForm.get('socialEffectiveFrom')?.markAsTouched();
         this.ruleForm.get('socialEffectiveTo')?.markAsTouched();
@@ -1159,17 +1196,58 @@ export class RuleDialogComponent implements OnInit {
         return;
       }
 
+      // % XOR fixed amount per side
+      const empPct = Number(formValue.socialEmployeeDefaultPct ?? 0);
+      const erPct = Number(formValue.socialEmployerDefaultPct ?? 0);
+      const empFixed = formValue.socialEmployeeFixedAmount;
+      const erFixed = formValue.socialEmployerFixedAmount;
+      const empFixedSet = empFixed != null && Number(empFixed) > 0;
+      const erFixedSet = erFixed != null && Number(erFixed) > 0;
+      const basis = String(formValue.socialContributionBasis ?? 'gross').toLowerCase();
+
+      if (basis === 'fixed' && !empFixedSet && !erFixedSet) {
+        this.notification.showError('For Fixed amount basis, set at least one fixed amount.');
+        this.isSubmitting.set(false);
+        return;
+      }
+      if (basis !== 'fixed') {
+        if (empPct > 0 && empFixedSet) {
+          this.notification.showError('Use either Employee % or Employee fixed amount — not both.');
+          this.isSubmitting.set(false);
+          return;
+        }
+        if (erPct > 0 && erFixedSet) {
+          this.notification.showError('Use either Employer % or Employer fixed amount — not both.');
+          this.isSubmitting.set(false);
+          return;
+        }
+        if (empPct + erPct > 100) {
+          this.notification.showError('Employee % + Employer % cannot exceed 100%.');
+          this.isSubmitting.set(false);
+          return;
+        }
+      }
+
+      // min ≤ max sanity
+      const minS = formValue.socialMinSalaryLimit;
+      const maxS = formValue.socialMaxSalaryLimit;
+      if (minS != null && maxS != null && Number(maxS) > 0 && Number(maxS) < Number(minS)) {
+        this.notification.showError('Max salary limit must be greater than or equal to min salary limit.');
+        this.isSubmitting.set(false);
+        return;
+      }
+
       const payload = {
         schemeId: String(formValue.socialSchemeId ?? ''),
         ruleName: String(formValue.ruleName ?? '').trim(),
         description: formValue.description ? String(formValue.description).trim() : null,
-        contributionBasis: String(formValue.socialContributionBasis ?? 'gross').toLowerCase(),
-        employeeDefaultPct: Number(formValue.socialEmployeeDefaultPct ?? 0),
-        employerDefaultPct: Number(formValue.socialEmployerDefaultPct ?? 0),
-        employeeFixedAmount: formValue.socialEmployeeFixedAmount == null ? null : Number(formValue.socialEmployeeFixedAmount),
-        employerFixedAmount: formValue.socialEmployerFixedAmount == null ? null : Number(formValue.socialEmployerFixedAmount),
-        minSalaryLimit: formValue.socialMinSalaryLimit == null ? null : Number(formValue.socialMinSalaryLimit),
-        maxSalaryLimit: formValue.socialMaxSalaryLimit == null ? null : Number(formValue.socialMaxSalaryLimit),
+        contributionBasis: basis,
+        employeeDefaultPct: empPct,
+        employerDefaultPct: erPct,
+        employeeFixedAmount: empFixed == null ? null : Number(empFixed),
+        employerFixedAmount: erFixed == null ? null : Number(erFixed),
+        minSalaryLimit: minS == null ? null : Number(minS),
+        maxSalaryLimit: maxS == null ? null : Number(maxS),
         annualSalaryCap: formValue.socialAnnualSalaryCap == null ? null : Number(formValue.socialAnnualSalaryCap),
         effectiveFrom: this.toIsoDate(formValue.socialEffectiveFrom),
         effectiveTo: this.toIsoDate(formValue.socialEffectiveTo),
@@ -1188,7 +1266,7 @@ export class RuleDialogComponent implements OnInit {
             this.notification.showSuccess(
               this.isEditMode ? 'Social security rule updated successfully' : 'Social security rule created successfully'
             );
-            this.dialogRef.close({ success: true, data: res, policyId: 11 });
+            this.dialogRef.close({ success: true, data: res, policyId: 11, mode: 'created' });
           },
           error: (err: any) => {
             console.error(err);

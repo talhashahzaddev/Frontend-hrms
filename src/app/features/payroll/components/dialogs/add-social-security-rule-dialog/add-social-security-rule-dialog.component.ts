@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -39,17 +39,47 @@ export class AddSocialSecurityRuleDialogComponent {
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   readonly schemes = this.data?.schemes ?? [];
 
-  readonly form = this.fb.group({
-    schemeId: ['', [Validators.required]],
-    ruleName: ['', [Validators.required]],
-    contributionBasis: ['gross', [Validators.required]],
-    employeeDefaultPct: [0, [Validators.min(0), Validators.max(100)]],
-    employerDefaultPct: [0, [Validators.min(0), Validators.max(100)]],
-    employeeFixedAmount: [null as number | null, [Validators.min(0)]],
-    employerFixedAmount: [null as number | null, [Validators.min(0)]],
-    minSalaryLimit: [null as number | null, [Validators.min(0)]],
-    maxSalaryLimit: [null as number | null, [Validators.min(0)]]
-  });
+  readonly form = this.fb.group(
+    {
+      schemeId: ['', [Validators.required]],
+      ruleName: ['', [Validators.required]],
+      contributionBasis: ['gross', [Validators.required]],
+      employeeDefaultPct: [0, [Validators.min(0), Validators.max(100)]],
+      employerDefaultPct: [0, [Validators.min(0), Validators.max(100)]],
+      employeeFixedAmount: [null as number | null, [Validators.min(0)]],
+      employerFixedAmount: [null as number | null, [Validators.min(0)]],
+      minSalaryLimit: [null as number | null, [Validators.min(0)]],
+      maxSalaryLimit: [null as number | null, [Validators.min(0)]]
+    },
+    { validators: [this.percentOrFixedValidator(), this.salaryRangeValidator(), this.combinedPctValidator()] }
+  );
+
+  get isFixedBasis(): boolean {
+    return String(this.form.get('contributionBasis')?.value ?? '').toLowerCase() === 'fixed';
+  }
+
+  get showEmployeeBothError(): boolean {
+    return this.form.hasError('employeeBothPctAndFixed') &&
+      ((this.form.get('employeeDefaultPct')?.touched ?? false) || (this.form.get('employeeFixedAmount')?.touched ?? false));
+  }
+
+  get showEmployerBothError(): boolean {
+    return this.form.hasError('employerBothPctAndFixed') &&
+      ((this.form.get('employerDefaultPct')?.touched ?? false) || (this.form.get('employerFixedAmount')?.touched ?? false));
+  }
+
+  get showFixedBasisRequiresAmount(): boolean {
+    return this.form.hasError('fixedBasisRequiresAmount');
+  }
+
+  get showSalaryRangeError(): boolean {
+    return this.form.hasError('invalidSalaryRange') &&
+      ((this.form.get('minSalaryLimit')?.touched ?? false) || (this.form.get('maxSalaryLimit')?.touched ?? false));
+  }
+
+  get showCombinedPctError(): boolean {
+    return this.form.hasError('combinedPctOver100');
+  }
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityRuleDialogData) {
     if (this.data?.initialValue) {
@@ -104,5 +134,64 @@ export class AddSocialSecurityRuleDialogComponent {
       return null;
     }
     return Number(value);
+  }
+
+  private percentOrFixedValidator(): ValidatorFn {
+    return (group): ValidationErrors | null => {
+      const basis = String(group.get('contributionBasis')?.value ?? '').toLowerCase();
+
+      const empPct = Number(group.get('employeeDefaultPct')?.value ?? 0);
+      const erPct = Number(group.get('employerDefaultPct')?.value ?? 0);
+      const empFixed = group.get('employeeFixedAmount')?.value;
+      const erFixed = group.get('employerFixedAmount')?.value;
+
+      const empFixedSet = empFixed !== null && empFixed !== undefined && empFixed !== '' && Number(empFixed) > 0;
+      const erFixedSet = erFixed !== null && erFixed !== undefined && erFixed !== '' && Number(erFixed) > 0;
+
+      const errors: ValidationErrors = {};
+
+      if (basis === 'fixed') {
+        // Fixed basis: at least one fixed amount required
+        if (!empFixedSet && !erFixedSet) {
+          errors['fixedBasisRequiresAmount'] = true;
+        }
+      } else {
+        // Percentage-based basis: cannot have both percent AND fixed on the same side
+        if (empPct > 0 && empFixedSet) {
+          errors['employeeBothPctAndFixed'] = true;
+        }
+        if (erPct > 0 && erFixedSet) {
+          errors['employerBothPctAndFixed'] = true;
+        }
+      }
+
+      return Object.keys(errors).length ? errors : null;
+    };
+  }
+
+  private salaryRangeValidator(): ValidatorFn {
+    return (group): ValidationErrors | null => {
+      const min = group.get('minSalaryLimit')?.value;
+      const max = group.get('maxSalaryLimit')?.value;
+      if (min != null && max != null && Number(max) > 0 && Number(max) < Number(min)) {
+        return { invalidSalaryRange: true };
+      }
+      return null;
+    };
+  }
+
+  private combinedPctValidator(): ValidatorFn {
+    return (group): ValidationErrors | null => {
+      const basis = String(group.get('contributionBasis')?.value ?? '').toLowerCase();
+      if (basis === 'fixed') {
+        return null;
+      }
+      const empPct = Number(group.get('employeeDefaultPct')?.value ?? 0);
+      const erPct = Number(group.get('employerDefaultPct')?.value ?? 0);
+      if (empPct + erPct > 100) {
+        return { combinedPctOver100: true };
+      }
+      return null;
+    };
   }
 }

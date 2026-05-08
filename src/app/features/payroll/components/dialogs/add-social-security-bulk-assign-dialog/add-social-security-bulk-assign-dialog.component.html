@@ -47,29 +47,15 @@
         </select>
       </label>
 
-      <label class="field">
-        <span>Config</span>
-        <select formControlName="configId">
-          <option value="">No config</option>
-          @for (config of configs; track config.id) {
-            <option [value]="config.id">{{ config.configName }}</option>
-          }
-        </select>
-      </label>
-
-      <label class="field">
+      <label class="field field-span-2">
         <span>Rule</span>
         <select formControlName="ruleId">
-          <option value="">No explicit rule</option>
+          <option value="" disabled>Select rule...</option>
           @for (rule of availableRules; track rule.ruleId) {
             <option [value]="rule.ruleId">{{ rule.ruleName }}</option>
           }
         </select>
       </label>
-
-      @if (showConfigOrRuleError) {
-        <p class="error field-span-2">Select a config or a rule before assigning.</p>
-      }
 
       <label class="field">
         <span>Actual salary (applies to all selected)</span>

@@ -70,6 +70,39 @@
       <p>Loading your social security records...</p>
     </div>
   } @else {
+    <div class="section-tabs with-tools">
+      <div>
+        <button type="button" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">My requests</button>
+        <button type="button" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">My claims</button>
+        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
+      </div>
+
+      @if (currentTab === 'transactions') {
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search rule or period..." [(ngModel)]="searchTerm" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="selectedPeriodId">
+            <option value="">All periods</option>
+            @for (period of periodOptions; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+
+          <select class="filter-select" [(ngModel)]="selectedStatus">
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="deducted">Deducted</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      }
+    </div>
+
     <div class="summary-cards">
       <div class="card">
         <div class="card-content">
@@ -114,39 +147,6 @@
         </div>
         <p class="card-footer">periods with enrollment</p>
       </div>
-    </div>
-
-    <div class="section-tabs with-tools">
-      <div>
-        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
-        <button type="button" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">My requests</button>
-        <button type="button" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">My claims</button>
-      </div>
-
-      @if (currentTab === 'transactions') {
-        <div class="filters">
-          <select class="filter-select" [(ngModel)]="selectedPeriodId">
-            <option value="">All periods</option>
-            @for (period of periodOptions; track period.id) {
-              <option [value]="period.id">{{ period.name }}</option>
-            }
-          </select>
-
-          <select class="filter-select" [(ngModel)]="selectedStatus">
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="deducted">Deducted</option>
-            <option value="rejected">Rejected</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search config or period..." [(ngModel)]="searchTerm" />
-          </div>
-        </div>
-      }
     </div>
 
     @if (currentTab === 'transactions') {

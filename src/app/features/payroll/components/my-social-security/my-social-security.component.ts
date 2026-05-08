@@ -62,7 +62,7 @@ export class MySocialSecurityComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
-  currentTab: MySocialTab = 'transactions';
+  currentTab: MySocialTab = 'requests';
 
   // Transactions
   transactions: MySocialTransactionRow[] = [];
