@@ -538,6 +538,11 @@ export class SkillMatrixComponent implements OnInit, OnDestroy {
     return this.mySkills.filter(s => s.assessorName).length;
   }
 
+
+    hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Performance', 'Skill Matrix', actionKey);
+  }
+
   // ─── Pagination helpers ───────────────────────────────────────────────
   min(a: number, b: number) { return Math.min(a, b); }
 

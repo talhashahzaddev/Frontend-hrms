@@ -7,7 +7,7 @@
       <p class="page-subtitle">Manage and track performance review windows for your organization iii.</p>
     </div>
     <div class="header-actions" >
-      <button class="btn-create" (click)="openCreateDialog()">
+      <button *ngIf="hasPermission('APPRAISAL_CYCLE_BUTTON')" class="btn-create" (click)="openCreateDialog()">
         <span class="material-icons btn-icon">add</span>
         Create Cycle
       </button>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Table -->
-    <div class="table-wrapper" *ngIf="!isLoading">
+    <div class="table-wrapper" *ngIf="!isLoading && hasPermission('APPRAISAL_CYCLE_TABLE')">
       <table class="cycles-table" mat-table [dataSource]="appraisalCycles">
 
         <!-- Cycle Name Column -->
@@ -107,15 +107,15 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="col-header col-header--right">Actions</th>
           <td mat-cell *matCellDef="let cycle" class="col-cell col-cell--right">
-            <button class="btn-menu" [matMenuTriggerFor]="cycleMenu">
+            <button *ngIf="hasPermission('APPRAISAL_CYCLE_EDIT_BUTTON') || hasPermission('APPRAISAL_CYCLE_DELETE_BUTTON')" class="btn-menu" [matMenuTriggerFor]="cycleMenu">
               <span class="material-icons">more_vert</span>
             </button>
             <mat-menu #cycleMenu="matMenu" class="cycle-action-menu">
-              <button mat-menu-item (click)="openEditDialog(cycle)">
+              <button mat-menu-item *ngIf="hasPermission('APPRAISAL_CYCLE_EDIT_BUTTON')" (click)="openEditDialog(cycle)">
                 <span class="material-icons menu-icon">edit</span>
                 Edit
               </button>
-              <button mat-menu-item class="menu-item--danger" (click)="deleteCycle(cycle)" >
+              <button mat-menu-item *ngIf="hasPermission('APPRAISAL_CYCLE_DELETE_BUTTON')" class="menu-item--danger" (click)="deleteCycle(cycle)" >
                 <span class="material-icons menu-icon">delete</span>
                 Delete
               </button>

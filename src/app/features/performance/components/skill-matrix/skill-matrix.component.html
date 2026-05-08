@@ -13,10 +13,10 @@
       </div>
     </div>
     <div class="sm-header__actions">
-      <button *ngIf="hasHRRole() && selectedTab === 0" mat-flat-button class="btn-primary" (click)="openCreateSkillDialog()">
+      <button *ngIf="hasPermission('CREATE_SKILLS_BUTTON') && selectedTab === 0" mat-flat-button class="btn-primary" (click)="openCreateSkillDialog()">
         <mat-icon>add</mat-icon> Create Skill
       </button>
-      <button *ngIf="selectedTab === 1" mat-flat-button class="btn-primary" (click)="openAddSkillDialog()">
+      <button *ngIf="hasPermission('ADD_SKILLS_BUTTON') && selectedTab === 1" mat-flat-button class="btn-primary" (click)="openAddSkillDialog()">
         <mat-icon>add</mat-icon> Add Skill
       </button>
     </div>
@@ -24,12 +24,12 @@
 
   <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
   <div class="sm-tabs">
-    <button class="sm-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+    <button *ngIf="hasPermission('SKILLS_SETS_SECTION')" class="sm-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
       <mat-icon>category</mat-icon>
       <span>Skill Sets</span>
       <span class="sm-tab__badge" *ngIf="totalSkills > 0">{{ totalSkills }}</span>
     </button>
-    <button class="sm-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+    <button *ngIf="hasPermission('MY_SKILLS_SECTION')" class="sm-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
       <mat-icon>person</mat-icon>
       <span>My Skills</span>
       <span class="sm-tab__badge" *ngIf="mySkills.length > 0">{{ mySkills.length }}</span>
@@ -39,7 +39,7 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- TAB 1 — SKILL SETS                                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <div *ngIf="selectedTab === 0" class="sm-tab-content">
+  <div *ngIf="selectedTab === 0 && hasPermission('SKILLS_SETS_SECTION')" class="sm-tab-content">
 
     <!-- ── Filters ────────────────────────────────────────────────────── -->
     <div class="sm-filter-bar">
@@ -162,7 +162,7 @@
           <mat-icon>category</mat-icon>
           <h3>No Skills Found</h3>
           <p>No skills match your filters.</p>
-          <button *ngIf="hasHRRole()" mat-flat-button class="btn-primary" (click)="openCreateSkillDialog()">
+          <button *ngIf="hasPermission('CREATE_SKILLS_BUTTON')" mat-flat-button class="btn-primary" (click)="openCreateSkillDialog()">
             <mat-icon>add</mat-icon> Create First Skill
           </button>
         </div>
@@ -309,7 +309,7 @@
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <!-- TAB 2 — MY SKILLS                                                  -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <div *ngIf="selectedTab === 1" class="sm-tab-content">
+  <div *ngIf="selectedTab === 1 && hasPermission('MY_SKILLS_SECTION')" class="sm-tab-content">
 
     <!-- Stats strip -->
     <div class="sm-stats" *ngIf="mySkills.length > 0">
@@ -433,7 +433,7 @@
           <mat-icon>school</mat-icon>
           <h3>No Skills Yet</h3>
           <p>Add your first skill to showcase your competencies.</p>
-          <button mat-flat-button class="btn-primary" (click)="openAddSkillDialog()">
+          <button *ngIf="hasPermission('ADD_SKILLS_BUTTON')" mat-flat-button class="btn-primary" (click)="openAddSkillDialog()">
             <mat-icon>add</mat-icon> Add Your First Skill
           </button>
         </div>
