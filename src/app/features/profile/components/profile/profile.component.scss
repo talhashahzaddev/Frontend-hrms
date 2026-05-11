@@ -1,4 +1,4 @@
-// ─── Page Header Styles (like employee-form) ────────────────
+// ─── Page Header ─────────────────────────────────────────────
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -43,22 +43,20 @@
   }
 }
 
-// Professional Profile Styles
 :host {
   --profile-primary: #4f46e5;
   --profile-primary-hover: #4338ca;
-  --profile-bg: #f1f5f9; 
+  --profile-bg: #f1f5f9;
   --card-border: #e2e8f0;
   --text-main: #1e293b;
   --text-muted: #64748b;
   --white: #ffffff;
-  
   --primary-50: #eff6ff;
   --purple-50: #f5f3ff;
 }
 
 .profile-container {
-  padding: 10px 0px;
+  padding: 10px 0;
   min-height: 100vh;
   background-color: var(--profile-bg);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -69,7 +67,6 @@
   margin: 0 auto;
 }
 
-// ───────── Section Cards ─────────
 .profile-section-card {
   background: var(--white);
   border-radius: 12px;
@@ -80,13 +77,11 @@
   padding: 24px;
 }
 
-// ───────── Header Gradient Card ─────────
 .header-card {
   background: linear-gradient(135deg, var(--primary-50) 0%, var(--purple-50) 100%);
   border: 1px solid rgba(79, 70, 229, 0.1);
 }
 
-// ───────── Avatar & Header Section ─────────
 .profile-avatar-section {
   display: flex;
   align-items: center;
@@ -116,10 +111,7 @@
       object-fit: cover;
       border-radius: 50%;
       display: block;
-
-      /* 🔥 IMAGE QUALITY FIX */
       image-rendering: auto;
-      transform: none;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
@@ -140,7 +132,7 @@
     background: white;
     border-radius: 8px;
     text-transform: none;
-    
+
     mat-icon {
       font-size: 18px;
       width: 18px;
@@ -158,7 +150,6 @@
     margin: 0;
     letter-spacing: -0.02em;
   }
-
   p {
     font-size: 15px;
     color: var(--text-muted);
@@ -166,7 +157,6 @@
   }
 }
 
-// ───────── Section Headers ─────────
 .section-title-box {
   display: flex;
   align-items: center;
@@ -183,7 +173,7 @@
     justify-content: center;
     color: white;
     box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
-    
+
     mat-icon {
       font-size: 22px;
       width: 22px;
@@ -192,36 +182,25 @@
   }
 
   .title-text {
-    h3 {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    p {
-      margin: 2px 0 0;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+    h3 { margin: 0; font-size: 17px; font-weight: 700; color: var(--text-main); }
+    p { margin: 2px 0 0; font-size: 13px; color: var(--text-muted); }
   }
 }
 
-// ───────── Form Grid ─────────
 .form-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  
+
   mat-form-field {
     width: 100%;
-    
+
     ::ng-deep {
       .mat-mdc-text-field-wrapper {
         background-color: #ffffff !important;
         transition: all 0.2s ease;
       }
-      
+
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
@@ -239,7 +218,6 @@
   }
 }
 
-// ───────── Actions ─────────
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -260,87 +238,73 @@
   }
 }
 
-// ───────── Responsive ─────────
 @media (max-width: 1024px) {
-  .form-grid { 
-    grid-template-columns: repeat(2, 1fr); 
-  }
+  .form-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .profile-container { 
-    padding: 20px 15px; 
-  }
-
-  .form-grid { 
-    grid-template-columns: 1fr; 
-  }
-
-  .profile-avatar-section {
-    flex-direction: column;
-    text-align: center;
-  }
+  .profile-container { padding: 20px 15px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .profile-avatar-section { flex-direction: column; text-align: center; }
 }
 
-// Phone field styles (copied from employee-edit)
+// ─── Phone field (fixes overlap) ─────────────────────────────
 .phone-field {
   ::ng-deep {
+    /* Country select prefix — fixed compact area */
     .mat-mdc-form-field-prefix {
       display: inline-flex !important;
       align-items: center !important;
-      height: auto !important;
-      padding: 0 !important;
       flex-shrink: 0 !important;
+      min-width: 92px !important;
+      max-width: 110px !important;
+      box-sizing: border-box !important;
+      padding: 0 8px !important;
       margin-right: 0 !important;
+      overflow: hidden !important;
     }
 
-    .mat-mdc-select {
-      min-width: 52px !important;
-      max-width: 72px !important;
-      width: auto !important;
-    }
-
-    .mat-mdc-select-trigger {
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 3px !important;
-      white-space: nowrap;
-      padding-right: 2px;
-    }
-
-    .mat-mdc-select-arrow-wrapper {
-      display: flex !important;
-      align-items: center !important;
-      height: auto !important;
-    }
-
+    /* Vertical divider after prefix */
     .mat-mdc-form-field-prefix::after {
       content: '';
       display: inline-block;
       width: 1px;
       height: 20px;
       background: #e5e7eb;
-      margin: 0 10px 0 8px;
+      margin-left: 8px;
       flex-shrink: 0;
       align-self: center;
     }
 
-    .mat-mdc-select-trigger img.opt-flag-img,
-    .mat-mdc-select-value img.opt-flag-img {
+    .mat-mdc-select {
+      min-width: 52px !important;
+      max-width: 80px !important;
+      width: auto !important;
+    }
+
+    .mat-mdc-select-trigger {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 4px !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      padding-right: 2px;
+    }
+
+    .mat-mdc-select-arrow-wrapper {
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-trigger img.opt-flag-img {
       width: 22px !important;
       height: 15px !important;
-      min-width: 22px !important;
-      min-height: 15px !important;
-      max-width: 22px !important;
-      max-height: 15px !important;
       object-fit: cover !important;
       border-radius: 2px !important;
-      display: inline-block !important;
-      vertical-align: middle !important;
-      flex-shrink: 0 !important;
       border: 1px solid rgba(0, 0, 0, 0.08) !important;
-      overflow: hidden !important;
-      align-self: center !important;
+      flex-shrink: 0 !important;
     }
 
     .mat-mdc-select-trigger .opt-code {
@@ -349,34 +313,23 @@
       color: #374151;
     }
 
-    /* Ensure a consistent, fixed prefix width so the select doesn't overlap input text
-       (fixes emergency contact phone overlap when inside nested formGroup) */
-    .mat-mdc-form-field-prefix {
-      min-width: 92px !important;
-      max-width: 120px !important;
-      box-sizing: border-box !important;
-      padding-left: 6px !important;
-      padding-right: 6px !important;
-      overflow: hidden !important;
+    /* 🔑 Push native input clear of the prefix so label/value never overlap */
+    .mat-mdc-form-field-infix {
+      padding-left: 12px !important;
     }
 
-    /* Truncate long select trigger content to keep layout stable */
-    .mat-mdc-select-trigger {
-      max-width: 100% !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-      white-space: nowrap !important;
-      display: inline-flex !important;
-      align-items: center !important;
+    input.mat-mdc-input-element {
+      padding-left: 4px !important;
     }
 
-    /* Add a small left padding to the native input so its text won't sit under the prefix */
-    .mat-mdc-text-field-input {
-      padding-left: 8px !important;
+    /* Floating label sits above input area, not over the prefix */
+    .mdc-floating-label--float-above {
+      transform: translateY(-106%) scale(0.75) !important;
     }
   }
 }
 
+// ─── Country dropdown panel ──────────────────────────────────
 ::ng-deep .country-panel {
   border-radius: 12px !important;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14) !important;
@@ -426,8 +379,6 @@
 
     &:hover { background: #f5f3ff !important; }
     &.mdc-list-item--selected, &.mat-mdc-option-active { background: #eef2ff !important; color: #6366f1 !important; }
-
-    .opt-flag { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; width: 22px !important; height: 16px !important; overflow: hidden !important; }
 
     img.opt-flag-img { width: 22px !important; height: 15px !important; object-fit: cover !important; border-radius: 2px !important; border: 1px solid rgba(0,0,0,0.07) !important; }
 

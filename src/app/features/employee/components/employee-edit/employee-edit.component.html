@@ -3,9 +3,7 @@
   <!-- ── Header ─────────────────────────────────────────────── -->
   <div class="dialog-header">
     <div class="header-left">
-      <div class="header-icon">
-        <mat-icon>edit</mat-icon>
-      </div>
+      <div class="header-icon"><mat-icon>edit</mat-icon></div>
       <div class="header-info">
         <h2 class="header-title">Edit Employee</h2>
         <p class="header-sub">{{ data.employee.fullName }} · {{ data.employee.employeeCode }}</p>
@@ -53,7 +51,8 @@
             <mat-error *ngIf="employeeForm.get('email')?.hasError('email')">Invalid email</mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="field phone-field">
+          <!-- ✅ floatLabel="always" prevents label/input overlap with prefix -->
+          <mat-form-field appearance="outline" class="field phone-field" floatLabel="always">
             <mat-label>Phone</mat-label>
             <mat-select matPrefix formControlName="phoneCountryCode" panelClass="country-panel" (openedChange)="onCountryPanelOpen($event)">
               <mat-select-trigger>
@@ -77,7 +76,7 @@
               </ng-container>
             </mat-select>
 
-                 <input matInput formControlName="phone" inputmode="numeric" pattern="[0-9]*"
+            <input matInput formControlName="phone" placeholder="Phone number" inputmode="numeric" pattern="[0-9]*"
                    (keydown)="onPhoneKeydown($event)"
                    (paste)="onPhonePaste($event)"
                    (input)="onPhoneInput($event)"
@@ -140,9 +139,7 @@
           <mat-form-field appearance="outline" class="field">
             <mat-label>Department *</mat-label>
             <mat-select formControlName="departmentId">
-              <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-                {{ dept.departmentName }}
-              </mat-option>
+              <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">{{ dept.departmentName }}</mat-option>
             </mat-select>
             <mat-error>Required</mat-error>
           </mat-form-field>
@@ -150,9 +147,7 @@
           <mat-form-field appearance="outline" class="field">
             <mat-label>Position *</mat-label>
             <mat-select formControlName="positionId" [disabled]="isPositionDisabled">
-              <mat-option *ngFor="let pos of filteredPositions" [value]="pos.positionId">
-                {{ pos.positionTitle }}
-              </mat-option>
+              <mat-option *ngFor="let pos of filteredPositions" [value]="pos.positionId">{{ pos.positionTitle }}</mat-option>
             </mat-select>
             <mat-hint *ngIf="isPositionDisabled">Select a department first</mat-hint>
             <mat-error>Required</mat-error>
@@ -162,9 +157,7 @@
             <mat-label>Reporting Manager</mat-label>
             <mat-select formControlName="reportingManagerId">
               <mat-option [value]="null">None</mat-option>
-              <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">
-                {{ mgr.fullName }}
-              </mat-option>
+              <mat-option *ngFor="let mgr of managers" [value]="mgr.employeeId">{{ mgr.fullName }}</mat-option>
             </mat-select>
           </mat-form-field>
 
@@ -212,7 +205,6 @@
             </mat-select>
           </mat-form-field>
 
-          <!-- Salary wrapper: currency badge outside field -->
           <div class="salary-wrapper field">
             <span class="currency-badge">{{ currencySymbol }}</span>
             <mat-form-field appearance="outline" class="salary-field">
@@ -286,7 +278,8 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="field phone-field">
+          <!-- ✅ floatLabel="always" -->
+          <mat-form-field appearance="outline" class="field phone-field" floatLabel="always">
             <mat-label>Phone</mat-label>
 
             <mat-select matPrefix formControlName="phoneCountryCode" panelClass="country-panel" (openedChange)="onCountryPanelOpen($event)">
@@ -311,7 +304,7 @@
               </ng-container>
             </mat-select>
 
-            <input matInput formControlName="phone" inputmode="numeric" pattern="[0-9]*"
+            <input matInput formControlName="phone" placeholder="Phone number" inputmode="numeric" pattern="[0-9]*"
                    (keydown)="onPhoneKeydown($event)"
                    (paste)="onPhonePaste($event)"
                    (input)="onPhoneInput($event)"
@@ -333,15 +326,11 @@
   <!-- ── Footer Actions ──────────────────────────────────────── -->
   <div class="dialog-footer">
     <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading" class="btn-cancel">
-      <mat-icon>close</mat-icon>
-      Cancel
+      <mat-icon>close</mat-icon> Cancel
     </button>
-    <button mat-flat-button (click)="onSave()"
-            [disabled]="isLoading || !employeeForm.dirty"
-            class="btn-save">
+    <button mat-flat-button (click)="onSave()" [disabled]="isLoading || !employeeForm.dirty" class="btn-save">
       <mat-icon>{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
       {{ isLoading ? 'Saving...' : 'Save Changes' }}
     </button>
   </div>
-
 </div>

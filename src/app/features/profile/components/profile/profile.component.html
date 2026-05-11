@@ -1,18 +1,11 @@
 <div class="profile-container">
   <div class="profile-content">
 
-    <!-- Page Header -->
     <div class="page-header">
       <div class="header-content">
         <h1 class="page-title">Update Profile</h1>
         <p class="page-subtitle">Update your personal and employment information</p>
       </div>
-      <!-- <div class="header-actions">
-        <button mat-stroked-button type="button" (click)="onCancel()" class="cancel-btn">
-          <mat-icon>arrow_back</mat-icon>
-          <span class="btn-text">Back to List</span>
-        </button>
-      </div> -->
     </div>
 
     <div class="profile-section-card header-card">
@@ -44,6 +37,7 @@
 
     <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()" novalidate>
 
+      <!-- Basic Info -->
       <div class="profile-section-card">
         <div class="section-title-box">
           <div class="icon-box"><mat-icon>person</mat-icon></div>
@@ -69,7 +63,8 @@
             <input matInput formControlName="email">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="phone-field">
+          <!-- ✅ floatLabel="always" prevents label/input overlap with prefix -->
+          <mat-form-field appearance="outline" class="phone-field" floatLabel="always">
             <mat-label>Phone</mat-label>
             <mat-select matPrefix formControlName="phoneCountryCode" panelClass="country-panel" (openedChange)="onCountryPanelOpen($event)">
               <mat-select-trigger>
@@ -93,7 +88,8 @@
               </ng-container>
             </mat-select>
 
-                 <input matInput formControlName="phone" inputmode="numeric" pattern="[0-9]*" (click)="$event.stopPropagation()"
+            <input matInput formControlName="phone" placeholder="Phone number" inputmode="numeric" pattern="[0-9]*"
+                   (click)="$event.stopPropagation()"
                    (keydown)="onPhoneKeydown($event)" (paste)="onPhonePaste($event)" (input)="onPhoneInput($event)">
           </mat-form-field>
 
@@ -129,6 +125,7 @@
         </div>
       </div>
 
+      <!-- Employment -->
       <div class="profile-section-card">
         <div class="section-title-box">
           <div class="icon-box"><mat-icon>work</mat-icon></div>
@@ -178,6 +175,7 @@
         </div>
       </div>
 
+      <!-- Address -->
       <div class="profile-section-card" formGroupName="address">
         <div class="section-title-box">
           <div class="icon-box"><mat-icon>home</mat-icon></div>
@@ -210,6 +208,7 @@
         </div>
       </div>
 
+      <!-- Emergency Contact -->
       <div class="profile-section-card" formGroupName="emergencyContact">
         <div class="section-title-box">
           <div class="icon-box"><mat-icon>contact_phone</mat-icon></div>
@@ -225,7 +224,8 @@
             <input matInput formControlName="name">
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="phone-field">
+          <!-- ✅ floatLabel="always" -->
+          <mat-form-field appearance="outline" class="phone-field" floatLabel="always">
             <mat-label>Phone</mat-label>
             <mat-select matPrefix formControlName="emergencyPhoneCountryCode" panelClass="country-panel" (openedChange)="onCountryPanelOpen($event)">
               <mat-select-trigger>
@@ -249,7 +249,8 @@
               </ng-container>
             </mat-select>
 
-                 <input matInput formControlName="phone" (click)="$event.stopPropagation()"
+            <input matInput formControlName="phone" placeholder="Phone number"
+                   (click)="$event.stopPropagation()"
                    (keydown)="onPhoneKeydown($event)" (paste)="onPhonePaste($event)" (input)="onPhoneInput($event)">
           </mat-form-field>
 
@@ -273,14 +274,10 @@
       </div>
 
       <div class="form-actions">
-        <button mat-flat-button color="primary" type="submit"
-                [disabled]="profileForm.invalid || isLoading">
+        <button mat-flat-button color="primary" type="submit" [disabled]="profileForm.invalid || isLoading">
           {{ isLoading ? 'Saving...' : 'Save Changes' }}
         </button>
-
-        <button mat-stroked-button type="button"
-                (click)="resetForm()"
-                [disabled]="isLoading">
+        <button mat-stroked-button type="button" (click)="resetForm()" [disabled]="isLoading">
           Reset
         </button>
       </div>
