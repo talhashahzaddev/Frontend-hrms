@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
+
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 export type SocialSecurityAdminActionMode =
   | 'approve-request'
@@ -47,6 +50,9 @@ export interface SocialSecurityAdminActionResult {
 export class SocialSecurityAdminActionDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<SocialSecurityAdminActionDialogComponent, SocialSecurityAdminActionResult | undefined>);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly mode: SocialSecurityAdminActionMode;
 
@@ -66,6 +72,13 @@ export class SocialSecurityAdminActionDialogComponent {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityAdminActionDialogData) {
     this.mode = data?.mode ?? 'approve-request';
+
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
 
     this.form.patchValue({
       overrideEmployeePct: data?.defaultEmployeePct ?? null,

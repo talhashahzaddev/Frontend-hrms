@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
+
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 export interface SocialSecurityTransactionEmployeeOption {
   id: string;
@@ -70,32 +73,36 @@ interface SocialSecurityTransactionDialogData {
 export class AddSocialSecurityTransactionDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AddSocialSecurityTransactionDialogComponent, SocialSecurityTransactionDialogPayload | undefined>);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   readonly employees = this.data?.employees ?? [];
   readonly periods = this.data?.periods ?? [];
-  readonly configs = this.data?.configs ?? [];
   readonly rules = this.data?.rules ?? [];
 
-  readonly form = this.fb.group(
-    {
-      employeeId: ['', Validators.required],
-      periodId: ['', Validators.required],
-      configId: [''],
-      ruleId: [''],
-      actualSalary: [0, [Validators.required, Validators.min(0)]],
-      isEnrolled: [true],
-      requestStatus: ['pending', Validators.required]
-    },
-    { validators: [this.configOrRuleValidator()] }
-  );
+  readonly form = this.fb.group({
+    employeeId: ['', Validators.required],
+    periodId: ['', Validators.required],
+    ruleId: ['', Validators.required],
+    actualSalary: [0, [Validators.required, Validators.min(1)]],
+    isEnrolled: [true],
+    requestStatus: ['pending', Validators.required]
+  });
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityTransactionDialogData) {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
+
     if (this.data?.initialValue) {
       this.form.patchValue({
         employeeId: this.data.initialValue.employeeId ?? '',
         periodId: this.data.initialValue.periodId ?? '',
-        configId: this.data.initialValue.configId ?? '',
         ruleId: this.data.initialValue.ruleId ?? '',
         actualSalary: this.data.initialValue.actualSalary ?? 0,
         isEnrolled: this.data.initialValue.isEnrolled ?? true,
@@ -112,26 +119,6 @@ export class AddSocialSecurityTransactionDialogComponent {
       this.form.get('employeeId')?.disable({ emitEvent: false });
       this.form.get('periodId')?.disable({ emitEvent: false });
     }
-
-    this.form.get('configId')?.valueChanges.subscribe((configId) => {
-      const selectedConfig = this.configs.find((config) => config.id === String(configId ?? ''));
-      if (!selectedConfig) {
-        return;
-      }
-
-      if (!this.form.get('ruleId')?.value && selectedConfig.ruleId) {
-        const linkedRule = this.rules.find((rule) => rule.ruleId === selectedConfig.ruleId);
-        if (this.isRuleActive(linkedRule)) {
-          this.form.patchValue({ ruleId: selectedConfig.ruleId }, { emitEvent: false });
-        }
-      }
-
-      this.form.updateValueAndValidity({ emitEvent: false });
-    });
-
-    this.form.get('ruleId')?.valueChanges.subscribe(() => {
-      this.form.updateValueAndValidity({ emitEvent: false });
-    });
   }
 
   get dialogTitle(): string {
@@ -140,11 +127,6 @@ export class AddSocialSecurityTransactionDialogComponent {
 
   get submitLabel(): string {
     return this.mode === 'edit' ? 'Save changes' : 'Create transaction';
-  }
-
-  get selectedConfig(): SocialSecurityTransactionConfigOption | null {
-    const configId = String(this.form.get('configId')?.value ?? '');
-    return this.configs.find((config) => config.id === configId) ?? null;
   }
 
   get selectedRule(): SocialSecurityTransactionRuleOption | null {
@@ -157,20 +139,15 @@ export class AddSocialSecurityTransactionDialogComponent {
     return this.rules.filter((rule) => this.isRuleActive(rule));
   }
 
-  get showConfigOrRuleError(): boolean {
-    return this.form.hasError('missingConfigOrRule')
-      && (this.form.get('configId')?.touched || this.form.get('ruleId')?.touched || this.form.touched);
-  }
-
   get salaryCapped(): number {
     const actualSalary = Number(this.form.get('actualSalary')?.value ?? 0);
 
-    const minSalaryLimit = this.selectedRule?.minSalaryLimit ?? this.selectedConfig?.minSalaryLimit ?? null;
+    const minSalaryLimit = this.selectedRule?.minSalaryLimit ?? null;
     if (minSalaryLimit != null && Number(minSalaryLimit) > 0 && actualSalary < Number(minSalaryLimit)) {
       return 0;
     }
 
-    const maxSalaryCap = this.selectedRule?.maxSalaryLimit ?? this.selectedConfig?.maxSalaryCap ?? null;
+    const maxSalaryCap = this.selectedRule?.maxSalaryLimit ?? null;
     if (maxSalaryCap == null || Number(maxSalaryCap) <= 0) {
       return Math.max(0, actualSalary);
     }
@@ -179,12 +156,12 @@ export class AddSocialSecurityTransactionDialogComponent {
   }
 
   get employeeAmount(): number {
-    const fixedAmount = this.selectedRule?.employeeFixedAmount ?? this.selectedConfig?.employeeFixedAmount ?? null;
+    const fixedAmount = this.selectedRule?.employeeFixedAmount ?? null;
     if (fixedAmount != null && Number(fixedAmount) > 0) {
       return Number(fixedAmount);
     }
 
-    const contributionPct = this.selectedRule?.employeeDefaultPct ?? this.selectedConfig?.employeeContributionPct ?? null;
+    const contributionPct = this.selectedRule?.employeeDefaultPct ?? null;
     if (contributionPct == null) {
       return 0;
     }
@@ -193,12 +170,12 @@ export class AddSocialSecurityTransactionDialogComponent {
   }
 
   get employerAmount(): number {
-    const fixedAmount = this.selectedRule?.employerFixedAmount ?? this.selectedConfig?.employerFixedAmount ?? null;
+    const fixedAmount = this.selectedRule?.employerFixedAmount ?? null;
     if (fixedAmount != null && Number(fixedAmount) > 0) {
       return Number(fixedAmount);
     }
 
-    const contributionPct = this.selectedRule?.employerDefaultPct ?? this.selectedConfig?.employerContributionPct ?? null;
+    const contributionPct = this.selectedRule?.employerDefaultPct ?? null;
     if (contributionPct == null) {
       return 0;
     }
@@ -225,25 +202,12 @@ export class AddSocialSecurityTransactionDialogComponent {
     this.dialogRef.close({
       employeeId: String(raw.employeeId ?? '').trim(),
       periodId: String(raw.periodId ?? '').trim(),
-      configId: raw.configId ? String(raw.configId).trim() : null,
+      configId: null,
       ruleId: raw.ruleId ? String(raw.ruleId).trim() : null,
       actualSalary: Number(raw.actualSalary ?? 0),
       isEnrolled: !!raw.isEnrolled,
       requestStatus: String(raw.requestStatus ?? 'pending').trim().toLowerCase()
     });
-  }
-
-  private configOrRuleValidator(): ValidatorFn {
-    return (group): ValidationErrors | null => {
-      const configId = String(group.get('configId')?.value ?? '').trim();
-      const ruleId = String(group.get('ruleId')?.value ?? '').trim();
-
-      if (!configId && !ruleId) {
-        return { missingConfigOrRule: true };
-      }
-
-      return null;
-    };
   }
 
   private isRuleActive(rule?: SocialSecurityTransactionRuleOption | null): boolean {

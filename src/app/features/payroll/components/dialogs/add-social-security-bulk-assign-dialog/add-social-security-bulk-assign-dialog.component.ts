@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Component, Inject, ViewEncapsulation, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { take } from 'rxjs';
 
 import {
   SocialSecurityTransactionConfigOption,
@@ -10,6 +11,7 @@ import {
   SocialSecurityTransactionPeriodOption,
   SocialSecurityTransactionRuleOption
 } from '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component';
+import { SettingsService } from '../../../../settings/services/settings.service';
 
 export interface SocialSecurityBulkAssignDialogPayload {
   employeeIds: string[];
@@ -24,7 +26,7 @@ export interface SocialSecurityBulkAssignDialogPayload {
 interface SocialSecurityBulkAssignDialogData {
   employees?: SocialSecurityTransactionEmployeeOption[];
   periods?: SocialSecurityTransactionPeriodOption[];
-  configs?: SocialSecurityTransactionConfigOption[];
+  configs?: SocialSecurityTransactionConfigOption[]; // legacy; ignored
   rules?: SocialSecurityTransactionRuleOption[];
 }
 
@@ -39,45 +41,30 @@ interface SocialSecurityBulkAssignDialogData {
 export class AddSocialSecurityBulkAssignDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<AddSocialSecurityBulkAssignDialogComponent, SocialSecurityBulkAssignDialogPayload | undefined>);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
   readonly employees = this.data?.employees ?? [];
   readonly periods = this.data?.periods ?? [];
-  readonly configs = this.data?.configs ?? [];
   readonly rules = this.data?.rules ?? [];
 
-  readonly form = this.fb.group(
-    {
-      employeeIds: this.fb.nonNullable.control<string[]>([], Validators.required),
-      periodId: this.fb.nonNullable.control('', Validators.required),
-      configId: this.fb.nonNullable.control(''),
-      ruleId: this.fb.nonNullable.control(''),
-      actualSalary: this.fb.nonNullable.control(0, [Validators.required, Validators.min(0)]),
-      isEnrolled: this.fb.nonNullable.control(true),
-      requestStatus: this.fb.nonNullable.control('pending', Validators.required)
-    },
-    { validators: [this.configOrRuleValidator()] }
-  );
+  readonly form = this.fb.group({
+    employeeIds: this.fb.nonNullable.control<string[]>([], Validators.required),
+    periodId: this.fb.nonNullable.control('', Validators.required),
+    ruleId: this.fb.nonNullable.control('', Validators.required),
+    actualSalary: this.fb.nonNullable.control(0, [Validators.required, Validators.min(1)]),
+    isEnrolled: this.fb.nonNullable.control(true),
+    requestStatus: this.fb.nonNullable.control('pending', Validators.required)
+  });
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: SocialSecurityBulkAssignDialogData) {
-    this.form.get('configId')?.valueChanges.subscribe((configId) => {
-      const selectedConfig = this.configs.find((config) => config.id === String(configId ?? ''));
-      if (!selectedConfig) {
-        return;
-      }
-
-      if (!this.form.get('ruleId')?.value && selectedConfig.ruleId) {
-        const linkedRule = this.rules.find((rule) => rule.ruleId === selectedConfig.ruleId);
-        if (this.isRuleActive(linkedRule)) {
-          this.form.patchValue({ ruleId: selectedConfig.ruleId }, { emitEvent: false });
-        }
-      }
-
-      this.form.updateValueAndValidity({ emitEvent: false });
-    });
-
-    this.form.get('ruleId')?.valueChanges.subscribe(() => {
-      this.form.updateValueAndValidity({ emitEvent: false });
-    });
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
+        error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
+      });
 
     const initialRuleId = String(this.form.get('ruleId')?.value ?? '');
     if (initialRuleId && !this.isRuleActive(this.rules.find((rule) => rule.ruleId === initialRuleId))) {
@@ -91,11 +78,6 @@ export class AddSocialSecurityBulkAssignDialogComponent {
 
   get selectedEmployeesCount(): number {
     return (this.form.get('employeeIds')?.value ?? []).length;
-  }
-
-  get showConfigOrRuleError(): boolean {
-    return this.form.hasError('missingConfigOrRule')
-      && (this.form.get('configId')?.touched || this.form.get('ruleId')?.touched || this.form.touched);
   }
 
   get showEmployeeError(): boolean {
@@ -147,25 +129,12 @@ export class AddSocialSecurityBulkAssignDialogComponent {
     this.dialogRef.close({
       employeeIds: [...(raw.employeeIds ?? [])].map((value) => String(value)),
       periodId: String(raw.periodId ?? '').trim(),
-      configId: raw.configId ? String(raw.configId).trim() : null,
+      configId: null,
       ruleId: raw.ruleId ? String(raw.ruleId).trim() : null,
       actualSalary: Number(raw.actualSalary ?? 0),
       isEnrolled: !!raw.isEnrolled,
       requestStatus: String(raw.requestStatus ?? 'pending').trim().toLowerCase()
     });
-  }
-
-  private configOrRuleValidator(): ValidatorFn {
-    return (group): ValidationErrors | null => {
-      const configId = String(group.get('configId')?.value ?? '').trim();
-      const ruleId = String(group.get('ruleId')?.value ?? '').trim();
-
-      if (!configId && !ruleId) {
-        return { missingConfigOrRule: true };
-      }
-
-      return null;
-    };
   }
 
   private isRuleActive(rule?: SocialSecurityTransactionRuleOption | null): boolean {

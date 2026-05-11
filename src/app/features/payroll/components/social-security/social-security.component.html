@@ -60,8 +60,8 @@
     <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
     <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
     <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
-    <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
     <button class="tab" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">Claims</button>
+    <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
   </div>
 
   <div class="summary-cards">
@@ -485,8 +485,6 @@
                       <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectEnrollmentRequest(req)">
                         <mat-icon>cancel</mat-icon>
                       </button>
-                    } @else {
-                      <span class="muted">{{ req.rejectionReason || req.remarks || '—' }}</span>
                     }
                   </td>
                 </tr>
@@ -570,8 +568,6 @@
                       <button class="action-btn hover-primary" type="button" title="Mark paid" (click)="markBenefitClaimPaid(claim)">
                         <mat-icon>payments</mat-icon>
                       </button>
-                    } @else {
-                      <span class="muted">{{ claim.rejectionReason || claim.decisionNotes || '—' }}</span>
                     }
                   </td>
                 </tr>

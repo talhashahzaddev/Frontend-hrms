@@ -25,7 +25,10 @@
 
         <label class="field">
           <span>Salary cap override</span>
-          <input type="number" min="0" formControlName="overrideSalaryCap" placeholder="optional" />
+          <div class="prefix-wrap">
+            <strong>{{ currencySymbol() }}</strong>
+            <input type="number" min="0" formControlName="overrideSalaryCap" placeholder="optional" />
+          </div>
         </label>
 
         <label class="field">
@@ -52,7 +55,10 @@
       @if (isApproveClaim) {
         <label class="field">
           <span>Approved amount</span>
-          <input type="number" min="0" step="0.01" formControlName="approvedAmount" />
+          <div class="prefix-wrap">
+            <strong>{{ currencySymbol() }}</strong>
+            <input type="number" min="0" step="0.01" formControlName="approvedAmount" />
+          </div>
         </label>
 
         <label class="field field-span-2">
@@ -64,7 +70,10 @@
       @if (isMarkPaid) {
         <label class="field">
           <span>Paid amount</span>
-          <input type="number" min="0" step="0.01" formControlName="paidAmount" />
+          <div class="prefix-wrap">
+            <strong>{{ currencySymbol() }}</strong>
+            <input type="number" min="0" step="0.01" formControlName="paidAmount" />
+          </div>
         </label>
 
         <label class="field">

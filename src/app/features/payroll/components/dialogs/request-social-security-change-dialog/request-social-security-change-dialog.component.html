@@ -39,7 +39,10 @@
 
         <label class="field">
           <span>Salary cap override</span>
-          <input type="number" min="0" formControlName="requestedSalaryCap" placeholder="optional" />
+          <div class="prefix-wrap">
+            <strong>{{ currencySymbol() }}</strong>
+            <input type="number" min="0" formControlName="requestedSalaryCap" placeholder="optional" />
+          </div>
         </label>
       }
 

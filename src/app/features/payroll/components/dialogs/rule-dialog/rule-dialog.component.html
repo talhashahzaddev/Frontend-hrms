@@ -799,7 +799,54 @@
 
       <section class="rd-section" *ngIf="selectedPolicy === 11">
         <div class="rd-section-title">
-          <h3>Social Security Rule Details</h3>
+          <h3>Social Security Rule</h3>
+        </div>
+
+        <div style="display: inline-flex; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.25rem; background: #f1f5f9; border-radius: 0.5rem;">
+          <button type="button"
+                  (click)="setSocialMode('select-existing')"
+                  [disabled]="socialSecurityRulesList().length === 0"
+                  [style.background]="socialMode() === 'select-existing' ? '#ffffff' : 'transparent'"
+                  [style.box-shadow]="socialMode() === 'select-existing' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'"
+                  [style.color]="socialMode() === 'select-existing' ? '#1d4ed8' : '#64748b'"
+                  style="border: none; padding: 0.45rem 0.85rem; border-radius: 0.4rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+            Use existing rule
+          </button>
+          <button type="button"
+                  (click)="setSocialMode('create-new')"
+                  [style.background]="socialMode() === 'create-new' ? '#ffffff' : 'transparent'"
+                  [style.box-shadow]="socialMode() === 'create-new' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'"
+                  [style.color]="socialMode() === 'create-new' ? '#1d4ed8' : '#64748b'"
+                  style="border: none; padding: 0.45rem 0.85rem; border-radius: 0.4rem; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+            Create new rule
+          </button>
+        </div>
+
+        <div *ngIf="socialMode() === 'select-existing'">
+          <div class="rd-field">
+            <label>Existing Rule *</label>
+            <mat-form-field appearance="outline" class="rd-mat-field">
+              <mat-select formControlName="socialSelectedRuleId" placeholder="Select an existing rule">
+                <mat-option *ngFor="let r of socialSecurityRulesList()" [value]="r.ruleId">
+                  {{ r.ruleName }}
+                  <span style="color:#64748b; font-weight:400;">
+                    — {{ r.contributionBasis || 'gross' }},
+                    EE {{ r.employeeDefaultPct ?? 0 }}%,
+                    ER {{ r.employerDefaultPct ?? 0 }}%
+                  </span>
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <p *ngIf="socialSecurityRulesList().length === 0" style="margin: 0.4rem 0 0; font-size: 0.82rem; color: #64748b;">
+              No existing rules yet. Switch to "Create new rule".
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="rd-section" *ngIf="selectedPolicy === 11 && socialMode() === 'create-new'">
+        <div class="rd-section-title">
+          <h3>New Social Security Rule</h3>
         </div>
 
         <div class="rd-field">

@@ -190,7 +190,7 @@ export class PayrollRulesComponent implements OnInit {
         this.router.navigate(['/payroll/policies/tax-regime-rules']);
         break;
         case 'socialSecurityPolicy':
-        this.router.navigate(['/payroll/policies/social-security-rules']);
+        this.router.navigate(['/payroll/social-security']);
         break;
       case 'gratuityPolicy':
         this.router.navigate(['/payroll/policies/gratuity-rules']);
