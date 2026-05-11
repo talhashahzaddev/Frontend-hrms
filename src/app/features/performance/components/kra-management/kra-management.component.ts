@@ -119,6 +119,14 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Ensure the default tab is visible based on permissions.
+    // If the user cannot see the KRA table, default to the Goals tab when available.
+    if (!this.hasPermission('KRA_MANAGEMENT_SECTION') || !this.hasPermission('KRA_TABLE')) {
+      if (this.hasPermission('GOAL_MANAGEMENT_SECTION') || this.hasPermission('HR_GOAL_TABLE')) {
+        this.selectedTab = 1;
+      }
+    }
+
     this.loadPositions();
     this.loadKRAs();
     this.loadGoals();
