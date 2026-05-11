@@ -42,7 +42,7 @@
     <div *ngSwitchCase="0" class="tab-content">
 
     <!-- KRA Table Section -->
-    <div class="section-card" [formGroup]="filterForm">
+    <div *ngIf="hasPermission('KRA_TABLE')" class="section-card" [formGroup]="filterForm">
 
     <!-- Search & Filter Bar -->
     <div class="filter-bar">
