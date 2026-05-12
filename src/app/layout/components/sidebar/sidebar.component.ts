@@ -12,7 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 // Services
 import { AuthService } from '@core/services/auth.service';
 import { User, UserPermissions } from '@core/models/auth.models';
-
+import { Onboarding } from '@/app/onboarding/onboarding.component';
 interface MenuItem {
   label: string;
   icon: string;
@@ -334,9 +334,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Company Settings', icon: 'work_outline', route: '/settings/general', menuName: 'Settings', subMenuName: 'Company Name' },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
         { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management' },
-        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' }
+        { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' },
+        { label: 'Company Policies', icon: 'policy', route: '/settings/policies', menuName: 'Settings', subMenuName: 'Company Policies' },
+        { label: 'Onboarding Configuration', icon: 'person_add', route: '/settings/onboarding-configuration', menuName: 'Settings', subMenuName: 'Onboarding Configuration' }
       ]
-    }
+    },
+     {
+      label: 'Onboarding',
+      icon: 'person_add',
+      route: '/onboarding'
+    },
   ];
 
   constructor(
@@ -387,6 +394,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   hasPermission(item: MenuItem): boolean {
+    // Show Company Policies and onboarding configuration to Super Admin always (if this route exists but permissions are missing)
+    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Onboarding Configuration') {
+      if (this.currentUser?.roleName?.toLowerCase() === 'super admin') {
+        return true;
+      }
+    }
+
     // If the item has no menuName, it either has no permission requirements or is a standalone item
     if (!item.menuName) {
       return true;

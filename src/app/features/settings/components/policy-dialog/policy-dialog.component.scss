@@ -1,0 +1,568 @@
+// ============================================================
+// FILE: policy-dialog.component.scss  (full replacement)
+// ============================================================
+
+$primary:      #5e37f0;
+$primary-light: rgba(94, 55, 240, 0.08);
+$success:      #10b981;
+$warning:      #f59e0b;
+$danger:       #ef4444;
+$text-primary: #111827;
+$text-secondary: #6b7280;
+$border:       #e5e7eb;
+$surface:      #ffffff;
+
+// ── Dialog wrapper ─────────────────────────────────────────────────────────
+::ng-deep .policy-dialog-panel {
+  .mat-mdc-dialog-container {
+    border-radius: 20px !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  background: $surface;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 28px 20px;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.dialog-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: $primary-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    color: $primary;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.dialog-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: $text-primary;
+  letter-spacing: -0.3px;
+}
+
+.dialog-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: $text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+
+  &.published { background: #ecfdf5; color: #065f46; }
+  &.draft     { background: #fff7ed; color: #92400e; }
+}
+
+.close-btn {
+  flex-shrink: 0;
+  color: $text-secondary !important;
+  width: 36px !important;
+  height: 36px !important;
+  margin-top: -4px;
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
+.dialog-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.req-star {
+  color: $danger;
+  margin-left: 2px;
+}
+
+// ── Toggle Panel ─────────────────────────────────────────────────────────────
+.toggles-panel {
+  background: #f9fafb;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.toggles-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .toggles-icon {
+    color: $primary;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .toggles-title {
+    margin: 0 0 3px;
+    font-size: 14px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .toggles-hint {
+    margin: 0;
+    font-size: 12px;
+    color: $text-secondary;
+  }
+}
+
+.toggles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 10px;
+  transition: border-color 0.2s;
+
+  &:has(mat-slide-toggle.mat-checked) {
+    border-color: rgba($primary, 0.4);
+    background: $primary-light;
+  }
+
+  .toggle-label-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .toggle-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  .toggle-hint {
+    font-size: 11px;
+    color: $text-secondary;
+  }
+}
+
+// ── Content editor ───────────────────────────────────────────────────────────
+.content-section {
+  margin: 8px 0 16px;
+}
+
+.content-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.content-error {
+  display: block;
+  font-size: 12px;
+  color: $danger;
+  margin-top: 4px;
+}
+
+::ng-deep .quill-field {
+  .ql-toolbar {
+    border: 1.5px solid $border;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    background: #fafafa;
+  }
+
+  .ql-container {
+    border: 1.5px solid $border;
+    border-radius: 0 0 10px 10px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-size: 14px;
+
+    .ql-editor {
+      min-height: 180px;
+      padding: 14px 16px;
+      line-height: 1.7;
+
+      &.ql-blank::before {
+        color: #9ca3af;
+        font-style: normal;
+      }
+    }
+  }
+
+  &:focus-within {
+    .ql-toolbar,
+    .ql-container { border-color: $primary; }
+  }
+}
+
+// ── Attachment section ────────────────────────────────────────────────────────
+.attachment-section {
+  margin: 12px 0 16px;
+
+  .content-label { margin-bottom: 10px; }
+}
+
+// Existing-file row (edit mode)
+.existing-file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.existing-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+
+  .file-name-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-meta {
+    font-size: 11px;
+    color: $text-secondary;
+    margin: 0;
+  }
+}
+
+.existing-file-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.file-action-btn {
+  width: 32px !important;
+  height: 32px !important;
+
+  &.download-btn { color: $primary !important; }
+  &.remove-btn   { color: $danger  !important; }
+}
+
+.file-type-icon {
+  color: $success;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+// Upload zone
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 32px 20px;
+  background: #fafafa;
+  border: 2px dashed $border;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: center;
+
+  &:hover {
+    border-color: $primary;
+    background: $primary-light;
+  }
+
+  &.has-file {
+    border-color: $success;
+    background: #f0fdf4;
+    border-style: solid;
+  }
+
+  &.required-zone {
+    border-color: rgba($danger, 0.5);
+    background: #fff1f2;
+  }
+
+  .upload-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: $text-secondary;
+
+    &.selected-icon { color: $success; }
+  }
+
+  .upload-primary {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+
+    &.file-selected-name {
+      color: $success;
+      max-width: 260px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .upload-secondary {
+    margin: 0;
+    font-size: 12px;
+    color: $text-secondary;
+  }
+}
+
+// File error
+.file-error-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: $danger;
+
+  .err-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Clear file button
+.clear-file-btn {
+  margin-top: 10px !important;
+  border-color: rgba($danger, 0.4) !important;
+  color: $danger !important;
+  font-size: 12px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+}
+
+// ── View-only attachment card ─────────────────────────────────────────────────
+.view-file-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+
+  .file-card-info {
+    flex: 1;
+    min-width: 0;
+
+    .file-name-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0 0 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 12px;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+.download-flat-btn {
+  flex-shrink: 0;
+  height: 36px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  background: $primary !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  text-decoration: none !important;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+// ── Publish toggle ────────────────────────────────────────────────────────────
+.publish-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid $border;
+  margin-top: 8px;
+  gap: 16px;
+
+  .publish-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .publish-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  .publish-hint {
+    font-size: 12px;
+    color: $text-secondary;
+  }
+}
+
+// ── View meta ─────────────────────────────────────────────────────────────────
+.view-meta {
+  margin-top: 8px;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid $border;
+
+  &:last-child { border-bottom: none; }
+
+  .meta-key {
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-secondary;
+  }
+
+  .meta-val {
+    font-size: 13px;
+    color: $text-primary;
+  }
+}
+
+.category-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+// ── Footer ───────────────────────────────────────────────────────────────────
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 28px;
+}
+
+.cancel-btn {
+  height: 40px !important;
+  border-radius: 8px !important;
+  border-color: $border !important;
+  color: $text-secondary !important;
+  font-weight: 500 !important;
+}
+
+.submit-btn {
+  height: 40px !important;
+  padding: 0 20px !important;
+  border-radius: 8px !important;
+  background: $primary !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+
+  &:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+  }
+
+  .btn-spinner {
+    ::ng-deep circle { stroke: #fff; }
+  }
+}

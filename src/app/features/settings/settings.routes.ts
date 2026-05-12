@@ -45,6 +45,39 @@ export const settingsRoutes: Routes = [
         data: { mode: 'view' }
       }
     ]
+  },
+  {
+    path: 'policies',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/company-policies/policy-list.component').then(m => m.PolicyListComponent),
+        title: 'Company Policies - HRMS'
+      },
+      // {
+      //   path: 'add',
+      //   loadComponent: () => import('./components/company-policies/policy-form.component').then(m => m.PolicyFormComponent),
+      //   title: 'Create Policy - HRMS',
+      //   data: { mode: 'add' }
+      // },
+      // {
+      //   path: ':id/edit',
+      //   loadComponent: () => import('./components/company-policies/policy-form.component').then(m => m.PolicyFormComponent),
+      //   title: 'Edit Policy - HRMS',
+      //   data: { mode: 'edit' }
+      // },
+      // {
+      //   path: ':id/view',
+      //   loadComponent: () => import('./components/company-policies/policy-form.component').then(m => m.PolicyFormComponent),
+      //   title: 'View Policy - HRMS',
+      //   data: { mode: 'view' }
+      // }
+    ]
+  },
+  {
+    path: 'onboarding-configuration',
+    loadComponent: () => import('./components/onboarding-configuration/onboarding-configuration.component').then(m => m.OnboardingConfigurationComponent),
+    title: 'Onboarding Configuration - HRMS'
   }
 ];
 

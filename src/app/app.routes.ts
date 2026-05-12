@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { PlatformAdminGuard } from './features/platform-admin/guards/platform-admin.guard';
+
 // import { RoleRedirectGuard } from './core/guards/role-redirect.guard';
 // import { EmptyRouteComponent } from './shared/components/Empty-Component/empty-route.component';
 
@@ -12,7 +13,12 @@ export const appRoutes: Routes = [
     redirectTo: '/dashboard',
     pathMatch: 'full'
   },
-
+{
+  path: 'onboarding',
+  loadComponent: () =>
+    import('./onboarding/onboarding.component').then(m => m.Onboarding),
+  title: 'Employee Onboarding - HRMS'
+},
   // Authentication Routes (accessible only when not authenticated)
   {
     path: 'login',
@@ -303,10 +309,12 @@ export const appRoutes: Routes = [
       import('./shared/components/server-error/server-error.component').then(m => m.ServerErrorComponent),
     title: 'Server Error - HRMS'
   },
+  
 
   // Catch all route - redirect to 404
   {
     path: '**',
     redirectTo: '/404'
   }
+  
 ];
