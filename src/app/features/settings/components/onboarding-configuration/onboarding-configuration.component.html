@@ -1,0 +1,99 @@
+<div class="onboarding-config-page" *ngIf="!unauthorized; else denied">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Settings / Company Policies</p>
+      <h1>Onboarding Configuration</h1>
+      <p>Configure the fields and document requirements used during onboarding for the selected organization.</p>
+    </div>
+    <button class="save-button" [disabled]="isSaving" (click)="saveConfiguration()">
+      {{ isSaving ? 'Saving...' : 'Save configuration' }}
+    </button>
+  </div>
+
+  <div class="config-grid">
+    <section class="detail-panel">
+      <div class="detail-header">
+        <div>
+          <h2>Field configuration</h2>
+          <p>Configure the required fields and documents for onboarding.</p>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">person</mat-icon>
+          <div class="section-title">
+            <h3>Personal information</h3>
+            <p>Toggle required status for onboarding personal fields.</p>
+          </div>
+        </div>
+
+        <div class="field-row" *ngFor="let field of personalFields">
+          <div class="field-label">
+            <span>{{ field === 'name' ? 'Name' : field === 'idNumber' ? 'ID' : 'Resume' }}</span>
+            <p>{{ field === 'idNumber' ? 'Employee ID or unique identifier' : field === 'resume' ? 'Candidate resume upload' : 'Full legal name' }}</p>
+          </div>
+          <div class="toggles">
+            <label class="switch-toggle">
+              <input type="checkbox" [checked]="configuration.personalInformation[field].enabled" (change)="toggleField('personalInformation', field)" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">school</mat-icon>
+          <div class="section-title">
+            <h3>Educational details</h3>
+            <p>Choose whether university and documents should be requested.</p>
+          </div>
+        </div>
+
+        <div class="field-row" *ngFor="let field of educationFields">
+          <div class="field-label">
+            <span>{{ field === 'university' ? 'University' : 'Documents' }}</span>
+            <p>{{ field === 'university' ? 'University name or college details' : 'Education documents and certificates' }}</p>
+          </div>
+          <div class="toggles">
+            <label class="switch-toggle">
+              <input type="checkbox" [checked]="configuration.educationDetails[field].enabled" (change)="toggleField('educationDetails', field)" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">work</mat-icon>
+          <div class="section-title">
+            <h3>Work experience</h3>
+            <p>Manage work history requirements for onboarding.</p>
+          </div>
+        </div>
+
+        <div class="field-row" *ngFor="let field of experienceFields">
+          <div class="field-label">
+            <span>{{ field === 'endDate' ? 'End date' : 'Documents' }}</span>
+            <p>{{ field === 'endDate' ? 'End time or completion date' : 'Work experience documents' }}</p>
+          </div>
+          <div class="toggles">
+            <label class="switch-toggle">
+              <input type="checkbox" [checked]="configuration.workExperience[field].enabled" (change)="toggleField('workExperience', field)" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<ng-template #denied>
+  <div class="unauthorized-panel">
+    <h2>Access denied</h2>
+    <p>Only Super Admin users can access onboarding configuration.</p>
+  </div>
+</ng-template>

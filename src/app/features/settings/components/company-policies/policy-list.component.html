@@ -1,0 +1,115 @@
+﻿<div class="policies-page">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">Company Policies</h1>
+      <p class="page-subtitle">Manage and publish employee handbook policies</p>
+    </div>
+    <button
+      *ngIf="isSuperAdmin"
+      mat-flat-button
+      class="add-btn"
+      (click)="openAddDialog()">
+      <mat-icon>add</mat-icon>
+      New Policy
+    </button>
+  </div>
+
+  <!-- ── Card ────────────────────────────────────────────────── -->
+  <div class="policies-card">
+
+    <div class="card-meta">
+      <span class="count-badge">{{ policiesList.length }} policies</span>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="state-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading policies…</p>
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="!isLoading && policiesList.length === 0" class="state-container">
+      <div class="empty-icon">
+        <mat-icon>policy</mat-icon>
+      </div>
+      <h3>No policies yet</h3>
+      <p>Create your first policy to get started.</p>
+      <button *ngIf="isSuperAdmin" mat-flat-button class="add-btn" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon>
+        Add Policy
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!isLoading && policiesList.length > 0" class="table-wrapper">
+      <table mat-table [dataSource]="dataSource" class="policies-table">
+
+        <!-- Policy Name -->
+        <ng-container matColumnDef="policyName">
+          <th mat-header-cell *matHeaderCellDef>Policy Name</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="policy-name">{{ row.policyName }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Category -->
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef>Category</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="category-chip">{{ row.category }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="isPublished">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-chip" [class.published]="row.isPublished" [class.draft]="!row.isPublished">
+              <span class="status-dot"></span>
+              {{ row.isPublished ? 'Published' : 'Draft' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Updated At -->
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef>Last Updated</th>
+          <td mat-cell *matCellDef="let row" class="date-cell">
+            {{ row.updatedAt | date:'MMM d, y' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="action-btn" matTooltip="Options">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu" class="policy-action-menu">
+              <button mat-menu-item (click)="openViewDialog(row)">
+                <mat-icon>visibility</mat-icon>
+                <span>View</span>
+              </button>
+              <button *ngIf="isSuperAdmin" mat-menu-item (click)="openEditDialog(row)">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <mat-divider *ngIf="isSuperAdmin"></mat-divider>
+              <button *ngIf="isSuperAdmin" mat-menu-item class="delete-item" (click)="deletePolicy(row)">
+                <mat-icon>delete_outline</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+      </table>
+    </div>
+
+  </div>
+</div>

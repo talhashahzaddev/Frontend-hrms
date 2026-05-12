@@ -1,0 +1,275 @@
+<!-- policy-dialog.component.html
+     CHANGES vs original:
+       • Upload zone shows a spinner while isUploadingFile is true
+         (mirrors Profile's disabled-button while isUploadingProfileImage).
+       • "View file" button calls openFile(url) → window.open → no download.
+       • selectedFile chip shows filename + a remove button.
+       • Existing-file row has a "View" button instead of a download <a>.
+       • View-mode attachment card has a "View" button (same pattern).
+       • Submit button is additionally disabled while isUploadingFile.
+       • ALL other markup (header, form fields, toggles, footer) is UNCHANGED.
+-->
+<div class="dialog-container">
+
+  <!-- ── Header (UNCHANGED) ──────────────────────────────────────────────── -->
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="dialog-icon">
+        <mat-icon>{{ isView ? 'visibility' : (mode === 'add' ? 'add_circle_outline' : 'edit') }}</mat-icon>
+      </div>
+      <div>
+        <h2 class="dialog-title">{{ dialogTitle }}</h2>
+        <p class="dialog-subtitle" *ngIf="isView && policy">
+          <span class="status-badge" [class.published]="policy.isPublished" [class.draft]="!policy.isPublished">
+            {{ policy.isPublished ? 'Published' : 'Draft' }}
+          </span>
+          &nbsp;·&nbsp; Updated {{ policy.updatedAt | date:'MMM d, y' }}
+        </p>
+        <p class="dialog-subtitle" *ngIf="!isView">
+          {{ mode === 'add' ? 'Fill in the details to create a new policy' : 'Update the policy details below' }}
+        </p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- ── Body ────────────────────────────────────────────────────────────── -->
+  <div class="dialog-body" [formGroup]="form">
+
+    <!-- ── Policy Name (UNCHANGED) ─────────────────────────────────────── -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>
+        Policy Name
+        <span class="req-star" *ngIf="toggles.nameRequired && !isView">*</span>
+      </mat-label>
+      <input
+        matInput
+        formControlName="policyName"
+        placeholder="e.g. Code of Conduct"
+        [readonly]="isView" />
+      <mat-error *ngIf="form.get('policyName')?.hasError('required')">
+        Policy name is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- ── Category (UNCHANGED) ────────────────────────────────────────── -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>
+        Category
+        <span class="req-star" *ngIf="toggles.categoryRequired && !isView">*</span>
+      </mat-label>
+      <mat-select formControlName="category">
+        <mat-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('category')?.hasError('required')">
+        Category is required
+      </mat-error>
+    </mat-form-field>
+
+    <!-- ── Policy Content (UNCHANGED) ──────────────────────────────────── -->
+    <div class="content-section">
+      <label class="content-label">
+        Policy Content
+        <span class="req-star" *ngIf="toggles.contentRequired && !isView">*</span>
+      </label>
+      <quill-editor
+        formControlName="policyContent"
+        [modules]="quillModules"
+        [readOnly]="isView"
+        placeholder="Enter the full policy text here…"
+        class="quill-field">
+      </quill-editor>
+      <mat-error
+        class="content-error"
+        *ngIf="form.get('policyContent')?.invalid && form.get('policyContent')?.touched">
+        Policy content is required
+      </mat-error>
+    </div>
+
+    <!-- ── File Attachment — add / edit mode ───────────────────────────── -->
+    <div class="attachment-section" *ngIf="!isView">
+      <label class="content-label">
+        Attachment
+        <span class="req-star" *ngIf="toggles.attachmentRequired">*</span>
+      </label>
+
+      <!-- Existing saved file (shown in edit mode before a new file is chosen) -->
+      <div class="existing-file-row" *ngIf="existingFileName && !selectedFile">
+        <div class="existing-file-info">
+          <mat-icon class="file-type-icon">description</mat-icon>
+          <div>
+            <p class="file-name-text">{{ existingFileName }}</p>
+            <p class="file-meta">Previously uploaded document</p>
+          </div>
+        </div>
+        <div class="existing-file-actions">
+          <!-- VIEW (not download) — mirrors Profile opening profilePreviewUrl -->
+          <button
+            *ngIf="existingFileUrl"
+            mat-icon-button
+            type="button"
+            matTooltip="View existing file"
+            class="file-action-btn view-btn"
+            (click)="openFile(existingFileUrl)">
+            <mat-icon>open_in_new</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            type="button"
+            matTooltip="Remove existing file"
+            class="file-action-btn remove-btn"
+            (click)="removeExistingFile()">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- File picker drop zone -->
+      <div
+        class="upload-zone"
+        [class.is-uploading]="isUploadingFile"
+        [class.has-file]="!!selectedFile && !isUploadingFile"
+        [class.required-zone]="toggles.attachmentRequired && !uploadedFileUrl && !existingFileName"
+        (click)="!isUploadingFile && fileInput.click()">
+
+        <input
+          #fileInput
+          type="file"
+          hidden
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          (change)="onFileSelected($event)" />
+
+        <!-- Uploading spinner — mirrors Profile's isUploadingProfileImage state -->
+        <ng-container *ngIf="isUploadingFile">
+          <mat-spinner diameter="32" class="upload-spinner"></mat-spinner>
+          <p class="upload-primary">Uploading {{ selectedFile?.name }}…</p>
+          <p class="upload-secondary">Please wait</p>
+        </ng-container>
+
+        <!-- Idle / no file -->
+        <ng-container *ngIf="!isUploadingFile && !selectedFile">
+          <mat-icon class="upload-icon">cloud_upload</mat-icon>
+          <p class="upload-primary">
+            {{ existingFileName ? 'Replace attachment' : 'Upload document' }}
+          </p>
+          <p class="upload-secondary">PDF, DOC, DOCX, JPG or PNG · max 5 MB</p>
+        </ng-container>
+
+        <!-- Upload complete — show filename + URL confirmation -->
+        <ng-container *ngIf="!isUploadingFile && selectedFile">
+          <mat-icon class="upload-icon selected-icon">check_circle</mat-icon>
+          <p class="upload-primary file-selected-name">{{ selectedFile.name }}</p>
+          <p class="upload-secondary">
+            {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB · Uploaded
+          </p>
+        </ng-container>
+      </div>
+
+      <!-- Error row -->
+      <div class="file-error-row" *ngIf="fileError">
+        <mat-icon class="err-icon">error_outline</mat-icon>
+        <span>{{ fileError }}</span>
+      </div>
+
+      <!-- Post-upload actions: View + Remove -->
+      <div class="file-actions-row" *ngIf="selectedFile && !isUploadingFile">
+        <!-- VIEW — opens URL in new tab, no download forced -->
+        <button
+          type="button"
+          mat-stroked-button
+          class="view-file-btn"
+          (click)="openFile(uploadedFileUrl)"
+          [disabled]="!uploadedFileUrl">
+          <mat-icon>open_in_new</mat-icon>
+          View uploaded file
+        </button>
+
+        <!-- Remove selection -->
+        <button
+          type="button"
+          mat-stroked-button
+          class="clear-file-btn"
+          (click)="removeSelectedFile()">
+          <mat-icon>close</mat-icon>
+          Remove
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Attachment — view-only mode ─────────────────────────────────── -->
+    <!--
+      Employees and SuperAdmins in view mode see this card.
+      "View" button opens the URL in a new tab — same as Profile
+      displaying profilePreviewUrl without forcing a download.
+    -->
+    <div class="attachment-section" *ngIf="isView && (existingFileUrl || policy?.fileUrl)">
+      <label class="content-label">Attachment</label>
+      <div class="view-file-card">
+        <mat-icon class="file-type-icon">description</mat-icon>
+        <div class="file-card-info">
+          <p class="file-name-text">{{ existingFileName || policy?.fileName || 'Policy Document' }}</p>
+          <p class="file-meta">Attached document</p>
+        </div>
+        <!-- VIEW button — no download, mirrors Profile inline preview -->
+        <button
+          mat-flat-button
+          type="button"
+          class="view-flat-btn"
+          (click)="openFile(existingFileUrl || policy?.fileUrl || null)">
+          <mat-icon>open_in_new</mat-icon>
+          View
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Publish Toggle (UNCHANGED) ──────────────────────────────────── -->
+    <div class="publish-row" *ngIf="!isView">
+      <div class="publish-info">
+        <span class="publish-label">Publish policy</span>
+        <span class="publish-hint">Employees will see this during onboarding</span>
+      </div>
+      <mat-slide-toggle formControlName="isPublished" color="primary"></mat-slide-toggle>
+    </div>
+
+    <!-- ── View-only meta (UNCHANGED) ──────────────────────────────────── -->
+    <div class="view-meta" *ngIf="isView && policy">
+      <div class="meta-row">
+        <span class="meta-key">Category</span>
+        <span class="meta-val category-chip">{{ policy.category }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Created</span>
+        <span class="meta-val">{{ policy.createdAt | date:'medium' }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-key">Last updated</span>
+        <span class="meta-val">{{ policy.updatedAt | date:'medium' }}</span>
+      </div>
+    </div>
+
+  </div><!-- /dialog-body -->
+
+  <mat-divider></mat-divider>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────────── -->
+  <div class="dialog-footer">
+    <button mat-stroked-button class="cancel-btn" (click)="cancel()">
+      {{ isView ? 'Close' : 'Cancel' }}
+    </button>
+    <button
+      *ngIf="!isView"
+      mat-flat-button
+      class="submit-btn"
+      [disabled]="form.invalid || isSaving || isUploadingFile"
+      (click)="onSubmit()">
+      <mat-spinner *ngIf="isSaving" diameter="16" class="btn-spinner"></mat-spinner>
+      <mat-icon *ngIf="!isSaving">{{ mode === 'add' ? 'add' : 'save' }}</mat-icon>
+      {{ isSaving ? 'Saving…' : (isUploadingFile ? 'Uploading…' : (mode === 'add' ? 'Create Policy' : 'Update Policy')) }}
+    </button>
+  </div>
+
+</div>

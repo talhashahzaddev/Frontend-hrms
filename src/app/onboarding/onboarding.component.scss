@@ -1,0 +1,1238 @@
+// ── Variables ────────────────────────────────────────────────
+$primary: #5e37f0;
+$primary-soft: rgba(94, 55, 240, 0.08);
+$secondary: #7c3aed;
+$success: #10b981;
+$danger: #ef4444;
+$warning: #f59e0b;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$border: #e2e8f0;
+$surface: #ffffff;
+$bg: #f8fafc;
+
+// ── Shell ─────────────────────────────────────────────────────
+.ob-shell {
+  min-height: 100vh;
+  background: $bg;
+  font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+  color: $text-primary;
+  * { box-sizing: border-box; }
+}
+
+.ob-content {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+// ── Step wrapper ──────────────────────────────────────────────
+.step-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ── Step Header ───────────────────────────────────────────────
+.step-header {
+  margin-bottom: 4px;
+
+  .step-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: $primary;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .step-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .step-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+      color: $text-primary;
+      letter-spacing: -0.3px;
+    }
+
+    .step-count {
+      font-size: 13px;
+      color: $text-secondary;
+      font-weight: 500;
+      strong { color: $primary; font-weight: 700; }
+    }
+  }
+
+  .progress-track {
+    height: 5px;
+    background: $border;
+    border-radius: 3px;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, $primary, $secondary);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+  }
+}
+
+// ── Card ─────────────────────────────────────────────────────
+.card {
+  background: $surface;
+  border-radius: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.07);
+  padding: 28px;
+  border: 1px solid $border;
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: $primary;
+    margin: 0 0 4px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid $border;
+  }
+
+  .card-subtitle {
+    font-size: 13px;
+    color: $text-secondary;
+    margin: 8px 0 20px;
+  }
+}
+
+.two-col-card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 32px;
+  align-items: start;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+// ── Photo Panel ───────────────────────────────────────────────
+.photo-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+
+  .photo-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: $bg;
+    border: 3px dashed $border;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+
+    &:hover { border-color: $primary; background: $primary-soft; }
+
+    .photo-img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-icon { font-size: 52px; }
+  }
+
+  .photo-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0 0 4px;
+    text-align: center;
+  }
+
+  .photo-hint {
+    font-size: 11px;
+    color: $text-secondary;
+    text-align: center;
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+
+  .upload-btn {
+    background: linear-gradient(135deg, $primary, $secondary);
+    color: $surface;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: box-shadow 0.2s, transform 0.2s;
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba($primary, 0.3);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// ── Fields Panel ──────────────────────────────────────────────
+.fields-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    @media (max-width: 600px) { grid-template-columns: 1fr; }
+  }
+
+  .full-span { grid-column: span 2; }
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: $text-secondary;
+    margin-bottom: 5px;
+
+    .req { color: $danger; margin-left: 2px; }
+  }
+
+  .field-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid $border;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: $text-primary;
+    background: $surface;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+
+    &:focus {
+      border-color: $primary;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+    }
+
+    &::placeholder { color: lighten($text-secondary, 15%); font-size: 13px; }
+
+    &.readonly-field {
+      background: #f9fafb;
+      color: $text-secondary;
+      cursor: not-allowed;
+    }
+
+    &[disabled] {
+      background: #f9fafb;
+      color: $text-secondary;
+      cursor: not-allowed;
+    }
+
+    // Red border for validation errors
+    &.field-error {
+      border-color: $danger !important;
+      box-shadow: 0 0 0 3px rgba($danger, 0.08);
+    }
+  }
+
+  textarea.field-input {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  select.field-input { cursor: pointer; }
+
+  // Inline validation error message
+  .inline-error {
+    display: block;
+    font-size: 11px;
+    color: $danger;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+}
+
+.select-wrapper {
+  position: relative;
+  select { padding-right: 32px; }
+}
+
+// ── File input ────────────────────────────────────────────────
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 2px dashed $border;
+  border-radius: 8px;
+  background: rgba($primary, 0.02);
+  transition: border-color 0.2s;
+
+  input[type="file"] { display: none; }
+
+  .file-label-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, $primary, $secondary);
+    color: $surface;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: box-shadow 0.2s;
+    flex-shrink: 0;
+
+    &:hover { box-shadow: 0 4px 10px rgba($primary, 0.25); }
+  }
+
+  .file-name {
+    font-size: 13px;
+    color: $text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+
+  &:hover { border-color: $primary; }
+}
+
+// ── Saved Entries ─────────────────────────────────────────────
+.entries-section {
+  .entries-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 12px;
+  }
+}
+
+.entry-card {
+  background: $surface;
+  border: 1.5px solid $border;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover { border-color: rgba($primary, 0.4); }
+
+  &.editing {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.08);
+  }
+
+  .entry-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .entry-badge {
+    background: $primary-soft;
+    color: $primary;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-transform: capitalize;
+    flex-shrink: 0;
+  }
+
+  .exp-badge {
+    background: rgba($success, 0.1);
+    color: darken($success, 10%);
+  }
+
+  .entry-info {
+    flex: 1;
+    min-width: 0;
+
+    .entry-primary {
+      font-size: 14px;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0 0 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .entry-secondary {
+      font-size: 12px;
+      color: $text-secondary;
+      margin: 0;
+    }
+  }
+
+  .entry-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .entry-desc {
+    font-size: 13px;
+    color: $text-secondary;
+    margin-top: 8px;
+    line-height: 1.5;
+    border-top: 1px solid $border;
+    padding-top: 8px;
+  }
+
+  .entry-file {
+    font-size: 12px;
+    color: $text-secondary;
+    margin-top: 4px;
+  }
+}
+
+// ── Icon Buttons ──────────────────────────────────────────────
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid $border;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s ease;
+
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  &.edit-btn {
+    color: $primary;
+    border-color: rgba($primary, 0.4);
+    &:hover:not(:disabled) { background: $primary-soft; }
+  }
+
+  &.delete-btn {
+    color: $danger;
+    border-color: rgba($danger, 0.4);
+    &:hover:not(:disabled) { background: rgba($danger, 0.08); }
+  }
+}
+
+// ── Checkbox ──────────────────────────────────────────────────
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: $text-primary;
+  user-select: none;
+
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: $primary;
+    flex-shrink: 0;
+  }
+
+  &:hover { color: $primary; }
+}
+
+// ── Form Actions ──────────────────────────────────────────────
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid $border;
+}
+
+// ── Nav Actions ───────────────────────────────────────────────
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.minor-note {
+  font-size: 13px;
+  color: $text-secondary;
+  font-style: italic;
+}
+
+// ── Buttons ───────────────────────────────────────────────────
+%btn-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 26px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-next {
+  @extend %btn-base;
+  background: linear-gradient(135deg, $primary, $secondary);
+  color: $surface;
+  box-shadow: 0 4px 12px rgba($primary, 0.2);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba($primary, 0.3);
+  }
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+.btn-prev {
+  @extend %btn-base;
+  background: $surface;
+  color: $text-secondary;
+  border: 1.5px solid $border;
+
+  &:hover { border-color: $primary; color: $primary; background: $primary-soft; }
+}
+
+.btn-primary {
+  @extend %btn-base;
+  background: $primary;
+  color: $surface;
+
+  &:hover:not(:disabled) { background: darken($primary, 8%); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-cancel {
+  @extend %btn-base;
+  background: none;
+  color: $text-secondary;
+  border: 1px solid $border;
+
+  &:hover { border-color: $danger; color: $danger; }
+}
+
+.btn-edit-small {
+  background: none;
+  border: 1px solid rgba($primary, 0.4);
+  color: $primary;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { background: $primary-soft; }
+}
+
+.btn-sm {
+  background: none;
+  border: 1px solid $border;
+  color: $text-primary;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 8px;
+
+  &:hover { border-color: $primary; color: $primary; }
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: $primary;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover { color: $secondary; }
+}
+
+// ── Alert ─────────────────────────────────────────────────────
+.alert-error {
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BANK DETAILS STEP 4 — New styles
+// ══════════════════════════════════════════════════════════════
+
+.bank-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+// Hero section — icon, title, subtitle centred
+.bank-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 36px 28px 24px;
+
+  .bank-icon-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: $primary-soft;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+
+  .bank-hero-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: $text-primary;
+    margin: 0 0 10px;
+    letter-spacing: -0.4px;
+  }
+
+  .bank-hero-sub {
+    font-size: 14px;
+    color: $text-secondary;
+    line-height: 1.7;
+    margin: 0;
+    max-width: 440px;
+  }
+}
+
+// "I don't have a bank account" toggle row
+.no-bank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 28px 20px;
+  padding: 14px 18px;
+  background: #f9fafb;
+  border: 1.5px solid $border;
+  border-radius: 12px;
+  transition: border-color 0.2s, background 0.2s;
+
+  &.active {
+    background: rgba($danger, 0.04);
+    border-color: rgba($danger, 0.3);
+  }
+
+  .no-bank-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .no-bank-icon { font-size: 20px; }
+
+  .no-bank-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+// No bank account info notice
+.no-bank-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 28px 24px;
+  padding: 16px 18px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+
+  .notice-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  p {
+    font-size: 13px;
+    color: #92400e;
+    margin: 0;
+    line-height: 1.6;
+
+    strong { color: #78350f; }
+  }
+}
+
+// Section dividers (ACCOUNT INFORMATION / BANK & BRANCH)
+.bank-section-divider {
+  padding: 0 28px;
+  margin: 4px 0 16px;
+
+  span {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: $text-secondary;
+    padding-bottom: 10px;
+    border-bottom: 1px solid $border;
+  }
+}
+
+// Fields inside bank card need horizontal padding
+.bank-card .fields-panel {
+  padding: 0 28px;
+  margin-bottom: 20px;
+}
+
+// Save Details button — matches screenshot purple pill button
+.bank-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 28px 24px;
+  border-top: 1px solid $border;
+}
+
+.btn-bank-save {
+  @extend %btn-base;
+  background: linear-gradient(135deg, $primary, $secondary);
+  color: $surface;
+  padding: 13px 40px;
+  border-radius: 30px;
+  font-size: 15px;
+  box-shadow: 0 4px 14px rgba($primary, 0.3);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba($primary, 0.35);
+  }
+
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+
+// Trust badges row — 3 columns
+.bank-trust-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid $border;
+  background: #f8fafc;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.trust-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 24px;
+  border-right: 1px solid $border;
+
+  &:last-child { border-right: none; }
+
+  @media (max-width: 640px) {
+    border-right: none;
+    border-bottom: 1px solid $border;
+    &:last-child { border-bottom: none; }
+  }
+
+  .trust-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+
+    &.secure  { background: rgba($primary, 0.1); }
+    &.verify  { background: rgba($success, 0.1); }
+    &.help    { background: rgba($warning, 0.12); }
+  }
+
+  .trust-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 3px;
+  }
+
+  .trust-desc {
+    font-size: 12px;
+    color: $text-secondary;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// Toggle switch (reusable — used in bank step)
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+
+  input { opacity: 0; width: 0; height: 0; }
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #d1d5db;
+  transition: 0.25s ease;
+  border-radius: 26px;
+
+  &::before {
+    position: absolute;
+    content: '';
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s ease;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+  }
+}
+
+input:checked + .slider { background-color: $primary; }
+input:checked + .slider::before { transform: translateX(22px); }
+
+// Bank details summary in Verification Hub
+.no-bank-badge {
+  font-size: 13px;
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.pending-bank {
+  font-size: 13px;
+  color: $text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// ── Verification Layout ───────────────────────────────────────
+.verification-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 1024px) { grid-template-columns: 1fr; }
+}
+
+.verification-main .card { padding: 24px; }
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+
+  .review-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: $primary;
+    background: $primary-soft;
+    padding: 5px 10px;
+    border-radius: 5px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    color: $text-primary;
+    flex: 1;
+  }
+}
+
+.review-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid $border;
+
+  &:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+
+  h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: $text-primary;
+    margin: 0 0 14px;
+  }
+
+  .review-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+
+    h4 { margin: 0; }
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+
+  .detail-item {
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    p {
+      font-size: 14px;
+      color: $text-primary;
+      margin: 0;
+      padding: 8px 0;
+    }
+  }
+}
+
+.review-card {
+  background: #fafafa;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+
+  &:hover { border-color: rgba($primary, 0.4); }
+
+  .review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+  }
+
+  .rv-primary { font-size: 14px; font-weight: 700; color: $primary; margin: 0 0 3px; }
+  .rv-secondary { font-size: 12px; color: $text-secondary; margin: 0; }
+  .rv-detail { font-size: 12px; color: $text-secondary; margin: 6px 0 0; }
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: #fafafa;
+  border-radius: 10px;
+  margin-bottom: 10px;
+
+  .doc-icon {
+    font-size: 24px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $primary-soft;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .doc-info {
+    flex: 1;
+    p { font-size: 14px; font-weight: 600; margin: 0 0 2px; color: $text-primary; }
+    span { font-size: 12px; color: $text-secondary; }
+  }
+
+  .doc-status {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+
+    &.verified { background: #ecfdf5; color: #065f46; }
+    &.pending  { background: #fff7ed; color: #92400e; }
+  }
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid $border;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: $text-primary;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+
+  &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, 0.08); }
+  &::placeholder { color: $text-secondary; }
+}
+
+.notes-counter {
+  font-size: 12px;
+  color: $text-secondary;
+  text-align: right;
+  margin: 4px 0 0;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────
+.verification-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-card {
+  background: $surface;
+  border: 1.5px solid $border;
+  border-radius: 14px;
+  padding: 18px;
+
+  h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 0 0 14px;
+  }
+
+  .sidebar-label { font-size: 12px; color: $text-secondary; margin: 0 0 8px; }
+
+  .sidebar-progress {
+    width: 100%;
+    height: 8px;
+    background: $border;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+
+    .sidebar-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, $primary, $secondary);
+      transition: width 0.4s ease;
+    }
+  }
+
+  .sidebar-percent {
+    font-size: 20px;
+    font-weight: 700;
+    color: $primary;
+    margin: 0;
+    text-align: center;
+  }
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid $border;
+  font-size: 13px;
+  gap: 8px;
+
+  &:last-child { border-bottom: none; }
+
+  > span:first-child { flex: 1; color: $text-secondary; font-weight: 500; }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+
+    &.ok   { background: #ecfdf5; color: #065f46; }
+    &.todo { background: #fff7ed; color: #92400e; }
+  }
+}
+
+// ── Policy Step ───────────────────────────────────────────────
+.policy-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb { background: $border; border-radius: 3px; }
+
+  .no-policies {
+    text-align: center;
+    padding: 24px;
+    color: $text-secondary;
+    font-size: 14px;
+  }
+}
+
+.policy-block {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid $border;
+
+  &:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+  .policy-number-title { font-size: 14px; font-weight: 700; color: $text-primary; margin: 0 0 6px; }
+
+  .policy-category-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: $primary;
+    background: $primary-soft;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .policy-content-html {
+    font-size: 13px;
+    color: $text-secondary;
+    line-height: 1.7;
+
+    p { margin: 6px 0; }
+    ul, ol { padding-left: 20px; margin: 6px 0; }
+    li { margin: 4px 0; }
+    strong { color: $text-primary; }
+  }
+}
+
+.policy-accept {
+  padding: 16px 18px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid $border;
+}
+
+.policy-attachment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+
+  .policy-attachment-icon { font-size: 18px; flex-shrink: 0; line-height: 1; }
+
+  .policy-attachment-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .policy-attachment-btn {
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 8px;
+    background: $primary;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover { background: darken($primary, 8%); }
+  }
+}
+
+// ── Chat FAB ──────────────────────────────────────────────────
+.chat-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $primary, $secondary);
+  color: $surface;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba($primary, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: all 0.2s;
+
+  &:hover { transform: scale(1.08); box-shadow: 0 10px 28px rgba($primary, 0.4); }
+}
+
+// ── Responsive ────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .ob-content { padding: 16px 14px 48px; }
+  .card { padding: 20px; }
+  .bank-card { padding: 0; }
+  .bank-hero { padding: 24px 20px 16px; }
+  .no-bank-row { margin: 0 20px 16px; }
+  .no-bank-notice { margin: 0 20px 16px; }
+  .bank-section-divider { padding: 0 20px; }
+  .bank-card .fields-panel { padding: 0 20px; }
+  .bank-footer { padding: 16px 20px 20px; }
+  .step-header .step-title { font-size: 22px; }
+  .verification-layout { grid-template-columns: 1fr; }
+  .details-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .two-col-card { grid-template-columns: 1fr; }
+  .nav-actions { flex-wrap: wrap; }
+  .btn-next, .btn-prev { flex: 1; text-align: center; justify-content: center; }
+  .bank-trust-row { grid-template-columns: 1fr; }
+}

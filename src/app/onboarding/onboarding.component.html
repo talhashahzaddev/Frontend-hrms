@@ -1,0 +1,858 @@
+<div class="ob-shell">
+  <div class="ob-content">
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 1 — PERSONAL INFO  (UNCHANGED)
+    ══════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 1" class="step-wrapper">
+      <div class="step-header">
+        <div class="step-eyebrow">ONBOARDING JOURNEY</div>
+        <div class="step-title-row">
+          <h1 class="step-title">Personal Information</h1>
+          <span class="step-count">Step <strong>1</strong> of 6</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:16%"></div></div>
+      </div>
+
+      <div class="card two-col-card">
+        <div class="photo-panel">
+          <div class="photo-circle" (click)="triggerFileInput()">
+            <img *ngIf="photoPreview" [src]="photoPreview" class="photo-img" alt="Profile" />
+            <span *ngIf="!photoPreview" class="photo-icon">👤</span>
+          </div>
+          <p class="photo-label">Profile Photo</p>
+          <p class="photo-hint">Please upload a professional headshot.</p>
+          <input type="file" #photoInput accept="image/*" (change)="onFileSelected($event)" hidden />
+          <button type="button" class="upload-btn" (click)="triggerFileInput()">Upload Image</button>
+        </div>
+
+        <div class="fields-panel">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">FULL NAME <span class="req">*</span></label>
+              <input class="field-input" type="text" placeholder="e.g. Alexander Graham"
+                     [(ngModel)]="form.fullName" name="fullName" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">JOB TITLE</label>
+              <input class="field-input" type="text" placeholder="e.g. Senior UX Designer"
+                     [(ngModel)]="form.jobTitle" name="jobTitle"
+                     [readonly]="isJobTitleReadOnly"
+                     [class.readonly-field]="isJobTitleReadOnly" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">EMAIL ADDRESS <span class="req">*</span></label>
+              <input class="field-input" type="email" placeholder="e.g. alex@company.com"
+                     [(ngModel)]="form.email" name="email" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">PHONE NUMBER <span class="req">*</span></label>
+              <input class="field-input" type="tel" placeholder="+1 (555) 000-0000"
+                     [(ngModel)]="form.phone" name="phone" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">DEPARTMENT <span class="req">*</span></label>
+              <div class="select-wrapper">
+                <select class="field-input" [(ngModel)]="form.department" name="department">
+                  <option value="" disabled>Select Department</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="hr">Human Resources</option>
+                  <option value="finance">Finance</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="operations">Operations</option>
+                  <option value="design">Design</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">GENDER <span class="req">*</span></label>
+              <div class="select-wrapper">
+                <select class="field-input" [(ngModel)]="form.gender" name="gender">
+                  <option value="" disabled>Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                  <option value="prefer_not">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">NATIONALITY <span class="req">*</span></label>
+              <div class="select-wrapper">
+                <select class="field-input" [(ngModel)]="form.nationality" name="nationality">
+                  <option value="" disabled>Select Nationality</option>
+                  <option value="pk">Pakistani</option>
+                  <option value="us">American</option>
+                  <option value="gb">British</option>
+                  <option value="ae">Emirati</option>
+                  <option value="in">Indian</option>
+                  <option value="sa">Saudi Arabian</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">NATIONAL ID / CNIC <span class="req">*</span></label>
+              <input class="field-input" type="text" placeholder="e.g. 35202-1234567-8"
+                     [(ngModel)]="form.idNumber" name="idNumber" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group full-span">
+              <label class="field-label">RESUME / CV (OPTIONAL)</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" (change)="onResumeSelected($event)" />
+                <label for="resumeFile" class="file-label-btn">📄 Choose File</label>
+                <span class="file-name">{{ form.resumeFileName || 'No file selected' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="personalInfoError" class="alert-error">❌ {{ personalInfoError }}</div>
+
+      <div class="nav-actions">
+        <button class="btn-next" type="button" (click)="onSubmit()" [disabled]="isSavingPersonalInfo">
+          <span *ngIf="!isSavingPersonalInfo">Save & Continue →</span>
+          <span *ngIf="isSavingPersonalInfo">⏳ Saving…</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 2 — EDUCATION  (UNCHANGED)
+    ══════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 2" class="step-wrapper">
+      <div class="step-header">
+        <div class="step-eyebrow">ONBOARDING JOURNEY</div>
+        <div class="step-title-row">
+          <h1 class="step-title">Qualification Details</h1>
+          <span class="step-count">Step <strong>2</strong> of 6</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:33%"></div></div>
+      </div>
+
+      <div *ngIf="educationList.length > 0" class="entries-section">
+        <h3 class="entries-title">
+          {{ educationList.length }} Qualification {{ educationList.length === 1 ? 'Entry' : 'Entries' }} Added
+        </h3>
+        <div class="entry-card" *ngFor="let edu of educationList; let i = index"
+             [class.editing]="editingEducationIndex === i">
+          <div class="entry-header">
+            <div class="entry-badge">{{ edu.degree | titlecase }}</div>
+            <div class="entry-info">
+              <p class="entry-primary">{{ edu.institution }}</p>
+              <p class="entry-secondary">{{ edu.field }} <span *ngIf="edu.gpa"> · GPA: {{ edu.gpa }}</span></p>
+            </div>
+            <div class="entry-actions">
+              <button type="button" class="icon-btn edit-btn" (click)="editEducation(i)" title="Edit"
+                      [disabled]="editingEducationIndex !== null && editingEducationIndex !== i"><span>✎</span></button>
+              <button type="button" class="icon-btn delete-btn" (click)="removeEducation(i)" title="Delete"
+                      [disabled]="editingEducationIndex !== null"><span>✕</span></button>
+            </div>
+          </div>
+          <div *ngIf="edu.description" class="entry-desc">{{ edu.description }}</div>
+          <div *ngIf="edu.fileName" class="entry-file">📎 {{ edu.fileName }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">{{ editingEducationIndex !== null ? '✎ Edit Qualification' : '+ Add Qualification' }}</h3>
+        <div class="fields-panel">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">DEGREE LEVEL <span class="req">*</span></label>
+              <div class="select-wrapper">
+                <select class="field-input" [(ngModel)]="education.degree" name="degree">
+                  <option value="" disabled>Select Level</option>
+                  <option value="bachelor">Bachelor</option>
+                  <option value="master">Master</option>
+                  <option value="phd">PhD</option>
+                  <option value="diploma">Diploma</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">INSTITUTION NAME <span class="req">*</span></label>
+              <input class="field-input" type="text" placeholder="e.g. Harvard University"
+                     [(ngModel)]="education.institution" name="institution" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">FIELD OF STUDY <span class="req">*</span></label>
+              <input class="field-input" type="text" placeholder="e.g. Business Administration"
+                     [(ngModel)]="education.field" name="field" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">GPA (OPTIONAL)</label>
+              <input class="field-input" type="text" placeholder="e.g. 3.8 / 4.0"
+                     [(ngModel)]="education.gpa" name="gpa" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group full-span">
+              <label class="field-label">ATTACH CERTIFICATE (OPTIONAL)</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="eduFile" (change)="onEducationFileSelected($event)" />
+                <label for="eduFile" class="file-label-btn">📎 Choose File</label>
+                <span class="file-name">{{ education.fileName || 'No file selected' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group full-span">
+              <label class="field-label">DESCRIPTION (OPTIONAL)</label>
+              <textarea class="field-input" rows="3" placeholder="Thesis, major projects, academic honours…"
+                        [(ngModel)]="education.description" name="description"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" type="button" *ngIf="editingEducationIndex !== null" (click)="cancelEducationEdit()">Cancel</button>
+          <button class="btn-prev" type="button" (click)="step = 1" *ngIf="editingEducationIndex === null">← Back</button>
+          <div style="flex:1"></div>
+          <button class="btn-primary" type="button" *ngIf="editingEducationIndex === null"
+                  [disabled]="isSavingEducation || !education.degree || !education.institution || !education.field"
+                  (click)="addEducation()">{{ isSavingEducation ? '⏳ Saving…' : '+ Add Education' }}</button>
+          <button class="btn-primary" type="button" *ngIf="editingEducationIndex !== null"
+                  [disabled]="!education.degree || !education.institution || !education.field"
+                  (click)="updateEducation()">✓ Update Education</button>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-prev" type="button" (click)="step = 1" *ngIf="editingEducationIndex === null">← Back</button>
+        <div style="flex:1"></div>
+        <span *ngIf="educationList.length === 0" class="minor-note">No entries added. You can continue and add later.</span>
+        <button class="btn-next" type="button" (click)="continueToWorkExperience()" *ngIf="editingEducationIndex === null">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 3 — WORK EXPERIENCE  (UNCHANGED)
+    ══════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 3" class="step-wrapper">
+      <div class="step-header">
+        <div class="step-eyebrow">ONBOARDING JOURNEY</div>
+        <div class="step-title-row">
+          <h1 class="step-title">Work Experience</h1>
+          <span class="step-count">Step <strong>3</strong> of 6</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+
+      <div *ngIf="workExperienceList.length > 0" class="entries-section">
+        <h3 class="entries-title">
+          {{ workExperienceList.length }} Experience {{ workExperienceList.length === 1 ? 'Entry' : 'Entries' }} Added
+        </h3>
+        <div class="entry-card exp-card" *ngFor="let exp of workExperienceList; let i = index"
+             [class.editing]="editingExperienceIndex === i">
+          <div class="entry-header">
+            <div class="entry-badge exp-badge">{{ exp.employmentType }}</div>
+            <div class="entry-info">
+              <p class="entry-primary">{{ exp.jobTitle }} · {{ exp.company }}</p>
+              <p class="entry-secondary">
+                <span *ngIf="exp.location">{{ exp.location }} &nbsp;·&nbsp;</span>
+                {{ exp.startDate }} — {{ exp.currentlyWorking ? 'Present' : exp.endDate }}
+              </p>
+            </div>
+            <div class="entry-actions">
+              <button type="button" class="icon-btn edit-btn" (click)="editWorkExperience(i)" title="Edit"
+                      [disabled]="editingExperienceIndex !== null && editingExperienceIndex !== i"><span>✎</span></button>
+              <button type="button" class="icon-btn delete-btn" (click)="removeWorkExperience(i)" title="Delete"
+                      [disabled]="editingExperienceIndex !== null"><span>✕</span></button>
+            </div>
+          </div>
+          <div *ngIf="exp.responsibilities" class="entry-desc">{{ exp.responsibilities }}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">{{ editingExperienceIndex !== null ? '✎ Edit Experience' : '+ Add Experience' }}</h3>
+        <div class="fields-panel">
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">JOB TITLE <span class="req">*</span></label>
+              <input class="field-input" type="text" placeholder="e.g. Lead Developer"
+                     [(ngModel)]="workExperience.jobTitle" name="jobTitle" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">COMPANY <span class="req">*</span></label>
+              <input class="field-input" type="text" placeholder="e.g. Google"
+                     [(ngModel)]="workExperience.company" name="company" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">EMPLOYMENT TYPE <span class="req">*</span></label>
+              <div class="select-wrapper">
+                <select class="field-input" [(ngModel)]="workExperience.employmentType" name="employmentType">
+                  <option value="" disabled>Select Type</option>
+                  <option value="Full-time">Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Freelance">Freelance</option>
+                  <option value="Internship">Internship</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">LOCATION</label>
+              <input class="field-input" type="text" placeholder="e.g. San Francisco, CA"
+                     [(ngModel)]="workExperience.location" name="location" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">START DATE <span class="req">*</span></label>
+              <input class="field-input" type="date" [(ngModel)]="workExperience.startDate" name="startDate" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">END DATE</label>
+              <input class="field-input" type="date" [(ngModel)]="workExperience.endDate" name="endDate"
+                     [disabled]="workExperience.currentlyWorking" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group full-span">
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="workExperience.currentlyWorking" name="currentlyWorking" />
+                <span>Currently working here</span>
+              </label>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group full-span">
+              <label class="field-label">KEY RESPONSIBILITIES</label>
+              <textarea class="field-input" rows="3" placeholder="Describe your main achievements and roles…"
+                        [(ngModel)]="workExperience.responsibilities" name="responsibilities"></textarea>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group full-span">
+              <label class="field-label">ATTACH DOCUMENT (OPTIONAL)</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="workExpFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                       (change)="onWorkExperienceFileSelected($event)" />
+                <label for="workExpFile" class="file-label-btn">📎 Choose File</label>
+                <span class="file-name">{{ workExperience.fileName || 'No file selected' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="workExperienceError" class="alert-error" style="margin: 0 0 12px;">❌ {{ workExperienceError }}</div>
+        <div class="form-actions">
+          <button class="btn-cancel" type="button" *ngIf="editingExperienceIndex !== null" (click)="cancelExperienceEdit()">Cancel</button>
+          <button class="btn-prev" type="button" (click)="step = 2" *ngIf="editingExperienceIndex === null">← Back</button>
+          <div style="flex:1"></div>
+          <button class="btn-primary" type="button" *ngIf="editingExperienceIndex === null"
+                  [disabled]="isSavingWorkExperience || !workExperience.jobTitle || !workExperience.company || !workExperience.employmentType || !workExperience.startDate"
+                  (click)="addWorkExperience()">{{ isSavingWorkExperience ? '⏳ Saving…' : '+ Add Experience' }}</button>
+          <button class="btn-primary" type="button" *ngIf="editingExperienceIndex !== null"
+                  [disabled]="!workExperience.jobTitle || !workExperience.company"
+                  (click)="updateWorkExperience()">✓ Update Experience</button>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-prev" type="button" (click)="step = 2" *ngIf="editingExperienceIndex === null">← Back</button>
+        <div style="flex:1"></div>
+        <span *ngIf="workExperienceList.length === 0" class="minor-note">No entries added. You can continue and add later.</span>
+        <button class="btn-next" type="button" (click)="continueFromWorkExperience()" *ngIf="editingExperienceIndex === null">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 4 — BANK DETAILS  (NEW)
+         Matches the provided screenshot exactly:
+         – "I don't have a bank account" toggle at top
+         – ACCOUNT INFORMATION section divider
+         – BANK & BRANCH section divider
+         – Save Details purple button
+         – Trust badges row at bottom
+    ══════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 4" class="step-wrapper">
+      <div class="step-header">
+        <div class="step-eyebrow">ONBOARDING JOURNEY</div>
+        <div class="step-title-row">
+          <h1 class="step-title">Bank Details</h1>
+          <span class="step-count">Step <strong>4</strong> of 6</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:66%"></div></div>
+      </div>
+
+      <div class="card bank-card">
+
+        <!-- Hero block -->
+        <div class="bank-hero">
+          <div class="bank-icon-circle">🏦</div>
+          <h2 class="bank-hero-title">Bank Details</h2>
+          <p class="bank-hero-sub">
+            Enter your account information for payroll processing.<br />
+            Ensure all details match your bank statements to avoid delays.
+          </p>
+        </div>
+
+        <!-- No bank account toggle row -->
+        <!-- <div class="no-bank-row" [class.active]="bankForm.noBankAccount">
+          <div class="no-bank-left">
+            <span class="no-bank-icon">🚫</span>
+            <span class="no-bank-label">I don't have a bank account</span>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" [(ngModel)]="bankForm.noBankAccount" name="noBankAccount"
+                   (change)="onNoBankAccountToggle()" />
+            <span class="slider"></span>
+          </label>
+        </div> -->
+
+        <!-- No bank account notice -->
+        <!-- <div class="no-bank-notice" *ngIf="bankForm.noBankAccount">
+          <span class="notice-icon">ℹ️</span>
+          <p>
+            Your salary will be processed via <strong>manual / cash payment</strong>.
+            HR will contact you to arrange an alternative payment method.
+          </p>
+        </div> -->
+
+        <!-- Bank form fields — hidden when noBankAccount -->
+        <ng-container *ngIf="!bankForm.noBankAccount">
+
+          <div class="bank-section-divider"><span>ACCOUNT INFORMATION</span></div>
+
+          <div class="fields-panel">
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">ACCOUNT HOLDER NAME <span class="req">*</span></label>
+                <input class="field-input" type="text" placeholder="Full legal name"
+                       [(ngModel)]="bankForm.accountHolderName" name="accountHolderName"
+                       [class.field-error]="bankErrors.accountHolderName"
+                       (input)="clearBankError('accountHolderName')" />
+                <span class="inline-error" *ngIf="bankErrors.accountHolderName">{{ bankErrors.accountHolderName }}</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label">PAYMENT METHOD <span class="req">*</span></label>
+                <div class="select-wrapper">
+                  <select class="field-input" [(ngModel)]="bankForm.paymentMethod" name="paymentMethod"
+                          [class.field-error]="bankErrors.paymentMethod"
+                          (change)="clearBankError('paymentMethod')">
+                    <option value="" disabled>Select payment method</option>
+                    <option value="Bank Transfer (EFT)">Bank Transfer (EFT)</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Wire Transfer">Wire Transfer</option>
+                  </select>
+                </div>
+                <span class="inline-error" *ngIf="bankErrors.paymentMethod">{{ bankErrors.paymentMethod }}</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">ACCOUNT NUMBER <span class="req">*</span></label>
+                <input class="field-input" type="password" placeholder="••••••••••••"
+                       [(ngModel)]="bankForm.accountNumber" name="accountNumber"
+                       [class.field-error]="bankErrors.accountNumber"
+                       (input)="clearBankError('accountNumber')" />
+                <span class="inline-error" *ngIf="bankErrors.accountNumber">{{ bankErrors.accountNumber }}</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label">CONFIRM ACCOUNT NUMBER <span class="req">*</span></label>
+                <input class="field-input" type="text" placeholder="Re-enter account number"
+                       [(ngModel)]="bankForm.confirmAccountNumber" name="confirmAccountNumber"
+                       [class.field-error]="bankErrors.confirmAccountNumber"
+                       (input)="clearBankError('confirmAccountNumber')" />
+                <span class="inline-error" *ngIf="bankErrors.confirmAccountNumber">{{ bankErrors.confirmAccountNumber }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bank-section-divider"><span>BANK &amp; BRANCH</span></div>
+
+          <div class="fields-panel">
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">BANK NAME <span class="req">*</span></label>
+                <div class="select-wrapper">
+                  <select class="field-input" [(ngModel)]="bankForm.bankName" name="bankName"
+                          [class.field-error]="bankErrors.bankName"
+                          (change)="clearBankError('bankName')">
+                    <option value="" disabled>Select your bank</option>
+                    <option value="ABN AMRO">ABN AMRO</option>
+                    <option value="Allied Bank">Allied Bank</option>
+                    <option value="Bank Al Habib">Bank Al Habib</option>
+                    <option value="Bank Alfalah">Bank Alfalah</option>
+                    <option value="Barclays">Barclays</option>
+                    <option value="Citibank">Citibank</option>
+                    <option value="Deutsche Bank">Deutsche Bank</option>
+                    <option value="Faysal Bank">Faysal Bank</option>
+                    <option value="First Abu Dhabi Bank">First Abu Dhabi Bank</option>
+                    <option value="HSBC">HSBC</option>
+                    <option value="Habib Bank Limited">Habib Bank Limited (HBL)</option>
+                    <option value="JP Morgan Chase">JP Morgan Chase</option>
+                    <option value="MCB Bank">MCB Bank</option>
+                    <option value="Meezan Bank">Meezan Bank</option>
+                    <option value="National Bank of Pakistan">National Bank of Pakistan</option>
+                    <option value="Silk Bank">Silk Bank</option>
+                    <option value="Standard Chartered">Standard Chartered</option>
+                    <option value="United Bank Limited">United Bank Limited (UBL)</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <span class="inline-error" *ngIf="bankErrors.bankName">{{ bankErrors.bankName }}</span>
+              </div>
+              <div class="field-group">
+                <label class="field-label">IBAN / SWIFT CODE</label>
+                <input class="field-input" type="text" placeholder="Optional for domestic transfers"
+                       [(ngModel)]="bankForm.iban" name="iban"
+                       [class.field-error]="bankErrors.iban"
+                       (input)="clearBankError('iban')" />
+                <span class="inline-error" *ngIf="bankErrors.iban">{{ bankErrors.iban }}</span>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">BRANCH NAME</label>
+                <input class="field-input" type="text" placeholder="e.g. Downtown Manhattan"
+                       [(ngModel)]="bankForm.branchName" name="branchName" />
+              </div>
+              <div class="field-group">
+                <label class="field-label">BRANCH CODE</label>
+                <input class="field-input" type="text" placeholder="Routing number or Sort code"
+                       [(ngModel)]="bankForm.branchCode" name="branchCode" />
+              </div>
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- Save Details button -->
+        <div class="bank-footer">
+          <button class="btn-bank-save" type="button"
+                  [disabled]="isSavingBankDetails"
+                  (click)="saveBankDetails()">
+            <span *ngIf="!isSavingBankDetails">Save Details</span>
+            <span *ngIf="isSavingBankDetails">⏳ Saving…</span>
+          </button>
+        </div>
+
+        <!-- Trust badges -->
+        <!-- <div class="bank-trust-row">
+          <div class="trust-item">
+            <div class="trust-icon-wrap secure">🔒</div>
+            <div>
+              <p class="trust-title">Secure Storage</p>
+              <p class="trust-desc">Your data is encrypted using 256-bit AES protocols.</p>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon-wrap verify">✅</div>
+            <div>
+              <p class="trust-title">Verification</p>
+              <p class="trust-desc">Details are verified by our payroll team within 24 hours.</p>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon-wrap help">❓</div>
+            <div>
+              <p class="trust-title">Need Help?</p>
+              <p class="trust-desc">Contact your HR representative for assistance.</p>
+            </div>
+          </div>
+        </div> -->
+
+      </div><!-- /bank-card -->
+
+      <div *ngIf="bankDetailsError" class="alert-error">❌ {{ bankDetailsError }}</div>
+
+      <div class="nav-actions">
+        <button class="btn-prev" type="button" (click)="step = 3">← Back</button>
+        <div style="flex:1"></div>
+        <span *ngIf="!bankDetailsSaved && !bankForm.noBankAccount" class="minor-note">
+          Please save your bank details before continuing.
+        </span>
+        <button class="btn-next" type="button" (click)="continueFromBankDetails()"
+                [disabled]="!bankDetailsSaved && !bankForm.noBankAccount">
+          Continue →
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 5 — VERIFICATION HUB  (was Step 4, renumbered)
+    ══════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 5" class="step-wrapper">
+      <div class="step-header">
+        <div class="step-eyebrow">ONBOARDING JOURNEY</div>
+        <div class="step-title-row">
+          <h1 class="step-title">Verification Hub</h1>
+          <span class="step-count">Step <strong>5</strong> of 6</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:83%"></div></div>
+      </div>
+
+      <div class="verification-layout">
+        <div class="verification-main">
+          <div class="card">
+            <div class="review-header">
+              <span class="review-badge">CRITICAL REVIEW</span>
+              <h3>Onboarding Dossier</h3>
+            </div>
+
+            <!-- Personal Info -->
+            <div class="review-section">
+              <div class="review-section-header">
+                <h4>Personal Information</h4>
+                <button type="button" class="btn-edit-small" (click)="editPersonalFromVerification()">✎ Edit</button>
+              </div>
+              <div class="details-grid">
+                <div class="detail-item"><label>Full Name</label><p>{{ form.fullName }}</p></div>
+                <div class="detail-item"><label>Job Title</label><p>{{ form.jobTitle || '—' }}</p></div>
+                <div class="detail-item"><label>Email</label><p>{{ form.email }}</p></div>
+                <div class="detail-item"><label>Phone</label><p>{{ form.phone }}</p></div>
+                <div class="detail-item"><label>Department</label><p>{{ form.department | titlecase }}</p></div>
+                <div class="detail-item"><label>Gender</label><p>{{ form.gender | titlecase }}</p></div>
+                <div class="detail-item"><label>Nationality</label><p>{{ form.nationality | titlecase }}</p></div>
+                <div class="detail-item"><label>CNIC / ID</label><p>{{ form.idNumber }}</p></div>
+              </div>
+            </div>
+
+            <!-- Education -->
+            <div class="review-section" *ngIf="educationList.length > 0">
+              <div class="review-section-header">
+                <h4>Qualification Background</h4>
+                <button type="button" class="btn-edit-small" (click)="step = 2">+ Add</button>
+              </div>
+              <div class="review-card" *ngFor="let edu of educationList; let i = index">
+                <div class="review-card-header">
+                  <div>
+                    <p class="rv-primary">{{ edu.degree | titlecase }}</p>
+                    <p class="rv-secondary">{{ edu.institution }}</p>
+                  </div>
+                  <div class="entry-actions">
+                    <button type="button" class="icon-btn edit-btn" (click)="editEducationFromVerification(i)">✎</button>
+                    <button type="button" class="icon-btn delete-btn" (click)="deleteEducationFromVerification(i)">✕</button>
+                  </div>
+                </div>
+                <p class="rv-detail">{{ edu.field }}<span *ngIf="edu.gpa"> · GPA: {{ edu.gpa }}</span></p>
+              </div>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="review-section" *ngIf="workExperienceList.length > 0">
+              <div class="review-section-header">
+                <h4>Work Experience</h4>
+                <button type="button" class="btn-edit-small" (click)="step = 3">+ Add</button>
+              </div>
+              <div class="review-card" *ngFor="let exp of workExperienceList; let i = index">
+                <div class="review-card-header">
+                  <div>
+                    <p class="rv-primary">{{ exp.jobTitle }}</p>
+                    <p class="rv-secondary">{{ exp.company }} · {{ exp.employmentType }}</p>
+                  </div>
+                  <div class="entry-actions">
+                    <button type="button" class="icon-btn edit-btn" (click)="editExperienceFromVerification(i)">✎</button>
+                    <button type="button" class="icon-btn delete-btn" (click)="deleteExperienceFromVerification(i)">✕</button>
+                  </div>
+                </div>
+                <p class="rv-detail">
+                  {{ exp.startDate }} — {{ exp.currentlyWorking ? 'Present' : exp.endDate }}
+                  <span *ngIf="exp.location"> · {{ exp.location }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Bank Details summary -->
+            <div class="review-section">
+              <div class="review-section-header">
+                <h4>Bank Details</h4>
+                <button type="button" class="btn-edit-small" (click)="step = 4">✎ Edit</button>
+              </div>
+              <div class="details-grid" *ngIf="!bankForm.noBankAccount && bankDetailsSaved">
+                <div class="detail-item"><label>Bank</label><p>{{ bankForm.bankName || '—' }}</p></div>
+                <div class="detail-item"><label>Account Holder</label><p>{{ bankForm.accountHolderName || '—' }}</p></div>
+                <div class="detail-item"><label>Account Number</label><p>•••• {{ bankForm.accountNumber | slice:-4 }}</p></div>
+                <div class="detail-item"><label>Payment Method</label><p>{{ bankForm.paymentMethod || '—' }}</p></div>
+                <div class="detail-item" *ngIf="bankForm.branchName"><label>Branch</label><p>{{ bankForm.branchName }}</p></div>
+                <div class="detail-item" *ngIf="bankForm.iban"><label>IBAN / SWIFT</label><p>{{ bankForm.iban }}</p></div>
+              </div>
+              <!-- <div class="no-bank-badge" *ngIf="bankForm.noBankAccount">
+                🚫 No bank account — manual / cash payment arranged
+              </div>
+              <div class="pending-bank" *ngIf="!bankDetailsSaved && !bankForm.noBankAccount">
+                ⊘ Bank details not saved.
+                <button class="btn-link" (click)="step = 4">Go back to add →</button>
+              </div> -->
+            </div>
+
+            <!-- Documents -->
+            <div class="review-section">
+              <h4>Documents</h4>
+              <div class="doc-item">
+                <div class="doc-icon">📄</div>
+                <div class="doc-info">
+                  <p>Resume</p>
+                  <span>{{ form.resumeFileName || 'Not provided' }}</span>
+                </div>
+                <span class="doc-status" [class.verified]="form.resume || hasSavedResume"
+                      [class.pending]="!form.resume && !hasSavedResume">
+                  {{ (form.resume || hasSavedResume) ? '✓ Uploaded' : '⊘ Pending' }}
+                </span>
+              </div>
+              <div class="doc-item">
+                <div class="doc-icon">🎓</div>
+                <div class="doc-info">
+                  <p>Education Certificates</p>
+                  <span>{{ educationList.length }} certificate(s)</span>
+                </div>
+                <span class="doc-status" [class.verified]="educationList.length > 0"
+                      [class.pending]="educationList.length === 0">
+                  {{ educationList.length > 0 ? '✓ Uploaded' : '⊘ Pending' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="review-section">
+              <h4>Additional Notes</h4>
+              <textarea class="notes-textarea" rows="4" maxlength="500"
+                        placeholder="Add any clarifications regarding document authenticity…"
+                        [(ngModel)]="documentNotes" name="documentNotes"></textarea>
+              <p class="notes-counter">{{ documentNotes.length }} / 500</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="verification-sidebar">
+          <div class="sidebar-card">
+            <h4>Review Status</h4>
+            <p class="sidebar-label">Completion rate</p>
+            <div class="sidebar-progress">
+              <div class="sidebar-progress-fill" [style.width.%]="reviewCompletionRate"></div>
+            </div>
+            <p class="sidebar-percent">{{ reviewCompletionRate }}%</p>
+          </div>
+
+          <div class="sidebar-card">
+            <h4>DATA SUMMARY</h4>
+            <div class="summary-item">
+              <span>Personal Info</span>
+              <span class="badge" [class.ok]="isPersonalCompleted()" [class.todo]="!isPersonalCompleted()">
+                {{ isPersonalCompleted() ? 'Complete' : 'Pending' }}
+              </span>
+              <button class="btn-sm" (click)="editPersonalFromVerification()">Edit</button>
+            </div>
+            <div class="summary-item">
+              <span>Education</span>
+              <span class="badge" [class.ok]="isEducationCompleted()" [class.todo]="!isEducationCompleted()">
+                {{ isEducationCompleted() ? 'Complete' : 'Pending' }}
+              </span>
+              <button class="btn-sm" (click)="step = 2">{{ isEducationCompleted() ? 'Edit' : 'Add' }}</button>
+            </div>
+            <div class="summary-item">
+              <span>Experience</span>
+              <span class="badge" [class.ok]="isWorkExperienceCompleted()" [class.todo]="!isWorkExperienceCompleted()">
+                {{ isWorkExperienceCompleted() ? 'Complete' : 'Pending' }}
+              </span>
+              <button class="btn-sm" (click)="step = 3">{{ isWorkExperienceCompleted() ? 'Edit' : 'Add' }}</button>
+            </div>
+            <div class="summary-item">
+              <span>Bank Details</span>
+              <span class="badge" [class.ok]="isBankDetailsCompleted()" [class.todo]="!isBankDetailsCompleted()">
+                {{ isBankDetailsCompleted() ? 'Complete' : 'Pending' }}
+              </span>
+              <button class="btn-sm" (click)="step = 4">Edit</button>
+            </div>
+            <div class="summary-item">
+              <span>Resume</span>
+              <span class="badge" [class.ok]="isResumeUploaded()" [class.todo]="!isResumeUploaded()">
+                {{ isResumeUploaded() ? 'Uploaded' : 'Pending' }}
+              </span>
+              <button class="btn-sm" (click)="step = 1">Upload</button>
+            </div>
+            <div class="summary-item">
+              <span>Policies</span>
+              <span class="badge" [class.ok]="policyAccepted" [class.todo]="!policyAccepted">
+                {{ policyAccepted ? 'Accepted' : 'Pending' }}
+              </span>
+              <button class="btn-sm" (click)="step = 6">Review</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-prev" (click)="step = 4">← Back</button>
+        <div style="flex:1"></div>
+        <button class="btn-next" (click)="proceedFromVerification()">Continue to Policies →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 6 — COMPANY POLICIES  (was Step 5, renumbered)
+         Module Access step has been removed.
+         Final "Complete Onboarding" button calls finishOnboarding().
+    ══════════════════════════════════════════════════════════ -->
+    <div *ngIf="step === 6" class="step-wrapper">
+      <div class="step-header">
+        <div class="step-eyebrow">ONBOARDING JOURNEY</div>
+        <div class="step-title-row">
+          <h1 class="step-title">Company Policies</h1>
+          <span class="step-count">Step <strong>6</strong> of 6</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Employee Handbook</h3>
+        <p class="card-subtitle">Please review all policies carefully before continuing.</p>
+
+        <div class="policy-scroll">
+          <div *ngIf="policies.length === 0" class="no-policies">
+            <p>No policies have been published yet. Contact HR for information.</p>
+          </div>
+          <div class="policy-block" *ngFor="let p of policies; let i = index">
+            <h4 class="policy-number-title">{{ i + 1 }}. {{ p.policyName }}</h4>
+            <span class="policy-category-tag">{{ p.category }}</span>
+            <div class="policy-content-html" [innerHTML]="p.policyContent"></div>
+            <div class="policy-attachment" *ngIf="p.fileUrl">
+              <span class="policy-attachment-icon">📎</span>
+              <span class="policy-attachment-name">{{ p.fileName || 'Policy Document' }}</span>
+              <button type="button" class="policy-attachment-btn" (click)="openPolicyFile(p.fileUrl)">View Document</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="policy-accept" *ngIf="policies.length > 0">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="policyAccepted" name="policyAccepted" />
+            <span>I have read and agree to all the company policies, terms of service, and privacy guidelines outlined above.</span>
+          </label>
+        </div>
+
+        <div class="nav-actions" style="margin-top:24px; margin-bottom:0;">
+          <button class="btn-prev" (click)="step = 5">← Back</button>
+          <div style="flex:1"></div>
+          <button class="btn-next" [disabled]="(!policyAccepted && policies.length > 0) || isSubmitting"
+                  (click)="finishOnboarding()">
+            <span *ngIf="!isSubmitting">Complete Onboarding ✓</span>
+            <span *ngIf="isSubmitting">⏳ Submitting…</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ob-content -->
+
+  <button class="chat-fab">💬</button>
+</div>
