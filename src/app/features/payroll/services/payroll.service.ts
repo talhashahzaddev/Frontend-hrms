@@ -130,6 +130,27 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
+export interface CalculatePayrollPayload {
+  periodId: string;
+  cycleId?: string | null;
+  bonusRuleId?: string | null;
+  attendanceRuleId?: string | null;
+  lateAttendanceRuleId?: string | null;
+  leaveRuleId?: string | null;
+  applyAttendanceRule?: boolean;
+  applyLateAttendanceRule?: boolean;
+  applyLeaveRule?: boolean;
+  applyOvertime?: boolean;
+  applyPerformanceBonus?: boolean;
+  applyGeneralBonus?: boolean;
+  applyGratuity?: boolean;
+  applyProvidentFund?: boolean;
+  applySocialSecurity?: boolean;
+  applyTax?: boolean;
+  applyLoanDeductions?: boolean;
+  applySalaryAdvanceDeductions?: boolean;
+}
+
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;
@@ -2929,6 +2950,15 @@ export class PayrollService {
         });
       }
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payroll-results`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
+    calculatePayroll(payload: CalculatePayrollPayload): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/calculate-payroll`, payload).pipe(
         map((response: any) => {
           if (!response.success && response.message) throw new Error(response.message);
           return response.data;

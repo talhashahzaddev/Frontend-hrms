@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 
 import { MatIconModule } from '@angular/material/icon';
 
-import { PayrollService } from '../../services/payroll.service';
+import { CalculatePayrollPayload, PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../../features/employee/services/employee.service';
 import { PerformanceService } from '../../../../features/performance/services/performance.service';
 import { Department } from '../../../../core/models/employee.models';
@@ -19,32 +19,40 @@ import { AppraisalCycle } from '../../../../core/models/performance.models';
   styleUrls: ['./payroll-calculation.component.scss']
 })
 export class PayrollCalculationComponent implements OnInit {
-  // Policy Rules
-  overtimeRules: any[] = [];
   attendanceRules: any[] = [];
   lateArrivalRules: any[] = [];
   leaveRules: any[] = [];
   bonusRules: any[] = [];
   appraisalCycles: AppraisalCycle[] = [];
-  
-  // Selections
+
+  // Selections (only used when matching module is enabled)
   selectedPeriodId: string = '';
   selectedDepartmentId: string = '';
-  selectedOvertimeRuleId: string = '';
   selectedAttendanceRuleId: string = '';
   selectedLateArrivalRuleId: string = '';
   selectedLeaveRuleId: string = '';
   selectedBonusRuleId: string = '';
   selectedPerformanceCycleId: string = '';
-  
-  // Policy Toggles
+
+  // Module toggles (align with CalculatePayrollDto flags)
+  enableOvertime: boolean = false;
+  enableAttendance: boolean = false;
+  enableLateArrival: boolean = false;
+  enableLeave: boolean = false;
+  enablePerformance: boolean = false;
+  enableBonus: boolean = false;
   enableLoan: boolean = true;
   enableAdvance: boolean = true;
   enablePF: boolean = true;
   enableTax: boolean = true;
   enableGratuity: boolean = false;
-  
+  enableSocialSecurity: boolean = true;
+
   isLoading: boolean = false;
+  isCalculating: boolean = false;
+  calculationResult: any | null = null;
+  errorMessage: string = '';
+  successMessage: string = '';
 
   periods: any[] = [];
   departments: Department[] = [];
@@ -61,8 +69,7 @@ export class PayrollCalculationComponent implements OnInit {
 
   loadInitialData(): void {
     this.isLoading = true;
-    
-    // Load Periods
+
     this.payrollService.getPayrollPeriods({ page: 1, pageSize: 200 }).subscribe({
       next: (data) => {
         this.periods = this.extractItems(data);
@@ -70,7 +77,6 @@ export class PayrollCalculationComponent implements OnInit {
       error: (err) => console.error('Error loading periods', err)
     });
 
-    // Load Active Departments
     this.employeeService.getDepartments(undefined, 'active').subscribe({
       next: (data) => {
         this.departments = this.extractItems(data);
@@ -78,42 +84,30 @@ export class PayrollCalculationComponent implements OnInit {
       error: (err) => console.error('Error loading departments', err)
     });
 
-    // Load Policy Rules
     this.loadPolicyRules();
   }
 
   loadPolicyRules(): void {
-    // Overtime
-    this.payrollService.getOvertimeActiveRules().subscribe({
-      next: (data) => this.overtimeRules = this.extractItems(data),
-      error: (err) => console.error('Error loading overtime rules', err)
-    });
-
-    // Attendance
     this.payrollService.getAttendanceActiveRules().subscribe({
-      next: (data) => this.attendanceRules = this.extractItems(data),
+      next: (data) => (this.attendanceRules = this.extractItems(data)),
       error: (err) => console.error('Error loading attendance rules', err)
     });
 
-    // Late Arrival
     this.payrollService.getLateArrivalActiveRules().subscribe({
-      next: (data) => this.lateArrivalRules = this.extractItems(data),
+      next: (data) => (this.lateArrivalRules = this.extractItems(data)),
       error: (err) => console.error('Error loading late arrival rules', err)
     });
 
-    // Leave
     this.payrollService.getLeaveActiveRules().subscribe({
-      next: (data) => this.leaveRules = this.extractItems(data),
+      next: (data) => (this.leaveRules = this.extractItems(data)),
       error: (err) => console.error('Error loading leave rules', err)
     });
 
-    // Bonus
     this.payrollService.getActiveBonusRules().subscribe({
-      next: (data) => this.bonusRules = this.extractItems(data),
+      next: (data) => (this.bonusRules = this.extractItems(data)),
       error: (err) => console.error('Error loading bonus rules', err)
     });
 
-    // Appraisal Cycles
     this.performanceService.getAppraisalCycles().subscribe({
       next: (response) => {
         if (response.success) {
@@ -128,6 +122,64 @@ export class PayrollCalculationComponent implements OnInit {
     });
   }
 
+  /** True when payroll period is set and every enabled module that has options has a selection. */
+  canCalculatePayroll(): boolean {
+    if (!this.selectedPeriodId?.trim()) {
+      return false;
+    }
+    if (this.enableAttendance && this.attendanceRules.length > 0 && !this.selectedAttendanceRuleId) {
+      return false;
+    }
+    if (this.enableLateArrival && this.lateArrivalRules.length > 0 && !this.selectedLateArrivalRuleId) {
+      return false;
+    }
+    if (this.enableLeave && this.leaveRules.length > 0 && !this.selectedLeaveRuleId) {
+      return false;
+    }
+    if (this.enablePerformance && this.appraisalCycles.length > 0 && !this.selectedPerformanceCycleId) {
+      return false;
+    }
+    if (this.enableBonus && this.bonusRules.length > 0 && !this.selectedBonusRuleId) {
+      return false;
+    }
+    return true;
+  }
+
+  setAttendanceEnabled(enabled: boolean): void {
+    this.enableAttendance = enabled;
+    if (!enabled) {
+      this.selectedAttendanceRuleId = '';
+    }
+  }
+
+  setLateArrivalEnabled(enabled: boolean): void {
+    this.enableLateArrival = enabled;
+    if (!enabled) {
+      this.selectedLateArrivalRuleId = '';
+    }
+  }
+
+  setLeaveEnabled(enabled: boolean): void {
+    this.enableLeave = enabled;
+    if (!enabled) {
+      this.selectedLeaveRuleId = '';
+    }
+  }
+
+  setPerformanceEnabled(enabled: boolean): void {
+    this.enablePerformance = enabled;
+    if (!enabled) {
+      this.selectedPerformanceCycleId = '';
+    }
+  }
+
+  setBonusEnabled(enabled: boolean): void {
+    this.enableBonus = enabled;
+    if (!enabled) {
+      this.selectedBonusRuleId = '';
+    }
+  }
+
   private extractItems(data: any): any[] {
     if (Array.isArray(data)) {
       return data;
@@ -138,5 +190,70 @@ export class PayrollCalculationComponent implements OnInit {
       if (Array.isArray(data.records)) return data.records;
     }
     return [];
+  }
+
+  calculatePayroll(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.calculationResult = null;
+
+    if (!this.selectedPeriodId) {
+      this.errorMessage = 'Please select a payroll period before calculation.';
+      return;
+    }
+    if (!this.canCalculatePayroll()) {
+      this.errorMessage = 'Enable each module you need and select a rule or cycle where required.';
+      return;
+    }
+
+    const payload: CalculatePayrollPayload = {
+      periodId: this.selectedPeriodId,
+      cycleId: this.enablePerformance ? this.normalizeGuid(this.selectedPerformanceCycleId) ?? undefined : undefined,
+      bonusRuleId:
+        this.enableBonus && this.selectedBonusRuleId
+          ? this.normalizeGuid(this.selectedBonusRuleId) ?? undefined
+          : undefined,
+      attendanceRuleId:
+        this.enableAttendance && this.selectedAttendanceRuleId
+          ? this.normalizeGuid(this.selectedAttendanceRuleId) ?? undefined
+          : undefined,
+      lateAttendanceRuleId:
+        this.enableLateArrival && this.selectedLateArrivalRuleId
+          ? this.normalizeGuid(this.selectedLateArrivalRuleId) ?? undefined
+          : undefined,
+      leaveRuleId:
+        this.enableLeave && this.selectedLeaveRuleId
+          ? this.normalizeGuid(this.selectedLeaveRuleId) ?? undefined
+          : undefined,
+      applyOvertime: this.enableOvertime,
+      applyAttendanceRule: this.enableAttendance,
+      applyLateAttendanceRule: this.enableLateArrival,
+      applyLeaveRule: this.enableLeave,
+      applyPerformanceBonus: this.enablePerformance,
+      applyGeneralBonus: this.enableBonus,
+      applyGratuity: this.enableGratuity,
+      applyProvidentFund: this.enablePF,
+      applySocialSecurity: this.enableSocialSecurity,
+      applyTax: this.enableTax,
+      applyLoanDeductions: this.enableLoan,
+      applySalaryAdvanceDeductions: this.enableAdvance
+    };
+
+    this.isCalculating = true;
+    this.payrollService.calculatePayroll(payload).subscribe({
+      next: (result) => {
+        this.calculationResult = result;
+        this.successMessage = 'Payroll calculated successfully.';
+        this.isCalculating = false;
+      },
+      error: (err) => {
+        this.errorMessage = err?.message || 'Payroll calculation failed.';
+        this.isCalculating = false;
+      }
+    });
+  }
+
+  private normalizeGuid(value: string): string | null {
+    return value && value.trim().length > 0 ? value : null;
   }
 }
