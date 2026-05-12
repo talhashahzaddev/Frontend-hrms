@@ -48,40 +48,30 @@
         <span class="policy-section-title">Policy Configuration</span>
         <div class="policy-grid">
 
-            <!-- Card 1: Overtime -->
-            <div class="policy-card">
-                <div class="card-header">
-                    <div class="policy-info">
-                        <div class="icon-wrapper blue">
-                            <mat-icon>schedule</mat-icon>
-                        </div>
-                        <div class="detail">
-                            <h4>Overtime Policy</h4>
-                            <p>Calculate extra hours pay</p>
-                        </div>
+            <!-- Overtime: toggle only (uses active org overtime rules on the server) -->
+            <div class="policy-card card-row">
+                <div class="policy-info">
+                    <div class="icon-wrapper blue">
+                        <mat-icon>schedule</mat-icon>
                     </div>
-                    <span class="status-pill" [class.configured]="selectedOvertimeRuleId"
-                        [class.skipped]="!selectedOvertimeRuleId">
-                        {{ selectedOvertimeRuleId ? 'Configured' : 'Skipped' }}
-                    </span>
+                    <div class="detail">
+                        <h4>Overtime</h4>
+                        <p>Extra hours pay using your organization's active overtime rules</p>
+                    </div>
                 </div>
-                <div class="input-wrapper">
-                    <select class="select-input" [(ngModel)]="selectedOvertimeRuleId">
-                        <option value="">Select Rule (Optional)</option>
-                        @for (rule of overtimeRules; track rule.ruleId) {
-                        <option [value]="rule.ruleId">
-                            {{ rule.ruleName }}
-                            ({{ rule.overtimeType }}: {{ rule.fixedAmount > 0 ? (rule.fixedAmount | number) :
-                            (rule.percentage + '%') }})
-                        </option>
-                        }
-                    </select>
+                <div class="toggle-group" (click)="enableOvertime = !enableOvertime">
+                    <span class="toggle-label" [class.enabled]="enableOvertime" [class.disabled]="!enableOvertime">
+                        {{ enableOvertime ? 'Enabled' : 'Disabled' }}
+                    </span>
+                    <div class="switch" [class.active]="enableOvertime" [class.inactive]="!enableOvertime">
+                        <div class="dot" [class.right]="enableOvertime" [class.left]="!enableOvertime"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Card 2: Attendance Deduction -->
-            <div class="policy-card">
-                <div class="card-header">
+            <!-- Attendance Deduction -->
+            <div class="policy-card policy-card--stacked">
+                <div class="policy-card__top card-row">
                     <div class="policy-info">
                         <div class="icon-wrapper amber">
                             <mat-icon>event_busy</mat-icon>
@@ -91,14 +81,20 @@
                             <p>Penalties for absenteeism</p>
                         </div>
                     </div>
-                    <span class="status-pill" [class.configured]="selectedAttendanceRuleId"
-                        [class.skipped]="!selectedAttendanceRuleId">
-                        {{ selectedAttendanceRuleId ? 'Configured' : 'Skipped' }}
-                    </span>
+                    <div class="toggle-group" (click)="setAttendanceEnabled(!enableAttendance)">
+                        <span class="toggle-label" [class.enabled]="enableAttendance" [class.disabled]="!enableAttendance">
+                            {{ enableAttendance ? 'Enabled' : 'Disabled' }}
+                        </span>
+                        <div class="switch" [class.active]="enableAttendance" [class.inactive]="!enableAttendance">
+                            <div class="dot" [class.right]="enableAttendance" [class.left]="!enableAttendance"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-wrapper">
+                @if (enableAttendance && attendanceRules.length > 0) {
+                <div class="input-wrapper policy-card__rule">
+                    <label class="rule-label">Deduction rule <span class="required">*</span></label>
                     <select class="select-input" [(ngModel)]="selectedAttendanceRuleId">
-                        <option value="">Select Rule</option>
+                        <option value="">Select rule</option>
                         @for (rule of attendanceRules; track rule.ruleId) {
                         <option [value]="rule.ruleId">
                             {{ rule.ruleName }}
@@ -108,28 +104,35 @@
                         }
                     </select>
                 </div>
+                }
             </div>
 
-            <!-- Card 3: Late Arrival -->
-            <div class="policy-card">
-                <div class="card-header">
+            <!-- Late Arrival -->
+            <div class="policy-card policy-card--stacked">
+                <div class="policy-card__top card-row">
                     <div class="policy-info">
                         <div class="icon-wrapper rose">
                             <mat-icon>alarm</mat-icon>
                         </div>
                         <div class="detail">
-                            <h4>Late Arrival Policy</h4>
+                            <h4>Late Arrival</h4>
                             <p>Deductions for tardiness</p>
                         </div>
                     </div>
-                    <span class="status-pill" [class.configured]="selectedLateArrivalRuleId"
-                        [class.skipped]="!selectedLateArrivalRuleId">
-                        {{ selectedLateArrivalRuleId ? 'Configured' : 'Skipped' }}
-                    </span>
+                    <div class="toggle-group" (click)="setLateArrivalEnabled(!enableLateArrival)">
+                        <span class="toggle-label" [class.enabled]="enableLateArrival" [class.disabled]="!enableLateArrival">
+                            {{ enableLateArrival ? 'Enabled' : 'Disabled' }}
+                        </span>
+                        <div class="switch" [class.active]="enableLateArrival" [class.inactive]="!enableLateArrival">
+                            <div class="dot" [class.right]="enableLateArrival" [class.left]="!enableLateArrival"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-wrapper">
+                @if (enableLateArrival && lateArrivalRules.length > 0) {
+                <div class="input-wrapper policy-card__rule">
+                    <label class="rule-label">Late arrival rule <span class="required">*</span></label>
                     <select class="select-input" [(ngModel)]="selectedLateArrivalRuleId">
-                        <option value="">Select Rule</option>
+                        <option value="">Select rule</option>
                         @for (rule of lateArrivalRules; track rule.ruleId) {
                         <option [value]="rule.ruleId">
                             {{ rule.ruleName }}
@@ -139,28 +142,35 @@
                         }
                     </select>
                 </div>
+                }
             </div>
 
-            <!-- Card 4: Leave Deduction -->
-            <div class="policy-card">
-                <div class="card-header">
+            <!-- Leave Deduction -->
+            <div class="policy-card policy-card--stacked">
+                <div class="policy-card__top card-row">
                     <div class="policy-info">
                         <div class="icon-wrapper amber">
                             <mat-icon>file_copy</mat-icon>
                         </div>
                         <div class="detail">
-                            <h4>Leave Deduction Policy</h4>
+                            <h4>Leave Deduction</h4>
                             <p>Deduct unpaid or excess leaves</p>
                         </div>
                     </div>
-                    <span class="status-pill" [class.configured]="selectedLeaveRuleId"
-                        [class.skipped]="!selectedLeaveRuleId">
-                        {{ selectedLeaveRuleId ? 'Configured' : 'Skipped' }}
-                    </span>
+                    <div class="toggle-group" (click)="setLeaveEnabled(!enableLeave)">
+                        <span class="toggle-label" [class.enabled]="enableLeave" [class.disabled]="!enableLeave">
+                            {{ enableLeave ? 'Enabled' : 'Disabled' }}
+                        </span>
+                        <div class="switch" [class.active]="enableLeave" [class.inactive]="!enableLeave">
+                            <div class="dot" [class.right]="enableLeave" [class.left]="!enableLeave"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-wrapper">
+                @if (enableLeave && leaveRules.length > 0) {
+                <div class="input-wrapper policy-card__rule">
+                    <label class="rule-label">Leave rule <span class="required">*</span></label>
                     <select class="select-input" [(ngModel)]="selectedLeaveRuleId">
-                        <option value="">Select Rule</option>
+                        <option value="">Select rule</option>
                         @for (rule of leaveRules; track rule.ruleId) {
                         <option [value]="rule.ruleId">
                             {{ rule.ruleName }}
@@ -169,69 +179,84 @@
                         }
                     </select>
                 </div>
+                }
             </div>
 
-            <!-- Card 5: Performance Bonus -->
-            <div class="policy-card">
-                <div class="card-header">
+            <!-- Performance Bonus -->
+            <div class="policy-card policy-card--stacked">
+                <div class="policy-card__top card-row">
                     <div class="policy-info">
                         <div class="icon-wrapper blue">
                             <mat-icon>trending_up</mat-icon>
                         </div>
                         <div class="detail">
-                            <h4>Performance Bonus Policy</h4>
+                            <h4>Performance Bonus</h4>
                             <p>Bonus from appraisal cycle scores</p>
                         </div>
                     </div>
-                    <span class="status-pill" [class.configured]="selectedPerformanceCycleId"
-                        [class.skipped]="!selectedPerformanceCycleId">
-                        {{ selectedPerformanceCycleId ? 'Configured' : 'Skipped' }}
-                    </span>
+                    <div class="toggle-group" (click)="setPerformanceEnabled(!enablePerformance)">
+                        <span class="toggle-label" [class.enabled]="enablePerformance" [class.disabled]="!enablePerformance">
+                            {{ enablePerformance ? 'Enabled' : 'Disabled' }}
+                        </span>
+                        <div class="switch" [class.active]="enablePerformance" [class.inactive]="!enablePerformance">
+                            <div class="dot" [class.right]="enablePerformance" [class.left]="!enablePerformance"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-wrapper">
+                @if (enablePerformance && appraisalCycles.length > 0) {
+                <div class="input-wrapper policy-card__rule">
+                    <label class="rule-label">Appraisal cycle <span class="required">*</span></label>
                     <select class="select-input" [(ngModel)]="selectedPerformanceCycleId">
-                        <option value="">Select Appraisal Cycle</option>
+                        <option value="">Select cycle</option>
                         @for (cycle of appraisalCycles; track cycle.cycleId) {
                             <option [value]="cycle.cycleId">
-                                {{ cycle.cycleName }} 
+                                {{ cycle.cycleName }}
                                 ({{ cycle.startDate | date:'MMM yyyy' }} - {{ cycle.endDate | date:'MMM yyyy' }})
                             </option>
                         }
                     </select>
                 </div>
+                }
             </div>
 
-            <!-- Card 6: Bonus -->
-            <div class="policy-card">
-                <div class="card-header">
+            <!-- General Bonus -->
+            <div class="policy-card policy-card--stacked">
+                <div class="policy-card__top card-row">
                     <div class="policy-info">
                         <div class="icon-wrapper blue">
                             <mat-icon>redeem</mat-icon>
                         </div>
                         <div class="detail">
-                            <h4>Bonus Policy</h4>
-                            <p>Annual or special bonuses</p>
+                            <h4>Bonus</h4>
+                            <p>Rule-based bonus, or period bonus entries when no rule is chosen</p>
                         </div>
                     </div>
-                    <span class="status-pill" [class.configured]="selectedBonusRuleId"
-                        [class.skipped]="!selectedBonusRuleId">
-                        {{ selectedBonusRuleId ? 'Configured' : 'Skipped' }}
-                    </span>
+                    <div class="toggle-group" (click)="setBonusEnabled(!enableBonus)">
+                        <span class="toggle-label" [class.enabled]="enableBonus" [class.disabled]="!enableBonus">
+                            {{ enableBonus ? 'Enabled' : 'Disabled' }}
+                        </span>
+                        <div class="switch" [class.active]="enableBonus" [class.inactive]="!enableBonus">
+                            <div class="dot" [class.right]="enableBonus" [class.left]="!enableBonus"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="input-wrapper">
+                @if (enableBonus && bonusRules.length > 0) {
+                <div class="input-wrapper policy-card__rule">
+                    <label class="rule-label">Bonus rule <span class="required">*</span></label>
                     <select class="select-input" [(ngModel)]="selectedBonusRuleId">
-                        <option value="">Select Rule</option>
+                        <option value="">Select rule</option>
                         @for (rule of bonusRules; track rule.ruleId) {
                         <option [value]="rule.ruleId">
                             {{ rule.ruleName }}
-                            (Value: {{ rule.fixedAmount > 0 ? (rule.fixedAmount | number) : (rule.percentage + '%') }})
+                            (Value: {{ rule.bonusAmount > 0 ? (rule.bonusAmount | number) : (rule.bonusPercentage + '%') }})
                         </option>
                         }
                     </select>
                 </div>
+                }
             </div>
 
-            <!-- Card 7: Employee Loan -->
+            <!-- Employee Loan -->
             <div class="policy-card card-row">
                 <div class="policy-info">
                     <div class="icon-wrapper indigo">
@@ -252,7 +277,7 @@
                 </div>
             </div>
 
-            <!-- Card 8: Salary Advance -->
+            <!-- Salary Advance -->
             <div class="policy-card card-row">
                 <div class="policy-info">
                     <div class="icon-wrapper indigo">
@@ -273,7 +298,7 @@
                 </div>
             </div>
 
-            <!-- Card 9: Provident Fund -->
+            <!-- Provident Fund -->
             <div class="policy-card card-row">
                 <div class="policy-info">
                     <div class="icon-wrapper indigo">
@@ -294,7 +319,7 @@
                 </div>
             </div>
 
-            <!-- Card 10: Income Tax -->
+            <!-- Income Tax -->
             <div class="policy-card card-row">
                 <div class="policy-info">
                     <div class="icon-wrapper indigo">
@@ -315,7 +340,7 @@
                 </div>
             </div>
 
-            <!-- Card 11: Gratuity -->
+            <!-- Gratuity -->
             <div class="policy-card card-row">
                 <div class="policy-info">
                     <div class="icon-wrapper indigo">
@@ -323,7 +348,7 @@
                     </div>
                     <div class="detail">
                         <h4>Gratuity</h4>
-                        <p>Calculate for eligible employees by tenure</p>
+                        <p>Include approved gratuity for this period</p>
                     </div>
                 </div>
                 <div class="toggle-group" (click)="enableGratuity = !enableGratuity">
@@ -338,13 +363,34 @@
 
         </div>
 
+        @if (selectedPeriodId && !canCalculatePayroll() && !isCalculating) {
+          <p class="validation-hint">Turn on each module you need. Where a rule or cycle list exists, choose one before calculating.</p>
+        }
+
         <!-- Form Actions -->
         <div class="form-actions">
             <button class="btn-preview">Preview Payroll</button>
-            <button class="btn-calculate">
-                <mat-icon>play_arrow</mat-icon> Calculate Payroll
+            <button class="btn-calculate" (click)="calculatePayroll()" [disabled]="isCalculating || !canCalculatePayroll()">
+                <mat-icon>{{ isCalculating ? 'hourglass_top' : 'play_arrow' }}</mat-icon>
+                {{ isCalculating ? 'Calculating...' : 'Calculate Payroll' }}
             </button>
         </div>
+
+        @if (errorMessage) {
+          <div class="feedback error">{{ errorMessage }}</div>
+        }
+
+        @if (successMessage) {
+          <div class="feedback success">
+            {{ successMessage }}
+            @if (calculationResult) {
+              <span>
+                Employees processed: {{ calculationResult.employeesConsidered || 0 }},
+                Total deductions: {{ (calculationResult.totalDeductions || 0) | number:'1.2-2' }}
+              </span>
+            }
+          </div>
+        }
 
     </div>
 </div>
