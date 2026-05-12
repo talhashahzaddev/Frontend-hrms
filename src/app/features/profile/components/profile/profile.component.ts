@@ -48,6 +48,9 @@ import { User } from '../../../../core/models/auth.models';
 export class ProfileComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
+  // Default country code (Pakistan)
+  private readonly DEFAULT_COUNTRY_CODE = '+92';
+
   currentUser: User | null = null;
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
@@ -67,7 +70,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   selectedProfileFile: File | null = null;
   profilePreviewUrl: string | ArrayBuffer | null = null;
-isUploadingProfileImage: boolean = false;
+  isUploadingProfileImage: boolean = false;
   private backendBaseUrl = 'https://localhost:60485';
 
   constructor(
@@ -94,7 +97,8 @@ isUploadingProfileImage: boolean = false;
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      phoneCountryCode: [''],
+      // ✅ default Pakistan
+      phoneCountryCode: [this.DEFAULT_COUNTRY_CODE],
       phone: [''],
       address: this.formBuilder.group({
         street: [''],
@@ -106,14 +110,15 @@ isUploadingProfileImage: boolean = false;
       hireDate: [''],
       gender: [''],
       maritalStatus: [''],
-      basicSalary:[''],
+      basicSalary: [''],
       nationality: [''],
       emergencyContact: this.formBuilder.group({
         name: [''],
         phone: [''],
         relationship: [''],
         email: [''],
-        emergencyPhoneCountryCode: ['']
+        // ✅ default Pakistan
+        emergencyPhoneCountryCode: [this.DEFAULT_COUNTRY_CODE]
       }),
       workLocation: [''],
       departmentId: [''],
@@ -158,12 +163,10 @@ isUploadingProfileImage: boolean = false;
     });
   }
 
-  // Load country dial codes for phone selection
   private loadCountryDialCodes(): void {
     this.employeeService.getCountryDialCodes().pipe(takeUntil(this.destroy$)).subscribe({
       next: (list) => {
         this.countries = list.map((x: any) => ({ name: x.name, code: x.code, flag: x.flag, cca2: x.cca2 }));
-        // attempt to normalise existing phone values (main + emergency)
         this.resolvePhoneCountryFromEmployee();
         this.resolveEmergencyPhoneCountryFromEmployee();
       },
@@ -195,7 +198,6 @@ isUploadingProfileImage: boolean = false;
         next: (employee) => {
           if (!employee) return;
 
-          // ---------- Set Profile Picture ----------
           if (this.selectedProfileFile) {
             const reader = new FileReader();
             reader.onload = () => this.profilePreviewUrl = reader.result;
@@ -207,23 +209,21 @@ isUploadingProfileImage: boolean = false;
           } else {
             this.profilePreviewUrl = null;
           }
-          const selectedManager = this.managers.find(m => m.employeeid === employee.reportingManagerId);
-          const selectedDepartment = this.departments.find(d => d.departmentId === employee.departmentId);
+
           const selectedPosition = this.positions.find(p => p.positionId === employee.positionId);
 
-          // Try to split international phone into country code + local number (align with employee-edit)
+          // Split international phone into country code + local number
           let detectedCode: string | null = null;
           let plainPhone = employee.phone || '';
           if (plainPhone && typeof plainPhone === 'string' && plainPhone.startsWith('+')) {
             const m = plainPhone.match(/^\+(\d{1,4})(.*)$/);
             if (m) {
-              // keep the plus to match other components (e.g. '+92')
               detectedCode = `+${m[1]}`;
               plainPhone = m[2].replace(/[^0-9]/g, '').trim();
             }
           }
 
-          // Also try to split emergency contact phone into country code + local number
+          // Same for emergency contact phone
           let detectedEmCode: string | null = null;
           let emPlainPhone = employee.emergencycontact?.phone || '';
           if (emPlainPhone && typeof emPlainPhone === 'string' && emPlainPhone.startsWith('+')) {
@@ -234,15 +234,14 @@ isUploadingProfileImage: boolean = false;
             }
           }
 
-          // Patch form values with proper mapping
           this.profileForm.patchValue({
             employeeNumber: employee.employeeNumber,
             firstName: employee.firstName,
             lastName: employee.lastName,
             email: employee.email,
-            // if we detected a country code, set phoneCountryCode and trimmed local phone
-            phoneCountryCode: detectedCode || '',
-            phone: detectedCode ? plainPhone : employee.phone,
+            // ✅ fall back to default country code when none detected
+            phoneCountryCode: detectedCode || this.DEFAULT_COUNTRY_CODE,
+            phone: detectedCode ? plainPhone : (employee.phone || ''),
             dateOfBirth: employee.dateOfBirth ? new Date(employee.dateOfBirth) : '',
             hireDate: employee.hireDate ? new Date(employee.hireDate) : '',
             gender: employee.gender,
@@ -260,8 +259,8 @@ isUploadingProfileImage: boolean = false;
 
             emergencyContact: {
               name: employee.emergencycontact?.name || '',
-              // if we detected an international prefix, set the emergency country code and local phone
-              emergencyPhoneCountryCode: detectedEmCode || '',
+              // ✅ fall back to default country code
+              emergencyPhoneCountryCode: detectedEmCode || this.DEFAULT_COUNTRY_CODE,
               phone: detectedEmCode ? emPlainPhone : (employee.emergencycontact?.phone || ''),
               relationship: employee.emergencycontact?.relationship || '',
               email: employee.emergencycontact?.email || ''
@@ -272,18 +271,18 @@ isUploadingProfileImage: boolean = false;
             position: employee.positionTitle || '',
             positionId: employee.positionId || '',
             reportingManagerId: employee.reportingManagerId || '',
-            managerName: employee.reportingManagerName?.trim()    ? employee.reportingManagerName    : 'No Manager Assigned',
+            managerName: employee.reportingManagerName?.trim() ? employee.reportingManagerName : 'No Manager Assigned',
             roleId: selectedPosition?.roleId || '',
             profileurl: employee.profilePictureUrl || ''
           });
-          // Disable the Department field so it cannot be edited
-this.profileForm.get('employeeNumber')?.disable({ onlySelf: true });
-this.profileForm.get('departmentName')?.disable({ onlySelf: true });
-this.profileForm.get('managerName')?.disable({ onlySelf: true });
-this.profileForm.get('roleId')?.disable({ onlySelf: true });
-this.profileForm.get('basicSalary')?.disable({ onlySelf: true });
-this.profileForm.get('position')?.disable({ onlySelf: true });
-this.profileForm.get('hireDate')?.disable({ onlySelf: true });
+
+          this.profileForm.get('employeeNumber')?.disable({ onlySelf: true });
+          this.profileForm.get('departmentName')?.disable({ onlySelf: true });
+          this.profileForm.get('managerName')?.disable({ onlySelf: true });
+          this.profileForm.get('roleId')?.disable({ onlySelf: true });
+          this.profileForm.get('basicSalary')?.disable({ onlySelf: true });
+          this.profileForm.get('position')?.disable({ onlySelf: true });
+          this.profileForm.get('hireDate')?.disable({ onlySelf: true });
         },
         error: (err) => {
           console.error('Failed to load employee details:', err);
@@ -291,17 +290,14 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
         }
       });
 
-    // load countries for phone handling
     this.loadCountryDialCodes();
   }
 
-  // Try to match emergency contact phone to a loaded country code and patch nested controls
   private resolveEmergencyPhoneCountryFromEmployee(): void {
     const rawPhone = (this.profileForm?.get('emergencyContact.phone')?.value || '').toString().trim();
     if (!rawPhone || !this.countries || this.countries.length === 0) return;
 
     const cleaned = rawPhone.replace(/[\s()\-.\/]/g, '');
-
     let bestMatch: { code: string; flag?: string } | null = null;
     let matchedPrefix = '';
 
@@ -322,30 +318,22 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
 
     if (bestMatch) {
       let local = cleaned;
-      if (matchedPrefix && local.startsWith('+')) {
-        local = local.replace(/^\+/, '');
-      }
+      if (matchedPrefix && local.startsWith('+')) local = local.replace(/^\+/, '');
       if (matchedPrefix) {
         const prefixDigits = matchedPrefix.replace(/[^0-9]/g, '');
-        if (local.startsWith(prefixDigits)) {
-          local = local.slice(prefixDigits.length);
-        }
+        if (local.startsWith(prefixDigits)) local = local.slice(prefixDigits.length);
       }
       local = local.replace(/[^0-9]/g, '').trim();
-
-      const controlCode = bestMatch.code;
-      this.profileForm.patchValue({ emergencyContact: { emergencyPhoneCountryCode: controlCode, phone: local } }, { emitEvent: false });
+      this.profileForm.patchValue({ emergencyContact: { emergencyPhoneCountryCode: bestMatch.code, phone: local } }, { emitEvent: false });
     }
   }
 
-  // Returns the flag URL for a selected country code (if available)
   getCountryFlag(code?: string | null): string | undefined {
     if (!code) return undefined;
     const found = this.countries.find(c => c.code === code || c.code === (code + ''));
     return found?.flag;
   }
 
-  // Returns a friendly label for a country code
   getCountryLabel(code?: string | null): string {
     if (!code) return '';
     const found = this.countries.find(c => c.code === code || c.code === (code + ''));
@@ -354,18 +342,14 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
   }
 
   onCountryPanelOpen(isOpen: boolean) {
-    if (isOpen) {
-      // focus handling could be added
-    }
+    if (isOpen) { /* focus handling */ }
   }
 
-  // Try to match profile phone to a loaded country code and patch form controls
   private resolvePhoneCountryFromEmployee(): void {
     const rawPhone = (this.profileForm?.get('phone')?.value || '').toString().trim();
     if (!rawPhone || !this.countries || this.countries.length === 0) return;
 
     const cleaned = rawPhone.replace(/[\s()\-.\/]/g, '');
-
     let bestMatch: { code: string; flag?: string } | null = null;
     let matchedPrefix = '';
 
@@ -386,34 +370,23 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
 
     if (bestMatch) {
       let local = cleaned;
-      if (matchedPrefix && local.startsWith('+')) {
-        local = local.replace(/^\+/, '');
-      }
+      if (matchedPrefix && local.startsWith('+')) local = local.replace(/^\+/, '');
       if (matchedPrefix) {
         const prefixDigits = matchedPrefix.replace(/[^0-9]/g, '');
-        if (local.startsWith(prefixDigits)) {
-          local = local.slice(prefixDigits.length);
-        }
+        if (local.startsWith(prefixDigits)) local = local.slice(prefixDigits.length);
       }
       local = local.replace(/[^0-9]/g, '').trim();
-
-      const controlCode = bestMatch.code;
-      this.profileForm.patchValue({ phoneCountryCode: controlCode, phone: local }, { emitEvent: false });
-      return;
+      this.profileForm.patchValue({ phoneCountryCode: bestMatch.code, phone: local }, { emitEvent: false });
     }
   }
 
-  // Prevent non-digit keystrokes for phone inputs
   public onPhoneKeydown(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
     if (allowedKeys.includes(event.key)) return;
     if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x', 'A', 'C', 'V', 'X'].includes(event.key)) return;
-    if (!/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-    }
+    if (!/^[0-9]$/.test(event.key)) event.preventDefault();
   }
 
-  // Sanitize pasted content to digits-only and insert into the input
   public onPhonePaste(event: ClipboardEvent): void {
     const clipboard = event.clipboardData || (window as any).clipboardData;
     if (!clipboard) return;
@@ -430,7 +403,6 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
     }
   }
 
-  // Ensure input contains only digits (keeps value as string)
   public onPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const cleaned = input.value.replace(/\D/g, '');
@@ -440,62 +412,39 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
     }
   }
 
-  // Helper to set phone control value for top-level or nested emergencyContact
   private setPhoneControlValue(controlName: string, value: string): void {
     const top = this.profileForm.get(controlName);
-    if (top) {
-      top.setValue(value, { emitEvent: false });
-      return;
-    }
+    if (top) { top.setValue(value, { emitEvent: false }); return; }
     const nested = this.profileForm.get('emergencyContact.' + controlName);
-    if (nested) {
-      nested.setValue(value, { emitEvent: false });
-    }
+    if (nested) nested.setValue(value, { emitEvent: false });
   }
 
-  // onFileSelected(event: Event): void {
-  //   const input = event.target as HTMLInputElement;
-  //   if (input.files && input.files.length > 0) {
-  //     this.selectedProfileFile = input.files[0];
-  //     const reader = new FileReader();
-  //     reader.onload = () => this.profilePreviewUrl = reader.result;
-  //     reader.readAsDataURL(this.selectedProfileFile);
-  //   }
-  // }
-
   onFileSelected(event: Event, input?: HTMLInputElement): void {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-  this.selectedProfileFile = file;
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.selectedProfileFile = file;
 
-  // Preview
-  const reader = new FileReader();
-  reader.onload = () => {
-    this.profilePreviewUrl = reader.result as string;
-  };
-  reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onload = () => { this.profilePreviewUrl = reader.result as string; };
+    reader.readAsDataURL(file);
 
+    this.authService.uploadProfilePic(file).subscribe({
+      next: (url: string) => {
+        this.profileForm.patchValue({ profileurl: url });
+        this.isUploadingProfileImage = false;
+        this.notificationService.showSuccess('Profile image uploaded successfully');
+      },
+      error: (err: any) => {
+        this.notificationService.showError(err?.message || 'Profile image upload failed');
+        this.isUploadingProfileImage = false;
+        this.profilePreviewUrl = null;
+        this.profileForm.patchValue({ profileurl: '' });
+        this.selectedProfileFile = null;
+      }
+    });
 
-  // Upload using your existing service
-  this.authService.uploadProfilePic(file).subscribe({
-    next: (url: string) => {
-      // Save URL in form (use 'profileurl' key)
-      this.profileForm.patchValue({ profileurl: url });
-      this.isUploadingProfileImage = false;
-      this.notificationService.showSuccess('Profile image uploaded successfully');
-    },
-    error: (err: any) => {
-      this.notificationService.showError(err?.message || 'Profile image upload failed');
-      this.isUploadingProfileImage = false;
-      this.profilePreviewUrl = null;
-      this.profileForm.patchValue({ profileurl: '' });
-      this.selectedProfileFile = null;
-    }
-  });
-
-  if (input) input.value = '';
-}
-
+    if (input) input.value = '';
+  }
 
   onPositionChange(selectedPosition: any) {
     if (!selectedPosition) return;
@@ -509,152 +458,112 @@ this.profileForm.get('hireDate')?.disable({ onlySelf: true });
     if (!this.profileForm.valid) return;
     this.isLoading = true;
 
-    //const formValue = this.profileForm.value;
     const formValue = this.profileForm.getRawValue();
     const formData = new FormData();
 
-    // Scalar fields
     formData.append('EmployeeNumber', formValue.employeeNumber || '');
     formData.append('FirstName', formValue.firstName || '');
     formData.append('LastName', formValue.lastName || '');
     formData.append('Email', formValue.email || '');
 
-    // Combine selected country code with phone digits (e.g. "+92 3012345678")
     const rawCountry = formValue.phoneCountryCode ? String(formValue.phoneCountryCode) : '';
     const normalizedCountry = rawCountry ? (rawCountry.startsWith('+') ? rawCountry : `+${rawCountry}`) : '';
     const phoneDigits = (formValue.phone || '').toString().replace(/\D/g, '');
-    const combinedPhone = normalizedCountry ? `${normalizedCountry} ${phoneDigits}` : phoneDigits;
-    formData.append('Phone', combinedPhone || '');
+    const combinedPhone = phoneDigits ? (normalizedCountry ? `${normalizedCountry} ${phoneDigits}` : phoneDigits) : '';
+    formData.append('Phone', combinedPhone);
 
     formData.append('Gender', formValue.gender || '');
     formData.append('MaritalStatus', formValue.maritalStatus || '');
     formData.append('Nationality', formValue.nationality || '');
     formData.append('WorkLocation', formValue.workLocation || '');
-    formData.append('BasicSalary',formValue.basicSalary || '')
+    formData.append('BasicSalary', formValue.basicSalary || '');
 
-    // Dropdowns
     formData.append('DepartmentId', formValue.departmentId || '');
     formData.append('PositionId', formValue.positionId || '');
     formData.append('RoleId', formValue.roleId || '');
     formData.append('ReportingManagerId', formValue.reportingManagerId || '');
 
-    // Nested objects
     formData.append('Address', JSON.stringify(formValue.address || {}));
 
-    // Emergency contact (leave phone as-is; there's no separate country selector for it)
-    // Combine emergency country code with phone digits if provided
     const emCountryRaw = formValue.emergencyContact?.emergencyPhoneCountryCode ? String(formValue.emergencyContact.emergencyPhoneCountryCode) : '';
     const emNormalizedCountry = emCountryRaw ? (emCountryRaw.startsWith('+') ? emCountryRaw : `+${emCountryRaw}`) : '';
     const emPhoneDigits = (formValue.emergencyContact?.phone || '').toString().replace(/\D/g, '');
-    const emCombinedPhone = emNormalizedCountry ? `${emNormalizedCountry} ${emPhoneDigits}` : emPhoneDigits;
+    const emCombinedPhone = emPhoneDigits ? (emNormalizedCountry ? `${emNormalizedCountry} ${emPhoneDigits}` : emPhoneDigits) : '';
     const emergencyObj = { ...(formValue.emergencyContact || {}), phone: emCombinedPhone };
     formData.append('EmergencyContact', JSON.stringify(emergencyObj));
 
-    // Dates
     if (formValue.hireDate) formData.append('HireDate', new Date(formValue.hireDate).toISOString());
     if (formValue.dateOfBirth) formData.append('DateOfBirth', new Date(formValue.dateOfBirth).toISOString());
 
-
-
-    // Profile picture URL (always send, regardless of file selection)
     formData.append('profileurl', formValue.profileurl || '');
-    console.log('Image URL from form:', formValue.profileurl);
 
-  this.authService.updateProfile(formData)
-  .pipe(takeUntil(this.destroy$))
-  .subscribe({
-    next: (res: any) => {
-      this.isLoading = false;
-      // Handle backend success=false even if HTTP 200
-      if (res?.success === false) {
-        this.notificationService.showError(res.message || 'Failed to update profile');
-        return;
-      }
-
-      // Otherwise success
-      this.notificationService.showSuccess('Profile updated successfully!');
-      if (this.currentUser?.userId) this.loadEmployeeDetail(this.currentUser.userId);
-    },
-    error: (error: any) => {
-      this.isLoading = false;
-
-      // Default fallback message
-      let message = 'Failed to update profile';
-
-      if (error) {
-        // Backend returns JSON error
-        if (error.error) {
-          // Case 1: error.error is object
-          if (typeof error.error === 'object' && error.error.message) {
-            message = error.error.message;
+    this.authService.updateProfile(formData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          this.isLoading = false;
+          if (res?.success === false) {
+            this.notificationService.showError(res.message || 'Failed to update profile');
+            return;
           }
-          // Case 2: error.error is string
-          else if (typeof error.error === 'string') {
-            message = error.error;
+          this.notificationService.showSuccess('Profile updated successfully!');
+          if (this.currentUser?.userId) this.loadEmployeeDetail(this.currentUser.userId);
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          let message = 'Failed to update profile';
+          if (error) {
+            if (error.error) {
+              if (typeof error.error === 'object' && error.error.message) message = error.error.message;
+              else if (typeof error.error === 'string') message = error.error;
+            } else if (error.message) message = error.message;
           }
+          this.notificationService.showError(message);
+          console.error('Update failed:', error);
         }
-        // Sometimes Angular wraps the message differently
-        else if (error.message) {
-          message = error.message;
-        }
-      }
-
-      this.notificationService.showError(message);
-      console.error('Update failed:', error);
-    }
-  });
-
-
+      });
   }
 
-onChangePassword(): void {
-  if (!this.passwordForm.valid) return;
-  this.isPasswordLoading = true;
+  onChangePassword(): void {
+    if (!this.passwordForm.valid) return;
+    this.isPasswordLoading = true;
 
-  const changePasswordRequest = {
-    currentPassword: this.passwordForm.get('currentPassword')?.value,
-    newPassword: this.passwordForm.get('newPassword')?.value
-  };
+    const changePasswordRequest = {
+      currentPassword: this.passwordForm.get('currentPassword')?.value,
+      newPassword: this.passwordForm.get('newPassword')?.value
+    };
 
-  this.authService.changePassword(changePasswordRequest)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (res) => {
-        this.isPasswordLoading = false;
-this.passwordForm.reset();
+    this.authService.changePassword(changePasswordRequest)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.isPasswordLoading = false;
+          this.passwordForm.reset();
+          Object.keys(this.passwordForm.controls).forEach(key => {
+            const control = this.passwordForm.get(key);
+            control?.setErrors(null);
+            control?.markAsPristine();
+            control?.markAsUntouched();
+          });
+          this.passwordForm.setErrors(null);
 
-// Clear errors manually for all controls
-Object.keys(this.passwordForm.controls).forEach(key => {
-  const control = this.passwordForm.get(key);
-  control?.setErrors(null);       // clear validators errors
-  control?.markAsPristine();      // mark control pristine
-  control?.markAsUntouched();     // mark control untouched
-});
-
-// Also clear any form-level errors (like your passwordMismatch)
-this.passwordForm.setErrors(null);
-
-        if (res.success) {
-          this.notificationService.showSuccess(res.message || 'Password updated successfully!');
-        } else {
-          this.notificationService.showWarning(res.message || 'New password must be different from old password.');
+          if (res.success) this.notificationService.showSuccess(res.message || 'Password updated successfully!');
+          else this.notificationService.showWarning(res.message || 'New password must be different from old password.');
+        },
+        error: (error) => {
+          this.isPasswordLoading = false;
+          const errorMessage = error?.message || 'Failed to update password';
+          this.notificationService.showError(errorMessage);
         }
-      },
-      error: (error) => {
-        this.isPasswordLoading = false;
-        const errorMessage = error?.message || 'Failed to update password';
-        this.notificationService.showError(errorMessage);
-      }
-    });
-}
+      });
+  }
 
   resetForm(): void {
-    this.profileForm.reset();
+    this.profileForm.reset({
+      phoneCountryCode: this.DEFAULT_COUNTRY_CODE,
+      emergencyContact: { emergencyPhoneCountryCode: this.DEFAULT_COUNTRY_CODE }
+    });
   }
 
-  // Handler for header back button
-  onCancel(): void {
-    // Example: navigate back or emit event
-    // this.router.navigate(['/employee-list']);
-  }
+  onCancel(): void { }
 }

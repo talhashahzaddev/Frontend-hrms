@@ -15,6 +15,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { SettingsService } from '../../../settings/services/settings.service';
+
 @Component({
   selector: 'app-employee-edit',
   standalone: true,
@@ -29,13 +30,16 @@ import { SettingsService } from '../../../settings/services/settings.service';
     MatSelectModule,
     MatIconModule,
     MatSnackBarModule,
-     MatDatepickerModule,
-  MatNativeDateModule
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './employee-edit.component.html',
   styleUrls: ['./employee-edit.component.scss']
 })
 export class EmployeeEditComponent implements OnInit, OnDestroy {
+  // ✅ Default country code (Pakistan)
+  private readonly DEFAULT_COUNTRY_CODE = '+92';
+
   employeeForm!: FormGroup;
   departments: Department[] = [];
   positions: Position[] = [];
@@ -48,7 +52,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   employmentTypes = [
-   { value: '', label: 'All Types' },
+    { value: '', label: 'All Types' },
     { value: 'full_time', label: 'Full Time' },
     { value: 'part_time', label: 'Part Time' },
     { value: 'contract', label: 'Contract' },
@@ -84,7 +88,7 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private employeeService: EmployeeService,
-    private notificationService:NotificationService,
+    private notificationService: NotificationService,
     private settingsService: SettingsService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<EmployeeEditComponent>,
@@ -96,7 +100,6 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
     this.loadDropdowns();
     this.loadInitialData();
 
-    // Filter positions by department selection and clear invalid position
     this.employeeForm.get('departmentId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((departmentId) => {
@@ -114,148 +117,158 @@ export class EmployeeEditComponent implements OnInit, OnDestroy {
       });
   }
 
+  initializeForm(): void {
+    const emp = this.data.employee;
 
-initializeForm(): void {
-  const emp = this.data.employee;
-  // Try to split international phone into country code + local number
-  let detectedCode: string | null = null;
-  let plainPhone = emp.phone || '';
-  if (plainPhone && typeof plainPhone === 'string' && plainPhone.startsWith('+')) {
-    const m = plainPhone.match(/^\+(\d{1,4})(.*)$/);
-    if (m) {
-      detectedCode = `+${m[1]}`;
-      plainPhone = m[2].replace(/[^0-9]/g, '').trim();
+    // Try to split international phone
+    let detectedCode: string | null = null;
+    let plainPhone = emp.phone || '';
+    if (plainPhone && typeof plainPhone === 'string' && plainPhone.startsWith('+')) {
+      const m = plainPhone.match(/^\+(\d{1,4})(.*)$/);
+      if (m) {
+        detectedCode = `+${m[1]}`;
+        plainPhone = m[2].replace(/[^0-9]/g, '').trim();
+      }
     }
-  }
 
-  // Emergency contact phone split
-  let detectedEmergencyCode: string | null = null;
-  let plainEmergencyPhone = emp.emergencyContact?.phone || '';
-  if (plainEmergencyPhone && typeof plainEmergencyPhone === 'string' && plainEmergencyPhone.startsWith('+')) {
-    const em = plainEmergencyPhone.match(/^\+(\d{1,4})(.*)$/);
-    if (em) {
-      detectedEmergencyCode = `+${em[1]}`;
-      plainEmergencyPhone = em[2].replace(/[^0-9]/g, '').trim();
+    // Emergency phone split
+    let detectedEmergencyCode: string | null = null;
+    let plainEmergencyPhone = emp.emergencyContact?.phone || '';
+    if (plainEmergencyPhone && typeof plainEmergencyPhone === 'string' && plainEmergencyPhone.startsWith('+')) {
+      const em = plainEmergencyPhone.match(/^\+(\d{1,4})(.*)$/);
+      if (em) {
+        detectedEmergencyCode = `+${em[1]}`;
+        plainEmergencyPhone = em[2].replace(/[^0-9]/g, '').trim();
+      }
     }
-  }
 
-  this.employeeForm = this.fb.group({
-    employeeCode: [{ value: emp.employeeCode, disabled: true }],
-    firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
-    lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
-    email: [emp.email, [Validators.required, Validators.email]],
-    phoneCountryCode: [detectedCode],
-    phone: [plainPhone, [Validators.pattern(/^\+?[0-9]{6,15}$/)]],
-    dateOfBirth: [emp.dateOfBirth ? new Date(emp.dateOfBirth) : null],
-    gender: [emp.gender?.toLowerCase() || null],
-    departmentId: [emp.departmentId || null],
-    positionId: [emp.positionId || null],
-    reportingManagerId: [emp.reportingManagerId || null],
-    nationality: [emp.nationality],
-    maritalStatus: [emp.maritalStatus?.toLowerCase() || null],
-    employmentType: [emp.employmentType?.toLowerCase() || null],
-    payType: [emp.payType?.toLowerCase() || null],
-    basicSalary: [emp.basicSalary, [Validators.min(0)]],
-    hireDate: [emp.hireDate ? new Date(emp.hireDate) : null],
-    status: [emp.status?.toLowerCase() || null],
-    address: this.fb.group({
-      street: [emp.address?.street || ''],
-      city: [emp.address?.city || ''],
-      state: [emp.address?.state || ''],
-      zip: [emp.address?.zip || '']
-    }),
-    emergencyContact: this.fb.group({
-      name: [emp.emergencyContact?.name || ''],
-      email: [emp.emergencyContact?.email || ''],
-      phoneCountryCode: [detectedEmergencyCode],
-      phone: [plainEmergencyPhone, [Validators.pattern(/^\+?[0-9]{6,15}$/)]],
-      relationship: [emp.emergencyContact?.relationship || '']
-    })
-  });
-}
+    this.employeeForm = this.fb.group({
+      employeeCode: [{ value: emp.employeeCode, disabled: true }],
+      firstName: [emp.firstName, [Validators.required, Validators.minLength(2)]],
+      lastName: [emp.lastName, [Validators.required, Validators.minLength(2)]],
+      email: [emp.email, [Validators.required, Validators.email]],
+      // ✅ Default to Pakistan if nothing detected
+      phoneCountryCode: [detectedCode || this.DEFAULT_COUNTRY_CODE],
+      phone: [plainPhone, [Validators.pattern(/^\+?[0-9]{6,15}$/)]],
+      dateOfBirth: [emp.dateOfBirth ? new Date(emp.dateOfBirth) : null],
+      gender: [emp.gender?.toLowerCase() || null],
+      departmentId: [emp.departmentId || null],
+      positionId: [emp.positionId || null],
+      reportingManagerId: [emp.reportingManagerId || null],
+      nationality: [emp.nationality],
+      maritalStatus: [emp.maritalStatus?.toLowerCase() || null],
+      employmentType: [emp.employmentType?.toLowerCase() || null],
+      payType: [emp.payType?.toLowerCase() || null],
+      basicSalary: [emp.basicSalary, [Validators.min(0)]],
+      hireDate: [emp.hireDate ? new Date(emp.hireDate) : null],
+      status: [emp.status?.toLowerCase() || null],
+      address: this.fb.group({
+        street: [emp.address?.street || ''],
+        city: [emp.address?.city || ''],
+        state: [emp.address?.state || ''],
+        zip: [emp.address?.zip || '']
+      }),
+      emergencyContact: this.fb.group({
+        name: [emp.emergencyContact?.name || ''],
+        email: [emp.emergencyContact?.email || ''],
+        // ✅ Default to Pakistan if nothing detected
+        phoneCountryCode: [detectedEmergencyCode || this.DEFAULT_COUNTRY_CODE],
+        phone: [plainEmergencyPhone, [Validators.pattern(/^\+?[0-9]{6,15}$/)]],
+        relationship: [emp.emergencyContact?.relationship || '']
+      })
+    });
+  }
 
   loadDropdowns(): void {
     this.employeeService.getDepartments().subscribe({
       next: (depts) => this.departments = depts,
-      error: (err) => this.showError('Failed to load departments')
+      error: () => this.showError('Failed to load departments')
     });
 
     this.employeeService.getPositions().subscribe({
       next: (pos) => this.positions = pos,
-      error: (err) => this.showError('Failed to load positions')
+      error: () => this.showError('Failed to load positions')
     });
 
     this.employeeService.getManagers().subscribe({
       next: (mgrs) => {
-        // Filter out the current employee from managers list
         this.managers = mgrs.filter(m => m.employeeId !== this.data.employee.employeeId);
       },
-      error: (err) => this.showError('Failed to load managers')
+      error: () => this.showError('Failed to load managers')
     });
   }
 
   formatDateForInput(date: string | undefined): string {
     if (!date) return '';
     const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
-
-onSave(): void {
-  if (this.employeeForm.invalid) {
-    this.employeeForm.markAllAsTouched();
-    this.showError('Please fill all required fields correctly');
-    return;
-  }
-
-  this.isLoading = true;
-
-  const formValue = this.employeeForm.getRawValue();
-  const formData = new FormData();
-
-  formData.append('EmployeeId', this.data.employee.employeeId);
-  formData.append('FirstName', formValue.firstName);
-  formData.append('LastName', formValue.lastName);
-  formData.append('Email', formValue.email);
-  const combinedPhone = `${formValue.phoneCountryCode || ''}${formValue.phone || ''}`.trim();
-  formData.append('Phone', combinedPhone);
-
-  formData.append('DepartmentId', formValue.departmentId ?? '');
-  formData.append('PositionId', formValue.positionId ?? '');
-  formData.append('BasicSalary', formValue.basicSalary?.toString() ?? '');
-  formData.append('WorkLocation', formValue.workLocation ?? '');
-  formData.append('ReportingManagerId', formValue.reportingManagerId ?? '');
-formData.append('DateOfBirth', formValue.dateOfBirth ? this.formatDate(formValue.dateOfBirth) : '');
-formData.append('Gender', formValue.gender ?? '');
-formData.append('Nationality', formValue.nationality ?? '');
-formData.append('MaritalStatus', formValue.maritalStatus ?? '');
-formData.append('EmploymentType', formValue.employmentType ?? '');
-formData.append('PayType', formValue.payType ?? '');
-formData.append('HireDate', formValue.hireDate ? this.formatDate(formValue.hireDate) : '');
-formData.append('Status', formValue.status ?? '');
-formData.append('EmployeeNumber', formValue.employeeCode ?? '');
-  formData.append('Address', JSON.stringify(formValue.address));
-  formData.append('EmergencyContact', JSON.stringify(formValue.emergencyContact));
-
-  // 👇 same trick as profile
-  formData.append('profileurl', new Blob(), '');
-
-  this.employeeService.updateEmployee(formData).subscribe({
-    next: (emp) => {
-      this.isLoading = false;
-      this.notificationService.showSuccess('Employee Updated Sucessfully');
-      this.dialogRef.close(emp);
-    },
-    error: (err) => {
-      this.isLoading = false;
-    this.notificationService.showError('Failed to Update Employee');
-      console.error(err);
+  onSave(): void {
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      this.showError('Please fill all required fields correctly');
+      return;
     }
-  });
-}
+
+    this.isLoading = true;
+
+    const formValue = this.employeeForm.getRawValue();
+    const formData = new FormData();
+
+    formData.append('EmployeeId', this.data.employee.employeeId);
+    formData.append('FirstName', formValue.firstName);
+    formData.append('LastName', formValue.lastName);
+    formData.append('Email', formValue.email);
+
+    // Only combine if there's an actual phone number
+    const combinedPhone = formValue.phone
+      ? `${formValue.phoneCountryCode || ''}${formValue.phone}`.trim()
+      : '';
+    formData.append('Phone', combinedPhone);
+
+    formData.append('DepartmentId', formValue.departmentId ?? '');
+    formData.append('PositionId', formValue.positionId ?? '');
+    formData.append('BasicSalary', formValue.basicSalary?.toString() ?? '');
+    formData.append('WorkLocation', formValue.workLocation ?? '');
+    formData.append('ReportingManagerId', formValue.reportingManagerId ?? '');
+    formData.append('DateOfBirth', formValue.dateOfBirth ? this.formatDate(formValue.dateOfBirth) : '');
+    formData.append('Gender', formValue.gender ?? '');
+    formData.append('Nationality', formValue.nationality ?? '');
+    formData.append('MaritalStatus', formValue.maritalStatus ?? '');
+    formData.append('EmploymentType', formValue.employmentType ?? '');
+    formData.append('PayType', formValue.payType ?? '');
+    formData.append('HireDate', formValue.hireDate ? this.formatDate(formValue.hireDate) : '');
+    formData.append('Status', formValue.status ?? '');
+    formData.append('EmployeeNumber', formValue.employeeCode ?? '');
+
+    // Combine emergency phone the same way
+    const emergency = { ...formValue.emergencyContact };
+    if (emergency.phone) {
+      emergency.phone = `${emergency.phoneCountryCode || ''}${emergency.phone}`.trim();
+    } else {
+      emergency.phone = '';
+    }
+    delete emergency.phoneCountryCode;
+
+    formData.append('Address', JSON.stringify(formValue.address));
+    formData.append('EmergencyContact', JSON.stringify(emergency));
+
+    formData.append('profileurl', new Blob(), '');
+
+    this.employeeService.updateEmployee(formData).subscribe({
+      next: (emp) => {
+        this.isLoading = false;
+        this.notificationService.showSuccess('Employee Updated Sucessfully');
+        this.dialogRef.close(emp);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.notificationService.showError('Failed to Update Employee');
+        console.error(err);
+      }
+    });
+  }
 
   onCancel(): void {
     this.dialogRef.close();
@@ -263,18 +276,14 @@ formData.append('EmployeeNumber', formValue.employeeCode ?? '');
 
   showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
+      duration: 3000, horizontalPosition: 'end', verticalPosition: 'top',
       panelClass: ['success-snackbar']
     });
   }
 
   showError(message: string): void {
     this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top',
+      duration: 5000, horizontalPosition: 'end', verticalPosition: 'top',
       panelClass: ['error-snackbar']
     });
   }
@@ -282,42 +291,31 @@ formData.append('EmployeeNumber', formValue.employeeCode ?? '');
   getErrorMessage(fieldName: string): string {
     const field = this.employeeForm.get(fieldName);
     if (!field) return '';
-
     if (field.hasError('required')) return 'This field is required';
     if (field.hasError('email')) return 'Invalid email address';
     if (field.hasError('minLength')) return `Minimum ${field.errors?.['minLength'].requiredLength} characters required`;
     if (field.hasError('pattern')) return 'Invalid format';
     if (field.hasError('min')) return 'Value must be greater than 0';
-
     return '';
   }
 
-private formatDate(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
+  private formatDate(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
 
-  // Returns a friendly label for a country code (e.g. "Pakistan +92")
   getCountryLabel(code?: string | null): string {
     if (!code) return '';
     const found = this.countries.find(c => c.code === code || c.code === (code + ''));
-    if (found) return `${found.name} ${found.code}`;
-    return code;
+    return found ? `${found.name} ${found.code}` : code;
   }
 
-  // Returns the flag URL for a selected country code (if available)
   getCountryFlag(code?: string | null): string | undefined {
     if (!code) return undefined;
     const found = this.countries.find(c => c.code === code || c.code === (code + ''));
     return found?.flag;
   }
 
-  onCountryPanelOpen(isOpen: boolean) {
-    if (isOpen) {
-      // focus handling could be added if needed
-    }
-  }
-
-
+  onCountryPanelOpen(_isOpen: boolean) {}
 
   get filteredPositions(): Position[] {
     const deptId = this.employeeForm?.get('departmentId')?.value;
@@ -332,18 +330,14 @@ private formatDate(date: Date): string {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
-  // Prevent non-digit keystrokes for phone inputs
+
   public onPhoneKeydown(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
     if (allowedKeys.includes(event.key)) return;
     if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x', 'A', 'C', 'V', 'X'].includes(event.key)) return;
-    if (!/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-    }
+    if (!/^[0-9]$/.test(event.key)) event.preventDefault();
   }
 
-  // Sanitize pasted content to digits-only and insert into the input
   public onPhonePaste(event: ClipboardEvent): void {
     const clipboard = event.clipboardData || (window as any).clipboardData;
     if (!clipboard) return;
@@ -360,7 +354,6 @@ private formatDate(date: Date): string {
     }
   }
 
-  // Ensure input contains only digits (keeps value as string)
   public onPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const cleaned = input.value.replace(/\D/g, '');
@@ -370,20 +363,14 @@ private formatDate(date: Date): string {
     }
   }
 
-  // Helper to set phone control value for top-level or nested emergencyContact
   private setPhoneControlValue(controlName: string, value: string): void {
     const top = this.employeeForm.get(controlName);
-    if (top) {
-      top.setValue(value, { emitEvent: false });
-      return;
-    }
+    if (top) { top.setValue(value, { emitEvent: false }); return; }
     const nested = this.employeeForm.get('emergencyContact.' + controlName);
-    if (nested) {
-      nested.setValue(value, { emitEvent: false });
-    }
+    if (nested) nested.setValue(value, { emitEvent: false });
   }
+
   private loadInitialData(): void {
-    // Load organization currency first
     this.settingsService.getOrganizationSettings()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -391,32 +378,25 @@ private formatDate(date: Date): string {
           this.organizationCurrency = settings.currency || 'USD';
           const currency = this.settingsService.getAvailableCurrencies().find(c => c.code === this.organizationCurrency);
           this.currencySymbol = currency?.symbol || '$';
-          // Load country dial codes
           this.employeeService.getCountryDialCodes()
             .pipe(takeUntil(this.destroy$))
             .subscribe({
               next: (list) => {
                 this.countries = list.map((x: any) => ({ name: x.name, code: x.code, flag: x.flag, cca2: x.cca2 }));
-                // After countries load, try to resolve and patch the phone country code and local phone
                 this.resolvePhoneCountryFromEmployee();
               },
-              error: (err) => {
-                console.error('Error loading country dial codes:', err);
-              }
+              error: (err) => console.error('Error loading country dial codes:', err)
             });
         },
         error: (error) => {
           console.error('Error loading organization currency:', error);
-          // Default to USD if error
-          
           this.currencySymbol = '$';
         }
       });
   }
 
-  // Try to match employee phone to a loaded country code and patch form controls
   private resolvePhoneCountryFromEmployee(): void {
-    // Main phone
+    // ── Main phone ───────────────────────────────────────────
     const rawPhone = (this.data?.employee?.phone || '').toString().trim();
     if (rawPhone) {
       const cleaned = rawPhone.replace(/[\s()\-./]/g, '');
@@ -425,44 +405,34 @@ private formatDate(date: Date): string {
       for (const c of this.countries) {
         if (!c.code) continue;
         const codeStr = String(c.code);
-        const variants = [codeStr, `+${codeStr}`];
-        for (const v of variants) {
+        for (const v of [codeStr, `+${codeStr}`]) {
           const norm = v.replace(/[^0-9+]/g, '');
           if (cleaned.startsWith(norm)) {
             if (!bestMatch || codeStr.length > (bestMatch.code || '').length) {
-              bestMatch = c;
-              matchedPrefix = norm;
+              bestMatch = c; matchedPrefix = norm;
             }
           }
         }
       }
       if (bestMatch) {
         let local = cleaned;
-        if (matchedPrefix && local.startsWith('+')) {
-          local = local.replace(/^\+/, '');
-        }
+        if (matchedPrefix && local.startsWith('+')) local = local.replace(/^\+/, '');
         if (matchedPrefix) {
           const prefixDigits = matchedPrefix.replace(/[^0-9]/g, '');
-          if (local.startsWith(prefixDigits)) {
-            local = local.slice(prefixDigits.length);
-          }
+          if (local.startsWith(prefixDigits)) local = local.slice(prefixDigits.length);
         }
         local = local.replace(/[^0-9]/g, '').trim();
-        const controlCode = bestMatch.code;
-        this.employeeForm.patchValue({ phoneCountryCode: controlCode, phone: local }, { emitEvent: false });
-      } else {
-        const currentCode = this.employeeForm.get('phoneCountryCode')?.value;
-        if (currentCode) {
-          const lookup = this.countries.find(c => c.code === currentCode || c.code === ('' + currentCode).replace(/^\+/, ''));
-          if (lookup) {
-            const cleanedPhone = cleaned.replace(/^\+?\d{1,4}/, '').replace(/[^0-9]/g, '').trim();
-            this.employeeForm.patchValue({ phoneCountryCode: lookup.code, phone: cleanedPhone }, { emitEvent: false });
-          }
-        }
+        this.employeeForm.patchValue({ phoneCountryCode: bestMatch.code, phone: local }, { emitEvent: false });
+      }
+    } else {
+      // ✅ No phone — keep default +92 and ensure flag resolves
+      const exists = this.countries.find(c => c.code === this.DEFAULT_COUNTRY_CODE);
+      if (exists) {
+        this.employeeForm.patchValue({ phoneCountryCode: this.DEFAULT_COUNTRY_CODE, phone: '' }, { emitEvent: false });
       }
     }
 
-    // Emergency phone
+    // ── Emergency phone ──────────────────────────────────────
     const rawEmergency = (this.data?.employee?.emergencyContact?.phone || '').toString().trim();
     if (rawEmergency) {
       const cleanedE = rawEmergency.replace(/[\s()\-./]/g, '');
@@ -471,42 +441,35 @@ private formatDate(date: Date): string {
       for (const c of this.countries) {
         if (!c.code) continue;
         const codeStr = String(c.code);
-        const variants = [codeStr, `+${codeStr}`];
-        for (const v of variants) {
+        for (const v of [codeStr, `+${codeStr}`]) {
           const norm = v.replace(/[^0-9+]/g, '');
           if (cleanedE.startsWith(norm)) {
             if (!bestMatchE || codeStr.length > (bestMatchE.code || '').length) {
-              bestMatchE = c;
-              matchedPrefixE = norm;
+              bestMatchE = c; matchedPrefixE = norm;
             }
           }
         }
       }
       if (bestMatchE) {
         let localE = cleanedE;
-        if (matchedPrefixE && localE.startsWith('+')) {
-          localE = localE.replace(/^\+/, '');
-        }
+        if (matchedPrefixE && localE.startsWith('+')) localE = localE.replace(/^\+/, '');
         if (matchedPrefixE) {
           const prefixDigits = matchedPrefixE.replace(/[^0-9]/g, '');
-          if (localE.startsWith(prefixDigits)) {
-            localE = localE.slice(prefixDigits.length);
-          }
+          if (localE.startsWith(prefixDigits)) localE = localE.slice(prefixDigits.length);
         }
         localE = localE.replace(/[^0-9]/g, '').trim();
-        const controlCodeE = bestMatchE.code;
-        this.employeeForm.patchValue({ emergencyContact: { phoneCountryCode: controlCodeE, phone: localE } }, { emitEvent: false });
-      } else {
-        const currentCodeE = this.employeeForm.get('emergencyContact.phoneCountryCode')?.value;
-        if (currentCodeE) {
-          const lookupE = this.countries.find(c => c.code === currentCodeE || c.code === ('' + currentCodeE).replace(/^\+/, ''));
-          if (lookupE) {
-            const cleanedPhoneE = cleanedE.replace(/^\+?\d{1,4}/, '').replace(/[^0-9]/g, '').trim();
-            this.employeeForm.patchValue({ emergencyContact: { phoneCountryCode: lookupE.code, phone: cleanedPhoneE } }, { emitEvent: false });
-          }
-        }
+        this.employeeForm.patchValue({
+          emergencyContact: { phoneCountryCode: bestMatchE.code, phone: localE }
+        }, { emitEvent: false });
+      }
+    } else {
+      // ✅ No emergency phone — keep default +92
+      const existsE = this.countries.find(c => c.code === this.DEFAULT_COUNTRY_CODE);
+      if (existsE) {
+        this.employeeForm.patchValue({
+          emergencyContact: { phoneCountryCode: this.DEFAULT_COUNTRY_CODE, phone: '' }
+        }, { emitEvent: false });
       }
     }
   }
 }
-
