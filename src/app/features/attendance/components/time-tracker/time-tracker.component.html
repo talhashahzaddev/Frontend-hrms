@@ -165,8 +165,8 @@
         <button
           class="btn-clock-in"
           (click)="clockIn()"
-          [disabled]="currentSession?.isActive || isClockActionLoading || !hasPermission('time_tracket_clock_in')"
-          *ngIf="hasPermission('time_tracket_clock_in')">
+          [disabled]="currentSession?.isActive || isClockActionLoading || !hasPermission('CLOCK_IN_BUTTON')"
+          *ngIf="hasPermission('CLOCK_IN_BUTTON')">
           <mat-spinner *ngIf="isClockActionLoading && !currentSession?.isActive" diameter="14"></mat-spinner>
           Clock In
         </button>
@@ -174,8 +174,8 @@
         <button
           class="btn-clock-out"
           (click)="clockOut()"
-          [disabled]="!currentSession?.isActive || isClockActionLoading || !hasPermission('time_tracket_clock_out')"
-          *ngIf="hasPermission('time_tracket_clock_out')">
+          [disabled]="!currentSession?.isActive || isClockActionLoading || !hasPermission('CLOCK_OUT_BUTTON')"
+          *ngIf="hasPermission('CLOCK_OUT_BUTTON')">
           <mat-spinner *ngIf="isClockActionLoading && currentSession?.isActive" diameter="14"></mat-spinner>
           Clock Out
         </button>
@@ -213,7 +213,7 @@
   <div class="main-grid">
 
     <!-- Recent Attendance -->
-    <div class="panel">
+    <div class="panel" *ngIf="hasPermission('RECENT_ATTENDANCE_TABLE')">
       <div class="panel-header">
         <h3 class="panel-title">Recent Attendance ({{ recentAttendance.length }})</h3>
       </div>
@@ -280,7 +280,7 @@
     </div>
 
     <!-- Today's Sessions -->
-    <div class="panel sessions-panel">
+    <div class="panel sessions-panel" *ngIf="hasPermission('TODAY_SESSION_TABLE')">
       <div class="panel-header">
         <mat-icon class="panel-icon">event_available</mat-icon>
         <h3 class="panel-title">Today's Sessions</h3>

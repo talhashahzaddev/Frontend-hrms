@@ -12,11 +12,11 @@
       </div>
     </div>
     <div class="header-actions">
-      <button *ngIf="selectedTab === 0" class="btn-primary" (click)="openEmployeeOvertime()">
+      <button *ngIf="selectedTab === 0 && hasPermission('EMPLOYEE_OVERTIME_SECTION')" class="btn-primary" (click)="openEmployeeOvertime()">
         <mat-icon>add</mat-icon>
         Employee Overtime Request
       </button>
-      <button *ngIf="selectedTab === 1" class="btn-primary" (click)="openManagerOvertime()">
+      <button *ngIf="selectedTab === 1 && hasPermission('MANAGER_OVERTIME_SECTION')" class="btn-primary" (click)="openManagerOvertime()">
         <mat-icon>add</mat-icon>
         Manager Overtime Request
       </button>
@@ -63,12 +63,12 @@
     </div>
   </ng-template>
   <div class="page-tabs">
-    <button class="page-tab" [class.active]="selectedTab === 0" (click)="selectTab(0)">
+    <button class="page-tab" *ngIf="hasPermission('EMPLOYEE_OVERTIME_SECTION')" [class.active]="selectedTab === 0" (click)="selectTab(0)">
       <mat-icon>person</mat-icon>
       <span>Employee</span>
       <span class="tab-badge">{{ (employeeCreatedRequests.length + employeeAssignedRequests.length) || 0 }}</span>
     </button>
-    <button class="page-tab" [class.active]="selectedTab === 1" (click)="selectTab(1)">
+    <button class="page-tab" *ngIf="hasPermission('MANAGER_OVERTIME_SECTION')" [class.active]="selectedTab === 1" (click)="selectTab(1)">
       <mat-icon>group</mat-icon>
       <span>Manager</span>
       <span class="tab-badge">{{ pendingRequests.length || 0 }}</span>
@@ -79,7 +79,8 @@
   <div [ngSwitch]="selectedTab" class="tab-content-wrapper">
 
     <!-- ─── EMPLOYEE TAB ─────────────────────────────────────────────── -->
-    <div *ngSwitchCase="0" class="tab-content">
+    <ng-container *ngIf="hasPermission('EMPLOYEE_OVERTIME_SECTION')">
+      <div *ngSwitchCase="0" class="tab-content">
 
       <!-- Employee Created Overtime Requests -->
       <div class="section-card">
@@ -181,10 +182,12 @@
         </div>
       </div>
 
-    </div>
+      </div>
+    </ng-container>
 
     <!-- ─── MANAGER TAB ──────────────────────────────────────────────── -->
-    <div *ngSwitchCase="1" class="tab-content">
+    <ng-container *ngIf="hasPermission('MANAGER_OVERTIME_SECTION')">
+      <div *ngSwitchCase="1" class="tab-content">
 
       <div class="section-card">
         <div class="section-header">
@@ -247,7 +250,8 @@
         </div>
       </div>
 
-    </div>
+      </div>
+    </ng-container>
 
   </div>
 
