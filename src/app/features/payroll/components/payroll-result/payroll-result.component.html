@@ -73,28 +73,28 @@
       <div class="icon-wrapper bg-surface"><mat-icon>payments</mat-icon></div>
       <div class="info">
         <div class="label">Total Gross Salary</div>
-        <div class="value">PKR {{ totalGrossSalary | number }}</div>
+        <div class="value">PKR {{ totalGrossSalary | number: '1.2-2' }}</div>
       </div>
     </div>
     <div class="card">
       <div class="icon-wrapper bg-error"><mat-icon>remove</mat-icon></div>
       <div class="info">
         <div class="label">Total Deductions</div>
-        <div class="value">PKR {{ totalDeductions | number }}</div>
+        <div class="value">PKR {{ totalDeductions | number: '1.2-2' }}</div>
       </div>
     </div>
     <div class="card">
       <div class="icon-wrapper bg-tertiary"><mat-icon>featured_seasonal_and_gifts</mat-icon></div>
       <div class="info">
         <div class="label">Total Bonuses</div>
-        <div class="value">PKR {{ totalBonuses | number }}</div>
+        <div class="value">PKR {{ totalBonuses | number: '1.2-2' }}</div>
       </div>
     </div>
     <div class="card highlight">
       <div class="icon-wrapper"><mat-icon>check</mat-icon></div>
       <div class="info">
         <div class="label">Total Net Payable</div>
-        <div class="value">PKR {{ totalNetPayable | number }}</div>
+        <div class="value">PKR {{ totalNetPayable | number: '1.2-2' }}</div>
       </div>
     </div>
   </div>
@@ -134,11 +134,20 @@
           </tr>
         </thead>
         <tbody>
-          @for (emp of employees; track emp.id; let last = $last) {
-            <tr class="table-row">
+          @for (emp of employees; track emp.rowKey; let last = $last) {
+            <tr class="table-row" [class.row-expanded]="isExpanded(emp.employeeId)">
               <td class="sticky-left">
                 <div class="employee-info">
-                  <img [src]="emp.avatar" alt="Avatar">
+                  <button
+                    type="button"
+                    class="expand-toggle"
+                    [class.expanded]="isExpanded(emp.employeeId)"
+                    [attr.aria-expanded]="isExpanded(emp.employeeId)"
+                    [attr.aria-label]="isExpanded(emp.employeeId) ? 'Hide payroll breakdown' : 'Show payroll breakdown'"
+                    (click)="toggleDetails(emp.employeeId)">
+                    <mat-icon>{{ isExpanded(emp.employeeId) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                  </button>
+                  <img [src]="emp.avatar" alt="">
                   <div class="emp-details">
                     <span class="emp-name">{{ emp.name }}</span>
                     <span class="emp-id">{{ emp.id }}</span>
@@ -146,29 +155,71 @@
                 </div>
               </td>
               <td>{{ emp.department }}</td>
-              <td class="text-right">{{ emp.earnings.basic | number }}</td>
-              <td class="text-right">{{ emp.earnings.ot | number }}</td>
-              <td class="text-right">{{ emp.earnings.perfBonus | number }}</td>
-              <td class="text-right">{{ emp.earnings.bonus | number }}</td>
-              <td class="text-right font-semibold">{{ emp.earnings.gross | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.attendance > 0">{{ emp.deductions.attendance | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.late > 0">{{ emp.deductions.late | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.leave > 0">{{ emp.deductions.leave | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.loan > 0">{{ emp.deductions.loan | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.advance > 0">{{ emp.deductions.advance | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.pfEmp > 0">{{ emp.deductions.pfEmp | number }}</td>
-              <td class="text-right" [class.text-error]="emp.deductions.tax > 0">{{ emp.deductions.tax | number }}</td>
-              <td class="text-right text-error font-semibold">{{ emp.deductions.total | number }}</td>
-              <td class="text-right">{{ emp.contributions.pfEmployer | number }}</td>
-              <td class="text-right">{{ emp.contributions.gratuity | number }}</td>
-              <td class="text-right font-bold text-primary sticky-right-1">{{ emp.netPayable | number }}</td>
+              <td class="text-right">{{ emp.earnings.basic | number: '1.2-2' }}</td>
+              <td class="text-right">{{ emp.earnings.ot | number: '1.2-2' }}</td>
+              <td class="text-right">{{ emp.earnings.perfBonus | number: '1.2-2' }}</td>
+              <td class="text-right">{{ emp.earnings.bonus | number: '1.2-2' }}</td>
+              <td class="text-right font-semibold">{{ emp.earnings.gross | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.attendance > 0">{{ emp.deductions.attendance | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.late > 0">{{ emp.deductions.late | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.leave > 0">{{ emp.deductions.leave | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.loan > 0">{{ emp.deductions.loan | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.advance > 0">{{ emp.deductions.advance | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.pfEmp > 0">{{ emp.deductions.pfEmp | number: '1.2-2' }}</td>
+              <td class="text-right" [class.text-error]="emp.deductions.tax > 0">{{ emp.deductions.tax | number: '1.2-2' }}</td>
+              <td class="text-right text-error font-semibold">{{ emp.deductions.total | number: '1.2-2' }}</td>
+              <td class="text-right">{{ emp.contributions.pfEmployer | number: '1.2-2' }}</td>
+              <td class="text-right">{{ emp.contributions.gratuity | number: '1.2-2' }}</td>
+              <td class="text-right font-bold text-primary sticky-right-1">{{ emp.netPayable | number: '1.2-2' }}</td>
               <td class="sticky-right-0">
                 <div class="action-group">
-                  <button><mat-icon>visibility</mat-icon></button>
-                  <button><mat-icon>download</mat-icon></button>
+                  <button type="button" (click)="toggleDetails(emp.employeeId)" title="Breakdown">
+                    <mat-icon>receipt_long</mat-icon>
+                  </button>
+                  <button type="button" title="Download"><mat-icon>download</mat-icon></button>
                 </div>
               </td>
             </tr>
+            @if (isExpanded(emp.employeeId)) {
+              <tr class="detail-row">
+                <td colspan="19" class="detail-cell">
+                  <div class="detail-panel">
+                    <div class="detail-panel-header">
+                      <mat-icon>analytics</mat-icon>
+                      <span>Payroll breakdown — {{ emp.name }}</span>
+                      <span class="detail-sub">Gross PKR {{ emp.earnings.gross | number: '1.2-2' }} · Net PKR {{ emp.netPayable | number: '1.2-2' }}</span>
+                    </div>
+                    @if (emp.detailSections.length === 0) {
+                      <p class="detail-empty">No line-item breakdown stored for this employee.</p>
+                    } @else {
+                      <div class="detail-sections">
+                        @for (section of emp.detailSections; track section.title) {
+                          <div class="detail-section">
+                            <h4 class="detail-section-title">{{ section.title }}</h4>
+                            <div class="detail-records">
+                              @for (rec of section.rows; track $index) {
+                                <div class="detail-record">
+                                  <table class="detail-kv-table">
+                                    <tbody>
+                                      @for (kv of entriesOf(rec); track kv[0]) {
+                                        <tr>
+                                          <th scope="row">{{ formatDetailLabel(kv[0]) }}</th>
+                                          <td>{{ formatDetailValue(kv[1]) }}</td>
+                                        </tr>
+                                      }
+                                    </tbody>
+                                  </table>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
             @if (!last) {
               <tr class="spacer-row"><td colspan="19"></td></tr>
             }

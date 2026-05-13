@@ -399,6 +399,19 @@
         }
 
         tbody {
+          tr.table-row.row-expanded td {
+            background-color: #f0f9ff;
+          }
+
+          tr.detail-row {
+            td.detail-cell {
+              padding: 0 1rem 1rem;
+              vertical-align: top;
+              border-bottom: 1px solid #e2e8f0;
+              background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 12px);
+            }
+          }
+
           tr.table-row {
             transition: background-color 0.15s ease;
             
@@ -426,7 +439,40 @@
               .employee-info {
                 display: flex;
                 align-items: center;
-                gap: 0.75rem;
+                gap: 0.5rem;
+
+                .expand-toggle {
+                  flex-shrink: 0;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 2rem;
+                  height: 2rem;
+                  padding: 0;
+                  border: none;
+                  border-radius: 0.5rem;
+                  background: #f1f5f9;
+                  color: #475569;
+                  cursor: pointer;
+                  transition: background 0.15s, color 0.15s;
+
+                  mat-icon {
+                    font-size: 1.25rem;
+                    width: 1.25rem;
+                    height: 1.25rem;
+                    transition: transform 0.15s;
+                  }
+
+                  &.expanded {
+                    background: #dbeafe;
+                    color: #004ac6;
+                  }
+
+                  &:hover {
+                    background: #e2e8f0;
+                    color: #0f172a;
+                  }
+                }
 
                 img {
                   width: 2rem;
@@ -569,6 +615,120 @@
             height: 1.25rem;
           }
         }
+      }
+    }
+  }
+
+  // Expandable payroll breakdown
+  .detail-panel {
+    margin: 0.5rem 0 0;
+    padding: 1rem 1.25rem 1.25rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+
+    .detail-panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: #0f172a;
+
+      mat-icon {
+        color: #004ac6;
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      .detail-sub {
+        flex: 1 1 100%;
+        font-weight: 500;
+        font-size: 0.8125rem;
+        color: #64748b;
+        @media (min-width: 720px) {
+          flex: 0 1 auto;
+          margin-left: auto;
+        }
+      }
+    }
+
+    .detail-empty {
+      margin: 0;
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    .detail-sections {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+
+      @media (min-width: 900px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @media (min-width: 1400px) {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .detail-section-title {
+      margin: 0 0 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #004ac6;
+    }
+
+    .detail-records {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .detail-record {
+      border: 1px solid #f1f5f9;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background: #fafbfc;
+    }
+
+    .detail-kv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+
+      th,
+      td {
+        padding: 0.4rem 0.65rem;
+        text-align: left;
+        border-bottom: 1px solid #eef2f7;
+        vertical-align: top;
+      }
+
+      tr:last-child th,
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      th {
+        width: 42%;
+        font-weight: 600;
+        color: #64748b;
+        background: #f8fafc;
+      }
+
+      td {
+        color: #1e293b;
+        word-break: break-word;
       }
     }
   }
