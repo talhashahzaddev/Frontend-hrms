@@ -114,7 +114,7 @@
     <div class="content-grid">
       
       <!-- Left: Attendance Records Table (60%) -->
-      <div class="table-section">
+      <div *ngIf="hasPermission('ATTENDANCE_RECORD_TABLE')" class="table-section">
         <div class="section-header">
           <h3 class="section-title">
             <mat-icon>list_alt</mat-icon>
@@ -201,7 +201,9 @@
       </div>
 
       <!-- Right: Calendar (40%) -->
-      <app-attendance-calendar></app-attendance-calendar>
+      <ng-container *ngIf="hasPermission('Attendance_Calendar')">
+        <app-attendance-calendar></app-attendance-calendar>
+      </ng-container>
 
     </div>
 

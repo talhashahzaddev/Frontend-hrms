@@ -12,6 +12,7 @@ import { CreateEmployeeOvertimeDialogComponent } from './create-employee-overtim
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmployeeOverTimeDto } from '../../../../core/models/attendance.models';
+import { AuthService } from '@/app/core/services/auth.service';
 
 @Component({
   selector: 'app-overtime',
@@ -35,7 +36,8 @@ export class OvertimeComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private attendanceService: AttendanceService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -199,6 +201,10 @@ export class OvertimeComponent implements OnInit {
         this.notification.showError('Failed to reject employee request');
       }
     });
+  }
+
+   hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Overtime', actionKey);
   }
 
   selectTab(index: number): void {
