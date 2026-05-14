@@ -153,7 +153,7 @@ listEndDateControl = new FormControl(new Date());
       });
   }
 
-  private loadAttendanceSummary(): void {
+  public loadAttendanceSummary(): void {
     const startDate = (new Date(new Date().getFullYear(), new Date().getMonth(), 1));
     const endDate = new Date(new Date());
 
