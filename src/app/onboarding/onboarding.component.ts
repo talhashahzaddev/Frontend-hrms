@@ -16,115 +16,138 @@ import {
 // ─── Local interfaces ─────────────────────────────────────────────────────────
 
 export interface ProfileForm {
-  fullName:       string;
-  jobTitle:       string;
-  email:          string;
-  phone:          string;
-  department:     string;
-  gender:         string;
-  nationality:    string;
-  idNumber:       string;
-  photo:          File | null;
-  resume:         File | null;
+  fullName: string;
+  jobTitle: string;
+  email: string;
+  phone: string;
+  department: string;
+  gender: string;
+  nationality: string;
+  idNumber: string;
+  photo: File | null;
+  resume: File | null;
   resumeFileName: string;
 }
 
 export interface EducationFormEntry extends OnboardingEducation {
   educationId?: string;
-  file:    File | null;
-  _saved:  boolean;
+  file: File | null;
+  _saved: boolean;
 }
 
 export interface WorkExperienceFormEntry extends OnboardingWorkExperience {
   experienceId?: string;
-  file:   File | null;
+  file: File | null;
   _saved: boolean;
 }
 
-/** Bank Details form model — mirrors the screenshot fields exactly */
-export interface BankDetailsForm {
-  noBankAccount:      boolean;
-  accountHolderName:  string;
-  paymentMethod:      string;
-  accountNumber:      string;
-  confirmAccountNumber: string;
-  bankName:           string;
-  iban:               string;
-  branchName:         string;
-  branchCode:         string;
+export interface PermissionModule {
+  id: string;
+  label: string;
+  description: string;
+  route: string;
+  allowed: boolean;
+  selected: boolean;
 }
 
-/** Inline validation errors for Bank Details */
-export interface BankDetailsErrors {
-  accountHolderName?:  string;
-  paymentMethod?:      string;
-  accountNumber?:      string;
+// ── Bank Details form ─────────────────────────────────────────────────────────
+export interface BankForm {
+  bankDetailsId?:       string;
+  noBankAccount:        boolean;
+  accountHolderName:    string;
+  accountNumber:        string;
+  confirmAccountNumber: string;
+  paymentMethod:        string;
+  bankName:             string;
+  iban:                 string;
+  branchName:           string;
+  branchCode:           string;
+}
+
+export interface BankErrors {
+  accountHolderName?:    string;
+  accountNumber?:        string;
   confirmAccountNumber?: string;
-  bankName?:           string;
-  iban?:               string;
+  paymentMethod?:        string;
+  bankName?:             string;
+  iban?:                 string;
 }
 
 @Component({
-  selector:    'app-onboarding',
-  standalone:  true,
-  imports:     [CommonModule, FormsModule],
+  selector: 'app-onboarding',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './onboarding.component.html',
-  styleUrls:   ['./onboarding.component.scss']
+  styleUrls: ['./onboarding.component.scss']
 })
 export class Onboarding implements OnInit, OnDestroy {
 
   // ── State ─────────────────────────────────────────────────────────────────
-  step         = 1;
+  step = 1;
   onboardingId: string | null = null;
 
-  photoPreview:       string | null = null;
-  hasSavedPhoto       = false;
-  hasSavedResume      = false;
-  isJobTitleReadOnly  = false;
+  photoPreview: string | null = null;
+  hasSavedPhoto  = false;
+  hasSavedResume = false;
+
+  /**
+   * True once the job title has been resolved from either:
+   *   1. Saved onboarding personalInfo (existing session), or
+   *   2. The logged-in user's employee profile (first visit).
+   * Keeps the field read-only in both cases.
+   */
+  isJobTitleReadOnly = false;
 
   // ── Lists ─────────────────────────────────────────────────────────────────
-  educationList:      EducationFormEntry[]    = [];
-  workExperienceList: WorkExperienceFormEntry[] = [];
-  policies:           CompanyPolicy[]           = [];
+  educationList:      EducationFormEntry[]      = [];
+  workExperienceList: WorkExperienceFormEntry[]  = [];
+  permissionModules:  PermissionModule[]         = [];
+  policies:           CompanyPolicy[]            = [];
 
-  // ── Edit tracking ─────────────────────────────────────────────────────────
+  // ── Edit tracking ──────────────────────────────────────────────────────────
   editingEducationIndex:  number | null = null;
   editingExperienceIndex: number | null = null;
 
   // ── UI flags ──────────────────────────────────────────────────────────────
-  isSavingPersonalInfo   = false;
-  isSavingEducation      = false;
-  isSavingWorkExperience = false;
-  isSavingBankDetails    = false;
-  isSubmitting           = false;
+  isSavingPersonalInfo    = false;
+  isSavingEducation       = false;
+  isSavingWorkExperience  = false;
+  isSavingBankDetails     = false;
+  bankDetailsSaved        = false;
+  isSubmitting            = false;
 
   personalInfoError:   string | null = null;
   workExperienceError: string | null = null;
   bankDetailsError:    string | null = null;
 
-  /** True once bank details have been saved to the API in this session */
-  bankDetailsSaved = false;
-
-  policyAccepted    = false;
-  documentNotes     = '';
+  policyAccepted      = false;
+  documentNotes       = '';
   reviewCompletionRate = 0;
 
-  // ── Personal form ─────────────────────────────────────────────────────────
+  // ── Forms ─────────────────────────────────────────────────────────────────
   form: ProfileForm = {
     fullName: '', jobTitle: '', email: '', phone: '',
     department: '', gender: '', nationality: '', idNumber: '',
     photo: null, resume: null, resumeFileName: ''
   };
 
-  // ── Education form ────────────────────────────────────────────────────────
-  education: EducationFormEntry = this.blankEducation();
-
-  // ── Work experience form ──────────────────────────────────────────────────
+  education:      EducationFormEntry      = this.blankEducation();
   workExperience: WorkExperienceFormEntry = this.blankWorkExperience();
 
-  // ── Bank details form ─────────────────────────────────────────────────────
-  bankForm: BankDetailsForm = this.blankBankForm();
-  bankErrors: BankDetailsErrors = {};
+  bankForm: BankForm = {
+    bankDetailsId:        undefined,
+    noBankAccount:        false,
+    accountHolderName:    '',
+    accountNumber:        '',
+    confirmAccountNumber: '',
+    paymentMethod:        '',
+    bankName:             '',
+    iban:                 '',
+    branchName:           '',
+    branchCode:           ''
+  };
+
+  bankErrors: BankErrors = {};
 
   // ── File validation ───────────────────────────────────────────────────────
   private readonly allowedWorkExpTypes = [
@@ -137,15 +160,16 @@ export class Onboarding implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   constructor(
-    private authService:       AuthService,
-    private router:            Router,
-    private settingsService:   SettingsService,
+    private authService: AuthService,
+    private router: Router,
+    private settingsService: SettingsService,
     private onboardingService: OnboardingService
   ) {}
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
+    this.initializePermissionModules();
     this.loadPublishedPolicies();
     this.loadExistingOnboardingData();
   }
@@ -161,8 +185,8 @@ export class Onboarding implements OnInit, OnDestroy {
     this.settingsService.getPolicies()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next:  p => { this.policies = p.filter(x => x.isPublished); },
-        error: () => { this.policies = []; }
+        next:  policies => { this.policies = policies.filter(p => p.isPublished); },
+        error: ()       => { this.policies = []; }
       });
   }
 
@@ -179,10 +203,16 @@ export class Onboarding implements OnInit, OnDestroy {
       .subscribe({
         next: response => {
           const data = response?.data ?? response;
-          if (!data) return;
+
+          if (!data) {
+            // No saved session yet — still fetch job title from employee profile
+            this.fetchJobTitleFromProfile();
+            return;
+          }
 
           this.onboardingId = data.onboardingId ?? data.personalInfo?.onboardingId ?? null;
 
+          // ── Personal info ────────────────────────────────────────────────
           if (data.personalInfo) {
             const p = data.personalInfo;
             this.form.fullName       = p.fullName       ?? '';
@@ -196,54 +226,72 @@ export class Onboarding implements OnInit, OnDestroy {
             this.form.resumeFileName = p.resumeFileName ?? '';
             this.hasSavedResume      = !!p.resumeFileName;
             this.hasSavedPhoto       = !!p.photoUrl;
-            this.isJobTitleReadOnly  = !!p.jobTitle;
             if (p.photoUrl) this.photoPreview = p.photoUrl;
+            if (p.jobTitle) {
+              this.isJobTitleReadOnly = true;
+            } else {
+              // Session exists but no job title saved yet — fetch from profile.
+              this.fetchJobTitleFromProfile();
+            }
+          } else {
+            // Session record exists but no personalInfo block — fetch from profile.
+            this.fetchJobTitleFromProfile();
           }
 
+          // ── Education list ────────────────────────────────────────────────
           if (data.educationList?.length > 0) {
             this.educationList = data.educationList.map((e: any) => ({
-              educationId: e.educationId ?? e.EducationId ?? undefined,
-              degree: e.degree ?? '', institution: e.institution ?? '',
-              field: e.field ?? '', gpa: e.gpa ?? '',
-              fileName: e.fileName ?? '', description: e.description ?? '',
-              file: null, _saved: true
+              educationId:  e.educationId  ?? e.EducationId ?? undefined,
+              degree:       e.degree       ?? '',
+              institution:  e.institution  ?? '',
+              field:        e.field        ?? '',
+              gpa:          e.gpa          ?? '',
+              fileName:     e.fileName     ?? '',
+              description:  e.description  ?? '',
+              file: null,
+              _saved: true
             }));
           }
 
+          // ── Work experience list ──────────────────────────────────────────
           if (data.workExperienceList?.length > 0) {
             this.workExperienceList = data.workExperienceList.map((e: any) => ({
-              experienceId: e.experienceId ?? e.ExperienceId ?? undefined,
-              jobTitle: e.jobTitle ?? '', company: e.company ?? '',
-              employmentType: e.employmentType ?? '', location: e.location ?? '',
-              startDate: e.startDate ?? '', endDate: e.endDate ?? '',
+              experienceId:     e.experienceId     ?? e.ExperienceId ?? undefined,
+              jobTitle:         e.jobTitle         ?? '',
+              company:          e.company          ?? '',
+              employmentType:   e.employmentType   ?? '',
+              location:         e.location         ?? '',
+              startDate:        e.startDate        ?? '',
+              endDate:          e.endDate          ?? '',
               currentlyWorking: e.currentlyWorking ?? false,
-              responsibilities: e.responsibilities ?? '', fileName: e.fileName ?? '',
-              file: null, _saved: true
+              responsibilities: e.responsibilities ?? '',
+              fileName:         e.fileName         ?? '',
+              file: null,
+              _saved: true
             }));
           }
 
-          // Pre-fill bank details if already saved
+          // ── Bank details ──────────────────────────────────────────────────
           if (data.bankDetails) {
             const b = data.bankDetails;
-            this.bankForm = {
-              noBankAccount:       b.noBankAccount       ?? false,
-              accountHolderName:   b.accountHolderName   ?? '',
-              paymentMethod:       b.paymentMethod       ?? '',
-              accountNumber:       b.accountNumber       ?? '',
-              confirmAccountNumber: b.accountNumber      ?? '',
-              bankName:            b.bankName            ?? '',
-              iban:                b.iban                ?? '',
-              branchName:          b.branchName          ?? '',
-              branchCode:          b.branchCode          ?? ''
-            };
-            this.bankDetailsSaved = true;
+            this.bankForm.noBankAccount     = b.noBankAccount      ?? false;
+            this.bankForm.accountHolderName = b.accountHolderName  ?? '';
+            this.bankForm.accountNumber     = b.accountNumber      ?? '';
+            this.bankForm.confirmAccountNumber = b.accountNumber   ?? '';
+            this.bankForm.paymentMethod     = b.paymentMethod      ?? '';
+            this.bankForm.bankName          = b.bankName           ?? '';
+            this.bankForm.iban              = b.iban               ?? '';
+            this.bankForm.branchName        = b.branchName         ?? '';
+            this.bankForm.branchCode        = b.branchCode         ?? '';
+            this.bankDetailsSaved           = true;
           }
 
-          this.documentNotes  = data.documentNotes    ?? '';
+          this.documentNotes  = data.documentNotes   ?? '';
           this.policyAccepted = data.isPolicyAccepted ?? false;
 
           this.calculateCompletionRate();
 
+          // Navigate to furthest step
           if (typeof data.currentStep === 'number' && data.currentStep > 1) {
             this.step = Math.min(data.currentStep, 6);
           } else if (this.workExperienceList.length > 0) {
@@ -254,8 +302,55 @@ export class Onboarding implements OnInit, OnDestroy {
             this.step = 2;
           }
         },
-        error: err => console.warn('No existing onboarding data:', err)
+        error: err => {
+          console.warn('No existing onboarding data:', err);
+          this.fetchJobTitleFromProfile();
+        }
       });
+  }
+
+  /**
+   * Fetches the logged-in employee's assigned position/role from the backend
+   * and pre-fills the Job Title field, then locks it as read-only.
+   *
+   * Strategy (in priority order):
+   *   1. JWT / session claims already decoded by AuthService  →  zero extra HTTP call.
+   *   2. Fallback: GET /employees/my-profile                  →  dedicated endpoint.
+   *   3. Fallback: GET /employees/:id                         →  generic employee endpoint.
+   */
+  private fetchJobTitleFromProfile(): void {
+    // ── 1. Try claims already available in AuthService ──────────────────────
+    const currentUser = this.authService.getCurrentUserValue();
+    const claimTitle  =
+      currentUser?.jobTitle        ??
+      null;
+
+    if (claimTitle) {
+      this.applyJobTitle(claimTitle);
+      return;
+    }
+
+    // ── 2. Fallback: fetch employee profile from API ─────────────────────────
+    this.onboardingService.getEmployeeJobTitle()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (title: string | null) => {
+          if (title) {
+            this.applyJobTitle(title);
+          }
+          // If still empty, leave field blank but still mark readonly so the
+          // placeholder text guides the user to contact HR.
+        },
+        error: (err: any) => console.warn('Could not fetch job title from profile:', err)
+      });
+  }
+
+  /**
+   * Applies a resolved job title to the form and locks the field.
+   */
+  private applyJobTitle(title: string): void {
+    this.form.jobTitle      = title;
+    this.isJobTitleReadOnly = true;
   }
 
   // ── Step 1 – Personal Info ────────────────────────────────────────────────
@@ -296,13 +391,13 @@ export class Onboarding implements OnInit, OnDestroy {
     ).pipe(takeUntil(this.destroy$)).subscribe({
       next: response => {
         this.isSavingPersonalInfo = false;
-        this.onboardingId         = this.extractOnboardingId(response);
+        this.onboardingId = this.extractOnboardingId(response);
         this.calculateCompletionRate();
         this.step = 2;
       },
       error: err => {
         this.isSavingPersonalInfo = false;
-        this.personalInfoError    = err?.error?.message || err?.message
+        this.personalInfoError = err?.error?.message || err?.message
           || 'Failed to save personal information. Please try again.';
       }
     });
@@ -323,10 +418,16 @@ export class Onboarding implements OnInit, OnDestroy {
 
     this.isSavingEducation = true;
     this.onboardingService.addEducation(
-      { degree: this.education.degree, institution: this.education.institution,
-        field: this.education.field, gpa: this.education.gpa,
-        fileName: this.education.fileName, description: this.education.description },
-      this.education.file, this.onboardingId
+      {
+        degree:      this.education.degree,
+        institution: this.education.institution,
+        field:       this.education.field,
+        gpa:         this.education.gpa,
+        fileName:    this.education.fileName,
+        description: this.education.description
+      },
+      this.education.file,
+      this.onboardingId
     ).pipe(takeUntil(this.destroy$)).subscribe({
       next: response => {
         this.isSavingEducation = false;
@@ -352,8 +453,8 @@ export class Onboarding implements OnInit, OnDestroy {
   }
 
   updateEducation(): void {
-    if (!this.education.degree || !this.education.institution || !this.education.field
-        || this.editingEducationIndex === null) return;
+    if (!this.education.degree || !this.education.institution
+      || !this.education.field || this.editingEducationIndex === null) return;
     this.educationList[this.editingEducationIndex] = { ...this.education };
     this.editingEducationIndex = null;
     this.resetEducationForm();
@@ -380,14 +481,21 @@ export class Onboarding implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const file  = input.files?.[0];
     this.workExperienceError = null;
-    if (!file) { this.workExperience.file = null; this.workExperience.fileName = ''; return; }
+
+    if (!file) {
+      this.workExperience.file     = null;
+      this.workExperience.fileName = '';
+      return;
+    }
     if (!this.allowedWorkExpTypes.includes(file.type)) {
       this.workExperienceError = 'Unsupported file type. Use PDF, DOC, DOCX, JPG, or PNG.';
-      input.value = ''; return;
+      input.value = '';
+      return;
     }
     if (file.size > 10 * 1024 * 1024) {
       this.workExperienceError = 'File too large. Maximum 10 MB allowed.';
-      input.value = ''; return;
+      input.value = '';
+      return;
     }
     this.workExperience.file     = file;
     this.workExperience.fileName = file.name;
@@ -396,7 +504,7 @@ export class Onboarding implements OnInit, OnDestroy {
   addWorkExperience(): void {
     this.workExperienceError = null;
     if (!this.workExperience.jobTitle || !this.workExperience.company
-        || !this.workExperience.employmentType || !this.workExperience.startDate) {
+      || !this.workExperience.employmentType || !this.workExperience.startDate) {
       this.workExperienceError = 'Job title, company, employment type, and start date are required.';
       return;
     }
@@ -404,12 +512,19 @@ export class Onboarding implements OnInit, OnDestroy {
 
     this.isSavingWorkExperience = true;
     this.onboardingService.addWorkExperience(
-      { jobTitle: this.workExperience.jobTitle, company: this.workExperience.company,
-        employmentType: this.workExperience.employmentType, location: this.workExperience.location,
-        startDate: this.workExperience.startDate, endDate: this.workExperience.endDate,
+      {
+        jobTitle:         this.workExperience.jobTitle,
+        company:          this.workExperience.company,
+        employmentType:   this.workExperience.employmentType,
+        location:         this.workExperience.location,
+        startDate:        this.workExperience.startDate,
+        endDate:          this.workExperience.endDate,
         currentlyWorking: this.workExperience.currentlyWorking,
-        responsibilities: this.workExperience.responsibilities, fileName: this.workExperience.fileName },
-      this.workExperience.file, this.onboardingId
+        responsibilities: this.workExperience.responsibilities,
+        fileName:         this.workExperience.fileName
+      },
+      this.workExperience.file,
+      this.onboardingId
     ).pipe(takeUntil(this.destroy$)).subscribe({
       next: response => {
         this.isSavingWorkExperience = false;
@@ -423,7 +538,7 @@ export class Onboarding implements OnInit, OnDestroy {
       },
       error: err => {
         this.isSavingWorkExperience = false;
-        this.workExperienceError    = err?.error?.message || err?.message
+        this.workExperienceError = err?.error?.message || err?.message
           || 'Unable to save work experience. Please try again.';
       }
     });
@@ -437,7 +552,7 @@ export class Onboarding implements OnInit, OnDestroy {
 
   updateWorkExperience(): void {
     if (!this.workExperience.jobTitle || !this.workExperience.company
-        || this.editingExperienceIndex === null) return;
+      || this.editingExperienceIndex === null) return;
     this.workExperienceList[this.editingExperienceIndex] = { ...this.workExperience };
     this.editingExperienceIndex = null;
     this.resetWorkExperienceForm();
@@ -461,159 +576,187 @@ export class Onboarding implements OnInit, OnDestroy {
 
   continueFromWorkExperience(): void {
     this.calculateCompletionRate();
-    this.step = 4;   // → Bank Details
+    this.step = 4;
   }
 
   // ── Step 4 – Bank Details ─────────────────────────────────────────────────
 
-  /** Called when "I don't have a bank account" toggle is flipped */
   onNoBankAccountToggle(): void {
     if (this.bankForm.noBankAccount) {
-      // Clear all bank fields and errors when toggling on
-      this.bankForm = { ...this.blankBankForm(), noBankAccount: true };
       this.bankErrors = {};
-      this.bankDetailsError = null;
     }
   }
 
-  /** Clear a single field's inline error on user input */
-  clearBankError(field: keyof BankDetailsErrors): void {
-    this.bankErrors[field] = undefined;
+  clearBankError(field: keyof BankErrors): void {
+    delete this.bankErrors[field];
   }
 
-  /**
-   * Validate bank form.
-   * Returns true if valid; populates bankErrors and returns false if not.
-   */
   private validateBankForm(): boolean {
     this.bankErrors = {};
+    if (this.bankForm.noBankAccount) return true;
 
-    if (this.bankForm.noBankAccount) return true;   // No validation needed
-
-    if (!this.bankForm.accountHolderName?.trim()) {
+    if (!this.bankForm.accountHolderName?.trim())
       this.bankErrors.accountHolderName = 'Account holder name is required.';
-    }
-
-    if (!this.bankForm.paymentMethod) {
+    if (!this.bankForm.paymentMethod)
       this.bankErrors.paymentMethod = 'Payment method is required.';
-    }
-
-    if (!this.bankForm.accountNumber?.trim()) {
+    if (!this.bankForm.accountNumber?.trim())
       this.bankErrors.accountNumber = 'Account number is required.';
-    } else if (!/^\d{8,}$/.test(this.bankForm.accountNumber.trim())) {
-      this.bankErrors.accountNumber = 'Account number must be at least 8 digits (numbers only).';
-    }
-
     if (!this.bankForm.confirmAccountNumber?.trim()) {
-      this.bankErrors.confirmAccountNumber = 'Please confirm your account number.';
+      this.bankErrors.confirmAccountNumber = 'Please confirm the account number.';
     } else if (this.bankForm.accountNumber !== this.bankForm.confirmAccountNumber) {
       this.bankErrors.confirmAccountNumber = 'Account numbers do not match.';
     }
-
-    if (!this.bankForm.bankName) {
-      this.bankErrors.bankName = 'Please select a bank.';
-    }
-
-    // IBAN optional — validate format if provided
-    if (this.bankForm.iban?.trim()) {
-      const ibanClean = this.bankForm.iban.trim().toUpperCase().replace(/\s/g, '');
-      if (!/^[A-Z]{2}[A-Z0-9]{2,34}$/.test(ibanClean)) {
-        this.bankErrors.iban = 'Invalid IBAN format. Should start with a 2-letter country code (e.g. GB29NWBK…).';
-      }
-    }
+    if (!this.bankForm.bankName)
+      this.bankErrors.bankName = 'Bank name is required.';
 
     return Object.keys(this.bankErrors).length === 0;
   }
 
-  /**
-   * Save bank details to the API.
-   * On success, sets bankDetailsSaved = true so the Continue button unlocks.
-   */
   saveBankDetails(): void {
     this.bankDetailsError = null;
-
-    if (!this.validateBankForm()) {
-      this.bankDetailsError = 'Please fix the errors above before saving.';
-      return;
-    }
-
+    if (!this.validateBankForm()) return;
     if (!this.onboardingId) {
-      this.bankDetailsError = 'Onboarding session not found. Please complete Step 1 first.';
+      this.bankDetailsError = 'Please complete personal information first.';
       return;
     }
 
     this.isSavingBankDetails = true;
-
-    const payload = {
+    this.onboardingService.saveBankDetails({
       onboardingId:       this.onboardingId,
       noBankAccount:      this.bankForm.noBankAccount,
-      accountHolderName:  this.bankForm.noBankAccount ? null : this.bankForm.accountHolderName.trim(),
-      accountNumber:      this.bankForm.noBankAccount ? null : this.bankForm.accountNumber.trim(),
+      accountHolderName:  this.bankForm.noBankAccount ? null : this.bankForm.accountHolderName,
+      accountNumber:      this.bankForm.noBankAccount ? null : this.bankForm.accountNumber,
       bankName:           this.bankForm.noBankAccount ? null : this.bankForm.bankName,
       paymentMethod:      this.bankForm.noBankAccount ? null : this.bankForm.paymentMethod,
-      iban:               this.bankForm.noBankAccount ? null : (this.bankForm.iban?.trim() || null),
-      branchName:         this.bankForm.noBankAccount ? null : (this.bankForm.branchName?.trim() || null),
-      branchCode:         this.bankForm.noBankAccount ? null : (this.bankForm.branchCode?.trim() || null)
-    };
-
-    this.onboardingService.saveBankDetails(payload)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.isSavingBankDetails = false;
-          this.bankDetailsSaved    = true;
-          this.bankDetailsError    = null;
-          this.calculateCompletionRate();
-        },
-        error: err => {
-          this.isSavingBankDetails = false;
-          this.bankDetailsError    = err?.error?.message || err?.message
-            || 'Failed to save bank details. Please try again.';
+      iban:               this.bankForm.noBankAccount ? null : (this.bankForm.iban || null),
+      branchName:         this.bankForm.noBankAccount ? null : (this.bankForm.branchName || null),
+      branchCode:         this.bankForm.noBankAccount ? null : (this.bankForm.branchCode || null)
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response: any) => {
+        this.isSavingBankDetails = false;
+        this.bankDetailsSaved    = true;
+        // Capture bankDetailsId from response if available
+        if (response?.data?.bankDetailsId) {
+          this.bankForm.bankDetailsId = response.data.bankDetailsId;
         }
-      });
+        this.calculateCompletionRate();
+      },
+      error: err => {
+        this.isSavingBankDetails = false;
+        this.bankDetailsError = err?.error?.message || err?.message
+          || 'Failed to save bank details. Please try again.';
+      }
+    });
+  }
+
+  editBankDetails(): void {
+    // Allow editing by temporarily hiding the saved summary and showing the form
+    // User can update details and save again
+    this.bankDetailsSaved = false;
+    // Scroll to bank details form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  removeBankDetails(): void {
+    if (!confirm('Are you sure you want to remove your bank details?')) return;
+    // Reset the form and allow re-entry
+    this.bankForm = {
+      bankDetailsId: undefined,
+      noBankAccount: false,
+      accountHolderName: '',
+      paymentMethod: '',
+      accountNumber: '',
+      confirmAccountNumber: '',
+      bankName: '',
+      iban: '',
+      branchName: '',
+      branchCode: ''
+    };
+    this.bankDetailsSaved = false;
+    this.bankErrors = {};
+    this.bankDetailsError = null;
   }
 
   continueFromBankDetails(): void {
-    if (!this.bankDetailsSaved && !this.bankForm.noBankAccount) return;
     this.calculateCompletionRate();
-    this.step = 5;   // → Verification Hub
+    this.step = 5;
+  }
+
+  isBankDetailsCompleted(): boolean {
+    return this.bankDetailsSaved || this.bankForm.noBankAccount;
   }
 
   // ── Step 5 – Verification ─────────────────────────────────────────────────
 
-  editPersonalFromVerification(): void { this.step = 1; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  editEducationFromVerification(index: number): void { this.editEducation(index); this.step = 2; }
-  deleteEducationFromVerification(index: number): void { this.removeEducation(index); }
-  editExperienceFromVerification(index: number): void { this.editWorkExperience(index); this.step = 3; }
-  deleteExperienceFromVerification(index: number): void { this.removeWorkExperience(index); }
+  editPersonalFromVerification(): void {
+    this.step = 1;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  editEducationFromVerification(index: number): void {
+    this.editEducation(index);
+    this.step = 2;
+  }
+
+  deleteEducationFromVerification(index: number): void {
+    this.removeEducation(index);
+  }
+
+  editExperienceFromVerification(index: number): void {
+    this.editWorkExperience(index);
+    this.step = 3;
+  }
+
+  deleteExperienceFromVerification(index: number): void {
+    this.removeWorkExperience(index);
+  }
 
   proceedFromVerification(): void {
     this.calculateCompletionRate();
-    this.step = 6;   // → Company Policies
+    this.step = 6;
   }
 
-  // ── Step 6 – Policies → Final submit ─────────────────────────────────────
+  // ── Step 6 – Policies / Submit ────────────────────────────────────────────
 
-  /**
-   * Final submit. Module Access step has been removed —
-   * onboarding completes directly after policy acceptance.
-   */
   finishOnboarding(): void {
     if (!this.policyAccepted && this.policies.length > 0) return;
-
     this.isSubmitting = true;
     this.calculateCompletionRate();
 
+    const isEmployee    = this.authService.hasRole?.('Employee');
+    const redirectRoute = isEmployee ? '/employee/dashboard' : '/dashboard';
+    this.submitOnboarding(redirectRoute);
+  }
+
+  private submitOnboarding(redirectRoute: string): void {
+    const request = this.buildOnboardingRequest();
+
+    this.onboardingService.submitOnboarding(request, this.form.photo, this.form.resume)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.router.navigate([redirectRoute]);
+        },
+        error: err => {
+          this.isSubmitting = false;
+          console.error('Onboarding submit error:', err);
+          alert('Unable to submit onboarding. Please try again.');
+        }
+      });
+  }
+
+  private buildOnboardingRequest(): OnboardingRequest {
     const { firstName, lastName } = this.splitName(this.form.fullName);
-    const request = {
+    return {
       firstName, lastName,
-      email:          this.form.email,
-      phone:          this.form.phone,
-      jobTitle:       this.form.jobTitle,
-      department:     this.form.department,
-      gender:         this.form.gender,
-      nationality:    this.form.nationality,
-      idNumber:       this.form.idNumber,
+      email:       this.form.email,
+      phone:       this.form.phone,
+      jobTitle:    this.form.jobTitle,
+      department:  this.form.department,
+      gender:      this.form.gender,
+      nationality: this.form.nationality,
+      idNumber:    this.form.idNumber,
       resumeFileName: this.form.resumeFileName,
       education: this.educationList.map(e => ({
         degree: e.degree, institution: e.institution, field: e.field,
@@ -625,26 +768,49 @@ export class Onboarding implements OnInit, OnDestroy {
         currentlyWorking: e.currentlyWorking, responsibilities: e.responsibilities || '',
         fileName: e.fileName || ''
       })),
-      selectedModuleIds: [],   // Module Access removed
+      selectedModuleIds: this.permissionModules.filter(m => m.selected).map(m => m.id),
       policyAccepted:    this.policyAccepted,
       documentNotes:     this.documentNotes
     };
+  }
 
-    this.onboardingService.submitOnboarding(request as any, this.form.photo, this.form.resume)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          const isEmployee    = this.authService.hasRole?.('Employee');
-          const redirectRoute = isEmployee ? '/employee/dashboard' : '/dashboard';
-          this.router.navigate([redirectRoute]);
-        },
-        error: err => {
-          this.isSubmitting = false;
-          console.error('Onboarding submit error:', err);
-          alert('Unable to submit onboarding. Please try again.');
-        }
-      });
+  // ── Permissions ───────────────────────────────────────────────────────────
+
+  initializePermissionModules(): void {
+    const savedSelected: string[] = JSON.parse(
+      localStorage.getItem('userSelectedModules') || '[]'
+    );
+    const perms   = this.authService.getUserPermissionsValue();
+    const allowed = new Set<string>();
+    perms?.menus?.forEach((menu: any) => {
+      if (menu.subMenus?.some((s: any) => s.actions?.some((a: any) => a.hasPermission))) {
+        allowed.add(menu.menuName.toLowerCase());
+      }
+    });
+
+    this.permissionModules = [
+      { id: 'dashboard',   label: 'Dashboard',   description: 'Overall business health and key metrics',           route: '/dashboard',            allowed: true,                                                        selected: false },
+      { id: 'attendance',  label: 'Attendance',  description: 'Track employee check-ins, shifts, and attendance',  route: '/attendance/dashboard', allowed: allowed.has('attendance'),                                   selected: false },
+      { id: 'leave',       label: 'Leave',       description: 'Manage leaves, requests, and balances',             route: '/leave/dashboard',      allowed: allowed.has('leave management') || allowed.has('leave'),     selected: false },
+      { id: 'payroll',     label: 'Payroll',     description: 'Salary processing, payslips and payroll rules',     route: '/payroll/periods',      allowed: allowed.has('payroll'),                                      selected: false },
+      { id: 'assets',      label: 'Assets',      description: 'Hardware / asset allocation and tracking',          route: '/assets/create',        allowed: allowed.has('assets management') || allowed.has('assets'),   selected: false },
+      { id: 'performance', label: 'Performance', description: 'Performance reviews and goals',                     route: '/performance/dashboard', allowed: allowed.has('performance'),                                 selected: false }
+    ].map(m => ({ ...m, selected: m.allowed ? (savedSelected.includes(m.id) || m.allowed) : false }));
+
+    this.savePermissionSelection();
+  }
+
+  togglePermissionModule(module: PermissionModule, checked: boolean): void {
+    if (!module.allowed) return;
+    module.selected = checked;
+    this.savePermissionSelection();
+  }
+
+  private savePermissionSelection(): void {
+    localStorage.setItem(
+      'userSelectedModules',
+      JSON.stringify(this.permissionModules.filter(m => m.selected).map(m => m.id))
+    );
   }
 
   // ── Completion helpers ────────────────────────────────────────────────────
@@ -660,32 +826,29 @@ export class Onboarding implements OnInit, OnDestroy {
   isWorkExperienceCompleted(): boolean { return this.workExperienceList.length > 0; }
   isResumeUploaded(): boolean          { return !!(this.form.resume || this.hasSavedResume); }
 
-  /** Bank details complete = saved OR employee has no bank account */
-  isBankDetailsCompleted(): boolean    { return this.bankDetailsSaved || this.bankForm.noBankAccount; }
-
   calculateCompletionRate(): void {
     let done = 0;
-    const total = 8;
+    const total = 7;
     if (this.form.fullName && this.form.email && this.form.phone
-        && this.form.department && this.form.gender
-        && this.form.nationality && this.form.idNumber) done++;
-    if (this.form.photo    || this.hasSavedPhoto)  done++;
-    if (this.form.resume   || this.hasSavedResume) done++;
-    if (this.educationList.length > 0)      done++;
-    if (this.workExperienceList.length > 0) done++;
-    if (this.isBankDetailsCompleted())      done++;
+      && this.form.department && this.form.gender
+      && this.form.nationality && this.form.idNumber) done++;
+    if (this.form.photo || this.hasSavedPhoto)           done++;
+    if (this.form.resume || this.hasSavedResume)          done++;
+    if (this.educationList.length > 0)                    done++;
+    if (this.workExperienceList.length > 0)               done++;
     if (this.educationList.length > 0 || this.workExperienceList.length > 0
-        || this.form.resume || this.hasSavedResume) done++;
-    if (this.policyAccepted) done++;
+      || this.form.resume || this.hasSavedResume)         done++;
+    if (this.policyAccepted)                              done++;
     this.reviewCompletionRate = Math.round((done / total) * 100);
   }
 
-  // ── Private helpers ───────────────────────────────────────────────────────
-
   private extractOnboardingId(response: any): string | null {
-    const c = response?.data?.onboardingId ?? response?.data?.id
-      ?? response?.onboardingId ?? response?.id
-      ?? response?.data?.onboarding_id ?? response?.onboarding_id;
+    const c = response?.data?.onboardingId
+      ?? response?.data?.id
+      ?? response?.onboardingId
+      ?? response?.id
+      ?? response?.data?.onboarding_id
+      ?? response?.onboarding_id;
     return c ? String(c) : null;
   }
 
@@ -706,14 +869,6 @@ export class Onboarding implements OnInit, OnDestroy {
       jobTitle: '', company: '', employmentType: '', location: '',
       startDate: '', endDate: '', currentlyWorking: false,
       responsibilities: '', file: null, fileName: '', _saved: false
-    };
-  }
-
-  private blankBankForm(): BankDetailsForm {
-    return {
-      noBankAccount: false, accountHolderName: '', paymentMethod: '',
-      accountNumber: '', confirmAccountNumber: '',
-      bankName: '', iban: '', branchName: '', branchCode: ''
     };
   }
 }

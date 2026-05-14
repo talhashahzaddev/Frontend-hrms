@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
@@ -83,9 +83,8 @@ export interface OnboardingStatusResponse {
     resumeFileName?: string;
     currentStep:     number;
   };
-  educationList:     any[];
+  educationList:      any[];
   workExperienceList: any[];
-  /** Pre-filled bank details returned by GET /onboarding/my-status */
   bankDetails?: {
     bankDetailsId:      string;
     noBankAccount:      boolean;
@@ -99,7 +98,6 @@ export interface OnboardingStatusResponse {
   };
 }
 
-/** Payload sent to POST/PUT /api/onboarding/bank-details */
 export interface SaveBankDetailsRequest {
   onboardingId:       string;
   noBankAccount:      boolean;
@@ -170,32 +168,90 @@ export class OnboardingService {
     );
   }
 
+  // ── Employee Job Title ────────────────────────────────────────────────────
+
+  /**
+   * Normalises an employee / profile payload to a single display title
+   * (position title, designation, or assigned role name).
+   */
+  private extractAssignedTitleFromResponse(response: any): string | null {
+    const root = response?.data !== undefined ? response.data : response;
+    const pick = (data: any): string | null => {
+      if (!data || typeof data !== 'object') return null;
+      const t = (v: unknown): string | null =>
+        typeof v === 'string' && v.trim() ? v.trim() : null;
+      return (
+        t(data.position?.positionTitle) ??
+        t(data.position?.roleName) ??
+        t(data.positionTitle) ??
+        t(data.jobTitle) ??
+        t(data.designation) ??
+        t(data.roleName) ??
+        t(data.role?.roleName) ??
+        (typeof data.role === 'string' ? t(data.role) : null) ??
+        null
+      );
+    };
+    return pick(root) ?? pick(root?.employee);
+  }
+
+  /**
+   * Fetches the logged-in employee's assigned role / position title for onboarding.
+   *
+   * Tries, in order (first non-empty title wins):
+   *   1. GET /employees/my-profile
+   *   2. GET /employees/me
+   *   3. GET /Employee/{employeeId} — same pattern as EmployeeService.getEmployee
+   *
+   * @param employeeId optional employee GUID from the auth token (see AuthService.getEmployeeIdFromToken)
+   */
+  getEmployeeJobTitle(employeeId?: string | null): Observable<string | null> {
+    const fetchTitle = (url: string) =>
+      this.http.get<any>(url).pipe(
+        map(res => this.extractAssignedTitleFromResponse(res)),
+        catchError(() => of<string | null>(null))
+      );
+
+    return fetchTitle(`${this.apiUrl}/employees/my-profile`).pipe(
+      switchMap(title =>
+        title ? of(title) : fetchTitle(`${this.apiUrl}/employees/me`)
+      ),
+      switchMap(title =>
+        title
+          ? of(title)
+          : employeeId
+            ? fetchTitle(`${this.apiUrl}/Employee/${employeeId}`)
+            : of(null)
+      )
+    );
+  }
+
   // ── Education ─────────────────────────────────────────────────────────────
 
   addEducation(
-    education:    OnboardingEducation,
-    attachment?:  File | null,
+    education:     OnboardingEducation,
+    attachment?:   File | null,
     onboardingId?: string | null
   ): Observable<any> {
     const requestBody = {
-      degree:       education.degree,
-      institution:  education.institution,
-      field:        education.field,
-      gpa:          education.gpa || '',
-      fileName:     education.fileName || '',
-      description:  education.description || '',
-      onboardingId: onboardingId || undefined,
+      degree:        education.degree,
+      institution:   education.institution,
+      field:         education.field,
+      gpa:           education.gpa || '',
+      fileName:      education.fileName || '',
+      description:   education.description || '',
+      onboardingId:  onboardingId || undefined,
       onboarding_id: onboardingId || undefined
     };
 
     if (attachment) {
       const formData = new FormData();
-      formData.append('degree',      requestBody.degree);
-      formData.append('institution', requestBody.institution);
-      formData.append('field',       requestBody.field);
-      formData.append('gpa',         requestBody.gpa);
-      formData.append('fileName',    requestBody.fileName);
-      formData.append('description', requestBody.description);
+      formData.append('degree',       requestBody.degree);
+      formData.append('institution',  requestBody.institution);
+      formData.append('field',        requestBody.field);
+      formData.append('gpa',          requestBody.gpa);
+      formData.append('fileName',     requestBody.fileName);
+      formData.append('description',  requestBody.description);
       if (onboardingId) {
         formData.append('onboardingId',  onboardingId);
         formData.append('onboarding_id', onboardingId);
@@ -276,19 +332,8 @@ export class OnboardingService {
     );
   }
 
-  // ── Bank Details (NEW) ────────────────────────────────────────────────────
+  // ── Bank Details ──────────────────────────────────────────────────────────
 
-  /**
-   * Save or update bank details for the current employee's onboarding session.
-   *
-   * Endpoint: POST /api/onboarding/bank-details
-   *   → Creates a new record if one does not exist for this onboardingId.
-   *   → If a record already exists, the backend should upsert (INSERT … ON CONFLICT UPDATE).
-   *
-   * The payload carries noBankAccount flag.
-   * When true, all financial fields are null and the backend marks the
-   * record accordingly for payroll to handle as a manual/cash case.
-   */
   saveBankDetails(request: SaveBankDetailsRequest): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/onboarding/bank-details`, request).pipe(
       map(response => {
@@ -297,6 +342,16 @@ export class OnboardingService {
       }),
       catchError(error => {
         console.error('Bank details save error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getBankDetails(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/onboarding/bank-details`).pipe(
+      catchError(error => {
+        if (error.status === 404) return of(null);
+        console.error('Bank details fetch error:', error);
         return throwError(() => error);
       })
     );
