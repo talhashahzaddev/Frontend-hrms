@@ -54,6 +54,18 @@ export class TaxLedgerComponent implements OnInit {
   taxLedgerRows: any[] = [];
 
   ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: unknown) => {
+          const code = typeof currencyCode === 'string' ? currencyCode : undefined;
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
+
     this.loadFilterData();
     this.loadTaxTransactions();
     this.loadEmployees();

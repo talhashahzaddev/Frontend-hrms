@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 
+import { take } from 'rxjs';
+
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../../features/employee/services/employee.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { Department } from '../../../../core/models/employee.models';
 
 export interface PayrollResultRow {
@@ -49,6 +52,12 @@ export interface PayrollResultRow {
   styleUrl: './payroll-result.component.scss'
 })
 export class PayrollResultComponent implements OnInit {
+  private readonly payrollService = inject(PayrollService);
+  private readonly employeeService = inject(EmployeeService);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+
   periods: any[] = [];
   departments: Department[] = [];
   selectedPeriodId: string = '';
@@ -100,12 +109,19 @@ export class PayrollResultComponent implements OnInit {
   totalBonuses = 0;
   totalNetPayable = 0;
 
-  constructor(
-    private payrollService: PayrollService,
-    private employeeService: EmployeeService
-  ) {}
-
   ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: unknown) => {
+          const code = typeof currencyCode === 'string' ? currencyCode : undefined;
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
+
     this.loadInitialData();
     this.loadPayrollResults();
   }

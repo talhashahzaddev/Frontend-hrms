@@ -6,7 +6,6 @@
             <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.</p>
         </div>
         <div class="header-actions">
-            <button class="ghost-btn" (click)="openBulkGenerateDialog()">Bulk Generate</button>
             <button class="green-btn" (click)="openBulkEmailDialog()">
                 <mat-icon>mail</mat-icon>
                 Bulk Email
@@ -161,9 +160,9 @@
                             </div>
                         </td>
                         <td>{{ row.periodLabel }}</td>
-                        <td class="text-right">{{ row.grossSalaryPkr | number }}</td>
-                        <td class="text-right danger">{{ row.deductionsPkr | number }}</td>
-                        <td class="text-right success">{{ row.netSalaryPkr | number }}</td>
+                        <td class="text-right">{{ currencySymbol() }} {{ row.grossSalaryPkr | number }}</td>
+                        <td class="text-right danger">{{ currencySymbol() }} {{ row.deductionsPkr | number }}</td>
+                        <td class="text-right success">{{ currencySymbol() }} {{ row.netSalaryPkr | number }}</td>
                         <td class="text-center">
                             <span class="status-pill" [ngClass]="statusClass(row.status)">{{ statusLabel(row.status) }}</span>
                         </td>

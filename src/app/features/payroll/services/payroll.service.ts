@@ -2569,6 +2569,113 @@ export class PayrollService {
     }
 
     // Payslips
+    // Compliance payslips (payroll results + PDF)
+    getCompliancePayslips(params: {
+      page?: number;
+      pageSize?: number;
+      payrollPeriodId?: string;
+      departmentId?: string;
+      searchTerm?: string;
+      status?: string;
+    }): Observable<any> {
+      let httpParams = new HttpParams();
+      if (params.page != null) {
+        httpParams = httpParams.set('page', String(params.page));
+      }
+      if (params.pageSize != null) {
+        httpParams = httpParams.set('pageSize', String(params.pageSize));
+      }
+      if (params.payrollPeriodId) {
+        httpParams = httpParams.set('payrollPeriodId', params.payrollPeriodId);
+      }
+      if (params.departmentId) {
+        httpParams = httpParams.set('departmentId', params.departmentId);
+      }
+      if (params.searchTerm?.trim()) {
+        httpParams = httpParams.set('searchTerm', params.searchTerm.trim());
+      }
+      if (params.status) {
+        httpParams = httpParams.set('status', params.status);
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips`, { params: httpParams })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getCompliancePayslipStats(params: {
+      payrollPeriodId?: string;
+      departmentId?: string;
+      searchTerm?: string;
+      status?: string;
+    }): Observable<any> {
+      let httpParams = new HttpParams();
+      if (params.payrollPeriodId) {
+        httpParams = httpParams.set('payrollPeriodId', params.payrollPeriodId);
+      }
+      if (params.departmentId) {
+        httpParams = httpParams.set('departmentId', params.departmentId);
+      }
+      if (params.searchTerm?.trim()) {
+        httpParams = httpParams.set('searchTerm', params.searchTerm.trim());
+      }
+      if (params.status) {
+        httpParams = httpParams.set('status', params.status);
+      }
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips/stats`, { params: httpParams })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    getCompliancePayslipPdfBlob(resultId: string): Observable<Blob> {
+      return this.http.get(`${this.apiUrl}/compliance-payslips/${resultId}/pdf`, {
+        responseType: 'blob'
+      });
+    }
+
+    getCompliancePayslipSource(resultId: string): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips/${resultId}/source`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
+    bulkGenerateCompliancePayslipPdfs(data: {
+      payrollPeriodId: string;
+      employeeIds: string[];
+      overwriteExisting: boolean;
+    }): Observable<any> {
+      return this.http.post<ApiResponse<any>>(`${this.apiUrl}/compliance-payslips/bulk-generate-pdfs`, {
+        payrollPeriodId: data.payrollPeriodId,
+        employeeIds: data.employeeIds,
+        overwriteExisting: data.overwriteExisting ?? false
+      })
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     getPayslips(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/payslips`, { params })
         .pipe(
