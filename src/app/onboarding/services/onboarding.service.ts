@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
@@ -100,6 +100,7 @@ export interface OnboardingStatusResponse {
 
 export interface SaveBankDetailsRequest {
   onboardingId:       string;
+  bankDetailsId?:     string;
   noBankAccount:      boolean;
   accountHolderName?: string | null;
   accountNumber?:     string | null;
@@ -165,64 +166,6 @@ export class OnboardingService {
         if (error.status === 404) return of(null);
         return throwError(() => error);
       })
-    );
-  }
-
-  // ── Employee Job Title ────────────────────────────────────────────────────
-
-  /**
-   * Normalises an employee / profile payload to a single display title
-   * (position title, designation, or assigned role name).
-   */
-  private extractAssignedTitleFromResponse(response: any): string | null {
-    const root = response?.data !== undefined ? response.data : response;
-    const pick = (data: any): string | null => {
-      if (!data || typeof data !== 'object') return null;
-      const t = (v: unknown): string | null =>
-        typeof v === 'string' && v.trim() ? v.trim() : null;
-      return (
-        t(data.position?.positionTitle) ??
-        t(data.position?.roleName) ??
-        t(data.positionTitle) ??
-        t(data.jobTitle) ??
-        t(data.designation) ??
-        t(data.roleName) ??
-        t(data.role?.roleName) ??
-        (typeof data.role === 'string' ? t(data.role) : null) ??
-        null
-      );
-    };
-    return pick(root) ?? pick(root?.employee);
-  }
-
-  /**
-   * Fetches the logged-in employee's assigned role / position title for onboarding.
-   *
-   * Tries, in order (first non-empty title wins):
-   *   1. GET /employees/my-profile
-   *   2. GET /employees/me
-   *   3. GET /Employee/{employeeId} — same pattern as EmployeeService.getEmployee
-   *
-   * @param employeeId optional employee GUID from the auth token (see AuthService.getEmployeeIdFromToken)
-   */
-  getEmployeeJobTitle(employeeId?: string | null): Observable<string | null> {
-    const fetchTitle = (url: string) =>
-      this.http.get<any>(url).pipe(
-        map(res => this.extractAssignedTitleFromResponse(res)),
-        catchError(() => of<string | null>(null))
-      );
-
-    return fetchTitle(`${this.apiUrl}/employees/my-profile`).pipe(
-      switchMap(title =>
-        title ? of(title) : fetchTitle(`${this.apiUrl}/employees/me`)
-      ),
-      switchMap(title =>
-        title
-          ? of(title)
-          : employeeId
-            ? fetchTitle(`${this.apiUrl}/Employee/${employeeId}`)
-            : of(null)
-      )
     );
   }
 
@@ -337,7 +280,9 @@ export class OnboardingService {
   saveBankDetails(request: SaveBankDetailsRequest): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/onboarding/bank-details`, request).pipe(
       map(response => {
-        if (!response?.success) throw new Error(response?.message || 'Failed to save bank details');
+        if (response?.success === false) {
+          throw new Error(response?.message || 'Failed to save bank details');
+        }
         return response;
       }),
       catchError(error => {
@@ -347,8 +292,45 @@ export class OnboardingService {
     );
   }
 
+  updateBankDetails(request: SaveBankDetailsRequest): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/onboarding/bank-details`, request).pipe(
+      map(response => {
+        if (response?.success === false) {
+          throw new Error(response?.message || 'Failed to update bank details');
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Bank details update error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  deleteBankDetails(bankDetailsId?: string | null): Observable<any> {
+    const url = bankDetailsId
+      ? `${this.apiUrl}/onboarding/bank-details/${bankDetailsId}`
+      : `${this.apiUrl}/onboarding/bank-details`;
+    return this.http.delete<any>(url).pipe(
+      map(response => {
+        if (response?.success === false) {
+          throw new Error(response?.message || 'Failed to delete bank details');
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Bank details delete error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   getBankDetails(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/onboarding/bank-details`).pipe(
+      map(response => {
+        if (response?.success === false) return null;
+        return response;
+      }),
       catchError(error => {
         if (error.status === 404) return of(null);
         console.error('Bank details fetch error:', error);

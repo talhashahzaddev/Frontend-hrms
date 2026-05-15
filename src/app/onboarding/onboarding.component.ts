@@ -10,7 +10,8 @@ import {
   OnboardingEducation,
   OnboardingRequest,
   OnboardingService,
-  OnboardingWorkExperience
+  OnboardingWorkExperience,
+  SaveBankDetailsRequest
 } from './services/onboarding.service';
 
 // ─── Local interfaces ─────────────────────────────────────────────────────────
@@ -90,14 +91,6 @@ export class Onboarding implements OnInit, OnDestroy {
   hasSavedPhoto  = false;
   hasSavedResume = false;
 
-  /**
-   * True once the job title has been resolved from either:
-   *   1. Saved onboarding personalInfo (existing session), or
-   *   2. The logged-in user's employee profile (first visit).
-   * Keeps the field read-only in both cases.
-   */
-  isJobTitleReadOnly = false;
-
   // ── Lists ─────────────────────────────────────────────────────────────────
   educationList:      EducationFormEntry[]      = [];
   workExperienceList: WorkExperienceFormEntry[]  = [];
@@ -113,6 +106,8 @@ export class Onboarding implements OnInit, OnDestroy {
   isSavingEducation       = false;
   isSavingWorkExperience  = false;
   isSavingBankDetails     = false;
+  isLoadingBankDetails    = false;
+  isDeletingBankDetails   = false;
   bankDetailsSaved        = false;
   isSubmitting            = false;
 
@@ -205,8 +200,6 @@ export class Onboarding implements OnInit, OnDestroy {
           const data = response?.data ?? response;
 
           if (!data) {
-            // No saved session yet — still fetch job title from employee profile
-            this.fetchJobTitleFromProfile();
             return;
           }
 
@@ -227,15 +220,6 @@ export class Onboarding implements OnInit, OnDestroy {
             this.hasSavedResume      = !!p.resumeFileName;
             this.hasSavedPhoto       = !!p.photoUrl;
             if (p.photoUrl) this.photoPreview = p.photoUrl;
-            if (p.jobTitle) {
-              this.isJobTitleReadOnly = true;
-            } else {
-              // Session exists but no job title saved yet — fetch from profile.
-              this.fetchJobTitleFromProfile();
-            }
-          } else {
-            // Session record exists but no personalInfo block — fetch from profile.
-            this.fetchJobTitleFromProfile();
           }
 
           // ── Education list ────────────────────────────────────────────────
@@ -271,19 +255,11 @@ export class Onboarding implements OnInit, OnDestroy {
             }));
           }
 
-          // ── Bank details ──────────────────────────────────────────────────
+          // ── Bank details (status payload or dedicated GET) ─────────────────
           if (data.bankDetails) {
-            const b = data.bankDetails;
-            this.bankForm.noBankAccount     = b.noBankAccount      ?? false;
-            this.bankForm.accountHolderName = b.accountHolderName  ?? '';
-            this.bankForm.accountNumber     = b.accountNumber      ?? '';
-            this.bankForm.confirmAccountNumber = b.accountNumber   ?? '';
-            this.bankForm.paymentMethod     = b.paymentMethod      ?? '';
-            this.bankForm.bankName          = b.bankName           ?? '';
-            this.bankForm.iban              = b.iban               ?? '';
-            this.bankForm.branchName        = b.branchName         ?? '';
-            this.bankForm.branchCode        = b.branchCode         ?? '';
-            this.bankDetailsSaved           = true;
+            this.applyBankDetails(data.bankDetails);
+          } else if (this.onboardingId) {
+            this.loadBankDetails();
           }
 
           this.documentNotes  = data.documentNotes   ?? '';
@@ -304,53 +280,8 @@ export class Onboarding implements OnInit, OnDestroy {
         },
         error: err => {
           console.warn('No existing onboarding data:', err);
-          this.fetchJobTitleFromProfile();
         }
       });
-  }
-
-  /**
-   * Fetches the logged-in employee's assigned position/role from the backend
-   * and pre-fills the Job Title field, then locks it as read-only.
-   *
-   * Strategy (in priority order):
-   *   1. JWT / session claims already decoded by AuthService  →  zero extra HTTP call.
-   *   2. Fallback: GET /employees/my-profile                  →  dedicated endpoint.
-   *   3. Fallback: GET /employees/:id                         →  generic employee endpoint.
-   */
-  private fetchJobTitleFromProfile(): void {
-    // ── 1. Try claims already available in AuthService ──────────────────────
-    const currentUser = this.authService.getCurrentUserValue();
-    const claimTitle  =
-      currentUser?.jobTitle        ??
-      null;
-
-    if (claimTitle) {
-      this.applyJobTitle(claimTitle);
-      return;
-    }
-
-    // ── 2. Fallback: fetch employee profile from API ─────────────────────────
-    this.onboardingService.getEmployeeJobTitle()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (title: string | null) => {
-          if (title) {
-            this.applyJobTitle(title);
-          }
-          // If still empty, leave field blank but still mark readonly so the
-          // placeholder text guides the user to contact HR.
-        },
-        error: (err: any) => console.warn('Could not fetch job title from profile:', err)
-      });
-  }
-
-  /**
-   * Applies a resolved job title to the form and locks the field.
-   */
-  private applyJobTitle(title: string): void {
-    this.form.jobTitle      = title;
-    this.isJobTitleReadOnly = true;
   }
 
   // ── Step 1 – Personal Info ────────────────────────────────────────────────
@@ -581,6 +512,78 @@ export class Onboarding implements OnInit, OnDestroy {
 
   // ── Step 4 – Bank Details ─────────────────────────────────────────────────
 
+  /** Loads saved bank details for the current session (survives page refresh). */
+  private loadBankDetails(): void {
+    this.isLoadingBankDetails = true;
+    this.onboardingService.getBankDetails()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: response => {
+          this.isLoadingBankDetails = false;
+          const record = this.normalizeBankDetailsPayload(response);
+          if (record && this.hasBankDetailsRecord(record)) {
+            this.applyBankDetails(record);
+          }
+        },
+        error: () => {
+          this.isLoadingBankDetails = false;
+        }
+      });
+  }
+
+  private normalizeBankDetailsPayload(response: any): any | null {
+    if (!response) return null;
+    const data = response?.data ?? response;
+    if (Array.isArray(data)) {
+      return data.length > 0 ? data[0] : null;
+    }
+    return data;
+  }
+
+  private hasBankDetailsRecord(data: any): boolean {
+    if (!data || typeof data !== 'object') return false;
+    if (data.bankDetailsId ?? data.BankDetailsId) return true;
+    if (data.noBankAccount === true || data.NoBankAccount === true) return true;
+    return !!(
+      data.accountNumber ?? data.AccountNumber ??
+      data.bankName ?? data.BankName ??
+      data.accountHolderName ?? data.AccountHolderName
+    );
+  }
+
+  /** Maps API / status bank-details payload into the form and saved summary state. */
+  private applyBankDetails(b: any): void {
+    const accountNumber =
+      b.accountNumber ?? b.AccountNumber ?? '';
+    this.bankForm.bankDetailsId       = String(b.bankDetailsId ?? b.BankDetailsId ?? '') || undefined;
+    this.bankForm.noBankAccount       = b.noBankAccount ?? b.NoBankAccount ?? false;
+    this.bankForm.accountHolderName   = b.accountHolderName ?? b.AccountHolderName ?? '';
+    this.bankForm.accountNumber       = accountNumber;
+    this.bankForm.confirmAccountNumber = accountNumber;
+    this.bankForm.paymentMethod       = b.paymentMethod ?? b.PaymentMethod ?? '';
+    this.bankForm.bankName            = b.bankName ?? b.BankName ?? '';
+    this.bankForm.iban                = b.iban ?? b.Iban ?? '';
+    this.bankForm.branchName          = b.branchName ?? b.BranchName ?? '';
+    this.bankForm.branchCode          = b.branchCode ?? b.BranchCode ?? '';
+    this.bankDetailsSaved             = true;
+    this.calculateCompletionRate();
+  }
+
+  private buildBankDetailsRequest(): SaveBankDetailsRequest {
+    return {
+      onboardingId:      this.onboardingId!,
+      bankDetailsId:     this.bankForm.bankDetailsId,
+      noBankAccount:     this.bankForm.noBankAccount,
+      accountHolderName: this.bankForm.noBankAccount ? null : this.bankForm.accountHolderName,
+      accountNumber:     this.bankForm.noBankAccount ? null : this.bankForm.accountNumber,
+      bankName:          this.bankForm.noBankAccount ? null : this.bankForm.bankName,
+      paymentMethod:     this.bankForm.noBankAccount ? null : this.bankForm.paymentMethod,
+      iban:              this.bankForm.noBankAccount ? null : (this.bankForm.iban || null),
+      branchName:        this.bankForm.noBankAccount ? null : (this.bankForm.branchName || null),
+      branchCode:        this.bankForm.noBankAccount ? null : (this.bankForm.branchCode || null)
+    };
+  }
+
   onNoBankAccountToggle(): void {
     if (this.bankForm.noBankAccount) {
       this.bankErrors = {};
@@ -621,25 +624,24 @@ export class Onboarding implements OnInit, OnDestroy {
     }
 
     this.isSavingBankDetails = true;
-    this.onboardingService.saveBankDetails({
-      onboardingId:       this.onboardingId,
-      noBankAccount:      this.bankForm.noBankAccount,
-      accountHolderName:  this.bankForm.noBankAccount ? null : this.bankForm.accountHolderName,
-      accountNumber:      this.bankForm.noBankAccount ? null : this.bankForm.accountNumber,
-      bankName:           this.bankForm.noBankAccount ? null : this.bankForm.bankName,
-      paymentMethod:      this.bankForm.noBankAccount ? null : this.bankForm.paymentMethod,
-      iban:               this.bankForm.noBankAccount ? null : (this.bankForm.iban || null),
-      branchName:         this.bankForm.noBankAccount ? null : (this.bankForm.branchName || null),
-      branchCode:         this.bankForm.noBankAccount ? null : (this.bankForm.branchCode || null)
-    }).pipe(takeUntil(this.destroy$)).subscribe({
+    const request = this.buildBankDetailsRequest();
+    const save$ = this.bankForm.bankDetailsId
+      ? this.onboardingService.updateBankDetails(request)
+      : this.onboardingService.saveBankDetails(request);
+
+    save$.pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.isSavingBankDetails = false;
-        this.bankDetailsSaved    = true;
-        // Capture bankDetailsId from response if available
-        if (response?.data?.bankDetailsId) {
-          this.bankForm.bankDetailsId = response.data.bankDetailsId;
+        const saved = response?.data ?? response;
+        const newId =
+          saved?.bankDetailsId ?? saved?.BankDetailsId ?? this.bankForm.bankDetailsId;
+        if (newId) {
+          this.bankForm.bankDetailsId = String(newId);
         }
-        this.calculateCompletionRate();
+        this.applyBankDetails({
+          ...this.bankForm,
+          bankDetailsId: this.bankForm.bankDetailsId
+        });
       },
       error: err => {
         this.isSavingBankDetails = false;
@@ -659,22 +661,46 @@ export class Onboarding implements OnInit, OnDestroy {
 
   removeBankDetails(): void {
     if (!confirm('Are you sure you want to remove your bank details?')) return;
-    // Reset the form and allow re-entry
-    this.bankForm = {
-      bankDetailsId: undefined,
-      noBankAccount: false,
-      accountHolderName: '',
-      paymentMethod: '',
-      accountNumber: '',
-      confirmAccountNumber: '',
-      bankName: '',
-      iban: '',
-      branchName: '',
-      branchCode: ''
+
+    const resetLocal = () => {
+      this.bankForm = {
+        bankDetailsId: undefined,
+        noBankAccount: false,
+        accountHolderName: '',
+        paymentMethod: '',
+        accountNumber: '',
+        confirmAccountNumber: '',
+        bankName: '',
+        iban: '',
+        branchName: '',
+        branchCode: ''
+      };
+      this.bankDetailsSaved = false;
+      this.bankErrors = {};
+      this.bankDetailsError = null;
+      this.calculateCompletionRate();
     };
-    this.bankDetailsSaved = false;
-    this.bankErrors = {};
+
+    if (!this.bankForm.bankDetailsId) {
+      resetLocal();
+      return;
+    }
+
+    this.isDeletingBankDetails = true;
     this.bankDetailsError = null;
+    this.onboardingService.deleteBankDetails(this.bankForm.bankDetailsId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isDeletingBankDetails = false;
+          resetLocal();
+        },
+        error: err => {
+          this.isDeletingBankDetails = false;
+          this.bankDetailsError = err?.error?.message || err?.message
+            || 'Failed to delete bank details. Please try again.';
+        }
+      });
   }
 
   continueFromBankDetails(): void {

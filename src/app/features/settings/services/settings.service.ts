@@ -14,7 +14,7 @@ import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { catchError, map, tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/auth.models';
-// import { OnboardingFieldConfig } from '@/app/onboarding/services/onboarding.service';
+import { OnboardingFieldConfig } from '@/app/onboarding/services/onboarding.service';
 
 
 export interface OrganizationSettings {
@@ -177,18 +177,18 @@ export class SettingsService {
     return currency?.symbol || '$';
   }
 
-  // getOnboardingConfig(orgId?: string): Observable<OnboardingFieldConfig> {
-  //   const url = orgId
-  //     ? `${this.apiUrl}/onboarding-config/org/${orgId}`
-  //     : `${this.apiUrl}/onboarding-config`;
-  //   return this.http.get<any>(url).pipe(
-  //     map(res => res.data),
-  //     catchError(err => {
-  //       console.error('Failed to fetch onboarding config:', err);
-  //       return throwError(() => err);
-  //     })
-  //   );
-  // }
+  getOnboardingConfig(orgId?: string): Observable<OnboardingFieldConfig> {
+    const url = orgId
+      ? `${this.apiUrl}/onboarding-config/org/${orgId}`
+      : `${this.apiUrl}/onboarding-config`;
+    return this.http.get<any>(url).pipe(
+      map(res => res.data),
+      catchError(err => {
+        console.error('Failed to fetch onboarding config:', err);
+        return throwError(() => err);
+      })
+    );
+  }
 
   saveOnboardingConfig(orgId: string, config: OnboardingFieldConfiguration): Observable<any> {
     return this.http.put<any>(
