@@ -35,11 +35,8 @@
             </div>
             <div class="field-group">
               <label class="field-label">JOB TITLE</label>
-              <input class="field-input readonly-field" type="text"
-                     [attr.placeholder]="form.jobTitle ? '' : 'Loading your assigned role…'"
-                     [(ngModel)]="form.jobTitle" name="jobTitlePersonal"
-                     readonly />
-              <p class="field-hint subtle" *ngIf="!form.jobTitle">If this stays empty, your role will be confirmed by HR.</p>
+              <input class="field-input" type="text" placeholder="e.g. Senior UX Designer"
+                     [(ngModel)]="form.jobTitle" name="jobTitle" />
             </div>
           </div>
           <div class="field-row">
@@ -406,15 +403,22 @@
               </p>
             </div>
             <div class="entry-actions">
-              <button type="button" class="icon-btn edit-btn" (click)="editBankDetails()" title="Edit">
+              <button type="button" class="icon-btn edit-btn" (click)="editBankDetails()" title="Edit"
+                      [disabled]="isDeletingBankDetails">
                 <span>✎</span>
+              </button>
+              <button type="button" class="icon-btn delete-btn" (click)="removeBankDetails()" title="Delete"
+                      [disabled]="isDeletingBankDetails">
+                <span>✕</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card bank-card" *ngIf="!bankDetailsSaved">
+      <p *ngIf="isLoadingBankDetails" class="minor-note" style="margin: 0 0 12px;">Loading saved bank details…</p>
+
+      <div class="card bank-card" *ngIf="!bankDetailsSaved && !isLoadingBankDetails">
 
         <!-- Hero block -->
         <div class="bank-hero">
