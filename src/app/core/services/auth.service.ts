@@ -748,6 +748,41 @@ export class AuthService {
     return action ? action.hasPermission : false;
   }
 
+  getFirstAllowedRoute(): string {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return '/dashboard';
+
+    // Priority-ordered list: menuName → default route to navigate to
+    const menuRouteMap: { menuName: string; route: string }[] = [
+      { menuName: 'Admin Dashboard',      route: '/dashboard' },
+      { menuName: 'Employee Dashboard',   route: '/employee/dashboard' },
+      { menuName: 'Employee Management',  route: '/employees' },
+      { menuName: 'Attendance',           route: '/attendance' },
+      { menuName: 'Leave Management',     route: '/leave' },
+      { menuName: 'Holidays',             route: '/holidays' },
+      { menuName: 'Assets Management',    route: '/assets' },
+      { menuName: 'Performance',          route: '/performance' },
+      { menuName: 'Calendar',             route: '/calendar' },
+      { menuName: 'AI Assistant',         route: '/ai-assistant' },
+      { menuName: 'Subscription',         route: '/subscription' },
+      { menuName: 'Billings',             route: '/subscription/billing' },
+      { menuName: 'Expense',              route: '/expense' },
+      { menuName: 'News',                 route: '/news' },
+      { menuName: 'Help Desk',            route: '/help-desk' },
+      { menuName: 'Jobs',                 route: '/jobs' },
+      { menuName: 'Payroll',              route: '/payroll' },
+      { menuName: 'Settings',             route: '/settings' },
+    ];
+
+    for (const entry of menuRouteMap) {
+      if (this.hasMenuParentPermission(entry.menuName)) {
+        return entry.route;
+      }
+    }
+
+    return '/dashboard'; // absolute fallback
+  }
+
   private isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
