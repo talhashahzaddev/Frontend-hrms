@@ -9,6 +9,7 @@ import { Subscription, take } from 'rxjs';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { environment } from '../../../../../environments/environment';
 import { PayrollService } from '../../services/payroll.service';
 import { PayslipBulkHubService, PayslipBulkProgress } from '../../services/payslip-bulk-hub.service';
 import {
@@ -72,6 +73,7 @@ interface PayslipRow {
   netSalaryPkr: number;
   status: PayslipStatus;
   versionNo: number;
+  payslipUrl: string | null;
   emailedAt: string | null;
   viewedAt: string | null;
   updatedAt: string | null;
@@ -348,15 +350,24 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const directUrl = this.resolvePayslipOpenUrl(row.payslipUrl);
+    if (directUrl) {
+      const opened = window.open(directUrl, '_blank', 'noopener,noreferrer');
+    //   if (!opened) {
+    //     window.alert('Pop-up blocked. Please allow pop-ups to view the payslip PDF.');
+    //   }
+    //   return;
+    }
+
     this.payrollService.getCompliancePayslipPdfBlob(row.id).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         const opened = window.open(url, '_blank');
-        if (!opened) {
-          URL.revokeObjectURL(url);
-          window.alert('Pop-up blocked. Please allow pop-ups to view the payslip PDF.');
-          return;
-        }
+        // if (!opened) {
+        //   URL.revokeObjectURL(url);
+        //   window.alert('Pop-up blocked. Please allow pop-ups to view the payslip PDF.');
+        //   return;
+        // }
 
         setTimeout(() => URL.revokeObjectURL(url), 120_000);
       },
@@ -961,6 +972,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: salary.net,
         status: 'generated',
         versionNo: 1,
+        payslipUrl: null,
         emailedAt: null,
         viewedAt: null,
         updatedAt: today
@@ -1025,6 +1037,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
       netSalaryPkr: netSalary,
       status: this.normalizePayslipStatus(item.payslipStatus ?? item.status),
       versionNo: Math.max(1, Math.floor(this.toNumber(item.versionNo ?? item.version ?? 1))),
+      payslipUrl: this.normalizePayslipUrl(item.payslipUrl ?? item.payslipurl),
       emailedAt: this.normalizeDateNullable(item.emailedAt ?? item.emailSentAt ?? item.sentAt),
       viewedAt: this.normalizeDateNullable(item.viewedAt),
       updatedAt: this.normalizeDateNullable(item.updatedAt ?? item.modifiedAt ?? item.createdAt)
@@ -1401,8 +1414,43 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
     return `${year}-${month}-${day}`;
   }
 
+  private resolvePayslipOpenUrl(payslipUrl: string | null | undefined): string | null {
+    const raw = String(payslipUrl ?? '').trim();
+    if (!raw) {
+      return null;
+    }
+
+    if (/^https?:\/\//i.test(raw)) {
+      return raw;
+    }
+
+    if (raw.startsWith('/')) {
+      const apiBase = environment.apiUrl.replace(/\/api\/?$/i, '');
+      return `${apiBase}${raw}`;
+    }
+
+    return null;
+  }
+
+  private normalizePayslipUrl(value: unknown): string | null {
+    const raw = String(value ?? '').trim();
+    return raw || null;
+  }
+
   private downloadPayslipPdf(payslipId: string): void {
     if (this.usingLocalPayslipData) {
+      return;
+    }
+
+    const row = this.payslips.find((item) => item.id === payslipId);
+    const directUrl = row ? this.resolvePayslipOpenUrl(row.payslipUrl) : null;
+    if (directUrl) {
+      const anchor = document.createElement('a');
+      anchor.href = directUrl;
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.download = `payslip-${payslipId}.pdf`;
+      anchor.click();
       return;
     }
 
@@ -1446,6 +1494,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 86600,
         status: 'sent',
         versionNo: 1,
+        payslipUrl: null,
         emailedAt: '2025-03-31',
         viewedAt: null,
         updatedAt: '2025-03-31'
@@ -1465,6 +1514,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 77800,
         status: 'sent',
         versionNo: 1,
+        payslipUrl: null,
         emailedAt: '2025-03-31',
         viewedAt: null,
         updatedAt: '2025-03-31'
@@ -1484,6 +1534,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 98900,
         status: 'viewed',
         versionNo: 2,
+        payslipUrl: null,
         emailedAt: '2025-03-31',
         viewedAt: '2025-04-01',
         updatedAt: '2025-04-01'
@@ -1503,6 +1554,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 62200,
         status: 'generated',
         versionNo: 1,
+        payslipUrl: null,
         emailedAt: null,
         viewedAt: null,
         updatedAt: '2025-03-30'
@@ -1522,6 +1574,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 52300,
         status: 'generated',
         versionNo: 1,
+        payslipUrl: null,
         emailedAt: null,
         viewedAt: null,
         updatedAt: '2025-03-30'
@@ -1541,6 +1594,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 65500,
         status: 'sent',
         versionNo: 2,
+        payslipUrl: null,
         emailedAt: '2025-03-31',
         viewedAt: null,
         updatedAt: '2025-03-31'
@@ -1560,6 +1614,7 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
         netSalaryPkr: 0,
         status: 'draft',
         versionNo: 1,
+        payslipUrl: null,
         emailedAt: null,
         viewedAt: null,
         updatedAt: '2025-03-28'
