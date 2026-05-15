@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { take } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { Subscription, take } from 'rxjs';
 
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollService } from '../../services/payroll.service';
+import { PayslipBulkHubService, PayslipBulkProgress } from '../../services/payslip-bulk-hub.service';
 import {
   PayslipViewDialogComponent,
   PayslipViewDialogData,
@@ -33,7 +35,7 @@ import {
   BulkEmailRecipientOption
 } from '../dialogs/bulk-email-payslips-dialog/bulk-email-payslips-dialog.component';
 
-type PayslipStatus = 'draft' | 'generated' | 'sent' | 'viewed';
+type PayslipStatus = 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 
 interface PeriodOption {
   id: string;
@@ -82,13 +84,20 @@ interface PayslipRow {
   templateUrl: './compliance-payslips.component.html',
   styleUrl: './compliance-payslips.component.scss'
 })
-export class CompliancePayslipsComponent implements OnInit {
+export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   private readonly payrollService = inject(PayrollService);
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
+  private readonly payslipBulkHub = inject(PayslipBulkHubService);
+  private readonly toastr = inject(ToastrService);
   private readonly dialog = inject(MatDialog);
 
+  private bulkProgressSubscription?: Subscription;
+  private bulkHideTimer?: ReturnType<typeof setTimeout>;
+
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+  readonly bulkJobActive = signal(false);
+  readonly bulkProgress = signal<PayslipBulkProgress | null>(null);
 
   pendingSearchKeyword = '';
   pendingPeriodId = '';
@@ -118,6 +127,14 @@ export class CompliancePayslipsComponent implements OnInit {
 
   usingLocalPayslipData = false;
   usingLocalPayslipDetailData = false;
+
+  ngOnDestroy(): void {
+    this.bulkProgressSubscription?.unsubscribe();
+    if (this.bulkHideTimer) {
+      clearTimeout(this.bulkHideTimer);
+    }
+    void this.payslipBulkHub.disconnect();
+  }
 
   ngOnInit(): void {
     this.localPayslipSeed = this.buildLocalPayslipSeed();
@@ -409,7 +426,7 @@ export class CompliancePayslipsComponent implements OnInit {
     const periodLabel = this.getPeriodLabelById(defaultPeriodId);
 
     const dialogRef = this.dialog.open(BulkEmailPayslipsDialogComponent, {
-      width: '600px',
+      width: '640px',
       maxWidth: '96vw',
       panelClass: 'bulk-email-payslips-dialog-panel',
       autoFocus: false,
@@ -723,24 +740,122 @@ export class CompliancePayslipsComponent implements OnInit {
       return;
     }
 
-    this.payrollService.bulkEmailPayslips({
-      payrollPeriodId: payload.payrollPeriodId,
-      sendToMode: payload.sendToMode,
-      subject: payload.subject,
-      message: payload.message,
-      employeeIds: payload.employeeIds
-    }).subscribe({
-      next: () => {
-        this.loadPayslips();
-        this.loadStats();
-      },
-      error: (error: any) => {
-        if (this.isUnsupportedEndpointError(error)) {
-          this.activateLocalPayslipFallback();
-          this.applyLocalBulkEmail(payload);
-        }
-      }
+    void this.startBulkUploadAndSend(payload);
+  }
+
+  private async startBulkUploadAndSend(payload: BulkEmailPayslipsDialogPayload): Promise<void> {
+    if (!payload.employeeIds.length) {
+      this.toastr.warning('Select at least one employee with a generated payslip.');
+      return;
+    }
+
+    if (this.bulkHideTimer) {
+      clearTimeout(this.bulkHideTimer);
+      this.bulkHideTimer = undefined;
+    }
+
+    this.bulkProgressSubscription?.unsubscribe();
+
+    const initialTotal = payload.employeeIds.length;
+    this.bulkJobActive.set(true);
+    this.bulkProgress.set({
+      jobId: '',
+      total: initialTotal,
+      processed: 0,
+      failed: 0,
+      percentageCompleted: 0,
+      isComplete: false
     });
+
+    let signalRConnected = false;
+
+    try {
+      await this.payslipBulkHub.connect();
+      signalRConnected = true;
+
+      this.bulkProgressSubscription = this.payslipBulkHub.progress$.subscribe((progress) => {
+        this.bulkProgress.set(progress);
+
+        if (progress.isComplete) {
+          this.onBulkJobComplete(progress);
+        }
+      });
+    } catch (hubError) {
+      console.warn('SignalR progress connection failed; bulk job will still run without live updates.', hubError);
+      this.toastr.warning('Live progress unavailable. Payslip emails are still being processed in the background.');
+    }
+
+    const connectionId = signalRConnected ? this.payslipBulkHub.connectionId : undefined;
+
+    try {
+      this.payrollService.uploadSendPayslips({
+        payrollPeriodId: payload.payrollPeriodId,
+        employeeIds: payload.employeeIds,
+        subject: payload.subject,
+        message: payload.message,
+        connectionId
+      }).subscribe({
+        next: async (result) => {
+          if (result?.jobId) {
+            this.bulkProgress.update((current) => ({
+              ...(current ?? {
+                total: initialTotal,
+                processed: 0,
+                failed: 0,
+                percentageCompleted: 0,
+                isComplete: false
+              }),
+              jobId: result.jobId
+            }));
+
+            try {
+              await this.payslipBulkHub.joinJob(result.jobId);
+            } catch (joinError) {
+              console.error('Failed to join payslip bulk SignalR group', joinError);
+            }
+          }
+
+          this.toastr.info('Bulk payslip upload and email started.');
+        },
+        error: (error: any) => {
+          if (this.isUnsupportedEndpointError(error)) {
+            this.activateLocalPayslipFallback();
+            this.resetBulkProgressUi();
+            this.applyLocalBulkEmail(payload);
+            return;
+          }
+
+          this.resetBulkProgressUi();
+          this.toastr.error(error?.message ?? 'Failed to start bulk payslip job.');
+        }
+      });
+    } catch (error: any) {
+      this.resetBulkProgressUi();
+      this.toastr.error(error?.message ?? 'Failed to start bulk payslip job.');
+    }
+  }
+
+  private onBulkJobComplete(progress: PayslipBulkProgress): void {
+    this.loadPayslips();
+    this.loadStats();
+
+    if (progress.failed > 0) {
+      this.toastr.warning(`Completed with ${progress.failed} failed of ${progress.total} payslips.`);
+    } else {
+      this.toastr.success(`Successfully processed ${progress.processed} payslip${progress.processed === 1 ? '' : 's'}.`);
+    }
+
+    this.bulkHideTimer = setTimeout(() => {
+      this.resetBulkProgressUi();
+    }, 6000);
+  }
+
+  private resetBulkProgressUi(): void {
+    this.bulkJobActive.set(false);
+    this.bulkProgress.set(null);
+    this.bulkProgressSubscription?.unsubscribe();
+    this.bulkProgressSubscription = undefined;
+    void this.payslipBulkHub.disconnect();
   }
 
   private applyLocalSingleGenerate(row: PayslipRow): void {
@@ -1177,8 +1292,10 @@ export class CompliancePayslipsComponent implements OnInit {
     const status = String(value ?? '').trim().toLowerCase();
 
     if (status === 'viewed' || status === 'seen') return 'viewed';
+    if (status === 'bounced') return 'bounced';
+    if (status === 'failed') return 'failed';
     if (status === 'sent' || status === 'emailed' || status === 'email-sent') return 'sent';
-    if (status === 'generated' || status === 'processed') return 'generated';
+    if (status === 'generated' || status === 'processed' || status === 'pending') return 'generated';
     return 'draft';
   }
 
@@ -1254,8 +1371,10 @@ export class CompliancePayslipsComponent implements OnInit {
 
   private statusRank(status: PayslipStatus | BulkEmailRecipientStatus): number {
     if (status === 'none') return 0;
-    if (status === 'viewed') return 4;
-    if (status === 'sent') return 3;
+    if (status === 'viewed') return 5;
+    if (status === 'sent') return 4;
+    if (status === 'bounced') return 3;
+    if (status === 'failed') return 3;
     if (status === 'generated') return 2;
     return 1;
   }

@@ -2748,6 +2748,34 @@ export class PayrollService {
         );
     }
 
+    uploadSendPayslips(data: {
+      payrollPeriodId: string;
+      employeeIds: string[];
+      subject?: string;
+      message?: string;
+      connectionId?: string;
+    }): Observable<{ jobId: string; message: string }> {
+      return this.http
+        .post<ApiResponse<{ jobId: string; message: string }>>(
+          `${environment.apiUrl}/payroll/upload-send-payslips`,
+          {
+            payrollPeriodId: data.payrollPeriodId,
+            employeeIds: data.employeeIds,
+            subject: data.subject ?? null,
+            message: data.message ?? null,
+            connectionId: data.connectionId ?? null
+          }
+        )
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data ?? { jobId: '', message: response.message ?? '' };
+          })
+        );
+    }
+
     getMyLoans(params?: any): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/loans/my-requests`, { params })
         .pipe(

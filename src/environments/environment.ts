@@ -1,13 +1,2 @@
-export const environment = {
-  production: false,
-  // apiUrl: 'https://localhost:60485/api',
-  // apiUrl: 'https://localhost:44308/api', //IIS Express
-  apiUrl: 'https://hrmsapplicationcodifiedlabs-production.up.railway.app/api',
-  apiKey: '',
-  appName: 'HRMS Frontend',
-  auth: {
-    tokenKey: 'token',
-    refreshTokenKey: 'refresh_token',
-    userKey: 'user'
-  }
-}; 
+// Default for local `ng serve` (development). Production builds use fileReplacements → environment.production.ts
+export { environment } from './environment.development';

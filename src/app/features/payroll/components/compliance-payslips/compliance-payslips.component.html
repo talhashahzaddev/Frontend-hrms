@@ -17,6 +17,44 @@
         </div>
     </header>
 
+    @if (bulkJobActive()) {
+    <section class="bulk-progress-banner" role="status" aria-live="polite">
+        <div class="bulk-progress-header">
+            <div class="bulk-progress-title">
+                <span class="pulse-dot"></span>
+                <div>
+                    <strong>{{ bulkProgress()?.isComplete ? 'Bulk email complete' : 'Uploading & emailing payslips' }}</strong>
+                    <small>Job {{ bulkProgress()?.jobId | slice:0:8 }}…</small>
+                </div>
+            </div>
+            <span class="bulk-progress-percent">{{ bulkProgress()?.percentageCompleted ?? 0 }}%</span>
+        </div>
+
+        <div class="bulk-progress-track">
+            <div class="bulk-progress-fill" [style.width.%]="bulkProgress()?.percentageCompleted ?? 0"></div>
+        </div>
+
+        <div class="bulk-progress-stats">
+            <div class="stat">
+                <span class="label">Total</span>
+                <span class="value">{{ bulkProgress()?.total ?? 0 }}</span>
+            </div>
+            <div class="stat success">
+                <span class="label">Sent</span>
+                <span class="value">{{ bulkProgress()?.processed ?? 0 }}</span>
+            </div>
+            <div class="stat danger">
+                <span class="label">Failed</span>
+                <span class="value">{{ bulkProgress()?.failed ?? 0 }}</span>
+            </div>
+        </div>
+
+        @if (bulkProgress()?.lastError) {
+        <p class="bulk-progress-error">{{ bulkProgress()?.lastError }}</p>
+        }
+    </section>
+    }
+
     <!-- Summary Stats -->
     <section class="summary-cards">
         <div class="card">
@@ -216,7 +254,7 @@
     </div>
 
     <!-- Quick Insights -->
-    <aside class="insight-card">
+    <!-- <aside class="insight-card">
         <h4>
             <span class="pulse"></span>
             Quick Insights
@@ -233,5 +271,5 @@
             <span>{{ distributionPercent }}% complete</span>
         </div>
         <button type="button">View Distribution Report</button>
-    </aside>
+    </aside> -->
 </div>

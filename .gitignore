@@ -16,10 +16,8 @@ dist/
 *.sln
 *.sw?
 
-# Environment
-environment.ts
-environment.prod.ts
-/src/environments/*.ts
+# Environment (local overrides only — committed: environment.ts, environment.development.ts, environment.production.ts)
+/src/environments/*.local.ts
 .angular/cache/
 dist/
 node_modules/

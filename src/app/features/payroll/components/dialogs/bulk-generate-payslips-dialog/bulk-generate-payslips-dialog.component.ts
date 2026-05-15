@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
-export type BulkGenerateEmployeeStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed';
+export type BulkGenerateEmployeeStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 
 export interface BulkGeneratePeriodOption {
   id: string;
@@ -148,6 +148,8 @@ export class BulkGeneratePayslipsDialogComponent {
   statusClass(status: BulkGenerateEmployeeStatus): string {
     if (status === 'sent') return 'status-sent';
     if (status === 'viewed') return 'status-viewed';
+    if (status === 'failed') return 'status-failed';
+    if (status === 'bounced') return 'status-bounced';
     if (status === 'generated') return 'status-generated';
     if (status === 'draft') return 'status-draft';
     return 'status-none';
