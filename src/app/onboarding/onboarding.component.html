@@ -35,10 +35,11 @@
             </div>
             <div class="field-group">
               <label class="field-label">JOB TITLE</label>
-              <input class="field-input" type="text" placeholder="e.g. Senior UX Designer"
-                     [(ngModel)]="form.jobTitle" name="jobTitle"
-                     [readonly]="isJobTitleReadOnly"
-                     [class.readonly-field]="isJobTitleReadOnly" />
+              <input class="field-input readonly-field" type="text"
+                     [attr.placeholder]="form.jobTitle ? '' : 'Loading your assigned role…'"
+                     [(ngModel)]="form.jobTitle" name="jobTitlePersonal"
+                     readonly />
+              <p class="field-hint subtle" *ngIf="!form.jobTitle">If this stays empty, your role will be confirmed by HR.</p>
             </div>
           </div>
           <div class="field-row">
@@ -390,7 +391,30 @@
         <div class="progress-track"><div class="progress-fill" style="width:66%"></div></div>
       </div>
 
-      <div class="card bank-card">
+      <!-- Saved Bank Details Summary Card -->
+      <div *ngIf="bankDetailsSaved && !bankForm.noBankAccount" class="entries-section">
+        <h3 class="entries-title">✓ Bank Details Saved</h3>
+        <div class="entry-card">
+          <div class="entry-header">
+            <div class="entry-badge">{{ bankForm.paymentMethod || 'Bank' }}</div>
+            <div class="entry-info">
+              <p class="entry-primary">{{ bankForm.bankName }} · {{ bankForm.accountHolderName }}</p>
+              <p class="entry-secondary">
+                Account: •••• {{ bankForm.accountNumber | slice:-4 }}
+                <span *ngIf="bankForm.iban">&nbsp;·&nbsp;IBAN: {{ bankForm.iban }}</span>
+                <span *ngIf="bankForm.branchName">&nbsp;·&nbsp;{{ bankForm.branchName }}</span>
+              </p>
+            </div>
+            <div class="entry-actions">
+              <button type="button" class="icon-btn edit-btn" (click)="editBankDetails()" title="Edit">
+                <span>✎</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bank-card" *ngIf="!bankDetailsSaved">
 
         <!-- Hero block -->
         <div class="bank-hero">
@@ -401,28 +425,6 @@
             Ensure all details match your bank statements to avoid delays.
           </p>
         </div>
-
-        <!-- No bank account toggle row -->
-        <!-- <div class="no-bank-row" [class.active]="bankForm.noBankAccount">
-          <div class="no-bank-left">
-            <span class="no-bank-icon">🚫</span>
-            <span class="no-bank-label">I don't have a bank account</span>
-          </div>
-          <label class="switch-toggle">
-            <input type="checkbox" [(ngModel)]="bankForm.noBankAccount" name="noBankAccount"
-                   (change)="onNoBankAccountToggle()" />
-            <span class="slider"></span>
-          </label>
-        </div> -->
-
-        <!-- No bank account notice -->
-        <!-- <div class="no-bank-notice" *ngIf="bankForm.noBankAccount">
-          <span class="notice-icon">ℹ️</span>
-          <p>
-            Your salary will be processed via <strong>manual / cash payment</strong>.
-            HR will contact you to arrange an alternative payment method.
-          </p>
-        </div> -->
 
         <!-- Bank form fields — hidden when noBankAccount -->
         <ng-container *ngIf="!bankForm.noBankAccount">
@@ -435,15 +437,15 @@
                 <label class="field-label">ACCOUNT HOLDER NAME <span class="req">*</span></label>
                 <input class="field-input" type="text" placeholder="Full legal name"
                        [(ngModel)]="bankForm.accountHolderName" name="accountHolderName"
-                       [class.field-error]="bankErrors.accountHolderName"
+                       [class.field-error]="bankErrors['accountHolderName']"
                        (input)="clearBankError('accountHolderName')" />
-                <span class="inline-error" *ngIf="bankErrors.accountHolderName">{{ bankErrors.accountHolderName }}</span>
+                <span class="inline-error" *ngIf="bankErrors['accountHolderName']">{{ bankErrors['accountHolderName'] }}</span>
               </div>
               <div class="field-group">
                 <label class="field-label">PAYMENT METHOD <span class="req">*</span></label>
                 <div class="select-wrapper">
                   <select class="field-input" [(ngModel)]="bankForm.paymentMethod" name="paymentMethod"
-                          [class.field-error]="bankErrors.paymentMethod"
+                          [class.field-error]="bankErrors['paymentMethod']"
                           (change)="clearBankError('paymentMethod')">
                     <option value="" disabled>Select payment method</option>
                     <option value="Bank Transfer (EFT)">Bank Transfer (EFT)</option>
@@ -452,7 +454,7 @@
                     <option value="Wire Transfer">Wire Transfer</option>
                   </select>
                 </div>
-                <span class="inline-error" *ngIf="bankErrors.paymentMethod">{{ bankErrors.paymentMethod }}</span>
+                <span class="inline-error" *ngIf="bankErrors['paymentMethod']">{{ bankErrors['paymentMethod'] }}</span>
               </div>
             </div>
 
@@ -461,17 +463,17 @@
                 <label class="field-label">ACCOUNT NUMBER <span class="req">*</span></label>
                 <input class="field-input" type="password" placeholder="••••••••••••"
                        [(ngModel)]="bankForm.accountNumber" name="accountNumber"
-                       [class.field-error]="bankErrors.accountNumber"
+                       [class.field-error]="bankErrors['accountNumber']"
                        (input)="clearBankError('accountNumber')" />
-                <span class="inline-error" *ngIf="bankErrors.accountNumber">{{ bankErrors.accountNumber }}</span>
+                <span class="inline-error" *ngIf="bankErrors['accountNumber']">{{ bankErrors['accountNumber'] }}</span>
               </div>
               <div class="field-group">
                 <label class="field-label">CONFIRM ACCOUNT NUMBER <span class="req">*</span></label>
                 <input class="field-input" type="text" placeholder="Re-enter account number"
                        [(ngModel)]="bankForm.confirmAccountNumber" name="confirmAccountNumber"
-                       [class.field-error]="bankErrors.confirmAccountNumber"
+                       [class.field-error]="bankErrors['confirmAccountNumber']"
                        (input)="clearBankError('confirmAccountNumber')" />
-                <span class="inline-error" *ngIf="bankErrors.confirmAccountNumber">{{ bankErrors.confirmAccountNumber }}</span>
+                <span class="inline-error" *ngIf="bankErrors['confirmAccountNumber']">{{ bankErrors['confirmAccountNumber'] }}</span>
               </div>
             </div>
           </div>
@@ -484,7 +486,7 @@
                 <label class="field-label">BANK NAME <span class="req">*</span></label>
                 <div class="select-wrapper">
                   <select class="field-input" [(ngModel)]="bankForm.bankName" name="bankName"
-                          [class.field-error]="bankErrors.bankName"
+                          [class.field-error]="bankErrors['bankName']"
                           (change)="clearBankError('bankName')">
                     <option value="" disabled>Select your bank</option>
                     <option value="ABN AMRO">ABN AMRO</option>
@@ -508,15 +510,15 @@
                     <option value="Other">Other</option>
                   </select>
                 </div>
-                <span class="inline-error" *ngIf="bankErrors.bankName">{{ bankErrors.bankName }}</span>
+                <span class="inline-error" *ngIf="bankErrors['bankName']">{{ bankErrors['bankName'] }}</span>
               </div>
               <div class="field-group">
                 <label class="field-label">IBAN / SWIFT CODE</label>
                 <input class="field-input" type="text" placeholder="Optional for domestic transfers"
                        [(ngModel)]="bankForm.iban" name="iban"
-                       [class.field-error]="bankErrors.iban"
+                       [class.field-error]="bankErrors['iban']"
                        (input)="clearBankError('iban')" />
-                <span class="inline-error" *ngIf="bankErrors.iban">{{ bankErrors.iban }}</span>
+                <span class="inline-error" *ngIf="bankErrors['iban']">{{ bankErrors['iban'] }}</span>
               </div>
             </div>
 
