@@ -37,14 +37,14 @@
         @for (item of data.earnings; track item.label) {
           <div class="line-row">
             <span>{{ item.label }}</span>
-            <strong [ngClass]="toneClass(item.tone)">{{ item.amount | number }}</strong>
+            <strong [ngClass]="toneClass(item.tone)">{{ data.currencySymbol }} {{ item.amount | number }}</strong>
           </div>
         }
       </div>
 
       <div class="total-box">
         <span>Total earnings</span>
-        <strong>{{ totalEarnings | number }}</strong>
+        <strong>{{ data.currencySymbol }} {{ totalEarnings | number }}</strong>
       </div>
 
       <h3 class="section-offset">Attendance</h3>
@@ -63,14 +63,14 @@
         @for (item of data.deductions; track item.label) {
           <div class="line-row">
             <span class="tone-danger">{{ item.label }}</span>
-            <strong class="tone-danger">{{ item.amount | number }}</strong>
+            <strong class="tone-danger">{{ data.currencySymbol }} {{ item.amount | number }}</strong>
           </div>
         }
       </div>
 
       <div class="total-box danger">
         <span>Total deductions</span>
-        <strong>{{ totalDeductions | number }}</strong>
+        <strong>{{ data.currencySymbol }} {{ totalDeductions | number }}</strong>
       </div>
 
       <div class="mini-card section-offset">
@@ -78,16 +78,16 @@
         @for (item of data.employerContributions; track item.label) {
           <div class="line-row">
             <span>{{ item.label }}</span>
-            <strong class="tone-primary">{{ item.amount | number }}</strong>
+            <strong class="tone-primary">{{ data.currencySymbol }} {{ item.amount | number }}</strong>
           </div>
         }
       </div>
 
       <div class="mini-card ytd">
         <h4>Year to date (YTD)</h4>
-        <div class="line-row"><span>YTD gross</span><strong>{{ data.ytd.grossPkr | number }}</strong></div>
-        <div class="line-row"><span>YTD tax</span><strong>{{ data.ytd.taxPkr | number }}</strong></div>
-        <div class="line-row strong"><span>YTD net</span><strong class="tone-primary">{{ data.ytd.netPkr | number }}</strong></div>
+        <div class="line-row"><span>YTD gross</span><strong>{{ data.currencySymbol }} {{ data.ytd.grossPkr | number }}</strong></div>
+        <div class="line-row"><span>YTD tax</span><strong>{{ data.currencySymbol }} {{ data.ytd.taxPkr | number }}</strong></div>
+        <div class="line-row strong"><span>YTD net</span><strong class="tone-primary">{{ data.currencySymbol }} {{ data.ytd.netPkr | number }}</strong></div>
       </div>
     </section>
   </div>

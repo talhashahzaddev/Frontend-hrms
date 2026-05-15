@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
-export type BulkEmailRecipientStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed';
+export type BulkEmailRecipientStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 export type BulkEmailSendMode = 'all-generated' | 'not-sent' | 'custom';
 
 export interface BulkEmailPeriodOption {
@@ -49,6 +49,9 @@ export interface BulkEmailPayslipsDialogPayload {
 export class BulkEmailPayslipsDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<BulkEmailPayslipsDialogComponent, BulkEmailPayslipsDialogPayload | undefined>);
+
+  selectionExpanded = true;
+  emailExpanded = false;
 
   readonly selectedRecipientIds = new Set<string>();
   selectionError = false;
@@ -102,6 +105,10 @@ export class BulkEmailPayslipsDialogComponent {
 
   get customRecipients(): BulkEmailRecipientOption[] {
     return this.generatedPeriodRecipients;
+  }
+
+  get displayRecipients(): BulkEmailRecipientOption[] {
+    return this.showCustomSelection ? this.customRecipients : this.sendableRecipients;
   }
 
   get sendableRecipients(): BulkEmailRecipientOption[] {
@@ -166,14 +173,20 @@ export class BulkEmailPayslipsDialogComponent {
     return this.selectedRecipientIds.has(id);
   }
 
-  save(): void {
+  process(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      if (!this.emailExpanded) {
+        this.emailExpanded = true;
+      }
       return;
     }
 
     if (!this.sendableRecipients.length) {
       this.selectionError = true;
+      if (!this.selectionExpanded) {
+        this.selectionExpanded = true;
+      }
       return;
     }
 

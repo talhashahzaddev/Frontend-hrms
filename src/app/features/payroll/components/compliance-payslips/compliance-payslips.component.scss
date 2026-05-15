@@ -10,6 +10,131 @@
     padding: 1.25rem;
   }
 
+  .bulk-progress-banner {
+    margin-bottom: 1.5rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(37, 99, 235, 0.22);
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 55%, #ffffff 100%);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+
+    .bulk-progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .bulk-progress-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      strong {
+        display: block;
+        font-size: 0.98rem;
+        color: #0f172a;
+      }
+
+      small {
+        color: #64748b;
+        font-size: 0.76rem;
+      }
+    }
+
+    .pulse-dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 999px;
+      background: #2563eb;
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+      animation: payslip-bulk-pulse 1.6s infinite;
+      flex-shrink: 0;
+    }
+
+    .bulk-progress-percent {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1d4ed8;
+      letter-spacing: -0.03em;
+    }
+
+    .bulk-progress-track {
+      height: 0.55rem;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+      margin-bottom: 0.85rem;
+    }
+
+    .bulk-progress-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #2563eb 0%, #10b981 100%);
+      transition: width 0.35s ease;
+    }
+
+    .bulk-progress-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.65rem;
+
+      .stat {
+        padding: 0.55rem 0.65rem;
+        border-radius: 0.55rem;
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid #e2e8f0;
+
+        .label {
+          display: block;
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+          color: #64748b;
+          font-weight: 700;
+        }
+
+        .value {
+          display: block;
+          margin-top: 0.15rem;
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: #0f172a;
+        }
+
+        &.success .value {
+          color: #059669;
+        }
+
+        &.danger .value {
+          color: #dc2626;
+        }
+      }
+    }
+
+    .bulk-progress-error {
+      margin: 0.75rem 0 0;
+      font-size: 0.8rem;
+      color: #b91c1c;
+      font-weight: 600;
+    }
+  }
+
+  @keyframes payslip-bulk-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
+    }
+
+    70% {
+      box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+  }
+
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -479,6 +604,8 @@
     &.status-generated { background: #dcfce7; color: #15803d; }
     &.status-sent { background: #e0f2fe; color: #0369a1; }
     &.status-viewed { background: #fef9c3; color: #a16207; }
+    &.status-failed { background: #fee2e2; color: #b91c1c; }
+    &.status-bounced { background: #ffedd5; color: #c2410c; }
   }
 
   .version-chip {

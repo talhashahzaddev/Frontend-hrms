@@ -1,12 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 
+import { take } from 'rxjs';
+
 import { PayrollService } from '../../services/payroll.service';
 import { EmployeeService } from '../../../../features/employee/services/employee.service';
+import { SettingsService } from '../../../settings/services/settings.service';
 import { Department } from '../../../../core/models/employee.models';
+
+export interface PayrollResultRow {
+  rowKey: string;
+  employeeId: string;
+  id: string;
+  name: string;
+  department: string;
+  avatar: string;
+  earnings: {
+    basic: number;
+    ot: number;
+    perfBonus: number;
+    bonus: number;
+    gross: number;
+  };
+  deductions: {
+    attendance: number;
+    late: number;
+    leave: number;
+    loan: number;
+    advance: number;
+    pfEmp: number;
+    tax: number;
+    total: number;
+  };
+  contributions: {
+    pfEmployer: number;
+    gratuity: number;
+  };
+  netPayable: number;
+  totalBonuses: number;
+  detailSections: { title: string; rows: Record<string, unknown>[] }[];
+}
 
 @Component({
   selector: 'app-payroll-result',
@@ -16,12 +52,21 @@ import { Department } from '../../../../core/models/employee.models';
   styleUrl: './payroll-result.component.scss'
 })
 export class PayrollResultComponent implements OnInit {
+  private readonly payrollService = inject(PayrollService);
+  private readonly employeeService = inject(EmployeeService);
+  private readonly settingsService = inject(SettingsService);
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+
   periods: any[] = [];
   departments: Department[] = [];
   selectedPeriodId: string = '';
   selectedDepartmentId: string = '';
   searchTerm: string = '';
   hasAppliedFilters: boolean = false;
+
+  /** Expanded payroll breakdown row (employeeId). */
+  expandedEmployeeId: string | null = null;
 
   currentPage: number = 1;
   pageSize: number = 10;
@@ -56,7 +101,7 @@ export class PayrollResultComponent implements OnInit {
     this.loadPayrollResults();
   }
 
-  employees: any[] = [];
+  employees: PayrollResultRow[] = [];
 
   totalEmployees = 0;
   totalGrossSalary = 0;
@@ -64,12 +109,19 @@ export class PayrollResultComponent implements OnInit {
   totalBonuses = 0;
   totalNetPayable = 0;
 
-  constructor(
-    private payrollService: PayrollService,
-    private employeeService: EmployeeService
-  ) {}
-
   ngOnInit(): void {
+    this.settingsService.getOrganizationCurrency()
+      .pipe(take(1))
+      .subscribe({
+        next: (currencyCode: unknown) => {
+          const code = typeof currencyCode === 'string' ? currencyCode : undefined;
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
+        },
+        error: () => {
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
+        }
+      });
+
     this.loadInitialData();
     this.loadPayrollResults();
   }
@@ -104,36 +156,43 @@ export class PayrollResultComponent implements OnInit {
     this.payrollService.getPayrollResults(filter).subscribe({
       next: (res) => {
         const data = res.data || [];
-        this.employees = data.map((item: any) => ({
-          id: item.employeeCode || item.employeeId,
-          name: item.employeeName,
-          department: item.departmentName,
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.employeeName)}&background=random`,
-          earnings: {
-            basic: item.basicSalary,
-            ot: this.sumJson(item.overtimeDetails, 'totalOvertimeAmount'),
-            perfBonus: this.sumJson(item.performanceBonuses, 'bonusAmount'),
-            bonus: this.sumJson(item.generalBonuses, 'bonusAmount'),
-            gross: item.basicSalary + item.totalBonuses
-          },
-          deductions: {
-            attendance: this.sumJson(item.attendanceDeductions, 'totalDeduction'),
-            late: this.sumJson(item.lateAttendanceDeductions, 'totalDeduction'),
-            leave: this.sumJson(item.leaveDeductions, 'totalDeduction'),
-            loan: this.sumJson(item.loanDeductions, 'installmentAmount'),
-            advance: this.sumJson(item.salaryAdvanceDeductions, 'deductedAmount'),
-            pfEmp: this.sumJson(item.pfDeductions, 'employeeAmount'),
-            tax: this.sumJson(item.taxDeductions, 'monthlyTax'),
-            total: item.totalDeductions
-          },
-          contributions: {
-            pfEmployer: this.sumJson(item.pfDeductions, 'employerAmount'),
-            gratuity: this.sumJson(item.gratuity, 'gratuityAmount')
-          },
-          netPayable: item.netSalary
-        }));
+        this.employees = data.map((item: any) => {
+          const employeeId = String(item.employeeId ?? '');
+          return {
+            rowKey: employeeId,
+            employeeId,
+            id: item.employeeCode || employeeId,
+            name: item.employeeName ?? '',
+            department: item.departmentName?.trim() ? item.departmentName : '—',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.employeeName ?? 'User')}&background=random`,
+            earnings: {
+              basic: Number(item.basicSalary) || 0,
+              ot: this.sumJson(item.overtimeDetails, 'totalOvertimeAmount'),
+              perfBonus: this.sumJson(item.performanceBonuses, 'bonusAmount'),
+              bonus: this.sumJson(item.generalBonuses, 'bonusAmount'),
+              gross: (Number(item.basicSalary) || 0) + (Number(item.totalBonuses) || 0)
+            },
+            deductions: {
+              attendance: this.sumJson(item.attendanceDeductions, 'totalDeduction'),
+              late: this.sumJson(item.lateAttendanceDeductions, 'totalDeduction'),
+              leave: this.sumJson(item.leaveDeductions, 'totalDeduction'),
+              loan: this.sumJson(item.loanDeductions, 'installmentAmount'),
+              advance: this.sumJson(item.salaryAdvanceDeductions, 'deductedAmount'),
+              pfEmp: this.sumJson(item.pfDeductions, 'employeeAmount'),
+              tax: this.sumJson(item.taxDeductions, 'monthlyTax'),
+              total: Number(item.totalDeductions) || 0
+            },
+            contributions: {
+              pfEmployer: this.sumJson(item.pfDeductions, 'employerAmount'),
+              gratuity: this.sumJson(item.gratuity, 'totalAmount', 'gratuityAmount', 'amount')
+            },
+            netPayable: Number(item.netSalary) || 0,
+            totalBonuses: Number(item.totalBonuses) || 0,
+            detailSections: this.buildDetailSections(item)
+          };
+        });
 
-        this.totalRecords = res.totalCount;
+        this.totalRecords = res.totalCount ?? 0;
         this.totalPages = Math.ceil(this.totalRecords / this.pageSize);
         this.updatePageRange();
         
@@ -145,21 +204,107 @@ export class PayrollResultComponent implements OnInit {
   }
 
   private updateSummaryTotals(): void {
-    // This only updates for the current page. For global totals, the API should ideally return them.
     this.totalEmployees = this.totalRecords;
-    // We don't have global sums from the current paginated API yet, so we'll leave these as placeholders 
-    // or calculate if the API is updated.
+    this.totalGrossSalary = this.employees.reduce((s, e) => s + (e.earnings?.gross ?? 0), 0);
+    this.totalDeductions = this.employees.reduce((s, e) => s + (e.deductions?.total ?? 0), 0);
+    this.totalBonuses = this.employees.reduce((s, e) => s + (e.totalBonuses ?? 0), 0);
+    this.totalNetPayable = this.employees.reduce((s, e) => s + (e.netPayable ?? 0), 0);
   }
 
-  private sumJson(jsonString: string | null, field: string): number {
+  toggleDetails(employeeId: string): void {
+    this.expandedEmployeeId = this.expandedEmployeeId === employeeId ? null : employeeId;
+  }
+
+  isExpanded(employeeId: string): boolean {
+    return this.expandedEmployeeId === employeeId;
+  }
+
+  /** Parse JSON line-item arrays stored on payroll result rows (handles PascalCase from API). */
+  parseJsonArray(jsonString: string | null | undefined): Record<string, unknown>[] {
+    if (!jsonString || typeof jsonString !== 'string') return [];
+    try {
+      const data = JSON.parse(jsonString);
+      if (!Array.isArray(data)) return [];
+      return data.filter(
+        (row): row is Record<string, unknown> =>
+          row !== null && typeof row === 'object' && !Array.isArray(row)
+      );
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Sum a numeric field across JSON array items. Field match is case-insensitive (API often uses PascalCase).
+   */
+  private sumJson(jsonString: string | null | undefined, ...fieldNames: string[]): number {
     if (!jsonString) return 0;
     try {
       const data = JSON.parse(jsonString);
       if (!Array.isArray(data)) return 0;
-      return data.reduce((sum: number, item: any) => sum + (item[field] || 0), 0);
-    } catch (e) {
+      const targets = fieldNames.map((f) => f.toLowerCase());
+      return data.reduce((sum: number, item: any) => {
+        if (!item || typeof item !== 'object') return sum;
+        const key = Object.keys(item).find((k) => targets.includes(k.toLowerCase()));
+        if (!key) return sum;
+        const raw = item[key];
+        const n = typeof raw === 'number' ? raw : parseFloat(String(raw));
+        return sum + (Number.isFinite(n) ? n : 0);
+      }, 0);
+    } catch {
       return 0;
     }
+  }
+
+  private buildDetailSections(item: any): { title: string; rows: Record<string, unknown>[] }[] {
+    const sections: { title: string; key: string }[] = [
+      { title: 'Overtime', key: 'overtimeDetails' },
+      { title: 'Tax', key: 'taxDeductions' },
+      { title: 'Provident fund', key: 'pfDeductions' },
+      { title: 'Attendance', key: 'attendanceDeductions' },
+      { title: 'Late attendance', key: 'lateAttendanceDeductions' },
+      { title: 'Leave', key: 'leaveDeductions' },
+      { title: 'Loans', key: 'loanDeductions' },
+      { title: 'Salary advance', key: 'salaryAdvanceDeductions' },
+      { title: 'Performance bonus', key: 'performanceBonuses' },
+      { title: 'General bonus', key: 'generalBonuses' },
+      { title: 'Gratuity', key: 'gratuity' }
+    ];
+    return sections
+      .map((s) => ({
+        title: s.title,
+        rows: this.parseJsonArray(item[s.key] as string | null | undefined)
+      }))
+      .filter((s) => s.rows.length > 0);
+  }
+
+  /** Key/value pairs for one breakdown object (stable column order). */
+  entriesOf(obj: Record<string, unknown> | null | undefined): [string, unknown][] {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return [];
+    return Object.keys(obj)
+      .sort((a, b) => a.localeCompare(b))
+      .map((k) => [k, (obj as Record<string, unknown>)[k]]);
+  }
+
+  formatDetailLabel(key: string): string {
+    return key
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  formatDetailValue(val: unknown): string {
+    if (val === null || val === undefined || val === '') return '—';
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+    if (typeof val === 'number' && Number.isFinite(val)) {
+      return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    const s = String(val).trim();
+    const n = parseFloat(s);
+    if (s !== '' && /^-?\d+(\.\d+)?$/.test(s) && Number.isFinite(n)) {
+      return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return s;
   }
 
   updatePageRange(): void {

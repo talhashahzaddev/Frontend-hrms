@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { take } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { Subscription, take } from 'rxjs';
 
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollService } from '../../services/payroll.service';
+import { PayslipBulkHubService, PayslipBulkProgress } from '../../services/payslip-bulk-hub.service';
 import {
   PayslipViewDialogComponent,
   PayslipViewDialogData,
@@ -33,7 +35,7 @@ import {
   BulkEmailRecipientOption
 } from '../dialogs/bulk-email-payslips-dialog/bulk-email-payslips-dialog.component';
 
-type PayslipStatus = 'draft' | 'generated' | 'sent' | 'viewed';
+type PayslipStatus = 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 
 interface PeriodOption {
   id: string;
@@ -82,13 +84,20 @@ interface PayslipRow {
   templateUrl: './compliance-payslips.component.html',
   styleUrl: './compliance-payslips.component.scss'
 })
-export class CompliancePayslipsComponent implements OnInit {
+export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   private readonly payrollService = inject(PayrollService);
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
+  private readonly payslipBulkHub = inject(PayslipBulkHubService);
+  private readonly toastr = inject(ToastrService);
   private readonly dialog = inject(MatDialog);
 
-  currencySymbol = 'PKR';
+  private bulkProgressSubscription?: Subscription;
+  private bulkHideTimer?: ReturnType<typeof setTimeout>;
+
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+  readonly bulkJobActive = signal(false);
+  readonly bulkProgress = signal<PayslipBulkProgress | null>(null);
 
   pendingSearchKeyword = '';
   pendingPeriodId = '';
@@ -107,6 +116,8 @@ export class CompliancePayslipsComponent implements OnInit {
   departments: Department[] = [];
   employees: EmployeeOption[] = [];
   payslips: PayslipRow[] = [];
+  serverTotalCount = 0;
+  complianceStats = { totalCount: 0, generatedCount: 0, pendingCount: 0 };
 
   readonly selectedPayslipIds = new Set<string>();
 
@@ -117,24 +128,32 @@ export class CompliancePayslipsComponent implements OnInit {
   usingLocalPayslipData = false;
   usingLocalPayslipDetailData = false;
 
+  ngOnDestroy(): void {
+    this.bulkProgressSubscription?.unsubscribe();
+    if (this.bulkHideTimer) {
+      clearTimeout(this.bulkHideTimer);
+    }
+    void this.payslipBulkHub.disconnect();
+  }
+
   ngOnInit(): void {
     this.localPayslipSeed = this.buildLocalPayslipSeed();
 
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
-        next: (currencyCode: any) => {
-          this.currencySymbol = this.settingsService.getCurrencySymbol(currencyCode) || 'PKR';
+        next: (currencyCode: unknown) => {
+          const code = typeof currencyCode === 'string' ? currencyCode : undefined;
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
         },
         error: () => {
-          this.currencySymbol = this.settingsService.getCurrencySymbol() || 'PKR';
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
 
     this.loadEmployees();
     this.loadDepartments();
     this.loadPeriods();
-    this.loadPayslips();
   }
 
   get hasActiveFilters(): boolean {
@@ -146,6 +165,10 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   get filteredPayslips(): PayslipRow[] {
+    if (!this.usingLocalPayslipData) {
+      return this.payslips;
+    }
+
     const search = this.appliedSearchKeyword.trim().toLowerCase();
 
     return this.payslips.filter((row) => {
@@ -163,12 +186,20 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   get pagedPayslips(): PayslipRow[] {
-    const start = (this.currentPage - 1) * this.pageSize;
-    return this.filteredPayslips.slice(start, start + this.pageSize);
+    if (this.usingLocalPayslipData) {
+      const start = (this.currentPage - 1) * this.pageSize;
+      return this.filteredPayslips.slice(start, start + this.pageSize);
+    }
+
+    return this.payslips;
   }
 
   get totalRecords(): number {
-    return this.filteredPayslips.length;
+    if (this.usingLocalPayslipData) {
+      return this.filteredPayslips.length;
+    }
+
+    return this.serverTotalCount;
   }
 
   get totalPages(): number {
@@ -188,35 +219,35 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   get totalPayslips(): number {
-    return this.filteredPayslips.length;
+    return this.complianceStats.totalCount;
   }
 
   get generatedCount(): number {
-    return this.filteredPayslips.filter((row) => row.status === 'generated' || row.status === 'sent' || row.status === 'viewed').length;
+    return this.complianceStats.generatedCount;
   }
 
   get sentCount(): number {
-    return this.filteredPayslips.filter((row) => row.status === 'sent' || row.status === 'viewed').length;
+    return 0;
   }
 
   get reissuedCount(): number {
-    return this.filteredPayslips.filter((row) => row.versionNo > 1).length;
+    return this.payslips.filter((row) => row.versionNo > 1).length;
   }
 
   get pendingCount(): number {
-    return Math.max(0, this.totalPayslips - this.generatedCount);
+    return this.complianceStats.pendingCount;
   }
 
   get pendingEmailsCount(): number {
-    return this.filteredPayslips.filter((row) => row.status === 'generated').length;
+    return this.complianceStats.generatedCount;
   }
 
   get distributionPercent(): number {
-    if (!this.totalPayslips) {
+    if (!this.complianceStats.totalCount) {
       return 0;
     }
 
-    return Math.round((this.sentCount / this.totalPayslips) * 100);
+    return Math.round((this.complianceStats.generatedCount / this.complianceStats.totalCount) * 100);
   }
 
   get activePeriodLabel(): string {
@@ -244,6 +275,8 @@ export class CompliancePayslipsComponent implements OnInit {
     this.appliedDepartmentId = this.pendingDepartmentId;
     this.currentPage = 1;
     this.reconcileSelection();
+    this.loadPayslips();
+    this.loadStats();
   }
 
   clearFilters(): void {
@@ -251,14 +284,16 @@ export class CompliancePayslipsComponent implements OnInit {
     this.pendingPeriodId = '';
     this.pendingStatus = '';
     this.pendingDepartmentId = '';
-    
+
     this.appliedSearchKeyword = '';
     this.appliedPeriodId = '';
     this.appliedStatus = '';
     this.appliedDepartmentId = '';
-    
+
     this.currentPage = 1;
     this.reconcileSelection();
+    this.loadPayslips();
+    this.loadStats();
   }
 
   prevPage(): void {
@@ -267,6 +302,9 @@ export class CompliancePayslipsComponent implements OnInit {
     }
 
     this.currentPage -= 1;
+    if (!this.usingLocalPayslipData) {
+      this.loadPayslips();
+    }
     this.reconcileSelection();
   }
 
@@ -276,6 +314,9 @@ export class CompliancePayslipsComponent implements OnInit {
     }
 
     this.currentPage += 1;
+    if (!this.usingLocalPayslipData) {
+      this.loadPayslips();
+    }
     this.reconcileSelection();
   }
 
@@ -302,23 +343,25 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   openViewPayslip(row: PayslipRow): void {
-    if (this.usingLocalPayslipDetailData) {
+    if (this.usingLocalPayslipData) {
       this.openPayslipViewDialog(this.getLocalPayslipDetail(row));
       return;
     }
 
-    this.payrollService.getPayslipById(row.id).subscribe({
-      next: (data: any) => {
-        const mapped = this.mapPayslipDetail(data, row);
-        this.localPayslipDetails.set(row.id, mapped);
-        this.openPayslipViewDialog(mapped);
-      },
-      error: (error: any) => {
-        if (this.isUnsupportedEndpointError(error)) {
-          this.usingLocalPayslipDetailData = true;
+    this.payrollService.getCompliancePayslipPdfBlob(row.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const opened = window.open(url, '_blank');
+        if (!opened) {
+          URL.revokeObjectURL(url);
+          window.alert('Pop-up blocked. Please allow pop-ups to view the payslip PDF.');
+          return;
         }
 
-        this.openPayslipViewDialog(this.getLocalPayslipDetail(row));
+        setTimeout(() => URL.revokeObjectURL(url), 120_000);
+      },
+      error: () => {
+        window.alert('Unable to open payslip PDF. Ensure payroll data exists for this employee and period.');
       }
     });
   }
@@ -383,7 +426,7 @@ export class CompliancePayslipsComponent implements OnInit {
     const periodLabel = this.getPeriodLabelById(defaultPeriodId);
 
     const dialogRef = this.dialog.open(BulkEmailPayslipsDialogComponent, {
-      width: '600px',
+      width: '640px',
       maxWidth: '96vw',
       panelClass: 'bulk-email-payslips-dialog-panel',
       autoFocus: false,
@@ -416,11 +459,15 @@ export class CompliancePayslipsComponent implements OnInit {
       return;
     }
 
-    this.payrollService.createPayslip({
-      employeeId: row.employeeId,
-      payrollPeriodId: row.periodId
+    this.payrollService.bulkGenerateCompliancePayslipPdfs({
+      payrollPeriodId: row.periodId,
+      employeeIds: [row.employeeId],
+      overwriteExisting: true
     }).subscribe({
-      next: () => this.loadPayslips(),
+      next: () => {
+        this.loadPayslips();
+        this.loadStats();
+      },
       error: (error: any) => {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
@@ -455,7 +502,7 @@ export class CompliancePayslipsComponent implements OnInit {
   }
 
   formatMoney(value: number): string {
-    return `${this.currencySymbol} ${Math.max(0, this.toNumber(value)).toLocaleString()}`;
+    return `${this.currencySymbol()} ${Math.max(0, this.toNumber(value)).toLocaleString()}`;
   }
 
   private loadEmployees(): void {
@@ -523,10 +570,14 @@ export class CompliancePayslipsComponent implements OnInit {
 
         this.periods = mapped.length ? mapped : this.buildLocalPeriods();
         this.ensureDefaultPeriodSelection();
+        this.loadPayslips();
+        this.loadStats();
       },
       error: () => {
         this.periods = this.buildLocalPeriods();
         this.ensureDefaultPeriodSelection();
+        this.loadPayslips();
+        this.loadStats();
       }
     });
   }
@@ -534,32 +585,87 @@ export class CompliancePayslipsComponent implements OnInit {
   private loadPayslips(): void {
     if (this.usingLocalPayslipData) {
       this.payslips = [...this.localPayslipSeed];
+      this.serverTotalCount = this.filteredPayslips.length;
+      this.refreshLocalComplianceStats();
       this.refreshDepartmentOptions();
       this.ensureDefaultPeriodSelection();
       this.ensurePageInRange();
       return;
     }
 
-    this.payrollService.getPayslips({ page: 1, pageSize: 500 }).subscribe({
-      next: (data: any) => {
-        const mapped = this.extractItems(data).map((item: any, index: number) => this.mapPayslipRow(item, index));
-
-        this.payslips = mapped;
+    this.payrollService.getCompliancePayslips({
+      page: this.currentPage,
+      pageSize: this.pageSize,
+      payrollPeriodId: this.appliedPeriodId || undefined,
+      departmentId: this.appliedDepartmentId || undefined,
+      searchTerm: this.appliedSearchKeyword || undefined,
+      status: this.appliedStatus || undefined
+    }).subscribe({
+      next: (page: any) => {
+        const items = Array.isArray(page?.data) ? page.data : [];
+        this.serverTotalCount = page?.totalCount ?? 0;
+        this.payslips = items.map((item: any, index: number) => this.mapPayslipRow(item, index));
         this.ensureDefaultPeriodSelection();
         this.ensurePageInRange();
+        this.reconcileSelection();
       },
       error: (error: any) => {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
           this.payslips = [...this.localPayslipSeed];
+          this.serverTotalCount = this.filteredPayslips.length;
+          this.refreshLocalComplianceStats();
           this.ensureDefaultPeriodSelection();
           this.ensurePageInRange();
           return;
         }
 
         this.payslips = [];
+        this.serverTotalCount = 0;
       }
     });
+  }
+
+  private loadStats(): void {
+    if (this.usingLocalPayslipData) {
+      this.refreshLocalComplianceStats();
+      return;
+    }
+
+    this.payrollService.getCompliancePayslipStats({
+      payrollPeriodId: this.appliedPeriodId || undefined,
+      departmentId: this.appliedDepartmentId || undefined,
+      searchTerm: this.appliedSearchKeyword || undefined,
+      status: this.appliedStatus || undefined
+    }).subscribe({
+      next: (s: any) => {
+        const total = s?.totalCount ?? 0;
+        const gen = s?.generatedCount ?? 0;
+        this.complianceStats = {
+          totalCount: total,
+          generatedCount: gen,
+          pendingCount: s?.pendingCount ?? Math.max(0, total - gen)
+        };
+      },
+      error: () => {
+        this.complianceStats = { totalCount: 0, generatedCount: 0, pendingCount: 0 };
+      }
+    });
+  }
+
+  private refreshLocalComplianceStats(): void {
+    if (!this.usingLocalPayslipData) {
+      return;
+    }
+
+    const rows = this.filteredPayslips;
+    const total = rows.length;
+    const gen = rows.filter((r) => r.status === 'generated' || r.status === 'sent' || r.status === 'viewed').length;
+    this.complianceStats = {
+      totalCount: total,
+      generatedCount: gen,
+      pendingCount: Math.max(0, total - gen)
+    };
   }
 
   private openPayslipViewDialog(data: PayslipViewDialogData): void {
@@ -591,7 +697,10 @@ export class CompliancePayslipsComponent implements OnInit {
       sendEmail: payload.sendEmail,
       nextVersionNo: payload.nextVersionNo
     }).subscribe({
-      next: () => this.loadPayslips(),
+      next: () => {
+        this.loadPayslips();
+        this.loadStats();
+      },
       error: (error: any) => {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
@@ -607,13 +716,15 @@ export class CompliancePayslipsComponent implements OnInit {
       return;
     }
 
-    this.payrollService.bulkGeneratePayslips({
+    this.payrollService.bulkGenerateCompliancePayslipPdfs({
       payrollPeriodId: payload.payrollPeriodId,
-      departmentId: payload.departmentId,
-      overwriteExisting: payload.overwriteExisting,
-      employeeIds: payload.employeeIds
+      employeeIds: payload.employeeIds,
+      overwriteExisting: payload.overwriteExisting
     }).subscribe({
-      next: () => this.loadPayslips(),
+      next: () => {
+        this.loadPayslips();
+        this.loadStats();
+      },
       error: (error: any) => {
         if (this.isUnsupportedEndpointError(error)) {
           this.activateLocalPayslipFallback();
@@ -629,21 +740,122 @@ export class CompliancePayslipsComponent implements OnInit {
       return;
     }
 
-    this.payrollService.bulkEmailPayslips({
-      payrollPeriodId: payload.payrollPeriodId,
-      sendToMode: payload.sendToMode,
-      subject: payload.subject,
-      message: payload.message,
-      employeeIds: payload.employeeIds
-    }).subscribe({
-      next: () => this.loadPayslips(),
-      error: (error: any) => {
-        if (this.isUnsupportedEndpointError(error)) {
-          this.activateLocalPayslipFallback();
-          this.applyLocalBulkEmail(payload);
-        }
-      }
+    void this.startBulkUploadAndSend(payload);
+  }
+
+  private async startBulkUploadAndSend(payload: BulkEmailPayslipsDialogPayload): Promise<void> {
+    if (!payload.employeeIds.length) {
+      this.toastr.warning('Select at least one employee with a generated payslip.');
+      return;
+    }
+
+    if (this.bulkHideTimer) {
+      clearTimeout(this.bulkHideTimer);
+      this.bulkHideTimer = undefined;
+    }
+
+    this.bulkProgressSubscription?.unsubscribe();
+
+    const initialTotal = payload.employeeIds.length;
+    this.bulkJobActive.set(true);
+    this.bulkProgress.set({
+      jobId: '',
+      total: initialTotal,
+      processed: 0,
+      failed: 0,
+      percentageCompleted: 0,
+      isComplete: false
     });
+
+    let signalRConnected = false;
+
+    try {
+      await this.payslipBulkHub.connect();
+      signalRConnected = true;
+
+      this.bulkProgressSubscription = this.payslipBulkHub.progress$.subscribe((progress) => {
+        this.bulkProgress.set(progress);
+
+        if (progress.isComplete) {
+          this.onBulkJobComplete(progress);
+        }
+      });
+    } catch (hubError) {
+      console.warn('SignalR progress connection failed; bulk job will still run without live updates.', hubError);
+      this.toastr.warning('Live progress unavailable. Payslip emails are still being processed in the background.');
+    }
+
+    const connectionId = signalRConnected ? this.payslipBulkHub.connectionId : undefined;
+
+    try {
+      this.payrollService.uploadSendPayslips({
+        payrollPeriodId: payload.payrollPeriodId,
+        employeeIds: payload.employeeIds,
+        subject: payload.subject,
+        message: payload.message,
+        connectionId
+      }).subscribe({
+        next: async (result) => {
+          if (result?.jobId) {
+            this.bulkProgress.update((current) => ({
+              ...(current ?? {
+                total: initialTotal,
+                processed: 0,
+                failed: 0,
+                percentageCompleted: 0,
+                isComplete: false
+              }),
+              jobId: result.jobId
+            }));
+
+            try {
+              await this.payslipBulkHub.joinJob(result.jobId);
+            } catch (joinError) {
+              console.error('Failed to join payslip bulk SignalR group', joinError);
+            }
+          }
+
+          this.toastr.info('Bulk payslip upload and email started.');
+        },
+        error: (error: any) => {
+          if (this.isUnsupportedEndpointError(error)) {
+            this.activateLocalPayslipFallback();
+            this.resetBulkProgressUi();
+            this.applyLocalBulkEmail(payload);
+            return;
+          }
+
+          this.resetBulkProgressUi();
+          this.toastr.error(error?.message ?? 'Failed to start bulk payslip job.');
+        }
+      });
+    } catch (error: any) {
+      this.resetBulkProgressUi();
+      this.toastr.error(error?.message ?? 'Failed to start bulk payslip job.');
+    }
+  }
+
+  private onBulkJobComplete(progress: PayslipBulkProgress): void {
+    this.loadPayslips();
+    this.loadStats();
+
+    if (progress.failed > 0) {
+      this.toastr.warning(`Completed with ${progress.failed} failed of ${progress.total} payslips.`);
+    } else {
+      this.toastr.success(`Successfully processed ${progress.processed} payslip${progress.processed === 1 ? '' : 's'}.`);
+    }
+
+    this.bulkHideTimer = setTimeout(() => {
+      this.resetBulkProgressUi();
+    }, 6000);
+  }
+
+  private resetBulkProgressUi(): void {
+    this.bulkJobActive.set(false);
+    this.bulkProgress.set(null);
+    this.bulkProgressSubscription?.unsubscribe();
+    this.bulkProgressSubscription = undefined;
+    void this.payslipBulkHub.disconnect();
   }
 
   private applyLocalSingleGenerate(row: PayslipRow): void {
@@ -663,6 +875,8 @@ export class CompliancePayslipsComponent implements OnInit {
     });
 
     this.payslips = [...this.localPayslipSeed];
+    this.serverTotalCount = this.filteredPayslips.length;
+    this.refreshLocalComplianceStats();
   }
 
   private applyLocalReissue(row: PayslipRow, payload: ReissuePayslipDialogPayload): void {
@@ -698,6 +912,8 @@ export class CompliancePayslipsComponent implements OnInit {
     this.localReissueHistory.set(row.id, nextHistory);
 
     this.payslips = [...this.localPayslipSeed];
+    this.serverTotalCount = this.filteredPayslips.length;
+    this.refreshLocalComplianceStats();
   }
 
   private applyLocalBulkGenerate(payload: BulkGeneratePayslipsDialogPayload): void {
@@ -755,6 +971,8 @@ export class CompliancePayslipsComponent implements OnInit {
 
     this.payslips = [...this.localPayslipSeed];
     this.ensurePageInRange();
+    this.serverTotalCount = this.filteredPayslips.length;
+    this.refreshLocalComplianceStats();
   }
 
   private applyLocalBulkEmail(payload: BulkEmailPayslipsDialogPayload): void {
@@ -783,6 +1001,8 @@ export class CompliancePayslipsComponent implements OnInit {
     });
 
     this.payslips = [...this.localPayslipSeed];
+    this.serverTotalCount = this.filteredPayslips.length;
+    this.refreshLocalComplianceStats();
   }
 
   private mapPayslipRow(item: any, index: number): PayslipRow {
@@ -791,12 +1011,12 @@ export class CompliancePayslipsComponent implements OnInit {
     const netSalary = this.toNumber(item.netSalaryPkr ?? item.netSalary ?? item.netPayablePkr ?? (grossSalary - deductions));
 
     return {
-      id: String(item.payslipId ?? item.id ?? `payslip-${index + 1}`),
+      id: String(item.resultId ?? item.resultid ?? item.payslipId ?? item.id ?? `payslip-${index + 1}`),
       employeeId: String(item.employeeId ?? item.employee?.employeeId ?? item.employee?.id ?? `emp-${index + 1}`),
       employeeName: String(item.employeeName ?? item.employee?.name ?? `Employee ${index + 1}`),
       employeeCode: String(item.employeeCode ?? item.employee?.employeeCode ?? item.employee?.code ?? `EMP-${index + 1}`),
       designation: String(item.designation ?? item.employee?.designation ?? item.positionTitle ?? 'Employee'),
-      departmentId: String(item.departmentId ?? item.employee?.departmentId ?? item.department?.id ?? `dept-${index + 1}`),
+      departmentId: item.departmentId != null && item.departmentId !== '' ? String(item.departmentId) : '',
       departmentName: String(item.departmentName ?? item.employee?.departmentName ?? item.department?.name ?? 'General'),
       periodId: String(item.payrollPeriodId ?? item.periodId ?? item.period?.id ?? `period-${index + 1}`),
       periodLabel: String(item.periodLabel ?? item.periodName ?? item.period?.name ?? 'N/A'),
@@ -833,7 +1053,7 @@ export class CompliancePayslipsComponent implements OnInit {
     return {
       payslipId: String(payload.payslipId ?? payload.id ?? fallbackRow.id),
       title: `Payslip - ${fallbackRow.periodLabel}`,
-      currencySymbol: this.currencySymbol,
+      currencySymbol: this.currencySymbol(),
       periodLabel: String(payload.periodLabel ?? payload.periodName ?? fallbackRow.periodLabel),
       periodStart: String(payload.periodStart ?? payload.startDate ?? `${fallbackRow.periodLabel} start`),
       periodEnd: String(payload.periodEnd ?? payload.endDate ?? `${fallbackRow.periodLabel} end`),
@@ -962,7 +1182,7 @@ export class CompliancePayslipsComponent implements OnInit {
     return {
       payslipId: row.id,
       title: `Payslip - ${row.periodLabel}`,
-      currencySymbol: this.currencySymbol,
+      currencySymbol: this.currencySymbol(),
       periodLabel: row.periodLabel,
       periodStart: 'Mar 1, 2025',
       periodEnd: 'Mar 31, 2025',
@@ -1064,14 +1284,18 @@ export class CompliancePayslipsComponent implements OnInit {
 
     this.usingLocalPayslipData = true;
     this.usingLocalPayslipDetailData = true;
+    this.loadPayslips();
+    this.loadStats();
   }
 
   private normalizePayslipStatus(value: unknown): PayslipStatus {
     const status = String(value ?? '').trim().toLowerCase();
 
     if (status === 'viewed' || status === 'seen') return 'viewed';
+    if (status === 'bounced') return 'bounced';
+    if (status === 'failed') return 'failed';
     if (status === 'sent' || status === 'emailed' || status === 'email-sent') return 'sent';
-    if (status === 'generated' || status === 'processed') return 'generated';
+    if (status === 'generated' || status === 'processed' || status === 'pending') return 'generated';
     return 'draft';
   }
 
@@ -1147,8 +1371,10 @@ export class CompliancePayslipsComponent implements OnInit {
 
   private statusRank(status: PayslipStatus | BulkEmailRecipientStatus): number {
     if (status === 'none') return 0;
-    if (status === 'viewed') return 4;
-    if (status === 'sent') return 3;
+    if (status === 'viewed') return 5;
+    if (status === 'sent') return 4;
+    if (status === 'bounced') return 3;
+    if (status === 'failed') return 3;
     if (status === 'generated') return 2;
     return 1;
   }
@@ -1175,8 +1401,24 @@ export class CompliancePayslipsComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  private downloadPayslipPdf(_payslipId: string): void {
-    // Placeholder hook for future signed-download endpoint integration.
+  private downloadPayslipPdf(payslipId: string): void {
+    if (this.usingLocalPayslipData) {
+      return;
+    }
+
+    this.payrollService.getCompliancePayslipPdfBlob(payslipId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `payslip-${payslipId}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        window.alert('Unable to download payslip PDF.');
+      }
+    });
   }
 
   private buildLocalPeriods(): PeriodOption[] {

@@ -1,6 +1,6 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://hrmsapplicationcodifiedlabs-production.up.railway.app/api',
+  production: false,
+  apiUrl: 'https://localhost:44308/api',
   apiKey: '',
   appName: 'HRMS Frontend',
   auth: {

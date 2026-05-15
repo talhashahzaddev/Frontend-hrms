@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -81,7 +81,7 @@ export class LoanRequestComplianceComponent implements OnInit {
 
   activeTab: ComplianceTab = 'tax-slabs';
 
-  currencySymbol = 'PKR';
+  readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
   fiscalYears = ['2023-2024', '2024-2025', '2025-2026'];
 
   selectedFiscalYear = '2024-2025';
@@ -107,11 +107,12 @@ export class LoanRequestComplianceComponent implements OnInit {
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
-        next: (currencyCode: any) => {
-          this.currencySymbol = this.settingsService.getCurrencySymbol(currencyCode) || 'PKR';
+        next: (currencyCode: unknown) => {
+          const code = typeof currencyCode === 'string' ? currencyCode : undefined;
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol(code));
         },
         error: () => {
-          this.currencySymbol = this.settingsService.getCurrencySymbol() || 'PKR';
+          this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
 
@@ -291,7 +292,7 @@ export class LoanRequestComplianceComponent implements OnInit {
   }
 
   formatMoney(value: number): string {
-    return `${this.currencySymbol} ${Math.max(0, Number(value ?? 0)).toLocaleString()}`;
+    return `${this.currencySymbol()} ${Math.max(0, Number(value ?? 0)).toLocaleString()}`;
   }
 
   formatDateLabel(dateValue: string | null): string {
