@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, filter, take, timeout, catchError, of } from 'rxjs';
 
 // Material Modules
 import { MatCardModule } from '@angular/material/card';
@@ -197,21 +197,34 @@ onSubmit(): void {
 
           if (targetSubdomain && targetSubdomain !== currentSubdomain) {
             const authData = encodeURIComponent(JSON.stringify(response));
-
-            let redirectUrl = sessionStorage.getItem('redirectUrl');
+            const storedRedirect = sessionStorage.getItem('redirectUrl');
             sessionStorage.removeItem('redirectUrl');
 
-
-            if (!redirectUrl) {
-              redirectUrl = '/dashboard';
+            if (storedRedirect) {
+              const separator = storedRedirect.includes('?') ? '&' : '?';
+              this.isSubmitting = false;
+              this.redirectToSubdomain(targetSubdomain, `${storedRedirect}${separator}auth_transfer=${authData}`);
+              return;
             }
 
-            const separator = redirectUrl.includes('?') ? '&' : '?';
-            redirectUrl += `${separator}auth_transfer=${authData}`;
+            // Wait for permissions then redirect cross-subdomain
+            this.authService.permissions$
+              .pipe(
+                filter(p => p !== null),
+                take(1),
+                timeout(3000),
+                catchError(() => of(null)),
+                takeUntil(this.destroy$)
+              )
+              .subscribe(() => {
+                const route = this.authService.getFirstAllowedRoute();
+                const separator = route.includes('?') ? '&' : '?';
+                const redirectUrl = `${route}${separator}auth_transfer=${authData}`;
+                this.isSubmitting = false;
+                this.redirectToSubdomain(targetSubdomain, redirectUrl);
+              });
 
-            this.isSubmitting = false;
-            this.redirectToSubdomain(targetSubdomain, redirectUrl);
-            return;
+            return; // stop execution, subscriber handles the redirect
           }
         }
 
@@ -220,17 +233,35 @@ onSubmit(): void {
         this.notificationService.loginSuccess(response.firstName);
 
         /* 🔹 REDIRECT LOGIC (FIXED) */
-        let redirectUrl = sessionStorage.getItem('redirectUrl');
+        const storedRedirect = sessionStorage.getItem('redirectUrl');
         sessionStorage.removeItem('redirectUrl');
 
-        if (!redirectUrl) {
-          redirectUrl = '/dashboard';
+        if (storedRedirect) {
+          // Honour an explicit stored redirect (e.g. deep-link before login)
+          this.isSubmitting = false;
+          this.router.navigateByUrl(storedRedirect);
+          return;
         }
 
-        this.isSubmitting = false;
+        // Permissions are fetched async inside authService.login() tap().
+        // Wait briefly for the fetch to land, then pick the first allowed route.
+        const permissions$ = this.authService.permissions$;
 
-        // ✅ IMPORTANT FIX
-        this.router.navigateByUrl(redirectUrl);
+        // Give the permission fetch up to 3 s; fall back immediately if it errors.
+        import('rxjs').then(({ filter, timeout, catchError, of, take }) => {
+          permissions$
+            .pipe(
+              filter(p => p !== null),   // wait until permissions arrive
+              take(1),
+              timeout(3000),             // don't wait forever
+              catchError(() => of(null)) // on timeout/error use fallback
+            )
+            .subscribe(() => {
+              const route = this.authService.getFirstAllowedRoute();
+              this.isSubmitting = false;
+              this.router.navigateByUrl(route);
+            });
+        });
       },
 
       error: (error) => {

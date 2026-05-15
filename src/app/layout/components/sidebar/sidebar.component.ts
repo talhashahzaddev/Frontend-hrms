@@ -264,6 +264,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     {
       label: 'Payroll',
       icon: 'payments',
+      menuName: 'Payroll',
       children: [
         {
           label: 'Bonus & Performance',
