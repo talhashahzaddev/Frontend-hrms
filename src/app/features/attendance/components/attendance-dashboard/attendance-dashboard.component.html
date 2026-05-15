@@ -35,7 +35,7 @@
   <main class="dashboard-main">
     
     <!-- Summary Cards Row -->
-    <div class="summary-cards-grid">
+    <div class="summary-cards-grid" *ngIf="hasPermission('My_Attendance_Summary')">
       <div class="summary-card">
         <div class="card-header-row">
           <p class="card-label">Present Days</p>
@@ -100,10 +100,10 @@
           <mat-datepicker #endPicker></mat-datepicker>
         </mat-form-field>
 
-        <button mat-flat-button 
-                class="load-data-btn" 
-                (click)="loadEmployeeAttendance()"
-                [disabled]="isLoadingList">
+        <button *ngIf="hasPermission('Load_Summary_Data_Buttom')" mat-flat-button 
+          class="load-data-btn" 
+          (click)="loadEmployeeAttendance(); loadAttendanceSummary()"
+          [disabled]="isLoadingList">
           <mat-icon>refresh</mat-icon>
           <span>Load Data</span>
         </button>

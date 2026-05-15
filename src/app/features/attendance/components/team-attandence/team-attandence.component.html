@@ -74,7 +74,7 @@
   </mat-card>
 
   <!-- Daily Stats Cards - Dashboard Style -->
-  <div class="statistics-cards" *ngIf="dailyStats">
+  <div class="statistics-cards" *ngIf="dailyStats && (hasPermission('team_attendance_summary') || hasPermission('Team_Attendance_Summary'))">
     <!-- Present Employees Card -->
     <mat-card class="stat-card stat-card-success">
       <mat-card-content>
@@ -172,7 +172,7 @@
   </div>
 
   <!-- Attendance Table -->
-  <mat-card class="table-card">
+  <mat-card class="table-card" *ngIf="hasPermission('Team_Attendance_Table') || hasPermission('team_attendance_table')">
     <!-- Loading Indicator -->
     <div *ngIf="isLoading" class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>

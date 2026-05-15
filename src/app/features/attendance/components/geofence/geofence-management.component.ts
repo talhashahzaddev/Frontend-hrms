@@ -17,6 +17,7 @@ import {
   CreateGeoFenceDto
 } from '../../services/geofence.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 declare const L: any; // Leaflet
 
@@ -73,7 +74,8 @@ export class GeoFenceManagementComponent implements OnInit, OnDestroy, AfterView
     private geoFenceService: GeoFenceService,
     private notification: NotificationService,
     private fb: FormBuilder,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private authService: AuthService
   ) {
     this.fenceForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -85,6 +87,10 @@ export class GeoFenceManagementComponent implements OnInit, OnDestroy, AfterView
       shape: ['circle'],
       isActive: [true]
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Attendance', 'Geo-Fences', actionKey);
   }
 
   ngOnInit(): void {
