@@ -122,27 +122,28 @@
             </td>
             <td class="td-date">{{ ticket.createdat | date: 'MM/dd/yy' }}</td>
 
-            <!-- Three-dot action menu -->
+            <!-- Three-dot action menu (hidden if no permissions) -->
             <td class="text-center">
-              <button
-                mat-icon-button
-                [matMenuTriggerFor]="menu"
-                class="btn-action"
-                title="Actions">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-              <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="viewTicket(ticket)">
-                  <mat-icon>visibility</mat-icon>
-                  <span>View</span>
+              <ng-container>
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="menu"
+                  class="btn-action"
+                  title="Actions">
+                  <mat-icon>more_vert</mat-icon>
                 </button>
-                <button mat-menu-item (click)="deleteTicket(ticket)">
-                  <mat-icon>delete</mat-icon>
-                  <span>Delete</span>
-                </button>
-              </mat-menu>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item *ngIf="hasPermission('Ticket_View_Button')" (click)="viewTicket(ticket)">
+                    <mat-icon>visibility</mat-icon>
+                    <span>View</span>
+                  </button>
+                  <button mat-menu-item *ngIf="hasPermission('Ticket_Delete_Button')" (click)="deleteTicket(ticket)">
+                    <mat-icon>delete</mat-icon>
+                    <span>Delete</span>
+                  </button>
+                </mat-menu>
+              </ng-container>
             </td>
-
           </tr>
         </tbody>
       </table>

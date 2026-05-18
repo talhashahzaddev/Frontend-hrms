@@ -20,8 +20,13 @@ export const helpdeskRoutes: Routes = [
    {
     path: 'tickets/view/:id',
     loadComponent: () => import('./components/view-ticket-details/view-ticket-details.component')
-      .then(m => m.ViewTicketDetailsComponent),
+      .then(m => m.ViewTicketDetailsComponent), 
   },
+    {
+      path: 'tickets/invlove-View/:id',
+      loadComponent: () => import('./components/invlovement-ticket-view/invlovement-ticket-view.component')
+        .then(m => m.InvlovementTicketViewComponent),
+    },
 {
   path: 'ticket-category',
   loadComponent: () => import('./components/ticket-category/ticket-category.component')

@@ -16,6 +16,7 @@ import { PerformanceService } from '@/app/features/performance/services/performa
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '@/app/core/services/notification.service';
 import { NewsService } from '../../services/news.services';
+import { AuthService } from '@/app/core/services/auth.service';
 import { QuillModule } from 'ngx-quill';
 
 @Component({
@@ -54,6 +55,7 @@ export class CreateNewsComponent implements OnInit {
     private performanceService: PerformanceService,
     private notification: NotificationService,
     private newsService: NewsService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -264,6 +266,10 @@ quillConfig = {
 
   get showEmployeeDropdown(): boolean {
     return this.newsForm.get('visibleTo')?.value === 'Selected';
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('News', 'Create News', actionKey);
   }
 
   onCancel() {

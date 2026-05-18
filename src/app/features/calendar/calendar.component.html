@@ -156,27 +156,27 @@
         <ng-template matMenuContent>
 
             <!-- Apply for Leave -->
-            <button mat-menu-item (click)="applyForLeave()" *ngIf="!hasExistingLeave(selectedDay)"
+            <button mat-menu-item (click)="applyForLeave()" *ngIf="!hasExistingLeave(selectedDay) && hasPermission('calendar_apply_for_leave')"
                 [disabled]="!canApplyLeave()">
                 <mat-icon>event_available</mat-icon>
                 <span>Apply for Leave</span>
             </button>
 
             <!-- Clock In -->
-            <button mat-menu-item (click)="clockIn()" [disabled]="!canClockIn()" *ngIf="!isPastDate()">
+            <button mat-menu-item (click)="clockIn()" [disabled]="!canClockIn()" *ngIf="!isPastDate() && hasPermission('calendar_clock_in')">
                 <mat-icon>login</mat-icon>
                 <span>Clock In</span>
             </button>
 
             <!-- Clock Out -->
-            <button mat-menu-item (click)="clockOut()" [disabled]="!canClockOut()" *ngIf="!isPastDate()">
+            <button mat-menu-item (click)="clockOut()" [disabled]="!canClockOut()" *ngIf="!isPastDate() && hasPermission('calendar_clock_out')">
                 <mat-icon>logout</mat-icon>
                 <span>Clock Out</span>
             </button>
 
 
             <!-- Swap Shift Request -->
-            <button mat-menu-item (click)="initiateSwapRequest()" [disabled]="!canSwapShift()">
+            <button mat-menu-item (click)="initiateSwapRequest()" [disabled]="!canSwapShift()" *ngIf="hasPermission('calendar_shift_swap_request')">
                 <mat-icon>swap_horiz</mat-icon>
                 <span>Swap Shift Request</span>
             </button>
@@ -184,8 +184,7 @@
             <mat-divider></mat-divider>
 
             <!-- View Day Details -->
-            <!-- View Day Details -->
-            <button mat-menu-item (click)="viewAttendanceDetailsFromSelectedDay()">
+            <button mat-menu-item *ngIf="hasPermission('calandar_view_day_details')" (click)="viewAttendanceDetailsFromSelectedDay()">
                 <mat-icon>info</mat-icon>
                 <span>View Day Details</span>
             </button>

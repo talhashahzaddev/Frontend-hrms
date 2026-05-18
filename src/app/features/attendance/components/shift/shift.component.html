@@ -20,7 +20,7 @@
   </div>
 
   <!-- ═══ SUMMARY STATS ROW ═══ -->
-  <div class="stats-row" *ngIf="shiftSummary">
+  <div class="stats-row" *ngIf="shiftSummary && hasPermission('Shift_Summary')">
 
     <div class="stat-box">
       <div class="stat-box-left">
@@ -81,7 +81,7 @@
   </div>
 
   <!-- ═══ CURRENT SHIFT CARD (non-admin) ══ -->
-  <div class="current-shift-card" *ngIf="currentShift">
+  <div class="current-shift-card" *ngIf="currentShift && hasPermission('My_Shift_View')">
     <div class="card-header">
       <h3>Current Shift</h3>
       <span class="status-chip">Active</span>

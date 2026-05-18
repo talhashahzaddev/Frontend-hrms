@@ -85,16 +85,16 @@
             </div>
 
             <div class="approval-actions">
-              <!-- View Details — always available -->
-              <button mat-stroked-button class="btn-details" (click)="openDetailsDialog(request)">
+              <!-- View Details — requires permission -->
+              <button *ngIf="hasPermission('Team_Leave_Details_Button')" mat-stroked-button class="btn-details" (click)="openDetailsDialog(request)">
                 <mat-icon>info</mat-icon>
                 Details
               </button>
-              <button mat-stroked-button class="btn-reject" (click)="rejectRequest(request)">
+              <button *ngIf="hasPermission('Team_Leave_Reject_Button')" mat-stroked-button class="btn-reject" (click)="rejectRequest(request)">
                 <mat-icon>close</mat-icon>
                 Reject
               </button>
-              <button mat-raised-button class="btn-approve" (click)="approveRequest(request)">
+              <button *ngIf="hasPermission('Team_Leave_Approve_Button')" mat-raised-button class="btn-approve" (click)="approveRequest(request)">
                 <mat-icon>check</mat-icon>
                 Approve
               </button>

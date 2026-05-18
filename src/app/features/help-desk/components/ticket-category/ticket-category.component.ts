@@ -13,6 +13,7 @@ import { Subject, combineLatest, debounceTime, distinctUntilChanged, startWith, 
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { NotificationService } from '@/app/core/services/notification.service';
+import { AuthService } from '@/app/core/services/auth.service';
 import { CreateTicketCategoryDialogComponent } from '../create-ticket-category-dialog/create-ticket-category-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component'; 
@@ -74,6 +75,7 @@ export class TicketCategoryComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private dialog: MatDialog,
     private notification: NotificationService
+    , private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -206,4 +208,12 @@ export class TicketCategoryComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Ticket Category', actionKey);
+  }
 }
+
+// Permission helper
+// Uses sidebar naming: Menu = 'Help Desk', SubMenu = 'Ticket Category'
+export interface _TicketCategoryPermissionHelper {}

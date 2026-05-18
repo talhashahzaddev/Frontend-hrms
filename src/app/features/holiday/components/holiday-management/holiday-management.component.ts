@@ -19,6 +19,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { HolidayService } from '../../services/holiday.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CompanyHoliday, HolidaySummary, CreateCompanyHoliday, UpdateCompanyHoliday } from '../../../../core/models/holiday.models';
 import { HolidayCatalogPickerComponent } from '../holiday-catalog-picker/holiday-catalog-picker.component';
 import { EmployeeService } from '../../../employee/services/employee.service';
@@ -90,7 +91,8 @@ export class HolidayManagementComponent implements OnInit {
     private employeeService: EmployeeService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {
     const currentYear = new Date().getFullYear();
     this.availableYears = [currentYear - 1, currentYear, currentYear + 1, currentYear + 2];
@@ -200,10 +202,16 @@ export class HolidayManagementComponent implements OnInit {
       }
     });
 
-    this.holidayService.getHolidaySummary(this.selectedYear).subscribe({
-      next: (summary) => this.summary = summary,
-      error: () => {}
-    });
+    // Only fetch summary if user has permission to view it
+    if (this.hasPermission('Holiday_Sumaary')) {
+      this.holidayService.getHolidaySummary(this.selectedYear).subscribe({
+        next: (summary) => this.summary = summary,
+        error: () => {}
+      });
+    } else {
+      // Clear any previously loaded summary when permission is not present
+      this.summary = null;
+    }
   }
 
   onYearChange(): void {
@@ -251,6 +259,10 @@ export class HolidayManagementComponent implements OnInit {
 
   isPast(dateStr: string): boolean {
     return new Date(dateStr) < new Date(new Date().toDateString());
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Holidays', 'Holiday Management', actionKey);
   }
 
   // ========================

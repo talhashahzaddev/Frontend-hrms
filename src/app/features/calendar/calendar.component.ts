@@ -784,4 +784,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
         return !!(att.details.checkInTime && !att.details.checkOutTime);
     }
 
+    hasPermission(actionKey: string): boolean {
+        // Menu and subMenu naming: use 'Calendar' for both
+        return this.authService.hasMenuPermission('Calendar', 'Calendar', actionKey);
+    }
+
 }
