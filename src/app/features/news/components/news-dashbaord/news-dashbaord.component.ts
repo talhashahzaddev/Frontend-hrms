@@ -15,6 +15,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { CommonModule } from '@angular/common';
 import { NewsService } from '../../services/news.services';
+import { AuthService } from '@/app/core/services/auth.service';
 import { NewsDto } from '@/app/core/models/news.models';
 import { CreateNewsComponent } from '../create-news/create-news.component';
 import { Subject, takeUntil } from 'rxjs';
@@ -86,13 +87,18 @@ export class NewsDashbaordComponent implements OnInit {
     private dialog: MatDialog,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
       category: [''],
       status: ['']
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('News', 'New Dashboard', actionKey);
   }
 
   ngOnInit(): void {

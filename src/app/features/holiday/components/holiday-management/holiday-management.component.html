@@ -18,7 +18,8 @@
   </div>
 
   <!-- Summary Cards -->
-  <div class="summary-section">
+  @if (hasPermission('Holiday_Summary')) {
+    <div class="summary-section">
     <div class="summary-card total">
       <mat-icon>event</mat-icon>
       <div class="card-content">
@@ -57,6 +58,7 @@
       </div>
     }
   </div>
+  }
 
   <!-- Filters & Year Selector -->
   <div class="filter-bar">
@@ -104,7 +106,7 @@
   }
 
   <!-- Table View -->
-  @if (!loading && viewMode === 'table') {
+  @if (!loading && viewMode === 'table' && hasPermission('Holiday_Table')) {
     <div class="table-container mat-elevation-z2">
       <table mat-table [dataSource]="filteredHolidays" matSort (matSortChange)="sortData($event)">
         <!-- Date Column -->

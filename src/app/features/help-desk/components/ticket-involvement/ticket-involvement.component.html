@@ -64,7 +64,7 @@
   <!-- ===================================================
        TABLE
        =================================================== -->
-  <div class="table-container" *ngIf="!loading && tickets.length > 0">
+  <div class="table-container" *ngIf="!loading && tickets.length > 0 && hasPermission('Invlove_Ticket_Table')">
 
     <div class="table-scroll">
       <table class="tickets-table">
@@ -131,7 +131,7 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="viewTicket(ticket)">
+                <button mat-menu-item *ngIf="hasPermission('Invlove_Ticket_View_Button')" (click)="viewTicket(ticket)">
                   <mat-icon>visibility</mat-icon>
                   <span>View</span>
                 </button>

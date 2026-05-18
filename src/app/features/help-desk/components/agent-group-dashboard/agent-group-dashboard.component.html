@@ -40,7 +40,7 @@
         </div>
 
         <!-- Create Button -->
-        <div class="filter-field">
+        <div class="filter-field" *ngIf="hasPermission('Create_AgentGroup_Button')">
           <button mat-raised-button color="primary" class="btn-create" (click)="openCreateGroupDialog()">
             <mat-icon>add</mat-icon>
             <span>Create Agent Group</span>
@@ -93,8 +93,9 @@
             </td>
               <td class="td-category">{{ group.categoryName || 'N/A' }}</td>
             <td class="text-center">
-              <button 
-                mat-icon-button 
+              <button
+                *ngIf="hasPermission('VIEW_AGENTGROUP_BUTTON') || hasPermission('EDIT_AGENTGROUP_BUTTON') || hasPermission('DELETE_AGENTGROUP_BUTTON')"
+                mat-icon-button
                 [matMenuTriggerFor]="actionMenu"
                 class="action-menu-btn"
                 aria-label="Actions menu">
@@ -102,15 +103,15 @@
               </button>
               
               <mat-menu #actionMenu="matMenu" class="custom-action-menu">
-                <button mat-menu-item (click)="viewGroup(group)">
+                <button mat-menu-item *ngIf="hasPermission('VIEW_AGENTGROUP_BUTTON')" (click)="viewGroup(group)">
                   <mat-icon>visibility</mat-icon>
                   <span>View</span>
                 </button>
-                <button mat-menu-item (click)="editGroup(group)">
+                <button mat-menu-item *ngIf="hasPermission('EDIT_AGENTGROUP_BUTTON')" (click)="editGroup(group)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
-                <button mat-menu-item (click)="deleteGroup(group)" class="delete-action">
+                <button mat-menu-item *ngIf="hasPermission('DELETE_AGENTGROUP_BUTTON')" (click)="deleteGroup(group)" class="delete-action">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>

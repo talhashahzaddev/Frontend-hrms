@@ -16,6 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '@/app/core/services/auth.service';
 
 @Component({
   selector: 'app-ticket-involvement',
@@ -58,6 +59,7 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
     private helpDeskService: HelpDeskService,
     private employeeService: EmployeeService,
     private router: Router
+    , private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -127,7 +129,11 @@ export class TicketInvolvementComponent implements OnInit, OnDestroy {
   // ✅ Actions
   viewTicket(ticket: Ticket): void {
     console.log('CLICK WORKING', ticket.ticketid);
-    this.router.navigate(['help-desk/tickets/view', ticket.ticketid]);
+    this.router.navigate(['help-desk/tickets/invlove-View', ticket.ticketid]);
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Ticket Involvement', actionKey);
   }
 
   deleteTicket(ticket: Ticket): void {

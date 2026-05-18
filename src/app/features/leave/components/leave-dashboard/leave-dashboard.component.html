@@ -18,7 +18,7 @@
   </div>
 
   <!-- Leave Balance Section -->
-  <div class="balance-section" *ngIf="leaveBalances.length > 0">
+  <div class="balance-section" *ngIf="leaveBalances.length > 0 && hasPermission('My_Leave_Balance_Cards')">
     <div class="section-header">
       <h2 class="section-title">Your Leave Balance</h2>
       <span class="year-badge">{{ currentYear }}</span>
@@ -71,7 +71,7 @@
   </div>
 
   <!-- ─── My Requests Section ─────────────────────────────────────────────── -->
-  <div class="requests-section" *ngIf="!isLoading">
+  <div class="requests-section" *ngIf="!isLoading && hasPermission('My_Leave_Request_Table')">
 
     <!-- Section Header (filters row style) -->
     <div class="requests-section-header">

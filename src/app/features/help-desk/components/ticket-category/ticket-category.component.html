@@ -40,7 +40,7 @@
         </div>
 
         <!-- Create Category Button -->
-        <div class="filter-field">
+        <div class="filter-field" *ngIf="hasPermission('CREATE_TICKETCATEGORY_BUTTON')">
           <button mat-raised-button color="primary" class="btn-create" (click)="openCreateCategoryDialog()">
             <mat-icon>add</mat-icon>
             <span>Create Category</span>
@@ -78,8 +78,8 @@
             <td>{{ category.status ? 'Active' : 'Inactive' }}</td>
             <td>{{ category.createdAt | date:'short' }}</td>
             <td class="text-center">
-              <button 
-                mat-icon-button 
+              <button
+                mat-icon-button
                 [matMenuTriggerFor]="actionMenu"
                 class="action-menu-btn"
                 aria-label="Actions menu">
@@ -87,11 +87,11 @@
               </button>
 
               <mat-menu #actionMenu="matMenu" class="custom-action-menu">
-                <button mat-menu-item (click)="editCategory(category)">
+                <button mat-menu-item *ngIf="hasPermission('EDIT_TICKETCategory_BUTTON')" (click)="editCategory(category)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
-                <button mat-menu-item (click)="deleteCategory(category)" class="delete-action">
+                <button mat-menu-item *ngIf="hasPermission('DELETE_TICKETCateogry_BUTTON')" (click)="deleteCategory(category)" class="delete-action">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>

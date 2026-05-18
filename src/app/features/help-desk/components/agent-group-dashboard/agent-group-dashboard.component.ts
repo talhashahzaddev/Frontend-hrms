@@ -14,6 +14,7 @@ import { Subject, combineLatest, debounceTime, distinctUntilChanged, startWith, 
 import { HelpDeskService } from '../../services/help-desk.services';
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { NotificationService } from '@/app/core/services/notification.service';
+import { AuthService } from '@/app/core/services/auth.service';
 import { TicketGroup } from '../../../../core/models/helpdesk.models';
 import { CreateAgentGroupDialogComponent } from '../create-agent-group-dialog/create-agent-group-dialog.component';
 import { ViewGroupAgentDetailsComponent } from './view-Group-agent-details';
@@ -67,6 +68,7 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private dialog: MatDialog,
     private notificationService: NotificationService
+    , private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -220,5 +222,9 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
           });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Help Desk', 'Agent Group', actionKey);
   }
 }
