@@ -1,4 +1,10 @@
 <div class="time-tracking-container payslips-page">
+    <div class="ledger-switch-container">
+      <div class="ledger-switch">
+        <a routerLink="/payroll/payslips" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Compliance payslips</a>
+        <a routerLink="/payroll/my-payslips" routerLinkActive="active">My payslips</a>
+      </div>
+    </div>
     <!-- Header -->
     <header class="page-header">
         <div class="title-section">
@@ -215,12 +221,12 @@
                                 <button type="button" (click)="openViewPayslip(row)" title="View Payslip">
                                     <mat-icon>visibility</mat-icon>
                                 </button>
-                                <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
+                                <!-- <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
                                     <mat-icon>alternate_email</mat-icon>
                                 </button>
                                 <button type="button" (click)="openReissueDialog(row)" title="Reissue Payslip">
                                     <mat-icon>refresh</mat-icon>
-                                </button>
+                                </button> -->
                             </div>
                             }
                         </td>

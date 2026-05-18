@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, take } from 'rxjs';
 
@@ -82,7 +83,7 @@ interface PayslipRow {
 @Component({
   selector: 'app-compliance-payslips',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './compliance-payslips.component.html',
   styleUrl: './compliance-payslips.component.scss'
 })

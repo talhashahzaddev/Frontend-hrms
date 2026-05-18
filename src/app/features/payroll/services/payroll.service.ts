@@ -2608,6 +2608,22 @@ export class PayrollService {
         );
     }
 
+    getMyPayslips(params?: MyPayslipFilterDto): Observable<ApiResponse<{ data: MyPayslipDto[]; totalCount: number }>> {
+      let httpParams = new HttpParams();
+      if (params) {
+        if (params.page != null) {
+          httpParams = httpParams.set('page', String(params.page));
+        }
+        if (params.pageSize != null) {
+          httpParams = httpParams.set('pageSize', String(params.pageSize));
+        }
+        if (params.periodId) {
+          httpParams = httpParams.set('periodId', params.periodId);
+        }
+      }
+      return this.http.get<ApiResponse<{ data: MyPayslipDto[]; totalCount: number }>>(`${this.apiUrl}/my-payslips`, { params: httpParams });
+    }
+
     getCompliancePayslipStats(params: {
       payrollPeriodId?: string;
       departmentId?: string;
@@ -3397,3 +3413,26 @@ export interface MarkSocialSecurityClaimPaidPayload {
   paymentReference?: string | null;
   authorityReference?: string | null;
 }
+
+export interface MyPayslipFilterDto {
+  periodId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface MyPayslipDto {
+  periodId: string;
+  periodName: string;
+  payslipUploadUrl?: string;
+  basicSalary: number;
+  netSalary: number;
+  calculatedAt: string;
+  employeeId: string;
+  organizationId: string;
+}
+
+export interface PayrollPeriodDto {
+  id: string;
+  label: string;
+}
+

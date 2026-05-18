@@ -1,0 +1,121 @@
+<div class="time-tracking-container">
+  <div class="ledger-switch-container">
+    <div class="ledger-switch">
+      <a routerLink="/payroll/payslips" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Compliance payslips</a>
+      <a routerLink="/payroll/my-payslips" routerLinkActive="active">My payslips</a>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="title">My Payslips</h1>
+      <p class="subtitle">View and download your generated payslips</p>
+    </div>
+  </div>
+
+  <!-- Content Area (Table + Toolbar) -->
+  <div class="content-card">
+    <div class="toolbar">
+      <!-- Filter row -->
+      <div class="filters-row">
+        <!-- Period filter -->
+        <select class="filter-select" [(ngModel)]="pendingPeriodId">
+          <option value="">All Periods</option>
+          @for (period of periods; track period.id) {
+            <option [value]="period.id">{{ period.label }}</option>
+          }
+        </select>
+
+        <!-- Action buttons -->
+        <div class="filter-actions">
+          <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
+            <mat-icon>filter_list</mat-icon>
+            Apply
+          </button>
+          <button class="clear-btn" [disabled]="!hasActiveFilters && !hasAppliedFilters" (click)="clearFilters()">
+            <mat-icon>close</mat-icon>
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if (totalCount > 0) {
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Period Name</th>
+            <th class="text-right">Basic Salary</th>
+            <th class="text-right">Net Salary</th>
+            <th>Calculated At</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (record of payslips; track record.calculatedAt) {
+          <tr class="table-row">
+            <td class="font-semibold">{{ record.periodName }}</td>
+            <td class="text-right">{{ record.basicSalary | number }}</td>
+            <td class="text-right text-success">{{ record.netSalary | number }}</td>
+            <td>{{ record.calculatedAt | date:'mediumDate' }}</td>
+            <td class="action-cell">
+              <button class="action-btn hover-primary" (click)="viewPayslip(record)" title="View Payslip">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p>
+        Showing {{ fromRecord }}&ndash;{{ toRecord }} of {{ totalCount }} payslips
+      </p>
+      <div class="pagination">
+        <!-- Prev -->
+        <button class="page-btn" [class.disabled]="page === 1" [disabled]="page === 1" (click)="prevPage()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- First page shortcut + ellipsis -->
+        @if (pageRange[0] > 1) {
+        <button class="page-btn" (click)="goToPage(1)">1</button>
+        @if (pageRange[0] > 2) {
+        <span class="page-ellipsis">&hellip;</span>
+        }
+        }
+
+        <!-- Sliding page range -->
+        @for (p of pageRange; track p) {
+        <button class="page-btn" [class.active]="p === page" (click)="goToPage(p)">{{ p }}</button>
+        }
+
+        <!-- Last page shortcut + ellipsis -->
+        @if (pageRange[pageRange.length - 1] < totalPages) { 
+          @if (pageRange[pageRange.length - 1] < totalPages - 1) {
+          <span class="page-ellipsis">&hellip;</span>
+          }
+          <button class="page-btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
+        }
+
+        <!-- Next -->
+        <button class="page-btn" [class.disabled]="page === totalPages" [disabled]="page === totalPages" (click)="nextPage()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+    } @else {
+    <div class="empty-state" *ngIf="!isLoading">
+      <div class="empty-icon-wrapper">
+        <mat-icon>receipt_long</mat-icon>
+      </div>
+      <h3>No payslips found</h3>
+      <p>You haven't received any payslips yet, or none match the selected filters.</p>
+    </div>
+    }
+  </div>
+</div>
