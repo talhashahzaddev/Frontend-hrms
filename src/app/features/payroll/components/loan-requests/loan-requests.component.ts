@@ -123,6 +123,12 @@ export class LoanRequestsComponent implements OnInit {
 
   salaryAdvances: SalaryAdvanceRecord[] = [];
 
+  // Resolved from the backend salary-advance summary. This is the employee's basic
+  // salary — the basis every rule cap ("max % of salary") is applied against, and
+  // the same value the server validates the requested amount against. Never hardcode.
+  salaryAdvanceBasis = 0;
+  salaryAdvanceBasisConfigured = false;
+
   private localLoanSeed: EmployeeLoanRecord[] = [];
   private localLoanPaymentSeed: LoanPaymentHistoryRecord[] = [];
   private localAdvanceSeed: SalaryAdvanceRecord[] = [];
@@ -168,6 +174,7 @@ export class LoanRequestsComponent implements OnInit {
     this.loadLoans();
     this.loadLoanPayments();
     this.loadSalaryAdvances();
+    this.loadSalaryAdvanceSummary();
     this.loadPayrollPeriods();
     this.loadLoanReferences();
 
@@ -443,7 +450,11 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   get availableAdvanceLimit(): number {
-    return Math.max(0, 125000 - this.outstandingAdvanceAmount);
+    // The cap basis the dialog multiplies by each rule's max percentage. Must equal
+    // the server's basis (employee basic salary) so the FE preview matches what the
+    // backend will actually accept. Stacking is blocked server-side, so we do not
+    // net out outstanding here — that would desync the FE cap from the BE cap.
+    return Math.max(0, this.salaryAdvanceBasis);
   }
 
   setModuleTab(tab: ModuleTab): void {
@@ -927,6 +938,25 @@ export class LoanRequestsComponent implements OnInit {
 
           this.activateLocalAdvanceFallback();
           this.salaryAdvances = this.filterForCurrentEmployee([...this.localAdvanceSeed]);
+        }
+      });
+  }
+
+  private loadSalaryAdvanceSummary(): void {
+    this.payrollService.getMySalaryAdvanceSummary()
+      .pipe(take(1))
+      .subscribe({
+        next: (summary: any) => {
+          const basis = Number(summary?.basicSalary ?? 0);
+          this.salaryAdvanceBasis = Number.isFinite(basis) && basis > 0 ? basis : 0;
+          this.salaryAdvanceBasisConfigured = !!summary?.hasBasicSalary && this.salaryAdvanceBasis > 0;
+        },
+        error: (error) => {
+          if (!this.isUnsupportedEndpointError(error)) {
+            console.error('Failed to load salary advance summary', error);
+          }
+          this.salaryAdvanceBasis = 0;
+          this.salaryAdvanceBasisConfigured = false;
         }
       });
   }

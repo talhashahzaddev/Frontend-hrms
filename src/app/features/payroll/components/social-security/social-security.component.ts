@@ -51,11 +51,16 @@ import {
 } from '../dialogs/social-security-admin-action-dialog/social-security-admin-action-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 import {
+  SocialSecurityDocumentsDialogComponent,
+  SocialSecurityDocumentsDialogData
+} from '../dialogs/social-security-documents-dialog/social-security-documents-dialog.component';
+import {
   SocialSecurityClaim,
-  SocialSecurityEnrollmentRequest
+  SocialSecurityEnrollmentRequest,
+  SocialSecurityEnrollmentRoster
 } from '../../services/payroll.service';
 
-type SocialTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules' | 'requests' | 'transactions' | 'claims';
+type SocialTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules' | 'requests' | 'enrollments' | 'transactions' | 'claims';
 
 interface SocialTransactionRow {
   id: string;
@@ -130,6 +135,15 @@ export class SocialSecurityComponent implements OnInit {
   enrollmentRequestStatusFilter = '';
   enrollmentRequestTypeFilter = '';
 
+  // Admin: enrollment roster
+  enrollments: SocialSecurityEnrollmentRoster[] = [];
+  enrollmentsTotal = 0;
+  enrollmentsPage = 1;
+  readonly enrollmentsPageSize = 10;
+  enrollmentsLoading = false;
+  enrollmentStatusFilter = '';
+  enrollmentSearch = '';
+
   // Admin: claims
   benefitClaims: SocialSecurityClaim[] = [];
   benefitClaimsTotal = 0;
@@ -153,6 +167,7 @@ export class SocialSecurityComponent implements OnInit {
     this.loadConfigOptions();
     this.loadSocialTransactions();
     this.loadEnrollmentRequests();
+    this.loadEnrollments();
     this.loadBenefitClaims();
   }
 
@@ -1032,12 +1047,100 @@ export class SocialSecurityComponent implements OnInit {
     this.loadEnrollmentRequests();
   }
 
+  // ── Enrollment roster (admin) ────────────────────────────────────────────
+
+  loadEnrollments(): void {
+    this.enrollmentsLoading = true;
+    const params: any = { page: this.enrollmentsPage, pageSize: this.enrollmentsPageSize };
+    if (this.enrollmentStatusFilter) params.enrollmentStatus = this.enrollmentStatusFilter;
+    if (this.enrollmentSearch && this.enrollmentSearch.trim()) params.searchTerm = this.enrollmentSearch.trim();
+
+    this.payrollService.getSocialSecurityEnrollments(params).pipe(take(1)).subscribe({
+      next: (result: any) => {
+        this.enrollments = this.extractItems(result) as SocialSecurityEnrollmentRoster[];
+        this.enrollmentsTotal = this.extractTotalCount(result, this.enrollments.length);
+        this.enrollmentsLoading = false;
+      },
+      error: (err) => {
+        this.enrollments = [];
+        this.enrollmentsTotal = 0;
+        this.enrollmentsLoading = false;
+        this.notification.showError(this.resolveErrorMessage(err, 'Failed to load enrollments.'));
+      }
+    });
+  }
+
+  applyEnrollmentFilters(): void {
+    this.enrollmentsPage = 1;
+    this.loadEnrollments();
+  }
+
+  clearEnrollmentFilters(): void {
+    this.enrollmentSearch = '';
+    this.enrollmentStatusFilter = '';
+    this.enrollmentsPage = 1;
+    this.loadEnrollments();
+  }
+
+  effectiveEmployeePct(e: SocialSecurityEnrollmentRoster): number {
+    return Number(e.employeeCustomPct ?? e.ruleEmployeeDefaultPct ?? 0);
+  }
+
+  effectiveEmployerPct(e: SocialSecurityEnrollmentRoster): number {
+    return Number(e.employerCustomPct ?? e.ruleEmployerDefaultPct ?? 0);
+  }
+
+  // ── Supporting documents (admin view + verify) ───────────────────────────
+
+  openRequestDocuments(req: SocialSecurityEnrollmentRequest): void {
+    const data: SocialSecurityDocumentsDialogData = {
+      requestId: req.requestId,
+      title: `Documents — ${req.employeeName} (${req.requestType})`,
+      canVerify: true
+    };
+    const ref = this.dialog.open(SocialSecurityDocumentsDialogComponent, {
+      width: '640px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+    ref.afterClosed().subscribe((changed: boolean | undefined) => {
+      if (changed) this.loadEnrollmentRequests();
+    });
+  }
+
+  openClaimDocuments(claim: SocialSecurityClaim): void {
+    if (!claim.requestId) {
+      this.notification.showError('This claim has no linked document set.');
+      return;
+    }
+    const data: SocialSecurityDocumentsDialogData = {
+      requestId: claim.requestId,
+      title: `Documents — ${claim.employeeName} (${claim.claimType} claim)`,
+      canVerify: true
+    };
+    const ref = this.dialog.open(SocialSecurityDocumentsDialogComponent, {
+      width: '640px', maxWidth: '95vw',
+      panelClass: 'social-security-transaction-dialog-panel',
+      autoFocus: false, restoreFocus: false, data
+    });
+    ref.afterClosed().subscribe((changed: boolean | undefined) => {
+      if (changed) this.loadBenefitClaims();
+    });
+  }
+
   approveEnrollmentRequest(req: SocialSecurityEnrollmentRequest): void {
+    const linkedRule = req.ruleId
+      ? this.rules.find((rule) => rule.ruleId === req.ruleId)
+      : undefined;
+
     const data: SocialSecurityAdminActionDialogData = {
       mode: 'approve-request',
       subject: `${req.employeeName} — ${req.requestType}`,
       defaultEmployeePct: req.requestedEmployeePct ?? null,
       defaultEmployerPct: req.requestedEmployerPct ?? null,
+      ruleEmployeePct: linkedRule?.employeeDefaultPct ?? null,
+      ruleEmployerPct: linkedRule?.employerDefaultPct ?? null,
+      ruleName: linkedRule?.ruleName ?? req.ruleName ?? null,
       defaultSalaryCap: req.requestedSalaryCap ?? null,
       defaultEffectiveDate: req.requestedEffectiveDate ? String(req.requestedEffectiveDate).slice(0, 10) : null
     };

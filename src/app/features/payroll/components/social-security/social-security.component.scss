@@ -29,6 +29,60 @@
         font-size: 12px;
         color: var(--text-secondary);
       }
+
+      // Approve / Reject actions — kept visually identical to the loans &
+      // salary-advance admin screens for cross-feature consistency.
+      .action-cell .request-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.55rem;
+
+        .approve-btn,
+        .reject-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          height: 2.2rem;
+          padding: 0 1rem;
+          border-radius: 0.6rem;
+          font-size: 0.85rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          mat-icon {
+            font-size: 1.1rem;
+            width: 1.1rem;
+            height: 1.1rem;
+          }
+        }
+
+        .approve-btn {
+          background: #059669;
+          color: #ffffff;
+          border: none;
+          box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+
+          &:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(5, 150, 105, 0.3);
+          }
+        }
+
+        .reject-btn {
+          background: #ffffff;
+          color: #ef4444;
+          border: 1px solid #fee2e2;
+          font-weight: 600;
+
+          &:hover {
+            background: #fef2f2;
+            border-color: #fecaca;
+          }
+        }
+      }
     }
   }
 }

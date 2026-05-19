@@ -21,6 +21,30 @@
         </div>
       </label>
 
+      @if (isRuleRequired) {
+        <label class="field field-span-2">
+          <span>Social security rule</span>
+          <div class="select-wrap">
+            <mat-icon class="leading">policy</mat-icon>
+            <select formControlName="ruleId">
+              <option value="" disabled>Select the rule you want…</option>
+              @for (rule of rules; track rule.ruleId) {
+                <option [value]="rule.ruleId">
+                  {{ rule.ruleName }}@if (rule.schemeName) { — {{ rule.schemeName }}}@if (rule.employeeDefaultPct != null) { ({{ rule.employeeDefaultPct }}% EE / {{ rule.employerDefaultPct ?? 0 }}% ER)}
+                </option>
+              }
+            </select>
+            <mat-icon class="trailing">expand_more</mat-icon>
+          </div>
+          @if (form.get('ruleId')?.touched && form.get('ruleId')?.errors?.['required']) {
+            <small class="error">Please choose a rule for this request.</small>
+          }
+          @if (rules.length === 0) {
+            <small class="error">No active social security rules exist yet. Ask HR to create one first.</small>
+          }
+        </label>
+      }
+
       <label class="field field-span-2">
         <span>Reason</span>
         <textarea formControlName="reason" placeholder="Briefly explain your request..." rows="3"></textarea>

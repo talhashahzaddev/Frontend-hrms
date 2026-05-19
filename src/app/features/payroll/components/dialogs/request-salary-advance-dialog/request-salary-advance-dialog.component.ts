@@ -38,7 +38,9 @@ export class RequestSalaryAdvanceDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<RequestSalaryAdvanceDialogComponent, RequestSalaryAdvanceDialogPayload | undefined>);
 
-  readonly currencySymbol = this.data?.currencySymbol ?? 'PKR';
+  // Caller supplies the org currency (resolved from SettingsService). Fall back to
+  // the system-wide neutral default rather than a country-specific symbol.
+  readonly currencySymbol = this.data?.currencySymbol ?? '$';
   readonly availableLimit = Math.max(0, Number(this.data?.availableLimit ?? 0));
   readonly activeRules = (this.data?.activeRules ?? [])
     .filter((rule) => !!String(rule?.ruleId ?? '').trim())
