@@ -583,11 +583,10 @@ export class AuthService {
   }
 
   private initializePermissionsIfNeeded(): void {
-    const permissionsJson = localStorage.getItem(this.PERMISSIONS_KEY);
     const user = this.currentUserSubject.value;
 
-    // If we have a user logged in but no permissions yet, fetch them
-    if (user && !permissionsJson) {
+    // Always refresh when logged in so role permission changes apply without re-login
+    if (user) {
       this.fetchAndStoreUserPermissions(user.userId).subscribe();
     }
   }
@@ -643,21 +642,43 @@ export class AuthService {
     const permissions = this.permissionsSubject.value;
     if (!permissions) return false;
 
-    const menu = permissions.menus.find(m => 
+    const menu = permissions.menus.find(m =>
       m.menuName.toLowerCase() === menuName.toLowerCase()
     );
     if (!menu) return false;
 
-    const subMenu = menu.subMenus.find(sm => 
+    const normalizedKey = actionKey.toLowerCase();
+    const matchingSubMenus = menu.subMenus.filter(sm =>
       sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
     );
-    if (!subMenu) return false;
 
-    const action = subMenu.actions.find(act => 
-      act.actionKey.toLowerCase() === actionKey.toLowerCase()
+    return matchingSubMenus.some(subMenu =>
+      subMenu.actions.some(
+        act => act.actionKey.toLowerCase() === normalizedKey && act.hasPermission
+      )
     );
-    
-    return action ? action.hasPermission : false;
+  }
+
+  /**
+   * Checks permission by action key across all menus/submenus.
+   * When the same action key appears under multiple submenus, any granted match wins.
+   */
+  hasPermissionByActionKey(actionKey: string): boolean {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return false;
+
+    const normalizedKey = actionKey.toLowerCase();
+    for (const menu of permissions.menus) {
+      for (const subMenu of menu.subMenus) {
+        if (subMenu.actions.some(
+          act => act.actionKey.toLowerCase() === normalizedKey && act.hasPermission
+        )) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -679,15 +700,16 @@ export class AuthService {
       return false;
     }
 
-    const subMenu = menu.subMenus.find(sm => 
+    const matchingSubMenus = menu.subMenus.filter(sm =>
       sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
     );
-    if (!subMenu) {
+    if (matchingSubMenus.length === 0) {
       return false;
     }
 
-    // Check if any action has permission
-    return subMenu.actions.some(action => action.hasPermission);
+    return matchingSubMenus.some(subMenu =>
+      subMenu.actions.some(action => action.hasPermission)
+    );
   }
 
   /**
@@ -734,18 +756,7 @@ export class AuthService {
       return false;
     }
 
-    const subMenu = menu.subMenus.find(sm => 
-      sm.subMenuName.toLowerCase() === subMenuName.toLowerCase()
-    );
-    if (!subMenu) {
-      return false;
-    }
-
-    const action = subMenu.actions.find(a => 
-      a.actionKey.toLowerCase() === actionKey.toLowerCase()
-    );
-    
-    return action ? action.hasPermission : false;
+    return this.hasMenuPermission(menuName, subMenuName, actionKey);
   }
 
   getFirstAllowedRoute(): string {

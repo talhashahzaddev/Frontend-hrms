@@ -20,7 +20,15 @@ import {
 import { finalize } from 'rxjs/operators';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import {
+  canAddPayrollPolicy,
+  canEditPayrollPolicy,
+  getCreatablePolicies,
+  getPolicyPermissionKey,
+  hasPayrollRulePermission
+} from '../../../utils/payroll-rule-permissions';
 
 export interface RuleDialogData {
   // Pass any initial data if needed, e.g., for edit mode
@@ -99,24 +107,15 @@ export class RuleDialogComponent implements OnInit {
   private readonly injectedData = inject<RuleDialogData | null>(MAT_DIALOG_DATA, { optional: true });
   public readonly data: RuleDialogData = this.injectedData ?? {};
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly isSubmitting = signal(false);
   readonly currencySymbol = signal('$');
 
-  readonly policies = [
-    { id: 1, name: 'Overtime Policy' },
-    { id: 2, name: 'Attendance Deduction Policy' },
-    { id: 3, name: 'Late Arrival Policy' },
-    { id: 4, name: 'Leave Deduction Policy' },
-    { id: 5, name: 'Performance Bonus Policy' },
-    { id: 6, name: 'Bonus' },
-    { id: 7, name: 'Employee Loan Policy' },
-    { id: 8, name: 'Salary Advance Policy' },
-    { id: 9, name: 'Provident Fund Policy' },
-    { id: 10, name: 'Tax regime Policy' },
-    { id: 11, name: 'Social Security Policy' },
-    { id: 12, name: 'Gratuity Policy' }
-  ];
+  /** Policies the user may select when creating a rule (add permission required). */
+  get availablePolicies() {
+    return getCreatablePolicies(this.authService);
+  }
 
   readonly overtimeTypes = ['regular', 'holiday', 'weekend'];
   readonly socialSecurityJurisdictions = signal<SocialSecurityJurisdictionOption[]>([]);
@@ -202,6 +201,24 @@ export class RuleDialogComponent implements OnInit {
           this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
+
+    if (!this.isEditMode && this.data?.policyId && !canAddPayrollPolicy(this.authService, this.data.policyId)) {
+      this.notification.showError('You do not have permission to create this policy.');
+      this.dialogRef.close();
+      return;
+    }
+
+    if (!this.isEditMode && !this.data?.policyId && this.availablePolicies.length === 0) {
+      this.notification.showError('You do not have permission to create any policies.');
+      this.dialogRef.close();
+      return;
+    }
+
+    if (this.isEditMode && this.data?.policyId && !canEditPayrollPolicy(this.authService, this.data.policyId)) {
+      this.notification.showError('You do not have permission to edit this policy.');
+      this.dialogRef.close();
+      return;
+    }
 
     if (this.selectedPolicy === 11 || this.data?.policyId === 11) {
       this.loadSocialSecurityLookups();
@@ -829,14 +846,28 @@ export class RuleDialogComponent implements OnInit {
     return date.toISOString().slice(0, 10);
   }
 
+  hasPermission(policyId: number, isEdit: boolean): boolean {
+    const key = getPolicyPermissionKey(policyId, isEdit ? 'edit' : 'add');
+    if (!key) {
+      return false;
+    }
+    return hasPayrollRulePermission(this.authService, key);
+  }
+
   onSubmit(): void {
     if (this.ruleForm.invalid || this.isSubmitting()) {
       this.ruleForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmitting.set(true);
     const formValue = this.ruleForm.getRawValue();
+    const policyId = Number(formValue.selectedPolicy);
+    if (!this.hasPermission(policyId, this.isEditMode)) {
+      this.notification.showError('You do not have permission to perform this action.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
 
     // We only send back the relevant fields based on the selected policy
     let resultPayload: any = {

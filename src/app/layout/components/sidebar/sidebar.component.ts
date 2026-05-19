@@ -21,6 +21,8 @@ interface MenuItem {
   children?: MenuItem[];
   menuName?: string;
   subMenuName?: string;
+  /** When set, item is visible only if this action key is granted. */
+  actionKey?: string;
   permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
@@ -47,6 +49,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   activeRoute = '';
   activeItemKey: string | null = null;
+  /** Bumped when permissions load/refresh so the menu re-filters. */
+  private menuPermissionsVersion = 0;
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
 
   private destroy$ = new Subject<void>();
@@ -320,9 +324,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
           route: '/payroll/payslips',
           exact: true
         },
-        { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies', actionKey: 'payroll_rules_view' },
         { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
-        { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
+        { label: 'Periods', icon: 'date_range', route: '/payroll/periods', actionKey: 'payroll_period_view' },
         { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
         { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
       ]
@@ -354,6 +358,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscribeToUser();
+    this.subscribeToPermissions();
     this.subscribeToRouterEvents();
     // Ensure active state is correct on initial load (before first NavigationEnd)
     this.activeRoute = this.router.url;
@@ -402,6 +407,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       }
     }
 
+    if (item.actionKey) {
+      return this.authService.hasPermissionByActionKey(item.actionKey);
+    }
+
     // If the item has no menuName, it either has no permission requirements or is a standalone item
     if (!item.menuName) {
       return true;
@@ -437,10 +446,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   getFilteredMenuItems(): MenuItem[] {
+    void this.menuPermissionsVersion;
     return this.menuItems.filter(item => this.hasPermission(item));
   }
 
   getFilteredChildren(children: MenuItem[]): MenuItem[] {
+    void this.menuPermissionsVersion;
     return children.filter(child => this.hasPermission(child));
   }
 
@@ -475,6 +486,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => { this.currentUser = user; });
+  }
+
+  private subscribeToPermissions(): void {
+    this.authService.permissions$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.menuPermissionsVersion++;
+      });
   }
 
   private subscribeToRouterEvents(): void {

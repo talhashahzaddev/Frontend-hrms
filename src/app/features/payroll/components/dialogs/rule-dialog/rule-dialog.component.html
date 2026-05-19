@@ -42,7 +42,7 @@
           <label>Select Policy *</label>
           <mat-form-field appearance="outline" class="rd-mat-field">
             <mat-select formControlName="selectedPolicy" placeholder="Choose a policy">
-              <mat-option *ngFor="let policy of policies" [value]="policy.id">
+              <mat-option *ngFor="let policy of availablePolicies" [value]="policy.id">
                 {{ policy.name }}
               </mat-option>
             </mat-select>

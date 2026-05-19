@@ -1,92 +1,109 @@
-<div class="tax-regime-rules-container">
-  <div class="page-header-wrapper">
-    <div class="page-header">
-      <div class="title-section">
-        <button class="icon-button back-btn" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="title-text-group">
-          <h1 class="title">Tax Regime</h1>
-          <p class="subtitle">Define and manage organization tax regimes by country and fiscal dates.</p>
+@if (!hasPermission('tax_regime_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view tax regimes. Please contact your system administrator.</p>
+    <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
+  </div>
+} @else {
+  <div class="tax-regime-rules-container">
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="title-section">
+          <button class="icon-button back-btn" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-text-group">
+            <h1 class="title">Tax Regime</h1>
+            <p class="subtitle">Define and manage organization tax regimes by country and fiscal dates.</p>
+          </div>
         </div>
+        @if (hasPermission('tax_regime_add')) {
+          <button class="create-rule-btn" (click)="openRuleDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Add Tax Regime</span>
+          </button>
+        }
       </div>
-      <button class="create-rule-btn" (click)="openRuleDialog()">
-        <mat-icon>add</mat-icon>
-        <span>Add Tax Regime</span>
+    </div>
+
+    <div class="tab-navigation">
+      @for (tab of taxTabs; track tab.key) {
+      <button class="tab" [class.active]="tab.key === 'regime'" (click)="navigateToTab(tab.route)">
+        {{ tab.label }}
       </button>
-    </div>
-  </div>
-
-  <div class="tab-navigation">
-    @for (tab of taxTabs; track tab.key) {
-    <button class="tab" [class.active]="tab.key === 'regime'" (click)="navigateToTab(tab.route)">
-      {{ tab.label }}
-    </button>
-    }
-  </div>
-
-  <div class="content-card">
-    @if (isLoading()) {
-    <div class="loading-state">
-      <mat-spinner diameter="34"></mat-spinner>
-    </div>
-    } @else if (taxRegimes().length === 0) {
-    <div class="empty-state">
-      <h3>No tax regimes configured yet.</h3>
-      <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
-        <mat-icon>add</mat-icon>
-        <span>Create tax regime</span>
-      </button>
-    </div>
-    } @else {
-    <div class="regime-grid">
-      @for (regime of taxRegimes(); track regime.regimeId) {
-      <article class="regime-card" [class.inactive-card]="!regime.isActive">
-        <div class="card-head">
-          <div class="rule-name-with-icon">
-            <div class="rule-icon-box">
-              <mat-icon>request_quote</mat-icon>
-            </div>
-            <div class="card-title-wrap">
-              <h3>{{ regime.regimeName || '-' }}</h3>
-              <p>{{ regime.country || '-' }}</p>
-            </div>
-          </div>
-          <span class="badge" [ngClass]="regime.isActive ? 'status-active' : 'status-inactive'">
-            {{ regime.isActive ? 'Active' : 'Inactive' }}
-          </span>
-        </div>
-
-        <div class="card-body">
-          <div class="meta-item">
-            <span class="meta-label">Start Date</span>
-            <span class="meta-value">{{ regime.startDate | date:'mediumDate' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">End Date</span>
-            <span class="meta-value">{{ regime.endDate | date:'mediumDate' }}</span>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button mat-icon-button class="action-btn hover-primary" title="Edit Tax Regime" (click)="editRule(regime)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button class="action-btn hover-primary" (click)="onToggleStatus(regime)"
-            [title]="regime.isActive ? 'Deactivate' : 'Activate'">
-            <mat-icon>{{ regime.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-          </button>
-          <button mat-icon-button class="action-btn hover-danger" (click)="onDelete(regime)" title="Delete Tax Regime">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </article>
       }
     </div>
-    }
 
-    <div class="table-footer">
-      <p>Showing {{ taxRegimes().length }} of {{ taxRegimes().length }} tax regimes</p>
+    <div class="content-card">
+      @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="34"></mat-spinner>
+      </div>
+      } @else if (taxRegimes().length === 0) {
+      <div class="empty-state">
+        <h3>No tax regimes configured yet.</h3>
+        @if (hasPermission('tax_regime_add')) {
+          <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+            <mat-icon>add</mat-icon>
+            <span>Create tax regime</span>
+          </button>
+        }
+      </div>
+      } @else {
+      <div class="regime-grid">
+        @for (regime of taxRegimes(); track regime.regimeId) {
+        <article class="regime-card" [class.inactive-card]="!regime.isActive">
+          <div class="card-head">
+            <div class="rule-name-with-icon">
+              <div class="rule-icon-box">
+                <mat-icon>request_quote</mat-icon>
+              </div>
+              <div class="card-title-wrap">
+                <h3>{{ regime.regimeName || '-' }}</h3>
+                <p>{{ regime.country || '-' }}</p>
+              </div>
+            </div>
+            <span class="badge" [ngClass]="regime.isActive ? 'status-active' : 'status-inactive'">
+              {{ regime.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+
+          <div class="card-body">
+            <div class="meta-item">
+              <span class="meta-label">Start Date</span>
+              <span class="meta-value">{{ regime.startDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">End Date</span>
+              <span class="meta-value">{{ regime.endDate | date:'mediumDate' }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            @if (hasPermission('tax_regime_edit')) {
+              <button mat-icon-button class="action-btn hover-primary" title="Edit Tax Regime" (click)="editRule(regime)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn hover-primary" (click)="onToggleStatus(regime)"
+                [title]="regime.isActive ? 'Deactivate' : 'Activate'">
+                <mat-icon>{{ regime.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+              </button>
+            }
+            @if (hasPermission('tax_regime_delete')) {
+              <button mat-icon-button class="action-btn hover-danger" (click)="onDelete(regime)" title="Delete Tax Regime">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </div>
+        </article>
+        }
+      </div>
+      }
+
+      <div class="table-footer">
+        <p>Showing {{ taxRegimes().length }} of {{ taxRegimes().length }} tax regimes</p>
+      </div>
     </div>
   </div>
-</div>
+}

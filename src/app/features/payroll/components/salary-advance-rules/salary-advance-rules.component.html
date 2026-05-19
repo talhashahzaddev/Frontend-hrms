@@ -1,99 +1,115 @@
-<div class="salary-advance-rules-container">
-  <div class="page-header-wrapper">
-    <div class="page-header">
-      <div class="title-section">
-        <button class="icon-button back-btn" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div class="title-text-group">
-          <h1 class="title">Salary Advance Rules</h1>
-          <p class="subtitle">Define and manage employee salary advance rules and eligibility criteria.</p>
+@if (!hasPermission('salary_advance_rule_view')) {
+  <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
+    <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
+    <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view salary advance rules. Please contact your system administrator.</p>
+    <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
+  </div>
+} @else {
+  <div class="salary-advance-rules-container">
+    <div class="page-header-wrapper">
+      <div class="page-header">
+        <div class="title-section">
+          <button class="icon-button back-btn" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="title-text-group">
+            <h1 class="title">Salary Advance Rules</h1>
+            <p class="subtitle">Define and manage employee salary advance rules and eligibility criteria.</p>
+          </div>
         </div>
+        @if (hasPermission('salary_advance_rule_add')) {
+          <button class="create-rule-btn" (click)="openRuleDialog()">
+            <mat-icon>add</mat-icon>
+            <span>Add Salary Advance Policy</span>
+          </button>
+        }
       </div>
-      <button class="create-rule-btn" (click)="openRuleDialog()">
-        <mat-icon>add</mat-icon>
-        <span>Add Salary Advance Policy</span>
-      </button>
     </div>
-  </div>
 
-  <div class="content-card">
-    <div class="table-responsive">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th class="text-left">Rule Name</th>
-            <th class="text-right">Max Percentage</th>
-            <th class="text-center">Status</th>
-            <th class="text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading()) {
-          <tr>
-            <td colspan="4" class="text-center" style="padding: 3rem;">
-              <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
-            </td>
-          </tr>
-          } @else if (salaryAdvanceRules().length === 0) {
-          <tr>
-            <td colspan="4" class="text-center" style="padding: 4rem;">
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                <h3 style="color: #64748b; font-weight: 500; margin: 0;">Define and manage employee salary advance rules and
-                  eligibility criteria.</h3>
-                <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
-                  <mat-icon>add</mat-icon>
-                  <span>Create rule</span>
-                </button>
-              </div>
-            </td>
-          </tr>
-          } @else {
-          @for (rule of salaryAdvanceRules(); track trackByRuleId($index, rule)) {
-          <tr class="table-row" [class.inactive-row]="!rule.isActive">
-            <td class="text-left">
-              <div class="rule-name-with-icon">
-                <div class="rule-icon-box">
-                  <mat-icon>payments</mat-icon>
+    <div class="content-card">
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th class="text-left">Rule Name</th>
+              <th class="text-right">Max Percentage</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+            <tr>
+              <td colspan="4" class="text-center" style="padding: 3rem;">
+                <mat-spinner diameter="30" style="margin: 0 auto;"></mat-spinner>
+              </td>
+            </tr>
+            } @else if (salaryAdvanceRules().length === 0) {
+            <tr>
+              <td colspan="4" class="text-center" style="padding: 4rem;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                  <h3 style="color: #64748b; font-weight: 500; margin: 0;">Define and manage employee salary advance rules and eligibility criteria.</h3>
+                  @if (hasPermission('salary_advance_rule_add')) {
+                    <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+                      <mat-icon>add</mat-icon>
+                      <span>Create rule</span>
+                    </button>
+                  }
                 </div>
-                <span class="font-semibold">{{ rule.ruleName }}</span>
-              </div>
-            </td>
-            <td class="text-right">
-              @if (getMaxPercentage(rule) !== null) {
-              <span class="highlight-val">{{ getMaxPercentage(rule) | number:'1.0-2' }}%</span>
-              } @else {
-              <span class="highlight-val">-</span>
-              }
-            </td>
-            <td class="text-center">
-              <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
-                {{ rule.isActive ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="text-right action-cell">
-              <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
-                (click)="editRule(rule)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule)"
-                [title]="rule.isActive ? 'Deactivate' : 'Activate'">
-                <mat-icon>{{ rule.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn text-muted hover-danger" (click)="onDelete(rule)"
-                title="Delete Rule">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </tr>
-          }
-          }
-        </tbody>
-      </table>
-    </div>
+              </td>
+            </tr>
+            } @else {
+            @for (rule of salaryAdvanceRules(); track trackByRuleId($index, rule)) {
+            <tr class="table-row" [class.inactive-row]="!rule.isActive">
+              <td class="text-left">
+                <div class="rule-name-with-icon">
+                  <div class="rule-icon-box">
+                    <mat-icon>payments</mat-icon>
+                  </div>
+                  <span class="font-semibold">{{ rule.ruleName }}</span>
+                </div>
+              </td>
+              <td class="text-right">
+                @if (getMaxPercentage(rule) !== null) {
+                <span class="highlight-val">{{ getMaxPercentage(rule) | number:'1.0-2' }}%</span>
+                } @else {
+                <span class="highlight-val">-</span>
+                }
+              </td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="rule.isActive ? 'status-active' : 'status-inactive'">
+                  {{ rule.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="text-right action-cell">
+                @if (hasPermission('salary_advance_rule_edit')) {
+                  <button mat-icon-button class="action-btn text-muted hover-primary" title="Edit Rule"
+                    (click)="editRule(rule)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button class="action-btn text-muted hover-primary" (click)="onToggleStatus(rule)"
+                    [title]="rule.isActive ? 'Deactivate' : 'Activate'">
+                    <mat-icon>{{ rule.isActive ? 'toggle_on' : 'toggle_off' }}</mat-icon>
+                  </button>
+                }
+                @if (hasPermission('salary_advance_rule_delete')) {
+                  <button mat-icon-button class="action-btn text-muted hover-danger" (click)="onDelete(rule)"
+                    title="Delete Rule">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
 
-    <div class="table-footer">
-      <p>Showing {{ salaryAdvanceRules().length }} of {{ salaryAdvanceRules().length }} policies</p>
+      <div class="table-footer">
+        <p>Showing {{ salaryAdvanceRules().length }} of {{ salaryAdvanceRules().length }} policies</p>
+      </div>
     </div>
   </div>
-</div>
+}

@@ -8,6 +8,8 @@ import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { PayrollService, TaxRegimeDto } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
@@ -26,6 +28,7 @@ export class TaxRegimeRulesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly taxRegimes = signal<TaxRegimeDto[]>([]);
   readonly isLoading = signal(true);
@@ -37,10 +40,14 @@ export class TaxRegimeRulesComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.fetchTaxRegimes();
+    watchPayrollRuleViewAccess(this.authService, 'tax_regime_view', {
+      onAllowed: () => this.fetchTaxRegimes(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchTaxRegimes(): void {
+    if (!this.hasPermission('tax_regime_view')) return;
     this.isLoading.set(true);
     this.payrollService.getTaxRegimes().subscribe({
       next: (data) => {
@@ -64,6 +71,7 @@ export class TaxRegimeRulesComponent implements OnInit {
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('tax_regime_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -78,6 +86,7 @@ export class TaxRegimeRulesComponent implements OnInit {
   }
 
   editRule(regime: TaxRegimeDto): void {
+    if (!this.hasPermission('tax_regime_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -104,6 +113,7 @@ export class TaxRegimeRulesComponent implements OnInit {
   }
 
   onToggleStatus(regime: TaxRegimeDto): void {
+    if (!this.hasPermission('tax_regime_edit')) return;
     const regimeId = String(regime.regimeId ?? '');
     if (!regimeId) {
       this.notification.showError('Unable to update status for this tax regime');
@@ -131,6 +141,7 @@ export class TaxRegimeRulesComponent implements OnInit {
   }
 
   onDelete(regime: TaxRegimeDto): void {
+    if (!this.hasPermission('tax_regime_delete')) return;
     const regimeId = String(regime.regimeId ?? '');
     if (!regimeId) {
       this.notification.showError('Unable to delete this tax regime');
@@ -164,5 +175,9 @@ export class TaxRegimeRulesComponent implements OnInit {
         });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

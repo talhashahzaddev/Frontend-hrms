@@ -7,6 +7,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { PayrollService, TaxCategoryDto, TaxSlabDto } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteData,
   ConfirmDeleteDialogComponent
@@ -25,6 +27,7 @@ export class TaxSlabsComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
 
   readonly taxTabs = [
     { key: 'regime', label: 'Tax Regime', route: '/payroll/policies/tax-regime-rules' },
@@ -37,7 +40,10 @@ export class TaxSlabsComponent implements OnInit {
   readonly isLoading = signal(true);
 
   ngOnInit(): void {
-    this.fetchData();
+    watchPayrollRuleViewAccess(this.authService, 'tax_slab_view', {
+      onAllowed: () => this.fetchData(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   goBack(): void {
@@ -49,6 +55,7 @@ export class TaxSlabsComponent implements OnInit {
   }
 
   openCreateDialog(): void {
+    if (!this.hasPermission('tax_slab_add')) return;
     const dialogRef = this.dialog.open(TaxEntityDialogComponent, {
       width: '620px',
       data: {
@@ -76,6 +83,7 @@ export class TaxSlabsComponent implements OnInit {
   }
 
   editSlab(slab: TaxSlabDto): void {
+    if (!this.hasPermission('tax_slab_edit')) return;
     const dialogRef = this.dialog.open(TaxEntityDialogComponent, {
       width: '620px',
       data: {
@@ -111,6 +119,7 @@ export class TaxSlabsComponent implements OnInit {
   }
 
   deleteSlab(slab: TaxSlabDto): void {
+    if (!this.hasPermission('tax_slab_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Tax Slab',
       message: 'Are you sure you want to delete this tax slab?',
@@ -173,5 +182,9 @@ export class TaxSlabsComponent implements OnInit {
       id: category.categoryId,
       label: `${category.categoryName || 'Unnamed Category'}${category.regimeName ? ` (${category.regimeName})` : ''}`
     }));
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

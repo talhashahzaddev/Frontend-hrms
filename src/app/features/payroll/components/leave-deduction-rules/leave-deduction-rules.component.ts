@@ -7,7 +7,9 @@ import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
@@ -27,6 +29,7 @@ export class LeaveDeductionRulesComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly leaveRules = signal<any[]>([]);
   readonly isLoading = signal(true);
@@ -44,10 +47,14 @@ export class LeaveDeductionRulesComponent implements OnInit {
         }
       });
 
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'leave_deduction_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchRules(): void {
+    if (!this.hasPermission('leave_deduction_rule_view')) return;
     this.isLoading.set(true);
     this.payrollService.getLeaveRules().subscribe({
       next: (data) => {
@@ -67,6 +74,7 @@ export class LeaveDeductionRulesComponent implements OnInit {
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('leave_deduction_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -81,6 +89,7 @@ export class LeaveDeductionRulesComponent implements OnInit {
   }
 
   editRule(rule: any): void {
+    if (!this.hasPermission('leave_deduction_rule_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -99,6 +108,7 @@ export class LeaveDeductionRulesComponent implements OnInit {
   }
 
   onToggleStatus(id: string): void {
+    if (!this.hasPermission('leave_deduction_rule_edit')) return;
     const rule = this.leaveRules().find(r => r.ruleId === id);
     if (!rule) return;
 
@@ -116,6 +126,7 @@ export class LeaveDeductionRulesComponent implements OnInit {
   }
 
   onDelete(id: string, ruleName?: string): void {
+    if (!this.hasPermission('leave_deduction_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Rule',
       message: 'Are you sure you want to delete this leave deduction rule?',
@@ -143,5 +154,9 @@ export class LeaveDeductionRulesComponent implements OnInit {
         });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }
