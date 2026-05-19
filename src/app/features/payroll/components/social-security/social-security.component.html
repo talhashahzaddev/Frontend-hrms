@@ -60,6 +60,7 @@
     <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
     <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
     <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
+    <button class="tab" [class.active]="currentTab === 'enrollments'" (click)="setTab('enrollments')">Enrollments</button>
     <button class="tab" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">Claims</button>
     <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
   </div>
@@ -452,6 +453,7 @@
             <tr>
               <th>Employee</th>
               <th>Type</th>
+              <th>Requested rule</th>
               <th>Submitted</th>
               <th>Reason</th>
               <th class="text-right">Requested EE %</th>
@@ -463,30 +465,130 @@
           </thead>
           <tbody>
             @if (enrollmentRequests.length === 0) {
-              <tr><td colspan="9" class="empty-row">No enrollment requests found.</td></tr>
+              <tr><td colspan="10" class="empty-row">No enrollment requests found.</td></tr>
             } @else {
               @for (req of enrollmentRequests; track req.requestId) {
                 <tr>
                   <td>{{ req.employeeName }}</td>
                   <td>{{ req.requestType }}</td>
+                  <td>
+                    {{ req.ruleName || (req.configName ? req.configName : '—') }}
+                  </td>
                   <td>{{ req.requestedAt | date:'mediumDate' }}</td>
                   <td>{{ req.reason || '-' }}</td>
                   <td class="text-right">{{ req.requestedEmployeePct != null ? (req.requestedEmployeePct + '%') : '-' }}</td>
                   <td class="text-right">{{ req.requestedEmployerPct != null ? (req.requestedEmployerPct + '%') : '-' }}</td>
-                  <td>{{ req.documentCount }} file(s)</td>
+                  <td>
+                    @if (req.documentCount > 0) {
+                      <button type="button" class="link-btn" (click)="openRequestDocuments(req)"
+                              style="background:none;border:none;color:#1d4ed8;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">
+                        {{ req.documentCount }} file(s)
+                      </button>
+                    } @else {
+                      <span class="muted">No files</span>
+                    }
+                  </td>
                   <td class="text-center">
                     <span class="status-pill" [ngClass]="getStatusClass(req.requestStatus)">{{ req.requestStatus }}</span>
                   </td>
                   <td class="text-right action-cell">
                     @if (req.requestStatus === 'pending') {
-                      <button class="action-btn hover-primary" type="button" title="Approve" (click)="approveEnrollmentRequest(req)">
-                        <mat-icon>check_circle</mat-icon>
-                      </button>
-                      <button class="action-btn hover-danger" type="button" title="Reject" (click)="rejectEnrollmentRequest(req)">
-                        <mat-icon>cancel</mat-icon>
-                      </button>
+                      <div class="request-actions">
+                        <button class="approve-btn" type="button" (click)="approveEnrollmentRequest(req)">
+                          <mat-icon>check_circle</mat-icon>
+                          Approve
+                        </button>
+                        <button class="reject-btn" type="button" (click)="rejectEnrollmentRequest(req)">
+                          <mat-icon>cancel</mat-icon>
+                          Reject
+                        </button>
+                      </div>
                     }
                   </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (currentTab === 'enrollments') {
+    <div class="content-card">
+      <div class="toolbar supporting-toolbar">
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search employee..." [(ngModel)]="enrollmentSearch"
+                   (keyup.enter)="applyEnrollmentFilters()" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="enrollmentStatusFilter" (change)="applyEnrollmentFilters()">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="suspended">Suspended</option>
+            <option value="withdrawn">Withdrawn</option>
+            <option value="closed">Closed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+          <div class="filter-actions">
+            <button class="apply-btn" type="button" (click)="applyEnrollmentFilters()">
+              <mat-icon>filter_list</mat-icon>
+              Apply
+            </button>
+            <button class="clear-btn" type="button"
+                    [disabled]="!enrollmentSearch && !enrollmentStatusFilter"
+                    (click)="clearEnrollmentFilters()">
+              <mat-icon>close</mat-icon>
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive" [class.loading]="enrollmentsLoading">
+        @if (enrollmentsLoading) {
+          <div class="loading-overlay"><div class="spinner"></div><p>Loading enrollments...</p></div>
+        }
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Rule</th>
+              <th>Scheme</th>
+              <th>Type</th>
+              <th class="text-right">EE %</th>
+              <th class="text-right">ER %</th>
+              <th>Effective from</th>
+              <th>Ends</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Current</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (enrollments.length === 0) {
+              <tr><td colspan="10" class="empty-row">No enrollments found.</td></tr>
+            } @else {
+              @for (e of enrollments; track e.enrollmentId) {
+                <tr>
+                  <td>
+                    {{ e.employeeName }}
+                    @if (e.employeeCode) { <small style="color:#94a3b8;">({{ e.employeeCode }})</small> }
+                  </td>
+                  <td>{{ e.ruleName || '-' }}</td>
+                  <td>{{ e.schemeName || '-' }}</td>
+                  <td>{{ e.enrollmentType }}</td>
+                  <td class="text-right">{{ effectiveEmployeePct(e) | number:'1.0-2' }}%</td>
+                  <td class="text-right">{{ effectiveEmployerPct(e) | number:'1.0-2' }}%</td>
+                  <td>{{ e.effectiveDate | date:'mediumDate' }}</td>
+                  <td>{{ e.endDate ? (e.endDate | date:'mediumDate') : '-' }}</td>
+                  <td class="text-center">
+                    <span class="status-pill" [ngClass]="getStatusClass(e.enrollmentStatus)">{{ e.enrollmentStatus }}</span>
+                  </td>
+                  <td class="text-center">{{ e.isCurrent ? 'Yes' : 'No' }}</td>
                 </tr>
               }
             }
@@ -537,13 +639,14 @@
               <th class="text-right">Claimed</th>
               <th class="text-right">Approved</th>
               <th class="text-right">Paid</th>
+              <th>Documents</th>
               <th class="text-center">Status</th>
               <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             @if (benefitClaims.length === 0) {
-              <tr><td colspan="8" class="empty-row">No claims found.</td></tr>
+              <tr><td colspan="9" class="empty-row">No claims found.</td></tr>
             } @else {
               @for (claim of benefitClaims; track claim.claimId) {
                 <tr>
@@ -553,6 +656,16 @@
                   <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
                   <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>
                   <td class="text-right">{{ claim.paidAmount != null ? (currencySymbol() + ' ' + (claim.paidAmount | number:'1.0-2')) : '-' }}</td>
+                  <td>
+                    @if (claim.documentCount > 0) {
+                      <button type="button" class="link-btn" (click)="openClaimDocuments(claim)"
+                              style="background:none;border:none;color:#1d4ed8;font-weight:600;cursor:pointer;padding:0;text-decoration:underline;">
+                        {{ claim.documentCount }} file(s)
+                      </button>
+                    } @else {
+                      <span class="muted">No files</span>
+                    }
+                  </td>
                   <td class="text-center">
                     <span class="status-pill" [ngClass]="getStatusClass(claim.claimStatus)">{{ claim.claimStatus }}</span>
                   </td>

@@ -2394,6 +2394,18 @@ export class PayrollService {
         );
     }
 
+    getMySalaryAdvanceSummary(): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/summary`)
+        .pipe(
+          map((response: any) => {
+            if (!response.success && response.message) {
+              throw new Error(response.message);
+            }
+            return response.data;
+          })
+        );
+    }
+
     getMySalaryAdvanceById(id: string): Observable<any> {
       return this.http.get<ApiResponse<any>>(`${this.apiUrl}/salary-advance/my-requests/${id}`)
         .pipe(
@@ -3141,6 +3153,15 @@ export class PayrollService {
       );
     }
 
+    getSocialSecurityEnrollments(params?: any): Observable<any> {
+      return this.http.get<ApiResponse<any>>(`${this.apiUrl}/social-security/enrollments`, { params }).pipe(
+        map((response: any) => {
+          if (!response.success && response.message) throw new Error(response.message);
+          return response.data;
+        })
+      );
+    }
+
     approveSocialSecurityEnrollmentRequest(requestId: string, data: ApproveSocialSecurityEnrollmentRequestPayload): Observable<boolean> {
       return this.http.post<ApiResponse<boolean>>(`${this.apiUrl}/social-security/enrollment-requests/${requestId}/approve`, data).pipe(
         map((response: any) => {
@@ -3222,6 +3243,18 @@ export class PayrollService {
       );
     }
 
+    verifySocialSecurityRequestDocument(documentId: string, verifiedStatus: string): Observable<boolean> {
+      return this.http.post<ApiResponse<boolean>>(
+        `${this.apiUrl}/social-security/documents/${documentId}/verify`,
+        { verifiedStatus }
+      ).pipe(
+        map((response: any) => {
+          if (!response.success) throw new Error(response.message || 'Failed to update document verification');
+          return response.data ?? true;
+        })
+      );
+    }
+
     uploadSocialSecurityFile(file: File): Observable<string> {
       const formData = new FormData();
       formData.append('file', file);
@@ -3260,6 +3293,31 @@ export interface SocialSecurityEnrollment {
   ruleEmployeeDefaultPct?: number | null;
   ruleEmployerDefaultPct?: number | null;
   contributionBasis?: string;
+  isCurrent: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SocialSecurityEnrollmentRoster {
+  enrollmentId: string;
+  organizationId: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode?: string | null;
+  ruleId: string;
+  ruleName?: string | null;
+  schemeId?: string | null;
+  schemeName?: string | null;
+  enrollmentType: string;
+  enrollmentStatus: string;
+  effectiveDate: string;
+  endDate?: string | null;
+  employeeCustomPct?: number | null;
+  employerCustomPct?: number | null;
+  ruleEmployeeDefaultPct?: number | null;
+  ruleEmployerDefaultPct?: number | null;
+  salaryCapOverride?: number | null;
+  contributionBasis?: string | null;
   isCurrent: boolean;
   createdAt: string;
   updatedAt: string;

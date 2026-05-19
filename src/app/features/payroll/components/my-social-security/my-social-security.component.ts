@@ -75,6 +75,9 @@ export class MySocialSecurityComponent implements OnInit {
   enrollment: SocialSecurityEnrollment | null = null;
   enrollmentLoading = false;
 
+  // Active rules the employee can request enrollment under
+  ruleOptions: { ruleId: string; ruleName: string; schemeName?: string | null; employeeDefaultPct?: number | null; employerDefaultPct?: number | null }[] = [];
+
   // Requests
   requests: SocialSecurityEnrollmentRequest[] = [];
   requestsLoading = false;
@@ -92,9 +95,30 @@ export class MySocialSecurityComponent implements OnInit {
       });
 
     this.loadEnrollment();
+    this.loadRuleOptions();
     this.loadMySocialSecurityTransactions();
     this.loadMyRequests();
     this.loadMyClaims();
+  }
+
+  private loadRuleOptions(): void {
+    this.payrollService.getSocialSecurityRules().pipe(take(1)).subscribe({
+      next: (rules: any[]) => {
+        this.ruleOptions = (rules ?? [])
+          .filter((r) => r?.isActive ?? true)
+          .map((r) => ({
+            ruleId: String(r.ruleId ?? ''),
+            ruleName: String(r.ruleName ?? 'Rule'),
+            schemeName: r.schemeName ?? null,
+            employeeDefaultPct: r.employeeDefaultPct ?? null,
+            employerDefaultPct: r.employerDefaultPct ?? null
+          }))
+          .filter((r) => !!r.ruleId);
+      },
+      error: () => {
+        this.ruleOptions = [];
+      }
+    });
   }
 
   setTab(tab: MySocialTab): void {
@@ -174,7 +198,7 @@ export class MySocialSecurityComponent implements OnInit {
       panelClass: 'social-security-transaction-dialog-panel',
       autoFocus: false,
       restoreFocus: false,
-      data: { currentEnrollment: this.enrollment }
+      data: { currentEnrollment: this.enrollment, rules: this.ruleOptions }
     });
 
     dialogRef.afterClosed().subscribe((payload: CreateSocialSecurityEnrollmentRequestPayload | undefined) => {

@@ -1,0 +1,68 @@
+<div class="social-security-transaction-dialog">
+  <div class="dialog-header">
+    <h2>{{ data.title }}</h2>
+    <button type="button" class="icon-btn" aria-label="Close" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-form">
+    @if (loading()) {
+      <div class="loading-state" style="display:flex;flex-direction:column;align-items:center;gap:0.6rem;padding:2rem;color:#64748b;font-weight:600;">
+        <div class="spinner"></div>
+        <p>Loading documents...</p>
+      </div>
+    } @else if (documents().length === 0) {
+      <div class="empty-state" style="display:flex;align-items:center;gap:0.7rem;padding:1.5rem;">
+        <mat-icon style="color:#94a3b8;">folder_off</mat-icon>
+        <div>
+          <strong style="display:block;color:#475569;">No documents attached</strong>
+          <p style="margin:0;color:#94a3b8;font-size:0.85rem;">The employee did not upload any supporting files with this request.</p>
+        </div>
+      </div>
+    } @else {
+      <ul class="attachment-list" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.5rem;">
+        @for (doc of documents(); track doc.documentId) {
+          <li style="display:flex;align-items:center;gap:0.6rem;padding:0.65rem 0.75rem;border:1px solid #e2e8f0;border-radius:0.6rem;background:#ffffff;">
+            <mat-icon style="color:#64748b;">description</mat-icon>
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                {{ doc.documentName }}
+              </div>
+              <div style="font-size:0.74rem;color:#94a3b8;">
+                {{ doc.documentType }}
+                @if (doc.issuer) { · {{ doc.issuer }} }
+                @if (doc.issuedDate) { · issued {{ doc.issuedDate | date:'mediumDate' }} }
+                @if (doc.expiryDate) { · expires {{ doc.expiryDate | date:'mediumDate' }} }
+              </div>
+            </div>
+
+            <span class="status-pill" [ngClass]="statusClass(doc.verifiedStatus)">{{ doc.verifiedStatus }}</span>
+
+            <button type="button" class="btn ghost" style="min-height:2rem;padding:0 0.7rem;" (click)="open(doc)">
+              <mat-icon style="vertical-align:middle;font-size:1rem;width:1rem;height:1rem;">open_in_new</mat-icon>
+              View
+            </button>
+
+            @if (canVerify) {
+              <button type="button" class="action-btn hover-primary" title="Mark verified"
+                      [disabled]="busyId() === doc.documentId || doc.verifiedStatus === 'verified'"
+                      (click)="verify(doc, 'verified')">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+              <button type="button" class="action-btn hover-danger" title="Reject document"
+                      [disabled]="busyId() === doc.documentId || doc.verifiedStatus === 'rejected'"
+                      (click)="verify(doc, 'rejected')">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="dialog-actions">
+    <button type="button" class="btn primary" (click)="close()">Done</button>
+  </div>
+</div>

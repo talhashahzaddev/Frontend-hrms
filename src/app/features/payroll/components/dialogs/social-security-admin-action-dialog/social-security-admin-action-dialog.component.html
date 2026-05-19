@@ -13,15 +13,52 @@
 
     <div class="form-grid">
       @if (isApproveRequest) {
-        <label class="field">
-          <span>Override employee %</span>
-          <input type="number" min="0" max="100" step="0.01" formControlName="overrideEmployeePct" placeholder="leave blank to use requested value" />
-        </label>
+        <div class="field field-span-2">
+          <span>Contribution percentages</span>
+          <div class="pct-source-toggle">
+            <button type="button" [class.active]="pctSource === 'requested'" (click)="setPctSource('requested')">
+              Use requested
+            </button>
+            <button type="button" [class.active]="pctSource === 'rule'" (click)="setPctSource('rule')" [disabled]="!hasRulePct">
+              Use rule default
+            </button>
+            <button type="button" [class.active]="pctSource === 'custom'" (click)="setPctSource('custom')">
+              Custom
+            </button>
+          </div>
 
-        <label class="field">
-          <span>Override employer %</span>
-          <input type="number" min="0" max="100" step="0.01" formControlName="overrideEmployerPct" placeholder="leave blank to use requested value" />
-        </label>
+          @if (pctSource === 'requested') {
+            <small class="pct-hint">
+              Employee: <strong>{{ requestedEmployeePct != null ? (requestedEmployeePct + '%') : 'not specified' }}</strong>
+              &nbsp;·&nbsp;
+              Employer: <strong>{{ requestedEmployerPct != null ? (requestedEmployerPct + '%') : 'not specified' }}</strong>
+              &nbsp;— values the employee asked for.
+            </small>
+          }
+          @if (pctSource === 'rule') {
+            <small class="pct-hint">
+              Employee: <strong>{{ ruleEmployeePct != null ? (ruleEmployeePct + '%') : '-' }}</strong>
+              &nbsp;·&nbsp;
+              Employer: <strong>{{ ruleEmployerPct != null ? (ruleEmployerPct + '%') : '-' }}</strong>
+              &nbsp;— defaults from {{ ruleName }}.
+            </small>
+          }
+          @if (!hasRulePct) {
+            <small class="pct-hint muted">No rule default available for this request.</small>
+          }
+        </div>
+
+        @if (pctSource === 'custom') {
+          <label class="field">
+            <span>Employee %</span>
+            <input type="number" min="0" max="100" step="0.01" formControlName="overrideEmployeePct" placeholder="e.g. 2" />
+          </label>
+
+          <label class="field">
+            <span>Employer %</span>
+            <input type="number" min="0" max="100" step="0.01" formControlName="overrideEmployerPct" placeholder="e.g. 5" />
+          </label>
+        }
 
         <label class="field">
           <span>Salary cap override</span>
