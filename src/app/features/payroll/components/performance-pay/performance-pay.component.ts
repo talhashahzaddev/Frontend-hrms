@@ -15,6 +15,7 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 
 interface PerformanceLedgerRow {
   id: any;
@@ -44,6 +45,7 @@ export class PerformancePayComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
 
   // Filter state
   pendingSearch = '';
@@ -67,9 +69,11 @@ export class PerformancePayComponent implements OnInit {
   readonly currencySymbol = signal('$');
 
   ngOnInit(): void {
-    this.loadFilterData();
-    this.loadPerformancePays();
-    this.loadEmployees();
+    if (this.hasPermission('performance_pay_view')) {
+      this.loadFilterData();
+      this.loadPerformancePays();
+      this.loadEmployees();
+    }
     
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
@@ -114,7 +118,18 @@ export class PerformancePayComponent implements OnInit {
     return !!(this.filterSearch || this.filterPeriod || this.filterRule);
   }
 
+  get canAccessPayrollBonusArea(): boolean {
+    return this.hasPermission('bonus_entry_view') || this.hasPermission('performance_pay_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   loadEmployees(): void {
+    if (!this.hasPermission('performance_pay_view')) {
+      return;
+    }
     this.employeeService.getEmployees({ page: 1, pageSize: 100 } as any).subscribe({
       next: (response: any) => {
         this.employeesList = response.employees || [];
@@ -124,6 +139,9 @@ export class PerformancePayComponent implements OnInit {
   }
 
   loadPerformancePays(): void {
+    if (!this.hasPermission('performance_pay_view')) {
+      return;
+    }
     const params: any = {
       page: this.currentPage,
       pageSize: this.pageSize
@@ -204,6 +222,9 @@ export class PerformancePayComponent implements OnInit {
   nextPage() { this.goToPage(this.currentPage + 1); }
 
   loadFilterData(): void {
+    if (!this.hasPermission('performance_pay_view')) {
+      return;
+    }
     this.payrollService.getPayrollPeriods().subscribe({
       next: (data: any) => {
         if (Array.isArray(data)) {
@@ -249,6 +270,9 @@ export class PerformancePayComponent implements OnInit {
   }
 
   openAddPerformanceDialog(): void {
+    if (!this.hasPermission('performance_pay_add')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddPerformancePayDialogComponent, {
       width: '480px',
       panelClass: 'performance-dialog-panel',
@@ -287,6 +311,9 @@ export class PerformancePayComponent implements OnInit {
   }
 
   openEditPerformanceDialog(row: any): void {
+    if (!this.hasPermission('performance_pay_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddPerformancePayDialogComponent, {
       width: '480px',
       panelClass: 'performance-dialog-panel',
@@ -339,6 +366,9 @@ export class PerformancePayComponent implements OnInit {
   }
 
   requestDeleteRow(row: any): void {
+    if (!this.hasPermission('performance_pay_delete')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',

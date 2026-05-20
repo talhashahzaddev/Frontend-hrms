@@ -1,4 +1,5 @@
-import { Component, Inject, OnInit, signal } from '@angular/core';
+import { Component, Inject, OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -22,6 +23,8 @@ export interface AttendanceDialogData {
   styleUrl: './attendance-dialog.component.scss'
 })
 export class AttendanceDialogComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
   form!: FormGroup;
   title = '';
   currencySymbol = signal('$');
@@ -271,11 +274,27 @@ export class AttendanceDialogComponent implements OnInit {
     }
   }
 
+  get canSubmit(): boolean {
+    const permissionByType: Record<AttendanceDialogData['type'], { add: string; edit: string }> = {
+      overtime: { add: 'overtime_entry_add', edit: 'overtime_entry_edit' },
+      absent: { add: 'attendance_summary_add', edit: 'attendance_summary_edit' },
+      late: { add: 'late_attendance_add', edit: 'late_attendance_edit' },
+      'half-day': { add: 'late_attendance_add', edit: 'late_attendance_edit' },
+      leave: { add: 'leave_summary_add', edit: 'leave_summary_edit' }
+    };
+    const keys = permissionByType[this.data.type];
+    const actionKey = this.data.mode === 'edit' ? keys.edit : keys.add;
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   close() {
     this.dialogRef.close();
   }
 
   save() {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.valid) {
       const rawValue = this.form.getRawValue();
       let payload: any;

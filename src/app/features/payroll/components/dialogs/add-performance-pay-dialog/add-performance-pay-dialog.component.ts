@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { SettingsService } from '../../../../settings/services/settings.service';
 import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 
 export interface PerformanceDialogResult {
   employee: string;
@@ -54,6 +55,7 @@ export class AddPerformancePayDialogComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly settingsService = inject(SettingsService);
   private readonly dialogRef = inject(MatDialogRef<AddPerformancePayDialogComponent, PerformanceDialogResultPayload | undefined>);
+  private readonly authService = inject(AuthService);
   
   readonly mode: 'create' | 'edit' = this.data?.mode ?? 'create';
   readonly currencySymbol = signal('$');
@@ -110,6 +112,13 @@ export class AddPerformancePayDialogComponent implements OnInit {
       });
   }
 
+  get canSubmit(): boolean {
+    if (this.mode === 'edit') {
+      return this.authService.hasPermissionByActionKey('performance_pay_edit');
+    }
+    return this.authService.hasPermissionByActionKey('performance_pay_add');
+  }
+
   updateRating(score: number): void {
     let rating = 'Average';
     if (score >= 90) rating = 'Excellent';
@@ -137,6 +146,9 @@ export class AddPerformancePayDialogComponent implements OnInit {
   }
 
   save(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

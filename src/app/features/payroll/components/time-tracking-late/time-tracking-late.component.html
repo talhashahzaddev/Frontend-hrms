@@ -93,12 +93,14 @@
         </div>
       </div>
 
+      @if (hasPermission('late_attendance_add')) {
       <div class="add-btn-wrap">
         <button class="add-btn" (click)="addRecord()">
           <mat-icon>add</mat-icon>
           Add Record
         </button>
       </div>
+      }
     </div>
 
     <!-- Table -->
@@ -144,12 +146,16 @@
               {{ record.deduction | number:'1.0-0' }}
             </td>
             <td class="action-cell">
+              @if (hasPermission('late_attendance_edit')) {
               <button class="action-btn hover-primary" (click)="editRecord(record)">
                 <mat-icon>edit</mat-icon>
               </button>
+              }
+              @if (hasPermission('late_attendance_delete')) {
               <button class="action-btn hover-danger" (click)="deleteRecord(record)">
                 <mat-icon>delete</mat-icon>
               </button>
+              }
             </td>
           </tr>
           } @empty {

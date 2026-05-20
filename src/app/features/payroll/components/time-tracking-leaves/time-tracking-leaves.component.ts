@@ -1,4 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +20,8 @@ import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@shared/compone
   styleUrl: './time-tracking-leaves.component.scss'
 })
 export class TimeTrackingLeavesComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
   currencySymbol = signal('$');
   records: LeaveSummary[] = [];
   leaveRules: LeaveRuleDto[] = [];
@@ -54,12 +57,21 @@ export class TimeTrackingLeavesComponent implements OnInit {
     private dialog: MatDialog
   ) {}
 
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   ngOnInit(): void {
+    if (!this.hasPermission('leave_summary_view')) {
+      this.isLoading.set(false);
+      return;
+    }
     this.loadInitialData();
     this.loadRecords();
   }
 
   loadInitialData() {
+    if (!this.hasPermission('leave_summary_view')) return;
     this.settingsService.getOrganizationCurrency().pipe(take(1)).subscribe({
       next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
       error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
@@ -82,6 +94,7 @@ export class TimeTrackingLeavesComponent implements OnInit {
   }
 
   loadRecords() {
+    if (!this.hasPermission('leave_summary_view')) return;
     this.isLoading.set(true);
     const params: any = {
       page: this.page,
@@ -143,6 +156,7 @@ export class TimeTrackingLeavesComponent implements OnInit {
   }
 
   openAddDialog() {
+    if (!this.hasPermission('leave_summary_add')) return;
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '550px',
       panelClass: 'custom-dialog-container',
@@ -166,6 +180,7 @@ export class TimeTrackingLeavesComponent implements OnInit {
   }
 
   editRecord(record: LeaveSummary) {
+    if (!this.hasPermission('leave_summary_edit')) return;
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '550px',
       panelClass: 'custom-dialog-container',
@@ -190,6 +205,7 @@ export class TimeTrackingLeavesComponent implements OnInit {
   }
 
   deleteRecord(record: LeaveSummary) {
+    if (!this.hasPermission('leave_summary_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Leave Record',
       message: `Are you sure you want to delete the leave record for ${record.employeeName}?`,

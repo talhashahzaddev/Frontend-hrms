@@ -3,7 +3,10 @@ import { Routes } from '@angular/router';
 export const payrollRoutes: Routes = [
   {
     path: '',
-    redirectTo: 'bonus',
+    loadComponent: () =>
+      import('./components/payroll-default-redirect/payroll-default-redirect.component').then(
+        m => m.PayrollDefaultRedirectComponent
+      ),
     pathMatch: 'full'
   },
   {

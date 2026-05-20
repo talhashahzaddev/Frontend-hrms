@@ -23,6 +23,8 @@ interface MenuItem {
   subMenuName?: string;
   /** When set, item is visible only if this action key is granted. */
   actionKey?: string;
+  /** When set, item is visible if any of these action keys is granted. */
+  anyOfActionKeys?: string[];
   permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
@@ -274,7 +276,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Bonus & Performance',
           icon: 'card_giftcard',
           route: '/payroll/bonus',
-          activeRoutes: ['/payroll/performance']
+          activeRoutes: ['/payroll/performance'],
+          anyOfActionKeys: ['bonus_entry_view', 'performance_pay_view']
         },
         {
           label: 'Loans',
@@ -325,7 +328,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true
         },
         { label: 'Policies', icon: 'rule', route: '/payroll/policies', actionKey: 'payroll_rules_view' },
-        { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
+        {
+          label: 'Time Tracking',
+          icon: 'schedule',
+          route: '/payroll/time-tracking',
+          anyOfActionKeys: [
+            'overtime_entry_view',
+            'attendance_summary_view',
+            'late_attendance_view',
+            'leave_summary_view'
+          ]
+        },
         { label: 'Periods', icon: 'date_range', route: '/payroll/periods', actionKey: 'payroll_period_view' },
         { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
         { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
@@ -409,6 +422,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     if (item.actionKey) {
       return this.authService.hasPermissionByActionKey(item.actionKey);
+    }
+
+    if (item.anyOfActionKeys && item.anyOfActionKeys.length > 0) {
+      return item.anyOfActionKeys.some(key => this.authService.hasPermissionByActionKey(key));
     }
 
     // If the item has no menuName, it either has no permission requirements or is a standalone item

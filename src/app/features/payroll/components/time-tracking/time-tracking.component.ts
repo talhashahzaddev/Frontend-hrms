@@ -1,4 +1,5 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,6 +25,8 @@ import { PayrollService } from '../../services/payroll.service';
   styleUrl: './time-tracking.component.scss'
 })
 export class TimeTrackingComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
   currencySymbol = signal('$');
   currentTab: 'overtime' | 'absents' | 'late' | 'leave' = 'overtime';
   records: any[] = [];
@@ -88,31 +91,55 @@ export class TimeTrackingComponent implements OnInit {
     private payrollService: PayrollService
   ) {}
 
+  get canAccessTimeTracking(): boolean {
+    return this.hasPermission('overtime_entry_view')
+      || this.hasPermission('attendance_summary_view')
+      || this.hasPermission('late_attendance_view')
+      || this.hasPermission('leave_summary_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   ngOnInit(): void {
+    this.currentTab = this.getDefaultTab();
+
     this.settingsService.getOrganizationCurrency().pipe(take(1)).subscribe({
       next: (code) => this.currencySymbol.set(this.settingsService.getCurrencySymbol(code)),
       error: () => this.currencySymbol.set(this.settingsService.getCurrencySymbol())
     });
 
-    this.payrollService.getOvertimeActiveRules().subscribe({
-      next: (rules: any[]) => this.overtimeRules = rules,
-      error: () => this.overtimeRules = []
-    });
+    if (this.hasPermission('overtime_entry_view')) {
+      this.payrollService.getOvertimeActiveRules().subscribe({
+        next: (rules: any[]) => this.overtimeRules = rules,
+        error: () => this.overtimeRules = []
+      });
 
-    this.payrollService.getPayrollPeriods({ pageSize: 100 }).subscribe({
-      next: (res: any) => {
-        this.periods = (res.data || []).map((p: any) => ({
-          id: p.periodId,
-          name: p.periodName
-        }));
-      },
-      error: () => this.periods = []
-    });
+      this.payrollService.getPayrollPeriods({ pageSize: 100 }).subscribe({
+        next: (res: any) => {
+          this.periods = (res.data || []).map((p: any) => ({
+            id: p.periodId,
+            name: p.periodName
+          }));
+        },
+        error: () => this.periods = []
+      });
 
-    this.loadRecords();
+      this.loadRecords();
+    }
+  }
+
+  private getDefaultTab(): 'overtime' | 'absents' | 'late' | 'leave' {
+    if (this.hasPermission('overtime_entry_view')) return 'overtime';
+    if (this.hasPermission('attendance_summary_view')) return 'absents';
+    if (this.hasPermission('late_attendance_view')) return 'late';
+    if (this.hasPermission('leave_summary_view')) return 'leave';
+    return 'overtime';
   }
 
   loadRecords() {
+    if (!this.hasPermission('overtime_entry_view')) return;
     const params: any = { page: this.page, pageSize: this.pageSize };
     if (this.filterSearch) params['employeeName'] = this.filterSearch;
     if (this.filterType)   params['overtimeType']  = this.filterType;
@@ -191,6 +218,13 @@ export class TimeTrackingComponent implements OnInit {
   }
 
   setTab(tab: 'overtime' | 'absents' | 'late' | 'leave') {
+    const tabPermission: Record<typeof tab, string> = {
+      overtime: 'overtime_entry_view',
+      absents: 'attendance_summary_view',
+      late: 'late_attendance_view',
+      leave: 'leave_summary_view'
+    };
+    if (!this.hasPermission(tabPermission[tab])) return;
     this.currentTab = tab;
   }
 
@@ -204,6 +238,9 @@ export class TimeTrackingComponent implements OnInit {
   nextPage() { this.goToPage(this.page + 1); }
 
   openDialog(mode: 'add' | 'edit', record?: any, type: string = 'overtime') {
+    if (mode === 'add' && !this.hasPermission('overtime_entry_add')) return;
+    if (mode === 'edit' && !this.hasPermission('overtime_entry_edit')) return;
+
     const dialogRef = this.dialog.open(AttendanceDialogComponent, {
       width: '480px',
       panelClass: 'custom-dialog-container',
@@ -238,6 +275,8 @@ export class TimeTrackingComponent implements OnInit {
   }
 
   onDelete(record: any): void {
+    if (!this.hasPermission('overtime_entry_delete')) return;
+
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Record',
       message: 'Are you sure you want to delete this attendance record?',

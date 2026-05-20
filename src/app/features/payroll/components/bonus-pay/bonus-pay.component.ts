@@ -13,6 +13,7 @@ import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 
 interface BonusLedgerRow {
   id: string;
@@ -38,6 +39,7 @@ export class BonusPayComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
 
   // Filter state
   pendingSearch = '';
@@ -61,8 +63,10 @@ export class BonusPayComponent implements OnInit {
   readonly currencySymbol = signal('$');
 
   ngOnInit(): void {
-    this.loadFilterData();
-    this.loadBonusEntries();
+    if (this.hasPermission('bonus_entry_view')) {
+      this.loadFilterData();
+      this.loadBonusEntries();
+    }
 
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
@@ -135,7 +139,18 @@ export class BonusPayComponent implements OnInit {
   prevPage() { this.goToPage(this.currentPage - 1); }
   nextPage() { this.goToPage(this.currentPage + 1); }
 
+  get canAccessPayrollBonusArea(): boolean {
+    return this.hasPermission('bonus_entry_view') || this.hasPermission('performance_pay_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   loadFilterData(): void {
+    if (!this.hasPermission('bonus_entry_view')) {
+      return;
+    }
     this.payrollService.getPayrollPeriods().subscribe({
       next: (data: any) => {
         this.periods = Array.isArray(data) ? data : (data?.items || data?.data || []);
@@ -158,6 +173,9 @@ export class BonusPayComponent implements OnInit {
   }
 
   loadBonusEntries(): void {
+    if (!this.hasPermission('bonus_entry_view')) {
+      return;
+    }
     this.isLoading = true;
     const params = {
       employeeName: this.filterSearch,
@@ -202,6 +220,9 @@ export class BonusPayComponent implements OnInit {
   }
 
   openAddBonusDialog(): void {
+    if (!this.hasPermission('bonus_entry_add')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddBonusDialogComponent, {
       width: '480px',
       panelClass: 'bonus-dialog-panel',
@@ -217,6 +238,9 @@ export class BonusPayComponent implements OnInit {
   }
 
   openEditBonusDialog(row: BonusLedgerRow): void {
+    if (!this.hasPermission('bonus_entry_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddBonusDialogComponent, {
       width: '480px',
       panelClass: 'bonus-dialog-panel',
@@ -242,6 +266,9 @@ export class BonusPayComponent implements OnInit {
   }
 
   requestDeleteRow(row: BonusLedgerRow): void {
+    if (!this.hasPermission('bonus_entry_delete')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',
