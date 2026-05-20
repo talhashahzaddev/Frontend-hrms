@@ -60,12 +60,16 @@ export class OpeningsComponent implements OnInit {
   totalPages = 0;
 
   get canManageJobs(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+    return this.hasPermission('manage_job_openings');
   }
 
   /** Apply button is shown to Manager and Employee only (not Super Admin, HR Manager). */
   get canApplyForSelf(): boolean {
-    return !this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+    return !this.hasPermission('manage_job_openings');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Jobs', 'Openings', actionKey);
   }
 
   statusOptions = [

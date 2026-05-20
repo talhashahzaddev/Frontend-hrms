@@ -190,26 +190,35 @@ export class HolidayManagementComponent implements OnInit {
 
   loadData(): void {
     this.loading = true;
-    this.holidayService.getCompanyHolidays(this.selectedYear).subscribe({
-      next: (holidays) => {
-        this.holidays = holidays;
-        this.applyFilters();
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.snackBar.open('Failed to load holidays', 'Close', { duration: 3000 });
-        this.loading = false;
-      }
-    });
+
+    // Only load holiday list if user has the table/list permission
+    if (this.hasPermission('Holiday_Table')) {
+      this.holidayService.getCompanyHolidays(this.selectedYear).subscribe({
+        next: (holidays) => {
+          this.holidays = holidays;
+          this.applyFilters();
+          this.loading = false;
+        },
+        error: (err: any) => {
+          this.snackBar.open('Failed to load holidays', 'Close', { duration: 3000 });
+          this.loading = false;
+        }
+      });
+    } else {
+      // If user is not allowed to view the holiday list, clear data and stop loading
+      this.holidays = [];
+      this.filteredHolidays = [];
+      this.loading = false;
+    }
 
     // Only fetch summary if user has permission to view it
-    if (this.hasPermission('Holiday_Sumaary')) {
+    // NOTE: fix typo in permission key to match template usage
+    if (this.hasPermission('Holiday_Summary')) {
       this.holidayService.getHolidaySummary(this.selectedYear).subscribe({
         next: (summary) => this.summary = summary,
         error: () => {}
       });
     } else {
-      // Clear any previously loaded summary when permission is not present
       this.summary = null;
     }
   }
@@ -294,6 +303,8 @@ export class HolidayManagementComponent implements OnInit {
   // ========================
 
   openAddHolidayDialog(): void {
+    if (!this.hasPermission('add_holidays')) return;
+
     this.editingHoliday = null;
     this.selectedEmployeeIds = [];
     this.employeeSearchText = '';
@@ -307,6 +318,8 @@ export class HolidayManagementComponent implements OnInit {
   }
 
   openEditHolidayDialog(holiday: CompanyHoliday): void {
+    if (!this.hasPermission('edit_holidays_details')) return;
+
     this.editingHoliday = holiday;
     this.selectedEmployeeIds = holiday.employeeIds ? [...holiday.employeeIds] : [];
     this.employeeSearchText = '';
@@ -336,6 +349,7 @@ export class HolidayManagementComponent implements OnInit {
     const date = formVal.holidayDate instanceof Date ? formVal.holidayDate : new Date(formVal.holidayDate);
 
     if (this.editingHoliday) {
+      if (!this.hasPermission('edit_holidays_details')) return;
       const dto: UpdateCompanyHoliday = {
         holidayName: formVal.holidayName,
         holidayDate: date.toISOString(),
@@ -361,6 +375,7 @@ export class HolidayManagementComponent implements OnInit {
         }
       });
     } else {
+      if (!this.hasPermission('add_holidays')) return;
       const dto: CreateCompanyHoliday = {
         holidayName: formVal.holidayName,
         holidayDate: date.toISOString(),
@@ -388,6 +403,8 @@ export class HolidayManagementComponent implements OnInit {
   }
 
   confirmDelete(holiday: CompanyHoliday): void {
+    if (!this.hasPermission('delete_holidays_details')) return;
+
     if (confirm(`Are you sure you want to delete "${holiday.holidayName}"?`)) {
       this.holidayService.deleteCompanyHoliday(holiday.holidayId).subscribe({
         next: () => {
@@ -406,6 +423,8 @@ export class HolidayManagementComponent implements OnInit {
   // ========================
 
   openImportDialog(): void {
+    if (!this.hasPermission('import_holidays_from_catalog')) return;
+
     const dialogRef = this.dialog.open(HolidayCatalogPickerComponent, {
       width: '800px',
       maxHeight: '85vh',

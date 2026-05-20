@@ -7,7 +7,7 @@
       <p class="page-subtitle">Manage and track all company assets with assignments.</p>
     </div>
     <div class="header-actions">
-      <button mat-flat-button class="add-button" (click)="openCreateDialog()">
+      <button *ngIf="hasPermission('assets_create')" mat-flat-button class="add-button" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Create Asset
       </button>
@@ -114,28 +114,28 @@
                 <mat-icon>more_horiz</mat-icon>
               </button>
               <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="openHistoryDialog(asset)">
+                <button *ngIf="hasPermission('assets_history')" mat-menu-item (click)="openHistoryDialog(asset)">
                   <mat-icon>history</mat-icon>
                   <span>History</span>
                 </button>
-                <button mat-menu-item (click)="openViewDialog(asset)">
+                <button *ngIf="hasPermission('assets_view')" mat-menu-item (click)="openViewDialog(asset)">
                   <mat-icon>visibility</mat-icon>
                   <span>View</span>
                 </button>
-                <button mat-menu-item (click)="editAsset(asset)">
+                <button *ngIf="hasPermission('assets_edit')" mat-menu-item (click)="editAsset(asset)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
                 </button>
-                <button *ngIf="asset.status !== 'Assigned'" mat-menu-item (click)="openAssignDialog(asset)">
+                <button *ngIf="asset.status !== 'Assigned' && hasPermission('assets_assign')" mat-menu-item (click)="openAssignDialog(asset)">
                   <mat-icon>person_add</mat-icon>
                   <span>Assign</span>
                 </button>
-                <button *ngIf="asset.status === 'Assigned'" mat-menu-item (click)="openReturnDialog(asset)">
+                <button *ngIf="asset.status === 'Assigned' && hasPermission('assets_return')" mat-menu-item (click)="openReturnDialog(asset)">
                   <mat-icon>assignment_return</mat-icon>
                   <span>Return</span>
                 </button>
                 <mat-divider></mat-divider>
-                <button mat-menu-item (click)="deleteAsset(asset)" class="danger-action">
+                <button *ngIf="hasPermission('assets_delete')" mat-menu-item (click)="deleteAsset(asset)" class="danger-action">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
@@ -153,7 +153,7 @@
       </div>
       <h3>{{ searchQuery || typeFilter || statusFilter ? 'No results found' : 'No assets yet' }}</h3>
       <p>{{ searchQuery || typeFilter || statusFilter ? 'No assets match your current filters.' : 'Create your first asset to get started.' }}</p>
-      <button *ngIf="!searchQuery && !typeFilter && !statusFilter" mat-flat-button class="add-button" (click)="openCreateDialog()">
+      <button *ngIf="!searchQuery && !typeFilter && !statusFilter && hasPermission('assets_create')" mat-flat-button class="add-button" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Create Asset
       </button>
