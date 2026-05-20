@@ -6,14 +6,18 @@
       <p class="subtitle">Manage company holidays, import from country catalogs, and configure holiday policies</p>
     </div>
     <div class="header-actions">
+      @if (hasPermission('import_holidays_from_catalog')) {
       <button mat-stroked-button (click)="openImportDialog()">
         <mat-icon>cloud_download</mat-icon>
         Import from Catalog
       </button>
+      }
+      @if (hasPermission('add_holidays')) {
       <button mat-raised-button color="primary" (click)="openAddHolidayDialog()">
         <mat-icon>add</mat-icon>
         Add Holiday
       </button>
+      }
     </div>
   </div>
 
@@ -192,14 +196,18 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #actionMenu="matMenu">
+              @if (hasPermission('edit_holidays_details')) {
               <button mat-menu-item (click)="openEditHolidayDialog(holiday)">
                 <mat-icon>edit</mat-icon>
                 <span>Edit</span>
               </button>
+              }
+              @if (hasPermission('delete_holidays_details')) {
               <button mat-menu-item (click)="confirmDelete(holiday)" class="delete-action">
                 <mat-icon>delete</mat-icon>
                 <span>Delete</span>
               </button>
+              }
             </mat-menu>
           </td>
         </ng-container>
@@ -208,15 +216,17 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="holiday-row"></tr>
       </table>
 
-      @if (filteredHolidays.length === 0) {
+          @if (filteredHolidays.length === 0) {
         <div class="empty-state">
           <mat-icon>event_busy</mat-icon>
           <h3>No holidays found</h3>
           <p>Add holidays manually or import from a country catalog</p>
+          @if (hasPermission('import_holidays_from_catalog')) {
           <button mat-stroked-button color="primary" (click)="openImportDialog()">
             <mat-icon>cloud_download</mat-icon>
             Import Holidays
           </button>
+          }
         </div>
       }
     </div>
@@ -249,12 +259,16 @@
                     </div>
                   </div>
                   <div class="timeline-actions">
+                    @if (hasPermission('edit_holidays_details')) {
                     <button mat-icon-button (click)="openEditHolidayDialog(holiday)" matTooltip="Edit">
                       <mat-icon>edit</mat-icon>
                     </button>
+                    }
+                    @if (hasPermission('delete_holidays_details')) {
                     <button mat-icon-button (click)="confirmDelete(holiday)" matTooltip="Delete">
                       <mat-icon>delete_outline</mat-icon>
                     </button>
+                    }
                   </div>
                 </div>
               </div>
@@ -391,13 +405,26 @@
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancel</button>
-    <button mat-raised-button color="primary" (click)="saveHoliday()"
-      [disabled]="holidayForm.invalid || saving">
-      @if (saving) {
-        <mat-spinner diameter="20"></mat-spinner>
-      } @else {
-        {{ editingHoliday ? 'Update' : 'Create' }}
+    @if (editingHoliday) {
+      @if (hasPermission('edit_holidays_details')) {
+        <button mat-raised-button color="primary" (click)="saveHoliday()" [disabled]="holidayForm.invalid || saving">
+          @if (saving) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Update
+          }
+        </button>
       }
-    </button>
+    } @else {
+      @if (hasPermission('add_holidays')) {
+        <button mat-raised-button color="primary" (click)="saveHoliday()" [disabled]="holidayForm.invalid || saving">
+          @if (saving) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Create
+          }
+        </button>
+      }
+    }
   </mat-dialog-actions>
 </ng-template>

@@ -10,7 +10,7 @@
         <p class="page-subtitle">View and manage all job openings</p>
       </div>
     </div>
-    <div class="header-right" *ngIf="canManageJobs">
+    <div class="header-right" *ngIf="hasPermission('opnings_create_job')">
       <button class="btn-primary" (click)="openCreateJobDialog()">
         <mat-icon>add</mat-icon>
         Create Job
@@ -147,7 +147,7 @@
             Apply by {{ job.lastDate | date:'mediumDate' }}
           </span>
           <div class="job-post-actions">
-            <button mat-stroked-button (click)="viewDetails(job)" class="action-btn view-btn" matTooltip="View details">
+            <button *ngIf="hasPermission('opnings_view_details')" mat-stroked-button (click)="viewDetails(job)" class="action-btn view-btn" matTooltip="View details">
               <mat-icon>visibility</mat-icon>
               View details
             </button>
@@ -156,12 +156,12 @@
               <mat-icon>person_add</mat-icon>
               Apply
             </button>
-            <button mat-flat-button (click)="openApplyJobDialog(job)" class="action-btn apply-btn"
+            <button *ngIf="hasPermission('opnongs_refer')" mat-flat-button (click)="openApplyJobDialog(job)" class="action-btn apply-btn"
               matTooltip="Refer someone for this job">
               <mat-icon>how_to_reg</mat-icon>
               Refer
             </button>
-            <button *ngIf="canManageJobs" mat-stroked-button (click)="editJob(job)" class="action-btn edit-btn"
+            <button *ngIf="hasPermission('opnongs_edit')" mat-stroked-button (click)="editJob(job)" class="action-btn edit-btn"
               matTooltip="Edit">
               <mat-icon>edit</mat-icon>
               Edit
@@ -208,7 +208,7 @@
       <mat-icon class="empty-icon">work_off</mat-icon>
       <p class="empty-text">No job openings yet.</p>
       <p class="empty-subtext">Create a job opening to get started.</p>
-      <button *ngIf="canManageJobs" mat-flat-button (click)="openCreateJobDialog()" class="add-button empty-action">
+      <button *ngIf="hasPermission('opnings_create_job')" mat-flat-button (click)="openCreateJobDialog()" class="add-button empty-action">
         <mat-icon>add</mat-icon>
         Create Job
       </button>

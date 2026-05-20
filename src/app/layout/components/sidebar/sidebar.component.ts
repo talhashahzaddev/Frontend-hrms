@@ -176,7 +176,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'inventory_2',
       menuName: 'Assets Management',
       children: [
-        { label: 'Types of Assets', icon: 'category', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
+        { label: 'Types of Assets', icon: 'folder-tree', route: '/assets/types', menuName: 'Assets Management', subMenuName: 'Type of Assets' },
         { label: 'Assets', icon: 'add_box', route: '/assets/create', menuName: 'Assets Management', subMenuName: 'Assets' }
       ]
     },

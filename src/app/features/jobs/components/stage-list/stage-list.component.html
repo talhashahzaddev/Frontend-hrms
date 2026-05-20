@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="header-right">
-      <button class="btn-primary" (click)="openCreateDialog()">
+      <button class="btn-primary" *ngIf="hasPermission('add_stage')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Stage
       </button>
@@ -24,7 +24,7 @@
   </div>
 
   <!-- Pipeline Visual Stepper -->
-  <div class="pipeline-card" *ngIf="!isLoading && dataSource.data.length > 0">
+  <div class="pipeline-card" *ngIf="!isLoading && dataSource.data.length > 0 && hasPermission('Stage_Table')">
     <div class="pipeline-wrapper">
       <ng-container *ngFor="let row of dataSource.data; let i = index; let last = last">
         <div class="stepper-item">
@@ -50,7 +50,7 @@
   </div>
 
   <!-- Stages Table -->
-  <div class="table-card" *ngIf="!isLoading">
+  <div class="table-card" *ngIf="!isLoading && hasPermission('Stage_Table')">
     <div class="card-header border-bottom">
       <h3>Stages <span class="count">({{ dataSource.data.length }})</span></h3>
     </div>
@@ -82,10 +82,10 @@
             </td>
             <td class="text-sm text-slate-500">{{ formatDate(row.createdAt) }}</td>
             <td class="text-right action-cell">
-              <button mat-icon-button (click)="editStage(row)" class="action-btn text-muted hover-primary">
+              <button mat-icon-button *ngIf="hasPermission('stage_edit')" (click)="editStage(row)" class="action-btn text-muted hover-primary">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button (click)="deleteStage(row)" class="action-btn text-muted hover-danger">
+              <button mat-icon-button *ngIf="hasPermission('stage_delete')" (click)="deleteStage(row)" class="action-btn text-muted hover-danger">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -101,7 +101,7 @@
         <h3>No Stages Found</h3>
         <p *ngIf="hasFiltersApplied()">No stages match your search query.</p>
         <p *ngIf="!hasFiltersApplied()">Get started by creating your first hiring stage.</p>
-        <button *ngIf="!hasFiltersApplied()" class="btn-primary mt-3" (click)="openCreateDialog()">
+        <button *ngIf="!hasFiltersApplied() && hasPermission('add_stage')" class="btn-primary mt-3" (click)="openCreateDialog()">
           <mat-icon>add</mat-icon> Add Stage
         </button>
       </div>

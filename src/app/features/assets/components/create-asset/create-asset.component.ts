@@ -28,6 +28,7 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { EmployeeSearchRequest } from '../../../../core/models/employee.models';
 import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-create-asset',
@@ -131,8 +132,13 @@ export class CreateAssetComponent implements OnInit, OnDestroy {
     private employeeService: EmployeeService,
     private notification: NotificationService,
     private loading: LoadingService,
+    private authService: AuthService,
     private dialog: MatDialog
   ) {}
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Assets Management', 'Assets', actionKey);
+  }
 
   // Auto-close dropdown when clicking outside
   @HostListener('document:click', ['$event'])

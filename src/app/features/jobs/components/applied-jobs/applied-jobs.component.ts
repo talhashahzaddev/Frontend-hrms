@@ -146,14 +146,29 @@ export class AppliedJobsComponent implements OnInit {
     });
   }
 
-  /** Show tab group (MY, PostedByMe, and optionally All) for HR Manager + Super Admin */
-  get canSeeReceivedTab(): boolean {
-    return this.authService.hasAnyRole(['Super Admin', 'HR Manager']);
+  /** Show 'My Referenced Applications' tab */
+  get canSeeMyReferenced(): boolean {
+    return this.hasPermission('my_referenced_application');
   }
 
-  /** Show "All Job Applications" tab only for Super Admin */
-  get canSeeAllApplicationsTab(): boolean {
-    return this.authService.hasRole('Super Admin');
+  /** Show 'Received Application By My Job Post' tab */
+  get canSeeReceivedByMyJobPost(): boolean {
+    return this.hasPermission('received_application_by_my_job_post');
+  }
+
+  /** Show 'All Job Applications' tab */
+  get canSeeAllApplications(): boolean {
+    return this.hasPermission('all_job_application');
+  }
+
+  /** Any manager-level tab visible? */
+  get canSeeAnyManagerTabs(): boolean {
+    return this.canSeeMyReferenced || this.canSeeReceivedByMyJobPost || this.canSeeAllApplications;
+  }
+
+  /** Permission helper for this component (delegates to AuthService) */
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Jobs', 'Job Applications', actionKey);
   }
 
   // --- Summary Dashboards for Super Admin ---
@@ -197,11 +212,11 @@ export class AppliedJobsComponent implements OnInit {
     });
     this.loadApplications();
 
-    if (!this.canSeeReceivedTab) {
+    if (!this.canSeeAnyManagerTabs) {
       this.loadMySelfApplications();
     }
 
-    if (this.canSeeAllApplicationsTab) {
+    if (this.canSeeAllApplications) {
       this.loadReceivedApplications();
     }
   }
@@ -311,7 +326,7 @@ export class AppliedJobsComponent implements OnInit {
   }
 
   loadPostedByMeApplications(): void {
-    if (!this.canSeeReceivedTab) return;
+    if (!this.canSeeReceivedByMyJobPost) return;
     this.postedByMeIsLoading = true;
     const v = this.postedByMeFilterForm.value;
     const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
@@ -371,7 +386,7 @@ export class AppliedJobsComponent implements OnInit {
   }
 
   loadReceivedApplications(): void {
-    if (!this.canSeeAllApplicationsTab) return;
+    if (!this.canSeeAllApplications) return;
     this.receivedIsLoading = true;
     const v = this.receivedFilterForm.value;
     const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
@@ -488,11 +503,34 @@ export class AppliedJobsComponent implements OnInit {
     this.receivedJobDropdownOpen = false;
   }
 
+  /** Order-aware visible manager tabs (used to map tab index -> permission key) */
+  visibleManagerTabs(): string[] {
+    const ordered = [
+      'my_referenced_application',
+      'received_application_by_my_job_post',
+      'all_job_application'
+    ];
+    return ordered.filter((k) => this.hasPermission(k));
+  }
+
   onTabChange(index: number): void {
+    if (this.canSeeAnyManagerTabs) {
+      const tabs = this.visibleManagerTabs();
+      const key = tabs[index];
+      if (!key) return;
+      if (key === 'received_application_by_my_job_post') {
+        this.loadPostedByMeApplications();
+      } else if (key === 'all_job_application') {
+        this.loadReceivedApplications();
+      } else if (key === 'my_referenced_application') {
+        this.loadApplications();
+      }
+      return;
+    }
+
+    // Employee (no manager tabs) layout
     if (index === 1) {
-      this.loadPostedByMeApplications();
-    } else if (index === 2 && this.canSeeAllApplicationsTab) {
-      this.loadReceivedApplications();
+      this.loadMySelfApplications();
     }
   }
 

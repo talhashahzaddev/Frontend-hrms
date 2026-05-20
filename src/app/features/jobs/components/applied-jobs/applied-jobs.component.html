@@ -6,13 +6,13 @@
       </div>
       <div class="st-title-group">
         <h2 class="st-page-title">Job Applications</h2>
-        <p class="st-page-subtitle" *ngIf="canSeeReceivedTab">Track and manage all candidate applications</p>
+        <p class="st-page-subtitle" *ngIf="canSeeAnyManagerTabs">Track and manage all candidate applications</p>
       </div>
     </div>
   </div>
 
   <!-- Top Summary Stats Component for Super Admin -->
-  <div class="st-stats-row" *ngIf="canSeeAllApplicationsTab">
+  <div class="st-stats-row" *ngIf="canSeeAllApplications">
     <div class="st-stat-pill blue">
       <span class="st-label">Total Applications</span>
       <span class="st-badge blue">{{ receivedTotalCount }}</span>
@@ -32,9 +32,9 @@
   </div>
 
   <!-- Tabs: only for HR Manager / Super Admin -->
-  <div class="tabs-wrapper" *ngIf="canSeeReceivedTab">
+  <div class="tabs-wrapper" *ngIf="canSeeAnyManagerTabs">
     <mat-tab-group (selectedIndexChange)="onTabChange($event)" animationDuration="200ms" class="applied-jobs-tabs">
-      <mat-tab>
+      <mat-tab *ngIf="canSeeMyReferenced">
         <ng-template mat-tab-label>
           <span class="tab-label">My Referenced Applications</span>
         </ng-template>
@@ -117,16 +117,16 @@
                       </td>
                       <td>
                         <div class="bp-td-actions">
-                          <button class="bp-action-btn view" matTooltip="View details"
+                          <button *ngIf="hasPermission('job_application_view_details')" class="bp-action-btn view" matTooltip="View details"
                             (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
                           <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Edit application'"
                              [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
-                            <button class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                            <button *ngIf="hasPermission('job_application_edit')" class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
                               (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
                           </span>
                           <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Withdraw'"
                              [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
-                            <button class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                            <button *ngIf="hasPermission('job_application_delete')" class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
                               (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
                           </span>
                         </div>
@@ -164,7 +164,7 @@
           </div>
         </ng-template>
       </mat-tab>
-      <mat-tab>
+      <mat-tab *ngIf="canSeeReceivedByMyJobPost">
         <ng-template mat-tab-label>
           <span class="tab-label">Received Application By My Job Post</span>
         </ng-template>
@@ -306,7 +306,7 @@
           </div>
         </ng-template>
       </mat-tab>
-      <mat-tab *ngIf="canSeeAllApplicationsTab">
+      <mat-tab *ngIf="canSeeAllApplications">
         <ng-template mat-tab-label>
           <span class="tab-label">All Job Applications</span>
         </ng-template>
@@ -449,12 +449,12 @@
   </div>
 
   <!-- Employee / Manager: two-tab layout -->
-  <div class="tabs-wrapper" *ngIf="!canSeeReceivedTab">
+  <div class="tabs-wrapper" *ngIf="!canSeeAnyManagerTabs">
     <mat-tab-group (selectedIndexChange)="onEmployeeTabChange($event)" animationDuration="200ms"
       class="applied-jobs-tabs">
 
       <!-- Tab 1: My Referenced Applications -->
-      <mat-tab>
+      <mat-tab *ngIf="canSeeMyReferenced">
         <ng-template mat-tab-label>
           <span class="tab-label">My Referenced Applications</span>
         </ng-template>
@@ -528,16 +528,16 @@
                       </td>
                       <td>
                         <div class="bp-td-actions">
-                          <button class="bp-action-btn view" matTooltip="View details"
+                          <button *ngIf="hasPermission('job_application_view_details')" class="bp-action-btn view" matTooltip="View details"
                             (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
                           <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Edit application'"
                              [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
-                            <button class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                            <button *ngIf="hasPermission('job_application_edit')" class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
                               (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
                           </span>
                           <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Withdraw'"
                              [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
-                            <button class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                            <button *ngIf="hasPermission('job_application_delete')" class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
                               (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
                           </span>
                         </div>
@@ -638,16 +638,16 @@
                       </td>
                       <td>
                         <div class="bp-td-actions">
-                          <button class="bp-action-btn view" matTooltip="View details"
+                          <button *ngIf="hasPermission('job_application_view_details')" class="bp-action-btn view" matTooltip="View details"
                             (click)="viewJobDetails(app)"><mat-icon>visibility</mat-icon></button>
                           <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Edit application'"
                              [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
-                            <button class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                            <button *ngIf="hasPermission('job_application_edit')" class="bp-action-btn edit" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
                               (click)="editApplication(app)"><mat-icon>edit</mat-icon></button>
                           </span>
                           <span class="action-wrap" [matTooltip]="(app.currentStageName || app.status || 'Applied') !== 'Applied' ? 'Application is in process phase' : 'Withdraw'"
                              [class.disabled-wrap]="(app.currentStageName || app.status || 'Applied') !== 'Applied'">
-                            <button class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
+                            <button *ngIf="hasPermission('job_application_delete')" class="bp-action-btn delete" [disabled]="(app.currentStageName || app.status || 'Applied') !== 'Applied'"
                               (click)="deleteApplication(app)"><mat-icon>delete</mat-icon></button>
                           </span>
                         </div>
