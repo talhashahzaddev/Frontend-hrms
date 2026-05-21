@@ -8,6 +8,7 @@ import { take } from 'rxjs';
 
 import { SettingsService } from '../../../settings/services/settings.service';
 import { PayrollService } from '../../services/payroll.service';
+import { AuthService } from '@core/services/auth.service';
 
 import {
   AddLoanDialogComponent,
@@ -155,6 +156,7 @@ export class LoansComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly settingsService = inject(SettingsService);
   private readonly payrollService = inject(PayrollService);
+  private readonly authService = inject(AuthService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
@@ -227,7 +229,17 @@ export class LoansComponent implements OnInit {
   repaymentsCurrentPage = 1;
   repaymentsPageSize = 10;
 
+  get canAccessLoanAdmin(): boolean {
+    return this.hasPermission('loan_admin_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   ngOnInit(): void {
+    this.currentTab = this.getDefaultTab();
+
     this.localPeriodsSeed = this.buildLocalPeriods();
     this.localLoansSeed = this.buildLocalLoans();
     this.localLoanPaymentsSeed = this.buildLocalLoanPayments();
@@ -236,12 +248,20 @@ export class LoansComponent implements OnInit {
 
     this.loadEmployees();
     this.loadPayrollPeriods();
-
-    this.loadLoans();
-    this.loadLoanPayments();
-    this.loadRepayments();
-
     this.loadCurrencySymbol();
+
+    if (this.hasPermission('loan_admin_view')) {
+      this.loadLoans();
+      this.loadLoanPayments();
+      this.loadRepayments();
+    }
+  }
+
+  private getDefaultTab(): LoanTab {
+    if (this.hasPermission('loan_admin_view')) {
+      return 'loans';
+    }
+    return 'loans';
   }
 
   private loadCurrencySymbol(): void {
@@ -551,6 +571,9 @@ export class LoansComponent implements OnInit {
   }
 
   setTab(tab: LoanTab): void {
+    if (!this.hasPermission('loan_admin_view')) {
+      return;
+    }
     this.currentTab = tab;
   }
 
@@ -780,6 +803,9 @@ export class LoansComponent implements OnInit {
   }
 
   disburseLoan(row: LoanLedgerRow): void {
+    if (!this.hasPermission('loan_admin_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DisburseLoanDialogComponent, {
       width: '500px',
       panelClass: 'disburse-loan-dialog-panel',
@@ -799,6 +825,9 @@ export class LoansComponent implements OnInit {
   }
 
   approveLoan(row: LoanLedgerRow): void {
+    if (!this.hasPermission('loan_admin_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',
@@ -835,6 +864,9 @@ export class LoansComponent implements OnInit {
   }
 
   requestRejectLoan(row: LoanLedgerRow): void {
+    if (!this.hasPermission('loan_admin_edit')) {
+      return;
+    }
     const dialogRef = this.dialog.open(LoanRejectionDialogComponent, {
       width: '460px',
       panelClass: 'delete-dialog-panel',
@@ -950,6 +982,9 @@ export class LoansComponent implements OnInit {
   }
 
   openAddLoanPaymentDialog(): void {
+    if (!this.hasPermission('loan_admin_add')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddLoanPaymentDialogComponent, {
       width: '650px',
       panelClass: 'loan-payment-dialog-panel',
@@ -973,6 +1008,9 @@ export class LoansComponent implements OnInit {
   }
 
   openEditLoanPaymentDialog(row: LoanPaymentRow): void {
+    if (!this.hasPermission('loan_admin_edit')) {
+      return;
+    }
     const loanOptions = this.ensureLoanPaymentOption(this.buildLoanPaymentOptions(true), row);
 
     const dialogRef = this.dialog.open(AddLoanPaymentDialogComponent, {
@@ -1212,6 +1250,9 @@ export class LoansComponent implements OnInit {
   }
 
   private loadLoans(): void {
+    if (!this.hasPermission('loan_admin_view')) {
+      return;
+    }
     this.isLoadingLoans = true;
 
     const filter = {
@@ -1243,6 +1284,9 @@ export class LoansComponent implements OnInit {
   }
 
   private loadLoanPayments(): void {
+    if (!this.hasPermission('loan_admin_view')) {
+      return;
+    }
     const filter = {
       SearchTerm: this.loanPaymentSearch || undefined,
       LoanStatus: this.loanPaymentStatus || undefined,
@@ -1272,6 +1316,9 @@ export class LoansComponent implements OnInit {
   }
 
   private loadRepayments(): void {
+    if (!this.hasPermission('loan_admin_view')) {
+      return;
+    }
     const filter = {
       SearchTerm: this.repaymentSearch || undefined,
       RepaymentType: this.repaymentTypeFilter || undefined,

@@ -1,4 +1,5 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, inject } from '@angular/core';
+import { AuthService } from '@core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,8 +15,14 @@ import { ToastrService } from 'ngx-toastr';
   styleUrl: './disburse-loan-dialog.component.scss'
 })
 export class DisburseLoanDialogComponent {
+  private readonly authService = inject(AuthService);
+
   form: FormGroup;
   isSubmitting = false;
+
+  get canSubmit(): boolean {
+    return this.authService.hasPermissionByActionKey('loan_admin_edit');
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -35,7 +42,7 @@ export class DisburseLoanDialogComponent {
   }
 
   save(): void {
-    if (this.form.invalid) return;
+    if (!this.canSubmit || this.form.invalid) return;
 
     this.isSubmitting = true;
     const requestData = {

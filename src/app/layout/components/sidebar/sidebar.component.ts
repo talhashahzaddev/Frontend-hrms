@@ -283,13 +283,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Loans',
           icon: 'account_balance',
           route: '/payroll/loans',
-          exact: true
+          exact: true,
+          anyOfActionKeys: ['loan_admin_view']
         },
         {
           label: 'Provident Funds',
           icon: 'account_balance_wallet',
           route: '/payroll/provident-fund',
-          exact: true
+          exact: true,
+          anyOfActionKeys: ['pf_admin_view']
         },
         {
           label: 'Tax Ledger',

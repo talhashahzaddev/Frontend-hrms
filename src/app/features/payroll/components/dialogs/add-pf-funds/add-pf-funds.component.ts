@@ -3,6 +3,7 @@ import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '@core/services/auth.service';
 
 export interface PfFundsEmployeeOption {
   id: string;
@@ -34,6 +35,7 @@ interface AddPfFundsDialogData {
 })
 export class AddPfFundsComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
   private readonly dialogRef = inject(MatDialogRef<AddPfFundsComponent, AddPfFundsDialogPayload | undefined>);
 
   readonly employees = this.data?.employees ?? [];
@@ -50,7 +52,14 @@ export class AddPfFundsComponent {
     this.dialogRef.close();
   }
 
+  get canSubmit(): boolean {
+    return this.authService.hasPermissionByActionKey('pf_admin_add');
+  }
+
   submit(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
