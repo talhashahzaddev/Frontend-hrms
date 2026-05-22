@@ -12,6 +12,8 @@ import { Department } from '../../../../core/models/employee.models';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { environment } from '../../../../../environments/environment';
 import { PayrollService } from '../../services/payroll.service';
+import { AuthService } from '@core/services/auth.service';
+import { Router } from '@angular/router';
 import { PayslipBulkHubService, PayslipBulkProgress } from '../../services/payslip-bulk-hub.service';
 import {
   PayslipViewDialogComponent,
@@ -94,6 +96,8 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   private readonly payslipBulkHub = inject(PayslipBulkHubService);
   private readonly toastr = inject(ToastrService);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   private bulkProgressSubscription?: Subscription;
   private bulkHideTimer?: ReturnType<typeof setTimeout>;
@@ -101,6 +105,22 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
   readonly bulkJobActive = signal(false);
   readonly bulkProgress = signal<PayslipBulkProgress | null>(null);
+
+  get canAccessCompliancePayslips(): boolean {
+    return this.hasPermission('compliance_payslip_view');
+  }
+
+  get canViewMyPayslipsTab(): boolean {
+    return this.hasPermission('my_payslip');
+  }
+
+  get showComplianceTab(): boolean {
+    return this.canAccessCompliancePayslips;
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
 
   pendingSearchKeyword = '';
   pendingPeriodId = '';
@@ -140,6 +160,13 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (!this.canAccessCompliancePayslips) {
+      if (this.canViewMyPayslipsTab) {
+        void this.router.navigate(['/payroll/my-payslips'], { replaceUrl: true });
+      }
+      return;
+    }
+
     this.localPayslipSeed = this.buildLocalPayslipSeed();
 
     this.settingsService.getOrganizationCurrency()
@@ -402,6 +429,9 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   }
 
   openBulkGenerateDialog(): void {
+    if (!this.hasPermission('payslip_generation')) {
+      return;
+    }
     const employees = this.employees.map((employee) => ({
       id: employee.id,
       name: employee.name,
@@ -434,6 +464,9 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   }
 
   openBulkEmailDialog(): void {
+    if (!this.hasPermission('mail_upload_payslip')) {
+      return;
+    }
     const defaultPeriodId = this.appliedPeriodId || this.periods[0]?.id || '';
     const periodLabel = this.getPeriodLabelById(defaultPeriodId);
 
@@ -462,6 +495,9 @@ export class CompliancePayslipsComponent implements OnInit, OnDestroy {
   }
 
   generateSinglePayslip(row: PayslipRow): void {
+    if (!this.hasPermission('payslip_generation')) {
+      return;
+    }
     if (row.status !== 'draft') {
       return;
     }

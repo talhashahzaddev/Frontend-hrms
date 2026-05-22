@@ -1,11 +1,18 @@
 <div class="time-tracking-container">
   <div class="ledger-switch-container">
     <div class="ledger-switch">
+      @if (showComplianceTab) {
       <a routerLink="/payroll/payslips" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Compliance payslips</a>
+      }
+      @if (canViewMyPayslips) {
       <a routerLink="/payroll/my-payslips" routerLinkActive="active">My payslips</a>
+      }
     </div>
   </div>
 
+  @if (!canViewMyPayslips) {
+    <div class="empty-state">You do not have permission to view payslips.</div>
+  } @else {
   <!-- Page Header -->
   <div class="page-header">
     <div class="title-section">
@@ -118,4 +125,5 @@
     </div>
     }
   </div>
+  }
 </div>

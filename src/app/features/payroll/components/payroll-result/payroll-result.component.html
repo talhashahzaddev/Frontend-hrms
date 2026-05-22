@@ -1,12 +1,19 @@
 <div class="time-tracking-container payroll-result-page">
+  @if (!canAccessPayrollResults) {
+  <div class="empty-state">You do not have permission to access payroll results.</div>
+  } @else {
   <!-- Page Header -->
   <div class="page-header">
     <div class="title-section">
       <h1 class="title">Payroll Results</h1>
     </div>
     <div class="ledger-switch">
+      @if (hasPermission('payroll_calculation')) {
       <a routerLink="/payroll/calculation" routerLinkActive="active">Payroll calculation</a>
+      }
+      @if (canAccessPayrollResults) {
       <a routerLink="/payroll/results" routerLinkActive="active">Payroll results</a>
+      }
     </div>
   </div>
 
@@ -255,4 +262,5 @@
       </div>
     </div>
   </div>
+  }
 </div>

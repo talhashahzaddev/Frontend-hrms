@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -10,6 +10,7 @@ import { EmployeeService } from '../../../../features/employee/services/employee
 import { PerformanceService } from '../../../../features/performance/services/performance.service';
 import { Department } from '../../../../core/models/employee.models';
 import { AppraisalCycle } from '../../../../core/models/performance.models';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-payroll-calculation',
@@ -19,6 +20,20 @@ import { AppraisalCycle } from '../../../../core/models/performance.models';
   styleUrls: ['./payroll-calculation.component.scss']
 })
 export class PayrollCalculationComponent implements OnInit {
+  private readonly authService = inject(AuthService);
+
+  get canAccessPayrollCalculation(): boolean {
+    return this.hasPermission('payroll_calculation');
+  }
+
+  get canAccessPayrollResults(): boolean {
+    return this.hasPermission('payroll_result');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   attendanceRules: any[] = [];
   lateArrivalRules: any[] = [];
   leaveRules: any[] = [];
@@ -64,6 +79,9 @@ export class PayrollCalculationComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    if (!this.canAccessPayrollCalculation) {
+      return;
+    }
     this.loadInitialData();
   }
 
@@ -193,6 +211,9 @@ export class PayrollCalculationComponent implements OnInit {
   }
 
   calculatePayroll(): void {
+    if (!this.canAccessPayrollCalculation) {
+      return;
+    }
     this.errorMessage = '';
     this.successMessage = '';
     this.calculationResult = null;

@@ -8,6 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { PayrollService, MyPayslipFilterDto, MyPayslipDto, PayrollPeriodDto } from '../../services/payroll.service';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-payslips',
@@ -20,6 +21,19 @@ export class PayslipsComponent implements OnInit {
   private payrollService = inject(PayrollService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private authService = inject(AuthService);
+
+  get canViewMyPayslips(): boolean {
+    return this.hasPermission('my_payslip');
+  }
+
+  get showComplianceTab(): boolean {
+    return this.hasPermission('compliance_payslip_view');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
 
   periods: PayrollPeriodDto[] = [];
   payslips: MyPayslipDto[] = [];
@@ -68,6 +82,9 @@ export class PayslipsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.canViewMyPayslips) {
+      return;
+    }
     this.loadPeriods();
     this.loadPayslips();
   }

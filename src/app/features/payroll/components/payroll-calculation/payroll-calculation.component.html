@@ -1,12 +1,19 @@
 <div class="time-tracking-container payroll-calculation-page">
+    @if (!canAccessPayrollCalculation) {
+    <div class="empty-state">You do not have permission to access payroll calculation.</div>
+    } @else {
     <div class="page-header">
         <div class="title-section">
             <h1 class="title">Run Payroll</h1>
             <p class="subtitle">Configure policies and define the scope for the current payroll execution.</p>
         </div>
         <div class="ledger-switch">
+          @if (canAccessPayrollCalculation) {
           <a routerLink="/payroll/calculation" routerLinkActive="active">Payroll calculation</a>
+          }
+          @if (canAccessPayrollResults) {
           <a routerLink="/payroll/results" routerLinkActive="active">Payroll results</a>
+          }
         </div>
     </div>
 
@@ -370,10 +377,12 @@
         <!-- Form Actions -->
         <div class="form-actions">
             <button class="btn-preview">Preview Payroll</button>
+            @if (canAccessPayrollCalculation) {
             <button class="btn-calculate" (click)="calculatePayroll()" [disabled]="isCalculating || !canCalculatePayroll()">
                 <mat-icon>{{ isCalculating ? 'hourglass_top' : 'play_arrow' }}</mat-icon>
                 {{ isCalculating ? 'Calculating...' : 'Calculate Payroll' }}
             </button>
+            }
         </div>
 
         @if (errorMessage) {
@@ -393,4 +402,5 @@
         }
 
     </div>
+    }
 </div>

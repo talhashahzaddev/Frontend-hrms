@@ -309,7 +309,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Gratuity',
           icon: 'emoji_events',
           route: '/payroll/gratuity',
-          exact: true
+          exact: true,
+          actionKey: 'gratuity_admin_view'
         },
         {
           label: 'Income Tax',
@@ -327,7 +328,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Payslip Management',
           icon: 'receipt_long',
           route: '/payroll/payslips',
-          exact: true
+          exact: true,
+          anyOfActionKeys: [
+            'my_payslip',
+            'compliance_payslip_view',
+            'payslip_generation',
+            'mail_upload_payslip'
+          ]
         },
         { label: 'Policies', icon: 'rule', route: '/payroll/policies', actionKey: 'payroll_rules_view' },
         {
@@ -343,7 +350,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
         },
         { label: 'Periods', icon: 'date_range', route: '/payroll/periods', actionKey: 'payroll_period_view' },
         { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
-        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
+        {
+          label: 'Payroll Calculation',
+          icon: 'calculate',
+          route: '/payroll/calculation',
+          anyOfActionKeys: ['payroll_calculation', 'payroll_result']
+        }
       ]
     },
     {

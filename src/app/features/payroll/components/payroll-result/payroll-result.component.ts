@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { take } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
+import { AuthService } from '@core/services/auth.service';
 import { EmployeeService } from '../../../../features/employee/services/employee.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { Department } from '../../../../core/models/employee.models';
@@ -55,8 +56,17 @@ export class PayrollResultComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly employeeService = inject(EmployeeService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+
+  get canAccessPayrollResults(): boolean {
+    return this.hasPermission('payroll_result');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
 
   periods: any[] = [];
   departments: Department[] = [];
@@ -110,6 +120,9 @@ export class PayrollResultComponent implements OnInit {
   totalNetPayable = 0;
 
   ngOnInit(): void {
+    if (!this.canAccessPayrollResults) {
+      return;
+    }
     this.settingsService.getOrganizationCurrency()
       .pipe(take(1))
       .subscribe({
