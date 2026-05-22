@@ -35,12 +35,18 @@
         </mat-form-field>
 
         <div class="action-buttons">
-          <button mat-flat-button type="submit" [disabled]="isSubmitting" class="save-button">
-            <mat-icon *ngIf="!isSubmitting">{{ isEditing ? 'save' : 'add' }}</mat-icon>
+          <button mat-flat-button type="submit" [disabled]="isSubmitting" class="save-button" *ngIf="!isEditing && hasPermission('manage_ip_add')">
+            <mat-icon *ngIf="!isSubmitting">add</mat-icon>
             <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
-            {{ isEditing ? 'Update' : 'Add' }} IP
+            Add IP
           </button>
-          
+
+          <button mat-flat-button type="submit" [disabled]="isSubmitting" class="save-button" *ngIf="isEditing && hasPermission('manage_ip_edit')">
+            <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+            <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+            Update IP
+          </button>
+
           <button mat-stroked-button type="button" (click)="cancelEdit()" *ngIf="isEditing" class="cancel-btn">
             Cancel
           </button>
@@ -59,7 +65,13 @@
         <p>Loading office IPs...</p>
       </div>
 
-      <div *ngIf="!isLoading" class="table-container">
+      <div *ngIf="!isLoading && hasPermission('Manage_Ip_Table')" class="table-container">
+        <div class="table-actions" style="margin-bottom:12px;">
+          <button mat-flat-button color="primary" (click)="ipForm.reset(); isEditing=false;" *ngIf="hasPermission('Manage_Ip_Tableadd')">
+            <mat-icon>add</mat-icon>
+            Add IP
+          </button>
+        </div>
         <table mat-table [dataSource]="officeIPs" class="office-ips-table" *ngIf="officeIPs.length > 0">
           <ng-container matColumnDef="ipAddressValue">
             <th mat-header-cell *matHeaderCellDef>IP Address</th>
@@ -83,15 +95,15 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #actionMenu="matMenu">
-                <button mat-menu-item (click)="editIP(ip)">
+                <button mat-menu-item (click)="editIP(ip)" *ngIf="hasPermission('manage_ip_edit')">
                   <mat-icon>edit</mat-icon>
                   Edit
                 </button>
                 <mat-divider></mat-divider>
-                <button mat-menu-item (click)="deleteIP(ip)" class="danger-action">
-                  <mat-icon>delete</mat-icon>
-                  Delete
-                </button>
+                  <button mat-menu-item (click)="deleteIP(ip)" class="danger-action" *ngIf="hasPermission('manage_ip_delete')">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
               </mat-menu>
             </td>
           </ng-container>

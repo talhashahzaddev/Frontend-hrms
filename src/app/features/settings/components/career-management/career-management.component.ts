@@ -18,6 +18,7 @@ import {
     CareerPageSettings
 } from '../../services/settings.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
     selector: 'app-career-management',
@@ -89,6 +90,7 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         private fb: FormBuilder,
         private settingsService: SettingsService,
         private notificationService: NotificationService
+        , private authService: AuthService
     ) {
         this.form = this.fb.group({
             logoUrl: ['', Validators.required],
@@ -274,6 +276,10 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         const d = this.savedData;
         return !!(d.logoUrl || d.careerBgImageUrl || d.careerHeaderText || d.careerDescription);
     }
+
+        hasPermission(actionKey: string): boolean {
+            return this.authService.hasMenuPermission('Settings', 'Career management', actionKey);
+        }
 
     private validateImage(file: File): string | null {
         if (!CareerManagementComponent.ALLOWED_TYPES.includes(file.type)) {

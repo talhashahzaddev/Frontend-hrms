@@ -13,7 +13,7 @@
     <mat-card class="billing-card">
       <mat-tab-group (selectedIndexChange)="onTabChange($event)" [selectedIndex]="activeTabIndex" animationDuration="200ms">
         <!-- Transactions Tab -->
-        <mat-tab>
+        <mat-tab *ngIf="hasPermission('billing_transactions')">
           <ng-template mat-tab-label>
             <mat-icon class="tab-icon">receipt_long</mat-icon>
             Transactions
@@ -103,7 +103,7 @@
         </mat-tab>
 
         <!-- Invoices Tab -->
-        <mat-tab>
+        <mat-tab *ngIf="hasPermission('billing_invoices')">
           <ng-template mat-tab-label>
             <mat-icon class="tab-icon">description</mat-icon>
             Invoices

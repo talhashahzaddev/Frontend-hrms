@@ -16,6 +16,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { RoleService } from '../../services/role.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Role } from '../../../../core/models/role.models';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
@@ -57,6 +58,7 @@ export class RoleListComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private router: Router,
     private route: ActivatedRoute
+    , private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -166,6 +168,10 @@ export class RoleListComponent implements OnInit, OnDestroy {
 
   clearFilters(): void {
     this.searchControl.setValue('');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Settings', 'Roles', actionKey);
   }
 
   formatDate(date: string): string {

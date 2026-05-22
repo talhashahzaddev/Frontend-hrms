@@ -22,7 +22,7 @@
                 Edit
             </button>
             <button mat-flat-button class="cm-btn cm-btn--primary"
-                *ngIf="!isLoading && !isEditMode && !hasAnyData() && savedData !== null"
+                *ngIf="!isLoading && !isEditMode && !hasAnyData() && savedData !== null && hasPermission('Setup_Career_Page_Button')"
                 (click)="enterEditMode()" id="career-setup-btn">
                 <mat-icon>add</mat-icon>
                 Set Up Career Page
@@ -58,7 +58,7 @@
             <p class="cm-state-title">Your career page isn't configured yet</p>
             <p class="cm-state-sub">Add a logo, background image, header and description to make it shine for
                 applicants.</p>
-            <button mat-flat-button class="cm-btn cm-btn--primary" (click)="enterEditMode()">
+            <button mat-flat-button class="cm-btn cm-btn--primary" (click)="enterEditMode()" *ngIf="hasPermission('Setup_Career_Page_Button')">
                 <mat-icon>add</mat-icon>Set Up Career Page
             </button>
         </div>
@@ -320,11 +320,11 @@
                     Waiting for uploads…
                 </span>
                 <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving" (click)="cancelEdit()"
-                    id="career-cancel-btn">
+                    id="career-cancel-btn" *ngIf="hasPermission('Discard_Career_Page_Button')">
                     Discard Changes
                 </button>
                 <button type="submit" class="cm-btn cm-btn--primary"
-                    [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn">
+                    [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn" *ngIf="hasPermission('Save_Career_Page_Button')">
                     <mat-spinner *ngIf="isSaving" diameter="18" class="cm-btn-spinner"></mat-spinner>
                     {{ isSaving ? 'Saving…' : 'Save Changes' }}
                 </button>

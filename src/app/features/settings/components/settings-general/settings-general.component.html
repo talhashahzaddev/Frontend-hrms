@@ -164,7 +164,7 @@
           <div class="form-actions">
 
             <button mat-raised-button color="primary" type="submit" class="save-button"
-              [disabled]="settingsForm.invalid || isSaving">
+              [disabled]="settingsForm.invalid || isSaving" *ngIf="hasPermission('Save_Button')">
 
               <mat-icon *ngIf="!isSaving">
                 save
@@ -181,7 +181,7 @@
 
 
 
-            <button mat-stroked-button type="button" (click)="loadSettings()" class="cancel-button">
+            <button mat-stroked-button type="button" (click)="loadSettings()" class="cancel-button" *ngIf="hasPermission('Reset_Button')">
 
               <mat-icon>refresh</mat-icon>
 

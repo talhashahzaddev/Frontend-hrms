@@ -12,6 +12,8 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest } from 'rxjs';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ChangeDetectorRef } from '@angular/core';
+import { AuthService } from '../../../../core/services/auth.service';
+
 export interface UpdateLocalizationRequest {
   currency: string;
   timeZone: string;
@@ -67,6 +69,8 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private notification: NotificationService,
     private notificationService: NotificationService,
+    private authService: AuthService,
+    
     private dialog: MatDialog
   ) {
     this.settingsForm = this.fb.group({
@@ -210,7 +214,9 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     });
   }
 
-
+hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Settings', 'Company Name', actionKey);
+  }
 
 
 
