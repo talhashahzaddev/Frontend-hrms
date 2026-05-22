@@ -7,10 +7,10 @@
       <p class="page-subtitle">Manage and publish employee handbook policies</p>
     </div>
     <button
-      *ngIf="isSuperAdmin"
       mat-flat-button
       class="add-btn"
-      (click)="openAddDialog()">
+      (click)="openAddDialog()"
+      *ngIf="hasPermission('Create_Policy')">
       <mat-icon>add</mat-icon>
       New Policy
     </button>
@@ -30,20 +30,20 @@
     </div>
 
     <!-- Empty -->
-    <div *ngIf="!isLoading && policiesList.length === 0" class="state-container">
+    <div *ngIf="!isLoading && policiesList.length === 0 && hasPermission('Policy_Table')" class="state-container">
       <div class="empty-icon">
         <mat-icon>policy</mat-icon>
       </div>
       <h3>No policies yet</h3>
       <p>Create your first policy to get started.</p>
-      <button *ngIf="isSuperAdmin" mat-flat-button class="add-btn" (click)="openAddDialog()">
+      <button mat-flat-button class="add-btn" (click)="openAddDialog()" *ngIf="hasPermission('Create_Policy')">
         <mat-icon>add</mat-icon>
         Add Policy
       </button>
     </div>
 
     <!-- Table -->
-    <div *ngIf="!isLoading && policiesList.length > 0" class="table-wrapper">
+    <div *ngIf="!isLoading && policiesList.length > 0 && hasPermission('Policy_Table')" class="table-wrapper">
       <table mat-table [dataSource]="dataSource" class="policies-table">
 
         <!-- Policy Name -->
@@ -89,16 +89,16 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu" class="policy-action-menu">
-              <button mat-menu-item (click)="openViewDialog(row)">
+              <button mat-menu-item (click)="openViewDialog(row)" *ngIf="hasPermission('View_Policy')">
                 <mat-icon>visibility</mat-icon>
                 <span>View</span>
               </button>
-              <button *ngIf="isSuperAdmin" mat-menu-item (click)="openEditDialog(row)">
+              <button mat-menu-item (click)="openEditDialog(row)" *ngIf="hasPermission('Edit_Policy')">
                 <mat-icon>edit</mat-icon>
                 <span>Edit</span>
               </button>
-              <mat-divider *ngIf="isSuperAdmin"></mat-divider>
-              <button *ngIf="isSuperAdmin" mat-menu-item class="delete-item" (click)="deletePolicy(row)">
+              <mat-divider *ngIf="hasPermission('Edit_Policy') || hasPermission('Delete_Policy')"></mat-divider>
+              <button mat-menu-item class="delete-item" (click)="deletePolicy(row)" *ngIf="hasPermission('Delete_Policy')">
                 <mat-icon>delete_outline</mat-icon>
                 <span>Delete</span>
               </button>

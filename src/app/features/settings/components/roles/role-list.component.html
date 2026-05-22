@@ -8,7 +8,7 @@
       <p class="page-subtitle">Manage access control and permissions for your organization</p>
     </div>
     <div class="header-actions">
-      <button mat-flat-button (click)="openAddRoleDialog()" class="add-button">
+      <button mat-flat-button (click)="openAddRoleDialog()" class="add-button" *ngIf="hasPermission('add_new_role')">
         <mat-icon>add</mat-icon>
         Add New Role
       </button>
@@ -99,19 +99,19 @@
               <mat-icon>more_horiz</mat-icon>
             </button>
             <mat-menu #actionMenu="matMenu">
-              <button mat-menu-item (click)="viewRole(role)">
-                <mat-icon>visibility</mat-icon>
-                <span>View Details</span>
-              </button>
-              <button mat-menu-item (click)="editRole(role)" [disabled]="role.isSystemRole">
-                <mat-icon>edit</mat-icon>
-                <span>Edit Role</span>
-              </button>
-              <mat-divider></mat-divider>
-              <button mat-menu-item (click)="deleteRole(role)" [disabled]="role.isSystemRole" class="danger-action">
-                <mat-icon>delete</mat-icon>
-                <span>Delete</span>
-              </button>
+                <button mat-menu-item (click)="viewRole(role)" *ngIf="hasPermission('role_view_details')">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View Details</span>
+                </button>
+                <button mat-menu-item (click)="editRole(role)" *ngIf="hasPermission('role_edit')" [disabled]="role.isSystemRole">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit Role</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="deleteRole(role)" *ngIf="hasPermission('role_delete')" [disabled]="role.isSystemRole" class="danger-action">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
             </mat-menu>
           </td>
         </ng-container>
