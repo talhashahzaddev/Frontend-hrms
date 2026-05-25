@@ -1,3 +1,4 @@
+@if (canAccessPayrollBonusArea) {
 <div class="time-tracking-container bonus-pay-page">
   <!-- Page Header -->
   <div class="page-header">
@@ -6,11 +7,16 @@
       <p class="subtitle">Manage bonus payouts and performance-based compensation for the current period</p>
     </div>
     <div class="ledger-switch">
+      @if (hasPermission('bonus_entry_view')) {
       <a routerLink="/payroll/bonus" routerLinkActive="active">Bonus</a>
+      }
+      @if (hasPermission('performance_pay_view')) {
       <a routerLink="/payroll/performance" routerLinkActive="active">Performance pay</a>
+      }
     </div>
   </div>
 
+  @if (hasPermission('bonus_entry_view')) {
   <!-- Summary Stat Cards -->
   <div class="summary-cards">
     <div class="card">
@@ -94,12 +100,14 @@
       </div>
 
       <!-- Add button -->
+      @if (hasPermission('bonus_entry_add')) {
       <div class="add-btn-wrap">
         <button class="add-btn" (click)="openAddBonusDialog()">
           <mat-icon>add</mat-icon>
           Add Bonus Pay
         </button>
       </div>
+      }
     </div>
 
     <div class="table-responsive" [class.loading]="isLoading">
@@ -139,12 +147,16 @@
                 <td class="text-right font-semibold highlight-val">{{ currencySymbol() }} {{ row.amount | number }}</td>
                 <td class="text-sm italic text-gray-500">{{ row.description }}</td>
                 <td class="action-cell">
+                  @if (hasPermission('bonus_entry_edit')) {
                   <button class="action-btn hover-primary" aria-label="Edit" (click)="openEditBonusDialog(row)">
                     <mat-icon>edit</mat-icon>
                   </button>
+                  }
+                  @if (hasPermission('bonus_entry_delete')) {
                   <button class="action-btn hover-danger" aria-label="Delete" (click)="requestDeleteRow(row)">
                     <mat-icon>delete</mat-icon>
                   </button>
+                  }
                 </td>
               </tr>
             }
@@ -180,4 +192,24 @@
       </div>
     </div>
   </div>
+  } @else {
+  <div class="empty-state"
+    style="padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="empty-icon-wrapper" style="color: #64748b;">
+      <mat-icon>info</mat-icon>
+    </div>
+    <h3>Bonus pay</h3>
+    <p>You do not have permission to view bonus pay. Use the Performance pay tab if you have access.</p>
+  </div>
+  }
 </div>
+} @else {
+  <div class="empty-state"
+    style="padding: 5rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="empty-icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+      <mat-icon>block</mat-icon>
+    </div>
+    <h3>Access Denied</h3>
+    <p>You do not have permission to access Bonus &amp; Performance Pay.</p>
+  </div>
+}

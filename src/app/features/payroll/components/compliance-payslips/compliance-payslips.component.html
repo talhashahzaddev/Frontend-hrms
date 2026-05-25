@@ -1,4 +1,14 @@
 <div class="time-tracking-container payslips-page">
+    <div class="ledger-switch-container">
+      <div class="ledger-switch">
+        @if (showComplianceTab) {
+        <a routerLink="/payroll/payslips" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Compliance payslips</a>
+        }
+        @if (canViewMyPayslipsTab) {
+        <a routerLink="/payroll/my-payslips" routerLinkActive="active">My payslips</a>
+        }
+      </div>
+    </div>
     <!-- Header -->
     <header class="page-header">
         <div class="title-section">
@@ -6,14 +16,18 @@
             <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.</p>
         </div>
         <div class="header-actions">
+            @if (hasPermission('mail_upload_payslip')) {
             <button class="green-btn" (click)="openBulkEmailDialog()">
                 <mat-icon>mail</mat-icon>
                 Bulk Email
             </button>
+            }
+            @if (hasPermission('payslip_generation')) {
             <button class="primary-btn" (click)="openBulkGenerateDialog()">
                 <mat-icon>add</mat-icon>
                 Generate Payslip
             </button>
+            }
         </div>
     </header>
 
@@ -208,19 +222,19 @@
                             <span class="version-chip">v{{ row.versionNo }}</span>
                         </td>
                         <td class="text-right">
-                            @if (row.status === 'draft') {
+                            @if (row.status === 'draft' && hasPermission('payslip_generation')) {
                             <button class="generate-btn" (click)="generateSinglePayslip(row)">Generate</button>
                             } @else {
                             <div class="action-icons">
                                 <button type="button" (click)="openViewPayslip(row)" title="View Payslip">
                                     <mat-icon>visibility</mat-icon>
                                 </button>
-                                <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
+                                <!-- <button type="button" (click)="sendSinglePayslip(row)" title="Email Payslip">
                                     <mat-icon>alternate_email</mat-icon>
                                 </button>
                                 <button type="button" (click)="openReissueDialog(row)" title="Reissue Payslip">
                                     <mat-icon>refresh</mat-icon>
-                                </button>
+                                </button> -->
                             </div>
                             }
                         </td>

@@ -1,3 +1,4 @@
+@if (canAccessLoanAdmin) {
 <div class="time-tracking-container loans-advances-page">
   <div class="page-header">
     <div class="title-section">
@@ -7,9 +8,11 @@
   </div>
 
   <div class="tab-navigation">
+    @if (hasPermission('loan_admin_view')) {
     <button class="tab" [class.active]="currentTab === 'loans'" (click)="setTab('loans')">Loans</button>
     <button class="tab" [class.active]="currentTab === 'loan-payments'" (click)="setTab('loan-payments')">Loan payments</button>
     <button class="tab" [class.active]="currentTab === 'repayments'" (click)="setTab('repayments')">Repayments</button>
+    }
   </div>
 
   @if (hasFallbackNotice) {
@@ -154,7 +157,7 @@
 
                 <div class="card-right">
                   <div class="request-actions">
-                    @if (row.status === 'pending') {
+                    @if (row.status === 'pending' && hasPermission('loan_admin_edit')) {
                       <button class="approve-btn" (click)="approveLoan(row)">
                         <mat-icon>check_circle</mat-icon>
                         Approve
@@ -163,7 +166,7 @@
                         <mat-icon>cancel</mat-icon>
                         Reject
                       </button>
-                    } @else if (row.status === 'approved' || row.status === 'accepted') {
+                    } @else if ((row.status === 'approved' || row.status === 'accepted') && hasPermission('loan_admin_edit')) {
                       <button class="disburse-btn" (click)="disburseLoan(row)">
                         <mat-icon>payment</mat-icon>
                         Disburse
@@ -297,12 +300,14 @@
           </div>
         </div>
 
+        @if (hasPermission('loan_admin_add')) {
         <div class="add-btn-wrap">
           <button class="add-btn" (click)="openAddLoanPaymentDialog()">
             <mat-icon>add</mat-icon>
             Add loan payment
           </button>
         </div>
+        }
 
       </div>
 
@@ -534,3 +539,13 @@
     </div>
   }
 </div>
+} @else {
+  <div class="empty-state"
+    style="padding: 5rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="empty-icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+      <mat-icon>block</mat-icon>
+    </div>
+    <h3>Access Denied</h3>
+    <p>You do not have permission to access Loans administration.</p>
+  </div>
+}

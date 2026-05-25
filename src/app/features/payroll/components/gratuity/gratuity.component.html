@@ -7,7 +7,7 @@
       <p class="subtitle">Manage employee gratuity entitlements — configure rules, track active records, and process payments.</p>
     </div>
     <div class="header-actions">
-      @if (currentTab === 'active') {
+      @if (currentTab === 'active' && hasPermission('gratuity_admin_add')) {
         <button class="add-btn" (click)="openAddRecordDialog()">
           <mat-icon>add</mat-icon>
           Add record
@@ -16,6 +16,9 @@
     </div>
   </div>
 
+  @if (!canAccessGratuityAdmin) {
+    <div class="empty-state">You do not have permission to view gratuity administration.</div>
+  } @else {
   <!-- Tab navigation -->
   <div class="tab-navigation">
     <button class="tab" [class.active]="currentTab === 'active'" (click)="setTab('active')">
@@ -156,23 +159,27 @@
 
               <div class="card-footer">
                 <div class="request-actions">
-                  @if (record.paymentStatus === 'calculated') {
+                  @if (record.paymentStatus === 'calculated' && hasPermission('gratuity_admin_edit')) {
                     <button class="approve-btn" (click)="approveRecord(record)">
                       <mat-icon>check_circle</mat-icon>
                       Approve
                     </button>
-                  } @else if (record.paymentStatus === 'approved') {
+                  } @else if (record.paymentStatus === 'approved' && hasPermission('gratuity_admin_edit')) {
                     <button class="approve-btn disburse-btn" (click)="markPaid(record)">
                       <mat-icon>payments</mat-icon>
                       Mark paid
                     </button>
                   }
+                  @if (hasPermission('gratuity_admin_edit')) {
                   <button class="action-icon-btn edit" (click)="openEditRecordDialog(record)" title="Edit record">
                     <mat-icon>edit</mat-icon>
                   </button>
+                  }
+                  @if (hasPermission('gratuity_admin_delete')) {
                   <button class="action-icon-btn danger" (click)="requestDeleteRecord(record)" title="Delete record">
                     <mat-icon>delete</mat-icon>
                   </button>
+                  }
                 </div>
               </div>
             </article>
@@ -282,9 +289,11 @@
 
               <div class="card-footer">
                 <div class="request-actions">
+                  @if (hasPermission('gratuity_admin_delete')) {
                   <button class="action-icon-btn danger" (click)="requestDeleteRecord(record)" title="Delete record">
                     <mat-icon>delete</mat-icon>
                   </button>
+                  }
                 </div>
               </div>
             </article>
@@ -319,5 +328,6 @@
     </div>
   }
 
+  }
 
 </div>

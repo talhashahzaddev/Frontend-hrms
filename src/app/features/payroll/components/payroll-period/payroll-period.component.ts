@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { PayrollPeriodDialogComponent } from '../payroll-period-dialog/payroll-period-dialog.component';
 import { PayrollService } from '../../services/payroll.service';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-payroll-period',
@@ -67,14 +68,19 @@ export class PayrollPeriodComponent implements OnInit {
   constructor(
     private notification: NotificationService,
     private dialog: MatDialog,
-    private payrollService: PayrollService
+    private payrollService: PayrollService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.loadRecords();
+    if (this.hasPermission('payroll_period_view')) {
+      this.loadRecords();
+    }
   }
 
   loadRecords() {
+    if (!this.hasPermission('payroll_period_view')) return;
+
     const params: any = {
        page: this.page,
        pageSize: this.pageSize,
@@ -282,6 +288,9 @@ export class PayrollPeriodComponent implements OnInit {
   nextPage() { this.goToPage(this.page + 1); }
 
   openDialog(mode: 'add' | 'edit', record?: any) {
+    if (mode === 'add' && !this.hasPermission('payroll_period_add')) return;
+    if (mode === 'edit' && !this.hasPermission('payroll_period_edit')) return;
+
     const dialogRef = this.dialog.open(PayrollPeriodDialogComponent, {
       width: '500px',
       data: {
@@ -335,6 +344,8 @@ export class PayrollPeriodComponent implements OnInit {
   }
 
   onDelete(record: any): void {
+    if (!this.hasPermission('payroll_period_delete')) return;
+
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Payroll Period',
       message: `Are you sure you want to delete the payroll period "${record.name}"?`,
@@ -363,5 +374,9 @@ export class PayrollPeriodComponent implements OnInit {
 
   onView(record: any): void {
       this.notification.showSuccess(`Viewing details for ${record.name}`);
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Payroll', 'Payroll Period', actionKey);
   }
 }

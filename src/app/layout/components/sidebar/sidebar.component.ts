@@ -21,6 +21,10 @@ interface MenuItem {
   children?: MenuItem[];
   menuName?: string;
   subMenuName?: string;
+  /** When set, item is visible only if this action key is granted. */
+  actionKey?: string;
+  /** When set, item is visible if any of these action keys is granted. */
+  anyOfActionKeys?: string[];
   permissionAliases?: string[];
   badge?: number;
   expanded?: boolean;
@@ -47,6 +51,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   activeRoute = '';
   activeItemKey: string | null = null;
+  /** Bumped when permissions load/refresh so the menu re-filters. */
+  private menuPermissionsVersion = 0;
   @ViewChildren(MatExpansionPanel) panels!: QueryList<MatExpansionPanel>;
 
   private destroy$ = new Subject<void>();
@@ -270,19 +276,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Bonus & Performance',
           icon: 'card_giftcard',
           route: '/payroll/bonus',
-          activeRoutes: ['/payroll/performance']
+          activeRoutes: ['/payroll/performance'],
+          anyOfActionKeys: ['bonus_entry_view', 'performance_pay_view']
         },
         {
           label: 'Loans',
           icon: 'account_balance',
           route: '/payroll/loans',
-          exact: true
+          exact: true,
+          anyOfActionKeys: ['loan_admin_view']
         },
         {
           label: 'Provident Funds',
           icon: 'account_balance_wallet',
           route: '/payroll/provident-fund',
-          exact: true
+          exact: true,
+          anyOfActionKeys: ['pf_admin_view']
         },
         {
           label: 'Tax Ledger',
@@ -300,7 +309,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Gratuity',
           icon: 'emoji_events',
           route: '/payroll/gratuity',
-          exact: true
+          exact: true,
+          actionKey: 'gratuity_admin_view'
         },
         {
           label: 'Income Tax',
@@ -318,13 +328,34 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Payslip Management',
           icon: 'receipt_long',
           route: '/payroll/payslips',
-          exact: true
+          exact: true,
+          anyOfActionKeys: [
+            'my_payslip',
+            'compliance_payslip_view',
+            'payslip_generation',
+            'mail_upload_payslip'
+          ]
         },
-        { label: 'Policies', icon: 'rule', route: '/payroll/policies' },
-        { label: 'Time Tracking', icon: 'schedule', route: '/payroll/time-tracking' },
-        { label: 'Periods', icon: 'date_range', route: '/payroll/periods' },
+        { label: 'Policies', icon: 'rule', route: '/payroll/policies', actionKey: 'payroll_rules_view' },
+        {
+          label: 'Time Tracking',
+          icon: 'schedule',
+          route: '/payroll/time-tracking',
+          anyOfActionKeys: [
+            'overtime_entry_view',
+            'attendance_summary_view',
+            'late_attendance_view',
+            'leave_summary_view'
+          ]
+        },
+        { label: 'Periods', icon: 'date_range', route: '/payroll/periods', actionKey: 'payroll_period_view' },
         { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
-        { label: 'Payroll Calculation', icon: 'calculate', route: '/payroll/calculation' }
+        {
+          label: 'Payroll Calculation',
+          icon: 'calculate',
+          route: '/payroll/calculation',
+          anyOfActionKeys: ['payroll_calculation', 'payroll_result']
+        }
       ]
     },
     {
@@ -354,6 +385,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscribeToUser();
+    this.subscribeToPermissions();
     this.subscribeToRouterEvents();
     // Ensure active state is correct on initial load (before first NavigationEnd)
     this.activeRoute = this.router.url;
@@ -402,6 +434,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
       }
     }
 
+    if (item.actionKey) {
+      return this.authService.hasPermissionByActionKey(item.actionKey);
+    }
+
+    if (item.anyOfActionKeys && item.anyOfActionKeys.length > 0) {
+      return item.anyOfActionKeys.some(key => this.authService.hasPermissionByActionKey(key));
+    }
+
     // If the item has no menuName, it either has no permission requirements or is a standalone item
     if (!item.menuName) {
       return true;
@@ -437,10 +477,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   getFilteredMenuItems(): MenuItem[] {
+    void this.menuPermissionsVersion;
     return this.menuItems.filter(item => this.hasPermission(item));
   }
 
   getFilteredChildren(children: MenuItem[]): MenuItem[] {
+    void this.menuPermissionsVersion;
     return children.filter(child => this.hasPermission(child));
   }
 
@@ -475,6 +517,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => { this.currentUser = user; });
+  }
+
+  private subscribeToPermissions(): void {
+    this.authService.permissions$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.menuPermissionsVersion++;
+      });
   }
 
   private subscribeToRouterEvents(): void {

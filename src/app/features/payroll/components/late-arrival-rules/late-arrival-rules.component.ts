@@ -7,7 +7,9 @@ import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
@@ -27,6 +29,7 @@ export class LateArrivalRulesComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly lateArrivalRules = signal<any[]>([]);
   readonly isLoading = signal(true);
@@ -44,10 +47,14 @@ export class LateArrivalRulesComponent implements OnInit {
         }
       });
 
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'late_arrival_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchRules(): void {
+    if (!this.hasPermission('late_arrival_rule_view')) return;
     this.isLoading.set(true);
     this.payrollService.getLateArrivalRules().subscribe({
       next: (data) => {
@@ -67,6 +74,7 @@ export class LateArrivalRulesComponent implements OnInit {
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('late_arrival_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -81,6 +89,7 @@ export class LateArrivalRulesComponent implements OnInit {
   }
 
   editRule(rule: any): void {
+    if (!this.hasPermission('late_arrival_rule_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -99,6 +108,7 @@ export class LateArrivalRulesComponent implements OnInit {
   }
 
   onToggleStatus(id: string): void {
+    if (!this.hasPermission('late_arrival_rule_edit')) return;
     const rule = this.lateArrivalRules().find(r => r.ruleId === id);
     if (!rule) return;
 
@@ -116,6 +126,7 @@ export class LateArrivalRulesComponent implements OnInit {
   }
 
   onDelete(id: string, ruleName?: string): void {
+    if (!this.hasPermission('late_arrival_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Rule',
       message: 'Are you sure you want to delete this late arrival rule?',
@@ -143,5 +154,9 @@ export class LateArrivalRulesComponent implements OnInit {
         });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

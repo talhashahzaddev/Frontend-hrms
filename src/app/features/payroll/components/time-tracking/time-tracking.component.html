@@ -1,3 +1,4 @@
+@if (canAccessTimeTracking) {
 <div class="time-tracking-container">
   <!-- Page Header -->
   <div class="page-header">
@@ -5,35 +6,33 @@
       <h1 class="title">Attendance & Payroll Records</h1>
       <p class="subtitle">Manage overtime, absences, late arrivals, and leave summaries for the current period</p>
     </div>
-    <!-- <div class="actions">
-      <button class="export-btn">
-        <mat-icon>file_download</mat-icon>
-        Export Report
-      </button>
-    </div> -->
   </div>
 
   <!-- Tab Navigation -->
   <div class="tab-navigation">
+    @if (hasPermission('overtime_entry_view')) {
     <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'overtime'" (click)="setTab('overtime')">
       <span>Overtime</span>
-      <span class="badge" [class.active-badge]="currentTab === 'overtime'">12</span>
     </a>
+    }
+    @if (hasPermission('attendance_summary_view')) {
     <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'absents'" (click)="setTab('absents')">
       <span>Absents</span>
-      <span class="badge" [class.active-badge]="currentTab === 'absents'">5</span>
     </a>
+    }
+    @if (hasPermission('late_attendance_view')) {
     <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'late'" (click)="setTab('late')">
       <span>Late / Half-day</span>
-      <span class="badge" [class.active-badge]="currentTab === 'late'">8</span>
     </a>
+    }
+    @if (hasPermission('leave_summary_view')) {
     <a href="javascript:void(0)" class="tab" [class.active]="currentTab === 'leave'" (click)="setTab('leave')">
       <span>Leave Summary</span>
-      <span class="badge" [class.active-badge]="currentTab === 'leave'">4</span>
     </a>
+    }
   </div>
 
-  @if (currentTab === 'overtime') {
+  @if (currentTab === 'overtime' && hasPermission('overtime_entry_view')) {
   <!-- Summary Stat Cards -->
   <div class="summary-cards">
     <div class="card">
@@ -92,15 +91,12 @@
   <!-- Content Area (Table + Toolbar) -->
   <div class="content-card">
     <div class="toolbar">
-      <!-- Filter row -->
       <div class="filters-row">
-        <!-- Search -->
         <div class="search-box">
           <mat-icon>search</mat-icon>
           <input type="text" placeholder="Search employee..." [(ngModel)]="pendingSearch" />
         </div>
 
-        <!-- Overtime Type filter -->
         <select class="filter-select" [(ngModel)]="pendingType">
           <option value="">All types</option>
           <option value="Regular">Regular</option>
@@ -108,7 +104,6 @@
           <option value="Weekend">Weekend</option>
         </select>
 
-        <!-- Rule filter -->
         <select class="filter-select" [(ngModel)]="pendingRule">
           <option value="">All rules</option>
           @for (rule of overtimeRules; track rule.ruleId) {
@@ -116,7 +111,6 @@
           }
         </select>
 
-        <!-- Period filter -->
         <select class="filter-select" [(ngModel)]="pendingPeriod">
           <option value="">All periods</option>
           @for (p of periods; track p.id) {
@@ -124,7 +118,6 @@
           }
         </select>
 
-        <!-- Action buttons -->
         <div class="filter-actions">
           <button class="apply-btn" [disabled]="!hasActiveFilters" (click)="applyFilters()">
             <mat-icon>filter_list</mat-icon>
@@ -137,13 +130,14 @@
         </div>
       </div>
 
-      <!-- Add button -->
+      @if (hasPermission('overtime_entry_add')) {
       <div class="add-btn-wrap">
         <button class="add-btn" (click)="openDialog('add')">
           <mat-icon>add</mat-icon>
           Add Overtime
         </button>
       </div>
+      }
     </div>
 
     <div class="table-responsive">
@@ -174,12 +168,16 @@
               <span class="badge" [ngClass]="record.typeClass">{{ record.type }}</span>
             </td>
             <td class="action-cell">
+              @if (hasPermission('overtime_entry_edit')) {
               <button class="action-btn hover-primary" (click)="openDialog('edit', record)">
                 <mat-icon>edit</mat-icon>
               </button>
+              }
+              @if (hasPermission('overtime_entry_delete')) {
               <button class="action-btn hover-danger" (click)="onDelete(record)">
                 <mat-icon>delete</mat-icon>
               </button>
+              }
             </td>
           </tr>
           }
@@ -196,12 +194,10 @@
         }
       </p>
       <div class="pagination">
-        <!-- Prev -->
         <button class="page-btn" [class.disabled]="page === 1" [disabled]="page === 1" (click)="prevPage()">
           <mat-icon>chevron_left</mat-icon>
         </button>
 
-        <!-- First page shortcut + ellipsis -->
         @if (pageRange[0] > 1) {
         <button class="page-btn" (click)="goToPage(1)">1</button>
         @if (pageRange[0] > 2) {
@@ -209,19 +205,16 @@
         }
         }
 
-        <!-- Sliding page range -->
         @for (p of pageRange; track p) {
         <button class="page-btn" [class.active]="p === page" (click)="goToPage(p)">{{ p }}</button>
         }
 
-        <!-- Last page shortcut + ellipsis -->
         @if (pageRange[pageRange.length - 1] < totalPages) { @if (pageRange[pageRange.length - 1] < totalPages - 1) {
           <span class="page-ellipsis">&hellip;</span>
           }
           <button class="page-btn" (click)="goToPage(totalPages)">{{ totalPages }}</button>
           }
 
-          <!-- Next -->
           <button class="page-btn" [class.disabled]="page === totalPages" [disabled]="page === totalPages"
             (click)="nextPage()">
             <mat-icon>chevron_right</mat-icon>
@@ -229,11 +222,21 @@
       </div>
     </div>
   </div>
-  } @else if (currentTab === 'absents') {
+  } @else if (currentTab === 'absents' && hasPermission('attendance_summary_view')) {
   <app-time-tracking-absents></app-time-tracking-absents>
-  } @else if (currentTab === 'late') {
+  } @else if (currentTab === 'late' && hasPermission('late_attendance_view')) {
   <app-time-tracking-late></app-time-tracking-late>
-  } @else if (currentTab === 'leave') {
+  } @else if (currentTab === 'leave' && hasPermission('leave_summary_view')) {
   <app-time-tracking-leaves></app-time-tracking-leaves>
   }
 </div>
+} @else {
+  <div class="empty-state"
+    style="padding: 5rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <div class="empty-icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+      <mat-icon>block</mat-icon>
+    </div>
+    <h3>Access Denied</h3>
+    <p>You do not have permission to access Time Tracking.</p>
+  </div>
+}

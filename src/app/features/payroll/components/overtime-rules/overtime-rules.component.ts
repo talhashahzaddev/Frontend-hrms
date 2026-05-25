@@ -8,7 +8,9 @@ import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.componen
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
+import { hasPayrollRulePermission, watchPayrollRuleViewAccess } from '../../utils/payroll-rule-permissions';
 import {
   ConfirmDeleteDialogComponent,
   ConfirmDeleteData
@@ -27,6 +29,7 @@ export class OvertimeRulesComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly overtimeRules = signal<any[]>([]);
   readonly isLoading = signal(true);
@@ -44,10 +47,14 @@ export class OvertimeRulesComponent implements OnInit {
         }
       });
 
-    this.fetchRules();
+    watchPayrollRuleViewAccess(this.authService, 'overtime_rule_view', {
+      onAllowed: () => this.fetchRules(),
+      onDenied: () => this.isLoading.set(false)
+    });
   }
 
   fetchRules(): void {
+    if (!this.hasPermission('overtime_rule_view')) return;
     this.isLoading.set(true);
     this.payrollService.getOvertimeRules().subscribe({
       next: (data) => {
@@ -63,11 +70,11 @@ export class OvertimeRulesComponent implements OnInit {
   }
 
   goBack(): void {
-    // Navigate back to the previous screen or rules list
-    this.router.navigate(['/payroll/policies']); // adjust route as needed based on actual routing setup
+    this.router.navigate(['/payroll/policies']);
   }
 
   openRuleDialog(): void {
+    if (!this.hasPermission('overtime_rule_add')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -82,6 +89,7 @@ export class OvertimeRulesComponent implements OnInit {
   }
 
   editRule(rule: any): void {
+    if (!this.hasPermission('overtime_rule_edit')) return;
     const dialogRef = this.dialog.open(RuleDialogComponent, {
       width: '600px',
       panelClass: 'rule-dialog-panel',
@@ -100,6 +108,7 @@ export class OvertimeRulesComponent implements OnInit {
   }
 
   onToggleStatus(id: string): void {
+    if (!this.hasPermission('overtime_rule_edit')) return;
     this.payrollService.toggleOvertimeRuleStatus(id).subscribe({
       next: () => {
         this.notification.showSuccess('Status updated successfully');
@@ -113,6 +122,7 @@ export class OvertimeRulesComponent implements OnInit {
   }
 
   onDelete(id: string, ruleName?: string): void {
+    if (!this.hasPermission('overtime_rule_delete')) return;
     const dialogData: ConfirmDeleteData = {
       title: 'Delete Rule',
       message: 'Are you sure you want to delete this overtime rule?',
@@ -140,5 +150,9 @@ export class OvertimeRulesComponent implements OnInit {
         });
       }
     });
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return hasPayrollRulePermission(this.authService, actionKey);
   }
 }

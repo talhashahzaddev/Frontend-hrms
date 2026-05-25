@@ -3,6 +3,7 @@ import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '@core/services/auth.service';
 
 export interface ManualPfEnrollmentEmployeeOption {
   employeeId: string;
@@ -41,6 +42,7 @@ interface ManualPfEnrollmentDialogData {
 })
 export class ManualProvidentFundEnrollmentDialogComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
   private readonly dialogRef = inject(
     MatDialogRef<ManualProvidentFundEnrollmentDialogComponent, ManualPfEnrollmentDialogPayload | undefined>
   );
@@ -74,11 +76,18 @@ export class ManualProvidentFundEnrollmentDialogComponent {
     return fullName || employee.employeeCode || employee.employeeId;
   }
 
+  get canSubmit(): boolean {
+    return this.authService.hasPermissionByActionKey('pf_admin_add');
+  }
+
   close(): void {
     this.dialogRef.close();
   }
 
   submit(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
