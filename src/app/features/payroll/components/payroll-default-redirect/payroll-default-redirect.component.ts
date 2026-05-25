@@ -15,12 +15,21 @@ export class PayrollDefaultRedirectComponent implements OnInit {
   private readonly authService = inject(AuthService);
 
   ngOnInit(): void {
-    const routes: { key: string; path: string }[] = [
+    const routes: { key: string; path: string; queryParams?: Record<string, string> }[] = [
       { key: 'bonus_entry_view', path: '/payroll/bonus' },
       { key: 'performance_pay_view', path: '/payroll/performance' },
       { key: 'overtime_entry_view', path: '/payroll/time-tracking' },
       { key: 'loan_admin_view', path: '/payroll/loans' },
       { key: 'pf_admin_view', path: '/payroll/provident-fund' },
+      { key: 'loan_employee_list', path: '/payroll/loans/requests', queryParams: { module: 'loans' } },
+      { key: 'loan_employee_request', path: '/payroll/loans/requests', queryParams: { module: 'loans' } },
+      { key: 'salary_advance_employee_list', path: '/payroll/loans/requests', queryParams: { module: 'salary-advance' } },
+      { key: 'salary_advance_employee_request', path: '/payroll/loans/requests', queryParams: { module: 'salary-advance' } },
+      { key: 'pf_employee_active', path: '/payroll/provident-fund-benefilts' },
+      { key: 'pf_employee_enroll', path: '/payroll/provident-fund-benefilts' },
+      { key: 'gratuity_employee', path: '/payroll/my-gratuity' },
+      { key: 'my_benefits', path: '/payroll/my-benefits' },
+      { key: 'salary_advance_admin_list', path: '/payroll/salary-advances' },
       { key: 'gratuity_admin_view', path: '/payroll/gratuity' },
       { key: 'compliance_payslip_view', path: '/payroll/payslips' },
       { key: 'my_payslip', path: '/payroll/my-payslips' },
@@ -32,7 +41,10 @@ export class PayrollDefaultRedirectComponent implements OnInit {
 
     for (const route of routes) {
       if (this.authService.hasPermissionByActionKey(route.key)) {
-        void this.router.navigate([route.path], { replaceUrl: true });
+        void this.router.navigate([route.path], {
+          queryParams: route.queryParams,
+          replaceUrl: true
+        });
         return;
       }
     }

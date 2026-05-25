@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
 
 @Component({
@@ -20,8 +21,17 @@ export class MyGratuityComponent implements OnInit {
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
 
   readonly gratuityRecord = signal<any>(null);
+
+  get canAccessGratuityEmployee(): boolean {
+    return this.hasPermission('gratuity_employee');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
   readonly isLoading = signal(true);
   readonly currencySymbol = signal('$');
 
@@ -37,10 +47,18 @@ export class MyGratuityComponent implements OnInit {
         }
       });
 
+    if (!this.canAccessGratuityEmployee) {
+      this.isLoading.set(false);
+      return;
+    }
+
     this.fetchMyGratuity();
   }
 
   fetchMyGratuity(): void {
+    if (!this.canAccessGratuityEmployee) {
+      return;
+    }
     this.isLoading.set(true);
     (this.payrollService as any).getMyGratuityStatus().subscribe({
       next: (data: any) => {
@@ -58,7 +76,12 @@ export class MyGratuityComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/payroll/my-benefits']);
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits']);
+      return;
+    }
+
+    void this.router.navigate(['/dashboard']);
   }
 
   getStatusLabel(status: string): string {

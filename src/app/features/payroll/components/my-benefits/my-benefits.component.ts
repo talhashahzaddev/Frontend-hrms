@@ -5,6 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { PayrollService } from '../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
+import { AuthService } from '@core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
 
@@ -20,6 +21,7 @@ export class MyBenefitsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
+  private readonly authService = inject(AuthService);
   private readonly settingsService = inject(SettingsService);
 
   readonly activeModules = signal<string[]>([]);
@@ -27,9 +29,79 @@ export class MyBenefitsComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
+  private readonly benefitPermissionKeys: Record<string, string[]> = {
+    Loan: [
+      'loan_employee_list',
+      'loan_employee_view',
+      'loan_employee_request',
+      'loan_employee_edit',
+      'loan_employee_delete',
+      'loan_employee_active',
+      'loan_employee_pending',
+      'loan_employee_history',
+      'loan_employee_references'
+    ],
+    'Advance Salary': [
+      'salary_advance_employee_list',
+      'salary_advance_employee_view',
+      'salary_advance_employee_request',
+      'salary_advance_employee_edit',
+      'salary_advance_employee_delete',
+      'salary_advance_employee_summary'
+    ],
+    'Provident Fund': [
+      'pf_employee_enroll',
+      'pf_employee_edit_enroll',
+      'pf_employee_update_percentage',
+      'pf_employee_withdraw',
+      'pf_employee_delete_request',
+      'pf_employee_pending_requests',
+      'pf_employee_active',
+      'pf_employee_transactions'
+    ],
+    Gratuity: ['gratuity_employee']
+  };
+
+  get canAccessMyBenefits(): boolean {
+    return this.hasMyBenefitsPermission();
+  }
+
   ngOnInit(): void {
-    this.fetchOverview();
     this.fetchCurrency();
+
+    if (!this.canAccessMyBenefits) {
+      this.isLoading.set(false);
+      return;
+    }
+
+    this.fetchOverview();
+  }
+
+  hasMyBenefitsPermission(): boolean {
+    return this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits');
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
+  hasAnyEmployeeBenefitPermission(): boolean {
+    return Object.values(this.benefitPermissionKeys)
+      .flat()
+      .some((key) => this.hasPermission(key));
+  }
+
+  canShowBenefitModule(moduleName: string): boolean {
+    if (!this.isModuleActive(moduleName)) {
+      return false;
+    }
+
+    const keys = this.benefitPermissionKeys[moduleName];
+    if (!keys?.length) {
+      return true;
+    }
+
+    return keys.some((key) => this.hasPermission(key));
   }
 
   fetchCurrency(): void {
@@ -61,10 +133,17 @@ export class MyBenefitsComponent implements OnInit {
   }
 
   isModuleActive(moduleName: string): boolean {
+    if (!this.hasMyBenefitsPermission()) {
+      return false;
+    }
     return this.activeModulesSet().has(moduleName);
   }
 
   openBenefit(module: string): void {
+    if (!this.canShowBenefitModule(module)) {
+      return;
+    }
+
     if (module === 'Loan') {
       this.router.navigate(['/payroll/loans/requests'], { queryParams: { module: 'loans' } });
       return;

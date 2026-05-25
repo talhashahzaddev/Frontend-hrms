@@ -303,7 +303,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Salary Advances',
           icon: 'savings',
           route: '/payroll/salary-advances',
-          exact: true
+          exact: true,
+          anyOfActionKeys: [
+            'salary_advance_admin_list',
+            'salary_advance_admin_view',
+            'salary_advance_admin_approve',
+            'salary_advance_admin_reject',
+            'salary_advance_admin_disburse'
+          ]
         },
         {
           label: 'Gratuity',
@@ -349,7 +356,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
           ]
         },
         { label: 'Periods', icon: 'date_range', route: '/payroll/periods', actionKey: 'payroll_period_view' },
-        { label: 'My Benefits', icon: 'card_giftcard', route: '/payroll/my-benefits' },
+        {
+          label: 'My Benefits',
+          icon: 'card_giftcard',
+          route: '/payroll/my-benefits',
+          menuName: 'Payroll',
+          subMenuName: 'My Benefits',
+          actionKey: 'my_benefits'
+        },
         {
           label: 'Payroll Calculation',
           icon: 'calculate',
@@ -435,6 +449,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
 
     if (item.actionKey) {
+      if (item.menuName && item.subMenuName) {
+        return this.authService.hasMenuPermission(item.menuName, item.subMenuName, item.actionKey);
+      }
       return this.authService.hasPermissionByActionKey(item.actionKey);
     }
 
