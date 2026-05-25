@@ -44,6 +44,7 @@ interface SalaryAdvanceDialogData {
   employees?: SalaryAdvanceEmployeeOption[];
   periods?: SalaryAdvancePeriodOption[];
   initialValue?: Partial<SalaryAdvanceDialogPayload>;
+  canSubmit?: boolean;
 }
 
 @Component({
@@ -115,6 +116,10 @@ export class AddSalaryAdvanceDialogComponent {
     return this.mode === 'edit';
   }
 
+  get canSubmit(): boolean {
+    return this.data?.canSubmit !== false;
+  }
+
   get showRejectedReasonError(): boolean {
     const status = this.form.get('status')?.value;
     const control = this.form.get('rejectionReason');
@@ -136,6 +141,9 @@ export class AddSalaryAdvanceDialogComponent {
   }
 
   save(): void {
+    if (!this.canSubmit) {
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

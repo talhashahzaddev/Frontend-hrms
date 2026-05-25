@@ -6,6 +6,10 @@
     </div>
   </div>
 
+  @if (!canAccessSalaryAdvanceAdmin) {
+    <div class="empty-state">You do not have permission to access salary advance administration.</div>
+  } @else {
+
   @if (hasFallbackNotice) {
     <div class="fallback-banner">
       <mat-icon>info</mat-icon>
@@ -162,33 +166,45 @@
               <div class="card-footer">
                 <div class="request-actions">
                   @if (advance.status === 'pending') {
+                    @if (hasPermission('salary_advance_admin_approve')) {
                     <button class="approve-btn" (click)="approveRequest(advance)">
                       <mat-icon>check_circle</mat-icon>
                       Approve
                     </button>
+                    }
+                    @if (hasPermission('salary_advance_admin_reject')) {
                     <button class="reject-btn" (click)="rejectRequest(advance)">
                       <mat-icon>cancel</mat-icon>
                       Reject
                     </button>
+                    }
                   } @else if (advance.status === 'approved') {
+                    @if (hasPermission('salary_advance_admin_disburse')) {
                     <button class="approve-btn" (click)="disburseAdvance(advance)">
                       <mat-icon>payments</mat-icon>
                       Disburse
                     </button>
+                    }
+                    @if (hasPermission('salary_advance_admin_reject')) {
                     <button class="reject-btn" (click)="cancelAdvance(advance)">
                       <mat-icon>block</mat-icon>
                       Cancel
                     </button>
+                    }
                   } @else if (advance.status === 'disbursed') {
+                    @if (hasPermission('salary_advance_admin_view')) {
                     <button class="approve-btn" (click)="markAsDeducted(advance)">
                       <mat-icon>task_alt</mat-icon>
                       Mark deducted
                     </button>
+                    }
                   }
 
+                  @if (hasPermission('salary_advance_admin_view')) {
                   <button class="action-icon-btn danger" (click)="requestDeleteSalaryAdvance(advance)" title="Delete advance">
                     <mat-icon>delete</mat-icon>
                   </button>
+                  }
                 </div>
               </div>
             }
@@ -220,4 +236,6 @@
       </div>
     </div>
   </div>
+
+  }
 </div>

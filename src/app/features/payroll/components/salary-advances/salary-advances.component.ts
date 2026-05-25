@@ -7,6 +7,7 @@ import { take } from 'rxjs';
 
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
+import { AuthService } from '@core/services/auth.service';
 import {
   AddSalaryAdvanceDialogComponent,
   SalaryAdvanceDialogPayload,
@@ -63,7 +64,22 @@ export class SalaryAdvancesComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly payrollService = inject(PayrollService);
   private readonly settingsService = inject(SettingsService);
+  private readonly authService = inject(AuthService);
   private readonly adminActor = 'Payroll Admin';
+
+  get canAccessSalaryAdvanceAdmin(): boolean {
+    return (
+      this.hasPermission('salary_advance_admin_list') ||
+      this.hasPermission('salary_advance_admin_view') ||
+      this.hasPermission('salary_advance_admin_approve') ||
+      this.hasPermission('salary_advance_admin_reject') ||
+      this.hasPermission('salary_advance_admin_disburse')
+    );
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
   currentTab: SalaryAdvanceTab = 'requests';
@@ -88,16 +104,24 @@ export class SalaryAdvancesComponent implements OnInit {
   salaryAdvancesPageSize = 10;
 
   ngOnInit(): void {
+    this.loadCurrencySymbol();
+
+    if (!this.canAccessSalaryAdvanceAdmin) {
+      return;
+    }
+
     this.localPeriodsSeed = this.buildLocalPeriods();
     this.localSalaryAdvancesSeed = this.buildLocalSalaryAdvances();
 
     this.loadEmployees();
     this.loadPayrollPeriods();
 
-    this.activateLocalSalaryAdvanceFallback();
-    this.loadSalaryAdvances();
-
-    this.loadCurrencySymbol();
+    if (this.hasPermission('salary_advance_admin_list')) {
+      this.loadSalaryAdvances();
+    } else {
+      this.activateLocalSalaryAdvanceFallback();
+      this.applyLocalSalaryAdvances();
+    }
   }
 
   private loadCurrencySymbol(): void {
@@ -223,7 +247,7 @@ export class SalaryAdvancesComponent implements OnInit {
     this.currentTab = tab;
     this.salaryAdvancesCurrentPage = 1;
 
-    if (!this.usingLocalSalaryAdvanceData) {
+    if (!this.usingLocalSalaryAdvanceData && this.hasPermission('salary_advance_admin_list')) {
       this.loadSalaryAdvances();
     }
   }
@@ -245,7 +269,7 @@ export class SalaryAdvancesComponent implements OnInit {
     this.salaryAdvanceStatusFilter = this.pendingSalaryAdvanceStatusFilter;
     this.salaryAdvancesCurrentPage = 1;
 
-    if (!this.usingLocalSalaryAdvanceData) {
+    if (!this.usingLocalSalaryAdvanceData && this.hasPermission('salary_advance_admin_list')) {
       this.loadSalaryAdvances();
     }
   }
@@ -257,7 +281,7 @@ export class SalaryAdvancesComponent implements OnInit {
     this.salaryAdvanceStatusFilter = '';
     this.salaryAdvancesCurrentPage = 1;
 
-    if (!this.usingLocalSalaryAdvanceData) {
+    if (!this.usingLocalSalaryAdvanceData && this.hasPermission('salary_advance_admin_list')) {
       this.loadSalaryAdvances();
     }
   }
@@ -279,6 +303,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   openAddSalaryAdvanceDialog(): void {
+    if (!this.hasPermission('salary_advance_admin_view')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddSalaryAdvanceDialogComponent, {
       width: '620px',
       panelClass: 'salary-advance-dialog-panel',
@@ -286,6 +313,7 @@ export class SalaryAdvancesComponent implements OnInit {
       restoreFocus: false,
       data: {
         mode: 'create',
+        canSubmit: this.hasPermission('salary_advance_admin_view'),
         employees: this.employees.map((employee) => ({
           id: employee.id,
           name: employee.name,
@@ -305,6 +333,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   openEditSalaryAdvanceDialog(row: SalaryAdvanceRow): void {
+    if (!this.hasPermission('salary_advance_admin_view')) {
+      return;
+    }
     const dialogRef = this.dialog.open(AddSalaryAdvanceDialogComponent, {
       width: '620px',
       panelClass: 'salary-advance-dialog-panel',
@@ -312,6 +343,7 @@ export class SalaryAdvancesComponent implements OnInit {
       restoreFocus: false,
       data: {
         mode: 'edit',
+        canSubmit: this.hasPermission('salary_advance_admin_view'),
         employees: this.employees.map((employee) => ({
           id: employee.id,
           name: employee.name,
@@ -340,6 +372,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   requestDeleteSalaryAdvance(row: SalaryAdvanceRow): void {
+    if (!this.hasPermission('salary_advance_admin_view')) {
+      return;
+    }
     const dialogRef = this.dialog.open(DeleteActionDialogComponent, {
       width: '420px',
       panelClass: 'delete-dialog-panel',
@@ -411,6 +446,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   approveRequest(row: SalaryAdvanceRow): void {
+    if (!this.hasPermission('salary_advance_admin_approve')) {
+      return;
+    }
     if (row.status !== 'pending') {
       return;
     }
@@ -445,6 +483,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   rejectRequest(row: SalaryAdvanceRow): void {
+    if (!this.hasPermission('salary_advance_admin_reject')) {
+      return;
+    }
     if (row.status !== 'pending') {
       return;
     }
@@ -475,6 +516,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   disburseAdvance(row: SalaryAdvanceRow): void {
+    if (!this.hasPermission('salary_advance_admin_disburse')) {
+      return;
+    }
     if (row.status !== 'approved') {
       return;
     }
@@ -519,6 +563,9 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   cancelAdvance(row: SalaryAdvanceRow): void {
+    if (!this.hasPermission('salary_advance_admin_reject')) {
+      return;
+    }
     if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
@@ -555,6 +602,10 @@ export class SalaryAdvancesComponent implements OnInit {
   }
 
   private loadSalaryAdvances(): void {
+    if (!this.hasPermission('salary_advance_admin_list')) {
+      return;
+    }
+
     const params: Record<string, string | number> = {
       page: 1,
       pageSize: 200

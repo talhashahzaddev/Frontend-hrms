@@ -84,6 +84,25 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly authService = inject(AuthService);
 
+  private readonly pfEmployeePermissionKeys = [
+    'pf_employee_enroll',
+    'pf_employee_edit_enroll',
+    'pf_employee_update_percentage',
+    'pf_employee_withdraw',
+    'pf_employee_delete_request',
+    'pf_employee_pending_requests',
+    'pf_employee_active',
+    'pf_employee_transactions'
+  ];
+
+  get canAccessPfEmployee(): boolean {
+    return this.pfEmployeePermissionKeys.some((key) => this.hasPermission(key));
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   tab: ProvidentFundTab = 'funds';
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
   readonly isLoading = signal(true);
@@ -174,13 +193,24 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCurrencySymbol();
+
+    if (!this.canAccessPfEmployee) {
+      this.isLoading.set(false);
+      return;
+    }
+
     this.loadCurrentEmployeeBasicSalary();
     this.loadActiveRules();
     this.refreshData();
   }
 
   goBackToBenefits(): void {
-    this.router.navigate(['/payroll/my-benefits']);
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits']);
+      return;
+    }
+
+    void this.router.navigate(['/dashboard']);
   }
 
   setTab(tab: ProvidentFundTab): void {
@@ -241,6 +271,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openAddRequestDialog(): void {
+    if (!this.hasPermission('pf_employee_enroll')) {
+      return;
+    }
     if (this.activeRules.length === 0) {
       this.notification.showError('No active provident fund rules found.');
       return;
@@ -285,6 +318,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openEditRequestDialog(row: ProvidentFundRequestRecord): void {
+    if (!this.hasPermission('pf_employee_edit_enroll')) {
+      return;
+    }
     if (row.status !== 'pending' || row.requestType !== 'enrollment') {
       return;
     }
@@ -334,6 +370,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   cancelRequest(row: ProvidentFundRequestRecord): void {
+    if (!this.hasPermission('pf_employee_delete_request')) {
+      return;
+    }
     if (row.status !== 'pending') {
       return;
     }
@@ -372,6 +411,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openPercentageUpdateDialog(): void {
+    if (!this.hasPermission('pf_employee_update_percentage')) {
+      return;
+    }
     const current = this.activeFund;
     if (!current) {
       return;
@@ -419,6 +461,9 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
   }
 
   openWithdrawalDialog(): void {
+    if (!this.hasPermission('pf_employee_withdraw')) {
+      return;
+    }
     if (!this.canRequestWithdrawal) {
       this.notification.showError('Withdrawal is not allowed because no withdrawal rules are configured.');
       return;
@@ -502,9 +547,34 @@ export class ProvidentFundBenefiltsComponent implements OnInit {
 
   private refreshData(): void {
     this.isLoading.set(true);
-    this.loadActiveFund();
-    this.loadMyRequests();
-    this.loadTransactions();
+
+    if (this.hasPermission('pf_employee_active')) {
+      this.loadActiveFund();
+    } else {
+      this.activeFund = null;
+    }
+
+    if (this.hasPermission('pf_employee_pending_requests')) {
+      this.loadMyRequests();
+    } else {
+      this.myRequests = [];
+      this.myRequestsTotalCount = 0;
+    }
+
+    if (this.hasPermission('pf_employee_transactions')) {
+      this.loadTransactions();
+    } else {
+      this.transactions = [];
+      this.historyTotalCount = 0;
+    }
+
+    if (
+      !this.hasPermission('pf_employee_active')
+      && !this.hasPermission('pf_employee_pending_requests')
+      && !this.hasPermission('pf_employee_transactions')
+    ) {
+      this.isLoading.set(false);
+    }
   }
 
   private loadCurrencySymbol(): void {

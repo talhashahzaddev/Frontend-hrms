@@ -1,4 +1,7 @@
 <div class="loan-requests-page">
+  @if (!canAccessLoanEmployee && !canAccessSalaryAdvanceEmployee) {
+  <div class="empty-state">You do not have permission to access this benefits page.</div>
+  } @else {
   <div class="requests-headline">
     <div class="title-section">
       <button class="icon-button back-btn" type="button" aria-label="Back to My Benefits" (click)="goBackToBenefits()">
@@ -14,13 +17,15 @@
       </div>
     </div>
 
+    @if ((moduleTab === 'loans' && hasPermission('loan_employee_request')) || (moduleTab === 'salary-advance' && hasPermission('salary_advance_employee_request'))) {
     <button class="primary-action" (click)="moduleTab === 'loans' ? openLoanRequestDialog() : openSalaryAdvanceDialog()">
       <mat-icon>add</mat-icon>
       {{ moduleTab === 'loans' ? 'New Loan Request' : 'Request Advance' }}
     </button>
+    }
   </div>
 
-  @if (moduleTab === 'loans') {
+  @if (moduleTab === 'loans' && canAccessLoanEmployee) {
     <div class="summary-cards">
       <div class="card">
         <div class="card-content">
@@ -182,14 +187,18 @@
                   @if (loan.status === 'active' || loan.status === 'completed') {
                     <!-- No actions for active loans here -->
                   } @else {
+                    @if (hasPermission('loan_employee_edit')) {
                     <button class="action-btn secondary" [disabled]="loan.status !== 'pending'" (click)="openEditLoanRequestDialog(loan)">
                       <mat-icon>edit</mat-icon>
                       Edit request
                     </button>
+                    }
+                    @if (hasPermission('loan_employee_delete')) {
                     <button class="action-btn danger" [disabled]="loan.status !== 'pending'" (click)="cancelLoanRequest(loan)">
                       <mat-icon>cancel</mat-icon>
                       Cancel request
                     </button>
+                    }
                   }
                 </div>
               </div>
@@ -296,7 +305,9 @@
         </div>
       </div>
     }
-  } @else {
+  }
+
+  @if (moduleTab === 'salary-advance' && canAccessSalaryAdvanceEmployee) {
     <div class="summary-cards">
       <div class="card">
         <div class="card-content">
@@ -479,7 +490,7 @@
 
               <div class="card-footer">
                 <div class="request-actions">
-                  @if (advance.status === 'pending') {
+                  @if (advance.status === 'pending' && hasPermission('salary_advance_employee_delete')) {
                     <button class="action-btn danger" (click)="cancelAdvanceRequest(advance)">
                       <mat-icon>cancel</mat-icon>
                       Cancel request
@@ -589,5 +600,6 @@
         </div>
       </div>
     }
+  }
   }
 </div>

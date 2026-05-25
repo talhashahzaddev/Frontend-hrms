@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { take, forkJoin } from 'rxjs';
+import { take, forkJoin, of } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
 import { PayrollService } from '../../services/payroll.service';
@@ -111,6 +111,39 @@ export class LoanRequestsComponent implements OnInit {
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
 
+  private readonly loanEmployeePermissionKeys = [
+    'loan_employee_list',
+    'loan_employee_view',
+    'loan_employee_request',
+    'loan_employee_edit',
+    'loan_employee_delete',
+    'loan_employee_active',
+    'loan_employee_pending',
+    'loan_employee_history',
+    'loan_employee_references'
+  ];
+
+  private readonly salaryAdvanceEmployeePermissionKeys = [
+    'salary_advance_employee_list',
+    'salary_advance_employee_view',
+    'salary_advance_employee_request',
+    'salary_advance_employee_edit',
+    'salary_advance_employee_delete',
+    'salary_advance_employee_summary'
+  ];
+
+  get canAccessLoanEmployee(): boolean {
+    return this.loanEmployeePermissionKeys.some((key) => this.hasPermission(key));
+  }
+
+  get canAccessSalaryAdvanceEmployee(): boolean {
+    return this.salaryAdvanceEmployeePermissionKeys.some((key) => this.hasPermission(key));
+  }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasPermissionByActionKey(actionKey);
+  }
+
   moduleTab: ModuleTab = 'loans';
   loanSectionTab: LoanSectionTab = 'active';
   salarySectionTab: SalarySectionTab = 'requested';
@@ -166,19 +199,63 @@ export class LoanRequestsComponent implements OnInit {
   ngOnInit(): void {
     this.resolveCurrentUserContext();
     this.applyModuleFromQueryParam();
+    this.ensureModuleAccess();
 
     this.localLoanSeed = this.buildLocalLoanSeed();
     this.localLoanPaymentSeed = this.buildLocalLoanPaymentSeed();
     this.localAdvanceSeed = this.buildLocalAdvanceSeed();
 
-    this.loadLoans();
-    this.loadLoanPayments();
-    this.loadSalaryAdvances();
-    this.loadSalaryAdvanceSummary();
-    this.loadPayrollPeriods();
-    this.loadLoanReferences();
+    if (this.moduleTab === 'loans' && this.canAccessLoanEmployee) {
+      this.loadLoans();
+      if (this.hasPermission('loan_employee_history')) {
+        this.loadLoanPayments();
+      }
+      if (this.hasPermission('loan_employee_references')) {
+        this.loadLoanReferences();
+      }
+    }
 
+    if (this.moduleTab === 'salary-advance' && this.canAccessSalaryAdvanceEmployee) {
+      if (this.hasPermission('salary_advance_employee_list')) {
+        this.loadSalaryAdvances();
+      }
+      if (this.hasPermission('salary_advance_employee_summary')) {
+        this.loadSalaryAdvanceSummary();
+      }
+    }
+
+    this.loadPayrollPeriods();
     this.loadCurrencySymbol();
+  }
+
+  private ensureModuleAccess(): void {
+    if (this.moduleTab === 'loans' && !this.canAccessLoanEmployee) {
+      if (this.canAccessSalaryAdvanceEmployee) {
+        this.moduleTab = 'salary-advance';
+        this.salarySectionTab = 'requested';
+        return;
+      }
+      this.redirectWhenNoEmployeeModuleAccess();
+      return;
+    }
+
+    if (this.moduleTab === 'salary-advance' && !this.canAccessSalaryAdvanceEmployee) {
+      if (this.canAccessLoanEmployee) {
+        this.moduleTab = 'loans';
+        this.loanSectionTab = 'requested';
+        return;
+      }
+      this.redirectWhenNoEmployeeModuleAccess();
+    }
+  }
+
+  private redirectWhenNoEmployeeModuleAccess(): void {
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits'], { replaceUrl: true });
+      return;
+    }
+
+    void this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
 
   private loadCurrencySymbol(): void {
@@ -213,6 +290,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoanReferences(): void {
+    if (!this.hasPermission('loan_employee_references')) {
+      return;
+    }
+
     this.payrollService.getMyLoanReferences()
       .pipe(take(1))
       .subscribe({
@@ -462,7 +543,12 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   goBackToBenefits(): void {
-    this.router.navigate(['/payroll/my-benefits']);
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits']);
+      return;
+    }
+
+    void this.router.navigate(['/dashboard']);
   }
 
   setLoanSectionTab(tab: LoanSectionTab): void {
@@ -546,6 +632,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openLoanRequestDialog(): void {
+    if (!this.hasPermission('loan_employee_request')) {
+      return;
+    }
     const dialogRef = this.dialog.open(RequestLoanDialogComponent, {
       width: '560px',
       panelClass: 'request-loan-dialog-panel',
@@ -565,6 +654,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openEditLoanRequestDialog(row: EmployeeLoanRecord): void {
+    if (!this.hasPermission('loan_employee_edit')) {
+      return;
+    }
     if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
@@ -598,6 +690,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   openSalaryAdvanceDialog(): void {
+    if (!this.hasPermission('salary_advance_employee_request')) {
+      return;
+    }
     this.payrollService.getActiveSalaryAdvanceRules()
       .pipe(take(1))
       .subscribe({
@@ -617,6 +712,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   cancelLoanRequest(row: EmployeeLoanRecord): void {
+    if (!this.hasPermission('loan_employee_delete')) {
+      return;
+    }
     if (row.status !== 'pending' && row.status !== 'approved') {
       return;
     }
@@ -649,6 +747,9 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   cancelAdvanceRequest(row: SalaryAdvanceRecord): void {
+    if (!this.hasPermission('salary_advance_employee_delete')) {
+      return;
+    }
     if (row.status !== 'pending') {
       return;
     }
@@ -850,10 +951,18 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoans(): void {
+    if (!this.hasPermission('loan_employee_pending') && !this.hasPermission('loan_employee_active')) {
+      return;
+    }
+
     // We combine pending requests and active loans into a single list
     forkJoin({
-      pending: this.payrollService.getMyPendingLoans().pipe(take(1)),
-      active: this.payrollService.getMyActiveLoans().pipe(take(1))
+      pending: this.hasPermission('loan_employee_pending')
+        ? this.payrollService.getMyPendingLoans().pipe(take(1))
+        : of([]),
+      active: this.hasPermission('loan_employee_active')
+        ? this.payrollService.getMyActiveLoans().pipe(take(1))
+        : of([])
     }).subscribe({
       next: (res: any) => {
         const pendingLoans = (res.pending || []).map((item: any, i: number) => this.mapLoan(item, i));
@@ -876,6 +985,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadLoanPayments(): void {
+    if (!this.hasPermission('loan_employee_history')) {
+      return;
+    }
+
     const filter = {
       page: this.loanHistoryCurrentPage,
       pageSize: this.historyPageSize,
@@ -920,6 +1033,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadSalaryAdvances(): void {
+    if (!this.hasPermission('salary_advance_employee_list')) {
+      return;
+    }
+
     this.payrollService.getMySalaryAdvances({ page: 1, pageSize: 200 })
       .pipe(take(1))
       .subscribe({
@@ -943,6 +1060,10 @@ export class LoanRequestsComponent implements OnInit {
   }
 
   private loadSalaryAdvanceSummary(): void {
+    if (!this.hasPermission('salary_advance_employee_summary')) {
+      return;
+    }
+
     this.payrollService.getMySalaryAdvanceSummary()
       .pipe(take(1))
       .subscribe({

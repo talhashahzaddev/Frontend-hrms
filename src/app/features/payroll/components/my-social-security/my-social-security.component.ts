@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
 
+import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import {
@@ -55,6 +56,7 @@ type MySocialTab = 'transactions' | 'requests' | 'claims';
 export class MySocialSecurityComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
   private readonly payrollService = inject(PayrollService);
   private readonly notification = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
@@ -126,7 +128,12 @@ export class MySocialSecurityComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/payroll/my-benefits']);
+    if (this.authService.hasMenuPermission('Payroll', 'My Benefits', 'my_benefits')) {
+      void this.router.navigate(['/payroll/my-benefits']);
+      return;
+    }
+
+    void this.router.navigate(['/dashboard']);
   }
 
   // ── Enrollment status ─────────────────────────────────────────────────────
