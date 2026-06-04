@@ -297,7 +297,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Tax Ledger',
           icon: 'history_edu',
           route: '/payroll/tax-ledger',
-          exact: true
+          exact: true,
+          actionKey: 'get_transaction_ledger'
         },
         {
           label: 'Salary Advances',
@@ -319,12 +320,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true,
           actionKey: 'gratuity_admin_view'
         },
-        {
-          label: 'Income Tax',
-          icon: 'request_quote',
-          route: '/payroll/tax-management',
-          exact: true
-        },
+        // {
+        //   label: 'Income Tax',
+        //   icon: 'request_quote',
+        //   route: '/payroll/tax-management',
+        //   exact: true
+        // },
         {
           label: 'Social Security',
           icon: 'shield_person',
@@ -385,7 +386,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         { label: 'Onboarding Configuration', icon: 'person_add', route: '/settings/onboarding-configuration', menuName: 'Settings', subMenuName: 'Onboarding Configuration' }
       ]
     },
-     {
+    {
       label: 'Onboarding',
       icon: 'person_add',
       route: '/onboarding'
