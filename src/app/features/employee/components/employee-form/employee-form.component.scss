@@ -526,10 +526,11 @@
   border-radius: 12px !important;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14) !important;
   border: 1px solid #e5e7eb !important;
+  z-index: 10020 !important;
   min-width: 320px !important;
   max-width: 360px !important;
   max-height: 380px !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   display: flex !important;
   flex-direction: column !important;
   padding: 0 !important;
@@ -573,9 +574,9 @@
   }
 
   // Scrollable options area
-  .mat-mdc-select-panel {
+  &.mat-mdc-select-panel {
     overflow-y: auto !important;
-    flex: 1;
+    flex: 1 1 auto !important;
     padding: 6px !important;
   }
 

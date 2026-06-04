@@ -51,8 +51,9 @@ import { NotificationService } from '../../../../core/services/notification.serv
       <div class="field-group">
         <label class="field-label">Employee Name</label>
         <div class="select-wrap">
-          <select class="field-select" formControlName="employeeId">
+          <select class="field-select" formControlName="employeeId" (click)="onEmployeeDropdownOpen()" (focus)="onEmployeeDropdownOpen()">
             <option value="" disabled>Select an employee...</option>
+            <option *ngIf="isLoadingEmployees" disabled>Loading employees...</option>
             <option *ngFor="let e of employees" [value]="e.employeeId">
               {{ e.fullName || (e.firstName + ' ' + e.lastName) }} ({{ e.employeeCode || e.employeeNumber }})
             </option>
@@ -422,6 +423,7 @@ export class CreateManagerOvertimeDialogComponent implements OnInit, OnDestroy {
   form: FormGroup;
   employees: Employee[] = [];
   isSubmitting = false;
+  isLoadingEmployees = false;
 
   private destroy$ = new Subject<void>();
 
@@ -448,15 +450,28 @@ export class CreateManagerOvertimeDialogComponent implements OnInit, OnDestroy {
   }
 
   private loadEmployees(): void {
+    if (this.isLoadingEmployees) return;
+    if (this.employees && this.employees.length) return;
+    this.isLoadingEmployees = true;
     this.employeeService.getEmployees()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           const list = res?.employees || [];
           this.employees = (list || []).filter((e: any) => ((e.status || '').toString().toLowerCase() === 'active'));
+          this.isLoadingEmployees = false;
         },
-        error: () => this.notification.showError('Failed to load employees')
+        error: () => {
+          this.isLoadingEmployees = false;
+          this.notification.showError('Failed to load employees');
+        }
       });
+  }
+
+  onEmployeeDropdownOpen(): void {
+    if (!this.employees || this.employees.length === 0) {
+      this.loadEmployees();
+    }
   }
 
   onCancel(): void {
