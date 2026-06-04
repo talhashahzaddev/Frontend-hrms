@@ -17,10 +17,9 @@ import { AttendanceService } from '../../services/attendance.service';
 import { OverlayModule, OverlayContainer } from '@angular/cdk/overlay';
 import { UpdateShiftDto } from '../../../../../app/core/models/attendance.models';
 import { ChangeDetectorRef } from '@angular/core';
-import { MatTimepickerModule } from '@dhutaryan/ngx-mat-timepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { SettingsService } from '@/app/features/settings/services/settings.service';
-import { Subject } from 'rxjs';
+import { Observable, Subject, of, switchMap } from 'rxjs';
 import { GeoFenceService, GeoFenceDto } from '../../services/geofence.service';
 import { ShiftDto } from '@/app/core/models/attendance.models';
 
@@ -35,7 +34,6 @@ declare const L: any;
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatTimepickerModule,
     MatNativeDateModule,
     MatSelectModule,
     MatIconModule,
@@ -56,11 +54,12 @@ export class CreateShiftComponent  implements OnInit,OnDestroy {
   shiftId: string = '';
   userRole: string = '';
   timezone: { value: string; label: string }[] = [];
-  timeSlots: string[] = []; 
+  timeSlots: Array<{ value: string; label: string }> = [];
   organizationTimeZone: string = 'UTC';
 private destroy$ = new Subject<void>();
   fences: GeoFenceDto[] = [];
   selectedFence: GeoFenceDto | null = null;
+  private currentGeoFenceId = '';
   private fencePreviewMap: any;
   private fencePreviewCircle: any;
   days = [
@@ -105,13 +104,29 @@ private destroy$ = new Subject<void>();
     }
   }
 ngOnInit(): void {
+  this.timeSlots = this.buildTimeSlots(15);
    this.loadInitialData();
    this.loadGeoFences();
+   if (this.isEditMode) {
+     this.loadShiftGeoFence();
+   }
 
    this.shiftForm.get('geoFenceId')?.valueChanges
      .pipe(takeUntil(this.destroy$))
      .subscribe((geoFenceId: string) => {
-       this.selectedFence = this.fences.find(f => f.geoFenceId === geoFenceId) || null;
+       if (!geoFenceId) {
+         this.selectedFence = null;
+         this.renderFencePreview();
+         return;
+       }
+
+       const matchedFence = this.fences.find(f => f.geoFenceId === geoFenceId);
+       if (matchedFence) {
+         this.selectedFence = matchedFence;
+       } else if (this.selectedFence?.geoFenceId !== geoFenceId) {
+         this.selectedFence = null;
+       }
+
        this.renderFencePreview();
      });
 }
@@ -135,10 +150,72 @@ ngOnDestroy(): void {
       timezone: data.timezone,
       marginHours: data.marginHours ?? 0,
       applyMarginhours: data.applyMarginhours ?? true,
-      graceMinutes: data.graceMinutes ?? 0
+      graceMinutes: data.graceMinutes ?? 0,
+      geoFenceId: data.geoFenceId ?? ''
 
 
     });
+  }
+
+  private loadShiftGeoFence(): void {
+    this.geoFenceService.getByShift(this.shiftId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (linkedFences) => {
+          const linkedFence = (linkedFences || [])[0] || null;
+
+          this.currentGeoFenceId = linkedFence?.geoFenceId || '';
+
+          if (linkedFence) {
+            this.selectedFence = linkedFence as unknown as GeoFenceDto;
+            this.ensureSelectedFenceIsAvailable(this.selectedFence);
+            this.shiftForm.patchValue({
+              geoFenceId: this.currentGeoFenceId
+            });
+          } else {
+            this.selectedFence = null;
+            this.shiftForm.patchValue({
+              geoFenceId: ''
+            });
+          }
+
+          this.cdr.markForCheck();
+          this.renderFencePreview();
+        },
+        error: () => {
+          this.currentGeoFenceId = '';
+          this.selectedFence = null;
+          this.shiftForm.patchValue({
+            geoFenceId: ''
+          });
+          this.cdr.markForCheck();
+          this.renderFencePreview();
+        }
+      });
+  }
+
+  private ensureSelectedFenceIsAvailable(fence: GeoFenceDto): void {
+    if (!fence?.geoFenceId) return;
+    if (this.fences.some(existing => existing.geoFenceId === fence.geoFenceId)) return;
+
+    this.fences = [fence, ...this.fences];
+  }
+
+  private buildTimeSlots(intervalMinutes: number): Array<{ value: string; label: string }> {
+    const slots: Array<{ value: string; label: string }> = [];
+
+    for (let totalMinutes = 0; totalMinutes < 24 * 60; totalMinutes += intervalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+      const period = hours < 12 ? 'AM' : 'PM';
+      const value = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      const label = `${String(hour12).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${period}`;
+
+      slots.push({ value, label });
+    }
+
+    return slots;
   }
 
   private loadGeoFences(): void {
@@ -295,9 +372,18 @@ private loadInitialData(): void {
 
       this.attendanceService.updateShift(this.shiftId, updateDto).subscribe({
         next: () => {
-          this.isSubmitting = false;
-          this.notification.showSuccess('Shift updated successfully');
-          this.dialogRef.close('updated');
+          this.syncShiftGeoFence((formValue.geoFenceId || '').trim()).subscribe({
+            next: () => {
+              this.currentGeoFenceId = (formValue.geoFenceId || '').trim();
+              this.isSubmitting = false;
+              this.notification.showSuccess('Shift updated successfully');
+              this.dialogRef.close('updated');
+            },
+            error: () => {
+              this.isSubmitting = false;
+              this.notification.showError('Shift updated, but failed to update the geo-fence');
+            }
+          });
         },
         error: (error) => {
           this.isSubmitting = false;
@@ -354,6 +440,28 @@ private loadInitialData(): void {
         }
       });
     }
+  }
+
+  private syncShiftGeoFence(selectedFenceId: string): Observable<void> {
+    const nextFenceId = (selectedFenceId || '').trim();
+    const previousFenceId = this.currentGeoFenceId.trim();
+
+    if (previousFenceId === nextFenceId) {
+      return of(void 0);
+    }
+
+    const unlink$ = previousFenceId
+      ? this.geoFenceService.unlinkFromShift(this.shiftId, previousFenceId)
+      : of(true);
+
+    if (!nextFenceId) {
+      return unlink$.pipe(switchMap(() => of(void 0)));
+    }
+
+    return unlink$.pipe(
+      switchMap(() => this.geoFenceService.linkToShift(this.shiftId, nextFenceId)),
+      switchMap(() => of(void 0))
+    );
   }
 
 toggleDay(value: number): void {

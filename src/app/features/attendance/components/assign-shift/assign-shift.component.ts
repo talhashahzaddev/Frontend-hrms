@@ -103,7 +103,7 @@ export class AssignShiftComponent implements OnInit, OnDestroy, AfterViewInit {
     this.assignShiftForm.get('shiftId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((shiftId: string) => {
-        this.loadShiftFences(shiftId);
+        setTimeout(() => this.loadShiftFences(shiftId), 0);
       });
 
     if (this.isManager) {
@@ -158,6 +158,10 @@ export class AssignShiftComponent implements OnInit, OnDestroy, AfterViewInit {
       this.renderShiftFencesOnMap();
       this.cdr.markForCheck();
       return;
+    }
+
+    if (!this.shiftFenceMap) {
+      this.initShiftFenceMap();
     }
 
     this.isFencesLoading = true;

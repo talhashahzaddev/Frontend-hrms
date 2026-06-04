@@ -28,14 +28,22 @@
           <label class="field-label">Start Time <span class="required">*</span></label>
           <mat-form-field appearance="outline" class="mat-field time-field">
             <mat-icon matPrefix class="prefix-icon">schedule</mat-icon>
-            <input matInput type="time" formControlName="startTime" />
+            <mat-select formControlName="startTime" placeholder="Select start time">
+              <mat-option *ngFor="let time of timeSlots" [value]="time.value">
+                {{ time.label }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
         </div>
         <div class="form-col">
           <label class="field-label">End Time <span class="required">*</span></label>
           <mat-form-field appearance="outline" class="mat-field time-field">
             <mat-icon matPrefix class="prefix-icon">schedule</mat-icon>
-            <input matInput type="time" formControlName="endTime" />
+            <mat-select formControlName="endTime" placeholder="Select end time">
+              <mat-option *ngFor="let time of timeSlots" [value]="time.value">
+                {{ time.label }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
         </div>
       </div>
@@ -100,7 +108,7 @@
         </div>
       </div>
 
-      <div class="form-row" *ngIf="!isEditMode">
+      <div class="form-row">
         <label class="field-label">Geo-Fence (Optional)</label>
         <mat-form-field appearance="outline" class="mat-field">
           <mat-select formControlName="geoFenceId" placeholder="Select geo-fence for this shift">
@@ -112,7 +120,7 @@
         </mat-form-field>
       </div>
 
-      <div class="form-row" *ngIf="!isEditMode">
+      <div class="form-row">
         <label class="field-label">Selected Fence Area</label>
         <div class="fence-preview-wrap">
           <div id="createShiftFencePreviewMap" class="fence-preview-map"></div>

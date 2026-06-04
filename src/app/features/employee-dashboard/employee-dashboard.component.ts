@@ -11,6 +11,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTableDataSource } from '@angular/material/table';
 import { NewsService } from '../news/services/news.services';
 import { Router } from '@angular/router';
+import { GeoFenceService } from '../attendance/services/geofence.service';
 
 import { AttendanceService } from '../attendance/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -20,10 +21,10 @@ import { PerformanceService } from '../performance/services/performance.service'
 import { ApplyLeaveComponent } from '../leave/components/apply-leave/apply-leave.component';
 import {
   TimeTrackingSession,
-  ClockInOutRequest,
   Attendance,
   AttendanceSummary
 } from '../../core/models/attendance.models';
+import { GeoClockInRequest } from '../attendance/services/geofence.service';
 
 @Component({
   selector: 'app-employee-dashboard',
@@ -52,6 +53,8 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
   isRecentLoading = false;
   currentSession: TimeTrackingSession | null = null;
   currentShiftId: string | null = null;
+  shiftHasGeoFence = false;
+  isGeoFenceLookupFailed = false;
   isClockActionLoading = false;
   attendanceSummary: AttendanceSummary | null = null;
   isSummaryLoading = false;
@@ -71,6 +74,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notification: NotificationService,
     private performanceService: PerformanceService,
+    private geoFenceService: GeoFenceService,
     private newsService: NewsService,
     private dialog: MatDialog,
     private router: Router
@@ -124,11 +128,93 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (shiftId) => {
           this.currentShiftId = shiftId;
+          if (shiftId) {
+            this.checkShiftGeoFences(shiftId);
+          } else {
+            this.shiftHasGeoFence = false;
+            this.isGeoFenceLookupFailed = false;
+          }
         },
         error: () => {
           this.currentShiftId = null;
+          this.shiftHasGeoFence = false;
+          this.isGeoFenceLookupFailed = false;
         }
       });
+  }
+
+  private checkShiftGeoFences(shiftId: string): void {
+    this.geoFenceService.getByShift(shiftId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (fences) => {
+          this.shiftHasGeoFence = (fences || []).some(f => f.isActive);
+          this.isGeoFenceLookupFailed = false;
+        },
+        error: () => {
+          this.shiftHasGeoFence = false;
+          this.isGeoFenceLookupFailed = true;
+        }
+      });
+  }
+
+  private redirectToTimeTrackerForGeoClock(action: 'in' | 'out'): void {
+    const actionLabel = action === 'in' ? 'Clock In' : 'Clock Out';
+    this.notification.showError(`${actionLabel} for geo-fenced shifts must be done from Time Tracker.`);
+    this.router.navigate(['/attendance/time-tracker']);
+  }
+
+  private getBrowserLocation(): Promise<{ latitude?: number; longitude?: number }> {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve({});
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        () => resolve({}),
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      );
+    });
+  }
+
+  private clockViaGeoEndpoint(action: 'in' | 'out', notes?: string): void {
+    this.isClockActionLoading = true;
+
+    this.getBrowserLocation().then(location => {
+      const request: GeoClockInRequest = {
+        action,
+        ...location,
+        matchResult: 'match',
+        notes,
+        deviceInfo: JSON.stringify({
+          userAgent: navigator.userAgent.substring(0, 200),
+          platform: navigator.platform,
+          timestamp: new Date().toISOString()
+        })
+      };
+
+      this.geoFenceService.geoClock(request)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            this.notification.showSuccess(response.message || `Clocked ${action === 'in' ? 'in' : 'out'} successfully!`);
+            this.loadCurrentSession();
+            this.isClockActionLoading = false;
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || error?.message || `Failed to clock ${action === 'in' ? 'in' : 'out'}.`;
+            this.notification.showError(errorMessage);
+            this.isClockActionLoading = false;
+          }
+        });
+    });
   }
 
 
@@ -224,35 +310,34 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isClockActionLoading = true;
+    if (this.shiftHasGeoFence) {
+      this.redirectToTimeTrackerForGeoClock('in');
+      return;
+    }
 
-    const request: ClockInOutRequest = {
-      action: 'in',
-      shiftId: this.currentShiftId,
-      location: {
-        source: 'web_app',
-        timestamp: new Date().toISOString()
-      }
-    };
+    if (this.isGeoFenceLookupFailed) {
+      this.notification.showError('Unable to verify shift geo-fence. Please use Time Tracker for clock actions.');
+      this.router.navigate(['/attendance/time-tracker']);
+      return;
+    }
 
-    this.attendanceService.checkIn(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.notification.showSuccess('Clocked in successfully!');
-          this.loadCurrentSession();
-          this.isClockActionLoading = false;
-        },
-        error: () => {
-          this.notification.showError('Failed to clock in.');
-          this.isClockActionLoading = false;
-        }
-      });
+    void this.clockViaGeoEndpoint('in');
   }
 
   clockOut(): void {
     if (!this.currentShiftId) {
       this.notification.showError('No shift assigned for today.');
+      return;
+    }
+
+    if (this.shiftHasGeoFence) {
+      this.redirectToTimeTrackerForGeoClock('out');
+      return;
+    }
+
+    if (this.isGeoFenceLookupFailed) {
+      this.notification.showError('Unable to verify shift geo-fence. Please use Time Tracker for clock actions.');
+      this.router.navigate(['/attendance/time-tracker']);
       return;
     }
 
@@ -269,31 +354,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(comment => {
       if (comment === undefined) return;
 
-      this.isClockActionLoading = true;
-
-      const request: ClockInOutRequest = {
-        action: 'out',
-        shiftId: this.currentShiftId,
-        location: {
-          source: 'web_app',
-          timestamp: new Date().toISOString()
-        },
-        notes: comment
-      };
-
-      this.attendanceService.checkOut(request)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.notification.showSuccess('Clocked out successfully!');
-            this.loadCurrentSession();
-            this.isClockActionLoading = false;
-          },
-          error: () => {
-            this.notification.showError('Failed to clock out.');
-            this.isClockActionLoading = false;
-          }
-        });
+      void this.clockViaGeoEndpoint('out', comment);
     });
   }
    openLeaveRequestDialog(): void {
