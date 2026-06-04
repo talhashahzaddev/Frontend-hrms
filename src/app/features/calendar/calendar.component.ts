@@ -24,6 +24,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { EmployeeService } from '../employee/services/employee.service';
 import { Employee } from '../../core/models/employee.models';
 import { PromptDialogComponent } from '../../shared/components/prompt-dialog/prompt-dialog.component';
+import { GeoFenceService, GeoClockInRequest } from '../attendance/services/geofence.service';
 // import { DayDetailsDialogComponent } from '../../shared/components/day-details-dialogs/day-details-dialog.component';
 // import { CalendarDetailsDialogComponent } from '../../shared/components/calendar-details-dialog/calendar-details-dialog.component';
 import { CalendarDetailsDialogueComponent } from '../../shared/components/calendar-details-dialog/view-details-dialogue.component';
@@ -89,6 +90,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
         private calendarService: CalendarService,
         private notificationService: NotificationService,
         private attendanceService: AttendanceService,
+        private geoFenceService: GeoFenceService,
         private router: Router,
         private dialog: MatDialog,
         private authService: AuthService,
@@ -524,25 +526,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
                 return;
             }
 
-            const request = {
-                action: 'in',
-                shiftId: shiftId, // ✅ FIX
-                location: {
-                    source: 'web_app',
-                    timestamp: new Date().toISOString()
-                }
-            };
-
-            this.attendanceService.checkIn(request).subscribe({
-                next: () => {
-                    this.notificationService.showSuccess('Checked in successfully!');
-                    this.loadCalendarData();
-                },
-                error: (error: any) => {
-                    const errorMessage = error?.error?.message || 'Failed to check in';
-                    this.notificationService.showError(errorMessage);
-                }
-            });
+            void this.clockViaGeoEndpoint('in');
         },
         error: () => {
             this.notificationService.showError('Failed to load current shift');
@@ -584,26 +568,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
       // If user cancelled (undefined), do nothing. Empty string is valid.
       if (comment === undefined) return;
 
-      const request = {
-        action: 'out',
-        shiftId: shiftId, // ✅ FIX
-        location: {
-          source: 'web_app',
-          timestamp: new Date().toISOString()
-        },
-        notes: comment
-      };
-
-      this.attendanceService.checkOut(request).subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Checked out successfully!');
-          this.loadCalendarData();
-        },
-        error: (error: any) => {
-          const errorMessage = error?.error?.message || 'Failed to check out';
-          this.notificationService.showError(errorMessage);
-        }
-      });
+            void this.clockViaGeoEndpoint('out', comment);
     });
   },
   error: () => {
@@ -611,6 +576,53 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 });
 
+}
+
+private getBrowserLocation(): Promise<{ latitude?: number; longitude?: number }> {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve({});
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
+            },
+            () => resolve({}),
+            { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+        );
+    });
+}
+
+private clockViaGeoEndpoint(action: 'in' | 'out', notes?: string): void {
+    this.getBrowserLocation().then(location => {
+        const request: GeoClockInRequest = {
+            action,
+            ...location,
+            notes,
+            matchResult: 'match',
+            deviceInfo: JSON.stringify({
+                userAgent: navigator.userAgent.substring(0, 200),
+                platform: navigator.platform,
+                timestamp: new Date().toISOString()
+            })
+        };
+
+        this.geoFenceService.geoClock(request).subscribe({
+            next: (res) => {
+                this.notificationService.showSuccess(res.message || `Checked ${action === 'in' ? 'in' : 'out'} successfully!`);
+                this.loadCalendarData();
+            },
+            error: (error: any) => {
+                const errorMessage = error?.error?.message || `Failed to check ${action === 'in' ? 'in' : 'out'}`;
+                this.notificationService.showError(errorMessage);
+            }
+        });
+    });
 }
 
 

@@ -84,10 +84,20 @@ export class ShiftComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadCurrentUser();
     this.loadAllShifts();
-  this.loadShiftSummary(); 
-    this.loadSuperAdminPendingSwaps();
-    this.loadEmployeeShiftSwaps();
+
+    if (this.hasPermission('Shift_Summary')) {
+      this.loadShiftSummary();
+    }
+
+    if (this.hasPermission('TEAM_SHIFT_SWAP_TABLE')) {
+      this.loadEmployeeShiftSwaps();
+    }
+
     this.loadEmployeeCurrentShift();
+
+    if (this.canViewAdminShiftSwaps()) {
+      this.loadSuperAdminPendingSwaps();
+    }
 
 
     this.selectedShiftId = '';
@@ -104,6 +114,10 @@ export class ShiftComponent implements OnInit, OnDestroy {
 
   private loadCurrentUser(): void {
     this.currentUser = this.authService.getCurrentUserValue();
+  }
+
+  private canViewAdminShiftSwaps(): boolean {
+    return ['Super Admin', 'HR Manager', 'Manager'].includes((this.currentUser?.role || '').toString());
   }
 
   loadAllShifts(): void {
@@ -337,6 +351,11 @@ rejectRequest(swap: PendingShiftSwap): void {
 
   private loadEmployeeShiftSwaps(): void {
     if (!this.currentUser?.userId) return;
+
+    if (!this.hasPermission('TEAM_SHIFT_SWAP_TABLE')) {
+      this.employeeShiftSwaps = [];
+      return;
+    }
 
     this.attendanceService.getEmployeeShiftSwaps(this.currentUser.userId).subscribe({
       next: (response: any) => {
