@@ -154,6 +154,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   loadMyRecurring(page: number = 1): void {
+    if (!this.hasPermission('my_rescurring_expenses')) return;
     this.myPage = page;
     this.isLoading = true;
     this.expenseService
@@ -199,6 +200,7 @@ export class RecurringExpenseListComponent implements OnInit, OnDestroy {
   }
 
   loadAllRecurring(page: number = 1): void {
+    if (!this.hasPermission('all_recurring')) return;
     this.allPage = page;
     this.isLoadingAll = true;
     const status = this.allStatus.value || undefined;
