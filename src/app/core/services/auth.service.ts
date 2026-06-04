@@ -86,6 +86,7 @@ export class AuthService {
 
         const user: User = {
           userId: authResponse.userId,
+          employeeId: this.getEmployeeIdFromToken(authResponse.token) || undefined,
           email: authResponse.email,
           firstName: authResponse.firstName,
           lastName: authResponse.lastName,
@@ -120,6 +121,7 @@ export class AuthService {
         const authResponse: AuthResponse = JSON.parse(pendingAuthJson);
         const user: User = {
           userId: authResponse.userId,
+          employeeId: this.getEmployeeIdFromToken(authResponse.token) || undefined,
           email: authResponse.email,
           firstName: authResponse.firstName,
           lastName: authResponse.lastName,
@@ -510,6 +512,7 @@ export class AuthService {
   private setAuthData(authResponse: AuthResponse): void {
     const user: User = {
       userId: authResponse.userId,
+      employeeId: this.getEmployeeIdFromToken(authResponse.token) || undefined,
       email: authResponse.email,
       firstName: authResponse.firstName,
       lastName: authResponse.lastName,
@@ -555,6 +558,11 @@ export class AuthService {
     if (token && userJson) {
       try {
         const user: User = JSON.parse(userJson);
+        const employeeId = user.employeeId || this.getEmployeeIdFromToken(token);
+        if (employeeId && user.employeeId !== employeeId) {
+          user.employeeId = employeeId;
+          localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+        }
         if (!this.isTokenExpired(token)) {
           this.currentUserSubject.next(user);
           this.tokenSubject.next(token);
@@ -608,8 +616,8 @@ export class AuthService {
    * The backend embeds it as the "EmployeeId" custom claim.
    * Returns null if the token is absent or the claim is not present.
    */
-  getEmployeeIdFromToken(): string | null {
-    const token = this.getToken();
+  getEmployeeIdFromToken(tokenOverride?: string | null): string | null {
+    const token = tokenOverride ?? this.getToken();
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
