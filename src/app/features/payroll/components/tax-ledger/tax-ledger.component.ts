@@ -9,6 +9,7 @@ import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '@core/services/notification.service';
 import { take } from 'rxjs';
 import { AddTaxEntryDialogComponent, AddTaxEntryDialogPayload } from '../dialogs/add-tax-entry/add-tax-entry.component';
+import { AuthService } from '@core/services/auth.service';
 
 interface TaxLedgerRow {
   id: string;
@@ -35,8 +36,10 @@ export class TaxLedgerComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
   private readonly notificationService = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
+  isSuperAdmin = false;
 
   searchTerm = '';
   periodId = '';
@@ -65,6 +68,10 @@ export class TaxLedgerComponent implements OnInit {
           this.currencySymbol.set(this.settingsService.getCurrencySymbol());
         }
       });
+
+    this.authService.currentUser$.pipe(take(1)).subscribe(user => {
+      this.isSuperAdmin = user?.roleName?.toLowerCase() === 'super admin';
+    });
 
     this.loadFilterData();
     this.loadTaxTransactions();
@@ -244,5 +251,10 @@ export class TaxLedgerComponent implements OnInit {
 
   get activeProfilesCount(): number {
     return this.totalCount;
+  }
+
+  hasPermission(actionKey: string): boolean {
+    if (this.isSuperAdmin) return true;
+    return this.authService.hasPermissionByActionKey(actionKey);
   }
 }

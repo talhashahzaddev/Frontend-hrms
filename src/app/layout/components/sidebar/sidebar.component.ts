@@ -297,7 +297,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
           label: 'Tax Ledger',
           icon: 'history_edu',
           route: '/payroll/tax-ledger',
-          exact: true
+          exact: true,
+          actionKey: 'get_transaction_ledger'
         },
         {
           label: 'Salary Advances',
@@ -319,12 +320,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
           exact: true,
           actionKey: 'gratuity_admin_view'
         },
-        {
-          label: 'Income Tax',
-          icon: 'request_quote',
-          route: '/payroll/tax-management',
-          exact: true
-        },
+        // {
+        //   label: 'Income Tax',
+        //   icon: 'request_quote',
+        //   route: '/payroll/tax-management',
+        //   exact: true
+        // },
         {
           label: 'Social Security',
           icon: 'shield_person',
@@ -379,13 +380,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Company Settings', icon: 'work_outline', route: '/settings/general', menuName: 'Settings', subMenuName: 'Company Name' },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
-        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management' },
+        { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management', actionKey: 'career_management_view' },
         { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' },
         { label: 'Company Policies', icon: 'policy', route: '/settings/policies', menuName: 'Settings', subMenuName: 'Company Policies' },
         { label: 'Onboarding Configuration', icon: 'person_add', route: '/settings/onboarding-configuration', menuName: 'Settings', subMenuName: 'Onboarding Configuration' }
       ]
     },
-     {
+    {
       label: 'Onboarding',
       icon: 'person_add',
       route: '/onboarding'

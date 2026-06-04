@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <div class="add-btn-wrap">
+      <div class="add-btn-wrap" *ngIf="hasPermission('add_transaction_ledger')">
         <button class="add-btn" (click)="openAddTaxEntryDialog()">
           <mat-icon>add</mat-icon>
           Add Tax Entry
