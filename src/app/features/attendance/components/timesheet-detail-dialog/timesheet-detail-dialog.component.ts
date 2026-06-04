@@ -394,7 +394,12 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
       this.selectedEmployee && typeof this.selectedEmployee.employeeName === 'string' && this.selectedEmployee.employeeName.toLowerCase().includes('super admin'));
 
-    return isDirectMatch || isSuperAdminBypass;
+    // An employee only ever sees their OWN timesheet here — the API scopes timesheet
+    // details to the current employee for non-admin/HR roles, so every row they see is
+    // theirs. The id-match above fails when the session carries no employeeId (the login
+    // token doesn't include one), which previously hid the "Request correction" action for
+    // all employees. Treat the employee role as always viewing their own timesheet.
+    return this.isEmployee() || isDirectMatch || isSuperAdminBypass;
 
   }
 
