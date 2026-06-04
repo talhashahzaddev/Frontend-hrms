@@ -19,6 +19,7 @@ import {
 } from '../../services/settings.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { DomainService } from '../../../../core/services/domain.service';
 
 @Component({
     selector: 'app-career-management',
@@ -59,6 +60,7 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
     logoFileName: string | null = null;
     isUploadingBg = false;
     bgFileName: string | null = null;
+    publicCareerUrl: string = '';
 
     readonly acceptedImageTypes = 'image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml';
     readonly maxFileMb = 5;
@@ -89,8 +91,9 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
     constructor(
         private fb: FormBuilder,
         private settingsService: SettingsService,
-        private notificationService: NotificationService
-        , private authService: AuthService
+        private notificationService: NotificationService,
+        private authService: AuthService,
+        private domainService: DomainService
     ) {
         this.form = this.fb.group({
             logoUrl: ['', Validators.required],
@@ -98,6 +101,8 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
             careerHeaderText: ['', Validators.required],
             careerDescription: ['', Validators.required]
         });
+        const subdomain = this.domainService.getCurrentSubdomain() || 'companyname';
+        this.publicCareerUrl = `${subdomain}.briskpeople.com/career`;
     }
 
     ngOnInit(): void {
@@ -270,6 +275,21 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
             });
     }
 
+    // ─── URL Actions ────────────────────────────────────────────────
+    copyUrl(): void {
+        const fullUrl = `https://${this.publicCareerUrl}`;
+        navigator.clipboard.writeText(fullUrl).then(() => {
+            this.notificationService.showSuccess('URL copied to clipboard!');
+        }).catch(() => {
+            this.notificationService.showError('Failed to copy URL');
+        });
+    }
+
+    openUrl(): void {
+        const fullUrl = `https://${this.publicCareerUrl}`;
+        window.open(fullUrl, '_blank');
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────
     hasAnyData(): boolean {
         if (!this.savedData) return false;
@@ -277,9 +297,9 @@ export class CareerManagementComponent implements OnInit, OnDestroy {
         return !!(d.logoUrl || d.careerBgImageUrl || d.careerHeaderText || d.careerDescription);
     }
 
-        hasPermission(actionKey: string): boolean {
-            return this.authService.hasMenuPermission('Settings', 'Career management', actionKey);
-        }
+    hasPermission(actionKey: string): boolean {
+        return this.authService.hasMenuPermission('Settings', 'Career management', actionKey);
+    }
 
     private validateImage(file: File): string | null {
         if (!CareerManagementComponent.ALLOWED_TYPES.includes(file.type)) {

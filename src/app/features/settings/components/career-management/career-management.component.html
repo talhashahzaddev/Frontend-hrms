@@ -15,14 +15,13 @@
             </div>
         </div>
         <div class="cm-page-header-right">
-            <button mat-flat-button class="cm-btn cm-btn--primary"
-                *ngIf="!isLoading && !isEditMode && hasAnyData()" (click)="enterEditMode()"
-                id="career-edit-btn">
+            <button mat-flat-button class="cm-btn cm-btn--primary" *ngIf="!isLoading && !isEditMode && hasAnyData()"
+                (click)="enterEditMode()" id="career-edit-btn">
                 <mat-icon>edit</mat-icon>
                 Edit
             </button>
             <button mat-flat-button class="cm-btn cm-btn--primary"
-                *ngIf="!isLoading && !isEditMode && !hasAnyData() && savedData !== null && hasPermission('Setup_Career_Page_Button')"
+                *ngIf="!isLoading && !isEditMode && !hasAnyData() && savedData !== null && hasPermission('career_management_edit')"
                 (click)="enterEditMode()" id="career-setup-btn">
                 <mat-icon>add</mat-icon>
                 Set Up Career Page
@@ -30,14 +29,6 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════ -->
-    <!-- ACCESS DENIED                                                -->
-    <!-- ════════════════════════════════════════════════════════════ -->
-    <div class="cm-state-card">
-        <div class="cm-state-icon cm-state-icon--lock"><mat-icon>lock</mat-icon></div>
-        <p class="cm-state-title">Access Restricted</p>
-        <p class="cm-state-sub">Only Super Admins can manage career page settings.</p>
-    </div>
 
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- LOADING                                                      -->
@@ -58,7 +49,8 @@
             <p class="cm-state-title">Your career page isn't configured yet</p>
             <p class="cm-state-sub">Add a logo, background image, header and description to make it shine for
                 applicants.</p>
-            <button mat-flat-button class="cm-btn cm-btn--primary" (click)="enterEditMode()" *ngIf="hasPermission('Setup_Career_Page_Button')">
+            <button mat-flat-button class="cm-btn cm-btn--primary" (click)="enterEditMode()"
+                *ngIf="hasPermission('career_management_edit')">
                 <mat-icon>add</mat-icon>Set Up Career Page
             </button>
         </div>
@@ -97,44 +89,15 @@
                     <h2 class="cm-section-title">Page Settings</h2>
                 </div>
                 <div class="cm-section-body cm-section-body--settings">
-                    <div class="cm-toggle-row">
-                        <div class="cm-toggle-info">
-                            <p class="cm-toggle-title">Public Accessibility</p>
-                            <p class="cm-toggle-sub">Allow anyone with the link to view your career page.</p>
-                        </div>
-                        <label class="cm-toggle-switch">
-                            <input type="checkbox" checked disabled id="view-toggle-public-access">
-                            <span class="cm-toggle-track"></span>
-                        </label>
-                    </div>
-                    <div class="cm-toggle-row">
-                        <div class="cm-toggle-info">
-                            <p class="cm-toggle-title">Index on Search Engines</p>
-                            <p class="cm-toggle-sub">Allow Google and other search engines to crawl your page.</p>
-                        </div>
-                        <label class="cm-toggle-switch">
-                            <input type="checkbox" disabled id="view-toggle-search-index">
-                            <span class="cm-toggle-track"></span>
-                        </label>
-                    </div>
-                    <div class="cm-toggle-row">
-                        <div class="cm-toggle-info">
-                            <p class="cm-toggle-title">Social Media Sharing</p>
-                            <p class="cm-toggle-sub">Show preview image and description when link is shared.</p>
-                        </div>
-                        <label class="cm-toggle-switch">
-                            <input type="checkbox" checked disabled id="view-toggle-social-sharing">
-                            <span class="cm-toggle-track"></span>
-                        </label>
-                    </div>
+
                     <div class="cm-url-block">
                         <p class="cm-url-label">PUBLIC CAREER URL</p>
                         <div class="cm-url-row">
-                            <div class="cm-url-field">careers.briskpeople.com/organization/your-company</div>
-                            <button type="button" class="cm-url-icon-btn" matTooltip="Copy URL">
+                            <div class="cm-url-field">{{ publicCareerUrl }}</div>
+                            <button type="button" class="cm-url-icon-btn" matTooltip="Copy URL" (click)="copyUrl()">
                                 <mat-icon>content_copy</mat-icon>
                             </button>
-                            <button type="button" class="cm-url-icon-btn" matTooltip="Open in new tab">
+                            <button type="button" class="cm-url-icon-btn" matTooltip="Open in new tab" (click)="openUrl()">
                                 <mat-icon>open_in_new</mat-icon>
                             </button>
                         </div>
@@ -148,8 +111,7 @@
     <!-- ════════════════════════════════════════════════════════════ -->
     <!-- EDIT MODE                                                    -->
     <!-- ════════════════════════════════════════════════════════════ -->
-    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="!isLoading && isEditMode"
-        class="cm-edit-form">
+    <form [formGroup]="form" (ngSubmit)="onSave()" *ngIf="!isLoading && isEditMode" class="cm-edit-form">
 
         <!-- Section 1: Branding -->
         <div class="cm-section">
@@ -261,49 +223,17 @@
             </div>
             <div class="cm-section-body cm-section-body--settings">
 
-                <!-- Toggle rows -->
-                <div class="cm-toggle-row">
-                    <div class="cm-toggle-info">
-                        <p class="cm-toggle-title">Public Accessibility</p>
-                        <p class="cm-toggle-sub">Allow anyone with the link to view your career page.</p>
-                    </div>
-                    <label class="cm-toggle-switch">
-                        <input type="checkbox" checked id="toggle-public-access">
-                        <span class="cm-toggle-track"></span>
-                    </label>
-                </div>
 
-                <div class="cm-toggle-row">
-                    <div class="cm-toggle-info">
-                        <p class="cm-toggle-title">Index on Search Engines</p>
-                        <p class="cm-toggle-sub">Allow Google and other search engines to crawl your page.</p>
-                    </div>
-                    <label class="cm-toggle-switch">
-                        <input type="checkbox" id="toggle-search-index">
-                        <span class="cm-toggle-track"></span>
-                    </label>
-                </div>
-
-                <div class="cm-toggle-row">
-                    <div class="cm-toggle-info">
-                        <p class="cm-toggle-title">Social Media Sharing</p>
-                        <p class="cm-toggle-sub">Show preview image and description when link is shared.</p>
-                    </div>
-                    <label class="cm-toggle-switch">
-                        <input type="checkbox" checked id="toggle-social-sharing">
-                        <span class="cm-toggle-track"></span>
-                    </label>
-                </div>
 
                 <!-- Public Career URL -->
                 <div class="cm-url-block">
                     <p class="cm-url-label">PUBLIC CAREER URL</p>
                     <div class="cm-url-row">
-                        <div class="cm-url-field">careers.briskpeople.com/organization/your-company</div>
-                        <button type="button" class="cm-url-icon-btn" matTooltip="Copy URL">
+                        <div class="cm-url-field">{{ publicCareerUrl }}</div>
+                        <button type="button" class="cm-url-icon-btn" matTooltip="Copy URL" (click)="copyUrl()">
                             <mat-icon>content_copy</mat-icon>
                         </button>
-                        <button type="button" class="cm-url-icon-btn" matTooltip="Open in new tab">
+                        <button type="button" class="cm-url-icon-btn" matTooltip="Open in new tab" (click)="openUrl()">
                             <mat-icon>open_in_new</mat-icon>
                         </button>
                     </div>
@@ -320,11 +250,12 @@
                     Waiting for uploads…
                 </span>
                 <button type="button" class="cm-btn cm-btn--outline" [disabled]="isSaving" (click)="cancelEdit()"
-                    id="career-cancel-btn" *ngIf="hasPermission('Discard_Career_Page_Button')">
+                    id="career-cancel-btn" *ngIf="hasPermission('career_management_edit')">
                     Discard Changes
                 </button>
                 <button type="submit" class="cm-btn cm-btn--primary"
-                    [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn" *ngIf="hasPermission('Save_Career_Page_Button')">
+                    [disabled]="form.invalid || isSaving || isUploadingLogo || isUploadingBg" id="career-save-btn"
+                    *ngIf="hasPermission('career_management_edit')">
                     <mat-spinner *ngIf="isSaving" diameter="18" class="cm-btn-spinner"></mat-spinner>
                     {{ isSaving ? 'Saving…' : 'Save Changes' }}
                 </button>

@@ -430,7 +430,7 @@ export class SettingsService {
   }
 
   getCareerPage(): Observable<CareerPageSettings> {
-    return this.http.get<ApiResponse<CareerPageSettings>>(`${this.apiUrl}/career-page`).pipe(
+    return this.http.get<ApiResponse<CareerPageSettings>>(`${environment.apiUrl}/settings/career-page`).pipe(
       map(res => {
         if (!res.success || !res.data) throw new Error(res.message || 'Failed to load career page settings');
         return res.data;
@@ -439,7 +439,7 @@ export class SettingsService {
   }
 
   updateCareerPage(request: UpdateCareerPageRequest): Observable<boolean> {
-    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/career-page`, request).pipe(
+    return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/settings/career-page`, request).pipe(
       map(res => {
         if (!res.success) throw new Error(res.message || 'Failed to update career page settings');
         return res.data ?? true;
