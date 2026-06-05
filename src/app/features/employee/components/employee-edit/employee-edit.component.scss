@@ -470,9 +470,9 @@
     }
   }
 
-  .mat-mdc-select-panel {
+  &.mat-mdc-select-panel {
     overflow-y: auto !important;
-    flex: 1;
+    flex: 1 1 auto !important;
     padding: 6px !important;
   }
 
