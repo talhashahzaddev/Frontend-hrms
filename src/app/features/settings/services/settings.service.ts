@@ -130,6 +130,8 @@ export interface UpdatePolicyRequest {
 })
 export class SettingsService {
   private readonly apiUrl = `${environment.apiUrl}/policies`;
+  private readonly settingsUrl = `${environment.apiUrl}/Settings`;
+
   private currencyCache$: Observable<string> | null = null;
   private currencySubject = new BehaviorSubject<string>('USD');
   public organizationCurrency$ = this.currencySubject.asObservable();
@@ -141,7 +143,7 @@ export class SettingsService {
   // ── All methods below are UNCHANGED ──────────────────────────────────────
 
   getOrganizationSettings(): Observable<OrganizationSettings> {
-    return this.http.get<ApiResponse<OrganizationSettings>>(`${this.apiUrl}/organization`)
+    return this.http.get<ApiResponse<OrganizationSettings>>(`${this.settingsUrl}/organization`)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -308,7 +310,7 @@ export class SettingsService {
 
   updateCurrency(currency: string): Observable<boolean> {
     const request: UpdateCurrencyRequest = { currency };
-    return this.http.put<ApiResponse<boolean>>(`${this.apiUrl}/currency`, request)
+    return this.http.put<ApiResponse<boolean>>(`${this.settingsUrl}/currency`, request)
       .pipe(
         map(response => {
           if (!response.success) {
@@ -321,7 +323,7 @@ export class SettingsService {
 
   updateLocalization(request: UpdateLocalizationRequest): Observable<boolean> {
     return this.http
-      .put<ApiResponse<boolean>>(`${this.apiUrl}/localization`, request)
+      .put<ApiResponse<boolean>>(`${this.settingsUrl}/localization`, request)
       .pipe(
         map(response => {
           if (!response.success) {
