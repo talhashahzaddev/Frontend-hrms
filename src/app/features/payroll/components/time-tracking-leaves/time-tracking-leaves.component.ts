@@ -12,10 +12,13 @@ import { take } from 'rxjs';
 import { AttendanceDialogComponent } from '../dialogs/attendance-dialog/attendance-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-time-tracking-leaves',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule],
   templateUrl: './time-tracking-leaves.component.html',
   styleUrl: './time-tracking-leaves.component.scss'
 })

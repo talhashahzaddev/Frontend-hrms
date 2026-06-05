@@ -25,6 +25,7 @@ import {
   SocialSecurityClaimDialogComponent
 } from '../dialogs/social-security-claim-dialog/social-security-claim-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface MySocialTransactionRow {
   id: string;
   periodId: string;
@@ -46,10 +47,12 @@ interface PeriodOption {
 
 type MySocialTab = 'transactions' | 'requests' | 'claims';
 
+
 @Component({
   selector: 'app-my-social-security',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './my-social-security.component.html',
   styleUrl: './my-social-security.component.scss'
 })

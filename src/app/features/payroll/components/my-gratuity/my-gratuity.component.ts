@@ -9,10 +9,13 @@ import { SettingsService } from '../../../settings/services/settings.service';
 import { AuthService } from '@core/services/auth.service';
 import { take } from 'rxjs';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-my-gratuity',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './my-gratuity.component.html',
   styleUrl: './my-gratuity.component.scss'
 })

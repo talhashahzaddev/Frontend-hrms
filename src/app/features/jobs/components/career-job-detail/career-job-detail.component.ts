@@ -11,10 +11,13 @@ import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto } from '@core/models/jobs.models';
 import { CompanyCareerDetails } from '../public-career/public-career.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
     selector: 'app-career-job-detail',
     standalone: true,
     imports: [
+    SharedCommonModule,
         CommonModule,
         MatIconModule,
         MatButtonModule,

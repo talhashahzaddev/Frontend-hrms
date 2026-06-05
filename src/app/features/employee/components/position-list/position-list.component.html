@@ -148,7 +148,7 @@
         <ng-container matColumnDef="createdAt">
           <th mat-header-cell *matHeaderCellDef>Created</th>
           <td mat-cell *matCellDef="let position" class="date-cell">
-            {{ position.createdAt | date:'dd-MM-yyyy' }}
+            {{ position.createdAt | localizedDate:'dd-MM-yyyy' }}
           </td>
         </ng-container>
 

@@ -1,3 +1,4 @@
+import { SharedCommonModule } from '@shared/shared-common.module';
 // tickets-dashboard.component.ts
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -20,10 +21,12 @@ import { NotificationService } from '@/app/core/services/notification.service';
 import { CreateTicketDialogueComponent } from '../create-ticket-dialogue/create-ticket-dialogue.component';
 import { AuthService } from '@/app/core/services/auth.service';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@/app/shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+
 @Component({
   selector: 'app-tickets-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

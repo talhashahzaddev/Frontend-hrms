@@ -7,16 +7,19 @@ import { ChatService, ChatMessage } from '../../shared/services/chat.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface FormattedMessagePart {
   type: 'text' | 'url' | 'linebreak';
   content: string;
   url?: string;
 }
 
+
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './ai-assistant.component.html',
   styleUrl: './ai-assistant.component.scss'
 })

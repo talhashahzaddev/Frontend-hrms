@@ -16,10 +16,13 @@ import { Department } from '@/app/core/models/employee.models';
 import { TicketGroup, CategoryDto } from '@/app/core/models/helpdesk.models';
 import { NotificationService } from '@/app/core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-create-agent-group-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule],
   templateUrl: './create-agent-group-dialog.component.html',
   styleUrls: ['./create-agent-group-dialog.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -39,10 +39,13 @@ import {
 
 import { User } from '../../../../core/models/auth.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-performance-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatFormFieldModule,
     MatSelectModule,

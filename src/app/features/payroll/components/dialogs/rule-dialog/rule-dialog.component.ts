@@ -30,6 +30,7 @@ import {
   hasPayrollRulePermission
 } from '../../../utils/payroll-rule-permissions';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RuleDialogData {
   // Pass any initial data if needed, e.g., for edit mode
   mode?: 'create' | 'edit';
@@ -78,11 +79,13 @@ export interface RuleDialogData {
   };
 }
 
+
 @Component({
   selector: 'app-rule-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

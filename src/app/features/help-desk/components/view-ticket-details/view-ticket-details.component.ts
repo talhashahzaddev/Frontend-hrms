@@ -14,6 +14,7 @@ import { ReplyChatDialogComponent } from '../reply-chat-dialog/reply-chat-dialog
 import { AuthService } from '@/app/core/services/auth.service';
 import { NotificationService } from '@/app/core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface CategoryDto {
   categoryId: string;
   organizationId: string;
@@ -24,10 +25,12 @@ interface CategoryDto {
   createdAt: string;
 }
 
+
 @Component({
   selector: 'app-view-ticket-details',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatDialogModule,

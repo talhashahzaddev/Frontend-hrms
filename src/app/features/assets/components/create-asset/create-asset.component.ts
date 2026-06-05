@@ -30,10 +30,13 @@ import { NotificationService } from '@core/services/notification.service';
 import { LoadingService } from '@core/services/loading.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-create-asset',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,

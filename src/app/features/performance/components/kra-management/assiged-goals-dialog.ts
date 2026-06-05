@@ -20,15 +20,18 @@ import { Employee, Department } from '@/app/core/models/employee.models';
 import { DepartmentEmployee } from '../../../../core/models/attendance.models';
 import { Goal } from '../../../../core/models/performance.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface AssignGoalPayload {
   goalId: string;
   assignedTo: string;
 }
 
+
 @Component({
   selector: 'app-assign-goals-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

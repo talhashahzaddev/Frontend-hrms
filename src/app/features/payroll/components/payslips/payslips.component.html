@@ -66,7 +66,7 @@
             <td class="font-semibold">{{ record.periodName }}</td>
             <td class="text-right">{{ record.basicSalary | number }}</td>
             <td class="text-right text-success">{{ record.netSalary | number }}</td>
-            <td>{{ record.calculatedAt | date:'mediumDate' }}</td>
+            <td>{{ record.calculatedAt | localizedDate:'mediumDate' }}</td>
             <td class="action-cell">
               <button class="action-btn hover-primary" (click)="viewPayslip(record)" title="View Payslip">
                 <mat-icon>visibility</mat-icon>

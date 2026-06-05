@@ -233,8 +233,8 @@
                   {{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}
                 </span>
               </td>
-              <td class="date-cell">{{ goal.startDate | date:'MMM dd, yyyy' }}</td>
-              <td class="date-cell">{{ goal.endDate | date:'MMM dd, yyyy' }}</td>
+              <td class="date-cell">{{ goal.startDate | localizedDate:'MMM dd, yyyy' }}</td>
+              <td class="date-cell">{{ goal.endDate | localizedDate:'MMM dd, yyyy' }}</td>
               <td>
                 <span [class]="'progress-badge progress-' + goal.progress.toLowerCase()">
                   {{ goal.progress | titlecase }}
@@ -359,8 +359,8 @@
                   {{ goal.assignedtoName?.trim() ? goal.assignedtoName : 'Not Assigned' }}
                 </span>
               </td>
-              <td class="date-cell">{{ goal.startDate | date:'MMM dd, yyyy' }}</td>
-              <td class="date-cell">{{ goal.endDate | date:'MMM dd, yyyy' }}</td>
+              <td class="date-cell">{{ goal.startDate | localizedDate:'MMM dd, yyyy' }}</td>
+              <td class="date-cell">{{ goal.endDate | localizedDate:'MMM dd, yyyy' }}</td>
               <td>
                 <span [class]="'progress-badge progress-' + goal.progress.toLowerCase()">
                   {{ goal.progress | titlecase }}

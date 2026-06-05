@@ -8,15 +8,18 @@ import { MatDividerModule } from '@angular/material/divider';
 import { KRA } from '../../../../core/models/performance.models';
 import { CreateKRADialogComponent } from './create-kra-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface KRADetailsDialogData {
   kra: KRA;
   hasEditPermission: boolean;
 }
 
+
 @Component({
   selector: 'app-kra-details-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,
@@ -99,7 +102,7 @@ export interface KRADetailsDialogData {
               <mat-icon>access_time</mat-icon>
               <span>Created At</span>
             </div>
-            <div class="detail-value">{{ data.kra.createdAt | date:'medium' }}</div>
+            <div class="detail-value">{{ data.kra.createdAt | localizedDate:'medium' }}</div>
           </div>
         </div>
 

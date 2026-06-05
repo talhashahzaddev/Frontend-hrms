@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { SocialSecuritySchemeOption } from '../../../services/payroll.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SocialSecurityRuleDialogPayload {
   schemeId: string;
   ruleName: string;
@@ -24,11 +25,13 @@ interface SocialSecurityRuleDialogData {
   initialValue?: Partial<SocialSecurityRuleDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-social-security-rule-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-rule-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

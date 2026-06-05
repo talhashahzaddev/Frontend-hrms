@@ -18,7 +18,7 @@
       </div>
       <div class="current-sub-row">
         <span class="sub-label">Expires:</span>
-        <span class="sub-value">{{ data.currentSubscription.endDate | date:'mediumDate' }}</span>
+        <span class="sub-value">{{ data.currentSubscription.endDate | localizedDate:'mediumDate' }}</span>
       </div>
     </div>
   } @else {

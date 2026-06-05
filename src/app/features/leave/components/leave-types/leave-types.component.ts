@@ -29,10 +29,13 @@ import { LeaveType } from '../../../../core/models/leave.models';
 import { LEAVE_COLOR_TOKEN, ColorOption } from '../../constants/leave-colors';
 import { AuthService } from '../../../../core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-leave-types',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -162,12 +165,14 @@ export class LeaveTypesComponent implements OnInit, OnDestroy {
 /* ------------------------------------------------------------------
    Inline Dialog Component for Adding Leave Type
 ------------------------------------------------------------------- */
+
 @Component({
   selector: 'add-leave-type-dialog-template',
   standalone: true,
   templateUrl: './add-leave-type-dialog.html',
   styleUrls: ['./leave-types-dialog.scss'],
   imports: [
+    SharedCommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -298,12 +303,14 @@ export class AddLeaveTypeDialogTemplate {
 /* ------------------------------------------------------------------
    Inline Dialog Component for Editing Leave Type
 ------------------------------------------------------------------- */
+
 @Component({
   selector: 'edit-leave-type-dialog-template',
   standalone: true,
   templateUrl: './edit-leave-type-dialog.html',
   styleUrls: ['./leave-types-dialog.scss'],
   imports: [
+    SharedCommonModule,
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,

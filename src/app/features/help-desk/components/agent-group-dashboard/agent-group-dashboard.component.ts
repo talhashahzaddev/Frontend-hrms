@@ -20,15 +20,18 @@ import { CreateAgentGroupDialogComponent } from '../create-agent-group-dialog/cr
 import { ViewGroupAgentDetailsComponent } from './view-Group-agent-details';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface Department {
   departmentId: string;
   departmentName: string;
 }
 
+
 @Component({
   selector: 'app-agent-group-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

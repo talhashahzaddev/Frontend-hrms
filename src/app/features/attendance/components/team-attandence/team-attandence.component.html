@@ -198,7 +198,7 @@
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef>Date</th>
           <td mat-cell *matCellDef="let attendance">
-            {{ attendance.workDate | date:'MMM d, y' }}
+            {{ attendance.workDate | localizedDate:'MMM d, y' }}
           </td>
         </ng-container>
 
@@ -207,7 +207,7 @@
           <th mat-header-cell *matHeaderCellDef>Check In</th>
           <td mat-cell *matCellDef="let attendance">
             <span *ngIf="attendance.checkInTime" class="time-value">
-              {{ attendance.checkInTime | date:'HH:mm' }}
+              {{ attendance.checkInTime | localizedDate:'HH:mm' }}
             </span>
             <span *ngIf="!attendance.checkInTime" class="no-time">--:--</span>
           </td>
@@ -218,7 +218,7 @@
           <th mat-header-cell *matHeaderCellDef>Check Out</th>
           <td mat-cell *matCellDef="let attendance">
             <span *ngIf="attendance.checkOutTime" class="time-value">
-              {{ attendance.checkOutTime | date:'HH:mm' }}
+              {{ attendance.checkOutTime | localizedDate:'HH:mm' }}
             </span>
             <span *ngIf="!attendance.checkOutTime" class="no-time">--:--</span>
           </td>

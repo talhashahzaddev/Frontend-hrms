@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -17,9 +18,11 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 // Services
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
+
 @Component({
     selector: 'app-layout',
     imports: [
+    SharedCommonModule,
         CommonModule,
         RouterOutlet,
         MatSidenavModule,

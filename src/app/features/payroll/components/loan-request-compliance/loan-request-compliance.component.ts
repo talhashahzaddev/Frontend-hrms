@@ -19,6 +19,7 @@ import {
 } from '../dialogs/add-social-security-config-dialog/add-social-security-config-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type ComplianceTab = 'tax-slabs' | 'social-security';
 
 interface TaxSlabRow {
@@ -67,10 +68,12 @@ interface SocialSecurityTransactionRow {
   periodLabel: string;
 }
 
+
 @Component({
   selector: 'app-loan-request-compliance',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './loan-request-compliance.component.html',
   styleUrl: './loan-request-compliance.component.scss'
 })

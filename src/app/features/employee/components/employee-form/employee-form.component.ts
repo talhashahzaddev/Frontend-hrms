@@ -20,9 +20,12 @@ import { PaymentService } from '../../../../core/services/payment.service';
 import { PayrollService } from 'src/app/features/payroll/services/payroll.service';
 import { TaxCategoryDto } from 'src/app/features/payroll/services/payroll.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-form',
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

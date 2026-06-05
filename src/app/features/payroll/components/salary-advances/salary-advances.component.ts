@@ -15,6 +15,7 @@ import {
 } from '../dialogs/add-salary-advance-dialog/add-salary-advance-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type SalaryAdvanceStatus = SalaryAdvanceDialogStatus;
 type SalaryAdvanceTab = 'requests' | 'active' | 'history';
 
@@ -53,10 +54,12 @@ interface SalaryAdvanceRow {
   deductedAt: string | null;
 }
 
+
 @Component({
   selector: 'app-salary-advances',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './salary-advances.component.html',
   styleUrl: './salary-advances.component.scss'
 })

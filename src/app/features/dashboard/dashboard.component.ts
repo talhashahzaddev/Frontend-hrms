@@ -19,6 +19,7 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { DateTimeFormatService } from '../../core/services/date-time-format.service';
 import {
   DashboardSummary,
   AttendanceStats,
@@ -30,6 +31,7 @@ import {
 } from '../../core/models/dashboard.models';
 import { User } from '../../core/models/auth.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface DashboardCard {
   title: string;
   value: string | number;
@@ -46,9 +48,11 @@ interface ChartConfig {
   options?: any;
 }
 
+
 @Component({
     selector: 'app-dashboard',
     imports: [
+    SharedCommonModule,
         CommonModule,
         RouterModule,
         MatCardModule,
@@ -72,6 +76,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   cdr = inject(ChangeDetectorRef);
+  private dateTimeFormat = inject(DateTimeFormatService);
 
   isLoading = false;
   currentUser: User | null = null;
@@ -413,11 +418,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   formatDate(date: string | Date): string {
-    return new Date(date).toLocaleDateString();
+    return this.dateTimeFormat.formatDate(date, { fallback: '' });
   }
 
   formatTime(date: string | Date): string {
-    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return this.dateTimeFormat.formatTime(date, { fallback: '' });
   }
   refreshDashboard(): void {
   this.loadDashboardData();

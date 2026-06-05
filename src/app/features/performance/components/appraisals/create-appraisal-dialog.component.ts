@@ -16,6 +16,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { takeUntil } from 'rxjs/operators';
 import { Subject, firstValueFrom } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CreateAppraisalDialogData {
   appraisalCycles: AppraisalCycle[];
   employees: Employee[];
@@ -24,10 +25,12 @@ export interface CreateAppraisalDialogData {
   preSelectedCycleId?: string;
 }
 
+
 @Component({
   selector: 'app-create-appraisal-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

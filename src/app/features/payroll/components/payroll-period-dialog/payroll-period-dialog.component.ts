@@ -4,15 +4,18 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/materia
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PayrollPeriodDialogData {
   mode: 'add' | 'edit';
   record?: any;
 }
 
+
 @Component({
   selector: 'app-payroll-period-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, ReactiveFormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './payroll-period-dialog.component.html',
   styleUrl: './payroll-period-dialog.component.scss'
 })

@@ -106,9 +106,9 @@
 
       <section class="info-section">
         <div class="timestamps">
-          <span>Created on {{ item.createdAt | date:'medium' }}</span>
+          <span>Created on {{ item.createdAt | localizedDate:'medium' }}</span>
           <span *ngIf="item.updatedAt && item.updatedAt !== item.createdAt">
-            • Last updated {{ item.updatedAt | date:'medium' }}
+            • Last updated {{ item.updatedAt | localizedDate:'medium' }}
           </span>
         </div>
       </section>

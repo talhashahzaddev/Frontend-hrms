@@ -14,11 +14,14 @@ import { PublicCareerService } from '../../services/public-career.service';
 import { JobOpeningDto, CreateJobApplicationRequest } from '@core/models/jobs.models';
 import { CompanyCareerDetails } from '../public-career/public-career.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
     selector: 'app-career-apply-page',
     standalone: true,
     encapsulation: ViewEncapsulation.None,
     imports: [
+    SharedCommonModule,
         CommonModule,
         ReactiveFormsModule,
         MatFormFieldModule,

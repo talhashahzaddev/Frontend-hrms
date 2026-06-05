@@ -11,7 +11,7 @@
     </div>
     <div class="mon-header-right">
       <span class="last-updated" *ngIf="lastUpdated">
-        Updated {{ lastUpdated | date:'HH:mm:ss' }}
+        Updated {{ lastUpdated | localizedDate:'HH:mm:ss' }}
       </span>
       <button class="btn-refresh" (click)="refresh()" [disabled]="isRefreshing">
         <mat-icon [class.spinning]="isRefreshing">refresh</mat-icon>
@@ -146,7 +146,7 @@
           <!-- Clock-in -->
           <td>
             <span class="table-text">
-              {{ emp.lastCheckIn ? (emp.lastCheckIn | date:'HH:mm') : '—' }}
+              {{ emp.lastCheckIn ? (emp.lastCheckIn | localizedDate:'HH:mm') : '—' }}
             </span>
           </td>
 

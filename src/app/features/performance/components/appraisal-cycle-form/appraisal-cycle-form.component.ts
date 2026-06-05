@@ -13,7 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // ← replaced MatCheckboxModule
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'; import { SharedCommonModule } from '@shared/shared-common.module';
+// ← replaced MatCheckboxModule
 import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import {
@@ -22,10 +23,12 @@ import {
   CreateAppraisalCycleRequest
 } from '../../../../core/models/performance.models';
 
+
 @Component({
   selector: 'app-appraisal-cycle-form',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

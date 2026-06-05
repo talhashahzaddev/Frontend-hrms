@@ -19,6 +19,7 @@ import { NotificationService } from '@core/services/notification.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type ProvidentFundTab = 'funds' | 'my-requests' | 'history';
 type ProvidentFundRequestStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 type ProvidentFundRequestType = 'enrollment' | 'update' | 'withdrawal';
@@ -68,10 +69,12 @@ interface ProvidentFundAccountRecord {
   withdrawalConfig: ProvidentFundWithdrawalConfig | null;
 }
 
+
 @Component({
   selector: 'app-provident-fund-benefilts',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './provident-fund-benefilts.component.html',
   styleUrl: './provident-fund-benefilts.component.scss'
 })

@@ -15,6 +15,7 @@ import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface BonusLedgerRow {
   id: string;
   employeeId: string;
@@ -28,10 +29,12 @@ interface BonusLedgerRow {
   avatarTone: string;
 }
 
+
 @Component({
   selector: 'app-bonus-pay',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, RouterModule, MatIconModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './bonus-pay.component.html',
   styleUrl: './bonus-pay.component.scss'
 })

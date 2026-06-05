@@ -9,6 +9,7 @@ import {
   SocialSecurityJurisdictionOption
 } from '../../../services/payroll.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SocialSecuritySchemeDialogPayload {
   jurisdictionId: string;
   authorityId: string | null;
@@ -25,11 +26,13 @@ interface SocialSecuritySchemeDialogData {
   initialValue?: Partial<SocialSecuritySchemeDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-social-security-scheme-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-scheme-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

@@ -17,6 +17,7 @@ import { AuthService } from '@/app/core/services/auth.service';
 import { CreateTicketCategoryDialogComponent } from '../create-ticket-category-dialog/create-ticket-category-dialog.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component'; 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface Department {
   departmentId: string;
   departmentName: string;
@@ -30,10 +31,12 @@ interface Category {
   createdAt: string;
 }
 
+
 @Component({
   selector: 'app-ticket-category',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

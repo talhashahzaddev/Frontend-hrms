@@ -12,10 +12,13 @@ import { Department } from '../../../../core/models/employee.models';
 import { AppraisalCycle } from '../../../../core/models/performance.models';
 import { AuthService } from '@core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-payroll-calculation',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './payroll-calculation.component.html',
   styleUrls: ['./payroll-calculation.component.scss']
 })

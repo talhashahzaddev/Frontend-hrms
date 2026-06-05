@@ -9,15 +9,18 @@ import { ExpenseCategoryDto, CreateExpenseCategoryRequest, UpdateExpenseCategory
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CategoryDialogData {
   mode: 'create' | 'edit';
   category?: ExpenseCategoryDto;
 }
 
+
 @Component({
   selector: 'app-category-form-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

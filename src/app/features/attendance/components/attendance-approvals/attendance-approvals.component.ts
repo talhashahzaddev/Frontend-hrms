@@ -25,6 +25,7 @@ import { RouterLink } from '@angular/router';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { DateTimeFormatService } from '@core/services/date-time-format.service';
 import {
   EmployeeReviewPackage,
   DailyReviewRecord,
@@ -37,12 +38,15 @@ import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../ma
 import { EmployeeReviewDetailDialogComponent, EmployeeReviewDetailDialogData } from '../employee-review-detail-dialog/employee-review-detail-dialog.component';
 import { AuthService } from '@/app/core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 const EMPTY_GUID = '00000000-0000-0000-0000-000000000000';
+
 
 @Component({
   selector: 'app-attendance-approvals',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatCardModule,
@@ -99,7 +103,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
     private attendanceService: AttendanceService,
     private notificationService: NotificationService,
     private authService: AuthService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private dateTimeFormat: DateTimeFormatService
   ) {}
 
   ngOnInit(): void {
@@ -843,7 +848,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
   formatTime(dateTime?: string): string {
     if (!dateTime) return 'Ã¢â‚¬â€';
-    return new Date(dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    return this.dateTimeFormat.formatTime(dateTime);
   }
 
   formatDate(date?: string): string {

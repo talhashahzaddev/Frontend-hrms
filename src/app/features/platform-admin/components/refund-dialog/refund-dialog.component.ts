@@ -9,16 +9,19 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SuperAdminService } from '../../services/super-admin.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RefundDialogData {
   transactionId: string;
   amount: number;
   companyName: string;
 }
 
+
 @Component({
   selector: 'app-refund-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

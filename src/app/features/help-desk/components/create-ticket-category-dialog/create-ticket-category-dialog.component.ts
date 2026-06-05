@@ -11,6 +11,7 @@ import { EmployeeService } from '@/app/features/employee/services/employee.servi
 import { NotificationService } from '@/app/core/services/notification.service';
 import { CreateCategoryRequest, UpdateCategoryRequest } from '@/app/core/models/helpdesk.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface Department {
   departmentId: string;
   departmentName: string;
@@ -25,10 +26,12 @@ export interface Category {
   createdAt: string;
 }
 
+
 @Component({
   selector: 'app-create-ticket-category-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

@@ -93,7 +93,7 @@
           <!-- Date -->
           <ng-container matColumnDef="createdAt">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Submitted</th>
-            <td mat-cell *matCellDef="let inq">{{ inq.createdAt | date:'mediumDate' }}</td>
+            <td mat-cell *matCellDef="let inq">{{ inq.createdAt | localizedDate:'mediumDate' }}</td>
           </ng-container>
 
           <!-- Actions -->

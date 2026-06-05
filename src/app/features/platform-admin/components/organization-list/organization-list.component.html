@@ -112,13 +112,13 @@
           <!-- Subscription Expiry -->
           <ng-container matColumnDef="subscriptionExpiryDate">
             <th mat-header-cell *matHeaderCellDef>Expiry</th>
-            <td mat-cell *matCellDef="let org">{{ org.subscriptionExpiryDate ? (org.subscriptionExpiryDate | date:'mediumDate') : '—' }}</td>
+            <td mat-cell *matCellDef="let org">{{ org.subscriptionExpiryDate ? (org.subscriptionExpiryDate | localizedDate:'mediumDate') : '—' }}</td>
           </ng-container>
 
           <!-- Created -->
           <ng-container matColumnDef="createdAt">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Joined</th>
-            <td mat-cell *matCellDef="let org">{{ org.createdAt | date:'mediumDate' }}</td>
+            <td mat-cell *matCellDef="let org">{{ org.createdAt | localizedDate:'mediumDate' }}</td>
           </ng-container>
 
           <!-- Actions -->

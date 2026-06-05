@@ -19,12 +19,15 @@ import {
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 declare const L: any; // Leaflet
+
 
 @Component({
   selector: 'app-geo-fence-management',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

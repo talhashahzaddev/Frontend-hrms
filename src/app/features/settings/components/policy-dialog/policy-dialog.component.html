@@ -23,7 +23,7 @@
           <span class="status-badge" [class.published]="policy.isPublished" [class.draft]="!policy.isPublished">
             {{ policy.isPublished ? 'Published' : 'Draft' }}
           </span>
-          &nbsp;·&nbsp; Updated {{ policy.updatedAt | date:'MMM d, y' }}
+          &nbsp;·&nbsp; Updated {{ policy.updatedAt | localizedDate:'MMM d, y' }}
         </p>
         <p class="dialog-subtitle" *ngIf="!isView">
           {{ mode === 'add' ? 'Fill in the details to create a new policy' : 'Update the policy details below' }}
@@ -243,11 +243,11 @@
       </div>
       <div class="meta-row">
         <span class="meta-key">Created</span>
-        <span class="meta-val">{{ policy.createdAt | date:'medium' }}</span>
+        <span class="meta-val">{{ policy.createdAt | localizedDate:'medium' }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-key">Last updated</span>
-        <span class="meta-val">{{ policy.updatedAt | date:'medium' }}</span>
+        <span class="meta-val">{{ policy.updatedAt | localizedDate:'medium' }}</span>
       </div>
     </div>
 

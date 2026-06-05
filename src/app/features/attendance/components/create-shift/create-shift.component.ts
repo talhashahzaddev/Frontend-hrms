@@ -23,12 +23,15 @@ import { Observable, Subject, of, switchMap } from 'rxjs';
 import { GeoFenceService, GeoFenceDto } from '../../services/geofence.service';
 import { ShiftDto } from '@/app/core/models/attendance.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 declare const L: any;
+
 
 @Component({
   selector: 'app-create-shift',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

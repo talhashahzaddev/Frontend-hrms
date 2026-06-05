@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { PayrollService } from '../../../services/payroll.service';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type LoanPaymentRepaymentMethod = 'cash' | 'bank transfer';
 export type LoanPaymentRepaymentType = 'installment' | 'full';
 
@@ -46,11 +47,13 @@ interface LoanPaymentDialogData {
   currencySymbol?: string;
 }
 
+
 @Component({
   selector: 'app-add-loan-payment-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-loan-payment-dialog.component.html',
   styleUrl: './add-loan-payment-dialog.component.scss'
 })

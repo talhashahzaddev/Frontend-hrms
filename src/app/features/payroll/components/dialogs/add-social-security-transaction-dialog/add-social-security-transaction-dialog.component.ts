@@ -7,6 +7,7 @@ import { take } from 'rxjs';
 
 import { SettingsService } from '../../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SocialSecurityTransactionEmployeeOption {
   id: string;
   name: string;
@@ -62,11 +63,13 @@ interface SocialSecurityTransactionDialogData {
   initialValue?: Partial<SocialSecurityTransactionDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-social-security-transaction-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-transaction-dialog.component.html',
   styleUrl: './add-social-security-transaction-dialog.component.scss'
 })

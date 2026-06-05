@@ -10,10 +10,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PayrollService, MyPayslipFilterDto, MyPayslipDto, PayrollPeriodDto } from '../../services/payroll.service';
 import { AuthService } from '@core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-payslips',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule, MatDialogModule, MatSnackBarModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule, MatDialogModule, MatSnackBarModule],
   templateUrl: './payslips.component.html',
   styleUrls: ['./payslips.component.scss']
 })

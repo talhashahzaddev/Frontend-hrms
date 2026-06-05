@@ -17,6 +17,7 @@ import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface PerformanceLedgerRow {
   id: any;
   employeeId?: any;
@@ -33,10 +34,12 @@ interface PerformanceLedgerRow {
   avatarTone: string;
 }
 
+
 @Component({
   selector: 'app-performance-pay',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, RouterModule, MatIconModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './performance-pay.component.html',
   styleUrl: './performance-pay.component.scss'
 })

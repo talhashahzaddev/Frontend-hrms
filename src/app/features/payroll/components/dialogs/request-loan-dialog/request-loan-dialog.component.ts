@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { PayrollService } from '../../../services/payroll.service';
 import { Observable, shareReplay, take } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type LoanRepaymentType = 'installment' | 'full';
 
 export interface RequestLoanDialogPayload {
@@ -24,11 +25,13 @@ interface RequestLoanDialogData {
   loanId?: string;
 }
 
+
 @Component({
   selector: 'app-request-loan-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './request-loan-dialog.component.html',
   styleUrl: './request-loan-dialog.component.scss'
 })

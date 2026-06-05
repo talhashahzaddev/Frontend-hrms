@@ -136,7 +136,7 @@
       <div class="working-meta">
         <div class="meta-item">
           <span class="meta-label">Started at</span>
-          <span class="meta-value">{{ currentSession?.checkInTime | date:'HH:mm' }}</span>
+          <span class="meta-value">{{ currentSession?.checkInTime | localizedDate:'HH:mm' }}</span>
         </div>
         <div class="meta-divider"></div>
         <div class="meta-item">
@@ -155,8 +155,8 @@
 
       <div class="time-block">
         <div class="time-row">
-          <span class="live-time">{{ currentTime | date:'HH:mm:ss' }}</span>
-          <span class="live-date">{{ currentTime | date:'dd-MM-yyyy' }}</span>
+          <span class="live-time">{{ currentTime | localizedDate:'HH:mm:ss' }}</span>
+          <span class="live-date">{{ currentTime | localizedDate:'dd-MM-yyyy' }}</span>
         </div>
         <span class="elapsed-label">Elapsed Time</span>
       </div>
@@ -188,13 +188,13 @@
     <div class="strip-item">
       <span class="strip-label">Check In</span>
       <span class="strip-value">
-        {{ todayAttendance.checkInTime ? (todayAttendance.checkInTime | date:'HH:mm') : '--:--' }}
+        {{ todayAttendance.checkInTime ? (todayAttendance.checkInTime | localizedDate:'HH:mm') : '--:--' }}
       </span>
     </div>
     <div class="strip-item">
       <span class="strip-label">Check Out</span>
       <span class="strip-value muted">
-        {{ todayAttendance.checkOutTime ? (todayAttendance.checkOutTime | date:'HH:mm') : '--:--' }}
+        {{ todayAttendance.checkOutTime ? (todayAttendance.checkOutTime | localizedDate:'HH:mm') : '--:--' }}
       </span>
     </div>
     <div class="strip-item">
@@ -247,15 +247,15 @@
                mat-table [dataSource]="recentAttendance" class="compact-table">
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let r">{{ r.workDate | date:'dd-MM-yyyy' }}</td>
+            <td mat-cell *matCellDef="let r">{{ r.workDate | localizedDate:'dd-MM-yyyy' }}</td>
           </ng-container>
           <ng-container matColumnDef="checkIn">
             <th mat-header-cell *matHeaderCellDef>Check-In</th>
-            <td mat-cell *matCellDef="let r">{{ r.checkInTime ? (r.checkInTime | date:'hh:mm a') : '--:--' }}</td>
+            <td mat-cell *matCellDef="let r">{{ r.checkInTime ? (r.checkInTime | localizedDate:'hh:mm a') : '--:--' }}</td>
           </ng-container>
           <ng-container matColumnDef="checkOut">
             <th mat-header-cell *matHeaderCellDef>Check-Out</th>
-            <td mat-cell *matCellDef="let r">{{ r.checkOutTime ? (r.checkOutTime | date:'hh:mm a') : '--:--' }}</td>
+            <td mat-cell *matCellDef="let r">{{ r.checkOutTime ? (r.checkOutTime | localizedDate:'hh:mm a') : '--:--' }}</td>
           </ng-container>
           <ng-container matColumnDef="hours">
             <th mat-header-cell *matHeaderCellDef>Hours</th>
@@ -295,12 +295,12 @@
         <div class="session-row" *ngFor="let session of todaySessions; let i = index" [class.dim]="i > 0">
           <div class="session-left">
             <div class="session-date-badge" [class.inactive]="i > 0">
-              <span class="day">{{ session.checkInTime | date:'d' }}</span>
-              <span class="month">{{ session.checkInTime | date:'MMM' }}</span>
+              <span class="day">{{ session.checkInTime | localizedDate:'d' }}</span>
+              <span class="month">{{ session.checkInTime | localizedDate:'MMM' }}</span>
             </div>
             <div class="session-time">
               <mat-icon>login</mat-icon>
-              {{ session.checkInTime | date:'hh:mm a' }}
+              {{ session.checkInTime | localizedDate:'hh:mm a' }}
             </div>
           </div>
           <div class="session-duration">

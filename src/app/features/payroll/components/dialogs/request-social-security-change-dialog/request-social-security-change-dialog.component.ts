@@ -13,6 +13,7 @@ import {
 } from '../../../services/payroll.service';
 import { SettingsService } from '../../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RequestSocialSecurityRuleOption {
   ruleId: string;
   ruleName: string;
@@ -31,11 +32,13 @@ interface UploadedDoc extends SocialSecurityRequestDocumentInput {
   error: boolean;
 }
 
+
 @Component({
   selector: 'app-request-social-security-change-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './request-social-security-change-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

@@ -76,7 +76,7 @@
             <td>{{ category.categoryName }}</td>
             <td>{{ category.departmentName || 'N/A' }}</td>
             <td>{{ category.status ? 'Active' : 'Inactive' }}</td>
-            <td>{{ category.createdAt | date:'short' }}</td>
+            <td>{{ category.createdAt | localizedDate:'short' }}</td>
             <td class="text-center">
               <button
                 mat-icon-button

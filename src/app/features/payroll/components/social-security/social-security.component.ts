@@ -60,6 +60,7 @@ import {
   SocialSecurityEnrollmentRoster
 } from '../../services/payroll.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type SocialTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules' | 'requests' | 'enrollments' | 'transactions' | 'claims';
 
 interface SocialTransactionRow {
@@ -80,10 +81,12 @@ interface SocialTransactionRow {
   isEnrolled: boolean;
 }
 
+
 @Component({
   selector: 'app-social-security',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './social-security.component.html',
   styleUrl: './social-security.component.scss'
 })

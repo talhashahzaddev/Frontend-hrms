@@ -28,7 +28,7 @@
           <mat-select formControlName="cycleId">
             <mat-option [value]="">All Cycles</mat-option>
             <mat-option *ngFor="let cycle of appraisalCycles" [value]="cycle.cycleId">
-              {{ cycle.cycleName }} ({{ cycle.startDate | date:'shortDate' }} - {{ cycle.endDate | date:'shortDate' }})
+              {{ cycle.cycleName }} ({{ cycle.startDate | localizedDate:'shortDate' }} - {{ cycle.endDate | localizedDate:'shortDate' }})
             </mat-option>
           </mat-select>
         </mat-form-field>

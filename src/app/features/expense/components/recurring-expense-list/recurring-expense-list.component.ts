@@ -27,12 +27,15 @@ import {
   ConfirmDeleteData
 } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type RecurringListView = 'my-recurring' | 'all-recurring';
+
 
 @Component({
   selector: 'app-recurring-expense-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

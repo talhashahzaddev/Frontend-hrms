@@ -53,8 +53,8 @@
             <mat-card class="holiday-card" [class.selected]="isSelected(holiday.holidayId)">
               <div class="card-left">
                 <div class="date-badge">
-                  <span class="day">{{ holiday.holidayDate | date:'dd' }}</span>
-                  <span class="month">{{ holiday.holidayDate | date:'MMM' }}</span>
+                  <span class="day">{{ holiday.holidayDate | localizedDate:'dd' }}</span>
+                  <span class="month">{{ holiday.holidayDate | localizedDate:'MMM' }}</span>
                 </div>
               </div>
               <div class="card-content">
@@ -129,8 +129,8 @@
             <mat-card class="holiday-card past" [class.selected]="isSelected(holiday.holidayId)">
               <div class="card-left">
                 <div class="date-badge past">
-                  <span class="day">{{ holiday.holidayDate | date:'dd' }}</span>
-                  <span class="month">{{ holiday.holidayDate | date:'MMM' }}</span>
+                  <span class="day">{{ holiday.holidayDate | localizedDate:'dd' }}</span>
+                  <span class="month">{{ holiday.holidayDate | localizedDate:'MMM' }}</span>
                 </div>
               </div>
               <div class="card-content">

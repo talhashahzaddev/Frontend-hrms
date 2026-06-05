@@ -4,6 +4,7 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ConfirmationDialogData {
   title: string;
   message: string;
@@ -15,10 +16,12 @@ export interface ConfirmationDialogData {
   icon?: string;
 }
 
+
 @Component({
   selector: 'app-confirmation-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
     <div class="confirmation-dialog">
       <h2 mat-dialog-title>

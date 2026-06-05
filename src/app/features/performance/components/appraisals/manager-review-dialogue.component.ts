@@ -17,6 +17,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ManagerReviewDialogueData {
   employeeId: string;
   employeeName: string;
@@ -39,10 +40,12 @@ export interface ManagerReviewRequest {
   status: string;
 }
 
+
 @Component({
   selector: 'app-manager-review-dialogue',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

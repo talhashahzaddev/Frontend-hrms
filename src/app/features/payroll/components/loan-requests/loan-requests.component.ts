@@ -24,6 +24,7 @@ import {
   SalaryAdvanceRuleOption
 } from '../dialogs/request-salary-advance-dialog/request-salary-advance-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type ModuleTab = 'loans' | 'salary-advance';
 type LoanSectionTab = 'requested' | 'active' | 'history';
 type SalarySectionTab = 'requested' | 'active' | 'history';
@@ -94,10 +95,12 @@ interface SalaryAdvanceRecord {
   deductedAt: string | null;
 }
 
+
 @Component({
   selector: 'app-loan-requests',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './loan-requests.component.html',
   styleUrl: './loan-requests.component.scss'
 })

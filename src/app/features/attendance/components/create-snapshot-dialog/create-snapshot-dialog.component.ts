@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MonthlyTimesheetCreateDto } from '../../../../core/models/attendance.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value;
   const end   = group.get('endDate')?.value;
@@ -19,10 +20,12 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
   return null;
 }
 
+
 @Component({
   selector: 'app-create-snapshot-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

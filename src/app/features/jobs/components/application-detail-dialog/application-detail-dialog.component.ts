@@ -7,14 +7,17 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { JobApplicationDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ApplicationDetailDialogData {
   jobApplyId: string;
 }
+
 
 @Component({
   selector: 'app-application-detail-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,

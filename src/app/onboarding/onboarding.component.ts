@@ -14,6 +14,7 @@ import {
   SaveBankDetailsRequest
 } from './services/onboarding.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 // ─── Local interfaces ─────────────────────────────────────────────────────────
 
 export interface ProfileForm {
@@ -74,10 +75,12 @@ export interface BankErrors {
   iban?:                 string;
 }
 
+
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss']
 })

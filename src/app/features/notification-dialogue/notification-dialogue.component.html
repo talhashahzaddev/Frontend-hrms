@@ -15,7 +15,7 @@
       <div class="content">
         <div class="title">{{ n.title }}</div>
         <div class="message" [innerHTML]="getSafeHtml(n.message)"></div>
-        <div class="time">{{ n.createdAt | date:'dd-MM-yyyy HH:mm' }}</div>
+        <div class="time">{{ n.createdAt | localizedDate:'dd-MM-yyyy HH:mm' }}</div>
 
         <!-- ✅ CHANGED: Show buttons only when requestStatus is 'pending' -->
         <div *ngIf="n.notificationType === 'Request' && n.moduletype && n.requestStatus === 'pending'"

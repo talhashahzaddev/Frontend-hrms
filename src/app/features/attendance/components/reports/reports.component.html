@@ -198,12 +198,12 @@
               <td class="employee-cell">{{ record.employeeName }}</td>
 
               <!-- Date -->
-              <td class="date-cell">{{ record.workDate | date:'MMM d, y' }}</td>
+              <td class="date-cell">{{ record.workDate | localizedDate:'MMM d, y' }}</td>
 
               <!-- Check In -->
               <td class="time-cell">
                 <span *ngIf="record.checkInTime" class="time-value">
-                  {{ record.checkInTime | date:'hh:mm a' }}
+                  {{ record.checkInTime | localizedDate:'hh:mm a' }}
                 </span>
                 <span *ngIf="!record.checkInTime" class="time-empty">--:--</span>
               </td>
@@ -211,7 +211,7 @@
               <!-- Check Out -->
               <td class="time-cell">
                 <span *ngIf="record.checkOutTime" class="time-value">
-                  {{ record.checkOutTime | date:'hh:mm a' }}
+                  {{ record.checkOutTime | localizedDate:'hh:mm a' }}
                 </span>
                 <span *ngIf="!record.checkOutTime" class="time-empty">--:--</span>
               </td>

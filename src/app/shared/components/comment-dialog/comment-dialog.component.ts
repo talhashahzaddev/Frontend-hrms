@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CommentDialogData {
     title: string;
     label: string;
@@ -14,10 +15,12 @@ export interface CommentDialogData {
     required?: boolean;
 }
 
+
 @Component({
     selector: 'app-comment-dialog',
     standalone: true,
     imports: [
+    SharedCommonModule,
         CommonModule,
         FormsModule,
         MatDialogModule,

@@ -7,6 +7,7 @@ import { take } from 'rxjs';
 
 import { SettingsService } from '../../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type SocialSecurityConfigStatus = 'active' | 'inactive';
 
 export interface SocialSecurityConfigDialogPayload {
@@ -77,11 +78,13 @@ interface SocialSecurityConfigDialogData {
   rules?: SocialSecurityConfigDialogRuleOption[];
 }
 
+
 @Component({
   selector: 'app-add-social-security-config-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-config-dialog.component.html',
   styleUrl: './add-social-security-config-dialog.component.scss'
 })

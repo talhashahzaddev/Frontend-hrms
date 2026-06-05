@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SalaryAdvanceRuleOption {
   ruleId: string;
   ruleName: string;
@@ -26,11 +27,13 @@ interface RequestSalaryAdvanceDialogData {
   initialValue?: Partial<RequestSalaryAdvanceDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-request-salary-advance-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './request-salary-advance-dialog.component.html',
   styleUrl: './request-salary-advance-dialog.component.scss'
 })

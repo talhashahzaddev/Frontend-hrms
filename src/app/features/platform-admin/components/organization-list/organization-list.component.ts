@@ -20,10 +20,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { OrganizationListItem, OrganizationFilter, SubscriptionPlan } from '../../models/super-admin.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-organization-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatTableModule,

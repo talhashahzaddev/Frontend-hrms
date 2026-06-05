@@ -17,9 +17,12 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { Employee } from '../../../../core/models/employee.models';
 import { AuthService } from '../../../../core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-detail',
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,
@@ -114,7 +117,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   </div>
                   <div class="info-item">
                     <label>Date of Birth</label>
-                    <span>{{ (employee.dateOfBirth | date:'mediumDate') || 'Not provided' }}</span>
+                    <span>{{ (employee.dateOfBirth | localizedDate:'mediumDate') || 'Not provided' }}</span>
                   </div>
                   <div class="info-item">
                     <label>Gender</label>
@@ -130,7 +133,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   </div>
                   <div class="info-item">
                     <label>Hire Date</label>
-                    <span>{{ employee.hireDate | date:'mediumDate' }}</span>
+                    <span>{{ employee.hireDate | localizedDate:'mediumDate' }}</span>
                   </div>
                 </div>
 
@@ -204,7 +207,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   </div>
                   <div class="info-item">
                     <label>Hire Date</label>
-                    <span>{{ employee.hireDate | date:'mediumDate' }}</span>
+                    <span>{{ employee.hireDate | localizedDate:'mediumDate' }}</span>
                   </div>
                 </div>
               </div>

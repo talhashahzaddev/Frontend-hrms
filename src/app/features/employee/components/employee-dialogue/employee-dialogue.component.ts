@@ -12,10 +12,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { EmployeeService } from '../../services/employee.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { Subject, takeUntil } from 'rxjs';
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-dialogue',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

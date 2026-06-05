@@ -16,6 +16,7 @@ import {
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface LateRecordDto {
   id: string;
   employeeId: string;
@@ -31,10 +32,12 @@ export interface LateRecordDto {
   ruleName?: string;
 }
 
+
 @Component({
   selector: 'app-time-tracking-late',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
   templateUrl: './time-tracking-late.component.html',
   styleUrl: './time-tracking-late.component.scss'
 })

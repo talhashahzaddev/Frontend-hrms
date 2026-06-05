@@ -11,16 +11,19 @@ import { SettingsService } from '../../../../settings/services/settings.service'
 import { take } from 'rxjs';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface BonusDialogData {
   mode?: 'create' | 'edit';
   initialValue?: any;
 }
 
+
 @Component({
   selector: 'app-add-bonus-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './add-bonus-dialog.component.html',
   styleUrl: './add-bonus-dialog.component.scss'
 })

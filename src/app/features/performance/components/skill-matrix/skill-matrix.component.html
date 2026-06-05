@@ -117,7 +117,7 @@
           <ng-container matColumnDef="createdAt">
             <th mat-header-cell *matHeaderCellDef>Created</th>
             <td mat-cell *matCellDef="let s" class="cell-date">
-              {{ s.createdAt | date:'dd MMM yyyy' }}
+              {{ s.createdAt | localizedDate:'dd MMM yyyy' }}
             </td>
           </ng-container>
 
@@ -402,7 +402,7 @@
           <ng-container matColumnDef="lastAssessed">
             <th mat-header-cell *matHeaderCellDef>Last Assessed</th>
             <td mat-cell *matCellDef="let s" class="cell-date">
-              {{ s.lastAssessed ? (s.lastAssessed | date:'dd MMM yyyy') : '—' }}
+              {{ s.lastAssessed ? (s.lastAssessed | localizedDate:'dd MMM yyyy') : '—' }}
             </td>
           </ng-container>
 
@@ -766,7 +766,7 @@
             <div class="dlg__skill-card__meta">
               <span *ngIf="sk.assessorName" class="cell-assessor"><mat-icon>person_check</mat-icon>{{ sk.assessorName }}</span>
               <span *ngIf="!sk.assessorName" class="badge badge--pending">Pending Assessment</span>
-              <span class="cell-date" *ngIf="sk.lastAssessed">{{ sk.lastAssessed | date:'dd MMM yyyy' }}</span>
+              <span class="cell-date" *ngIf="sk.lastAssessed">{{ sk.lastAssessed | localizedDate:'dd MMM yyyy' }}</span>
             </div>
             <div class="dlg__skill-card__notes" *ngIf="sk.notes">{{ sk.notes }}</div>
           </div>

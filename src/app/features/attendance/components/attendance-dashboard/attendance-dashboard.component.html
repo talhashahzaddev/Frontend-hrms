@@ -15,8 +15,8 @@
     
     <div class="header-right">
       <div class="current-time-display">
-        <p class="time-text">{{ currentTime | date:'HH:mm:ss' }}</p>
-        <p class="date-text">{{ currentTime | date:'dd-MM-yyyy' }}</p>
+        <p class="time-text">{{ currentTime | localizedDate:'HH:mm:ss' }}</p>
+        <p class="date-text">{{ currentTime | localizedDate:'dd-MM-yyyy' }}</p>
       </div>
       <div class="header-divider"></div>
       <div class="user-profile" *ngIf="currentUser">
@@ -151,10 +151,10 @@
                     <span class="employee-name-text">{{ session.employeeName }}</span>
                   </div>
                 </td>
-                <td class="date-cell">{{ session.workDate | date:'dd-MM-yyyy' }}</td>
+                <td class="date-cell">{{ session.workDate | localizedDate:'dd-MM-yyyy' }}</td>
                 <td class="time-cell">
                   <ng-container *ngIf="session.checkInTime; else absent">
-                    {{ session.checkInTime | date:'HH:mm' }}
+                    {{ session.checkInTime | localizedDate:'HH:mm' }}
                   </ng-container>
                   <ng-template #absent>
                     <span class="absent-text">--:--</span>
@@ -162,7 +162,7 @@
                 </td>
                 <td class="time-cell">
                   <ng-container *ngIf="session.checkOutTime; else absentOut">
-                    {{ session.checkOutTime | date:'HH:mm' }}
+                    {{ session.checkOutTime | localizedDate:'HH:mm' }}
                   </ng-container>
                   <ng-template #absentOut>
                     <span class="absent-text">--:--</span>

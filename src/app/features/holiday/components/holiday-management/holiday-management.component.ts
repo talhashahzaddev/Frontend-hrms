@@ -25,16 +25,19 @@ import { HolidayCatalogPickerComponent } from '../holiday-catalog-picker/holiday
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { Department } from '../../../../core/models/employee.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface TimelineMonth {
   key: string;
   label: string;
   holidays: CompanyHoliday[];
 }
 
+
 @Component({
   selector: 'app-holiday-management',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

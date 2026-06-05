@@ -8,16 +8,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PromptDialogData {
     title: string;
     label: string;
     value: Date; // Changed from number to Date
 }
 
+
 @Component({
     selector: 'app-prompt-dialog',
     standalone: true,
     imports: [
+    SharedCommonModule,
         CommonModule,
         FormsModule,
         MatDialogModule,

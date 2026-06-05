@@ -1,3 +1,4 @@
+import { SharedCommonModule } from '@shared/shared-common.module';
 // ============================================================
 // FILE: features/settings/components/policy-dialog/policy-dialog.component.ts
 //
@@ -44,10 +45,12 @@ export interface PolicyDialogData {
   policy: CompanyPolicy | null;
 }
 
+
 @Component({
   selector:    'app-policy-dialog',
   standalone:  true,
   imports: [
+    SharedCommonModule,
     CommonModule, ReactiveFormsModule,
     MatDialogModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule,

@@ -23,6 +23,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ViewDetailsDialogueComponent } from '../view-details-dialogue/view-details-dialogue.component';
+import { SharedCommonModule } from '@shared/shared-common.module';
 // import { ManageOfficeIPsDialogComponent } from '../manage-office-ips-dialog/manage-office-ips-dialog.component';
 
 import { AttendanceService } from '../../services/attendance.service';
@@ -36,10 +37,12 @@ import {
 import { Department } from '../../../../core/models/employee.models';
 import { User } from '../../../../core/models/auth.models';
 
+
 @Component({
   selector: 'app-team-attandence',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     ReactiveFormsModule,

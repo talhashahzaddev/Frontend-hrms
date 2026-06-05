@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type ProvidentFundRequestDialogMode = 'enrollment' | 'percentage-update' | 'withdrawal';
 export type ProvidentFundWithdrawalType = 'temporary' | 'permanent';
 export interface ProvidentFundWithdrawalRule {
@@ -48,11 +49,13 @@ interface ProvidentFundRequestDialogData {
   initialValue?: Partial<ProvidentFundRequestDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-provident-fund-request-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './provident-fund-request-dialog.component.html',
   styleUrl: './provident-fund-request-dialog.component.scss'
 })

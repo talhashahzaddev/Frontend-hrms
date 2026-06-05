@@ -89,14 +89,14 @@
     <div class="card-body">
       <p><strong>Shift Name:</strong> {{ currentShift.shiftName }}</p>
       <p>
-        <strong>Start:</strong> {{ currentShift.startTime }} |
-        <strong>End:</strong> {{ currentShift.endTime }} |
+        <strong>Start:</strong> {{ currentShift.startTime | localizedTime }} |
+        <strong>End:</strong> {{ currentShift.endTime | localizedTime }} |
         <strong>Break:</strong> {{ currentShift.breakDuration }} min
         <strong *ngIf="currentShift.marginHours">
           | Margin Hours: ±{{ currentShift.marginHours }} hrs
         </strong>
       </p>
-      <p *ngIf="currentShift?.daysOfWeek">
+      <p *ngIf="currentShift.daysOfWeek">
         <strong>Days:</strong> {{ formatShiftDays(currentShift.daysOfWeek) }}
       </p>
     </div>
@@ -134,12 +134,12 @@
 
         <ng-container matColumnDef="startTime">
           <mat-header-cell *matHeaderCellDef>Start Time</mat-header-cell>
-          <mat-cell *matCellDef="let shift">{{ shift.startTime }}</mat-cell>
+          <mat-cell *matCellDef="let shift">{{ shift.startTime | localizedTime }}</mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="endTime">
           <mat-header-cell *matHeaderCellDef>End Time</mat-header-cell>
-          <mat-cell *matCellDef="let shift">{{ shift.endTime }}</mat-cell>
+          <mat-cell *matCellDef="let shift">{{ shift.endTime | localizedTime }}</mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="marginHours">

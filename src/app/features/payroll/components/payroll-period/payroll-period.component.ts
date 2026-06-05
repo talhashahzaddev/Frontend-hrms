@@ -9,10 +9,13 @@ import { PayrollService } from '../../services/payroll.service';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { AuthService } from '@core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-payroll-period',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, MatDialogModule],
   templateUrl: './payroll-period.component.html',
   styleUrl: './payroll-period.component.scss'
 })

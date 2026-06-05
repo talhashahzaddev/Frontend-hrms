@@ -74,7 +74,7 @@
               </mat-checkbox>
               <div class="holiday-details">
                 <span class="holiday-name">{{ holiday.holidayName }}</span>
-                <span class="holiday-date">{{ holiday.holidayDate | date:'EEE, MMM dd, yyyy' }}</span>
+                <span class="holiday-date">{{ holiday.holidayDate | localizedDate:'EEE, MMM dd, yyyy' }}</span>
               </div>
               @if (holiday.description) {
                 <span class="holiday-desc">{{ holiday.description }}</span>

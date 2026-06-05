@@ -17,7 +17,8 @@ import { LeaveService } from '../../services/leave.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { LeaveRequestDetailsDialogComponent } from '../leave-request-details-dialog/leave-request-details-dialog.component';
-import { CancelLeaveDialogComponent } from '../cancel-leave-dialog/cancel-leave-dialog.component';  // ← new
+import { CancelLeaveDialogComponent } from '../cancel-leave-dialog/cancel-leave-dialog.component';  import { SharedCommonModule } from '@shared/shared-common.module';
+// ← new
 import {
   LeaveRequest,
   LeaveType,
@@ -26,10 +27,12 @@ import {
 import { User } from '../../../../core/models/auth.models';
 import { ApplyLeaveComponent } from '../apply-leave/apply-leave.component';
 
+
 @Component({
   selector: 'app-leave-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     MatCardModule,

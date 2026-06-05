@@ -85,7 +85,7 @@
                   <mat-divider></mat-divider>
                   <div class="info-row">
                     <span class="info-label">Created</span>
-                    <span class="info-value">{{ org.createdAt | date:'medium' }}</span>
+                    <span class="info-value">{{ org.createdAt | localizedDate:'medium' }}</span>
                   </div>
                 </mat-card-content>
               </mat-card>
@@ -150,12 +150,12 @@
                   <mat-divider></mat-divider>
                   <div class="info-row">
                     <span class="info-label">Start Date</span>
-                    <span class="info-value">{{ org.subscription.startDate | date:'mediumDate' }}</span>
+                    <span class="info-value">{{ org.subscription.startDate | localizedDate:'mediumDate' }}</span>
                   </div>
                   <mat-divider></mat-divider>
                   <div class="info-row">
                     <span class="info-label">End Date</span>
-                    <span class="info-value">{{ org.subscription.endDate | date:'mediumDate' }}</span>
+                    <span class="info-value">{{ org.subscription.endDate | localizedDate:'mediumDate' }}</span>
                   </div>
                 </mat-card-content>
               </mat-card>
@@ -203,7 +203,7 @@
 
                     <ng-container matColumnDef="createdAt">
                       <th mat-header-cell *matHeaderCellDef>Date</th>
-                      <td mat-cell *matCellDef="let row">{{ row.createdAt | date:'medium' }}</td>
+                      <td mat-cell *matCellDef="let row">{{ row.createdAt | localizedDate:'medium' }}</td>
                     </ng-container>
 
                     <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>

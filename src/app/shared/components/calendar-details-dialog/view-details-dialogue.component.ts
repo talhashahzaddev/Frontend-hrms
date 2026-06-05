@@ -4,22 +4,26 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AttendanceService } from '../../../features/attendance/services/attendance.service';
+import { DateTimeFormatService } from '@core/services/date-time-format.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AttendanceSessionDto, ShiftDto } from '../../../core/models/attendance.models';
 import { CalendarEvent } from '../../../features/calendar/models/calendar.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-view-details-dialogue',
   templateUrl: './view-details-dialogue.component.html',
   styleUrls: ['./view-details-dialogue.component.scss'],
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatIconModule,
     MatCardModule,
@@ -27,8 +31,7 @@ import { CalendarEvent } from '../../../features/calendar/models/calendar.models
     MatProgressSpinnerModule,
     MatDialogModule,
     MatDividerModule,
-    MatButtonModule,
-    DatePipe
+    MatButtonModule
   ]
 })
 export class CalendarDetailsDialogueComponent implements OnInit, OnDestroy {
@@ -52,7 +55,8 @@ export class CalendarDetailsDialogueComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: { date: string, events: CalendarEvent[], employeeId: string, employeeName: string },
     private attendanceService: AttendanceService,
     private authService: AuthService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private dateTimeFormat: DateTimeFormatService
   ) { }
 
   ngOnInit(): void {
@@ -129,11 +133,7 @@ export class CalendarDetailsDialogueComponent implements OnInit, OnDestroy {
 
   formatShiftTime(time: string): string {
     if (!time) return '';
-    const [hours, minutes] = time.split(':');
-    const date = new Date();
-    date.setHours(parseInt(hours, 10));
-    date.setMinutes(parseInt(minutes, 10));
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return this.dateTimeFormat.formatTime(time, { fallback: '' });
   }
 
   closeDialog(): void {

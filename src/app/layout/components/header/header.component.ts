@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef, HostListener } from '@angular/core';
+import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -35,9 +36,11 @@ import { EmployeeService } from '@/app/features/employee/services/employee.servi
 import { NotificationDialogueComponent } from '../../../features/notification-dialogue/notification-dialogue.component'
 import { environment } from '@/environments/environment';
 
+
 @Component({
   selector: 'app-header',
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     RouterModule,

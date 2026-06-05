@@ -18,14 +18,17 @@ import {
   ConfirmDeleteData
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ApplicationProcessDialogData {
   jobApplyId: string;
 }
+
 
 @Component({
   selector: 'app-application-process-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

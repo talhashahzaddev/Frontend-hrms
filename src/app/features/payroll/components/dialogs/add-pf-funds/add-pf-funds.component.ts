@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PfFundsEmployeeOption {
   id: string;
   name: string;
@@ -25,11 +26,13 @@ interface AddPfFundsDialogData {
   periods?: PfFundsPeriodOption[];
 }
 
+
 @Component({
   selector: 'app-add-pf-funds',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-pf-funds.component.html',
   styleUrl: './add-pf-funds.component.scss'
 })

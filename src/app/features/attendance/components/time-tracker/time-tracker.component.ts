@@ -29,13 +29,16 @@ import {
 import { User } from '../../../../core/models/auth.models';
 import { GeoFenceService, ShiftGeoFenceDto, GeoClockInRequest } from '../../services/geofence.service';
 import { environment } from '../../../../../environments/environment';
+import { SharedCommonModule } from '@shared/shared-common.module';
 declare const faceapi: any;
 type StepState = 'idle' | 'loading' | 'success' | 'error';
+
 
 @Component({
   selector: 'app-time-tracker',
   standalone: true,
   imports: [
+    SharedCommonModule,
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,

@@ -14,6 +14,7 @@ import { takeUntil, catchError } from 'rxjs/operators';
 
 import { AttendanceService } from '../../services/attendance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { DateTimeFormatService } from '@core/services/date-time-format.service';
 import {
   EmployeeReviewPackage,
   DailyReviewRecord,
@@ -26,6 +27,7 @@ import { ManagerOverrideDialogComponent, ManagerOverrideDialogData } from '../ma
 import { AttendanceRequestDialogComponent } from '../attendance-request-dialog/attendance-request-dialog.component';
 import { AuthService } from '../../../../core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface EmployeeReviewDetailDialogData {
   package: EmployeeReviewPackage;
   timesheetId: string;
@@ -39,10 +41,12 @@ interface MonthlyDayRecord extends DailyReviewRecord {
   hasRecord: boolean;
 }
 
+
 @Component({
   selector: 'app-employee-review-detail-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,
@@ -110,7 +114,8 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
     private attendanceService: AttendanceService,
     private notificationService: NotificationService,
     private dialog: MatDialog,
-    private authService: AuthService
+    private authService: AuthService,
+    private dateTimeFormat: DateTimeFormatService
   ) {
     this.pkg = data.package;
   }
@@ -600,11 +605,7 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
     if (typeof timeStr === 'string' && timeStr.includes('T')) {
       const d = new Date(timeStr);
       if (!isNaN(d.getTime())) {
-        return d.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
+        return this.dateTimeFormat.formatTime(d);
       }
     }
     if (typeof timeStr === 'string' && /^\d{2}:\d{2}$/.test(timeStr)) {

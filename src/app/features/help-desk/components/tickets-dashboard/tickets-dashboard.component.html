@@ -120,7 +120,7 @@
                                         && ticket.priority !== 'Low')
               }">{{ ticket.priority || 'N/A' }}</span>
             </td>
-            <td class="td-date">{{ ticket.createdat | date: 'MM/dd/yy' }}</td>
+            <td class="td-date">{{ ticket.createdat | localizedDate: 'MM/dd/yy' }}</td>
 
             <!-- Three-dot action menu (hidden if no permissions) -->
             <td class="text-center">

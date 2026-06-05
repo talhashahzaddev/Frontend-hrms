@@ -15,16 +15,19 @@ import { MatDividerModule } from '@angular/material/divider';
 
 import { PlatformAdminAuthService } from '../services/platform-admin-auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface NavItem {
   label: string;
   icon: string;
   route: string;
 }
 
+
 @Component({
   selector: 'app-platform-layout',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     MatSidenavModule,

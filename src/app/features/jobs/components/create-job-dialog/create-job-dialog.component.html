@@ -223,7 +223,7 @@
               </div>
               <div class="bp-summary-footer" *ngIf="jobForm.value.lastDate">
                 <span class="label">Last Date to Apply</span>
-                <span class="value">{{ jobForm.value.lastDate | date:'mediumDate' }}</span>
+                <span class="value">{{ jobForm.value.lastDate | localizedDate:'mediumDate' }}</span>
               </div>
             </div>
           </div>

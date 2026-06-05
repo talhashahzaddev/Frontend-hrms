@@ -20,10 +20,13 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { CreateAssetTypeDialogComponent } from './create-asset-type-dialog.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-asset-types',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

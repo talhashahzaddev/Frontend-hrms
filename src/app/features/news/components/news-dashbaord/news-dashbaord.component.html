@@ -120,7 +120,7 @@
           <ng-container matColumnDef="publishedAt">
             <th mat-header-cell *matHeaderCellDef>PUBLISHED AT</th>
             <td mat-cell *matCellDef="let news">
-              <span class="date-text">{{ news.publishedAt ? (news.publishedAt | date:'MMM dd, yyyy') : '--' }}</span>
+              <span class="date-text">{{ news.publishedAt ? (news.publishedAt | localizedDate:'MMM dd, yyyy') : '--' }}</span>
             </td>
           </ng-container>
 

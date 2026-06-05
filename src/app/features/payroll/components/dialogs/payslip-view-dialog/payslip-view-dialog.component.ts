@@ -3,6 +3,7 @@ import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PayslipViewValueItem {
   label: string;
   amount: number;
@@ -46,11 +47,13 @@ export interface PayslipViewDialogData {
   netPayablePkr: number;
 }
 
+
 @Component({
   selector: 'app-payslip-view-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatIconModule],
   templateUrl: './payslip-view-dialog.component.html',
   styleUrl: './payslip-view-dialog.component.scss'
 })

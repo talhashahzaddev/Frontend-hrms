@@ -125,11 +125,11 @@
               </div>
               <div>
                 <p>Approved on</p>
-                <strong>{{ (record.approvedAt ?? record.approvedat) ? ((record.approvedAt ?? record.approvedat) | date:'dd MMM yyyy') : 'Pending' }}</strong>
+                <strong>{{ (record.approvedAt ?? record.approvedat) ? ((record.approvedAt ?? record.approvedat) | localizedDate:'dd MMM yyyy') : 'Pending' }}</strong>
               </div>
               <div>
                 <p>Paid on</p>
-                <strong>{{ (record.paidAt ?? record.paidat) ? ((record.paidAt ?? record.paidat) | date:'dd MMM yyyy') : 'Not paid yet' }}</strong>
+                <strong>{{ (record.paidAt ?? record.paidat) ? ((record.paidAt ?? record.paidat) | localizedDate:'dd MMM yyyy') : 'Not paid yet' }}</strong>
               </div>
             </div>
           </div>
