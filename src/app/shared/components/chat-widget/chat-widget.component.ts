@@ -6,16 +6,19 @@ import { ChatService, ChatMessage } from '../../services/chat.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface FormattedMessagePart {
   type: 'text' | 'url' | 'linebreak';
   content: string;
   url?: string;
 }
 
+
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule],
   templateUrl: './chat-widget.component.html',
   styleUrls: ['./chat-widget.component.scss']
 })

@@ -19,6 +19,7 @@ import {
 } from '../dialogs/add-gratuity-record-dialog/add-gratuity-record-dialog.component';
 import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/delete-action-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type GratuityTab = 'active' | 'history';
 
 interface GratuityConfigRow {
@@ -53,10 +54,12 @@ interface GratuityRecordRow {
   updatedAt: string;
 }
 
+
 @Component({
   selector: 'app-gratuity',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './gratuity.component.html',
   styleUrl: './gratuity.component.scss'
 })

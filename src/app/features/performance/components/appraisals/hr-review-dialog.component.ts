@@ -14,6 +14,7 @@ import { PerformanceService } from '../../services/performance.service';
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface HrReviewDialogData {
   appraisalCycles: AppraisalCycle[];
   employees?: Employee[];
@@ -21,10 +22,12 @@ export interface HrReviewDialogData {
   preSelectedCycleId?: string;
 }
 
+
 @Component({
   selector: 'app-hr-review-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

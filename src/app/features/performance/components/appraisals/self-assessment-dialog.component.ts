@@ -14,15 +14,18 @@ import { PerformanceService } from '../../services/performance.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Subject, takeUntil } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SelfAssessmentDialogData {
   goals?: Goal[];
   selectedGoal?: Goal;
 }
 
+
 @Component({
   selector: 'app-self-assessment-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

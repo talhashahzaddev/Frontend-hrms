@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type LoanDialogStatus = 'active' | 'pending' | 'completed' | 'cancelled';
 
 export interface LoanEmployeeOption {
@@ -27,11 +28,13 @@ interface LoanDialogData {
   initialValue?: Partial<LoanDialogPayload>;
 }
 
+
 @Component({
   selector: 'app-add-loan-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-loan-dialog.component.html',
   styleUrl: './add-loan-dialog.component.scss'
 })

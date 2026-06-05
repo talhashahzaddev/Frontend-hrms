@@ -31,10 +31,15 @@ import { PerformanceService } from '@/app/features/performance/services/performa
 import {ShiftRejectDialogComponent} from './shiftReject';
 import { GeoFenceService } from '../../services/geofence.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { LocalizedTimePipe } from '@shared/pipes/localized-time.pipe';
 @Component({
   selector: 'app-shift',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    LocalizedTimePipe,
     CommonModule,
     FormsModule,
     MatButtonModule,

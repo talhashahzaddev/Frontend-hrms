@@ -19,16 +19,19 @@ import { NotificationService } from '@core/services/notification.service';
 import { EmployeeService } from '@features/employee/services/employee.service';
 import { Department } from '@core/models/employee.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CreateJobDialogData {
   mode: 'create' | 'edit';
   job?: JobOpeningDto;
 }
+
 
 @Component({
   selector: 'app-create-job-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

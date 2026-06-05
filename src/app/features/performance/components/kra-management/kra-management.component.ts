@@ -31,10 +31,13 @@ import { CreateGoalDialogComponent } from './create-goals-dialog';
 import { AssignGoalsDialogComponent } from './assiged-goals-dialog';
 import { SelfAssessmentDialogComponent } from '../appraisals/self-assessment-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-kra-management',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

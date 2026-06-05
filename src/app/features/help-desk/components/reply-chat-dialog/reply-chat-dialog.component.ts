@@ -11,6 +11,7 @@ import { TicketMessageRequest, TicketMessageDto, Ticket } from '../../../../core
 import { EmployeeService } from '@/app/features/employee/services/employee.service';
 import { Employee } from '@/app/core/models/employee.models';
 import {  OnInit } from '@angular/core';
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ReplyChatDialogData {
   ticket: Ticket; 
   senderId: string;       // Current user's ID
@@ -18,10 +19,12 @@ export interface ReplyChatDialogData {
   recipientIds?: string[]; // Combined assigned + group employee IDs
 }
 
+
 @Component({
   selector: 'app-reply-chat-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

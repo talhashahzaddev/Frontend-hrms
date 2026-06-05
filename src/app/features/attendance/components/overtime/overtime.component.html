@@ -36,9 +36,9 @@
 
       <div class="table-wrap compact">
         <div class="today-info-row">
-          <div><strong>Date:</strong> {{ todayOvertime.overtimeDate | date:'mediumDate' }}</div>
-          <div><strong>Start:</strong> {{ todayOvertime.overtimeStart }}</div>
-          <div><strong>End:</strong> {{ todayOvertime.overtimeEnd }}</div>
+          <div><strong>Date:</strong> {{ todayOvertime.overtimeDate | localizedDate:'mediumDate' }}</div>
+          <div><strong>Start:</strong> {{ todayOvertime.overtimeStart | localizedTime }}</div>
+          <div><strong>End:</strong> {{ todayOvertime.overtimeEnd | localizedTime }}</div>
           <div><strong>Requested Hours:</strong> {{ todayOvertime.requestedHours }}</div>
         </div>
         <div *ngIf="todayOvertime.reason" class="today-reason">
@@ -103,20 +103,20 @@
             </thead>
             <tbody>
               <tr *ngFor="let r of employeeCreatedRequests" class="table-row">
-                <td>{{ r.overtimeStart }}</td>
-                <td>{{ r.overtimeEnd }}</td>
-                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.overtimeStart | localizedTime }}</td>
+                <td>{{ r.overtimeEnd | localizedTime }}</td>
+                <td class="date-cell">{{ r.overtimeDate | localizedDate:'mediumDate' }}</td>
                 <td>{{ r.overtimeType }}</td>
                 <td>{{ r.requestedHours }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
                 </td>
-                <td class="date-cell">{{ r.createdAt | date:'short' }}</td>
+                <td class="date-cell">{{ r.createdAt | localizedDate:'short' }}</td>
               </tr>
             </tbody>
           </table>
 
-          <div *ngIf="!employeeCreatedRequests?.length" class="empty-state">
+          <div *ngIf="!employeeCreatedRequests.length" class="empty-state">
             <mat-icon class="empty-icon">schedule</mat-icon>
             <h3>No Overtime Requests</h3>
             <p>You haven't submitted any overtime requests yet.</p>
@@ -148,9 +148,9 @@
                 <td>
                   <div class="cell-title">{{ r.requestedByName }}</div>
                 </td>
-                <td>{{ r.overtimeStart }}</td>
-                <td>{{ r.overtimeEnd }}</td>
-                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td>{{ r.overtimeStart | localizedTime }}</td>
+                <td>{{ r.overtimeEnd | localizedTime }}</td>
+                <td class="date-cell">{{ r.overtimeDate | localizedDate:'mediumDate' }}</td>
                 <td>{{ r.overtimeType }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
@@ -174,7 +174,7 @@
             </tbody>
           </table>
 
-          <div *ngIf="!employeeAssignedRequests?.length" class="empty-state">
+          <div *ngIf="!employeeAssignedRequests.length" class="empty-state">
             <mat-icon class="empty-icon">assignment</mat-icon>
             <h3>No Assigned Requests</h3>
             <p>No overtime requests have been assigned to you.</p>
@@ -214,12 +214,12 @@
                   <div class="cell-title">{{ r.requestedByName }}</div>
                 </td>
                 <td>{{ r.overtimeType }}</td>
-                <td class="date-cell">{{ r.overtimeDate | date:'mediumDate' }}</td>
+                <td class="date-cell">{{ r.overtimeDate | localizedDate:'mediumDate' }}</td>
                 <td>{{ r.requestedHours }}</td>
                 <td>
                   <span class="cell-sub">{{ r.reason }}</span>
                 </td>
-                <td class="date-cell">{{ r.createdAt | date:'short' }}</td>
+                <td class="date-cell">{{ r.createdAt | localizedDate:'short' }}</td>
                 <td>
                   <span [class]="'status-badge ' + getStatusClass(r.status)">{{ r.status }}</span>
                 </td>
@@ -242,7 +242,7 @@
             </tbody>
           </table>
 
-          <div *ngIf="!pendingRequests?.length" class="empty-state">
+          <div *ngIf="!pendingRequests.length" class="empty-state">
             <mat-icon class="empty-icon">group</mat-icon>
             <h3>No Pending Requests</h3>
             <p>There are no team overtime requests awaiting your review.</p>

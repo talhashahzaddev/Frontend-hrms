@@ -474,7 +474,7 @@
                   <td>
                     {{ req.ruleName || (req.configName ? req.configName : '—') }}
                   </td>
-                  <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                  <td>{{ req.requestedAt | localizedDate:'mediumDate' }}</td>
                   <td>{{ req.reason || '-' }}</td>
                   <td class="text-right">{{ req.requestedEmployeePct != null ? (req.requestedEmployeePct + '%') : '-' }}</td>
                   <td class="text-right">{{ req.requestedEmployerPct != null ? (req.requestedEmployerPct + '%') : '-' }}</td>
@@ -583,8 +583,8 @@
                   <td>{{ e.enrollmentType }}</td>
                   <td class="text-right">{{ effectiveEmployeePct(e) | number:'1.0-2' }}%</td>
                   <td class="text-right">{{ effectiveEmployerPct(e) | number:'1.0-2' }}%</td>
-                  <td>{{ e.effectiveDate | date:'mediumDate' }}</td>
-                  <td>{{ e.endDate ? (e.endDate | date:'mediumDate') : '-' }}</td>
+                  <td>{{ e.effectiveDate | localizedDate:'mediumDate' }}</td>
+                  <td>{{ e.endDate ? (e.endDate | localizedDate:'mediumDate') : '-' }}</td>
                   <td class="text-center">
                     <span class="status-pill" [ngClass]="getStatusClass(e.enrollmentStatus)">{{ e.enrollmentStatus }}</span>
                   </td>
@@ -652,7 +652,7 @@
                 <tr>
                   <td>{{ claim.employeeName }}</td>
                   <td>{{ claim.claimType }}</td>
-                  <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                  <td>{{ claim.claimDate | localizedDate:'mediumDate' }}</td>
                   <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
                   <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>
                   <td class="text-right">{{ claim.paidAmount != null ? (currencySymbol() + ' ' + (claim.paidAmount | number:'1.0-2')) : '-' }}</td>

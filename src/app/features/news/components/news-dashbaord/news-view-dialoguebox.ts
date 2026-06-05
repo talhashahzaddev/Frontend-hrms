@@ -6,10 +6,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { NewsDto } from '@/app/core/models/news.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-news-view-dialoguebox',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,
@@ -55,7 +58,7 @@ import { NewsDto } from '@/app/core/models/news.models';
         <div class="meta-item date">
           <span class="meta-label">Published</span>
           <span class="meta-value">
-            {{ data.news.publishedAt ? (data.news.publishedAt | date:'mediumDate') : 'Not published' }}
+            {{ data.news.publishedAt ? (data.news.publishedAt | localizedDate:'mediumDate') : 'Not published' }}
           </span>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { take } from 'rxjs';
 import { OnInit, inject, signal } from '@angular/core';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PerformanceDialogResult {
   employee: string;
   designation: string;
@@ -43,11 +44,13 @@ interface PerformanceDialogData {
   rules?: any[];
 }
 
+
 @Component({
   selector: 'app-add-performance-pay-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule, MatFormFieldModule, MatSelectModule],
   templateUrl: './add-performance-pay-dialog.component.html',
   styleUrl: './add-performance-pay-dialog.component.scss'
 })

@@ -4,6 +4,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { PerformanceService } from '../../services/performance.service';
 import { AuthService } from '@/app/core/services/auth.service';
 import { NotificationService } from '@/app/core/services/notification.service';
+import { SharedCommonModule } from '@shared/shared-common.module';
 // import { error } from 'console';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -16,10 +17,12 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 
+
 @Component({
   selector: 'app-reports',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatFormFieldModule,
     MatSelectModule,

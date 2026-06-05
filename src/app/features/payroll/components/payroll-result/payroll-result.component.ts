@@ -12,6 +12,7 @@ import { EmployeeService } from '../../../../features/employee/services/employee
 import { SettingsService } from '../../../settings/services/settings.service';
 import { Department } from '../../../../core/models/employee.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface PayrollResultRow {
   rowKey: string;
   employeeId: string;
@@ -45,10 +46,12 @@ export interface PayrollResultRow {
   detailSections: { title: string; rows: Record<string, unknown>[] }[];
 }
 
+
 @Component({
   selector: 'app-payroll-result',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, RouterModule, MatIconModule, FormsModule],
   templateUrl: './payroll-result.component.html',
   styleUrl: './payroll-result.component.scss'
 })

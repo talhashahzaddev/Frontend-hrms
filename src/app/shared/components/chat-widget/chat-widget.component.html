@@ -49,7 +49,7 @@
             </ng-container>
             <span *ngIf="message.sender === 'user'">{{ message.text }}</span>
           </div>
-          <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+          <div class="message-time">{{ message.timestamp | localizedDate:'short' }}</div>
         </div>
       </div>
 

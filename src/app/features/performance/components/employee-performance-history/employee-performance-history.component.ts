@@ -19,10 +19,13 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { EmployeePerformanceHistory, EmployeeAppraisal, SkillGapAnalysis } from '../../../../core/models/performance.models';
 import { User } from '../../../../core/models/auth.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-performance-history',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,

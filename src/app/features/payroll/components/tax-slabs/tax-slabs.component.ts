@@ -15,10 +15,13 @@ import {
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { TaxEntityDialogComponent } from '../dialogs/tax-entity-dialog/tax-entity-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-tax-slabs',
   standalone: true,
-  imports: [CommonModule, MatIconModule, RouterModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, RouterModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './tax-slabs.component.html',
   styleUrl: './tax-slabs.component.scss'
 })

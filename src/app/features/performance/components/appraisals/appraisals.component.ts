@@ -46,10 +46,13 @@ import { EmployeeService } from '@/app/features/employee/services/employee.servi
 import { Employee } from '@/app/core/models/employee.models';
 import { PaginatedResponse } from '../../../../core/models/common.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-appraisals',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

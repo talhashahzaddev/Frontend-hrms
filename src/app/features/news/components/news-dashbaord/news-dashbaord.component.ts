@@ -21,10 +21,13 @@ import { CreateNewsComponent } from '../create-news/create-news.component';
 import { Subject, takeUntil } from 'rxjs';
 import { NewsViewDialogueboxComponent } from './news-view-dialoguebox';
 import { MatMenuModule } from '@angular/material/menu';
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-news-dashbaord',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,

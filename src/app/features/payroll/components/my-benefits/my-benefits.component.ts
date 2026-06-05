@@ -9,10 +9,13 @@ import { AuthService } from '@core/services/auth.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { take } from 'rxjs';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-my-benefits',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './my-benefits.component.html',
   styleUrl: './my-benefits.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

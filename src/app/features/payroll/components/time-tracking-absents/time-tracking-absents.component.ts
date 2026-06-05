@@ -16,6 +16,7 @@ import {
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface AbsentRecordDto {
   id: string;
   employeeId: string;
@@ -37,10 +38,12 @@ export interface AbsentRecordDto {
   totalDeduction?: number;
 }
 
+
 @Component({
   selector: 'app-time-tracking-absents',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatButtonModule, MatDialogModule, MatProgressSpinnerModule, FormsModule],
   templateUrl: './time-tracking-absents.component.html',
   styleUrl: './time-tracking-absents.component.scss'
 })

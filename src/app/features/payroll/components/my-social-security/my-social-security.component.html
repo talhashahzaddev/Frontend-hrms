@@ -49,7 +49,7 @@
           </div>
           <div class="status-cell">
             <span class="label">Effective from</span>
-            <span class="value">{{ enrollment.effectiveDate | date:'mediumDate' }}</span>
+            <span class="value">{{ enrollment.effectiveDate | localizedDate:'mediumDate' }}</span>
           </div>
         </div>
       } @else {
@@ -213,7 +213,7 @@
                 } @else {
                   @for (req of requests; track req.requestId) {
                     <tr>
-                      <td>{{ req.requestedAt | date:'mediumDate' }}</td>
+                      <td>{{ req.requestedAt | localizedDate:'mediumDate' }}</td>
                       <td><span class="type-pill">{{ req.requestType }}</span></td>
                       <td class="truncate">{{ req.reason || '-' }}</td>
                       <td>{{ req.documentCount }} file(s)</td>
@@ -255,7 +255,7 @@
                 } @else {
                   @for (claim of claims; track claim.claimId) {
                     <tr>
-                      <td>{{ claim.claimDate | date:'mediumDate' }}</td>
+                      <td>{{ claim.claimDate | localizedDate:'mediumDate' }}</td>
                       <td><span class="type-pill">{{ claim.claimType }}</span></td>
                       <td class="text-right">{{ currencySymbol() }} {{ claim.claimedAmount ?? 0 | number:'1.0-2' }}</td>
                       <td class="text-right">{{ claim.approvedAmount != null ? (currencySymbol() + ' ' + (claim.approvedAmount | number:'1.0-2')) : '-' }}</td>

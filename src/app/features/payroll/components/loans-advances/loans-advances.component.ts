@@ -36,6 +36,7 @@ import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/del
 import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
 import { DisburseLoanDialogComponent } from '../dialogs/disburse-loan-dialog/disburse-loan-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type LoanStatus = 'active' | 'pending' | 'completed' | 'cancelled' | 'rejected' | 'approved' | 'accepted';
 type LoanTab = 'loans' | 'salary-advances' | 'loan-payments' | 'repayments';
 type LoanPaymentStatus = 'pending' | 'deducted' | 'skipped';
@@ -157,10 +158,12 @@ interface RepaymentLedgerRow {
   loanStatus: LoanStatus | 'active' | 'completed';
 }
 
+
 @Component({
   selector: 'app-loans-advances',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './loans-advances.component.html',
   styleUrl: './loans-advances.component.scss'
 })

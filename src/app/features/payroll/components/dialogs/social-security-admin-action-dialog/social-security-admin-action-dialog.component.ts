@@ -7,6 +7,7 @@ import { take } from 'rxjs';
 
 import { SettingsService } from '../../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type SocialSecurityAdminActionMode =
   | 'approve-request'
   | 'reject-request'
@@ -44,11 +45,13 @@ export interface SocialSecurityAdminActionResult {
   authorityReference?: string | null;
 }
 
+
 @Component({
   selector: 'app-social-security-admin-action-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './social-security-admin-action-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

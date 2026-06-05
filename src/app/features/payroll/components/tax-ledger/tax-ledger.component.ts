@@ -11,6 +11,7 @@ import { take } from 'rxjs';
 import { AddTaxEntryDialogComponent, AddTaxEntryDialogPayload } from '../dialogs/add-tax-entry/add-tax-entry.component';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface TaxLedgerRow {
   id: string;
   employeeId: string;
@@ -23,10 +24,12 @@ interface TaxLedgerRow {
   status: 'fully_paid' | 'partially_paid' | 'unpaid';
 }
 
+
 @Component({
   selector: 'app-tax-ledger',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './tax-ledger.component.html',
   styleUrl: './tax-ledger.component.scss'
 })

@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CancelLeaveDialogData {
   leaveTypeName: string;
   leaveTypeColor: string;
@@ -13,10 +14,12 @@ export interface CancelLeaveDialogData {
   reason?: string;
 }
 
+
 @Component({
   selector: 'app-cancel-leave-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,

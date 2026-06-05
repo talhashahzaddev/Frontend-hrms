@@ -90,7 +90,7 @@
           </label>
           <div class="field-display date-box">
             <mat-icon class="date-icon">calendar_month</mat-icon>
-            {{ data.startDate | date:'dd / MM / yyyy' }}
+            {{ data.startDate | localizedDate:'dd / MM / yyyy' }}
           </div>
         </div>
 
@@ -102,7 +102,7 @@
           </label>
           <div class="field-display date-box">
             <mat-icon class="date-icon">calendar_month</mat-icon>
-            {{ data.endDate | date:'dd / MM / yyyy' }}
+            {{ data.endDate | localizedDate:'dd / MM / yyyy' }}
           </div>
         </div>
 
@@ -126,7 +126,7 @@
             Submitted On
           </label>
           <div class="field-display submitted-value">
-            {{ data.submittedAt | date:'dd MMM yyyy, hh:mm a' }}
+            {{ data.submittedAt | localizedDate:'dd MMM yyyy, hh:mm a' }}
           </div>
         </div>
 
@@ -182,7 +182,7 @@
           </label>
           <div class="field-display date-box">
             <mat-icon class="date-icon">event_available</mat-icon>
-            {{ data.approvedAt | date:'dd / MM / yyyy' }}
+            {{ data.approvedAt | localizedDate:'dd / MM / yyyy' }}
           </div>
         </div>
       </div>
@@ -224,7 +224,7 @@
           </label>
           <div class="field-display date-box">
             <mat-icon class="date-icon">event_busy</mat-icon>
-            {{ data.approvedAt | date:'dd / MM / yyyy' }}
+            {{ data.approvedAt | localizedDate:'dd / MM / yyyy' }}
           </div>
         </div>
       </div>

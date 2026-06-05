@@ -3,6 +3,7 @@ import { Component, Inject, ViewEncapsulation } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface DeleteActionDialogData {
   title?: string;
   message?: string;
@@ -11,11 +12,13 @@ export interface DeleteActionDialogData {
   confirmTheme?: 'danger' | 'success';
 }
 
+
 @Component({
   selector: 'app-delete-action-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatIconModule],
   templateUrl: './delete-action-dialog.component.html',
   styleUrl: './delete-action-dialog.component.scss'
 })

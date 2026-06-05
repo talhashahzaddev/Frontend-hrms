@@ -15,6 +15,7 @@ import { JobsService } from '@features/jobs/services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ExpenseService } from '@features/expense/services/expense.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ApplyJobDialogData {
   job?: JobOpeningDto;
   mode?: 'create' | 'edit';
@@ -23,11 +24,13 @@ export interface ApplyJobDialogData {
   applyForSelf?: boolean;
 }
 
+
 @Component({
   selector: 'app-apply-job-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

@@ -57,7 +57,7 @@
         <mat-icon>celebration</mat-icon>
         <div class="card-content">
           <span class="card-value">{{ summary?.upcomingHoliday?.holidayName }}</span>
-          <span class="card-label">{{ summary?.upcomingHoliday?.holidayDate | date:'MMM dd' }}</span>
+          <span class="card-label">{{ summary?.upcomingHoliday?.holidayDate | localizedDate:'MMM dd' }}</span>
         </div>
       </div>
     }
@@ -118,10 +118,10 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
           <td mat-cell *matCellDef="let holiday">
             <div class="date-cell">
-              <span class="date-day">{{ holiday.holidayDate | date:'dd' }}</span>
+              <span class="date-day">{{ holiday.holidayDate | localizedDate:'dd' }}</span>
               <div class="date-details">
-                <span class="date-month">{{ holiday.holidayDate | date:'MMM yyyy' }}</span>
-                <span class="date-weekday">{{ holiday.holidayDate | date:'EEEE' }}</span>
+                <span class="date-month">{{ holiday.holidayDate | localizedDate:'MMM yyyy' }}</span>
+                <span class="date-weekday">{{ holiday.holidayDate | localizedDate:'EEEE' }}</span>
               </div>
             </div>
           </td>
@@ -244,8 +244,8 @@
                 <div class="timeline-dot" [ngClass]="'type-' + holiday.holidayType"></div>
                 <div class="timeline-content">
                   <div class="timeline-date">
-                    <span class="day">{{ holiday.holidayDate | date:'dd' }}</span>
-                    <span class="weekday">{{ holiday.holidayDate | date:'EEE' }}</span>
+                    <span class="day">{{ holiday.holidayDate | localizedDate:'dd' }}</span>
+                    <span class="weekday">{{ holiday.holidayDate | localizedDate:'EEE' }}</span>
                   </div>
                   <div class="timeline-details">
                     <span class="timeline-name">{{ holiday.holidayName }}</span>

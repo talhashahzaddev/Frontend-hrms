@@ -16,16 +16,19 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SuperAdminService } from '../../services/super-admin.service';
 import { ManageSubscriptionRequest, SubscriptionDetail, SubscriptionPlan } from '../../models/super-admin.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ManageSubscriptionDialogData {
   organizationId: string;
   organizationName: string;
   currentSubscription: SubscriptionDetail | null;
 }
 
+
 @Component({
   selector: 'app-manage-subscription-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

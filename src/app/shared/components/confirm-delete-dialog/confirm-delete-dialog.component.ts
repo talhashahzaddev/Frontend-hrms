@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ConfirmDeleteData {
   title: string;
   message: string;
@@ -11,10 +12,12 @@ export interface ConfirmDeleteData {
   confirmButtonText?: string;
 }
 
+
 @Component({
   selector: 'app-confirm-delete-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
     <div class="cdd">
       <h2 class="cdd-title">{{ data.title }}</h2>

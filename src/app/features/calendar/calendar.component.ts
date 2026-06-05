@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +30,7 @@ import { GeoFenceService, GeoClockInRequest } from '../attendance/services/geofe
 // import { CalendarDetailsDialogComponent } from '../../shared/components/calendar-details-dialog/calendar-details-dialog.component';
 import { CalendarDetailsDialogueComponent } from '../../shared/components/calendar-details-dialog/view-details-dialogue.component';
 import { CommentDialogComponent } from '../../shared/components/comment-dialog/comment-dialog.component';
+import { DateTimeFormatService } from '../../core/services/date-time-format.service';
 
 interface CalendarDay {
     date: Date;
@@ -41,10 +43,12 @@ interface CalendarDay {
 
 type EventFilter = 'ALL' | 'ATTENDANCE' | 'LEAVE' | 'HOLIDAY';
 
+
 @Component({
     selector: 'app-calendar',
     standalone: true,
     imports: [
+    SharedCommonModule,
         CommonModule,
         MatCardModule,
         MatButtonModule,
@@ -94,7 +98,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
         private router: Router,
         private dialog: MatDialog,
         private authService: AuthService,
-        private employeeService: EmployeeService
+        private employeeService: EmployeeService,
+        private dateTimeFormat: DateTimeFormatService
     ) { }
 
     ngOnInit(): void {
@@ -334,11 +339,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     }
 
     private formatTime(isoOrTime: string): string {
-        const dt = new Date(isoOrTime);
-        if (!isNaN(dt.getTime())) {
-            return dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-        return isoOrTime;
+        return this.dateTimeFormat.formatTime(isoOrTime, { fallback: isoOrTime });
     }
 
     private formatHours(hours: number): string {

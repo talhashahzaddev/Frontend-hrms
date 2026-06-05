@@ -218,7 +218,7 @@
                         @for (cycle of appraisalCycles; track cycle.cycleId) {
                             <option [value]="cycle.cycleId">
                                 {{ cycle.cycleName }}
-                                ({{ cycle.startDate | date:'MMM yyyy' }} - {{ cycle.endDate | date:'MMM yyyy' }})
+                                ({{ cycle.startDate | localizedDate:'MMM yyyy' }} - {{ cycle.endDate | localizedDate:'MMM yyyy' }})
                             </option>
                         }
                     </select>

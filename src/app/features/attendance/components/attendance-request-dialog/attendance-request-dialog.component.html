@@ -7,7 +7,7 @@
     </div>
     <div class="header-text">
       <h2 class="dialog-title">{{ isCreateMode ? 'Add Attendance Record' : 'Request Attendance Correction' }}</h2>
-      <span class="record-date">{{ data.employeeName }} &bull; {{ data.workDate | date:'mediumDate' }}</span>
+      <span class="record-date">{{ data.employeeName }} &bull; {{ data.workDate | localizedDate:'mediumDate' }}</span>
     </div>
     <button mat-icon-button class="close-btn" (click)="cancel()" [disabled]="isSubmitting" aria-label="Close">
       <mat-icon>close</mat-icon>
@@ -26,7 +26,7 @@
         <div class="before-grid">
           <div class="before-item">
             <span class="bi-label">Date</span>
-            <span class="bi-value">{{ data.workDate | date:'mediumDate' }}</span>
+            <span class="bi-value">{{ data.workDate | localizedDate:'mediumDate' }}</span>
           </div>
           <div class="before-item">
             <span class="bi-label">Check-In</span>

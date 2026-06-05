@@ -8,10 +8,13 @@ import { NotificationService } from '@core/services/notification.service';
 import { SettingsService } from '../../services/settings.service';
 import { OnboardingConfiguration } from '../../services/settings.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-onboarding-configuration',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './onboarding-configuration.component.html',
   styleUrls: ['./onboarding-configuration.component.scss']
 })

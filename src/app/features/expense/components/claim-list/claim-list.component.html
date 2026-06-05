@@ -90,7 +90,7 @@
                   <td class="font-semibold">{{ row.title }}</td>
                   <td>{{ row.categoryName || '—' }}</td>
                   <td class="font-semibold">{{ row.amount | currency:organizationCurrency }}</td>
-                  <td>{{ row.billDate | date:'MMM d, y' }}</td>
+                  <td>{{ row.billDate | localizedDate:'MMM d, y' }}</td>
                   <td>
                     <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
                   </td>
@@ -178,7 +178,7 @@
                   <td class="font-semibold">{{ row.title }}</td>
                   <td>{{ row.categoryName || '—' }}</td>
                   <td class="font-semibold">{{ row.amount | currency:organizationCurrency }}</td>
-                  <td>{{ row.billDate | date:'MMM d, y' }}</td>
+                  <td>{{ row.billDate | localizedDate:'MMM d, y' }}</td>
                   <td>
                     <span class="badge" [ngClass]="getStatusClass(row.status)">{{ row.status || 'Pending' }}</span>
                   </td>
@@ -231,7 +231,7 @@
           <h4 class="claim-title">{{ request.title }}</h4>
           <p class="description" *ngIf="request.description">{{ request.description }}</p>
           <div class="meta-row">
-            <span class="date"><mat-icon>calendar_today</mat-icon> {{ request.billDate | date:'mediumDate' }}</span>
+            <span class="date"><mat-icon>calendar_today</mat-icon> {{ request.billDate | localizedDate:'mediumDate' }}</span>
           </div>
         </div>
         <div class="card-actions">

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { Subject, filter, takeUntil, take, map, combineLatest } from 'rxjs';
 import { ServerNotificationService } from './core/services/server-notification';
+import { SharedCommonModule } from '@shared/shared-common.module';
 // Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -29,9 +30,11 @@ import { ThemeService } from './core/services/theme.service';
 import { ProgressBarService } from './core/services/progress-bar.service';
 
 
+
 @Component({
   selector: 'app-root',
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterOutlet,
     MatToolbarModule,

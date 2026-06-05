@@ -13,6 +13,7 @@ import {
 } from '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component';
 import { SettingsService } from '../../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SocialSecurityBulkAssignDialogPayload {
   employeeIds: string[];
   periodId: string;
@@ -30,11 +31,13 @@ interface SocialSecurityBulkAssignDialogData {
   rules?: SocialSecurityTransactionRuleOption[];
 }
 
+
 @Component({
   selector: 'app-add-social-security-bulk-assign-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './add-social-security-bulk-assign-dialog.component.html',
   styleUrl: './add-social-security-bulk-assign-dialog.component.scss'
 })

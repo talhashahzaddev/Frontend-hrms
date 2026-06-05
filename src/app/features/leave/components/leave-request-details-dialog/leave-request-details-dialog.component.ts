@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface LeaveRequestDetailsDialogData {
   employeeName:    string;
   employeeEmail?:  string;
@@ -22,10 +23,12 @@ export interface LeaveRequestDetailsDialogData {
   isSelfView?:     boolean;
 }
 
+
 @Component({
   selector: 'app-leave-request-details-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,

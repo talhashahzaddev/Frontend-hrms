@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type BulkEmailRecipientStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 export type BulkEmailSendMode = 'all-generated' | 'not-sent' | 'custom';
 
@@ -38,11 +39,13 @@ export interface BulkEmailPayslipsDialogPayload {
   employeeIds: string[];
 }
 
+
 @Component({
   selector: 'app-bulk-email-payslips-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './bulk-email-payslips-dialog.component.html',
   styleUrl: './bulk-email-payslips-dialog.component.scss'
 })

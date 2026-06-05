@@ -7,15 +7,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface RejectRequestDialogData {
   employeeName: string;
   workDate: string;
 }
 
+
 @Component({
   selector: 'app-reject-request-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

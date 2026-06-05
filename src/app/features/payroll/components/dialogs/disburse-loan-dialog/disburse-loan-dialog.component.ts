@@ -7,10 +7,13 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/materia
 import { PayrollService } from '../../../services/payroll.service';
 import { ToastrService } from 'ngx-toastr';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-disburse-loan-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatDialogModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatIconModule, MatDialogModule],
   templateUrl: './disburse-loan-dialog.component.html',
   styleUrl: './disburse-loan-dialog.component.scss'
 })

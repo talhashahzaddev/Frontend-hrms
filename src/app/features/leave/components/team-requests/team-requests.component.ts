@@ -29,10 +29,13 @@ import {
   TeamRemainingLeaves
 } from '../../../../core/models/leave.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-team-requests',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

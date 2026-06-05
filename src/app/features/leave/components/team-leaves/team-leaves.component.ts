@@ -32,6 +32,7 @@ import {
   LeaveType
 } from '../../../../core/models/leave.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 // ── Employee model (from GetEmployeebyOrganization) ──────────────
 export interface EmployeeOption {
   employeeId: string;
@@ -42,10 +43,12 @@ export interface EmployeeOption {
   profilePreviewUrl?: string | null;
 }
 
+
 @Component({
   selector: 'app-team-leaves',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,              // ← needed for [(ngModel)] on search input

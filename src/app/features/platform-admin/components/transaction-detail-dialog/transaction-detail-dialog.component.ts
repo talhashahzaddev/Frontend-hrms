@@ -6,10 +6,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { TransactionDetailDto } from '@core/models/payment-management.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-transaction-detail-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,
@@ -74,7 +77,7 @@ import { TransactionDetailDto } from '@core/models/payment-management.models';
         }
         <div class="detail-item">
           <span class="label">Date</span>
-          <span class="value">{{ data.createdAt | date:'medium' }}</span>
+          <span class="value">{{ data.createdAt | localizedDate:'medium' }}</span>
         </div>
         @if (data.failureReason) {
           <div class="detail-item full-width">
@@ -106,7 +109,7 @@ import { TransactionDetailDto } from '@core/models/payment-management.models';
           </div>
           <div class="detail-item">
             <span class="label">Issued</span>
-            <span class="value">{{ data.invoice.issuedAt | date:'mediumDate' }}</span>
+            <span class="value">{{ data.invoice.issuedAt | localizedDate:'mediumDate' }}</span>
           </div>
         </div>
       }
@@ -134,7 +137,7 @@ import { TransactionDetailDto } from '@core/models/payment-management.models';
             </div>
             <div class="refund-row">
               <span class="label">Date</span>
-              <span class="value">{{ refund.createdAt | date:'medium' }}</span>
+              <span class="value">{{ refund.createdAt | localizedDate:'medium' }}</span>
             </div>
           </div>
         }

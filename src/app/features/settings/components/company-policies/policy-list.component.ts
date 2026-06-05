@@ -20,10 +20,13 @@ import { AuthService } from '@core/services/auth.service';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { PolicyDialogComponent } from '../policy-dialog/policy-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-policy-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatTableModule,

@@ -21,10 +21,13 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { EmployeeService } from '../../../employee/services/employee.service';
 import { User } from '../../../../core/models/auth.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
+    SharedCommonModule,
     MatDatepickerModule,
     MatNativeDateModule,
     CommonModule,

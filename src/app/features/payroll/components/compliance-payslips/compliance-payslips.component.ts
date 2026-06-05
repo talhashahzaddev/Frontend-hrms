@@ -39,6 +39,7 @@ import {
   BulkEmailRecipientOption
 } from '../dialogs/bulk-email-payslips-dialog/bulk-email-payslips-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type PayslipStatus = 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 
 interface PeriodOption {
@@ -82,10 +83,12 @@ interface PayslipRow {
   updatedAt: string | null;
 }
 
+
 @Component({
   selector: 'app-compliance-payslips',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './compliance-payslips.component.html',
   styleUrl: './compliance-payslips.component.scss'
 })

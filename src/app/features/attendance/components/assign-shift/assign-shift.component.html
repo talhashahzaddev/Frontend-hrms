@@ -20,7 +20,7 @@
           <mat-form-field appearance="outline" class="mat-field">
             <mat-select formControlName="shiftId" placeholder="Select a shift">
               <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
-                {{ shift.shiftName }} — {{ shift.startTime }}-{{ shift.endTime }}
+                {{ shift.shiftName }} — {{ shift.startTime | localizedTime }}-{{ shift.endTime | localizedTime }}
               </mat-option>
             </mat-select>
           </mat-form-field>

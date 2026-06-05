@@ -31,9 +31,12 @@ import { PaymentService } from '../../../../core/services/payment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-list',
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     ReactiveFormsModule,

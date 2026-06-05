@@ -58,7 +58,7 @@
                   <a class="msg-sender-email" href="mailto:{{ msg.senderEmail }}">{{ msg.senderEmail }}</a>
                 </div>
               </div>
-              <span class="msg-time">{{ msg.createdAt | date:'MMM d, y, h:mm a' }}</span>
+              <span class="msg-time">{{ msg.createdAt | localizedDate:'MMM d, y, h:mm a' }}</span>
               <!-- <span class="message-type">{{ msg.messageType }}</span> -->
             </div>
             <!-- Message Body -->
@@ -282,7 +282,7 @@
             </div>
             <div class="metadata-row">
               <span class="metadata-label">Created Date</span>
-              <span class="metadata-value">{{ ticket.createdat | date:'short' }}</span>
+              <span class="metadata-value">{{ ticket.createdat | localizedDate:'short' }}</span>
             </div>
           </div>
 

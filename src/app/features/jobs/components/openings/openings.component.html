@@ -114,7 +114,7 @@
               {{ getMetaLine(job) }}
             </p>
             <p class="job-post-meta job-post-date" *ngIf="job.postedDate">
-              Posted {{ job.postedDate | date:'mediumDate' }}
+              Posted {{ job.postedDate | localizedDate:'mediumDate' }}
               <span class="job-posted-as" *ngIf="job.postedAs"> · {{ job.postedAs }}</span>
             </p>
           </div>
@@ -144,7 +144,7 @@
         </div>
         <div class="job-post-footer">
           <span class="job-last-date" *ngIf="job.lastDate">
-            Apply by {{ job.lastDate | date:'mediumDate' }}
+            Apply by {{ job.lastDate | localizedDate:'mediumDate' }}
           </span>
           <div class="job-post-actions">
             <button *ngIf="hasPermission('opnings_view_details')" mat-stroked-button (click)="viewDetails(job)" class="action-btn view-btn" matTooltip="View details">

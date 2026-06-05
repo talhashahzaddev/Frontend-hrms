@@ -16,10 +16,13 @@ import { TransactionDto, InvoiceDto, PagedResult } from '@core/models/payment-ma
 import { AuthService } from '@core/services/auth.service';
 
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-billing-history',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,

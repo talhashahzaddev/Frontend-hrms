@@ -8,7 +8,7 @@
     <div class="header-info" *ngIf="activeCycle">
       <mat-chip color="primary">{{ activeCycle.cycleName }}</mat-chip>
       <span class="cycle-dates">
-        {{ activeCycle.startDate | date:'mediumDate' }} - {{ activeCycle.endDate | date:'mediumDate' }}
+        {{ activeCycle.startDate | localizedDate:'mediumDate' }} - {{ activeCycle.endDate | localizedDate:'mediumDate' }}
       </span>
     </div>
   </div>
@@ -189,7 +189,7 @@
             </div>
             <div class="assessment-details">
               <span class="rating">Rating: {{ assessment.rating }}/5</span>
-              <span class="date">{{ assessment.updatedAt | date:'short' }}</span>
+              <span class="date">{{ assessment.updatedAt | localizedDate:'short' }}</span>
             </div>
             <p *ngIf="assessment.comments" class="comments">{{ assessment.comments }}</p>
           </div>

@@ -17,16 +17,19 @@ import {
 import { ExpenseService } from '../../services/expense.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ClaimDialogData {
   mode: 'create' | 'edit';
   expense?: ExpenseDto;
   categories: ExpenseCategoryDto[];
 }
 
+
 @Component({
   selector: 'app-claim-form-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatIconModule,

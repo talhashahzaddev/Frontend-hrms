@@ -12,16 +12,19 @@ import {
 } from '../../../services/payroll.service';
 import { SettingsService } from '../../../../settings/services/settings.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface UploadedDoc extends SocialSecurityRequestDocumentInput {
   uploading: boolean;
   error: boolean;
 }
 
+
 @Component({
   selector: 'app-social-security-claim-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './social-security-claim-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

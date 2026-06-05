@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { PayrollService, SocialSecurityRequestDocument } from '../../../services/payroll.service';
 import { NotificationService } from '@core/services/notification.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface SocialSecurityDocumentsDialogData {
   requestId: string;
   title: string;
@@ -13,11 +14,13 @@ export interface SocialSecurityDocumentsDialogData {
   canVerify?: boolean;
 }
 
+
 @Component({
   selector: 'app-social-security-documents-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, MatIconModule],
   templateUrl: './social-security-documents-dialog.component.html',
   styleUrl: '../add-social-security-transaction-dialog/add-social-security-transaction-dialog.component.scss'
 })

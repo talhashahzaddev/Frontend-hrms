@@ -17,10 +17,13 @@ import {
 import { NotificationService } from '@core/services/notification.service';
 import { PayrollService } from '../../services/payroll.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-time-tracking',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatDialogModule, TimeTrackingAbsentsComponent, TimeTrackingLateComponent, TimeTrackingLeavesComponent],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, MatDialogModule, TimeTrackingAbsentsComponent, TimeTrackingLateComponent, TimeTrackingLeavesComponent],
   templateUrl: './time-tracking.component.html',
   styleUrl: './time-tracking.component.scss'
 })

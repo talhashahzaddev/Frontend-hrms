@@ -7,16 +7,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ShiftRejectData {
   title: string;
   message: string;
   employeeName?: string;
 }
 
+
 @Component({
   selector: 'app-shift-reject-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatDialogModule,

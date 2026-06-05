@@ -18,10 +18,13 @@ import { SuperAdminService } from '../../services/super-admin.service';
 import { OrganizationDetail, SubscriptionHistoryItem } from '../../models/super-admin.models';
 import { ManageSubscriptionDialogComponent } from '../manage-subscription-dialog/manage-subscription-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-organization-detail',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     MatCardModule,

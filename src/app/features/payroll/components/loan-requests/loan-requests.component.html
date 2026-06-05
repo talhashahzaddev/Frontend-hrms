@@ -268,7 +268,7 @@
                   <tr>
                     <td>{{ payment.installmentNumber || 'N/A' }}</td>
                     <td>{{ payment.periodLabel }}</td>
-                    <td>{{ payment.paidDate | date:'mediumDate' }}</td>
+                    <td>{{ payment.paidDate | localizedDate:'mediumDate' }}</td>
                     <td class="numeric">{{ payment.installmentAmount | number }}</td>
                     <td class="numeric remaining-column">{{ payment.remainingAmount | number }}</td>
                     <td class="status-column">

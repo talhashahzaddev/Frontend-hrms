@@ -9,16 +9,19 @@ import { take } from 'rxjs';
 import { EmployeeService } from '../../../../employee/services/employee.service';
 import { PayrollService } from '../../../services/payroll.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface AttendanceDialogData {
   type: 'leave' | 'absent' | 'late' | 'half-day' | 'overtime';
   mode: 'add' | 'edit';
   record?: any;
 }
 
+
 @Component({
   selector: 'app-attendance-dialog',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, ReactiveFormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatDialogModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './attendance-dialog.component.html',
   styleUrl: './attendance-dialog.component.scss'
 })

@@ -8,15 +8,18 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { CreateGoalRequest, UpdateGoalRequest, Goal, KRA } from '../../../../core/models/performance.models';
 import { PerformanceService } from '../../services/performance.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CreateGoalDialogData {
   goal?: Goal;
   isEditMode: boolean;
 }
 
+
 @Component({
   selector: 'app-create-goals-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

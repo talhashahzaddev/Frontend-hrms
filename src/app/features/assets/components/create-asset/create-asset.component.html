@@ -99,7 +99,7 @@
               <span class="code-cell">{{ asset.code || asset.assetTag || '—' }}</span>
             </td>
             <td>
-              <span class="date-cell">{{ asset.purchaseDate | date:'d MMM y' }}</span>
+              <span class="date-cell">{{ asset.purchaseDate | localizedDate:'d MMM y' }}</span>
             </td>
             <td>
               <span class="status-badge" [ngClass]="'status-' + (asset.status | lowercase)">
@@ -495,11 +495,11 @@
           </div>
           <div class="view-row">
             <span class="view-label">Purchase Date</span>
-            <span class="view-value">{{ selectedAsset.purchaseDate | date:'d MMM y' }}</span>
+            <span class="view-value">{{ selectedAsset.purchaseDate | localizedDate:'d MMM y' }}</span>
           </div>
           <div class="view-row">
             <span class="view-label">Created Date</span>
-            <span class="view-value">{{ selectedAsset.createdAt | date:'d MMM y' }}</span>
+            <span class="view-value">{{ selectedAsset.createdAt | localizedDate:'d MMM y' }}</span>
           </div>
         </div>
       </div>
@@ -583,7 +583,7 @@
             <div class="history-item-details">
               <div class="history-detail">
                 <span class="history-detail-label">Assigned</span>
-                <span class="history-detail-value">{{ (a.assignedAt || a.AssignedAt || a.assignDate || a.AssignDate) | date:'d MMM y' }}</span>
+                <span class="history-detail-value">{{ (a.assignedAt || a.AssignedAt || a.assignDate || a.AssignDate) | localizedDate:'d MMM y' }}</span>
               </div>
               <div class="history-detail">
                 <span class="history-detail-label">Condition</span>
@@ -593,7 +593,7 @@
                 <span class="history-detail-label">Returned</span>
                 <span class="history-detail-value">
                   {{ (a.returnedAt || a.ReturnedAt || a.returnDate || a.ReturnDate)
-                     ? ((a.returnedAt || a.ReturnedAt || a.returnDate || a.ReturnDate) | date:'d MMM y')
+                     ? ((a.returnedAt || a.ReturnedAt || a.returnDate || a.ReturnDate) | localizedDate:'d MMM y')
                      : 'Still Assigned' }}
                 </span>
               </div>
@@ -611,7 +611,7 @@
           <div class="history-item" *ngFor="let l of selectedAsset.logs">
             <div class="history-log-ts">
               <mat-icon>schedule</mat-icon>
-              {{ l.timestamp | date:'d MMM y, h:mm a' }}
+              {{ l.timestamp | localizedDate:'d MMM y, h:mm a' }}
             </div>
             <p class="history-log-msg">{{ l.message }}</p>
           </div>

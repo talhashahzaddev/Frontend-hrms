@@ -14,15 +14,18 @@ import { CreateKRARequest, UpdateKRARequest, KRA } from '../../../../core/models
 import { PerformanceService } from '../../services/performance.service';
 import { AppraisalCycle } from '../../../../core/models/performance.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CreateKRADialogData {
   kra?: KRA;
   isEditMode: boolean;
 }
 
+
 @Component({
   selector: 'app-create-kra-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatDialogModule,

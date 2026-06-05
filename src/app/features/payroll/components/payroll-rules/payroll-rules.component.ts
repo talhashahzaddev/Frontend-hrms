@@ -14,10 +14,13 @@ import {
   watchPayrollRuleViewAccess
 } from '../../utils/payroll-rule-permissions';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-payroll-rules',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule],
   templateUrl: './payroll-rules.component.html',
   styleUrl: './payroll-rules.component.scss'
 })

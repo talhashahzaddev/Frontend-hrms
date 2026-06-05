@@ -49,7 +49,7 @@
 
           <div class="metadata-item" *ngIf="news.publishedAt">
             <mat-icon class="metadata-icon">calendar_today</mat-icon>
-            <span>{{ news.publishedAt | date:'d MMMM yyyy' }}</span>
+            <span>{{ news.publishedAt | localizedDate:'d MMMM yyyy' }}</span>
           </div>
 
           <div class="metadata-item" *ngIf="news.views !== undefined">

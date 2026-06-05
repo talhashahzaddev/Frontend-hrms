@@ -26,7 +26,7 @@
           <mat-icon>badge</mat-icon>
           <span>Date</span>
         </div>
-        <div class="detail-value">{{ data.workDate | date:'dd-MM-yyyy' }}</div>
+        <div class="detail-value">{{ data.workDate | localizedDate:'dd-MM-yyyy' }}</div>
       </div>
 
       <div class="detail-item">
@@ -67,7 +67,7 @@
         </div>
         <div class="detail-value">
           @if (data.checkInTime) {
-            {{ data.checkInTime | date:'shortTime' }}<br>
+            {{ data.checkInTime | localizedDate:'shortTime' }}<br>
             <span class="location">{{ data.checkInLocation }}</span>
           } @else {
             <span class="absent-text">Not Checked In</span>
@@ -82,7 +82,7 @@
         </div>
         <div class="detail-value">
           @if (data.checkOutTime) {
-            {{ data.checkOutTime | date:'shortTime' }}<br>
+            {{ data.checkOutTime | localizedDate:'shortTime' }}<br>
             <span class="location">{{ data.checkOutLocation }}</span>
           } @else {
             <span class="absent-text">Not Checked Out</span>
@@ -124,11 +124,11 @@
           <div class="session-item row">
             <div>
               <mat-icon>login</mat-icon>
-              {{ s.checkInTime | date:'shortTime' }}
+              {{ s.checkInTime | localizedDate:'shortTime' }}
             </div>
             <div>
               <mat-icon>logout</mat-icon>
-              {{ s.checkOutTime ? (s.checkOutTime | date:'shortTime') : '—' }}
+              {{ s.checkOutTime ? (s.checkOutTime | localizedDate:'shortTime') : '—' }}
             </div>
           </div>
         }

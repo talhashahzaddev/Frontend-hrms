@@ -1,7 +1,7 @@
 <div class="dialog-header">
   <div class="header-content">
     <h2 mat-dialog-title> Day Details </h2>
-    <span class="date-badge">{{ data.date | date:'fullDate' }}</span>
+    <span class="date-badge">{{ data.date | localizedDate:'fullDate' }}</span>
   </div>
   <button mat-icon-button (click)="closeDialog()">
     <mat-icon>close</mat-icon>
@@ -90,14 +90,14 @@
         <mat-icon class="check-in">login</mat-icon>
         <div class="stat-info">
           <span class="label">Check In</span>
-          <span class="value">{{ (attendanceEvent.details?.checkInTime | date:'shortTime') || '--:--' }}</span>
+          <span class="value">{{ (attendanceEvent.details?.checkInTime | localizedDate:'shortTime') || '--:--' }}</span>
         </div>
       </div>
       <div class="stat-card">
         <mat-icon class="check-out">logout</mat-icon>
         <div class="stat-info">
           <span class="label">Check Out</span>
-          <span class="value">{{ (attendanceEvent.details?.checkOutTime | date:'shortTime') || '--:--' }}</span>
+          <span class="value">{{ (attendanceEvent.details?.checkOutTime | localizedDate:'shortTime') || '--:--' }}</span>
         </div>
       </div>
       <div class="stat-card">
@@ -121,9 +121,9 @@
       <h4>Sessions</h4>
       <div class="session-item" *ngFor="let session of todaySessions">
         <div class="session-time">
-          <span class="start">{{ session.checkInTime | date:'shortTime' }}</span>
+          <span class="start">{{ session.checkInTime | localizedDate:'shortTime' }}</span>
           <span class="separator">-</span>
-          <span class="end">{{ (session.checkOutTime | date:'shortTime') || 'Ongoing' }}</span>
+          <span class="end">{{ (session.checkOutTime | localizedDate:'shortTime') || 'Ongoing' }}</span>
         </div>
         <div class="session-duration">
           <mat-icon>schedule</mat-icon>

@@ -9,10 +9,13 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { OfficeIP } from '../../../../core/models/attendance.models';
 import { NotificationService } from '@/app/core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-edit-office-ip-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

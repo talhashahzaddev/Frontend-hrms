@@ -25,11 +25,11 @@
       <div class="before-grid">
         <div class="before-item">
           <span class="bi-label">Check-In</span>
-          <span class="bi-value">{{ data.record.originalCheckIn ? parseTimeFromDateTime(data.record.originalCheckIn) : '—' }}</span>
+          <span class="bi-value">{{ data.record.originalCheckIn ? (data.record.originalCheckIn | localizedTime) : '—' }}</span>
         </div>
         <div class="before-item">
           <span class="bi-label">Check-Out</span>
-          <span class="bi-value">{{ data.record.originalCheckOut ? parseTimeFromDateTime(data.record.originalCheckOut) : '—' }}</span>
+          <span class="bi-value">{{ data.record.originalCheckOut ? (data.record.originalCheckOut | localizedTime) : '—' }}</span>
         </div>
         <div class="before-item">
           <span class="bi-label">Status</span>

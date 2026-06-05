@@ -22,3 +22,10 @@ dist/
 dist/
 node_modules/
 
+SOCIAL_SECURITY_TEST_SCENARIOS.md
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

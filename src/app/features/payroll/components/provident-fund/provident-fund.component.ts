@@ -25,6 +25,7 @@ import {
   ManualProvidentFundEnrollmentDialogComponent
 } from '../dialogs/manual-provident-fund-enrollment-dialog/manual-provident-fund-enrollment-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type ProvidentFundTab = 'requests' | 'payments' | 'repayments';
 type ProvidentFundStatus = 'pending' | 'approved' | 'rejected';
 type ProvidentFundFundStatus = 'active' | 'closed' | 'pending';
@@ -90,10 +91,12 @@ interface ProvidentFundRepaymentRow {
   createdAt: string | null;
 }
 
+
 @Component({
   selector: 'app-provident-fund',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './provident-fund.component.html',
   styleUrl: './provident-fund.component.scss'
 })

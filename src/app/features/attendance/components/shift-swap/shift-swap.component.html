@@ -15,7 +15,7 @@
     <div class="current-shift-banner">
       <div class="shift-info-left">
         <span class="shift-label">YOUR CURRENT SHIFT</span>
-        <span class="shift-time">{{ currentShift?.startTime || '08:00' }} - {{ currentShift?.endTime || '17:00' }}</span>
+        <span class="shift-time">{{ currentShift?.startTime | localizedTime:false:'08:00' }} - {{ currentShift?.endTime | localizedTime:false:'17:00' }}</span>
         <span class="shift-name">{{ currentShift?.shiftName || 'Morning Shift' }}</span>
       </div>
       <div class="shift-info-right">
@@ -29,7 +29,7 @@
       <mat-form-field appearance="outline" class="custom-field">
         <mat-select formControlName="requestedShiftId" placeholder="Select the shift you want to request">
           <mat-option *ngFor="let shift of shifts" [value]="shift.shiftId">
-            {{ shift.shiftName }} ({{ shift.startTime }} - {{ shift.endTime }})
+            {{ shift.shiftName }} ({{ shift.startTime | localizedTime }} - {{ shift.endTime | localizedTime }})
           </mat-option>
         </mat-select>
         <mat-error *ngIf="swapForm.get('requestedShiftId')?.hasError('required')">

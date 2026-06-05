@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface LoanRejectionDialogData {
   title?: string;
   message?: string;
@@ -12,11 +13,13 @@ export interface LoanRejectionDialogData {
   cancelText?: string;
 }
 
+
 @Component({
   selector: 'app-loan-rejection-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatDialogModule, MatIconModule],
   templateUrl: './loan-rejection-dialog.component.html',
   styleUrl: './loan-rejection-dialog.component.scss'
 })

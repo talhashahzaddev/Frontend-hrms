@@ -13,7 +13,9 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest }
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
+import { LocalizationService } from '../../../../core/services/localization.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface UpdateLocalizationRequest {
   currency: string;
   timeZone: string;
@@ -28,10 +30,12 @@ export interface CultureOption {
 
 
 
+
 @Component({
   selector: 'app-settings-general',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -70,6 +74,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private notificationService: NotificationService,
     private authService: AuthService,
+    private localizationService: LocalizationService,
     
     private dialog: MatDialog
   ) {
@@ -104,6 +109,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
           }))
           .sort((a, b) => a.label.localeCompare(b.label));
 
+        this.normalizeTimeZoneSelection();
         this.cdr.markForCheck();
       },
       error: () => {
@@ -124,8 +130,10 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
           this.currentCurrency = settings.currency;
           if (settings.currency) {
             this.settingsForm.patchValue({ currency: settings.currency });
-            this.settingsForm.patchValue({ timeZone: settings.timeZone });
+            const normalizedTimeZone = this.normalizeTimeZoneValue(settings.timeZone);
+            this.settingsForm.patchValue({ timeZone: normalizedTimeZone });
             this.settingsForm.patchValue({ culture: settings.culture });
+            this.localizationService.setLocalization(settings.culture, normalizedTimeZone);
           }
           this.isLoading = false;
         },
@@ -174,6 +182,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
           this.currentTimeZone = selectedTimeZone;
           this.currentCulture = selectedCulture;
 
+          this.localizationService.setLocalization(selectedCulture, selectedTimeZone);
           this.notificationService.showSuccess('Settings updated successfully');
           this.isSaving = false;
         },
@@ -231,6 +240,22 @@ hasPermission(actionKey: string): boolean {
     if (!currencyCode) return '';
     const currency = this.availableCurrencies.find(c => c.code === currencyCode);
     return currency ? currency.symbol : '';
+  }
+
+  private normalizeTimeZoneSelection(): void {
+    const current = this.settingsForm.get('timeZone')?.value;
+    const normalized = this.normalizeTimeZoneValue(current);
+    if (normalized && normalized !== current) {
+      this.settingsForm.patchValue({ timeZone: normalized });
+    }
+  }
+
+  private normalizeTimeZoneValue(value?: string | null): string | null {
+    if (!value) return null;
+    const direct = this.timezone.find(tz => tz.value === value)?.value;
+    if (direct) return direct;
+    const byLabel = this.timezone.find(tz => tz.label === value);
+    return byLabel?.value ?? value;
   }
 
   // openManageOfficeIPsDialog(): void {

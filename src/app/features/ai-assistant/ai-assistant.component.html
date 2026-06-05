@@ -66,7 +66,7 @@
 
               <div class="meta-row" [class.user-meta]="message.sender === 'user'" [class.ai-meta]="message.sender === 'ai'">
                 <span>{{ message.sender === 'user' ? 'You' : 'Assistant' }}</span>
-                <span>{{ message.timestamp | date:'h:mm a' }}</span>
+                <span>{{ message.timestamp | localizedDate:'h:mm a' }}</span>
               </div>
             </div>
           </article>

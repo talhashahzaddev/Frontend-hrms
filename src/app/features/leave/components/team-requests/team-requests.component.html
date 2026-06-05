@@ -72,9 +72,9 @@
 
               <div class="leave-dates">
                 <mat-icon class="date-icon">calendar_month</mat-icon>
-                <span>{{ request.startDate | date:'dd MMM yyyy' }}</span>
+                <span>{{ request.startDate | localizedDate:'dd MMM yyyy' }}</span>
                 <span class="separator">→</span>
-                <span>{{ request.endDate | date:'dd MMM yyyy' }}</span>
+                <span>{{ request.endDate | localizedDate:'dd MMM yyyy' }}</span>
                 <span class="days-badge">{{ request.daysRequested }} {{ request.daysRequested === 1 ? 'day' : 'days' }}</span>
               </div>
             </div>

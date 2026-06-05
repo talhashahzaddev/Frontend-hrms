@@ -16,6 +16,8 @@ import { AttendanceService } from '../../services/attendance.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ShiftSwap } from '../../../../core/models/attendance.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { LocalizedTimePipe } from '@shared/pipes/localized-time.pipe';
 export interface ShiftDto {
   shiftId: string;
   shiftName: string;
@@ -27,10 +29,13 @@ export interface ShiftDto {
   isActive: boolean;
 }
 
+
 @Component({
   selector: 'app-shift-swap',
   standalone: true,
   imports: [
+    SharedCommonModule,
+    LocalizedTimePipe,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

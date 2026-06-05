@@ -21,11 +21,14 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { AuthService } from '../../../../core/services/auth.service';
 import { DomainService } from '../../../../core/services/domain.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
     selector: 'app-career-management',
     standalone: true,
     encapsulation: ViewEncapsulation.None,
     imports: [
+    SharedCommonModule,
         CommonModule,
         ReactiveFormsModule,
         MatCardModule,

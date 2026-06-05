@@ -34,6 +34,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface CalendarDay {
   date: Date;
   dayNumber: number;
@@ -46,10 +47,12 @@ interface CalendarDay {
   attendance?: AttendanceCalendarData;
 }
 
+
 @Component({
   selector: 'app-attendance-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     RouterModule,
     ReactiveFormsModule,

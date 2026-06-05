@@ -4,7 +4,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { Subject, takeUntil } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -14,12 +14,15 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { User } from '../../../../core/models/auth.models';
 import { AttendanceSessionDto, TimeTrackingSession } from '../../../../core/models/attendance.models';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-view-details-dialogue',
   templateUrl: './view-details-dialogue.component.html',
   styleUrls: ['./view-details-dialogue.component.scss'],
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatIconModule,
     MatCardModule,
@@ -27,8 +30,7 @@ import { AttendanceSessionDto, TimeTrackingSession } from '../../../../core/mode
     MatProgressSpinnerModule,
     MatDialogModule,
     MatDividerModule,
-    MatButtonModule,
-    DatePipe
+    MatButtonModule
   ]
 })
 export class ViewDetailsDialogueComponent implements OnInit, OnDestroy {

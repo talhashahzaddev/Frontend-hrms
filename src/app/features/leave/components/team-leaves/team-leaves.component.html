@@ -164,7 +164,7 @@
         <ng-container matColumnDef="dates">
           <th mat-header-cell *matHeaderCellDef>Duration</th>
           <td mat-cell *matCellDef="let request" class="date-cell">
-            {{ request.startDate | date:'dd-MM-yyyy' }} &ndash; {{ request.endDate | date:'dd-MM-yyyy' }}
+            {{ request.startDate | localizedDate:'dd-MM-yyyy' }} &ndash; {{ request.endDate | localizedDate:'dd-MM-yyyy' }}
             <span style="color: #6366f1; font-weight: 600; font-size: 11px; margin-left: 4px;">({{ request.daysRequested }} days)</span>
           </td>
         </ng-container>
@@ -181,7 +181,7 @@
         <ng-container matColumnDef="submitted">
           <th mat-header-cell *matHeaderCellDef>Submitted</th>
           <td mat-cell *matCellDef="let request" class="date-cell">
-            {{ request.submittedAt | date:'dd-MM-yyyy HH:mm' }}
+            {{ request.submittedAt | localizedDate:'dd-MM-yyyy HH:mm' }}
           </td>
         </ng-container>
 

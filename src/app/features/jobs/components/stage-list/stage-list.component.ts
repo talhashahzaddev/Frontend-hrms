@@ -22,10 +22,13 @@ import {
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { AuthService } from '@core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-stage-list',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,

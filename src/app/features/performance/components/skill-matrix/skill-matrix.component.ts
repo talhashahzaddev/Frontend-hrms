@@ -1,3 +1,4 @@
+import { SharedCommonModule } from '@shared/shared-common.module';
 // skill-matrix.component.ts
 import {
   Component, OnInit, OnDestroy, ChangeDetectorRef,
@@ -27,10 +28,12 @@ import {
   EmployeeSkillFullDetail, SKILL_CATEGORIES
 } from 'src/app/core/models/performance.models';
 
+
 @Component({
   selector: 'app-skill-matrix',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule, FormsModule, ReactiveFormsModule,
     MatTableModule, MatIconModule, MatButtonModule, MatMenuModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule,

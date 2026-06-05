@@ -14,10 +14,14 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { EmployeeOverTimeDto } from '../../../../core/models/attendance.models';
 import { AuthService } from '@/app/core/services/auth.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
+import { LocalizedTimePipe } from '@shared/pipes/localized-time.pipe';
 @Component({
   selector: 'app-overtime',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, MatTableModule, MatMenuModule, MatTooltipModule],
+  imports: [
+    SharedCommonModule, LocalizedTimePipe, CommonModule, MatButtonModule, MatIconModule, MatDialogModule, MatTableModule, MatMenuModule, MatTooltipModule],
   templateUrl: './overtime.component.html',
   styleUrls: ['./overtime.component.scss']
 })

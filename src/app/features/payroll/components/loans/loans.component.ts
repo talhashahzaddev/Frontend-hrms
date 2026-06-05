@@ -36,6 +36,7 @@ import { DeleteActionDialogComponent } from '../dialogs/delete-action-dialog/del
 import { LoanRejectionDialogComponent } from '../dialogs/loan-rejection-dialog/loan-rejection-dialog.component';
 import { DisburseLoanDialogComponent } from '../dialogs/disburse-loan-dialog/disburse-loan-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type LoanStatus = LoanDialogStatus | 'approved' | 'accepted' | 'rejected';
 type LoanTab = 'loans' | 'loan-payments' | 'repayments';
 type LoanPaymentStatus = 'pending' | 'deducted' | 'skipped';
@@ -145,10 +146,12 @@ interface RepaymentLedgerRow {
   loanStatus: LoanStatus | 'active' | 'completed';
 }
 
+
 @Component({
   selector: 'app-loans',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './loans.component.html',
   styleUrl: './loans.component.scss'
 })
@@ -2070,7 +2073,7 @@ export class LoansComponent implements OnInit {
     const repaymentType = String(item?.repaymentType ?? item?.loanType ?? '').trim().toLowerCase();
 
     if (referenceId || (employeeId || employeeName)) {
-      return `repayment-sig:${referenceId}|emp:${employeeId || employeeName}|period:${periodId || periodName}|amt:${amount}|date:${paymentDate}|type:${repaymentType}`;
+      return `repayment-sig:${referenceId}|emp:${employeeId || employeeName}|period:${periodId || periodName}|amt:${amount}| localizedDate:${paymentDate}|type:${repaymentType}`;
     }
 
     return `repayment-fallback:${index}`;

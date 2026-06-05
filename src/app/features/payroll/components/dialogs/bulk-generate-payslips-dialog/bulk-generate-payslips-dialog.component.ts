@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export type BulkGenerateEmployeeStatus = 'none' | 'draft' | 'generated' | 'sent' | 'viewed' | 'failed' | 'bounced';
 
 export interface BulkGeneratePeriodOption {
@@ -39,11 +40,13 @@ export interface BulkGeneratePayslipsDialogPayload {
   employeeIds: string[];
 }
 
+
 @Component({
   selector: 'app-bulk-generate-payslips-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './bulk-generate-payslips-dialog.component.html',
   styleUrl: './bulk-generate-payslips-dialog.component.scss'
 })

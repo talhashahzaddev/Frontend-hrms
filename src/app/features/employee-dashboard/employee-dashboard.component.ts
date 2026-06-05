@@ -26,10 +26,13 @@ import {
 } from '../../core/models/attendance.models';
 import { GeoClockInRequest } from '../attendance/services/geofence.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-employee-dashboard',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,

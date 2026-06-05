@@ -19,10 +19,13 @@ import { NewsService } from '../../services/news.services';
 import { AuthService } from '@/app/core/services/auth.service';
 import { QuillModule } from 'ngx-quill';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-create-news',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,

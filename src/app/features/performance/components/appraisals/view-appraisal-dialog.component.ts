@@ -9,14 +9,17 @@ import { PerformanceService } from '../../services/performance.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ViewAppraisalDialogData {
   appraisal: EmployeeAppraisal;
 }
+
 
 @Component({
   selector: 'app-view-appraisal-dialog',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatDialogModule,
     MatButtonModule,
@@ -110,16 +113,16 @@ export interface ViewAppraisalDialogData {
           <h3 class="text-lg font-semibold mb-2">Timeline</h3>
           <div class="grid grid-cols-2 gap-4">
             <div *ngIf="data.appraisal.createdAt">
-              <strong>Created:</strong> {{ data.appraisal.createdAt | date:'medium' }}
+              <strong>Created:</strong> {{ data.appraisal.createdAt | localizedDate:'medium' }}
             </div>
             <div>
               <strong>Submitted:</strong> 
-              <span *ngIf="data.appraisal.submittedAt">{{ data.appraisal.submittedAt | date:'medium' }}</span>
+              <span *ngIf="data.appraisal.submittedAt">{{ data.appraisal.submittedAt | localizedDate:'medium' }}</span>
               <span *ngIf="!data.appraisal.submittedAt">Not submitted</span>
             </div>
             <div>
               <strong>Reviewed:</strong>
-              <span *ngIf="data.appraisal.reviewedAt">{{ data.appraisal.reviewedAt | date:'medium' }}</span>
+              <span *ngIf="data.appraisal.reviewedAt">{{ data.appraisal.reviewedAt | localizedDate:'medium' }}</span>
               <span *ngIf="!data.appraisal.reviewedAt">Not reviewed</span>
             </div>
           </div>

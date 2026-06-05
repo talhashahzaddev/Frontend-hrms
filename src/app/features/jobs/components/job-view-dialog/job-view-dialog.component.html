@@ -79,11 +79,11 @@
 
         <div class="info-cell">
           <p class="info-label">Posted On</p>
-          <p class="info-value">{{ job.postedDate ? (job.postedDate | date:'mediumDate') : '—' }}</p>
+          <p class="info-value">{{ job.postedDate ? (job.postedDate | localizedDate:'mediumDate') : '—' }}</p>
         </div>
         <div class="info-cell">
           <p class="info-label">Last Date to Apply</p>
-          <p class="info-value">{{ job.lastDate ? (job.lastDate | date:'mediumDate') : '—' }}</p>
+          <p class="info-value">{{ job.lastDate ? (job.lastDate | localizedDate:'mediumDate') : '—' }}</p>
         </div>
 
         <div class="info-cell" *ngIf="job.externalLink">

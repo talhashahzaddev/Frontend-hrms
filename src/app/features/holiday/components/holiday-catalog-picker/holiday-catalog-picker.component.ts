@@ -13,13 +13,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { HolidayService } from '../../services/holiday.service';
 import { CatalogCountry, HolidayCatalog } from '../../../../core/models/holiday.models';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 // Country code to flag emoji mapping
 const FLAG_OFFSETS: Record<string, string> = {};
+
 
 @Component({
   selector: 'app-holiday-catalog-picker',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     FormsModule,
     MatDialogModule,

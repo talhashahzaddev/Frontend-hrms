@@ -274,8 +274,8 @@
               <div *ngFor="let event of upcomingEvents" class="event-item">
                 <div class="event-date-wrapper">
                   <div class="event-date">
-                    <span class="date-day">{{ event.date | date:'d' }}</span>
-                    <span class="date-month">{{ event.date | date:'MMM' }}</span>
+                    <span class="date-day">{{ event.date | localizedDate:'d' }}</span>
+                    <span class="date-month">{{ event.date | localizedDate:'MMM' }}</span>
                   </div>
                 </div>
                 <div class="event-content">

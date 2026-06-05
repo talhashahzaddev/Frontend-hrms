@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '@core/services/auth.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 export interface ManualPfEnrollmentEmployeeOption {
   employeeId: string;
   employeeCode: string;
@@ -32,11 +33,13 @@ interface ManualPfEnrollmentDialogData {
   rules: ManualPfEnrollmentRuleOption[];
 }
 
+
 @Component({
   selector: 'app-manual-provident-fund-enrollment-dialog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, ReactiveFormsModule, MatDialogModule, MatIconModule],
   templateUrl: './manual-provident-fund-enrollment-dialog.component.html',
   styleUrl: './manual-provident-fund-enrollment-dialog.component.scss'
 })

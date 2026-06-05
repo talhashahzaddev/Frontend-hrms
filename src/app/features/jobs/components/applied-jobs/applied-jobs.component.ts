@@ -29,10 +29,13 @@ import { NotificationService } from '@core/services/notification.service';
 import { JobApplicationDto, JobOpeningDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
 import { EditApplicationStageDialogComponent } from '../edit-application-stage-dialog/edit-application-stage-dialog.component';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-applied-jobs',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     ReactiveFormsModule,
     RouterLink,

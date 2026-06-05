@@ -13,10 +13,13 @@ import { HolidayService } from '../../services/holiday.service';
 import { CompanyHoliday, EmployeeRestrictedHoliday } from '../../../../core/models/holiday.models';
 import { NotificationService } from '../../../../core/services/notification.service';
 
+
+import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
   selector: 'app-restricted-holiday-picker',
   standalone: true,
   imports: [
+    SharedCommonModule,
     CommonModule,
     MatCardModule,
     MatButtonModule,

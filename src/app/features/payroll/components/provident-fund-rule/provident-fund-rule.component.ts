@@ -17,6 +17,7 @@ import {
 } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { RuleDialogComponent } from '../dialogs/rule-dialog/rule-dialog.component';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 interface ProvidentFundRule {
   ruleId: string;
   ruleName: string;
@@ -32,10 +33,12 @@ interface ProvidentFundRule {
   isActive: boolean;
 }
 
+
 @Component({
   selector: 'app-provident-fund-rule',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
+  imports: [
+    SharedCommonModule,CommonModule, MatIconModule, MatDialogModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './provident-fund-rule.component.html',
   styleUrl: './provident-fund-rule.component.scss'
 })

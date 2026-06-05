@@ -14,12 +14,15 @@ import {
   SocialSecuritySchemeOption
 } from '../../services/payroll.service';
 
+import { SharedCommonModule } from '@shared/shared-common.module';
 type MasterTab = 'jurisdictions' | 'authorities' | 'schemes' | 'rules';
+
 
 @Component({
   selector: 'app-social-security-masters',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [
+    SharedCommonModule,CommonModule, FormsModule, MatIconModule],
   templateUrl: './social-security-masters.component.html',
   styleUrl: './social-security-masters.component.scss'
 })
