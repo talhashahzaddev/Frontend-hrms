@@ -7,6 +7,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { take, forkJoin, of } from 'rxjs';
 
 import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
 import { PayrollService } from '../../services/payroll.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import {
@@ -110,6 +111,7 @@ export class LoanRequestsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly payrollService = inject(PayrollService);
+  private readonly notificationService = inject(NotificationService);
   private readonly settingsService = inject(SettingsService);
 
   readonly currencySymbol = signal(this.settingsService.getCurrencySymbol());
@@ -352,13 +354,13 @@ export class LoanRequestsComponent implements OnInit {
 
   get activeLoanRecords(): EmployeeLoanRecord[] {
     return this.loans
-      .filter((row) => row.status === 'active')
+      .filter((row) => row.status === 'active' || row.status === 'accepted')
       .sort((a, b) => this.compareDateDesc(a.requestedOn, b.requestedOn));
   }
 
   get requestedLoanRecords(): EmployeeLoanRecord[] {
     return this.loans
-      .filter((row) => row.status !== 'active')
+      .filter((row) => row.status !== 'active' && row.status !== 'accepted')
       .sort((a, b) => this.compareDateDesc(a.requestedOn, b.requestedOn));
   }
 
@@ -533,6 +535,14 @@ export class LoanRequestsComponent implements OnInit {
       .length;
   }
 
+  get hasActiveOrPendingLoan(): boolean {
+    return this.loans.some(row => ['active', 'pending', 'approved', 'accepted'].includes(row.status));
+  }
+
+  get hasActiveOrPendingAdvance(): boolean {
+    return this.salaryAdvances.some(row => ['pending', 'approved', 'disbursed'].includes(row.status));
+  }
+
   get availableAdvanceLimit(): number {
     // The cap basis the dialog multiplies by each rule's max percentage. Must equal
     // the server's basis (employee basic salary) so the FE preview matches what the
@@ -638,6 +648,10 @@ export class LoanRequestsComponent implements OnInit {
     if (!this.hasPermission('loan_employee_request')) {
       return;
     }
+    if (this.hasActiveOrPendingLoan) {
+      this.notificationService.warning('You already have an active or pending loan request.');
+      return;
+    }
     const dialogRef = this.dialog.open(RequestLoanDialogComponent, {
       width: '560px',
       panelClass: 'request-loan-dialog-panel',
@@ -694,6 +708,10 @@ export class LoanRequestsComponent implements OnInit {
 
   openSalaryAdvanceDialog(): void {
     if (!this.hasPermission('salary_advance_employee_request')) {
+      return;
+    }
+    if (this.hasActiveOrPendingAdvance) {
+      this.notificationService.warning('You already have an active or pending salary advance request.');
       return;
     }
     this.payrollService.getActiveSalaryAdvanceRules()

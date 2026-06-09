@@ -60,11 +60,6 @@
         </button>
       </div>
     </div>
-    <div class="export-action">
-      <button class="export-btn">
-        <mat-icon>download</mat-icon> Export
-      </button>
-    </div>
   </div>
 
   <!-- Summary Cards -->
@@ -157,7 +152,7 @@
                   <img [src]="emp.avatar" alt="">
                   <div class="emp-details">
                     <span class="emp-name">{{ emp.name }}</span>
-                    <span class="emp-id">{{ emp.id }}</span>
+                    <!-- <span class="emp-id">{{ emp.id }}</span> -->
                   </div>
                 </div>
               </td>
@@ -183,7 +178,6 @@
                   <button type="button" (click)="toggleDetails(emp.employeeId)" title="Breakdown">
                     <mat-icon>receipt_long</mat-icon>
                   </button>
-                  <button type="button" title="Download"><mat-icon>download</mat-icon></button>
                 </div>
               </td>
             </tr>

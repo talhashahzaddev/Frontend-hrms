@@ -298,6 +298,7 @@ export class PayrollResultComponent implements OnInit {
   entriesOf(obj: Record<string, unknown> | null | undefined): [string, unknown][] {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return [];
     return Object.keys(obj)
+      .filter((k) => !k.toLowerCase().endsWith('id'))
       .sort((a, b) => a.localeCompare(b))
       .map((k) => [k, (obj as Record<string, unknown>)[k]]);
   }

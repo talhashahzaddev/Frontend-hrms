@@ -125,14 +125,13 @@
             <th>Employee</th>
             <th>Period</th>
             <th class="text-right">Amount</th>
-            <th>Description</th>
             <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           @if (rows.length === 0) {
             <tr>
-              <td class="empty-row" colspan="5">No bonus records found.</td>
+              <td class="empty-row" colspan="4">No bonus records found.</td>
             </tr>
           } @else {
             @for (row of rows; track trackById($index, row)) {
@@ -145,7 +144,6 @@
                 </td>
                 <td>{{ row.period }}</td>
                 <td class="text-right font-semibold highlight-val">{{ currencySymbol() }} {{ row.amount | number }}</td>
-                <td class="text-sm italic text-gray-500">{{ row.description }}</td>
                 <td class="action-cell">
                   @if (hasPermission('bonus_entry_edit')) {
                   <button class="action-btn hover-primary" aria-label="Edit" (click)="openEditBonusDialog(row)">
