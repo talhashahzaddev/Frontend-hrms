@@ -13,7 +13,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest }
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
-import { LocalizationService } from '../../../../core/services/localization.service';
+// import { LocalizationService } from '../../../../core/services/localization.service';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface UpdateLocalizationRequest {
@@ -74,7 +74,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private notificationService: NotificationService,
     private authService: AuthService,
-    private localizationService: LocalizationService,
+    // private localizationService: LocalizationService,
     
     private dialog: MatDialog
   ) {
@@ -133,7 +133,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
             const normalizedTimeZone = this.normalizeTimeZoneValue(settings.timeZone);
             this.settingsForm.patchValue({ timeZone: normalizedTimeZone });
             this.settingsForm.patchValue({ culture: settings.culture });
-            this.localizationService.setLocalization(settings.culture, normalizedTimeZone);
+            // this.localizationService.setLocalization(settings.culture, normalizedTimeZone);
           }
           this.isLoading = false;
         },
@@ -182,7 +182,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
           this.currentTimeZone = selectedTimeZone;
           this.currentCulture = selectedCulture;
 
-          this.localizationService.setLocalization(selectedCulture, selectedTimeZone);
+          // this.localizationService.setLocalization(selectedCulture, selectedTimeZone);
           this.notificationService.showSuccess('Settings updated successfully');
           this.isSaving = false;
         },

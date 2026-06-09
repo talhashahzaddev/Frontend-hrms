@@ -709,7 +709,7 @@ $radius-md:     0.5rem;
     gap: 12px;
 
     .session-date-badge {
-      width: 40px;
+      min-width: 44px;
       height: 40px;
       border-radius: $radius-md;
       background: $primary;
@@ -718,9 +718,10 @@ $radius-md:     0.5rem;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      padding: 0 6px;
 
       .day {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 800;
         color: $white;
         line-height: 1;
@@ -734,6 +735,7 @@ $radius-md:     0.5rem;
         letter-spacing: 0.04em;
         line-height: 1;
         margin-top: 1px;
+        white-space: nowrap;
       }
 
       &.inactive {
