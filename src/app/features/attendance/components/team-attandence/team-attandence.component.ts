@@ -70,9 +70,12 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
 
   attendanceRecords: Attendance[] = [];
   filteredAttendance: Attendance[] = [];
+  teamAttendanceRecords: Attendance[] = [];
+  filteredTeamAttendance: Attendance[] = [];
   departments: Department[] = [];
   dailyStats: DailyAttendanceStats | null = null;
   totalRecords: number = 0;
+  teamTotalRecords: number = 0;
   currentPage = 1;
   pageSize = 10;
   currentUser: User | null = null;
@@ -103,10 +106,10 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     { value: 'present', label: 'Present' },
     { value: 'absent', label: 'Absent' },
     { value: 'late', label: 'Late' },
-    { value: 'early_departure', label: 'Early Departure' },
-    { value: 'half_day', label: 'Half Day' },
-    { value: 'on_leave', label: 'On Leave' },
-    { value: 'pending_approval', label: 'Pending Approval' }
+    // { value: 'early_departure', label: 'Early Departure' },
+    // { value: 'half_day', label: 'Half Day' },
+    // { value: 'on_leave', label: 'On Leave' },
+    // { value: 'pending_approval', label: 'Pending Approval' }
   ];
 
   constructor(
@@ -123,6 +126,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     this.loadDailyStats();
     this.setupFilters();
     this.loadAttendanceData();
+    this.loadTeamAttendanceData();
   }
 
   ngOnDestroy(): void {
@@ -160,6 +164,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadAttendanceData();
+    this.loadTeamAttendanceData();
   }
 
   private loadDailyStats(): void {
@@ -187,6 +192,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.currentPage = 1;
         this.loadAttendanceData();
+        this.loadTeamAttendanceData();
       });
 
     // Listen to department changes
@@ -198,6 +204,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.currentPage = 1;
         this.loadAttendanceData();
+        this.loadTeamAttendanceData();
       });
 
     // Listen to status changes
@@ -209,6 +216,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.currentPage = 1;
         this.loadAttendanceData();
+        this.loadTeamAttendanceData();
       });
 
     // Listen to start date changes
@@ -220,6 +228,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.currentPage = 1;
         this.loadAttendanceData();
+        this.loadTeamAttendanceData();
       });
 
     // Listen to end date changes
@@ -231,12 +240,14 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.currentPage = 1;
         this.loadAttendanceData();
+        this.loadTeamAttendanceData();
       });
   }
 
   applyFilters(): void {
     this.currentPage = 1;
     this.loadAttendanceData();
+    this.loadTeamAttendanceData();
   }
 
   private loadAttendanceData(): void {
@@ -274,6 +285,47 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           const errorMessage = error?.error?.message || error?.message || 'Failed to load attendance data';
+          this.notification.showError(errorMessage);
+          this.isLoading = false;
+        }
+      });
+  }
+
+  private loadTeamAttendanceData(): void {
+    this.isLoading = true;
+
+    const formatLocalDate = (date: Date | null) => {
+      if (!date) return '';
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    const startDate = formatLocalDate(this.startDateControl.value);
+    const endDate = formatLocalDate(this.endDateControl.value);
+
+    const searchRequest: AttendanceSearchRequest = {
+      SearchTerm: this.searchTermControl.value || undefined,
+      startDate,
+      endDate,
+      departmentId: this.departmentControl.value || undefined,
+      status: this.statusControl.value || undefined,
+      page: this.currentPage,
+      pageSize: this.pageSize
+    };
+
+    this.attendanceService.getTeamAttendances(searchRequest)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.teamAttendanceRecords = response.attendances;
+          this.teamTotalRecords = response.totalCount;
+          this.filteredTeamAttendance = [...this.teamAttendanceRecords];
+          this.isLoading = false;
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load team attendance data';
           this.notification.showError(errorMessage);
           this.isLoading = false;
         }

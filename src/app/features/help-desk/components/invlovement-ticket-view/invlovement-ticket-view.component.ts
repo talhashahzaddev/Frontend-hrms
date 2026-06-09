@@ -27,7 +27,7 @@ interface CategoryDto {
 
 
 @Component({
-  selector: 'app-view-ticket-details',
+  selector: 'app-invlovement-ticket-view',
   standalone: true,
   imports: [
     SharedCommonModule,
@@ -37,7 +37,7 @@ interface CategoryDto {
     MatButtonModule,
   ],
  templateUrl: './invlovement-ticket-view.component.html',
-  styleUrl: './invlovement-ticket-view.component.scss',
+  styleUrls: ['./invlovement-ticket-view.component.scss'],
 })
 export class InvlovementTicketViewComponent implements OnInit, OnDestroy {
 
@@ -696,7 +696,7 @@ sendReply(): void {
   }
    
    hasPermission(actionKey: string): boolean {
-    return this.authService.hasMenuPermission('Help Desk', 'Tickets Dashboard', actionKey);
+    return this.authService.hasMenuPermission('Help Desk', 'Ticket Involvement', actionKey);
   }
 
 }
