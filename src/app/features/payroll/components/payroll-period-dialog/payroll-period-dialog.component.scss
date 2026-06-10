@@ -1,6 +1,9 @@
 .attendance-dialog-container {
   width: 100%;
   max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   background-color: #ffffff;
   border-radius: 1rem;
   overflow: hidden;
@@ -14,6 +17,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
+    flex-shrink: 0;
 
     .header-content {
       display: flex;
@@ -70,6 +74,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    overflow-y: auto;
 
     .form-row {
       display: flex;
@@ -169,6 +174,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
+    flex-shrink: 0;
 
     button {
       padding: 0.625rem 1.25rem;
