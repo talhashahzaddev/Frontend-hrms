@@ -132,6 +132,7 @@ export interface ApiResponse<T> {
 
 export interface CalculatePayrollPayload {
   periodId: string;
+  departmentId?: string | null;
   cycleId?: string | null;
   bonusRuleId?: string | null;
   attendanceRuleId?: string | null;

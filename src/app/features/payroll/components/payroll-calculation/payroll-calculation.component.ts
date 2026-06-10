@@ -11,6 +11,7 @@ import { PerformanceService } from '../../../../features/performance/services/pe
 import { Department } from '../../../../core/models/employee.models';
 import { AppraisalCycle } from '../../../../core/models/performance.models';
 import { AuthService } from '@core/services/auth.service';
+import { NotificationService } from '@core/services/notification.service';
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
@@ -24,6 +25,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 })
 export class PayrollCalculationComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
 
   get canAccessPayrollCalculation(): boolean {
     return this.hasPermission('payroll_calculation');
@@ -69,8 +71,6 @@ export class PayrollCalculationComponent implements OnInit {
   isLoading: boolean = false;
   isCalculating: boolean = false;
   calculationResult: any | null = null;
-  errorMessage: string = '';
-  successMessage: string = '';
 
   periods: any[] = [];
   departments: Department[] = [];
@@ -217,21 +217,20 @@ export class PayrollCalculationComponent implements OnInit {
     if (!this.canAccessPayrollCalculation) {
       return;
     }
-    this.errorMessage = '';
-    this.successMessage = '';
     this.calculationResult = null;
 
     if (!this.selectedPeriodId) {
-      this.errorMessage = 'Please select a payroll period before calculation.';
+      this.notificationService.warning('Please select a payroll period before calculation.');
       return;
     }
     if (!this.canCalculatePayroll()) {
-      this.errorMessage = 'Enable each module you need and select a rule or cycle where required.';
+      this.notificationService.warning('Enable each module you need and select a rule or cycle where required.');
       return;
     }
 
     const payload: CalculatePayrollPayload = {
       periodId: this.selectedPeriodId,
+      departmentId: this.normalizeGuid(this.selectedDepartmentId) ?? undefined,
       cycleId: this.enablePerformance ? this.normalizeGuid(this.selectedPerformanceCycleId) ?? undefined : undefined,
       bonusRuleId:
         this.enableBonus && this.selectedBonusRuleId
@@ -267,11 +266,13 @@ export class PayrollCalculationComponent implements OnInit {
     this.payrollService.calculatePayroll(payload).subscribe({
       next: (result) => {
         this.calculationResult = result;
-        this.successMessage = 'Payroll calculated successfully.';
+        const processed = result?.employeesConsidered || 0;
+        const deducts = (result?.totalDeductions || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        this.notificationService.success(`Payroll calculated successfully. Processed ${processed} employees with total deductions of ${deducts}.`);
         this.isCalculating = false;
       },
       error: (err) => {
-        this.errorMessage = err?.message || 'Payroll calculation failed.';
+        this.notificationService.error(err?.message || 'Payroll calculation failed.');
         this.isCalculating = false;
       }
     });

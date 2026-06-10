@@ -35,8 +35,8 @@
       <label class="field">
         <span>Monthly installment {{ currencySymbol }}</span>
         <div class="prefix-input">
-          <strong>Rs.</strong>
-          <input type="number" formControlName="monthlyInstallment" min="1" placeholder="0.00" />
+          <strong>{{ currencySymbol }}</strong>
+          <input type="number" formControlName="monthlyInstallment" min="1" placeholder="0.00" readonly />
         </div>
         @if (showInstallmentError) {
         <small class="error-text">Installment should be valid and cannot exceed total amount.</small>
@@ -46,6 +46,13 @@
       <label class="field">
         <span>Total installments</span>
         <input type="number" formControlName="totalInstallments" min="1" placeholder="12" />
+        @if (showTotalInstallmentsError) {
+        @if (form.hasError('maxInstallmentsExceeded')) {
+        <small class="error-text">Cannot exceed maximum allowed installments ({{ selectedRule?.maxInstallments }}).</small>
+        } @else {
+        <small class="error-text">Please enter a valid number of installments.</small>
+        }
+        }
       </label>
 
       <div [class.form-grid]="isFullRepayment" class="full-span">

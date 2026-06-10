@@ -385,21 +385,7 @@
             }
         </div>
 
-        @if (errorMessage) {
-          <div class="feedback error">{{ errorMessage }}</div>
-        }
 
-        @if (successMessage) {
-          <div class="feedback success">
-            {{ successMessage }}
-            @if (calculationResult) {
-              <span>
-                Employees processed: {{ calculationResult.employeesConsidered || 0 }},
-                Total deductions: {{ (calculationResult.totalDeductions || 0) | number:'1.2-2' }}
-              </span>
-            }
-          </div>
-        }
 
     </div>
     }

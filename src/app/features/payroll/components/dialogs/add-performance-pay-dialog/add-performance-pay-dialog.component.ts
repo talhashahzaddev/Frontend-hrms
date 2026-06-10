@@ -71,7 +71,7 @@ export class AddPerformancePayDialogComponent implements OnInit {
     employeeId: ['', Validators.required],
     periodId: ['', Validators.required],
     ruleId: [null as string | null],
-    score: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+    score: [0, [Validators.required, Validators.min(0), Validators.max(5)]],
     rating: ['Average' as const],
     amount: [0, [Validators.required, Validators.min(0)]]
   });
@@ -124,9 +124,9 @@ export class AddPerformancePayDialogComponent implements OnInit {
 
   updateRating(score: number): void {
     let rating = 'Average';
-    if (score >= 90) rating = 'Excellent';
-    else if (score >= 75) rating = 'Good';
-    else if (score < 50) rating = 'Below average';
+    if (score >= 4.5) rating = 'Excellent';
+    else if (score >= 3.5) rating = 'Good';
+    else if (score < 2.5) rating = 'Below average';
 
     this.form.patchValue({ rating: rating as any }, { emitEvent: false });
   }
