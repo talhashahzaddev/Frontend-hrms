@@ -82,6 +82,8 @@
                       <th>Applied Date</th>
                       <th>Source</th>
                       <th>Status</th>
+                      <th>Score</th>
+                      <th>Knockout</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -114,6 +116,15 @@
                       <td>
                         <span class="bp-td-status" [class.status-applied]="app.status === 'Applied'">{{ app.status ||
                           'Active' }}</span>
+                      </td>
+                      <td>
+                        <span *ngIf="app.matchScore != null" class="font-bold" [style.color]="app.matchScore >= 70 ? 'green' : 'orange'">{{ app.matchScore }}%</span>
+                        <span *ngIf="app.matchScore == null" class="text-gray-400">-</span>
+                      </td>
+                      <td>
+                        <span *ngIf="app.passedKnockout === true" class="text-green-600 flex items-center"><mat-icon class="text-[16px] w-[16px] h-[16px]">check_circle</mat-icon> Pass</span>
+                        <span *ngIf="app.passedKnockout === false" class="text-red-600 flex items-center"><mat-icon class="text-[16px] w-[16px] h-[16px]">cancel</mat-icon> Fail</span>
+                        <span *ngIf="app.passedKnockout == null" class="text-gray-400">-</span>
                       </td>
                       <td>
                         <div class="bp-td-actions">
@@ -265,6 +276,16 @@
                           <mat-icon class="st-icon">mail</mat-icon>
                           <span class="st-truncate" [title]="app.candidateEmail">{{ app.candidateEmail }}</span>
                         </div>
+                        <div class="flex gap-3 mt-2" *ngIf="app.matchScore != null || app.passedKnockout != null">
+                          <div class="st-body-item st-meta-text" *ngIf="app.matchScore != null" [style.color]="app.matchScore >= 70 ? 'green' : 'orange'">
+                            <mat-icon class="st-icon">score</mat-icon>
+                            <span class="font-bold">{{ app.matchScore }}%</span>
+                          </div>
+                          <div class="st-body-item st-meta-text" *ngIf="app.passedKnockout != null" [style.color]="app.passedKnockout ? 'green' : 'red'">
+                            <mat-icon class="st-icon">{{ app.passedKnockout ? 'check_circle' : 'cancel' }}</mat-icon>
+                            <span>{{ app.passedKnockout ? 'Passed' : 'Failed' }}</span>
+                          </div>
+                        </div>
                       </div>
 
                       <button class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
@@ -405,6 +426,16 @@
                           <mat-icon class="st-icon">mail</mat-icon>
                           <span class="st-truncate" [title]="app.candidateEmail">{{ app.candidateEmail }}</span>
                         </div>
+                        <div class="flex gap-3 mt-2" *ngIf="app.matchScore != null || app.passedKnockout != null">
+                          <div class="st-body-item st-meta-text" *ngIf="app.matchScore != null" [style.color]="app.matchScore >= 70 ? 'green' : 'orange'">
+                            <mat-icon class="st-icon">score</mat-icon>
+                            <span class="font-bold">{{ app.matchScore }}%</span>
+                          </div>
+                          <div class="st-body-item st-meta-text" *ngIf="app.passedKnockout != null" [style.color]="app.passedKnockout ? 'green' : 'red'">
+                            <mat-icon class="st-icon">{{ app.passedKnockout ? 'check_circle' : 'cancel' }}</mat-icon>
+                            <span>{{ app.passedKnockout ? 'Passed' : 'Failed' }}</span>
+                          </div>
+                        </div>
                       </div>
 
                       <button class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
@@ -499,6 +530,8 @@
                       <th>Applied Date</th>
                       <th>Source</th>
                       <th>Status</th>
+                      <th>Score</th>
+                      <th>Knockout</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -525,6 +558,15 @@
                       <td>
                         <span class="bp-td-status" [class.status-applied]="app.status === 'Applied'">{{ app.status ||
                           'Active' }}</span>
+                      </td>
+                      <td>
+                        <span *ngIf="app.matchScore != null" class="font-bold" [style.color]="app.matchScore >= 70 ? 'green' : 'orange'">{{ app.matchScore }}%</span>
+                        <span *ngIf="app.matchScore == null" class="text-gray-400">-</span>
+                      </td>
+                      <td>
+                        <span *ngIf="app.passedKnockout === true" class="text-green-600 flex items-center"><mat-icon class="text-[16px] w-[16px] h-[16px]">check_circle</mat-icon> Pass</span>
+                        <span *ngIf="app.passedKnockout === false" class="text-red-600 flex items-center"><mat-icon class="text-[16px] w-[16px] h-[16px]">cancel</mat-icon> Fail</span>
+                        <span *ngIf="app.passedKnockout == null" class="text-gray-400">-</span>
                       </td>
                       <td>
                         <div class="bp-td-actions">
@@ -619,6 +661,8 @@
                       <th>Current Stage</th>
                       <th>Applied Date</th>
                       <th>Status</th>
+                      <th>Score</th>
+                      <th>Knockout</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -635,6 +679,15 @@
                       <td>
                         <span class="bp-td-status" [class.status-applied]="app.status === 'Applied'">{{ app.status ||
                           'Active' }}</span>
+                      </td>
+                      <td>
+                        <span *ngIf="app.matchScore != null" class="font-bold" [style.color]="app.matchScore >= 70 ? 'green' : 'orange'">{{ app.matchScore }}%</span>
+                        <span *ngIf="app.matchScore == null" class="text-gray-400">-</span>
+                      </td>
+                      <td>
+                        <span *ngIf="app.passedKnockout === true" class="text-green-600 flex items-center"><mat-icon class="text-[16px] w-[16px] h-[16px]">check_circle</mat-icon> Pass</span>
+                        <span *ngIf="app.passedKnockout === false" class="text-red-600 flex items-center"><mat-icon class="text-[16px] w-[16px] h-[16px]">cancel</mat-icon> Fail</span>
+                        <span *ngIf="app.passedKnockout == null" class="text-gray-400">-</span>
                       </td>
                       <td>
                         <div class="bp-td-actions">

@@ -264,7 +264,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
       children: [
         { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings' },
         { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications' },
-        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage' }
+        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage' },
+        { label: 'Question Bank', icon: 'quiz', route: '/jobs/question-bank', menuName: 'Jobs', subMenuName: 'Question Bank' }
       ]
     },
     {
@@ -443,8 +444,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   hasPermission(item: MenuItem): boolean {
     // Show Company Policies and onboarding configuration to Super Admin always (if this route exists but permissions are missing)
-    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Onboarding Configuration') {
-      if (this.currentUser?.roleName?.toLowerCase() === 'super admin') {
+    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Onboarding Configuration' || item.subMenuName === 'Question Bank') {
+      if (this.currentUser?.roleName?.toLowerCase() === 'super admin' || this.currentUser?.roleName?.toLowerCase() === 'admin' || this.currentUser?.roleName?.toLowerCase() === 'hr manager') {
         return true;
       }
     }

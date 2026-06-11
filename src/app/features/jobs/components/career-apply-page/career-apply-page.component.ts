@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,20 +8,25 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { QuillModule } from 'ngx-quill';
+import * as signalR from '@microsoft/signalr';
 
 import { PublicCareerService } from '../../services/public-career.service';
-import { JobOpeningDto, CreateJobApplicationRequest } from '@core/models/jobs.models';
+import { JobOpeningDto, CreateJobApplicationRequest, JobQuestionDto } from '@core/models/jobs.models';
 import { CompanyCareerDetails } from '../public-career/public-career.component';
-
+import { QuestionBankService } from '../../services/question-bank.service';
+import { environment } from '../../../../../environments/environment';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+
 @Component({
     selector: 'app-career-apply-page',
     standalone: true,
     encapsulation: ViewEncapsulation.None,
     imports: [
-    SharedCommonModule,
+        SharedCommonModule,
         CommonModule,
         ReactiveFormsModule,
         MatFormFieldModule,
@@ -30,12 +35,14 @@ import { SharedCommonModule } from '@shared/shared-common.module';
         MatIconModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
+        MatSelectModule,
+        MatRadioModule,
         QuillModule
     ],
     templateUrl: './career-apply-page.component.html',
     styleUrls: ['./career-apply-page.component.scss']
 })
-export class CareerApplyPageComponent implements OnInit {
+export class CareerApplyPageComponent implements OnInit, OnDestroy {
     job: JobOpeningDto | null = null;
     companyDetails: CompanyCareerDetails | null = null;
     isLoadingJob = true;
@@ -47,11 +54,19 @@ export class CareerApplyPageComponent implements OnInit {
     submitSuccess = false;
     submitError = '';
 
+    // Questions
+    jobQuestions: JobQuestionDto[] = [];
+
     // Resume upload
     resumeFileName: string | null = null;
     isUploadingResume = false;
     readonly acceptedResumeTypes = '.pdf,.jpg,.jpeg,.png,.gif';
     readonly maxResumeSizeMb = 5;
+
+    // SignalR CV Parsing
+    private hubConnection: signalR.HubConnection | null = null;
+    parsingStatus: string = '';
+    isParsing = false;
 
     private static readonly MAX_RESUME_BYTES = 5 * 1024 * 1024;
     private static readonly ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.gif'];
@@ -72,7 +87,8 @@ export class CareerApplyPageComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private location: Location,
-        private publicCareerService: PublicCareerService
+        private publicCareerService: PublicCareerService,
+        private qbService: QuestionBankService
     ) {
         this.applyForm = this.fb.group({
             firstName: ['', [Validators.required, Validators.maxLength(100)]],
@@ -82,7 +98,8 @@ export class CareerApplyPageComponent implements OnInit {
             linkedInUrl: [''],
             salaryExpectation: [''],
             resumeUrl: ['', [Validators.required]],
-            coverLetter: ['']
+            coverLetter: [''],
+            answers: this.fb.group({}) // dynamic answers
         });
     }
 
@@ -96,6 +113,12 @@ export class CareerApplyPageComponent implements OnInit {
 
         this.loadCompanyDetails();
         this.loadJobDetails(jobCode);
+    }
+
+    ngOnDestroy(): void {
+        if (this.hubConnection) {
+            this.hubConnection.stop();
+        }
     }
 
     private getDomainFromUrl(): string {
@@ -119,15 +142,43 @@ export class CareerApplyPageComponent implements OnInit {
         const domain = this.getDomainFromUrl();
         this.publicCareerService.getExternalJobByJobCode(jobCode, domain).subscribe({
             next: (job) => {
-                if (job) this.job = job;
-                else this.errorMessage = 'Job opening not found.';
-                this.isLoadingJob = false;
+                if (job) {
+                    this.job = job;
+                    this.loadJobQuestions(job.jobId);
+                }
+                else {
+                    this.errorMessage = 'Job opening not found.';
+                    this.isLoadingJob = false;
+                }
             },
             error: () => {
                 this.errorMessage = 'Failed to load job details.';
                 this.isLoadingJob = false;
             }
         });
+    }
+
+    private loadJobQuestions(jobId: string): void {
+        const domain = this.getDomainFromUrl();
+        this.qbService.getJobQuestions(jobId, domain).subscribe({
+            next: (questions) => {
+                this.jobQuestions = questions;
+                const answersGroup = this.applyForm.get('answers') as FormGroup;
+                this.jobQuestions.forEach(q => {
+                    // if it's multiple choice, options are comma separated
+                    answersGroup.addControl(q.questionId, new FormControl('', q.isRequired ? Validators.required : null));
+                });
+                this.isLoadingJob = false;
+            },
+            error: () => {
+                this.isLoadingJob = false;
+            }
+        });
+    }
+
+    getOptionsArray(optionsStr: string | null | undefined): string[] {
+        if (!optionsStr) return [];
+        return optionsStr.split(',').map(s => s.trim());
     }
 
     goBack(): void {
@@ -204,6 +255,30 @@ export class CareerApplyPageComponent implements OnInit {
         this.resumeFileName = null;
     }
 
+    private startSignalRConnection(jobApplyId: string): void {
+        this.hubConnection = new signalR.HubConnectionBuilder()
+            .withUrl(`${environment.apiUrl.replace('/api', '')}/cvparsinghub`)
+            .withAutomaticReconnect()
+            .build();
+
+        this.hubConnection.on('ReceiveParsingStatus', (status: string, message: string) => {
+            this.parsingStatus = message;
+            if (status === 'Completed' || status === 'Failed') {
+                this.isParsing = false;
+                // Disconnect after finished
+                this.hubConnection?.stop();
+            }
+        });
+
+        this.hubConnection.start()
+            .then(() => {
+                this.hubConnection?.invoke('JoinGroup', jobApplyId);
+                this.isParsing = true;
+                this.parsingStatus = 'Analyzing your resume...';
+            })
+            .catch(err => console.error('Error while starting connection: ' + err));
+    }
+
     onSubmit(): void {
         if (this.applyForm.invalid) {
             this.applyForm.markAllAsTouched();
@@ -218,6 +293,12 @@ export class CareerApplyPageComponent implements OnInit {
         // Combine first and last name since the API payload signature holds 'candidateName'
         const combinedName = `${formVal.firstName || ''} ${formVal.lastName || ''}`.trim();
 
+        // format answers
+        const formattedAnswers = Object.keys(formVal.answers).map(key => ({
+            questionId: key,
+            answerText: formVal.answers[key]
+        }));
+
         const request: CreateJobApplicationRequest = {
             jobId: this.job!.jobId,
             candidateName: combinedName || null,
@@ -227,15 +308,21 @@ export class CareerApplyPageComponent implements OnInit {
             resumeUrl: formVal.resumeUrl?.trim() || null,
             coverLetter: formVal.coverLetter || null,
             applicationSource: 'External',
-            status: 'Applied'
+            status: 'Applied',
+            answers: formattedAnswers.length > 0 ? formattedAnswers : null
         };
 
         const domain = this.getDomainFromUrl();
         this.publicCareerService.applyJobByExternalCandidate(domain, request).subscribe({
-            next: (res) => {
+            next: (res: any) => {
                 this.isSubmitting = false;
-                if (res.success) {
+                if (res.success || res.jobApplyId) {
                     this.submitSuccess = true;
+                    // res.data could have jobApplyId, if backend wraps it
+                    const applyId = res.data?.jobApplyId || res.jobApplyId || null;
+                    if (applyId) {
+                        this.startSignalRConnection(applyId);
+                    }
                 } else {
                     this.submitError = res.message || 'Something went wrong. Please try again.';
                 }

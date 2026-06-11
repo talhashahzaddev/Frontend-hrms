@@ -34,6 +34,8 @@
           <span class="badge badge-code" *ngIf="application.jobCode"># {{ application.jobCode }}</span>
           <span class="badge badge-stage">{{ application.currentStageName || application.status || 'Applied' }}</span>
           <span class="badge badge-source" *ngIf="application.applicationSource">{{ application.applicationSource }}</span>
+          <span class="badge badge-score" *ngIf="application.matchScore != null" [ngClass]="application.matchScore >= 70 ? 'badge-success' : 'badge-warning'">Score: {{ application.matchScore }}%</span>
+          <span class="badge badge-knockout" *ngIf="application.passedKnockout != null" [ngClass]="application.passedKnockout ? 'badge-success' : 'badge-danger'">{{ application.passedKnockout ? 'Passed Knockout' : 'Failed Knockout' }}</span>
         </div>
       </div>
 
@@ -81,12 +83,55 @@
         </div>
       </div>
 
-      <!-- Cover Letter -->
-      <div class="content-tabs" *ngIf="application.coverLetter">
-        <div class="tab-headers">
-          <button class="tab-btn active">Cover Letter</button>
+      <!-- Content Tabs -->
+      <div class="content-tabs" *ngIf="application.coverLetter || parsedResume">
+        <div class="tab-headers flex gap-4 border-b border-gray-200 mb-4">
+          <button *ngIf="parsedResume" 
+                  class="tab-btn px-4 py-2 font-medium" 
+                  [class.text-blue-600]="activeTab === 'resumeInfo'" 
+                  [class.border-b-2]="activeTab === 'resumeInfo'" 
+                  [class.border-blue-600]="activeTab === 'resumeInfo'"
+                  (click)="activeTab = 'resumeInfo'">
+            Parsed Resume Info
+          </button>
+          <button *ngIf="application.coverLetter" 
+                  class="tab-btn px-4 py-2 font-medium" 
+                  [class.text-blue-600]="activeTab === 'coverLetter'" 
+                  [class.border-b-2]="activeTab === 'coverLetter'" 
+                  [class.border-blue-600]="activeTab === 'coverLetter'"
+                  (click)="activeTab = 'coverLetter'">
+            Cover Letter
+          </button>
         </div>
-        <div class="tab-content ql-content" [innerHTML]="application.coverLetter"></div>
+
+        <div class="tab-content">
+          <!-- Parsed Resume Panel -->
+          <div *ngIf="activeTab === 'resumeInfo' && parsedResume" class="parsed-resume-panel space-y-6">
+            
+            <div *ngIf="parsedResume.skills" class="resume-section">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Extracted Skills</h3>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let skill of parsedResume.skills.split(',')" class="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded-md">{{ skill.trim() }}</span>
+              </div>
+            </div>
+
+            <div *ngIf="parsedResume.workExperience" class="resume-section">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Experience Overview</h3>
+              <p class="text-gray-800 whitespace-pre-line">{{ parsedResume.workExperience }}</p>
+            </div>
+
+            <div *ngIf="parsedResume.education" class="resume-section">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Education</h3>
+              <p class="text-gray-800 whitespace-pre-line">{{ parsedResume.education }}</p>
+            </div>
+
+          </div>
+
+          <!-- Cover Letter Panel -->
+          <div *ngIf="activeTab === 'coverLetter' && application.coverLetter" class="cover-letter-panel">
+            <div class="ql-content" [innerHTML]="application.coverLetter"></div>
+          </div>
+        </div>
       </div>
 
     </ng-container>

@@ -23,6 +23,7 @@ export interface JobOpeningDto {
   postedAs: string;
   externalLink?: string | null;
   status: string;
+  mandatorySkills?: string | null;
   createdBy?: string | null;
   createdByName?: string | null;
   createdAt?: string | null;
@@ -56,6 +57,7 @@ export interface CreateJobOpeningRequest {
   postedAs: string;
   externalLink?: string | null;
   status?: string | null;
+  mandatorySkills?: string | null;
 }
 
 export interface UpdateJobOpeningRequest {
@@ -78,6 +80,7 @@ export interface UpdateJobOpeningRequest {
   postedAs?: string | null;
   externalLink?: string | null;
   status?: string | null;
+  mandatorySkills?: string | null;
 }
 
 export interface ServiceResponse<T> {
@@ -128,6 +131,8 @@ export interface JobApplicationDto {
   status: string;
   createdDate?: string | null;
   updatedDate?: string | null;
+  passedKnockout?: boolean | null;
+  matchScore?: number | null;
 }
 
 export interface CreateJobApplicationRequest {
@@ -141,6 +146,7 @@ export interface CreateJobApplicationRequest {
   currentStageId?: string | null;
   applicationSource?: string | null;
   status?: string | null;
+  answers?: SubmitCandidateAnswerRequest[] | null;
 }
 
 /** Request for applying to a job as the current user (self). Name, email, phone come from employee record. */
@@ -150,6 +156,7 @@ export interface ApplyForMySelfRequest {
   resumeUrl: string;
   coverLetter?: string | null;
   applicationSource?: string | null;
+  answers?: SubmitCandidateAnswerRequest[] | null;
 }
 
 export interface UpdateJobApplicationRequest {
@@ -246,4 +253,73 @@ export interface UpdateApplicationStageRequest {
   interviewerIds?: string[] | null;
   interviewDate?: string | null;
   interviewPlace?: string | null;
+}
+
+// ==================== ATS Knockout & Question Bank DTOs ====================
+
+export interface QuestionCategoryDto {
+  categoryId: string;
+  organizationId: string;
+  categoryName: string;
+  description?: string | null;
+  isActive: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface CreateQuestionCategoryRequest {
+  categoryName: string;
+  description?: string | null;
+}
+
+export interface QuestionDto {
+  questionId: string;
+  categoryId: string;
+  organizationId: string;
+  questionText: string;
+  questionType: string;
+  options?: string | null;
+  correctOption?: string | null;
+  isKnockout: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface CreateQuestionRequest {
+  categoryId: string;
+  questionText: string;
+  questionType: string;
+  options?: string | null;
+  correctOption?: string | null;
+  isKnockout: boolean;
+}
+
+export interface JobQuestionDto {
+  jobQuestionId: string;
+  jobId: string;
+  questionId: string;
+  isRequired: boolean;
+  questionText: string;
+  questionType: string;
+  options?: string | null;
+  correctOption?: string | null;
+  isKnockout: boolean;
+}
+
+export interface SubmitCandidateAnswerRequest {
+  questionId: string;
+  answerText: string;
+}
+
+export interface ParsedResumeDto {
+  parsedResumeId: string;
+  jobApplyId: string;
+  contactDetails?: string | null;
+  skills?: string | null;
+  workExperience?: string | null;
+  education?: string | null;
+  parseStatus: string;
+  parseError?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }

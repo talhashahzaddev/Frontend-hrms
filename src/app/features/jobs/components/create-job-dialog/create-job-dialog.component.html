@@ -139,6 +139,38 @@
             </div>
           </div>
 
+          <!-- ATS Configuration -->
+          <div class="bp-card">
+            <div class="bp-card-header">
+              <h3>ATS Configuration</h3>
+            </div>
+            <div class="bp-card-body">
+              <div class="bp-row bp-cols-1">
+                <div class="bp-form-field">
+                  <label>Mandatory Skills (Comma separated for CV parsing)</label>
+                  <input type="text" formControlName="mandatorySkills" placeholder="e.g. C#, Angular, SQL">
+                </div>
+              </div>
+              <div class="bp-row bp-cols-2">
+                <div class="bp-form-field">
+                  <label>Question Category Template</label>
+                  <select formControlName="categoryId">
+                    <option [ngValue]="null">None</option>
+                    <option *ngFor="let c of categories" [value]="c.categoryId">{{ c.categoryName }}</option>
+                  </select>
+                </div>
+                <div class="bp-form-field">
+                  <label>Selected Questions</label>
+                  <mat-select formControlName="questionIds" multiple placeholder="Select Questions" class="!border !border-gray-300 !rounded-md !px-3 !py-2 !h-[42px] focus:!border-primary focus:!ring-1 focus:!ring-primary">
+                    <mat-option *ngFor="let q of questions" [value]="q.questionId">
+                      {{ q.questionText }} <span *ngIf="q.isKnockout" style="color:red;font-size:12px;margin-left:4px">(Knockout)</span>
+                    </mat-option>
+                  </mat-select>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Job Content -->
           <div class="bp-card">
             <div class="bp-card-header bp-b-bottom">

@@ -18,6 +18,8 @@ import { JobsService } from '@features/jobs/services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
 import { EmployeeService } from '@features/employee/services/employee.service';
 import { Department } from '@core/models/employee.models';
+import { QuestionBankService } from '../../services/question-bank.service';
+import { QuestionCategoryDto, QuestionDto } from '@core/models/jobs.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CreateJobDialogData {
@@ -56,6 +58,9 @@ export class CreateJobDialogComponent implements OnInit {
     return this.data?.mode === 'edit' || !!this.editJobId;
   }
   editJobId?: string | null;
+
+  categories: QuestionCategoryDto[] = [];
+  questions: QuestionDto[] = [];
 
   /** Quill toolbar for plain-ish text (intro) */
   readonly quillBasicConfig = {
@@ -105,7 +110,8 @@ export class CreateJobDialogComponent implements OnInit {
     private notification: NotificationService,
     private employeeService: EmployeeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private qbService: QuestionBankService
   ) {
     this.jobForm = this.fb.group({
       jobRoleName: ['', [Validators.required, Validators.maxLength(200)]],
@@ -126,7 +132,10 @@ export class CreateJobDialogComponent implements OnInit {
       lastDate: [null as string | null],
       postedAs: ['Internal', [Validators.required, Validators.maxLength(20)]],
       externalLink: [''],
-      status: ['Open', Validators.maxLength(50)]
+      status: ['Open', Validators.maxLength(50)],
+      mandatorySkills: [''],
+      categoryId: [null],
+      questionIds: [[]]
     });
   }
 
@@ -147,6 +156,21 @@ export class CreateJobDialogComponent implements OnInit {
     this.employeeService.getDepartments().subscribe({
       next: (depts: Department[]) => (this.departments = depts),
       error: () => this.notification.showError('Failed to load departments')
+    });
+
+    this.qbService.getCategories().subscribe(res => this.categories = res);
+
+    this.jobForm.get('categoryId')?.valueChanges.subscribe(catId => {
+      if (catId) {
+        this.qbService.getQuestionsByCategory(catId).subscribe(res => {
+          this.questions = res;
+          // select all by default
+          this.jobForm.get('questionIds')?.setValue(res.map(q => q.questionId));
+        });
+      } else {
+        this.questions = [];
+        this.jobForm.get('questionIds')?.setValue([]);
+      }
     });
   }
 
@@ -188,7 +212,8 @@ export class CreateJobDialogComponent implements OnInit {
       lastDate: job.lastDate ? new Date(job.lastDate) : null,
       postedAs: job.postedAs || 'Internal',
       externalLink: job.externalLink || '',
-      status: job.status || 'Open'
+      status: job.status || 'Open',
+      mandatorySkills: job.mandatorySkills || ''
     });
   }
 
@@ -221,13 +246,16 @@ export class CreateJobDialogComponent implements OnInit {
         lastDate: lastDateStr,
         postedAs: v.postedAs,
         externalLink: v.externalLink || null,
-        status: v.status || 'Open'
+        status: v.status || 'Open',
+        mandatorySkills: v.mandatorySkills || null
       };
       this.isSubmitting = true;
       this.jobsService.updateJobOpening(targetId, request).subscribe({
         next: (updated: JobOpeningDto) => {
-          this.notification.showSuccess('Job opening updated successfully');
-          this.closeComponent(updated);
+          this.attachQuestionsIfAny(updated.jobId, () => {
+            this.notification.showSuccess('Job opening updated successfully');
+            this.closeComponent(updated);
+          });
         },
         error: (err: { message?: string }) => {
           this.isSubmitting = false;
@@ -254,19 +282,34 @@ export class CreateJobDialogComponent implements OnInit {
         lastDate: lastDateStr,
         postedAs: v.postedAs,
         externalLink: v.externalLink || null,
-        status: v.status || 'Open'
+        status: v.status || 'Open',
+        mandatorySkills: v.mandatorySkills || null
       };
       this.isSubmitting = true;
       this.jobsService.createJobOpening(request).subscribe({
         next: (created: JobOpeningDto) => {
-          this.notification.showSuccess('Job opening created successfully');
-          this.closeComponent(created);
+          this.attachQuestionsIfAny(created.jobId, () => {
+            this.notification.showSuccess('Job opening created successfully');
+            this.closeComponent(created);
+          });
         },
         error: (err: { message?: string }) => {
           this.isSubmitting = false;
           this.notification.showError(err?.message || 'Failed to create job opening');
         }
       });
+    }
+  }
+
+  private attachQuestionsIfAny(jobId: string, callback: () => void): void {
+    const qIds = this.jobForm.value.questionIds as string[];
+    if (qIds && qIds.length > 0) {
+      this.qbService.attachQuestionsToJob(jobId, qIds).subscribe({
+        next: () => callback(),
+        error: () => callback() // still proceed
+      });
+    } else {
+      callback();
     }
   }
 

@@ -56,6 +56,17 @@
                 Back to Jobs
             </button>
 
+            <!-- SignalR Parsing Status -->
+            <div *ngIf="isParsing" class="parsing-status mt-6 p-4 bg-blue-50 border border-blue-100 rounded-lg text-center flex flex-col items-center">
+                <mat-spinner diameter="30" class="mb-2"></mat-spinner>
+                <p class="text-blue-800 font-medium m-0">{{ parsingStatus }}</p>
+                <p class="text-xs text-blue-600 mt-1">Please wait while we analyze your resume. You can safely close this page if you wish.</p>
+            </div>
+            <div *ngIf="!isParsing && parsingStatus" class="parsing-status mt-6 p-4 bg-green-50 border border-green-100 rounded-lg text-center flex flex-col items-center">
+                <mat-icon class="text-green-500 mb-2">done_all</mat-icon>
+                <p class="text-green-800 font-medium m-0">Resume parsing complete!</p>
+            </div>
+
             <!-- <div class="success-card-footer">
                 <p>Need help? <a href="#">Contact Support</a></p>
             </div> -->
@@ -189,6 +200,42 @@
                     <div class="error-text"
                         *ngIf="applyForm.get('resumeUrl')?.invalid && applyForm.get('resumeUrl')?.touched">
                         Please upload your resume.
+                    </div>
+                </div>
+
+                <!-- Section: Questionnaire -->
+                <div class="form-section" *ngIf="jobQuestions.length > 0">
+                    <h2 class="section-title">Questionnaire</h2>
+                    <p class="section-hint">Please answer the following questions required for this position.</p>
+                    
+                    <div formGroupName="answers">
+                        <div class="form-group" *ngFor="let q of jobQuestions" style="margin-bottom: 20px;">
+                            <label>{{ q.questionText }} <span *ngIf="q.isRequired">*</span></label>
+                            
+                            <ng-container [ngSwitch]="q.questionType">
+                                <ng-container *ngSwitchCase="'Text'">
+                                    <input type="text" class="form-input mt-2" [formControlName]="q.questionId" />
+                                </ng-container>
+                                
+                                <ng-container *ngSwitchCase="'True/False'">
+                                    <mat-radio-group [formControlName]="q.questionId" class="flex gap-4 mt-2">
+                                        <mat-radio-button value="True">Yes</mat-radio-button>
+                                        <mat-radio-button value="False">No</mat-radio-button>
+                                    </mat-radio-group>
+                                </ng-container>
+                                
+                                <ng-container *ngSwitchCase="'Multiple Choice'">
+                                    <select class="form-input mt-2" [formControlName]="q.questionId">
+                                        <option value="">Select an option</option>
+                                        <option *ngFor="let opt of getOptionsArray(q.options)" [value]="opt">{{ opt }}</option>
+                                    </select>
+                                </ng-container>
+                            </ng-container>
+                            
+                            <div class="error-text" *ngIf="applyForm.get('answers')?.get(q.questionId)?.invalid && applyForm.get('answers')?.get(q.questionId)?.touched">
+                                This question requires an answer.
+                            </div>
+                        </div>
                     </div>
                 </div>
 

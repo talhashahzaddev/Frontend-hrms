@@ -1,0 +1,126 @@
+<div class="question-bank-container w-full h-full p-6 bg-gray-50 flex flex-col md:flex-row gap-6">
+  <!-- Left Panel: Categories -->
+  <div class="w-full md:w-1/3 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-bold text-gray-800 m-0">Question Categories</h2>
+      <button mat-flat-button color="primary" class="rounded-full !px-6" (click)="showCategoryForm = !showCategoryForm">
+        <mat-icon>add</mat-icon> New Category
+      </button>
+    </div>
+
+    <mat-card *ngIf="showCategoryForm" class="p-4 rounded-xl shadow-sm border border-gray-100">
+      <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="flex flex-col gap-3">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Category Name</mat-label>
+          <input matInput formControlName="categoryName" placeholder="e.g. Technical Skills" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
+        <div class="flex justify-end gap-2">
+          <button mat-button type="button" (click)="showCategoryForm = false">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="categoryForm.invalid">Save</button>
+        </div>
+      </form>
+    </mat-card>
+
+    <div class="categories-list flex flex-col gap-2 overflow-y-auto pr-2 max-h-[70vh]">
+      <div 
+        *ngFor="let cat of categories" 
+        class="category-item p-4 rounded-xl border border-gray-200 bg-white cursor-pointer transition hover:border-primary hover:shadow-md"
+        [class.selected]="selectedCategory?.categoryId === cat.categoryId"
+        (click)="selectCategory(cat)">
+        <h3 class="font-semibold text-gray-800 m-0">{{ cat.categoryName }}</h3>
+        <p class="text-xs text-gray-500 m-0 mt-1 line-clamp-2" *ngIf="cat.description">{{ cat.description }}</p>
+      </div>
+      <div *ngIf="categories.length === 0" class="p-8 text-center text-gray-400">
+        No categories found.
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Questions -->
+  <div class="w-full md:w-2/3 flex flex-col gap-4">
+    <ng-container *ngIf="selectedCategory">
+      <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800 m-0">{{ selectedCategory.categoryName }} - Questions</h2>
+          <span class="text-sm text-gray-500">{{ questions.length }} question(s)</span>
+        </div>
+        <button mat-flat-button color="primary" class="rounded-full !px-6" (click)="showQuestionForm = !showQuestionForm">
+          <mat-icon>add</mat-icon> Add Question
+        </button>
+      </div>
+
+      <mat-card *ngIf="showQuestionForm" class="p-4 rounded-xl shadow-sm border border-gray-100 bg-blue-50/30">
+        <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()" class="flex flex-col gap-3">
+          <div class="flex gap-4">
+            <mat-form-field appearance="outline" class="w-2/3">
+              <mat-label>Question Text</mat-label>
+              <input matInput formControlName="questionText" placeholder="e.g. Do you have 5+ years of C# experience?" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-1/3">
+              <mat-label>Type</mat-label>
+              <mat-select formControlName="questionType">
+                <mat-option *ngFor="let type of questionTypes" [value]="type">{{ type }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="flex gap-4 items-center" *ngIf="showOptionsField">
+            <mat-form-field appearance="outline" class="w-1/2">
+              <mat-label>Options (comma separated)</mat-label>
+              <input matInput formControlName="options" placeholder="A, B, C, D" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-1/2">
+              <mat-label>Correct Option (Optional)</mat-label>
+              <input matInput formControlName="correctOption" placeholder="e.g. A" />
+            </mat-form-field>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <mat-checkbox formControlName="isKnockout" color="primary">Is Knockout Question?</mat-checkbox>
+            <mat-icon class="text-gray-400 text-sm" matTooltip="If the candidate answers incorrectly, they will fail the knockout screening.">info</mat-icon>
+          </div>
+          <div class="flex justify-end gap-2 mt-2">
+            <button mat-button type="button" (click)="showQuestionForm = false">Cancel</button>
+            <button mat-flat-button color="primary" type="submit" [disabled]="questionForm.invalid">Add Question</button>
+          </div>
+        </form>
+      </mat-card>
+
+      <div class="questions-list flex flex-col gap-3 overflow-y-auto pr-2 max-h-[70vh]">
+        <div *ngFor="let q of questions" class="question-card p-4 rounded-xl bg-white border border-gray-200 shadow-sm flex items-start gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600 font-medium">{{ q.questionType }}</span>
+              <span *ngIf="q.isKnockout" class="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-600 font-medium flex items-center gap-1">
+                <mat-icon class="text-[12px] h-[12px] w-[12px]">gavel</mat-icon> Knockout
+              </span>
+            </div>
+            <p class="font-medium text-gray-800 m-0">{{ q.questionText }}</p>
+            <div *ngIf="q.questionType === 'Multiple Choice' && q.options" class="mt-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-lg">
+              <strong>Options:</strong> {{ q.options }}
+              <br *ngIf="q.correctOption">
+              <strong *ngIf="q.correctOption" class="text-green-600">Correct:</strong> {{ q.correctOption }}
+            </div>
+          </div>
+          <button mat-icon-button color="warn" matTooltip="Delete Question" (click)="deleteQuestion(q.questionId)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+        <div *ngIf="questions.length === 0" class="p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-200 border-dashed">
+          No questions created for this category yet.
+        </div>
+      </div>
+    </ng-container>
+
+    <div *ngIf="!selectedCategory" class="h-full flex items-center justify-center text-gray-400">
+      <div class="text-center">
+        <mat-icon class="text-6xl mb-4 opacity-50">rule_folder</mat-icon>
+        <p>Select or create a category to manage questions.</p>
+      </div>
+    </div>
+  </div>
+</div>
