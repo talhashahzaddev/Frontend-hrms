@@ -1,18 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { QuestionBankService } from '../../services/question-bank.service';
 import { NotificationService } from '@core/services/notification.service';
 import { AuthService } from '@core/services/auth.service';
 import { QuestionCategoryDto, QuestionDto } from '@core/models/jobs.models';
+
+import { CreateCategoryDialogComponent } from '../create-category-dialog/create-category-dialog.component';
+import { CreateQuestionDialogComponent } from '../create-question-dialog/create-question-dialog.component';
+import { ConfirmDeleteDialogComponent } from '@shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 @Component({
   selector: 'app-question-bank',
@@ -26,119 +31,169 @@ import { QuestionCategoryDto, QuestionDto } from '@core/models/jobs.models';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatCheckboxModule,
-    MatTabsModule
+    MatProgressSpinnerModule
   ],
   templateUrl: './question-bank.component.html',
   styleUrls: ['./question-bank.component.scss']
 })
 export class QuestionBankComponent implements OnInit {
   categories: QuestionCategoryDto[] = [];
-  selectedCategory: QuestionCategoryDto | null = null;
+  selectedCategoryControl = new FormControl<string | null>(null);
+  
   questions: QuestionDto[] = [];
-
-  showCategoryForm = false;
-  categoryForm: FormGroup;
-
-  showQuestionForm = false;
-  questionForm: FormGroup;
-  questionTypes = ['Text', 'True/False', 'Multiple Choice'];
+  isLoadingCategories = false;
+  isLoadingQuestions = false;
 
   constructor(
     private qbService: QuestionBankService,
-    private fb: FormBuilder,
     private notification: NotificationService,
-    public authService: AuthService
-  ) {
-    this.categoryForm = this.fb.group({
-      categoryName: ['', Validators.required],
-      description: ['']
-    });
-
-    this.questionForm = this.fb.group({
-      questionText: ['', Validators.required],
-      questionType: ['Text', Validators.required],
-      options: [''], // Comma-separated for multiple choice
-      correctOption: [''],
-      isKnockout: [false]
-    });
-  }
+    public authService: AuthService,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+
+    this.selectedCategoryControl.valueChanges.subscribe(categoryId => {
+      if (categoryId) {
+        this.loadQuestions(categoryId);
+      } else {
+        this.questions = [];
+      }
+    });
   }
 
   loadCategories(): void {
+    this.isLoadingCategories = true;
     this.qbService.getCategories().subscribe({
       next: (res) => {
         this.categories = res;
-        if (this.categories.length > 0 && !this.selectedCategory) {
-          this.selectCategory(this.categories[0]);
+        this.isLoadingCategories = false;
+        
+        // Auto-select first category if none is selected
+        if (this.categories.length > 0 && !this.selectedCategoryControl.value) {
+          this.selectedCategoryControl.setValue(this.categories[0].categoryId);
         }
       },
-      error: () => this.notification.showError('Failed to load categories.')
+      error: () => {
+        this.notification.showError('Failed to load categories.');
+        this.isLoadingCategories = false;
+      }
     });
-  }
-
-  selectCategory(category: QuestionCategoryDto): void {
-    this.selectedCategory = category;
-    this.showCategoryForm = false;
-    this.showQuestionForm = false;
-    this.loadQuestions(category.categoryId);
   }
 
   loadQuestions(categoryId: string): void {
+    this.isLoadingQuestions = true;
     this.qbService.getQuestionsByCategory(categoryId).subscribe({
-      next: (res) => this.questions = res,
-      error: () => this.notification.showError('Failed to load questions.')
+      next: (res) => {
+        this.questions = res;
+        this.isLoadingQuestions = false;
+      },
+      error: () => {
+        this.notification.showError('Failed to load questions.');
+        this.isLoadingQuestions = false;
+      }
     });
   }
 
-  saveCategory(): void {
-    if (this.categoryForm.invalid) return;
-    this.qbService.createCategory(this.categoryForm.value).subscribe({
-      next: (cat) => {
-        this.notification.showSuccess('Category created!');
-        this.showCategoryForm = false;
-        this.categoryForm.reset();
-        this.loadCategories();
-        this.selectCategory(cat);
-      },
-      error: (err) => this.notification.showError(err.message)
+  openCreateCategoryDialog(): void {
+    const dialogRef = this.dialog.open(CreateCategoryDialogComponent, {
+      width: '600px',
+      panelClass: 'hrms-dialog-panel',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.qbService.createCategory(result).subscribe({
+          next: (cat) => {
+            this.notification.showSuccess('Category created!');
+            this.loadCategories();
+            this.selectedCategoryControl.setValue(cat.categoryId);
+          },
+          error: (err) => this.notification.showError(err.message || 'Failed to create category')
+        });
+      }
     });
   }
 
-  saveQuestion(): void {
-    if (this.questionForm.invalid || !this.selectedCategory) return;
-    
-    // Convert options string to a valid format if Multiple Choice, but backend accepts simple string
-    const payload = { ...this.questionForm.value };
-    
-    this.qbService.createQuestion(this.selectedCategory.categoryId, payload).subscribe({
-      next: () => {
-        this.notification.showSuccess('Question added!');
-        this.showQuestionForm = false;
-        this.questionForm.reset({ questionType: 'Text', isKnockout: false });
-        this.loadQuestions(this.selectedCategory!.categoryId);
-      },
-      error: (err) => this.notification.showError(err.message)
+  openCreateQuestionDialog(): void {
+    const categoryId = this.selectedCategoryControl.value;
+    if (!categoryId) {
+      this.notification.showError('Please select a category first.');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(CreateQuestionDialogComponent, {
+      width: '700px',
+      panelClass: 'hrms-dialog-panel',
+      disableClose: true,
+      data: { categoryId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.qbService.createQuestion(categoryId, result).subscribe({
+          next: () => {
+            this.notification.showSuccess('Question added!');
+            this.loadQuestions(categoryId);
+          },
+          error: (err) => this.notification.showError(err.message || 'Failed to add question')
+        });
+      }
+    });
+  }
+
+  editQuestion(question: QuestionDto): void {
+    const dialogRef = this.dialog.open(CreateQuestionDialogComponent, {
+      width: '700px',
+      panelClass: 'hrms-dialog-panel',
+      disableClose: true,
+      data: { categoryId: question.categoryId, question }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.qbService.updateQuestion(question.questionId, result).subscribe({
+          next: () => {
+            this.notification.showSuccess('Question updated!');
+            if (this.selectedCategoryControl.value) {
+              this.loadQuestions(this.selectedCategoryControl.value);
+            }
+          },
+          error: (err) => this.notification.showError(err.message || 'Failed to update question')
+        });
+      }
     });
   }
 
   deleteQuestion(questionId: string): void {
-    if(!confirm('Are you sure you want to delete this question?')) return;
-    this.qbService.deleteQuestion(questionId).subscribe({
-      next: () => {
-        this.notification.showSuccess('Question deleted!');
-        if (this.selectedCategory) {
-          this.loadQuestions(this.selectedCategory.categoryId);
-        }
-      },
-      error: () => this.notification.showError('Failed to delete question.')
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Question',
+        message: 'Are you sure you want to delete this question? This action cannot be undone.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.qbService.deleteQuestion(questionId).subscribe({
+          next: () => {
+            this.notification.showSuccess('Question deleted!');
+            if (this.selectedCategoryControl.value) {
+              this.loadQuestions(this.selectedCategoryControl.value);
+            }
+          },
+          error: () => this.notification.showError('Failed to delete question.')
+        });
+      }
     });
   }
 
-  get showOptionsField(): boolean {
-    return this.questionForm.get('questionType')?.value === 'Multiple Choice';
+  hasPermission(permission: string): boolean {
+    // Modify based on actual permissions required
+    // return this.authService.hasPermissionByActionKey(permission);
+    return true; // Bypassing for now as it's a new feature
   }
 }

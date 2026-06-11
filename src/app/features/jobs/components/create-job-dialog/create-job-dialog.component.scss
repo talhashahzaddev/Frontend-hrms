@@ -175,12 +175,17 @@ $green-700: #15803d;
 }
 
 .bp-form-field {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   label {
     display: block;
     font-size: 14px;
     font-weight: 600;
     color: $slate-700;
-    margin-bottom: 6px;
+    margin-bottom: auto;
+    padding-bottom: 6px;
   }
 
   input,

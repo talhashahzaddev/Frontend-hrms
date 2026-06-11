@@ -8,6 +8,7 @@ import {
   CreateQuestionCategoryRequest,
   QuestionDto,
   CreateQuestionRequest,
+  UpdateQuestionRequest,
   JobQuestionDto,
   ServiceResponse,
   ParsedResumeDto
@@ -57,11 +58,23 @@ export class QuestionBankService {
   }
 
   createQuestion(categoryId: string, request: CreateQuestionRequest): Observable<QuestionDto> {
+    const payload = { ...request, categoryId };
     return this.http
-      .post<ServiceResponse<QuestionDto>>(`${this.apiUrl}/categories/${categoryId}/questions`, request)
+      .post<ServiceResponse<QuestionDto>>(`${this.apiUrl}/questions`, payload)
       .pipe(
         map((res) => {
           if (!res.success || !res.data) throw new Error(res.message || 'Failed to create question');
+          return res.data;
+        })
+      );
+  }
+
+  updateQuestion(questionId: string, request: UpdateQuestionRequest): Observable<QuestionDto> {
+    return this.http
+      .put<ServiceResponse<QuestionDto>>(`${this.apiUrl}/questions/${questionId}`, request)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) throw new Error(res.message || 'Failed to update question');
           return res.data;
         })
       );

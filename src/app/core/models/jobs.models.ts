@@ -260,7 +260,7 @@ export interface UpdateApplicationStageRequest {
 export interface QuestionCategoryDto {
   categoryId: string;
   organizationId: string;
-  categoryName: string;
+  name: string;
   description?: string | null;
   isActive: boolean;
   createdAt?: string | null;
@@ -268,7 +268,7 @@ export interface QuestionCategoryDto {
 }
 
 export interface CreateQuestionCategoryRequest {
-  categoryName: string;
+  name: string;
   description?: string | null;
 }
 
@@ -279,7 +279,7 @@ export interface QuestionDto {
   questionText: string;
   questionType: string;
   options?: string | null;
-  correctOption?: string | null;
+  expectedAnswer?: string | null;
   isKnockout: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -290,8 +290,17 @@ export interface CreateQuestionRequest {
   questionText: string;
   questionType: string;
   options?: string | null;
-  correctOption?: string | null;
+  expectedAnswer?: string | null;
   isKnockout: boolean;
+}
+
+export interface UpdateQuestionRequest {
+  categoryId?: string | null;
+  questionText?: string | null;
+  questionType?: string | null;
+  options?: string | null;
+  expectedAnswer?: string | null;
+  isKnockout?: boolean | null;
 }
 
 export interface JobQuestionDto {
@@ -302,7 +311,7 @@ export interface JobQuestionDto {
   questionText: string;
   questionType: string;
   options?: string | null;
-  correctOption?: string | null;
+  expectedAnswer?: string | null;
   isKnockout: boolean;
 }
 

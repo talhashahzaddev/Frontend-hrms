@@ -174,6 +174,23 @@ export class CreateJobDialogComponent implements OnInit {
     });
   }
 
+  isQuestionSelected(qId: string): boolean {
+    const qIds = this.jobForm.get('questionIds')?.value || [];
+    return qIds.includes(qId);
+  }
+
+  toggleQuestion(qId: string): void {
+    const control = this.jobForm.get('questionIds');
+    if (!control) return;
+    let qIds = control.value || [];
+    if (qIds.includes(qId)) {
+      qIds = qIds.filter((id: string) => id !== qId);
+    } else {
+      qIds = [...qIds, qId];
+    }
+    control.setValue(qIds);
+  }
+
   private loadJobDetails(id: string): void {
     this.jobsService.getJobOpeningById(id).subscribe({
       next: (job) => {
@@ -346,6 +363,11 @@ export class CreateJobDialogComponent implements OnInit {
     if (min != null) return `${cur} ${min}+`;
     if (max != null) return `Up to ${cur} ${max}`;
     return '';
+  }
+
+  get parsedSkills(): string[] {
+    const val = this.jobForm.value.mandatorySkills || '';
+    return val.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
   }
 
   onCancel(): void {
