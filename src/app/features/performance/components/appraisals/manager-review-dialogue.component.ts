@@ -156,9 +156,6 @@ export interface ManagerReviewRequest {
         <button mat-button type="button" mat-dialog-close class="btn-cancel" [disabled]="isSubmitting">
           Cancel
         </button>
-        <button mat-stroked-button type="button" class="btn-draft" [disabled]="isSubmitting">
-          Save Draft
-        </button>
         <button
           mat-raised-button
           type="submit"

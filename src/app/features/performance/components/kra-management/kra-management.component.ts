@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent, MatPaginator } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -60,7 +60,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   templateUrl: './kra-management.component.html',
   styleUrls: ['./kra-management.component.scss']
 })
-export class KRAManagementComponent implements OnInit, OnDestroy {
+export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
   
   isLoading = false;
@@ -102,6 +102,11 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
 
   // Tab management
   selectedTab = 0;
+
+  // Paginators (template refs)
+  @ViewChild('kraPaginator') kraPaginator?: MatPaginator;
+  @ViewChild('goalsPaginator') goalsPaginator?: MatPaginator;
+  @ViewChild('employeeGoalsPaginator') employeeGoalsPaginator?: MatPaginator;
 
   // Filter form
   filterForm: FormGroup;
@@ -146,6 +151,13 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
         this.pageIndex = 0; // Reset to first page on filter change
         this.applyFilters();
       });
+  }
+
+  ngAfterViewInit(): void {
+    // Subscribe to paginator page events if they exist
+    this.kraPaginator?.page.pipe(takeUntil(this.destroy$)).subscribe((e: PageEvent) => this.onPageChange(e));
+    this.goalsPaginator?.page.pipe(takeUntil(this.destroy$)).subscribe((e: PageEvent) => this.onGoalPageChange(e));
+    this.employeeGoalsPaginator?.page.pipe(takeUntil(this.destroy$)).subscribe((e: PageEvent) => this.onEmployeeGoalPageChange(e));
   }
 
   ngOnDestroy(): void {
@@ -214,6 +226,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
     // Update total items based on filtered results
     this.totalItems = this.filteredKRAs.length;
     this.pageIndex = 0; // Reset to first page when filters change
+
+    // Reset paginator UI back to first page when filters are applied
+    try { this.kraPaginator?.firstPage(); } catch { }
 
     // Apply pagination to filtered results
     this.updatePaginatedKRAs();
@@ -446,6 +461,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
             this.totalGoals = this.goals.length;
             this.goalPageIndex = 0;
             this.updatePaginatedGoals();
+            try { this.goalsPaginator?.firstPage(); } catch { }
           }
           this.isLoadingGoals = false;
           this.cdr.markForCheck();
@@ -477,6 +493,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
 
     this.totalGoals = this.filteredGoals.length;
     this.goalPageIndex = 0; // Reset to first page on filter change
+    try { this.goalsPaginator?.firstPage(); } catch { }
     this.updatePaginatedGoals();
   }
 
@@ -628,7 +645,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
     this.notificationService.showInfo(`Goal: ${goal.title}`);
   }
 
-  onGoalPageChange(event: any): void {
+  onGoalPageChange(event: PageEvent): void {
     this.goalPageIndex = event.pageIndex;
     this.goalPageSize = event.pageSize;
     this.updatePaginatedGoals();
@@ -663,6 +680,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
             this.totalEmployeeGoals = this.employeeGoals.length;
             this.employeeGoalPageIndex = 0;
             this.updatePaginatedEmployeeGoals();
+            try { this.employeeGoalsPaginator?.firstPage(); } catch { }
           }
           this.isLoadingEmployeeGoals = false;
           this.cdr.markForCheck();
@@ -694,10 +712,11 @@ export class KRAManagementComponent implements OnInit, OnDestroy {
 
     this.totalEmployeeGoals = this.filteredEmployeeGoals.length;
     this.employeeGoalPageIndex = 0; // Reset to first page on filter change
+    try { this.employeeGoalsPaginator?.firstPage(); } catch { }
     this.updatePaginatedEmployeeGoals();
   }
 
-  onEmployeeGoalPageChange(event: any): void {
+  onEmployeeGoalPageChange(event: PageEvent): void {
     this.employeeGoalPageIndex = event.pageIndex;
     this.employeeGoalPageSize = event.pageSize;
     this.updatePaginatedEmployeeGoals();
