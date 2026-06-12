@@ -3,15 +3,18 @@ import {
   Component,
   OnInit,
   OnDestroy,
+  AfterViewInit,
   ChangeDetectionStrategy,
   inject,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  ViewChild
 } from '@angular/core';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -54,6 +57,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatButtonModule,
     MatIconModule,
     MatTableModule,
+    MatPaginatorModule,
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTabsModule,
@@ -64,7 +68,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   styleUrls: ['./performance-dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PerformanceDashboardComponent implements OnInit, OnDestroy {
+  export class PerformanceDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private destroy$ = new Subject<void>();
   private cdr = inject(ChangeDetectorRef);
@@ -87,11 +91,17 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   overallRating = 0;
   currentRating = 0;
 
-  // Pagination
-  pageSize = 10;
-  pageIndex = 0;
-  totalItems = 0;
-  pageSizeOptions = [5, 10, 25, 50];
+  // Pagination - HR Reviews
+  hrReviewPageSize = 10;
+  hrReviewPageIndex = 0;
+  hrReviewTotalItems = 0;
+  hrReviewPageSizeOptions = [5, 10, 25, 50];
+
+  // Pagination - Received Reviews
+  receivedReviewPageSize = 10;
+  receivedReviewPageIndex = 0;
+  receivedReviewTotalItems = 0;
+  receivedReviewPageSizeOptions = [5, 10, 25, 50];
 
   // Stars
   starRatings = [1, 2, 3, 4, 5];
@@ -112,7 +122,10 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
   receivedReviews: ManagerReviewDto[] = [];
   isLoadingReceivedReviews = false;
   receivedReviewsDataSource = new MatTableDataSource<ManagerReviewDto>([]);
-  receivedReviewDisplayedColumns: string[] = ['cycleName', 'employeeName', 'kraName', 'goalName', 'rating', 'actions'];
+  receivedReviewDisplayedColumns: string[] = ['cycleName', 'employeeName', 'kraName', 'goalName', 'rating'];
+
+  @ViewChild('hrReviewsPaginator') hrReviewsPaginator?: MatPaginator;
+  @ViewChild('receivedReviewsPaginator') receivedReviewsPaginator?: MatPaginator;
 
   constructor(
     private performanceService: PerformanceService,
@@ -121,6 +134,67 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private router: Router
   ) {}
+
+  ngAfterViewInit(): void {
+    // Attach paginators after view init to ensure datasource paging works with OnPush
+    if (this.hrReviewsPaginator) {
+      Promise.resolve().then(() => {
+        this.cdr.detectChanges();
+      });
+    }
+    if (this.receivedReviewsPaginator) {
+      Promise.resolve().then(() => {
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  onHrReviewPageChange(event: PageEvent): void {
+    this.hrReviewPageIndex = event.pageIndex;
+    this.hrReviewPageSize = event.pageSize;
+    if (this.hrReviewsPaginator) {
+      this.hrReviewsPaginator.pageIndex = this.hrReviewPageIndex;
+      this.hrReviewsPaginator.pageSize = this.hrReviewPageSize;
+    }
+    this.applyHrReviewsPagination();
+  }
+
+  onReceivedReviewsPageChange(event: PageEvent): void {
+    this.receivedReviewPageIndex = event.pageIndex;
+    this.receivedReviewPageSize = event.pageSize;
+    if (this.receivedReviewsPaginator) {
+      this.receivedReviewsPaginator.pageIndex = this.receivedReviewPageIndex;
+      this.receivedReviewsPaginator.pageSize = this.receivedReviewPageSize;
+    }
+    this.applyReceivedReviewsPagination();
+  }
+
+  private applyHrReviewsPagination(): void {
+    const start = this.hrReviewPageIndex * this.hrReviewPageSize;
+    const end = start + this.hrReviewPageSize;
+    const slice = (this.employeeHrReviews || []).slice(start, end);
+    this.hrReviewsDataSource.data = slice;
+    // update paginator UI
+    if (this.hrReviewsPaginator) {
+      this.hrReviewsPaginator.length = this.hrReviewTotalItems;
+      this.hrReviewsPaginator.pageIndex = this.hrReviewPageIndex;
+      this.hrReviewsPaginator.pageSize = this.hrReviewPageSize;
+    }
+    this.cdr.detectChanges();
+  }
+
+  private applyReceivedReviewsPagination(): void {
+    const start = this.receivedReviewPageIndex * this.receivedReviewPageSize;
+    const end = start + this.receivedReviewPageSize;
+    const slice = (this.receivedReviews || []).slice(start, end);
+    this.receivedReviewsDataSource.data = slice;
+    if (this.receivedReviewsPaginator) {
+      this.receivedReviewsPaginator.length = this.receivedReviewTotalItems;
+      this.receivedReviewsPaginator.pageIndex = this.receivedReviewPageIndex;
+      this.receivedReviewsPaginator.pageSize = this.receivedReviewPageSize;
+    }
+    this.cdr.detectChanges();
+  }
 
   ngOnInit(): void {
     this.loadCurrentUser();
@@ -151,10 +225,17 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success && response.data) {
             this.receivedReviews = response.data || [];
-            this.receivedReviewsDataSource.data = this.receivedReviews;
+            this.receivedReviewTotalItems = this.receivedReviews.length;
+            if (this.receivedReviewsPaginator) {
+              this.receivedReviewsPaginator.length = this.receivedReviewTotalItems;
+              this.receivedReviewsPaginator.pageIndex = this.receivedReviewPageIndex;
+              this.receivedReviewsPaginator.pageSize = this.receivedReviewPageSize;
+            }
+            this.applyReceivedReviewsPagination();
           } else {
             this.receivedReviews = [];
             this.receivedReviewsDataSource.data = [];
+            this.receivedReviewTotalItems = 0;
           }
           this.isLoadingReceivedReviews = false;
           this.cdr.markForCheck();
@@ -163,6 +244,7 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
           console.error('Error loading received reviews:', error);
           this.receivedReviews = [];
           this.receivedReviewsDataSource.data = [];
+          this.receivedReviewTotalItems = 0;
           this.isLoadingReceivedReviews = false;
           this.cdr.markForCheck();
         }
@@ -217,7 +299,13 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
 
         // HR Reviews
         this.employeeHrReviews = results[3] || [];
-        this.hrReviewsDataSource.data = this.employeeHrReviews;
+        this.hrReviewTotalItems = this.employeeHrReviews.length;
+        if (this.hrReviewsPaginator) {
+          this.hrReviewsPaginator.length = this.hrReviewTotalItems;
+          this.hrReviewsPaginator.pageIndex = this.hrReviewPageIndex;
+          this.hrReviewsPaginator.pageSize = this.hrReviewPageSize;
+        }
+        this.applyHrReviewsPagination();
 
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -264,5 +352,12 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     if (starNumber <= numericRating) return 'filled';
     if (starNumber - 1 < numericRating && numericRating < starNumber) return 'half';
     return 'empty';
+  }
+
+  getRatingDisplay(rating: number | string | null | undefined): string {
+    if (rating === null || rating === undefined) return '';
+    const n = Number(rating);
+    if (Number.isNaN(n)) return '';
+    return n.toFixed(1);
   }
 }

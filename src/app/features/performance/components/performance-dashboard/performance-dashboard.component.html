@@ -139,6 +139,7 @@
                       <mat-icon *ngFor="let star of [1,2,3,4,5]"
                                 [ngClass]="getStarClass(star, +review.finalRating)">star</mat-icon>
                     </div>
+                    <span class="numeric-rating" *ngIf="review.finalRating !== null && review.finalRating !== undefined">{{ getRatingDisplay(review.finalRating) }}</span>
                   </td>
                 </ng-container>
 
@@ -164,6 +165,17 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
               </table>
+            </div>
+
+            <div class="table-pagination" *ngIf="hrReviewTotalItems > 0">
+              <mat-paginator #hrReviewsPaginator
+                [length]="hrReviewTotalItems"
+                [pageSize]="hrReviewPageSize"
+                [pageSizeOptions]="hrReviewPageSizeOptions"
+                [pageIndex]="hrReviewPageIndex"
+                (page)="onHrReviewPageChange($event)"
+                showFirstLastButtons>
+              </mat-paginator>
             </div>
           </div>
 
@@ -240,11 +252,12 @@
                       <mat-icon *ngFor="let star of [1,2,3,4,5]"
                                 [ngClass]="getStarClass(star, +review.rating)">star</mat-icon>
                     </div>
+                    <span class="numeric-rating" *ngIf="review.rating !== null && review.rating !== undefined">{{ getRatingDisplay(review.rating) }}</span>
                   </td>
                 </ng-container>
 
                 <!-- Actions -->
-                <ng-container matColumnDef="actions">
+                <!-- <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef>Actions</th>
                   <td mat-cell *matCellDef="let review">
                     <button mat-icon-button [matMenuTriggerFor]="receivedActionMenu">
@@ -257,7 +270,7 @@
                       </button>
                     </mat-menu>
                   </td>
-                </ng-container>
+                </ng-container> -->
 
                 <tr mat-header-row *matHeaderRowDef="receivedReviewDisplayedColumns"></tr>
                 <tr mat-row *matRowDef="let review; columns: receivedReviewDisplayedColumns;"></tr>
@@ -270,6 +283,17 @@
               <mat-icon>assessment</mat-icon>
               <h3>No Reviews Received</h3>
               <p>You haven't received any reviews from your managers yet.</p>
+            </div>
+
+            <div class="table-pagination" *ngIf="receivedReviewTotalItems > 0">
+              <mat-paginator #receivedReviewsPaginator
+                [length]="receivedReviewTotalItems"
+                [pageSize]="receivedReviewPageSize"
+                [pageSizeOptions]="receivedReviewPageSizeOptions"
+                [pageIndex]="receivedReviewPageIndex"
+                (page)="onReceivedReviewsPageChange($event)"
+                showFirstLastButtons>
+              </mat-paginator>
             </div>
 
           </div>

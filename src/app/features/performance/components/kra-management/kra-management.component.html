@@ -168,7 +168,7 @@
 
     <!-- Pagination -->
     <div class="paginator-wrap" *ngIf="!isLoading && filteredKRAs.length > 0">
-      <mat-paginator
+      <mat-paginator #kraPaginator
         [length]="totalItems"
         [pageSize]="pageSize"
         [pageIndex]="pageIndex"
@@ -300,7 +300,7 @@
       </div>
 
       <div class="goals-footer" *ngIf="!isLoadingGoals && goals.length > 0">
-        <mat-paginator
+        <mat-paginator #goalsPaginator
           [length]="totalGoals"
           [pageSize]="goalPageSize"
           [pageIndex]="goalPageIndex"
@@ -423,7 +423,7 @@
       </div>
 
       <div class="goals-footer" *ngIf="!isLoadingEmployeeGoals && employeeGoals.length > 0">
-        <mat-paginator
+        <mat-paginator #employeeGoalsPaginator
           [length]="totalEmployeeGoals"
           [pageSize]="employeeGoalPageSize"
           [pageIndex]="employeeGoalPageIndex"

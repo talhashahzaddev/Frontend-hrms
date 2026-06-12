@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -8,7 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent, MatPaginator } from '@angular/material/paginator';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -20,6 +20,7 @@ import { SelfAssessmentDialogComponent } from './self-assessment-dialog.componen
 import { ViewAppraisalDialogComponent } from './view-appraisal-dialog.component';
 import { ManagerReviewDialogueComponent } from './manager-review-dialogue.component';
 import { HrReviewDialogComponent } from './hr-review-dialog.component';
+import { AppraisalAllTablesViewDetailsComponent } from './appraisal-all-tables-view-details';
 import { AppraisalCycleFormComponent } from '../appraisal-cycle-form/appraisal-cycle-form.component';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -73,7 +74,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   templateUrl: './appraisals.component.html',
   styleUrls: ['./appraisals.component.scss']
 })
-export class AppraisalsComponent implements OnInit, OnDestroy {
+export class AppraisalsComponent implements OnInit, OnDestroy, AfterViewInit {
   currentUser: User | null = null;
   filterForm!: FormGroup;
   isSubmitting = false;
@@ -217,6 +218,12 @@ isLoadingAllManagerReviews = false;
   allManagerReviewPageIndex = 0;
   allManagerReviewTotalItems = 0;
   allManagerReviewPageSizeOptions = [5, 10, 25, 50];
+
+  // Pagination - Received Reviews (from managers)
+  receivedReviewPageSize = 10;
+  receivedReviewPageIndex = 0;
+  receivedReviewTotalItems = 0;
+  receivedReviewPageSizeOptions = [5, 10, 25, 50];
   
   // Pagination - Appraisal Cycles
   cyclePageSize = 10;
@@ -226,6 +233,14 @@ isLoadingAllManagerReviews = false;
   
   // View mode
   selectedTab = 0;
+  // Paginators for tables
+  @ViewChild('managerReviewsPaginator') managerReviewsPaginator?: MatPaginator;
+  @ViewChild('allManagerReviewsPaginator') allManagerReviewsPaginator?: MatPaginator;
+  @ViewChild('managerSelfAssessmentPaginator') managerSelfAssessmentPaginator?: MatPaginator;
+  @ViewChild('teamSelfAssessmentPaginator') teamSelfAssessmentPaginator?: MatPaginator;
+  @ViewChild('hrReviewsPaginator') hrReviewsPaginator?: MatPaginator;
+  @ViewChild('employeeHrReviewsPaginator') employeeHrReviewsPaginator?: MatPaginator;
+  @ViewChild('receivedReviewsPaginator') receivedReviewsPaginator?: MatPaginator;
   
   onTabChange(index: number): void {
     this.selectedTab = index;
@@ -299,6 +314,10 @@ isLoadingAllManagerReviews = false;
     this.loadEmployeeHrReviews();
     this.loadAllKras();
     this.loadHrReviews();
+  }
+
+  ngAfterViewInit(): void {
+    // We handle slicing manually for the data sources in this component.
   }
 
   ngOnDestroy(): void {
@@ -426,6 +445,10 @@ isLoadingAllManagerReviews = false;
           if (response.success && response.data) {
             this.managerReviews = response.data || [];
             this.managerReviewTotalItems = this.managerReviews.length;
+            // set datasource to the first page slice so the table updates immediately
+            this.managerReviews = response.data || [];
+            this.managerReviewTotalItems = this.managerReviews.length;
+            this.managerReviewPageIndex = 0;
             this.updateManagerReviewsDataSource();
           } else {
             this.managerReviews = [];
@@ -450,15 +473,43 @@ isLoadingAllManagerReviews = false;
   private updateManagerReviewsDataSource(): void {
     const startIndex = this.managerReviewPageIndex * this.managerReviewPageSize;
     const endIndex = startIndex + this.managerReviewPageSize;
-    const paginatedData = this.managerReviews.slice(startIndex, endIndex);
-    this.managerReviewsDataSource.data = paginatedData;
+    this.managerReviewsDataSource.data = this.managerReviews.slice(startIndex, endIndex);
+  }
+
+  private updateManagerSelfAssessmentsDataSource(): void {
+    const startIndex = this.managerSelfAssessmentPageIndex * this.managerSelfAssessmentPageSize;
+    const endIndex = startIndex + this.managerSelfAssessmentPageSize;
+    this.managerSelfAssessmentsDataSource.data = this.allManagerSelfAssessmentsData?.slice(startIndex, endIndex) || [];
+  }
+
+  private updateTeamSelfAssessmentsDataSource(): void {
+    const startIndex = this.teamSelfAssessmentPageIndex * this.teamSelfAssessmentPageSize;
+    const endIndex = startIndex + this.teamSelfAssessmentPageSize;
+    this.teamSelfAssessmentsDataSource.data = this.allTeamSelfAssessmentsData?.slice(startIndex, endIndex) || [];
+  }
+
+  private updateHrReviewsDataSource(): void {
+    const startIndex = this.hrReviewPageIndex * this.hrReviewPageSize;
+    const endIndex = startIndex + this.hrReviewPageSize;
+    this.hrReviewsDataSource.data = this.hrReviews.slice(startIndex, endIndex);
+  }
+
+  private updateEmployeeHrReviewsDataSource(): void {
+    const startIndex = this.employeeHrReviewPageIndex * this.employeeHrReviewPageSize;
+    const endIndex = startIndex + this.employeeHrReviewPageSize;
+    this.employeeHrReviewsDataSource.data = this.employeeHrReviews.slice(startIndex, endIndex);
+  }
+
+  private updateEmployeeSelfAssessmentsDataSource(): void {
+    const startIndex = this.employeeSelfAssessmentPageIndex * this.employeeSelfAssessmentPageSize;
+    const endIndex = startIndex + this.employeeSelfAssessmentPageSize;
+    this.employeeSelfAssessmentsDataSource.data = this.employeeSelfAssessments.slice(startIndex, endIndex);
   }
 
   onManagerReviewPageChange(event: PageEvent): void {
     this.managerReviewPageIndex = event.pageIndex;
     this.managerReviewPageSize = event.pageSize;
     this.updateManagerReviewsDataSource();
-    console.log('Manager Review Pagination:', { pageIndex: this.managerReviewPageIndex, pageSize: this.managerReviewPageSize, totalItems: this.managerReviewTotalItems });
   }
 
   loadReceivedReviews(): void {
@@ -469,9 +520,12 @@ isLoadingAllManagerReviews = false;
         next: (response) => {
           if (response.success && response.data) {
             this.receivedReviews = response.data || [];
-            this.receivedReviewsDataSource.data = this.receivedReviews;
+            this.receivedReviewTotalItems = this.receivedReviews.length;
+            this.receivedReviewPageIndex = 0;
+            this.updateReceivedReviewsDataSource();
           } else {
             this.receivedReviews = [];
+            this.receivedReviewTotalItems = 0;
             this.receivedReviewsDataSource.data = [];
           }
           this.isLoadingReceivedReviews = false;
@@ -481,11 +535,24 @@ isLoadingAllManagerReviews = false;
           console.error('Error loading received reviews:', error);
           this.notificationService.showError('Failed to load received reviews');
           this.receivedReviews = [];
+          this.receivedReviewTotalItems = 0;
           this.receivedReviewsDataSource.data = [];
           this.isLoadingReceivedReviews = false;
           this.cdr.markForCheck();
         }
       });
+  }
+
+  private updateReceivedReviewsDataSource(): void {
+    const startIndex = this.receivedReviewPageIndex * this.receivedReviewPageSize;
+    const endIndex = startIndex + this.receivedReviewPageSize;
+    this.receivedReviewsDataSource.data = this.receivedReviews.slice(startIndex, endIndex);
+  }
+
+  onReceivedReviewsPageChange(event: PageEvent): void {
+    this.receivedReviewPageIndex = event.pageIndex;
+    this.receivedReviewPageSize = event.pageSize;
+    this.updateReceivedReviewsDataSource();
   }
 
   loadAllManagerReviews(): void {
@@ -501,6 +568,9 @@ isLoadingAllManagerReviews = false;
         if (response.success && response.data) {
           this.allManagerReviews = response.data || [];
           this.allManagerReviewTotalItems = this.allManagerReviews.length;
+          this.allManagerReviews = response.data || [];
+          this.allManagerReviewTotalItems = this.allManagerReviews.length;
+          this.allManagerReviewPageIndex = 0;
           this.updateAllManagerReviewsDataSource();
         } else {
           this.allManagerReviews = [];
@@ -527,8 +597,7 @@ isLoadingAllManagerReviews = false;
 private updateAllManagerReviewsDataSource(): void {
   const startIndex = this.allManagerReviewPageIndex * this.allManagerReviewPageSize;
   const endIndex = startIndex + this.allManagerReviewPageSize;
-  const paginatedData = this.allManagerReviews.slice(startIndex, endIndex);
-  this.allManagerReviewsDataSource.data = paginatedData;
+  this.allManagerReviewsDataSource.data = this.allManagerReviews.slice(startIndex, endIndex);
 }
 
 onAllManagerReviewPageChange(event: PageEvent): void {
@@ -549,8 +618,10 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   viewAppraisal(appraisal: EmployeeAppraisal): void {
     console.log('Opening view dialog for appraisal:', appraisal);
     const dialogRef = this.dialog.open(ViewAppraisalDialogComponent, {
-      width: '900px',
-      maxWidth: '90vw',
+      width: '520px',
+      maxWidth: '95vw',
+      height: 'auto',
+      maxHeight: '80vh',
       data: {
         appraisal: appraisal
       },
@@ -721,6 +792,21 @@ onAllManagerReviewPageChange(event: PageEvent): void {
       });
   }
 
+  openAllTablesViewDetails(data: any): void {
+    const dialogRef = this.dialog.open(AppraisalAllTablesViewDetailsComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      height: 'auto',
+      maxHeight: '80vh',
+      data: data,
+      disableClose: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
+  }
+
   updateUniqueFilters(assessments: SelfAssessment[]): void {
     const cycleMap = new Map<string, AppraisalCycle>();
     assessments.forEach(assessment => {
@@ -879,7 +965,7 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   onManagerSelfAssessmentPageChange(event: PageEvent): void {
     this.managerSelfAssessmentPageIndex = event.pageIndex;
     this.managerSelfAssessmentPageSize = event.pageSize;
-    // Update datasource without reloading from API
+    // Manual slice so displayed rows update immediately
     const startIndex = this.managerSelfAssessmentPageIndex * this.managerSelfAssessmentPageSize;
     const endIndex = startIndex + this.managerSelfAssessmentPageSize;
     this.managerSelfAssessmentsDataSource.data = this.allManagerSelfAssessmentsData?.slice(startIndex, endIndex) || [];
@@ -888,7 +974,6 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   onTeamSelfAssessmentPageChange(event: PageEvent): void {
     this.teamSelfAssessmentPageIndex = event.pageIndex;
     this.teamSelfAssessmentPageSize = event.pageSize;
-    // Update datasource without reloading from API
     const startIndex = this.teamSelfAssessmentPageIndex * this.teamSelfAssessmentPageSize;
     const endIndex = startIndex + this.teamSelfAssessmentPageSize;
     this.teamSelfAssessmentsDataSource.data = this.allTeamSelfAssessmentsData?.slice(startIndex, endIndex) || [];
@@ -897,7 +982,14 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   onEmployeeSelfAssessmentPageChange(event: PageEvent): void {
     this.employeeSelfAssessmentPageIndex = event.pageIndex;
     this.employeeSelfAssessmentPageSize = event.pageSize;
-    this.loadEmployeeSelfAssessments();
+    // If we already have a full dataset, slice it locally for quick front-end pagination
+    if (this.employeeSelfAssessments && this.employeeSelfAssessments.length > 0) {
+      const startIndex = this.employeeSelfAssessmentPageIndex * this.employeeSelfAssessmentPageSize;
+      const endIndex = startIndex + this.employeeSelfAssessmentPageSize;
+      this.employeeSelfAssessmentsDataSource.data = this.employeeSelfAssessments.slice(startIndex, endIndex);
+    } else {
+      this.loadEmployeeSelfAssessments();
+    }
   }
 
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' | undefined {
@@ -984,10 +1076,9 @@ onAllManagerReviewPageChange(event: PageEvent): void {
           if (response.success && response.data) {
             const allData = Array.isArray(response.data) ? response.data : [response.data];
             this.employeeSelfAssessmentTotalItems = allData.length;
-            const startIndex = this.employeeSelfAssessmentPageIndex * this.employeeSelfAssessmentPageSize;
-            const endIndex = startIndex + this.employeeSelfAssessmentPageSize;
-            this.employeeSelfAssessments = allData.slice(startIndex, endIndex);
-            this.employeeSelfAssessmentsDataSource.data = this.employeeSelfAssessments;
+            this.employeeSelfAssessments = allData;
+            this.employeeSelfAssessmentPageIndex = 0;
+            this.updateEmployeeSelfAssessmentsDataSource();
           } else {
             this.employeeSelfAssessments = [];
             this.employeeSelfAssessmentsDataSource.data = [];
@@ -1061,10 +1152,10 @@ onAllManagerReviewPageChange(event: PageEvent): void {
           if (response.success && response.data) {
             const allData = Array.isArray(response.data) ? response.data : [response.data];
             this.managerSelfAssessmentTotalItems = allData.length;
-            const startIndex = this.managerSelfAssessmentPageIndex * this.managerSelfAssessmentPageSize;
-            const endIndex = startIndex + this.managerSelfAssessmentPageSize;
-            this.managerSelfAssessments = allData.slice(startIndex, endIndex);
-            this.managerSelfAssessmentsDataSource.data = this.managerSelfAssessments;
+            this.allManagerSelfAssessmentsData = allData;
+            this.managerSelfAssessments = allData;
+            this.managerSelfAssessmentPageIndex = 0;
+            this.updateManagerSelfAssessmentsDataSource();
           }
           this.isLoadingManagerSelfAssessments = false;
           this.cdr.markForCheck();
@@ -1104,10 +1195,10 @@ onAllManagerReviewPageChange(event: PageEvent): void {
           if (response.success && response.data) {
             const allData = Array.isArray(response.data) ? response.data : [response.data];
             this.teamSelfAssessmentTotalItems = allData.length;
-            const startIndex = this.teamSelfAssessmentPageIndex * this.teamSelfAssessmentPageSize;
-            const endIndex = startIndex + this.teamSelfAssessmentPageSize;
-            this.teamSelfAssessments = allData.slice(startIndex, endIndex);
-            this.teamSelfAssessmentsDataSource.data = this.teamSelfAssessments;
+            this.allTeamSelfAssessmentsData = allData;
+            this.teamSelfAssessments = allData;
+            this.teamSelfAssessmentPageIndex = 0;
+            this.updateTeamSelfAssessmentsDataSource();
           }
           this.isLoadingTeamSelfAssessments = false;
           this.cdr.markForCheck();
@@ -1140,10 +1231,10 @@ onAllManagerReviewPageChange(event: PageEvent): void {
           if (response.success && response.data) {
             const allData = Array.isArray(response.data) ? response.data : [response.data];
             this.hrReviewTotalItems = allData.length;
-            const startIndex = this.hrReviewPageIndex * this.hrReviewPageSize;
-            const endIndex = startIndex + this.hrReviewPageSize;
-            this.hrReviews = allData.slice(startIndex, endIndex);
-            this.hrReviewsDataSource.data = this.hrReviews;
+            this.hrReviews = allData;
+            this.hrReviews = allData;
+            this.hrReviewPageIndex = 0;
+            this.updateHrReviewsDataSource();
           } else {
             this.hrReviewTotalItems = 0;
             this.hrReviews = [];
@@ -1167,7 +1258,6 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   onHrReviewPageChange(event: PageEvent): void {
     this.hrReviewPageIndex = event.pageIndex;
     this.hrReviewPageSize = event.pageSize;
-    // Update datasource without reloading from API
     const startIndex = this.hrReviewPageIndex * this.hrReviewPageSize;
     const endIndex = startIndex + this.hrReviewPageSize;
     this.hrReviewsDataSource.data = this.hrReviews.slice(startIndex, endIndex);
@@ -1183,10 +1273,10 @@ onAllManagerReviewPageChange(event: PageEvent): void {
           if (response.success && response.data) {
             const allData = Array.isArray(response.data) ? response.data : [response.data];
             this.employeeHrReviewTotalItems = allData.length;
-            const startIndex = this.employeeHrReviewPageIndex * this.employeeHrReviewPageSize;
-            const endIndex = startIndex + this.employeeHrReviewPageSize;
-            this.employeeHrReviews = allData.slice(startIndex, endIndex);
-            this.employeeHrReviewsDataSource.data = this.employeeHrReviews;
+            this.employeeHrReviews = allData;
+            this.employeeHrReviews = allData;
+            this.employeeHrReviewPageIndex = 0;
+            this.updateEmployeeHrReviewsDataSource();
           } else {
             this.employeeHrReviews = [];
             this.employeeHrReviewsDataSource.data = [];
@@ -1210,7 +1300,6 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   onEmployeeHrReviewPageChange(event: PageEvent): void {
     this.employeeHrReviewPageIndex = event.pageIndex;
     this.employeeHrReviewPageSize = event.pageSize;
-    // Update datasource without reloading from API
     const startIndex = this.employeeHrReviewPageIndex * this.employeeHrReviewPageSize;
     const endIndex = startIndex + this.employeeHrReviewPageSize;
     this.employeeHrReviewsDataSource.data = this.employeeHrReviews.slice(startIndex, endIndex);
@@ -1225,9 +1314,7 @@ onAllManagerReviewPageChange(event: PageEvent): void {
           if (response.success && response.data) {
             this.appraisalCycles = response.data;
             this.cycleTotalItems = response.data.length;
-            const startIndex = this.cyclePageIndex * this.cyclePageSize;
-            const endIndex = startIndex + this.cyclePageSize;
-            this.cyclesDataSource.data = this.appraisalCycles.slice(startIndex, endIndex);
+            this.cyclesDataSource.data = this.appraisalCycles;
           }
           this.isLoadingCycles = false;
           this.cdr.markForCheck();
@@ -1312,9 +1399,7 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   onCyclePageChange(event: PageEvent): void {
     this.cyclePageIndex = event.pageIndex;
     this.cyclePageSize = event.pageSize;
-    const startIndex = this.cyclePageIndex * this.cyclePageSize;
-    const endIndex = startIndex + this.cyclePageSize;
-    this.cyclesDataSource.data = this.appraisalCycles.slice(startIndex, endIndex);
+    // If a paginator exists for cycles it will handle view slicing
   }
 
   hasFiltersApplied(): boolean {
@@ -1351,6 +1436,11 @@ onAllManagerReviewPageChange(event: PageEvent): void {
     if (!this.teamSelfAssessmentFilterForm) return false;
     const values = this.teamSelfAssessmentFilterForm.value;
     return !!(values.cycleId || values.employeeId || values.kraId || values.search?.trim());
+  }
+
+  getRatingDisplay(rating: number | string | undefined): string {
+    const n = rating === null || rating === undefined ? NaN : Number(rating);
+    return Number.isFinite(n) ? n.toFixed(1) : 'N/A';
   }
 
   getStarClass(starNumber: number, rating: number | undefined): string {
