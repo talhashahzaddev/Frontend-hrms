@@ -313,6 +313,8 @@ export interface JobQuestionDto {
   options?: string | null;
   expectedAnswer?: string | null;
   isKnockout: boolean;
+  categoryId?: string | null;
+  categoryName?: string | null;
 }
 
 export interface SubmitCandidateAnswerRequest {

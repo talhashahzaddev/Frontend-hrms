@@ -197,6 +197,26 @@ export class CreateJobDialogComponent implements OnInit {
         if (job) {
           this.data.job = job;
           this.patchFormWithJob(job);
+          
+          this.qbService.getJobQuestions(job.jobId).subscribe({
+            next: (qs) => {
+              if (qs && qs.length > 0) {
+                // If the user already has a category selected, this will just temporarily show
+                // the existing questions until they change the category.
+                // Or we could patch the categoryId if they all share one, but we'll just show them.
+                this.questions = qs as any[];
+                this.jobForm.get('questionIds')?.setValue(qs.map(q => q.questionId));
+                
+                // If they all belong to the same category, let's select it
+                const firstCat = qs.find(q => q.categoryId);
+                if (firstCat && firstCat.categoryId) {
+                  // Temporarily disable the categoryId value changes to avoid overwriting this.questions
+                  this.jobForm.get('categoryId')?.setValue(firstCat.categoryId, { emitEvent: false });
+                }
+              }
+            }
+          });
+
         } else {
           this.notification.showError('Job not found');
           this.router.navigate(['/jobs/openings']);
@@ -210,6 +230,16 @@ export class CreateJobDialogComponent implements OnInit {
   }
 
   private patchFormWithJob(job: JobOpeningDto): void {
+    let skillsString = job.mandatorySkills || '';
+    try {
+      const parsed = JSON.parse(skillsString);
+      if (Array.isArray(parsed)) {
+        skillsString = parsed.join(', ');
+      }
+    } catch (e) {
+      // ignore if not JSON
+    }
+
     this.jobForm.patchValue({
       jobRoleName: job.jobRoleName || '',
       jobCode: job.jobCode || '',
@@ -230,7 +260,7 @@ export class CreateJobDialogComponent implements OnInit {
       postedAs: job.postedAs || 'Internal',
       externalLink: job.externalLink || '',
       status: job.status || 'Open',
-      mandatorySkills: job.mandatorySkills || ''
+      mandatorySkills: skillsString
     });
   }
 
@@ -239,6 +269,9 @@ export class CreateJobDialogComponent implements OnInit {
 
     const v = this.jobForm.value;
     const lastDateStr = v.lastDate ? new Date(v.lastDate).toISOString() : null;
+    
+    const parsedSkills = (v.mandatorySkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const mandatorySkillsJson = parsedSkills.length > 0 ? JSON.stringify(parsedSkills) : null;
 
     if (this.isEditMode && (this.data.job?.jobId || this.editJobId)) {
       const targetId = this.data.job?.jobId || this.editJobId;
@@ -264,7 +297,7 @@ export class CreateJobDialogComponent implements OnInit {
         postedAs: v.postedAs,
         externalLink: v.externalLink || null,
         status: v.status || 'Open',
-        mandatorySkills: v.mandatorySkills || null
+        mandatorySkills: mandatorySkillsJson
       };
       this.isSubmitting = true;
       this.jobsService.updateJobOpening(targetId, request).subscribe({
@@ -300,7 +333,7 @@ export class CreateJobDialogComponent implements OnInit {
         postedAs: v.postedAs,
         externalLink: v.externalLink || null,
         status: v.status || 'Open',
-        mandatorySkills: v.mandatorySkills || null
+        mandatorySkills: mandatorySkillsJson
       };
       this.isSubmitting = true;
       this.jobsService.createJobOpening(request).subscribe({

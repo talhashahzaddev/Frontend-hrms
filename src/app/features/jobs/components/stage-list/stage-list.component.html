@@ -24,7 +24,7 @@
   </div>
 
   <!-- Pipeline Visual Stepper -->
-  <div class="pipeline-card" *ngIf="!isLoading && dataSource.data.length > 0 && hasPermission('Stage_Table')">
+  <div class="pipeline-card" *ngIf="!isLoading && dataSource.data.length > 0">
     <div class="pipeline-wrapper">
       <ng-container *ngFor="let row of dataSource.data; let i = index; let last = last">
         <div class="stepper-item">
@@ -50,7 +50,7 @@
   </div>
 
   <!-- Stages Table -->
-  <div class="table-card" *ngIf="!isLoading && hasPermission('Stage_Table')">
+  <div class="table-card" *ngIf="!isLoading">
     <div class="card-header border-bottom">
       <h3>Stages <span class="count">({{ dataSource.data.length }})</span></h3>
     </div>

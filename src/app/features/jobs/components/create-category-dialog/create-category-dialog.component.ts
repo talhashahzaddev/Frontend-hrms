@@ -40,8 +40,7 @@ export class CreateCategoryDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: CreateCategoryDialogData
   ) {
     this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(200)]],
-      description: ['', Validators.maxLength(500)]
+      name: ['', [Validators.required, Validators.maxLength(200)]]
     });
   }
 

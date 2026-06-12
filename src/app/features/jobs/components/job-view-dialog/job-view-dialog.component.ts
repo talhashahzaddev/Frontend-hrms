@@ -8,10 +8,12 @@ import { JobOpeningDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { QuestionBankService } from '@features/jobs/services/question-bank.service';
+import { JobQuestionDto } from '@core/models/jobs.models';
+
 export interface JobViewDialogData {
   jobId: string;
 }
-
 
 @Component({
   selector: 'app-job-view-dialog',
@@ -29,23 +31,42 @@ export interface JobViewDialogData {
 })
 export class JobViewDialogComponent implements OnInit {
   job: JobOpeningDto | null = null;
+  questions: JobQuestionDto[] = [];
   isLoading = true;
   error: string | null = null;
 
-  activeTab: 'intro' | 'resp' | 'skill' = 'intro';
+  activeTab: 'intro' | 'resp' | 'skill' | 'questions' = 'intro';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: JobViewDialogData,
     private dialogRef: MatDialogRef<JobViewDialogComponent>,
-    private jobsService: JobsService
+    private jobsService: JobsService,
+    private qbService: QuestionBankService
   ) { }
 
   ngOnInit(): void {
     this.jobsService.getJobOpeningById(this.data.jobId).subscribe({
       next: (j) => {
+        if (!j) {
+          this.error = 'Job not found';
+          this.isLoading = false;
+          return;
+        }
+        
         this.job = j;
         this.setDefaultTab();
-        this.isLoading = false;
+        
+        // Fetch attached questions
+        this.qbService.getJobQuestions(j.jobId).subscribe({
+          next: (qs) => {
+            this.questions = qs;
+            this.isLoading = false;
+          },
+          error: () => {
+            // we won't fail the whole dialog if questions fail to load
+            this.isLoading = false;
+          }
+        });
       },
       error: () => {
         this.error = 'Failed to load job details';

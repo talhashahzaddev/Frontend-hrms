@@ -204,35 +204,43 @@
                 </div>
 
                 <!-- Section: Questionnaire -->
-                <div class="form-section" *ngIf="jobQuestions.length > 0">
+                <div class="form-section questionnaire-section" *ngIf="jobQuestions.length > 0">
                     <h2 class="section-title">Questionnaire</h2>
                     <p class="section-hint">Please answer the following questions required for this position.</p>
                     
-                    <div formGroupName="answers">
-                        <div class="form-group" *ngFor="let q of jobQuestions" style="margin-bottom: 20px;">
-                            <label>{{ q.questionText }} <span *ngIf="q.isRequired">*</span></label>
+                    <div formGroupName="answers" class="questions-container">
+                        <div class="question-card" *ngFor="let q of jobQuestions; let i = index">
+                            <div class="question-header">
+                                <h4 class="question-text">
+                                    <span class="q-num">{{i + 1}}.</span> {{ q.questionText }} 
+                                    <span class="required-star" *ngIf="q.isRequired">*</span>
+                                </h4>
+                            </div>
                             
-                            <ng-container [ngSwitch]="q.questionType">
-                                <ng-container *ngSwitchCase="'Text'">
-                                    <input type="text" class="form-input mt-2" [formControlName]="q.questionId" />
+                            <div class="question-body">
+                                <ng-container [ngSwitch]="q.questionType">
+                                    <ng-container *ngSwitchCase="'Text'">
+                                        <textarea class="form-input" [formControlName]="q.questionId" placeholder="Type your answer here..." rows="3" style="resize: vertical; min-height: 80px;"></textarea>
+                                    </ng-container>
+                                    
+                                    <ng-container *ngSwitchCase="'True/False'">
+                                        <mat-radio-group [formControlName]="q.questionId" class="radio-options">
+                                            <mat-radio-button value="True">Yes</mat-radio-button>
+                                            <mat-radio-button value="False">No</mat-radio-button>
+                                        </mat-radio-group>
+                                    </ng-container>
+                                    
+                                    <ng-container *ngSwitchCase="'Multiple Choice'">
+                                        <select class="form-input custom-select" [formControlName]="q.questionId">
+                                            <option value="" disabled selected>Select an option</option>
+                                            <option *ngFor="let opt of getOptionsArray(q.options)" [value]="opt">{{ opt }}</option>
+                                        </select>
+                                    </ng-container>
                                 </ng-container>
-                                
-                                <ng-container *ngSwitchCase="'True/False'">
-                                    <mat-radio-group [formControlName]="q.questionId" class="flex gap-4 mt-2">
-                                        <mat-radio-button value="True">Yes</mat-radio-button>
-                                        <mat-radio-button value="False">No</mat-radio-button>
-                                    </mat-radio-group>
-                                </ng-container>
-                                
-                                <ng-container *ngSwitchCase="'Multiple Choice'">
-                                    <select class="form-input mt-2" [formControlName]="q.questionId">
-                                        <option value="">Select an option</option>
-                                        <option *ngFor="let opt of getOptionsArray(q.options)" [value]="opt">{{ opt }}</option>
-                                    </select>
-                                </ng-container>
-                            </ng-container>
+                            </div>
                             
                             <div class="error-text" *ngIf="applyForm.get('answers')?.get(q.questionId)?.invalid && applyForm.get('answers')?.get(q.questionId)?.touched">
+                                <mat-icon class="error-icon">error_outline</mat-icon>
                                 This question requires an answer.
                             </div>
                         </div>

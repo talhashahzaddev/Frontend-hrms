@@ -21,21 +21,9 @@
         <div class="form-row">
           <div class="form-group full-width">
             <label class="form-label required">Category Name</label>
-            <mat-form-field appearance="outline" class="w-100 hrms-form-field">
-              <input matInput formControlName="name" placeholder="e.g. Frontend Engineering, Behavioral">
-              <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
-              <mat-error *ngIf="form.get('name')?.hasError('maxlength')">Max 200 characters allowed</mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group full-width">
-            <label class="form-label">Description</label>
-            <mat-form-field appearance="outline" class="w-100 hrms-form-field">
-              <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this category"></textarea>
-              <mat-error *ngIf="form.get('description')?.hasError('maxlength')">Max 500 characters allowed</mat-error>
-            </mat-form-field>
+            <input type="text" class="custom-input" formControlName="name" placeholder="e.g. Frontend Engineering, Behavioral">
+            <div class="error-text" *ngIf="form.get('name')?.hasError('required') && form.get('name')?.touched">Name is required</div>
+            <div class="error-text" *ngIf="form.get('name')?.hasError('maxlength') && form.get('name')?.touched">Max 200 characters allowed</div>
           </div>
         </div>
       </div>

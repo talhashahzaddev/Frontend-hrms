@@ -102,8 +102,9 @@ export class QuestionBankService {
   }
 
   attachQuestionsToJob(jobId: string, questionIds: string[]): Observable<boolean> {
+    const payload = { jobId, questionIds };
     return this.http
-      .post<ServiceResponse<boolean>>(`${this.apiUrl}/jobs/${jobId}/questions`, questionIds)
+      .post<ServiceResponse<boolean>>(`${this.apiUrl}/jobs/attach-questions`, payload)
       .pipe(map(res => res.success));
   }
 
