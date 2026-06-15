@@ -34,7 +34,9 @@
       <span class="section-title">Role Details</span>
     </div>
 
-    <div class="form-row">
+    <!-- Edit/Add Mode: Role Name & Base Role on same row -->
+    <div class="form-row" *ngIf="!isViewMode">
+      <!-- Role Name -->
       <div class="form-group">
         <label class="form-label">Role Name</label>
         <mat-form-field appearance="outline" class="form-field">
@@ -45,11 +47,50 @@
         </mat-form-field>
       </div>
 
-      <div class="form-group desc-group">
+      <!-- Base Role Selection (Add & Edit Mode) -->
+      <div class="form-group">
+        <label class="form-label">Base Role Template (Optional)</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-icon matPrefix>layers</mat-icon>
+          <mat-select formControlName="baseRole" (selectionChange)="onBaseRoleChange($event.value)">
+            <mat-option value="">Default</mat-option>
+            <mat-option *ngFor="let template of baseRoleTemplates" [value]="template.id">
+              {{ template.name }}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Choose a base role to inherit its permissions</mat-hint>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Description Row (Full width in edit mode) -->
+    <div class="form-row" *ngIf="!isViewMode">
+      <div class="form-group">
         <label class="form-label">Description</label>
         <mat-form-field appearance="outline" class="form-field">
-          <input matInput formControlName="description"
-            placeholder="Describe the purpose of this role...">
+          <textarea matInput formControlName="description"
+            placeholder="Describe the purpose of this role..."></textarea>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- View Mode: Role Name & Description on same row -->
+    <div class="form-row" *ngIf="isViewMode">
+      <!-- Role Name -->
+      <div class="form-group">
+        <label class="form-label">Role Name</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-icon matPrefix>shield</mat-icon>
+          <input matInput formControlName="roleName" placeholder="e.g. Senior HR Manager" readonly>
+        </mat-form-field>
+      </div>
+
+      <!-- Description in View Mode -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <mat-form-field appearance="outline" class="form-field">
+          <textarea matInput formControlName="description"
+            placeholder="Describe the purpose of this role..." readonly></textarea>
         </mat-form-field>
       </div>
     </div>

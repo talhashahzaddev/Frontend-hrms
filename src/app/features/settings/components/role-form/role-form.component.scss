@@ -96,18 +96,16 @@
   .form-row {
     display: flex;
     gap: 16px;
-    padding: 10px 12px 5px;
+    padding: 1px 12px 5px;
 
     .form-group {
-      flex: 1;
-      &.desc-group { flex: 1.4; }
+      flex: 0 0 calc(50% - 8px);
 
       .form-label {
         display: block;
         font-size: 12px;
         font-weight: 600;
         color: #374151;
-        
       }
 
       .form-field {
@@ -136,8 +134,8 @@
             font-size: 13px !important;
             color: #374151 !important;
             resize: none;
-            min-height: 60px !important;
-            max-height: 60px !important;
+            min-height: 100px !important;
+            max-height: 100px !important;
           }
 
           input {

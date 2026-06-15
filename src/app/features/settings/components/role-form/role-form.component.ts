@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
 
 import { RoleService } from '../../services/role.service';
 import { MenuService } from '../../services/menu.service';
@@ -35,7 +36,8 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule
   ],
   templateUrl: './role-form.component.html',
   styleUrls: ['./role-form.component.scss']
@@ -43,6 +45,10 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 export class RoleFormComponent implements OnInit {
   roleForm!: FormGroup;
   permissionGroups: MenuPermissionGroup[] = [];
+  baseRoleTemplates = [
+    { id: 'super-admin', name: 'Super Admin' },
+    { id: 'employee', name: 'Employee' }
+  ];
   isLoadingMenus = false;
   isSaving = false;
   grantFullAccess = false;
@@ -73,6 +79,7 @@ export class RoleFormComponent implements OnInit {
 
   private buildForm(): void {
     this.roleForm = this.fb.group({
+      baseRole: [{ value: '', disabled: this.isViewMode }],
       roleName: [
         { value: this.role?.roleName || '', disabled: this.isViewMode },
         [Validators.required, Validators.minLength(2)]
@@ -114,6 +121,73 @@ export class RoleFormComponent implements OnInit {
         }))
       }))
     }));
+  }
+
+  onBaseRoleChange(selectedTemplateId: string): void {
+    if (!selectedTemplateId) {
+      // Reset permissions if no base role selected
+      this.resetPermissions();
+      return;
+    }
+
+    if (selectedTemplateId === 'super-admin') {
+      this.applySuperAdminTemplate();
+    } else if (selectedTemplateId === 'employee') {
+      this.applyEmployeeTemplate();
+    }
+  }
+
+  private applySuperAdminTemplate(): void {
+    // Grant all permissions
+    this.permissionGroups.forEach(group =>
+      group.subMenus.forEach(sub =>
+        sub.actions.forEach(action => action.hasPermission = true)
+      )
+    );
+  }
+
+  private applyEmployeeTemplate(): void {
+    // Reset first
+    this.resetPermissions();
+    
+    // Grant limited permissions for Employee role
+    const employeePermissions: Record<string, string[]> = {
+      'Dashboard': ['View'],
+      'Profile': ['View', 'Edit'],
+      'Employee Dashboard' : ['Employee Dashboard'],
+      'Attendance': ['Clock In Button','Clock Out Button','View','Attendance Record Table'],
+      'Leave Management': ['View', 'Request'],
+      'Calendar': ['View'],
+      'News': ['View', 'Create'],
+      'Performance': ['View'],
+      'Expense': ['View', 'Create'],
+      'Help Desk': ['View'],
+      'Jobs': ['View'],
+      'AI Assistant':['Ai Assistant'],
+      'Subscription': ['Select Plan']
+    };
+
+    this.permissionGroups.forEach(group => {
+      const menuPermissions = employeePermissions[group.menuName];
+      if (menuPermissions) {
+        group.subMenus.forEach(sub =>
+          sub.actions.forEach(action => {
+            // Check if this action matches any permission for this menu
+            if (menuPermissions.some(perm => action.actionName.includes(perm))) {
+              action.hasPermission = true;
+            }
+          })
+        );
+      }
+    });
+  }
+
+  private resetPermissions(): void {
+    this.permissionGroups.forEach(group =>
+      group.subMenus.forEach(sub =>
+        sub.actions.forEach(action => action.hasPermission = false)
+      )
+    );
   }
 
   private populateExistingPermissions(existingMenus: any[]): void {
