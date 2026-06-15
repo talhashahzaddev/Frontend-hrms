@@ -1,12 +1,11 @@
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { KRA } from '../../../../core/models/performance.models';
-import { CreateKRADialogComponent } from './create-kra-dialog.component';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface KRADetailsDialogData {
@@ -28,297 +27,447 @@ export interface KRADetailsDialogData {
     MatDividerModule
   ],
   template: `
-    <div class="dialog-header">
-      <h2 mat-dialog-title>
-        <mat-icon>info</mat-icon>
-        KRA Details
-      </h2>
-      <button mat-icon-button mat-dialog-close class="close-button">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
+    <div class="dialog-container">
 
-    <mat-dialog-content class="dialog-content">
-      <div class="kra-details">
-        
-        <div class="detail-section">
-          <div class="detail-item">
-            <div class="detail-label">
-              <mat-icon>title</mat-icon>
-              <span>Title</span>
-            </div>
-            <div class="detail-value">{{ data.kra.title }}</div>
+      <!-- ── Header ─────────────────────────────────────────────── -->
+      <div class="dialog-header">
+        <div class="header-left">
+          <div class="header-avatar">
+            <mat-icon>trending_up</mat-icon>
           </div>
-
-          <div class="detail-item">
-            <div class="detail-label">
-              <mat-icon>calendar_today</mat-icon>
-              <span>Cycle Name</span>
-            </div>
-            <div class="detail-value">{{ data.kra.cycleName }}</div>
+          <div class="header-info">
+            <h2 class="header-name">{{ data.kra.title }}</h2>
           </div>
+        </div>
+      </div>
 
-          <div class="detail-item">
-            <div class="detail-label">
-              <mat-icon>description</mat-icon>
-              <span>Description</span>
-            </div>
-            <div class="detail-value">{{ data.kra.kraDescription }}</div>
+      <!-- ── Quick Info Strip ───────────────────────────────────── -->
+      <div class="info-strip">
+        <div class="strip-item">
+          <mat-icon>calendar_today</mat-icon>
+          <span>{{ data.kra.cycleName }}</span>
+        </div>
+        <div class="strip-divider"></div>
+        <div class="strip-item">
+          <span class="status-pill"
+            [class.pill-active]="data.kra.isActive"
+            [class.pill-inactive]="!data.kra.isActive">
+            <span class="pill-dot"></span>
+            {{ data.kra.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Scrollable Content ──────────────────────────────────── -->
+      <mat-dialog-content>
+
+        <!-- KRA Information -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>trending_up</mat-icon></div>
+            <span>KRA Information</span>
           </div>
-
-          <div class="detail-item">
-            <div class="detail-label">
-              <mat-icon>trending_up</mat-icon>
-              <span>KRA Rate (Progress)</span>
+          <div class="block-grid">
+            <div class="cell cell-wide">
+              <span class="cell-label">Title</span>
+              <span class="cell-value">{{ data.kra.title }}</span>
             </div>
-            <div class="detail-value">
-              <span class="weight-badge">{{ data.kra.kraRate }}</span>
+            <div class="cell cell-wide">
+              <span class="cell-label">Description</span>
+              <span class="cell-value">{{ data.kra.kraDescription || '—' }}</span>
             </div>
-          </div>
-
-          <div class="detail-item">
-            <div class="detail-label">
-              <mat-icon>check_circle</mat-icon>
-              <span>Status</span>
-            </div>
-            <div class="detail-value">
-              <mat-chip [class]="getStatusClass(data.kra.isActive)" [disabled]="false">
-                <mat-icon>{{ data.kra.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
-                {{ data.kra.isActive ? 'Active' : 'Inactive' }}
-              </mat-chip>
-            </div>
-          </div>
-
-          <div class="detail-item">
-            <div class="detail-label">
-              <mat-icon>person</mat-icon>
-              <span>Created By</span>
-            </div>
-            <div class="detail-value">{{ data.kra.createdByName }}</div>
-          </div>
-
-          <div class="detail-item" *ngIf="data.kra.createdAt">
-            <div class="detail-label">
-              <mat-icon>access_time</mat-icon>
-              <span>Created At</span>
-            </div>
-            <div class="detail-value">{{ data.kra.createdAt | localizedDate:'medium' }}</div>
           </div>
         </div>
 
-      </div>
-    </mat-dialog-content>
+        <!-- Metrics -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>show_chart</mat-icon></div>
+            <span>Metrics</span>
+          </div>
+          <div class="block-grid">
+            <div class="cell">
+              <span class="cell-label">Cycle Name</span>
+              <span class="cell-value">{{ data.kra.cycleName }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">KRA Rate</span>
+              <span class="cell-value">{{ data.kra.kraRate }}</span>
+            </div>
+          </div>
+        </div>
 
-    <div class="dialog-actions">
-      <button mat-stroked-button mat-dialog-close>
-        Close
-      </button>
-      <button 
-        *ngIf="data.hasEditPermission"
-        mat-raised-button 
-        color="primary" 
-        class="edit-button"
-        (click)="openEditDialog()">
-        <mat-icon>edit</mat-icon>
-        Edit KRA
-      </button>
+        <!-- Status & Metadata -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>info</mat-icon></div>
+            <span>Status & Metadata</span>
+          </div>
+          <div class="block-grid">
+            <div class="cell">
+              <span class="cell-label">Status</span>
+              <span class="cell-value">
+                <span class="status-pill"
+                  [class.pill-active]="data.kra.isActive"
+                  [class.pill-inactive]="!data.kra.isActive">
+                  <span class="pill-dot"></span>
+                  {{ data.kra.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Created By</span>
+              <span class="cell-value">{{ data.kra.createdByName || '—' }}</span>
+            </div>
+            <div class="cell cell-wide" *ngIf="data.kra.createdAt">
+              <span class="cell-label">Created At</span>
+              <span class="cell-value">{{ data.kra.createdAt | localizedDate:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </mat-dialog-content>
+
     </div>
   `,
   styles: [`
     ::ng-deep .mat-mdc-dialog-container {
-      border-radius: 16px !important;
       padding: 0 !important;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-      max-width: 700px !important;
+      border-radius: 12px !important;
+      overflow: hidden !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+      max-width: 600px !important;
       width: 90vw !important;
     }
 
-    .dialog-header {
+    .dialog-container {
+      width: 100%;
+      background: #f7f8fa;
+      border-radius: 12px;
+      overflow: hidden;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 28px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      flex-direction: column;
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
 
-      h2 {
+      // ─── Header ─────────────────────────────────────────────────
+      .dialog-header {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 0;
-        font-size: 22px;
-        font-weight: 700;
-        color: white;
+        justify-content: space-between;
+        padding: 24px 28px 20px;
+        background: #ffffff;
+        border-bottom: 1px solid #ebebeb;
+        gap: 16px;
+        flex-shrink: 0;
 
-        mat-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-          color: white;
-        }
-      }
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          min-width: 0;
+          flex: 1;
 
-      .close-button {
-        color: white;
-        transition: all 0.2s ease;
+          .header-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #f0eeff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 2px solid #e0e2e8;
 
-        &:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: rotate(90deg);
-        }
-      }
-    }
+            mat-icon {
+              font-size: 24px;
+              width: 24px;
+              height: 24px;
+              background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            }
+          }
 
-    .dialog-content {
-      padding: 28px !important;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
+          .header-info {
+            min-width: 0;
 
-    .kra-details {
-      .detail-section {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      }
+            .header-name {
+              margin: 0 0 5px;
+              font-size: 18px;
+              font-weight: 700;
+              color: #111827;
+              line-height: 1.2;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              letter-spacing: -0.2px;
+            }
 
-      .detail-item {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        padding-bottom: 20px;
-        border-bottom: 1px solid #e5e7eb;
+            .header-meta {
+              display: flex;
+              align-items: center;
+              gap: 8px;
 
-        &:last-child {
-          border-bottom: none;
-          padding-bottom: 0;
-        }
-      }
-
-      .detail-label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-          color: #667eea;
-        }
-      }
-
-      .detail-value {
-        font-size: 1rem;
-        color: #1f2937;
-        font-weight: 500;
-        line-height: 1.6;
-
-        .weight-badge {
-          display: inline-block;
-          padding: 6px 12px;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-          color: #667eea;
-          border-radius: 8px;
-          font-weight: 600;
-        }
-      }
-
-      mat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.875rem;
-
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-
-        &.status-active {
-          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%);
-          color: #059669;
-        }
-
-        &.status-inactive {
-          background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
-          color: #dc2626;
-        }
-      }
-    }
-
-    .dialog-actions {
-      padding: 20px 28px !important;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-
-      button {
-        height: 44px;
-        padding: 0 28px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        text-transform: none !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        &[mat-stroked-button] {
-          background: white !important;
-          color: #6b7280 !important;
-          border: 2px solid #e5e7eb !important;
-
-          &:hover {
-            background: #f9fafb !important;
-            border-color: #cbd5e1 !important;
-            color: #374151 !important;
+              .dept-id {
+                font-size: 12px;
+                font-weight: 500;
+                color: #6b7280;
+                letter-spacing: 0.2px;
+              }
+            }
           }
         }
+      }
 
-        &.edit-button {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-          color: white !important;
-          border: none !important;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+      // ─── Info Strip ─────────────────────────────────────────────
+      .info-strip {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 11px 28px;
+        background: #ffffff;
+        border-bottom: 1px solid #ebebeb;
+        flex-shrink: 0;
+        flex-wrap: wrap;
 
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-          }
+        .strip-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12.5px;
+          color: #4b5563;
+          font-weight: 500;
 
           mat-icon {
-            font-size: 20px !important;
-            width: 20px !important;
-            height: 20px !important;
-            margin: 0;
+            font-size: 15px;
+            width: 15px;
+            height: 15px;
+            color: #9ca3af;
+          }
+        }
+
+        .strip-divider {
+          width: 1px;
+          height: 13px;
+          background: #e5e7eb;
+          flex-shrink: 0;
+        }
+      }
+
+      // ─── Status Pills ────────────────────────────────────────────
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #374151;
+
+        .pill-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        &.pill-active {
+          color: #166534;
+          .pill-dot { background: #22c55e; }
+        }
+
+        &.pill-inactive {
+          color: #374151;
+          .pill-dot { background: #9ca3af; }
+        }
+      }
+
+      // ─── Scrollable Body ─────────────────────────────────────────
+      mat-dialog-content {
+        padding: 16px 16px !important;
+        max-height: 58vh;
+        overflow-y: auto;
+        background: #f7f8fa;
+
+        &::-webkit-scrollbar { width: 4px; }
+        &::-webkit-scrollbar-track { background: transparent; }
+        &::-webkit-scrollbar-thumb {
+          background: #e0e2e8;
+          border-radius: 4px;
+        }
+      }
+
+      // ─── Info Block ──────────────────────────────────────────────
+      .info-block {
+        background: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #ebebeb;
+        margin-bottom: 10px;
+
+        .block-header {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 14px 20px;
+          border-bottom: 1px solid #f0f0f0;
+          font-size: 13px;
+          font-weight: 700;
+          color: #111827;
+          letter-spacing: -0.1px;
+          background: #ffffff;
+
+          .block-icon {
+            width: 4px;
+            height: 16px;
+            border-radius: 2px;
+            background: #111827;
+            flex-shrink: 0;
+
+            mat-icon {
+              position: absolute;
+              opacity: 0;
+              pointer-events: none;
+              width: 0;
+              height: 0;
+              overflow: hidden;
+            }
+          }
+        }
+
+        .block-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+
+          .cell {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            position: relative;
+
+            &:nth-child(odd) {
+              border-right: 1px solid #f5f5f5;
+            }
+
+            &:nth-last-child(-n+2) {
+              border-bottom: none;
+            }
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            &.cell-wide {
+              grid-column: 1 / -1;
+              border-right: none;
+
+              &:not(:last-child) {
+                border-bottom: 1px solid #f5f5f5;
+              }
+            }
+
+            .cell-label {
+              font-size: 10.5px;
+              font-weight: 600;
+              color: #9ca3af;
+              text-transform: uppercase;
+              letter-spacing: 0.7px;
+              line-height: 1;
+            }
+
+            .cell-value {
+              font-size: 13.5px;
+              font-weight: 500;
+              color: #111827;
+              line-height: 1.4;
+              word-break: break-word;
+
+              &.code {
+                font-family: 'Fira Code', 'Courier New', monospace;
+                font-size: 12.5px;
+                color: #374151;
+                letter-spacing: 0.3px;
+              }
+            }
           }
         }
       }
+
+      // ─── Footer ─────────────────────────────────────────────────
+      // Removed: Footer section with buttons
     }
 
-    @media (max-width: 768px) {
-      .dialog-content {
-        padding: 20px !important;
-      }
-      .dialog-actions {
-        flex-direction: column;
-        gap: 12px;
-        button {
-          width: 100%;
+    // ─── Mobile ──────────────────────────────────────────────────
+    @media (max-width: 600px) {
+      .dialog-container {
+
+        .dialog-header {
+          padding: 18px 18px 14px;
+
+          .header-left {
+            gap: 12px;
+
+            .header-avatar {
+              width: 44px;
+              height: 44px;
+
+              mat-icon { font-size: 20px; width: 20px; height: 20px; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+            }
+
+            .header-info {
+              .header-name { font-size: 16px; }
+            }
+          }
+        }
+
+        .info-strip {
+          padding: 10px 18px;
+          gap: 12px;
+
+          .strip-divider { display: none; }
+          .strip-item { font-size: 11.5px; }
+        }
+
+        mat-dialog-content {
+          padding: 12px 12px !important;
+          max-height: 60vh;
+        }
+
+        .info-block {
+          border-radius: 9px;
+
+          .block-header {
+            padding: 12px 16px;
+            font-size: 12.5px;
+          }
+
+          .block-grid {
+            grid-template-columns: repeat(2, 1fr);
+
+            .cell {
+              padding: 11px 16px;
+
+              .cell-label { font-size: 10px; }
+              .cell-value {
+                font-size: 12.5px;
+                &.code { font-size: 12px; }
+              }
+            }
+          }
+        }
+
+        .dialog-footer {
+          padding: 12px 16px;
+          flex-direction: column;
+          gap: 10px;
+
+          .btn-close,
+          .btn-edit {
+            width: 100%;
+            height: 40px !important;
+          }
         }
       }
     }
@@ -328,33 +477,8 @@ export interface KRADetailsDialogData {
 export class KRADetailsDialogComponent {
   constructor(
     private dialogRef: MatDialogRef<KRADetailsDialogComponent>,
-    private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: KRADetailsDialogData
   ) {}
-
-  getStatusClass(isActive: boolean): string {
-    return isActive ? 'status-active' : 'status-inactive';
-  }
-
-  openEditDialog(): void {
-    this.dialogRef.close({ edit: true });
-    
-    const editDialogRef = this.dialog.open(CreateKRADialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
-      data: {
-        kra: this.data.kra,
-        isEditMode: true
-      },
-      disableClose: false
-    });
-
-    editDialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.dialogRef.close({ refresh: true });
-      }
-    });
-  }
 }
 
 

@@ -5,18 +5,23 @@
       <h1>Holiday Management</h1>
       <p class="subtitle">Manage company holidays, import from country catalogs, and configure holiday policies</p>
     </div>
-    <div class="header-actions">
+    <div class="header-actions" >
       @if (hasPermission('import_holidays_from_catalog')) {
-      <button mat-stroked-button (click)="openImportDialog()">
+        <div class="add-btn-wrap">
+        <button mat-stroked-button (click)="openImportDialog()" class="add-btn ">
         <mat-icon>cloud_download</mat-icon>
         Import from Catalog
       </button>
+        </div>
       }
       @if (hasPermission('add_holidays')) {
-      <button mat-raised-button color="primary" (click)="openAddHolidayDialog()">
+        <div class="add-btn-wrap">
+        <button mat-raised-button color="primary" (click)="openAddHolidayDialog()" class="add-btn ">
         <mat-icon>add</mat-icon>
         Add Holiday
       </button>
+        </div>
+      
       }
     </div>
   </div>

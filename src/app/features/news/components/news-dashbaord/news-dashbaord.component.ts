@@ -21,6 +21,7 @@ import { CreateNewsComponent } from '../create-news/create-news.component';
 import { Subject, takeUntil } from 'rxjs';
 import { NewsViewDialogueboxComponent } from './news-view-dialoguebox';
 import { MatMenuModule } from '@angular/material/menu';
+import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
@@ -140,28 +141,46 @@ export class NewsDashbaordComponent implements OnInit {
   deleteNews(newsId: string): void {
     if (!newsId) return;
 
-    const confirmDelete = confirm('Are you sure you want to delete this news?');
-    if (!confirmDelete) return;
+    // Find the news item to get its title
+    const newsItem = this.newsList.find(n => n.newsId === newsId);
+    const newsTitle = newsItem?.title || 'this news';
 
-    this.isLoading = true;
+    const dialogData: ConfirmDeleteData = {
+      title: 'Delete News',
+      message: 'Are you sure you want to delete this news?',
+      itemName: newsTitle,
+      confirmButtonText: 'Yes, Delete'
+    };
 
-    this.newsService.deleteNews(newsId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (isDeleted) => {
-          if (isDeleted) {
-            // Remove from UI instantly (optional but smooth)
-            this.newsList = this.newsList.filter(n => n.newsId !== newsId);
-            this.applyFilters();
-          }
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }
-      });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: dialogData,
+      panelClass: 'confirm-delete-dialog-panel'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.isLoading = true;
+
+        this.newsService.deleteNews(newsId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (isDeleted) => {
+              if (isDeleted) {
+                // Remove from UI instantly (optional but smooth)
+                this.newsList = this.newsList.filter(n => n.newsId !== newsId);
+                this.applyFilters();
+              }
+              this.isLoading = false;
+              this.cdr.markForCheck();
+            },
+            error: () => {
+              this.isLoading = false;
+              this.cdr.markForCheck();
+            }
+          });
+      }
+    });
   }
 
   // Navigate to create-news page in edit mode (as route param)

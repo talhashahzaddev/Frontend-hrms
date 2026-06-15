@@ -13,7 +13,7 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest }
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
-
+import { LocalizationService } from '../../../../core/services/localization.service';
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface UpdateLocalizationRequest {
   currency: string;
@@ -72,6 +72,7 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private notification: NotificationService,
     private notificationService: NotificationService,
+    private localizationService: LocalizationService,
     private authService: AuthService,
     private dialog: MatDialog
   ) {
@@ -132,10 +133,13 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
 
     this.timezone = hardcodedTimezones.sort((a, b) => a.label.localeCompare(b.label));
     this.normalizeTimeZoneSelection();
+    
     this.cdr.markForCheck();
   }
 
 
+
+  
   loadSettings(): void {
     this.isLoading = true;
     this.settingsService.getOrganizationSettings()
@@ -185,6 +189,8 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
       timeZone: selectedTimeZone,
       culture: selectedCulture
     };
+
+    this.localizationService.setLocalization(selectedCulture, selectedTimeZone);
 
     this.isSaving = true;
 
