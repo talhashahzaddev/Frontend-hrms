@@ -8,10 +8,10 @@
       <p class="page-subtitle">Manage and organize your workforce</p>
     </div>
 
-    <div class="header-actions">
+    <div class="add-btn-wrap">
       <ng-container *ngIf="hasPermission('add_employee')">
         <button mat-flat-button *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeAction"
-        (click)="onAddEmployeeClick()" class="add-button">
+        (click)="onAddEmployeeClick()" class="add-btn">
         <mat-icon>person_add</mat-icon>
         Add Employee
       </button>

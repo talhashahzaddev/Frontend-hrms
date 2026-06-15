@@ -13,7 +13,6 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest }
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../../../../core/services/auth.service';
-// import { LocalizationService } from '../../../../core/services/localization.service';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface UpdateLocalizationRequest {
@@ -74,8 +73,6 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
     private notification: NotificationService,
     private notificationService: NotificationService,
     private authService: AuthService,
-    // private localizationService: LocalizationService,
-    
     private dialog: MatDialog
   ) {
     this.settingsForm = this.fb.group({
@@ -98,25 +95,44 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
   }
 
   loadTimeZones(): void {
-    this.settingsService.getAllTimeZones().subscribe({
-      next: (countries: any[]) => {
+    // Hardcoded timezone data
+    const hardcodedTimezones = [
+      { value: 'America/New_York', label: 'United States/New York' },
+      { value: 'America/Chicago', label: 'United States/Chicago' },
+      { value: 'America/Denver', label: 'United States/Denver' },
+      { value: 'America/Los_Angeles', label: 'United States/Los Angeles' },
+      { value: 'Europe/London', label: 'United Kingdom/London' },
+      { value: 'Europe/Paris', label: 'France/Paris' },
+      { value: 'Europe/Berlin', label: 'Germany/Berlin' },
+      { value: 'Europe/Madrid', label: 'Spain/Madrid' },
+      { value: 'Europe/Amsterdam', label: 'Netherlands/Amsterdam' },
+      { value: 'Europe/Moscow', label: 'Russia/Moscow' },
+      { value: 'Asia/Dubai', label: 'United Arab Emirates/Dubai' },
+      { value: 'Asia/Kolkata', label: 'India/Kolkata' },
+      { value: 'Asia/Bangkok', label: 'Thailand/Bangkok' },
+      { value: 'Asia/Hong_Kong', label: 'China/Hong Kong' },
+      { value: 'Asia/Shanghai', label: 'China/Shanghai' },
+      { value: 'Asia/Tokyo', label: 'Japan/Tokyo' },
+      { value: 'Asia/Seoul', label: 'South Korea/Seoul' },
+      { value: 'Asia/Singapore', label: 'Singapore/Singapore' },
+      { value: 'Asia/Manila', label: 'Philippines/Manila' },
+      { value: 'Australia/Sydney', label: 'Australia/Sydney' },
+      { value: 'Australia/Melbourne', label: 'Australia/Melbourne' },
+      { value: 'Australia/Brisbane', label: 'Australia/Brisbane' },
+      { value: 'Pacific/Auckland', label: 'New Zealand/Auckland' },
+      { value: 'Africa/Cairo', label: 'Egypt/Cairo' },
+      { value: 'Africa/Johannesburg', label: 'South Africa/Johannesburg' },
+      { value: 'Africa/Lagos', label: 'Nigeria/Lagos' },
+      { value: 'America/Toronto', label: 'Canada/Toronto' },
+      { value: 'America/Vancouver', label: 'Canada/Vancouver' },
+      { value: 'America/Mexico_City', label: 'Mexico/Mexico City' },
+      { value: 'America/Sao_Paulo', label: 'Brazil/Sao Paulo' },
+      { value: 'America/Buenos_Aires', label: 'Argentina/Buenos Aires' }
+    ];
 
-        this.timezone = countries
-          .filter(c => c.capital?.length && c.timezones?.length)
-          .map(country => ({
-            value: country.timezones[0],
-            label: `${country.name.common}/${country.capital[0]}`
-          }))
-          .sort((a, b) => a.label.localeCompare(b.label));
-
-        this.normalizeTimeZoneSelection();
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.notification.showError('Failed to load timezones');
-        this.cdr.markForCheck();
-      }
-    });
+    this.timezone = hardcodedTimezones.sort((a, b) => a.label.localeCompare(b.label));
+    this.normalizeTimeZoneSelection();
+    this.cdr.markForCheck();
   }
 
 
@@ -133,7 +149,6 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
             const normalizedTimeZone = this.normalizeTimeZoneValue(settings.timeZone);
             this.settingsForm.patchValue({ timeZone: normalizedTimeZone });
             this.settingsForm.patchValue({ culture: settings.culture });
-            // this.localizationService.setLocalization(settings.culture, normalizedTimeZone);
           }
           this.isLoading = false;
         },
@@ -182,7 +197,6 @@ export class SettingsGeneralComponent implements OnInit, OnDestroy {
           this.currentTimeZone = selectedTimeZone;
           this.currentCulture = selectedCulture;
 
-          // this.localizationService.setLocalization(selectedCulture, selectedTimeZone);
           this.notificationService.showSuccess('Settings updated successfully');
           this.isSaving = false;
         },

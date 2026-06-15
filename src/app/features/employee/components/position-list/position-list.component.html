@@ -7,8 +7,8 @@
       <h1 class="page-title">Position Management</h1>
       <p class="page-subtitle">Manage and organize job positions</p>
     </div>
-    <div class="header-actions">
-      <button mat-flat-button *ngIf="hasPermission('add_position')" (click)="openCreateDialog()" class="add-button">
+    <div class="add-btn-wrap">
+      <button mat-flat-button *ngIf="hasPermission('add_position')" (click)="openCreateDialog()" class="add-btn">
         <mat-icon>add</mat-icon>
         Add Position
       </button>

@@ -19,7 +19,7 @@ import { Employee, Department, Position, CreateEmployeeRequest, UpdateEmployeeRe
 import { PaymentService } from '../../../../core/services/payment.service';
 import { PayrollService } from 'src/app/features/payroll/services/payroll.service';
 import { TaxCategoryDto } from 'src/app/features/payroll/services/payroll.service';
-
+import { CountryCode } from 'src/app/core/models/countyphonecode.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
@@ -55,7 +55,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
   positions: Position[] = [];
   managers: Employee[] = [];
   taxCategories: TaxCategoryDto[] = [];
-  countries: { name: string; code: string; flag?: string; cca2?: string }[] = [];
+  countries: CountryCode[] = [];
   countryFilter = '';
   organizationCurrency: string = 'USD';
   currencySymbol: string = '$';

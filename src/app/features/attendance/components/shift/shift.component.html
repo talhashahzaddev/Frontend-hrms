@@ -110,9 +110,6 @@
         <h4 class="table-card-title">All Shifts</h4>
         <span class="shifts-badge">{{ shifts.length || 0 }} Shifts</span>
       </div>
-      <button mat-icon-button class="more-btn" [matMenuTriggerFor]="shiftMenu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
       <mat-menu #shiftMenu="matMenu">
         <button mat-menu-item>Export</button>
         <button mat-menu-item>Refresh</button>
