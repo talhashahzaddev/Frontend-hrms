@@ -1,15 +1,21 @@
-<div class="dialog-header">
-  <h2 mat-dialog-title>
-    <mat-icon>schedule</mat-icon>
-    Attendance Details
-  </h2>
-  <button mat-icon-button mat-dialog-close class="close-button">
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
+<div class="dialog-container">
 
-<mat-dialog-content class="dialog-content">
-  <div class="attendance-details">
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-avatar">
+        <mat-icon>schedule</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-name">Attendance Details</h2>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="attendance-details">
 
     <!-- Employee Info Section -->
     <div class="detail-section">
@@ -138,8 +144,13 @@
     </div>
 
   </div>
-</mat-dialog-content>
+    </mat-dialog-content>
 
-<div class="dialog-actions">
-  <button mat-stroked-button mat-dialog-close>Close</button>
+    <div class="dialog-footer">
+      <button mat-stroked-button mat-dialog-close class="btn-close">
+        <mat-icon>close</mat-icon>
+        Close
+      </button>
+    </div>
+
 </div>

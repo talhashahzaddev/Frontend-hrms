@@ -328,9 +328,12 @@
     <button mat-stroked-button (click)="onCancel()" [disabled]="isLoading" class="btn-cancel">
       <mat-icon>close</mat-icon> Cancel
     </button>
-    <button mat-flat-button (click)="onSave()" [disabled]="isLoading || !employeeForm.dirty" class="btn-save">
+  <div class="add-btn-wrap">
+ <button mat-flat-button (click)="onSave()" [disabled]="isLoading || !employeeForm.dirty" class="add-btn">
       <mat-icon>{{ isLoading ? 'hourglass_empty' : 'save' }}</mat-icon>
       {{ isLoading ? 'Saving...' : 'Save Changes' }}
     </button>
+  </div>
+   
   </div>
 </div>

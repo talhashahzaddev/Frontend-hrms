@@ -40,8 +40,8 @@
         </div>
 
         <!-- Create Button -->
-        <div class="filter-field" *ngIf="hasPermission('Create_AgentGroup_Button')">
-          <button mat-raised-button color="primary" class="btn-create" (click)="openCreateGroupDialog()">
+        <div class="filter-field" *ngIf="hasPermission('Create_AgentGroup_Button')" class="add-btn-wrap">
+          <button mat-raised-button color="primary" class="add-btn" (click)="openCreateGroupDialog()">
             <mat-icon>add</mat-icon>
             <span>Create Agent Group</span>
           </button>

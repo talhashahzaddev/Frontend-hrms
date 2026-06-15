@@ -297,12 +297,12 @@
                 <mat-icon>visibility</mat-icon>
                 View Details
               </button>
-              <button mat-menu-item 
+              <!-- <button mat-menu-item 
                 (click)="editAttendance(attendance)"
                 *ngIf="hasPermission('team_attendance_edit_record')">
                 <mat-icon>edit</mat-icon>
                 Edit Record
-              </button>
+              </button> -->
               <mat-divider></mat-divider>
               <button mat-menu-item (click)="approveAttendance(attendance)" class="success-action"
                 *ngIf="attendance.status === 'pending_approval'">

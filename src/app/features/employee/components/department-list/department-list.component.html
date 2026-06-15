@@ -7,8 +7,8 @@
       <h1 class="page-title">Department Management</h1>
       <p class="page-subtitle">Manage and organize your departments</p>
     </div>
-    <div class="header-actions">
-      <button mat-flat-button *ngIf="hasPermission('add_department')" (click)="openCreateDialog()" class="add-button">
+    <div class="add-btn-wrap">
+      <button mat-flat-button *ngIf="hasPermission('add_department')" (click)="openCreateDialog()" class="add-btn">
         <mat-icon>add</mat-icon>
         Add Department
       </button>

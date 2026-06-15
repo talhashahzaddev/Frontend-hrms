@@ -701,6 +701,52 @@ a {
   }
 }
 
+
+
+
+// Add this in your styles.scss
+.add-btn-wrap {
+  flex-shrink: 0;
+
+  .add-btn {
+    background-color: #004ac6 !important;
+    color: #ffffff !important;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 0.625rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    border: none !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 14px rgba(0, 74, 198, 0.2) !important;
+    transition: all 0.2s !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    min-width: unset !important;
+    height: auto !important;
+
+    &:hover {
+      transform: translateY(-1px) !important;
+      background-color: #003ba3 !important;
+      box-shadow: 0 6px 20px rgba(0, 74, 198, 0.3) !important;
+    }
+
+    &:active {
+      transform: translateY(0) !important;
+    }
+
+    mat-icon {
+      font-size: 1.125rem !important;
+      width: 1.125rem !important;
+      height: 1.125rem !important;
+    }
+  }
+}
+
 /* =======================================================
    Global Empty State Button Styling
    - Applies to all empty state buttons across the app
