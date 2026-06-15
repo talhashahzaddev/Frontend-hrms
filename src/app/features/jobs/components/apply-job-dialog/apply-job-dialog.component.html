@@ -7,14 +7,14 @@
 
   <!-- ── Header ── -->
   <header class="ajd-header">
-    <div class="ajd-header-left">
-      <div class="ajd-header-icon">
-        <mat-icon>person_add</mat-icon>
+    <div class="ajd-header-titles">
+      <div class="ajd-title-row">
+        <h2 mat-dialog-title class="ajd-title">{{ isEditMode ? 'Edit Application' : 'Candidate Application' }}</h2>
+        <span *ngIf="job?.jobId" class="ajd-job-badge">{{ job!.jobRoleName }} ({{ job!.jobCode }})</span>
       </div>
-      <div>
-        <h2>{{ isEditMode ? 'Edit Application' : (applyForSelf ? 'Apply for Job' : 'Refer Candidate') }}</h2>
-        <p class="ajd-header-sub">{{ applyForSelf ? 'Applying for:' : 'Referring for:' }}
-          <span>{{ job.jobRoleName }}</span>
+      <div *ngIf="job?.jobId" class="ajd-header-sub">
+        <p class="ajd-header-sub">{{ applyForSelf ? 'Applying for:' : (isEditMode ? 'Application for:' : 'Referring for:') }}
+          <strong>{{ job!.jobRoleName }}</strong>
         </p>
       </div>
     </div>
@@ -116,6 +116,41 @@
         </div>
       </section>
 
+      <!-- Section: Applicant Questionnaire -->
+      <section class="ajd-section" *ngIf="jobQuestions && jobQuestions.length > 0">
+        <div class="ajd-section-title">
+          <h3>Applicant Questionnaire</h3>
+        </div>
+        <div class="ajd-questions">
+          <div class="ajd-field" *ngFor="let question of jobQuestions">
+            <label>{{ question.questionText }} <span *ngIf="question.isRequired">*</span></label>
+            
+            <ng-container [ngSwitch]="question.questionType">
+              <mat-form-field *ngSwitchCase="'Text'" appearance="outline" class="ajd-mat-field">
+                <textarea matInput [formControl]="getAnswerControl(question.questionId)" rows="3" placeholder="Type your answer..."></textarea>
+              </mat-form-field>
+              
+              <div *ngSwitchCase="'True/False'" class="ajd-field">
+                <mat-radio-group [formControl]="getAnswerControl(question.questionId)" style="display: flex; gap: 16px;">
+                    <mat-radio-button value="True">Yes</mat-radio-button>
+                    <mat-radio-button value="False">No</mat-radio-button>
+                </mat-radio-group>
+              </div>
+              
+              <mat-form-field *ngSwitchCase="'Multiple Choice'" appearance="outline" class="ajd-mat-field">
+                <mat-select [formControl]="getAnswerControl(question.questionId)" placeholder="Select an option">
+                  <mat-option *ngFor="let opt of getOptionsArray(question.options)" [value]="opt">{{ opt }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+            
+            <mat-error *ngIf="getAnswerControl(question.questionId)?.invalid && getAnswerControl(question.questionId)?.touched" class="ajd-resume-error" style="margin-top: 4px;">
+              This question is required
+            </mat-error>
+          </div>
+        </div>
+      </section>
+
       <!-- Section: Cover Letter -->
       <section class="ajd-section ajd-section-last">
         <div class="ajd-section-title">
@@ -138,7 +173,7 @@
   <!-- ── Footer ── -->
   <footer class="ajd-footer">
     <button class="ajd-btn-cancel" type="button" (click)="onCancel()">Cancel</button>
-    <button class="ajd-btn-submit" type="button" [disabled]="applyForm.invalid || isSubmitting" (click)="onSubmit()">
+    <button class="ajd-btn-submit" type="button" [disabled]="isSubmitting" (click)="onSubmit()">
       <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
       <span *ngIf="!isSubmitting">
         {{ isEditMode ? 'Update Application' : (applyForSelf ? 'Apply' : 'Submit Referral') }}

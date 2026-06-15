@@ -159,6 +159,13 @@ export interface ApplyForMySelfRequest {
   answers?: SubmitCandidateAnswerRequest[] | null;
 }
 
+export interface CandidateAnswerDto {
+  candidateAnswerId: string;
+  jobApplyId: string;
+  questionId: string;
+  answerText: string;
+}
+
 export interface UpdateJobApplicationRequest {
   candidateName?: string | null;
   candidateEmail?: string | null;
@@ -169,6 +176,7 @@ export interface UpdateJobApplicationRequest {
   currentStageId?: string | null;
   applicationSource?: string | null;
   status?: string | null;
+  answers?: SubmitCandidateAnswerRequest[] | null;
 }
 
 export interface StageMasterDto {

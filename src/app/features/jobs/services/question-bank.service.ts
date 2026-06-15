@@ -11,7 +11,8 @@ import {
   UpdateQuestionRequest,
   JobQuestionDto,
   ServiceResponse,
-  ParsedResumeDto
+  ParsedResumeDto,
+  CandidateAnswerDto
 } from '../../../core/models/jobs.models';
 
 @Injectable({
@@ -114,6 +115,17 @@ export class QuestionBankService {
       .get<ServiceResponse<ParsedResumeDto>>(`${this.apiUrl}/parsed-resumes/${jobApplyId}`)
       .pipe(
         map((res) => (res.success && res.data ? res.data : null))
+      );
+  }
+
+  getCandidateAnswers(jobApplyId: string): Observable<CandidateAnswerDto[]> {
+    return this.http
+      .get<ServiceResponse<CandidateAnswerDto[]>>(`${this.apiUrl}/candidate-answers/${jobApplyId}`)
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) return [];
+          return res.data;
+        })
       );
   }
 }

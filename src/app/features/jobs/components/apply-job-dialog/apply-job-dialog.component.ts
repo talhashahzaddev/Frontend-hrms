@@ -1,6 +1,6 @@
-import { Component, Inject, ViewEncapsulation } from '@angular/core';
+import { Component, Inject, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,9 +9,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { JobOpeningDto, JobApplicationDto, JobQuestionDto } from '@core/models/jobs.models';
+import { MatSelectModule } from '@angular/material/select';
+import { MatRadioModule } from '@angular/material/radio';
 import { QuillModule } from 'ngx-quill';
-import { JobOpeningDto, JobApplicationDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
+import { QuestionBankService } from '@features/jobs/services/question-bank.service';
 import { NotificationService } from '@core/services/notification.service';
 import { ExpenseService } from '@features/expense/services/expense.service';
 
@@ -40,16 +43,21 @@ export interface ApplyJobDialogData {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatSelectModule,
+    MatRadioModule,
     QuillModule
   ],
   templateUrl: './apply-job-dialog.component.html',
   styleUrls: ['./apply-job-dialog.component.scss']
 })
-export class ApplyJobDialogComponent {
+export class ApplyJobDialogComponent implements OnInit {
   applyForm: FormGroup;
   isSubmitting = false;
   resumeFileName: string | null = null;
   isUploadingResume = false;
+
+  jobQuestions: JobQuestionDto[] = [];
+  isLoadingQuestions = false;
 
   readonly acceptedResumeTypes = '.pdf,.jpg,.jpeg,.png,.gif';
   readonly maxResumeSizeMb = 5;
@@ -72,6 +80,7 @@ export class ApplyJobDialogComponent {
   constructor(
     private fb: FormBuilder,
     private jobsService: JobsService,
+    private qbService: QuestionBankService,
     private expenseService: ExpenseService,
     private dialogRef: MatDialogRef<ApplyJobDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ApplyJobDialogData,
@@ -83,13 +92,78 @@ export class ApplyJobDialogComponent {
       candidateEmail: [isSelf ? '' : '', isSelf ? [] : [Validators.required, Validators.email, Validators.maxLength(200)]],
       phone: [isSelf ? '' : '', isSelf ? [] : [Validators.required, Validators.maxLength(50)]],
       linkedInUrl: ['', [Validators.maxLength(500)]],
-      resumeUrl: ['', [Validators.required]],
+      resumeUrl: ['', (isSelf || this.isEditMode) ? [] : [Validators.required]],
       coverLetter: [''],
-      applicationSource: [isSelf ? 'Self' : 'Internal', [Validators.maxLength(100)]]
+      applicationSource: [isSelf ? 'Self' : 'Internal', [Validators.maxLength(100)]],
+      answers: this.fb.group({})
     });
     if (this.isEditMode && this.data.application) {
       this.patchFormWithApplication(this.data.application);
     }
+  }
+
+  ngOnInit(): void {
+    const jobId = this.job?.jobId || this.data.application?.jobId;
+    if (jobId) {
+      if (this.isEditMode && this.data.application?.jobApplyId) {
+        this.loadJobQuestionsAndAnswers(jobId, this.data.application.jobApplyId);
+      } else {
+        this.loadJobQuestions(jobId);
+      }
+    }
+  }
+
+  private loadJobQuestions(jobId: string): void {
+    this.isLoadingQuestions = true;
+    this.qbService.getJobQuestions(jobId).subscribe({
+      next: (questions) => {
+        this.jobQuestions = questions;
+        const answersGroup = this.applyForm.get('answers') as FormGroup;
+        this.jobQuestions.forEach(q => {
+          answersGroup.addControl(q.questionId, new FormControl('', q.isRequired ? Validators.required : null));
+        });
+        this.isLoadingQuestions = false;
+      },
+      error: () => {
+        this.isLoadingQuestions = false;
+      }
+    });
+  }
+
+  private loadJobQuestionsAndAnswers(jobId: string, jobApplyId: string): void {
+    this.isLoadingQuestions = true;
+    this.qbService.getJobQuestions(jobId).subscribe({
+      next: (questions) => {
+        this.jobQuestions = questions;
+        const answersGroup = this.applyForm.get('answers') as FormGroup;
+        
+        // Fetch existing answers
+        this.qbService.getCandidateAnswers(jobApplyId).subscribe({
+          next: (answers) => {
+            this.jobQuestions.forEach(q => {
+              const existingAns = answers.find(a => a.questionId === q.questionId);
+              answersGroup.addControl(q.questionId, new FormControl(existingAns?.answerText || '', q.isRequired ? Validators.required : null));
+            });
+            this.isLoadingQuestions = false;
+          },
+          error: () => {
+            // Fallback to empty controls if answers fetch fails
+            this.jobQuestions.forEach(q => {
+              answersGroup.addControl(q.questionId, new FormControl('', q.isRequired ? Validators.required : null));
+            });
+            this.isLoadingQuestions = false;
+          }
+        });
+      },
+      error: () => {
+        this.isLoadingQuestions = false;
+      }
+    });
+  }
+
+  getOptionsArray(optionsStr: string | null | undefined): string[] {
+    if (!optionsStr) return [];
+    return optionsStr.split(',').map(s => s.trim());
   }
 
   get isEditMode(): boolean {
@@ -192,6 +266,10 @@ export class ApplyJobDialogComponent {
     this.dialogRef.close();
   }
 
+  getAnswerControl(questionId: string): FormControl {
+    return this.applyForm.get('answers')?.get(questionId) as FormControl;
+  }
+
   onSubmit(): void {
     if (this.applyForm.invalid || this.isSubmitting) {
       this.applyForm.markAllAsTouched();
@@ -199,6 +277,13 @@ export class ApplyJobDialogComponent {
     }
     this.isSubmitting = true;
     const value = this.applyForm.getRawValue();
+
+    // Map answers object back to an array
+    const mappedAnswers = Object.keys(value.answers || {}).map(qId => ({
+        questionId: qId,
+        answerText: value.answers[qId]
+    }));
+
     if (this.isEditMode && this.data.application) {
       const updateRequest = {
         candidateName: value.candidateName?.trim() || undefined,
@@ -207,7 +292,8 @@ export class ApplyJobDialogComponent {
         linkedInUrl: value.linkedInUrl?.trim() || undefined,
         resumeUrl: value.resumeUrl?.trim() || undefined,
         coverLetter: value.coverLetter?.trim() || undefined,
-        applicationSource: value.applicationSource?.trim() || undefined
+        applicationSource: value.applicationSource?.trim() || undefined,
+        answers: mappedAnswers
       };
       this.jobsService.updateJobApplication(this.data.application.jobApplyId, updateRequest).subscribe({
         next: () => {
@@ -225,7 +311,8 @@ export class ApplyJobDialogComponent {
         linkedInUrl: value.linkedInUrl?.trim() || undefined,
         resumeUrl: value.resumeUrl?.trim() ?? '',
         coverLetter: value.coverLetter?.trim() || undefined,
-        applicationSource: value.applicationSource?.trim() || undefined
+        applicationSource: value.applicationSource?.trim() || undefined,
+        answers: mappedAnswers
       };
       this.jobsService.applyForMySelf(request).subscribe({
         next: () => {
@@ -246,7 +333,8 @@ export class ApplyJobDialogComponent {
         linkedInUrl: value.linkedInUrl?.trim() || undefined,
         resumeUrl: value.resumeUrl?.trim() || undefined,
         coverLetter: value.coverLetter?.trim() || undefined,
-        applicationSource: value.applicationSource?.trim() || undefined
+        applicationSource: value.applicationSource?.trim() || undefined,
+        answers: mappedAnswers
       };
       this.jobsService.createJobApplication(request).subscribe({
         next: () => {
