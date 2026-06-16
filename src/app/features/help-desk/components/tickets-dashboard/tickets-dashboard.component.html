@@ -11,9 +11,14 @@
      
       <h1 class="page-title"
       *ngIf="!loading">Ticket Request</h1>
-      <button class="btn-create" *ngIf="hasPermission('Create_Ticket_Button')" (click)="openCreateTicketDialog()">
-        + Create Request Ticket
-      </button>
+      <div class="add-btn-wrap">
+        <button class="btn-create" *ngIf="hasPermission('Create_Ticket_Button')" (click)="openCreateTicketDialog()" class="add-btn">
+          <mat-icon>add</mat-icon>
+          <span>Create Request Ticket</span>
+        </button>
+
+      </div>
+      
     </div>
 
     <!-- 3 filters: Status | Department | Ticket Type -->

@@ -695,265 +695,404 @@ $color-expert:       #10b981;
   overflow: visible !important;
 }
 
-.dlg {
+// ══════════════════════════════════════════════════════════════════════
+// DIALOG STYLING (Matches department-form-dialog)
+// ══════════════════════════════════════════════════════════════════════
+
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 12px !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10) !important;
+}
+
+// ── Dialog Header ─────────────────────────────────────────────────────
+.dialog-header {
   display: flex;
-  flex-direction: column;
-  max-height: 90vh;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 18px 16px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #ebebeb;
 
-  &--wide { width: 800px; max-width: 95vw; }
-
-  &__head {
+  h2 {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 20px 24px;
-    background: linear-gradient(135deg, $color-primary 0%, #8b5cf6 100%);
-    color: white;
-    flex-shrink: 0;
+    gap: 12px;
+    margin: 0;
+    font-size: 25px;
+    font-weight: 700;
+    color: #111827;
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
+    letter-spacing: -0.2px;
 
-    mat-icon { font-size: 22px; width: 22px; height: 22px; color: white; }
-
-    h2 {
-      flex: 1;
-      margin: 0;
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
+    mat-icon {
+      font-size: 30px;
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
   }
+}
 
-  &__close {
-    color: white !important;
-    transition: all 0.2s ease;
-    &:hover { background: rgba(255,255,255,0.2) !important; transform: rotate(90deg); }
-  }
+// ── Dialog Content ────────────────────────────────────────────────────
+.dialog-content {
+  padding: 20px 24px !important;
+  min-width: 480px;
+  max-width: 580px;
+  background: #f7f8fa;
 
-  &__body {
-    padding: 22px 24px !important;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  &__footer {
-    padding: 16px 24px;
-    border-top: 1px solid $color-border;
-    background: #fafafa;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-shrink: 0;
-
-    [mat-stroked-button] {
-      height: 38px !important;
-      border-radius: 8px !important;
-      font-size: 13.5px !important;
-      font-weight: 500 !important;
-      color: $color-text-secondary !important;
-      border-color: $color-border !important;
-      &:hover { background: #f9fafb !important; }
-    }
-  }
-
-  &__field { margin-bottom: 16px; }
-
-  &__label {
+  mat-form-field {
     display: block;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: $color-text;
-    margin-bottom: 6px;
-    .req { color: #ef4444; margin-left: 2px; }
-  }
+    width: 100%;
+    margin-bottom: 16px;
 
-  &__toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    background: #f8f9fc;
-    border: 1px solid $color-border;
-    border-radius: 8px;
-  }
-
-  &__toggle-label { font-size: 13.5px; font-weight: 500; color: $color-text; }
-
-  &__info-card {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    background: #f8f9fc;
-    border: 1px solid $color-border;
-    border-radius: 8px;
-    margin-bottom: 20px;
-
-    strong { font-size: 14px; color: $color-text; }
-  }
-
-  &__emp-profile {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    padding: 14px;
-    background: #f8f9fc;
-    border: 1px solid $color-border;
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
-
-  &__emp-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, $color-primary 0%, #8b5cf6 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 700;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  &__emp-name { font-size: 15px; font-weight: 700; color: $color-text; margin-bottom: 3px; }
-  &__emp-meta { font-size: 12.5px; color: $color-text-secondary; margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
-
-  &__emp-mini {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 12px 14px;
-    background: #f8f9fc;
-    border: 1px solid $color-border;
-    border-radius: 8px;
-  }
-
-  &__section-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: $color-text;
-    margin: 0 0 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid $color-border;
-  }
-
-  &__skill-cards { display: flex; flex-direction: column; gap: 10px; }
-
-  &__skill-card {
-    border: 1px solid $color-border;
-    border-radius: 10px;
-    padding: 14px;
-    transition: box-shadow 0.15s ease;
-
-    &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-
-    &__top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
+    &:last-child {
+      margin-bottom: 0;
     }
 
-    &__name { font-size: 14px; font-weight: 600; color: $color-text; margin-top: 4px; }
-    &__meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    &__notes { font-size: 12.5px; color: $color-text-muted; margin-top: 8px; font-style: italic; }
+    ::ng-deep {
+      &.mat-form-field-appearance-outline {
+        .mat-mdc-text-field-wrapper {
+          background: #ffffff;
+          border-radius: 8px !important;
+          transition: background 0.15s ease;
+        }
+
+        .mat-mdc-form-field-flex { padding: 0 14px; }
+        .mat-mdc-form-field-infix { padding: 11px 0 !important; min-height: unset; }
+
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: #e5e7eb !important;
+          transition: border-color 0.15s ease;
+        }
+
+        &:hover .mat-mdc-text-field-wrapper { background: #ffffff; }
+
+        &:hover {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #c4b5fd !important;
+          }
+        }
+
+        &.mat-focused {
+          .mat-mdc-text-field-wrapper { background: #ffffff; }
+
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #6366f1 !important;
+            border-width: 2px !important;
+          }
+
+          label { color: #6366f1 !important; }
+        }
+
+        .mat-mdc-form-field-label,
+        label {
+          font-size: 13px;
+          color: #6b7280;
+          font-weight: 500;
+        }
+
+        input,
+        textarea,
+        .mat-mdc-select-value {
+          font-size: 13.5px;
+          color: #111827;
+          font-weight: 500;
+        }
+
+        textarea { resize: vertical; }
+
+        &.mat-form-field-invalid {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: #ef4444 !important;
+          }
+
+          label { color: #ef4444 !important; }
+        }
+
+        .mat-mdc-form-field-hint {
+          font-size: 11.5px;
+          color: #9ca3af;
+          font-weight: 400;
+        }
+      }
+    }
   }
+}
 
-  &__assess-list { display: flex; flex-direction: column; gap: 16px; }
+// ── Dialog Actions ────────────────────────────────────────────────────
+.dialog-actions {
+  padding: 14px 24px !important;
+  background: #ffffff;
+  border-top: 1px solid #ebebeb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 
-  &__assess-item {
-    border: 1px solid $color-border;
-    border-radius: 10px;
-    padding: 14px;
+  button {
+    height: 38px;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    transition: all 0.15s ease !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    // Cancel Button
+    &[mat-stroked-button] {
+      background: #ffffff !important;
+      color: #374151 !important;
+      border-color: #d1d5db !important;
+
+      &:hover {
+        background: #f9fafb !important;
+        border-color: #9ca3af !important;
+      }
+    }
+
+    // Submit Button
+    &.submit-button:not([disabled]) {
+      background: #111827 !important;
+      color: #ffffff !important;
+      border: none !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
+
+      &:hover {
+        background: #1f2937 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+      }
+
+      mat-spinner {
+        display: inline-block;
+        margin-right: 6px;
+
+        ::ng-deep circle { stroke: white !important; }
+      }
+    }
+
+    // Disabled State
+    &[disabled] {
+      background: #f3f4f6 !important;
+      color: #9ca3af !important;
+      border: 1px solid #e5e7eb !important;
+      cursor: not-allowed;
+      box-shadow: none !important;
+    }
   }
+}
 
-  &__assess-header {
+// ── Error Messages ────────────────────────────────────────────────────
+::ng-deep mat-error {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #dc2626;
+  margin-top: 2px;
+}
+
+// ── Select Panel ──────────────────────────────────────────────────────
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10) !important;
+  border: 1px solid #f0f1f5 !important;
+
+  .mat-mdc-option {
+    border-radius: 6px !important;
+    margin: 2px 6px !important;
+    font-size: 13.5px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+
+    &:hover { background: #f5f3ff !important; }
+
+    &.mat-mdc-option-active,
+    &.mdc-list-item--selected {
+      background: #eef2ff !important;
+      color: #6366f1 !important;
+    }
+  }
+}
+
+// ── Form Group (for proficiency picker) ───────────────────────────────
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+// ── Info Card ─────────────────────────────────────────────────────────
+.info-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 16px;
+
+  .info-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 12px;
-    strong { font-size: 13.5px; color: $color-text; }
-  }
+    width: 100%;
 
-  // Proficiency picker
-  &__prof-picker {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-
-    &--sm { gap: 4px; }
-  }
-
-  &__prof-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
-    border: 1.5px solid $color-border;
-    background: white;
-    font-size: 13px;
-    font-weight: 600;
-    color: $color-text-secondary;
-    cursor: pointer;
-    transition: all 0.15s ease;
-
-    &:hover { border-color: $color-primary; color: $color-primary; background: $color-primary-light; }
-
-    &.selected {
-      border-color: $color-primary !important;
-      background: $color-primary !important;
-      color: white !important;
-      box-shadow: 0 2px 6px rgba($color-primary, 0.35);
+    strong {
+      font-size: 14px;
+      color: #111827;
+      font-weight: 600;
     }
-
-    // Color variants by proficiency
-    &--novice.selected       { background: $color-novice !important; border-color: $color-novice !important; }
-    &--beginner.selected     { background: $color-beginner !important; border-color: $color-beginner !important; }
-    &--intermediate.selected { background: $color-intermediate !important; border-color: darken($color-intermediate, 10%) !important; color: #713f12 !important; }
-    &--advanced.selected     { background: $color-advanced !important; border-color: $color-advanced !important; }
-    &--expert.selected       { background: $color-expert !important; border-color: $color-expert !important; }
-  }
-
-  &__prof-hint {
-    margin-top: 8px;
-    height: 20px;
-  }
-
-  &__prof-label {
-    font-size: 12.5px;
-    font-weight: 600;
-    &.prof--expert       { color: $color-expert; }
-    &.prof--advanced     { color: $color-advanced; }
-    &.prof--intermediate { color: darken($color-intermediate, 20%); }
-    &.prof--beginner     { color: $color-beginner; }
-    &.prof--novice       { color: $color-novice; }
   }
 }
 
-// ─── Full-width form field ──────────────────────────────────────────────────
-.full {
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #6366f1;
+
+  &-category {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+}
+
+// ── Proficiency Picker ────────────────────────────────────────────────
+.proficiency-picker {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.proficiency-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1.5px solid #e5e7eb;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.08);
+  }
+
+  &.selected {
+    border-color: #6366f1 !important;
+    background: #6366f1 !important;
+    color: white !important;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+  }
+
+  // Color variants by proficiency
+  &--novice.selected { background: #ef4444 !important; border-color: #ef4444 !important; }
+  &--beginner.selected { background: #f97316 !important; border-color: #f97316 !important; }
+  &--intermediate.selected { background: #eab308 !important; border-color: #eab308 !important; color: #713f12 !important; }
+  &--advanced.selected { background: #3b82f6 !important; border-color: #3b82f6 !important; }
+  &--expert.selected { background: #10b981 !important; border-color: #10b981 !important; }
+}
+
+.proficiency-hint {
+  margin-top: 8px;
+  height: 20px;
+}
+
+.proficiency-label {
+  font-size: 12.5px;
+  font-weight: 600;
+
+  &.prof--expert { color: #10b981; }
+  &.prof--advanced { color: #3b82f6; }
+  &.prof--intermediate { color: #ca8a04; }
+  &.prof--beginner { color: #f97316; }
+  &.prof--novice { color: #ef4444; }
+}
+
+// ── Toggle Row ────────────────────────────────────────────────────────
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0;
+}
+
+.toggle-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111827;
+}
+
+// ── Full Width ────────────────────────────────────────────────────────
+.full-width {
   width: 100%;
-
-  ::ng-deep {
-    .mat-mdc-text-field-wrapper { background: #f9fafb; border-radius: 8px; }
-    .mat-mdc-form-field-infix { padding: 10px 0 !important; }
-    input, textarea { font-size: 13.5px !important; color: $color-text !important; }
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing { border-color: $color-border !important; }
-    &.mat-focused .mdc-notched-outline__leading,
-    &.mat-focused .mdc-notched-outline__notch,
-    &.mat-focused .mdc-notched-outline__trailing { border-color: $color-primary !important; border-width: 1.5px !important; }
-    .mat-mdc-form-field-label { font-size: 13px !important; }
-    &.mat-focused .mat-mdc-form-field-label { color: $color-primary !important; }
-  }
 }
 
-// ─── Slide toggle ──────────────────────────────────────────────────────────
+// ── Slide Toggle Customization ────────────────────────────────────────
 ::ng-deep .mat-mdc-slide-toggle {
-  .mdc-switch:enabled .mdc-switch__track::after { background: $color-primary !important; }
-  .mdc-switch.mdc-switch--selected:enabled .mdc-switch__handle::after { background: $color-primary !important; }
+  .mdc-switch:enabled .mdc-switch__track::after { background: #6366f1 !important; }
+  .mdc-switch.mdc-switch--selected:enabled .mdc-switch__handle::after { background: #6366f1 !important; }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .dialog-header {
+    padding: 16px 18px 14px;
+
+    h2 {
+      font-size: 18px;
+    }
+  }
+
+  .dialog-content {
+    min-width: unset;
+    padding: 14px 14px !important;
+  }
+
+  .dialog-actions {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px !important;
+
+    button {
+      width: 100%;
+      justify-content: center;
+      height: 40px !important;
+    }
+  }
 }
 
 // ─── Responsive ────────────────────────────────────────────────────────────

@@ -448,61 +448,61 @@
 <!-- DIALOG: Create Skill                                                   -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <ng-template #createSkillTpl>
-  <div class="dlg">
-    <div class="dlg__head">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
       <mat-icon>psychology</mat-icon>
-      <h2>Create New Skill</h2>
-      <button mat-icon-button mat-dialog-close class="dlg__close"><mat-icon>close</mat-icon></button>
-    </div>
-    <mat-dialog-content class="dlg__body" [formGroup]="createSkillForm">
-
-      <!-- Category -->
-      <div class="dlg__field">
-        <label class="dlg__label">Category <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="full">
-          <mat-select formControlName="category" (selectionChange)="onCreateCategoryChange($event.value)" placeholder="Select category">
-            <mat-option *ngFor="let cat of allCategories" [value]="cat">{{ cat }}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="createSkillForm.get('category')?.hasError('required')">Category is required</mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Skill Name -->
-      <div class="dlg__field">
-        <label class="dlg__label">Skill Name <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="full">
-          <mat-select formControlName="skillName" placeholder="Select skill" [disabled]="!createSkillForm.get('category')?.value">
-            <mat-option *ngFor="let sk of filteredSkillsForCreate" [value]="sk">{{ sk }}</mat-option>
-          </mat-select>
-          <mat-hint *ngIf="!createSkillForm.get('category')?.value">Select a category first</mat-hint>
-          <mat-error *ngIf="createSkillForm.get('skillName')?.hasError('required')">Skill name is required</mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Description -->
-      <div class="dlg__field">
-        <label class="dlg__label">Description</label>
-        <mat-form-field appearance="outline" class="full">
-          <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this skill..."></textarea>
-        </mat-form-field>
-      </div>
-
-      <!-- Active toggle -->
-      <div class="dlg__toggle-row">
-        <span class="dlg__toggle-label">Active Skill</span>
-        <mat-slide-toggle formControlName="isActive" color="primary"></mat-slide-toggle>
-      </div>
-
-    </mat-dialog-content>
-    <div class="dlg__footer">
-      <button mat-stroked-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button class="btn-primary" (click)="submitCreateSkill()" [disabled]="createSkillForm.invalid || isSubmittingSkill">
-        <mat-spinner diameter="18" *ngIf="isSubmittingSkill"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingSkill">save</mat-icon>
-        {{ isSubmittingSkill ? 'Creating...' : 'Create Skill' }}
-      </button>
-    </div>
+      Create New Skill
+    </h2>
   </div>
+
+  <mat-dialog-content class="dialog-content" [formGroup]="createSkillForm">
+    <!-- Category -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category *</mat-label>
+      <mat-select formControlName="category" (selectionChange)="onCreateCategoryChange($event.value)">
+        <mat-option *ngFor="let cat of allCategories" [value]="cat">{{ cat }}</mat-option>
+      </mat-select>
+      <mat-hint>Required field</mat-hint>
+      <mat-error *ngIf="createSkillForm.get('category')?.hasError('required')">Category is required</mat-error>
+    </mat-form-field>
+
+    <!-- Skill Name -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Skill Name *</mat-label>
+      <mat-select formControlName="skillName" [disabled]="!createSkillForm.get('category')?.value">
+        <mat-option *ngFor="let sk of filteredSkillsForCreate" [value]="sk">{{ sk }}</mat-option>
+      </mat-select>
+      <mat-hint *ngIf="!createSkillForm.get('category')?.value">Select a category first</mat-hint>
+      <mat-error *ngIf="createSkillForm.get('skillName')?.hasError('required')">Skill name is required</mat-error>
+    </mat-form-field>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3" placeholder="Brief description of this skill (optional)"></textarea>
+      <mat-hint>Optional field</mat-hint>
+    </mat-form-field>
+
+    <!-- Active toggle -->
+    <div class="toggle-row">
+      <span class="toggle-label">Active Skill</span>
+      <mat-slide-toggle formControlName="isActive" color="primary"></mat-slide-toggle>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button mat-dialog-close type="button">
+      Cancel
+    </button>
+    <button mat-flat-button 
+            [disabled]="createSkillForm.invalid || isSubmittingSkill"
+            (click)="submitCreateSkill()"
+            class="submit-button">
+      <mat-spinner *ngIf="isSubmittingSkill" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmittingSkill">Create Skill</span>
+      <span *ngIf="isSubmittingSkill">Creating...</span>
+    </button>
+  </mat-dialog-actions>
 </ng-template>
 
 
@@ -510,82 +510,82 @@
 <!-- DIALOG: Add My Skill                                                   -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <ng-template #addMySkillTpl>
-  <div class="dlg">
-    <div class="dlg__head">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
       <mat-icon>school</mat-icon>
-      <h2>Add Skill</h2>
-      <button mat-icon-button mat-dialog-close class="dlg__close"><mat-icon>close</mat-icon></button>
-    </div>
-    <mat-dialog-content class="dlg__body" [formGroup]="addMySkillForm">
-
-      <!-- Category selection -->
-      <div class="dlg__field">
-        <label class="dlg__label">Category <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="full">
-          <mat-select formControlName="category" (selectionChange)="onAddSkillCategoryChange($event.value)" placeholder="Select category">
-            <mat-option *ngFor="let cat of availableSkillCategories" [value]="cat">{{ cat }}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="addMySkillForm.get('category')?.hasError('required')">Category is required</mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Skill selection (from skills in that category that org has) -->
-      <div class="dlg__field">
-        <label class="dlg__label">Skill <span class="req">*</span></label>
-        <mat-form-field appearance="outline" class="full">
-          <mat-select formControlName="skillId" placeholder="Select skill" [disabled]="!addMySkillForm.get('category')?.value">
-            <mat-option *ngFor="let sk of filteredSkillsForAdd" [value]="sk.skillId"
-              [disabled]="isAlreadyAdded(sk.skillId)">
-              {{ sk.skillName }}
-              <span *ngIf="isAlreadyAdded(sk.skillId)" style="color:#9ca3af"> — Already Added</span>
-            </mat-option>
-            <mat-option *ngIf="filteredSkillsForAdd.length === 0" disabled>No skills in this category</mat-option>
-          </mat-select>
-          <mat-hint *ngIf="!addMySkillForm.get('category')?.value">Select a category first</mat-hint>
-          <mat-error *ngIf="addMySkillForm.get('skillId')?.hasError('required')">Skill is required</mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Proficiency Level (1-10) -->
-      <div class="dlg__field">
-        <label class="dlg__label">Proficiency Level <span class="req">*</span></label>
-        <div class="dlg__prof-picker">
-          <button *ngFor="let n of profLevels" type="button"
-            class="dlg__prof-btn"
-            [class.selected]="addMySkillForm.get('proficiencyLevel')?.value === n"
-            [class]="'dlg__prof-btn dlg__prof-btn--' + getProfClass2(n)"
-            (click)="addMySkillForm.get('proficiencyLevel')?.setValue(n)">
-            {{ n }}
-          </button>
-        </div>
-        <div class="dlg__prof-hint">
-          <span *ngIf="addMySkillForm.get('proficiencyLevel')?.value as lv" [class]="'dlg__prof-label ' + getProfClass(lv)">
-            {{ getProfLabel(lv) }}
-          </span>
-        </div>
-        <mat-error *ngIf="addMySkillForm.get('proficiencyLevel')?.touched && !addMySkillForm.get('proficiencyLevel')?.value">
-          Please select a proficiency level
-        </mat-error>
-      </div>
-
-      <!-- Notes -->
-      <div class="dlg__field">
-        <label class="dlg__label">Notes</label>
-        <mat-form-field appearance="outline" class="full">
-          <textarea matInput formControlName="notes" rows="3" placeholder="Optional: describe your experience with this skill..."></textarea>
-        </mat-form-field>
-      </div>
-
-    </mat-dialog-content>
-    <div class="dlg__footer">
-      <button mat-stroked-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button class="btn-primary" (click)="submitAddMySkill()" [disabled]="addMySkillForm.invalid || isSubmittingMySkill">
-        <mat-spinner diameter="18" *ngIf="isSubmittingMySkill"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingMySkill">add</mat-icon>
-        {{ isSubmittingMySkill ? 'Adding...' : 'Add Skill' }}
-      </button>
-    </div>
+      Add Skill
+    </h2>
   </div>
+
+  <mat-dialog-content class="dialog-content" [formGroup]="addMySkillForm">
+    <!-- Category selection -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category *</mat-label>
+      <mat-select formControlName="category" (selectionChange)="onAddSkillCategoryChange($event.value)">
+        <mat-option *ngFor="let cat of availableSkillCategories" [value]="cat">{{ cat }}</mat-option>
+      </mat-select>
+      <mat-hint>Required field</mat-hint>
+      <mat-error *ngIf="addMySkillForm.get('category')?.hasError('required')">Category is required</mat-error>
+    </mat-form-field>
+
+    <!-- Skill selection (from skills in that category that org has) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Skill *</mat-label>
+      <mat-select formControlName="skillId" [disabled]="!addMySkillForm.get('category')?.value">
+        <mat-option *ngFor="let sk of filteredSkillsForAdd" [value]="sk.skillId"
+          [disabled]="isAlreadyAdded(sk.skillId)">
+          {{ sk.skillName }}
+          <span *ngIf="isAlreadyAdded(sk.skillId)" style="color:#9ca3af"> — Already Added</span>
+        </mat-option>
+        <mat-option *ngIf="filteredSkillsForAdd.length === 0" disabled>No skills in this category</mat-option>
+      </mat-select>
+      <mat-hint *ngIf="!addMySkillForm.get('category')?.value">Select a category first</mat-hint>
+      <mat-error *ngIf="addMySkillForm.get('skillId')?.hasError('required')">Skill is required</mat-error>
+    </mat-form-field>
+
+    <!-- Proficiency Level (1-10) -->
+    <div class="form-group">
+      <label class="form-label">Proficiency Level *</label>
+      <div class="proficiency-picker">
+        <button *ngFor="let n of profLevels" type="button"
+          class="proficiency-btn"
+          [class.selected]="addMySkillForm.get('proficiencyLevel')?.value === n"
+          [class]="'proficiency-btn ' + getProfClass2(n)"
+          (click)="addMySkillForm.get('proficiencyLevel')?.setValue(n)">
+          {{ n }}
+        </button>
+      </div>
+      <div class="proficiency-hint">
+        <span *ngIf="addMySkillForm.get('proficiencyLevel')?.value as lv" [class]="'proficiency-label ' + getProfClass(lv)">
+          {{ getProfLabel(lv) }}
+        </span>
+      </div>
+      <mat-error *ngIf="addMySkillForm.get('proficiencyLevel')?.touched && !addMySkillForm.get('proficiencyLevel')?.value">
+        Please select a proficiency level
+      </mat-error>
+    </div>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" rows="3" placeholder="Optional: describe your experience with this skill (optional)"></textarea>
+      <mat-hint>Optional field</mat-hint>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button mat-dialog-close type="button">
+      Cancel
+    </button>
+    <button mat-flat-button 
+            [disabled]="addMySkillForm.invalid || isSubmittingMySkill"
+            (click)="submitAddMySkill()"
+            class="submit-button">
+      <mat-spinner *ngIf="isSubmittingMySkill" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmittingMySkill">Add Skill</span>
+      <span *ngIf="isSubmittingMySkill">Adding...</span>
+    </button>
+  </mat-dialog-actions>
 </ng-template>
 
 
@@ -593,56 +593,61 @@
 <!-- DIALOG: Edit My Skill                                                  -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <ng-template #editMySkillTpl>
-  <div class="dlg">
-    <div class="dlg__head">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
       <mat-icon>edit</mat-icon>
-      <h2>Edit Skill</h2>
-      <button mat-icon-button mat-dialog-close class="dlg__close"><mat-icon>close</mat-icon></button>
-    </div>
-    <mat-dialog-content class="dlg__body" [formGroup]="editMySkillForm">
-
-      <!-- Readonly skill info -->
-      <div class="dlg__info-card">
-        <div class="dlg__info-row">
-          <span class="badge badge--cat">{{ editingSkill?.skillCategory }}</span>
-          <strong>{{ editingSkill?.skillName }}</strong>
-        </div>
-      </div>
-
-      <!-- Proficiency Level -->
-      <div class="dlg__field">
-        <label class="dlg__label">Proficiency Level <span class="req">*</span></label>
-        <div class="dlg__prof-picker">
-          <button *ngFor="let n of profLevels" type="button"
-            class="dlg__prof-btn"
-            [class.selected]="editMySkillForm.get('proficiencyLevel')?.value === n"
-            (click)="editMySkillForm.get('proficiencyLevel')?.setValue(n)">
-            {{ n }}
-          </button>
-        </div>
-        <div class="dlg__prof-hint" *ngIf="editMySkillForm.get('proficiencyLevel')?.value as lv">
-          <span [class]="'dlg__prof-label ' + getProfClass(lv)">{{ getProfLabel(lv) }}</span>
-        </div>
-      </div>
-
-      <!-- Notes -->
-      <div class="dlg__field">
-        <label class="dlg__label">Notes</label>
-        <mat-form-field appearance="outline" class="full">
-          <textarea matInput formControlName="notes" rows="3" placeholder="Optional notes..."></textarea>
-        </mat-form-field>
-      </div>
-
-    </mat-dialog-content>
-    <div class="dlg__footer">
-      <button mat-stroked-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button class="btn-primary" (click)="submitEditMySkill()" [disabled]="editMySkillForm.invalid || isSubmittingMySkill">
-        <mat-spinner diameter="18" *ngIf="isSubmittingMySkill"></mat-spinner>
-        <mat-icon *ngIf="!isSubmittingMySkill">save</mat-icon>
-        {{ isSubmittingMySkill ? 'Saving...' : 'Save Changes' }}
-      </button>
-    </div>
+      Edit Skill
+    </h2>
   </div>
+
+  <mat-dialog-content class="dialog-content" [formGroup]="editMySkillForm">
+    <!-- Readonly skill info -->
+    <div class="info-card">
+      <div class="info-row">
+        <span class="badge badge-category">{{ editingSkill?.skillCategory }}</span>
+        <strong>{{ editingSkill?.skillName }}</strong>
+      </div>
+    </div>
+
+    <!-- Proficiency Level -->
+    <div class="form-group">
+      <label class="form-label">Proficiency Level *</label>
+      <div class="proficiency-picker">
+        <button *ngFor="let n of profLevels" type="button"
+          class="proficiency-btn"
+          [class.selected]="editMySkillForm.get('proficiencyLevel')?.value === n"
+          (click)="editMySkillForm.get('proficiencyLevel')?.setValue(n)">
+          {{ n }}
+        </button>
+      </div>
+      <div class="proficiency-hint">
+        <span *ngIf="editMySkillForm.get('proficiencyLevel')?.value as lv" [class]="'proficiency-label ' + getProfClass(lv)">
+          {{ getProfLabel(lv) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Notes</mat-label>
+      <textarea matInput formControlName="notes" rows="3" placeholder="Optional notes (optional)"></textarea>
+      <mat-hint>Optional field</mat-hint>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-stroked-button mat-dialog-close type="button">
+      Cancel
+    </button>
+    <button mat-flat-button 
+            [disabled]="editMySkillForm.invalid || isSubmittingMySkill"
+            (click)="submitEditMySkill()"
+            class="submit-button">
+      <mat-spinner *ngIf="isSubmittingMySkill" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmittingMySkill">Save Changes</span>
+      <span *ngIf="isSubmittingMySkill">Saving...</span>
+    </button>
+  </mat-dialog-actions>
 </ng-template>
 
 
