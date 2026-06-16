@@ -233,6 +233,7 @@ export interface AtsFilterParams {
   applyDateFrom?: string | null;
   applyDateTo?: string | null;
   jobIds?: string[] | null;
+  passedKnockout?: boolean | null;
 }
 
 /** Application stage (movement of a job application to a stage) */

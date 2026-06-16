@@ -173,7 +173,8 @@ export class AppliedJobsComponent implements OnInit {
     this.atsFilterForm = this.fb.group({
       search: [''],
       applyDateFrom: [null as Date | null],
-      applyDateTo: [null as Date | null]
+      applyDateTo: [null as Date | null],
+      passedKnockout: ['']
     });
   }
 
@@ -488,13 +489,19 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.atsFilterForm.value;
     const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
     const applyDateTo = v.applyDateTo instanceof Date ? v.applyDateTo.toISOString().slice(0, 10) : (v.applyDateTo || null);
+    
+    let passedKnockout: boolean | null = null;
+    if (v.passedKnockout === 'pass') passedKnockout = true;
+    else if (v.passedKnockout === 'fail') passedKnockout = false;
+
     this.jobsService.getAtsApplicationsPaged({
       page: this.atsPage,
       pageSize: this.atsPageSize,
       search: v.search || undefined,
       applyDateFrom: applyDateFrom || undefined,
       applyDateTo: applyDateTo || undefined,
-      jobIds: this.atsSelectedJobIds.length > 0 ? this.atsSelectedJobIds : undefined
+      jobIds: this.atsSelectedJobIds.length > 0 ? this.atsSelectedJobIds : undefined,
+      passedKnockout: passedKnockout !== null ? passedKnockout : undefined
     }).subscribe({
       next: (result: PagedResult<JobApplicationDto>) => {
         this.atsApplications = result.data ?? [];
@@ -518,7 +525,7 @@ export class AppliedJobsComponent implements OnInit {
   }
 
   clearAtsFilters(): void {
-    this.atsFilterForm.patchValue({ search: '', applyDateFrom: null, applyDateTo: null });
+    this.atsFilterForm.patchValue({ search: '', applyDateFrom: null, applyDateTo: null, passedKnockout: '' });
     this.atsSelectedJobIds = [];
     this.atsPage = 1;
     this.atsExpandedId = null;
@@ -529,7 +536,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.atsFilterForm.value;
     const fromDate = v.applyDateFrom;
     const toDate = v.applyDateTo;
-    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || this.atsSelectedJobIds.length > 0);
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || v.passedKnockout || this.atsSelectedJobIds.length > 0);
   }
 
   onAtsPageChange(event: PageEvent): void {

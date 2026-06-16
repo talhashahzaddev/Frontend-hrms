@@ -525,6 +525,13 @@
                     </div>
                   </div>
                 </div>
+                <div class="bp-filter-select-wrap">
+                  <select formControlName="passedKnockout" class="bp-filter-select">
+                    <option value="">Knockout State</option>
+                    <option value="pass">Passed</option>
+                    <option value="fail">Failed</option>
+                  </select>
+                </div>
                 <button type="submit" class="bp-btn-primary">Search</button>
                 <button type="button" class="bp-btn-clear" [disabled]="!hasAtsFiltersApplied()" (click)="clearAtsFilters()">Clear</button>
               </form>

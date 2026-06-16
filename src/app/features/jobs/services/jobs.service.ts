@@ -343,7 +343,7 @@ export class JobsService {
   }
 
   getAtsApplicationsPaged(params: AtsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
-    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, jobIds } = params;
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, jobIds, passedKnockout } = params;
     let httpParams = new HttpParams()
       .set('pageNumber', page.toString())
       .set('pageSize', pageSize.toString());
@@ -352,6 +352,9 @@ export class JobsService {
     if (applyDateTo) httpParams = httpParams.set('applyDateTo', applyDateTo);
     if (jobIds && jobIds.length > 0) {
       jobIds.forEach(id => { httpParams = httpParams.append('jobIds', id); });
+    }
+    if (passedKnockout !== undefined && passedKnockout !== null) {
+      httpParams = httpParams.set('passedKnockout', passedKnockout.toString());
     }
     return this.http
       .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/ats-inbox`, { params: httpParams })
