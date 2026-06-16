@@ -1,6 +1,6 @@
 // Font and basic vars
 $brand-blue: #1D7DFC;
-$brand-blue-hover: darken($brand-blue, 10%);
+$brand-blue-hover: #0364e2;
 $brand-blue-light: #EFF6FF;
 
 $bg-body: #F9FAFB;
@@ -239,6 +239,52 @@ $border-radius: 8px;
     gap: 24px;
 }
 
+    .form-input {
+        height: 48px;
+        padding: 0 16px;
+        border: 1px solid $border;
+        border-radius: $border-radius;
+        font-size: 15px;
+        color: $text-primary;
+        background-color: #FFFFFF;
+        transition: all 0.2s;
+        font-family: inherit;
+
+        &::placeholder {
+            color: $text-muted;
+        }
+
+        &:focus {
+            @include highlight-focus;
+        }
+    }
+
+    select.custom-select {
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+        background-position: right 16px center !important;
+        background-repeat: no-repeat !important;
+        background-size: 18px 18px !important;
+        padding-right: 40px !important;
+        cursor: pointer;
+
+        &:invalid,
+        option[value=""] {
+            color: $text-muted !important;
+        }
+
+        &:has(option[value=""]:checked) {
+            color: $text-muted !important;
+        }
+        
+        option {
+            color: $text-primary !important;
+            background-color: #ffffff !important;
+        }
+    }
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -260,25 +306,6 @@ $border-radius: 8px;
             font-weight: 400;
             margin-left: 4px;
             color: #9CA3AF;
-        }
-    }
-
-    .form-input {
-        height: 48px;
-        padding: 0 16px;
-        border: 1px solid $border;
-        border-radius: $border-radius;
-        font-size: 15px;
-        color: $text-primary;
-        transition: all 0.2s;
-        font-family: inherit;
-
-        &::placeholder {
-            color: $text-muted;
-        }
-
-        &:focus {
-            @include highlight-focus;
         }
     }
 
@@ -794,7 +821,7 @@ $border-radius: 8px;
 
         &:hover {
             transform: translateY(-1px);
-            background-color: darken($brand-blue, 5%);
+            background-color: #0871fa;
         }
 
         &.linkedin {
@@ -858,28 +885,12 @@ $border-radius: 8px;
         .question-body {
             .form-input {
                 width: 100%;
-                background-color: #FFFFFF;
-                
-                &.custom-select {
-                    appearance: none;
-                    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239CA3AF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-                    background-repeat: no-repeat;
-                    background-position: right 16px top 50%;
-                    background-size: 10px auto;
-                    padding-right: 40px;
-                }
             }
 
             textarea.form-input {
                 height: auto;
                 padding: 12px 16px;
-                border: 1px solid #E5E7EB;
-                outline: none;
-                
-                &:focus {
-                    border-color: #93C5FD;
-                    box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.2);
-                }
+                min-height: 80px;
             }
 
             .radio-options {

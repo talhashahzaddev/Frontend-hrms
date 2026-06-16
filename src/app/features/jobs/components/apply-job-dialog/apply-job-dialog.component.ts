@@ -163,6 +163,17 @@ export class ApplyJobDialogComponent implements OnInit {
 
   getOptionsArray(optionsStr: string | null | undefined): string[] {
     if (!optionsStr) return [];
+    const trimmed = optionsStr.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map(s => String(s).trim());
+        }
+      } catch (e) {
+        // Fall back to comma-separated split if JSON parsing fails
+      }
+    }
     return optionsStr.split(',').map(s => s.trim());
   }
 
