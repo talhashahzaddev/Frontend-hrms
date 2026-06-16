@@ -19,6 +19,7 @@ import {
   UpdateStageMasterRequest,
   MyJobApplicationsFilterParams,
   ReceivedJobApplicationsFilterParams,
+  AtsFilterParams,
   CreateApplicationStageRequest,
   ApplicationStageDto,
   UpdateApplicationStageRequest,
@@ -338,6 +339,45 @@ export class JobsService {
           }
           return res.data;
         })
+      );
+  }
+
+  getAtsApplicationsPaged(params: AtsFilterParams = {}): Observable<PagedResult<JobApplicationDto>> {
+    const { page = 1, pageSize = 10, search, applyDateFrom, applyDateTo, jobIds } = params;
+    let httpParams = new HttpParams()
+      .set('pageNumber', page.toString())
+      .set('pageSize', pageSize.toString());
+    if (search != null && search.trim() !== '') httpParams = httpParams.set('search', search.trim());
+    if (applyDateFrom) httpParams = httpParams.set('applyDateFrom', applyDateFrom);
+    if (applyDateTo) httpParams = httpParams.set('applyDateTo', applyDateTo);
+    if (jobIds && jobIds.length > 0) {
+      jobIds.forEach(id => { httpParams = httpParams.append('jobIds', id); });
+    }
+    return this.http
+      .get<ServiceResponse<PagedResult<JobApplicationDto>>>(`${this.apiUrl}/applications/ats-inbox`, { params: httpParams })
+      .pipe(
+        map((res) => {
+          if (!res.success || !res.data) {
+            return {
+              data: [],
+              totalCount: 0,
+              page: 1,
+              pageSize: pageSize,
+              totalPages: 0,
+              hasNextPage: false,
+              hasPreviousPage: false
+            };
+          }
+          return res.data;
+        })
+      );
+  }
+
+  enterApplicationToStage(jobApplyId: string): Observable<boolean> {
+    return this.http
+      .put<ServiceResponse<boolean>>(`${this.apiUrl}/applications/${jobApplyId}/enter-stage`, {})
+      .pipe(
+        map((res) => res.success === true && res.data === true)
       );
   }
 

@@ -112,7 +112,7 @@ export class QuestionBankService {
   // ==================== Parsed Resumes ====================
   getParsedResume(jobApplyId: string): Observable<ParsedResumeDto | null> {
     return this.http
-      .get<ServiceResponse<ParsedResumeDto>>(`${this.apiUrl}/parsed-resumes/${jobApplyId}`)
+      .get<ServiceResponse<ParsedResumeDto>>(`${this.apiUrl}/applications/${jobApplyId}/parsed-resume`)
       .pipe(
         map((res) => (res.success && res.data ? res.data : null))
       );
@@ -120,7 +120,7 @@ export class QuestionBankService {
 
   getCandidateAnswers(jobApplyId: string): Observable<CandidateAnswerDto[]> {
     return this.http
-      .get<ServiceResponse<CandidateAnswerDto[]>>(`${this.apiUrl}/candidate-answers/${jobApplyId}`)
+      .get<ServiceResponse<CandidateAnswerDto[]>>(`${this.apiUrl}/applications/${jobApplyId}/answers`)
       .pipe(
         map((res) => {
           if (!res.success || !res.data) return [];

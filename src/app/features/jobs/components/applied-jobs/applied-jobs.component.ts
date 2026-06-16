@@ -26,8 +26,10 @@ import {
 import { JobsService } from '../../services/jobs.service';
 import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
-import { JobApplicationDto, JobOpeningDto, PagedResult, StageMasterDto } from '@core/models/jobs.models';
+import { JobApplicationDto, JobOpeningDto, PagedResult, StageMasterDto, CandidateAnswerDto, ParsedResumeDto } from '@core/models/jobs.models';
 import { EditApplicationStageDialogComponent } from '../edit-application-stage-dialog/edit-application-stage-dialog.component';
+import { QuestionBankService } from '../../services/question-bank.service';
+import { forkJoin, of } from 'rxjs';
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
@@ -98,6 +100,26 @@ export class AppliedJobsComponent implements OnInit {
   jobOptions: { value: string; label: string; status: string }[] = [];
   allJobs: JobOpeningDto[] = [];
 
+  /** ATS Inbox tab – unreviewed applications sorted by score */
+  atsApplications: JobApplicationDto[] = [];
+  atsFilterForm: FormGroup;
+  atsPage = 1;
+  atsPageSize = 10;
+  atsTotalCount = 0;
+  atsTotalPages = 0;
+  atsIsLoading = false;
+  /** ID of the currently expanded ATS row (for show/hide detail) */
+  atsExpandedId: string | null = null;
+  /** Parsed resume cache per jobApplyId */
+  atsParsedResumes: Map<string, ParsedResumeDto | null> = new Map();
+  /** Candidate answers cache per jobApplyId */
+  atsAnswers: Map<string, CandidateAnswerDto[]> = new Map();
+  /** Loading indicator per jobApplyId for expandable detail */
+  atsDetailLoading: Map<string, boolean> = new Map();
+  /** Multi-select job filter for ATS tab (independent set) */
+  atsSelectedJobIds: string[] = [];
+  atsJobDropdownOpen = false;
+
   /** Multi-select job filter state */
   selectedJobIds: string[] = [];
   postedByMeJobDropdownOpen = false;
@@ -123,7 +145,8 @@ export class AppliedJobsComponent implements OnInit {
     private jobsService: JobsService,
     private authService: AuthService,
     private notification: NotificationService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private questionBankService: QuestionBankService
   ) {
     this.filterForm = this.fb.group({
       search: [''],
@@ -146,6 +169,11 @@ export class AppliedJobsComponent implements OnInit {
       applyDateFrom: [null as Date | null],
       applyDateTo: [null as Date | null],
       stageId: ['']
+    });
+    this.atsFilterForm = this.fb.group({
+      search: [''],
+      applyDateFrom: [null as Date | null],
+      applyDateTo: [null as Date | null]
     });
   }
 
@@ -221,6 +249,11 @@ export class AppliedJobsComponent implements OnInit {
 
     if (this.canSeeAllApplications) {
       this.loadReceivedApplications();
+    }
+
+    // Load ATS inbox whenever any manager-level tab is visible
+    if (this.canSeeAnyManagerTabs) {
+      this.loadAtsApplications();
     }
   }
 
@@ -448,7 +481,202 @@ export class AppliedJobsComponent implements OnInit {
     this.loadReceivedApplications();
   }
 
+  // ==================== ATS Inbox Tab ====================
+
+  loadAtsApplications(): void {
+    this.atsIsLoading = true;
+    const v = this.atsFilterForm.value;
+    const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
+    const applyDateTo = v.applyDateTo instanceof Date ? v.applyDateTo.toISOString().slice(0, 10) : (v.applyDateTo || null);
+    this.jobsService.getAtsApplicationsPaged({
+      page: this.atsPage,
+      pageSize: this.atsPageSize,
+      search: v.search || undefined,
+      applyDateFrom: applyDateFrom || undefined,
+      applyDateTo: applyDateTo || undefined,
+      jobIds: this.atsSelectedJobIds.length > 0 ? this.atsSelectedJobIds : undefined
+    }).subscribe({
+      next: (result: PagedResult<JobApplicationDto>) => {
+        this.atsApplications = result.data ?? [];
+        this.atsTotalCount = result.totalCount ?? 0;
+        this.atsTotalPages = result.totalPages ?? 0;
+        this.atsIsLoading = false;
+      },
+      error: () => {
+        this.atsApplications = [];
+        this.atsTotalCount = 0;
+        this.atsTotalPages = 0;
+        this.atsIsLoading = false;
+      }
+    });
+  }
+
+  applyAtsFilters(): void {
+    this.atsPage = 1;
+    this.atsExpandedId = null;
+    this.loadAtsApplications();
+  }
+
+  clearAtsFilters(): void {
+    this.atsFilterForm.patchValue({ search: '', applyDateFrom: null, applyDateTo: null });
+    this.atsSelectedJobIds = [];
+    this.atsPage = 1;
+    this.atsExpandedId = null;
+    this.loadAtsApplications();
+  }
+
+  hasAtsFiltersApplied(): boolean {
+    const v = this.atsFilterForm.value;
+    const fromDate = v.applyDateFrom;
+    const toDate = v.applyDateTo;
+    return !!(v.search?.trim() || (fromDate && (fromDate instanceof Date || fromDate)) || (toDate && (toDate instanceof Date || toDate)) || this.atsSelectedJobIds.length > 0);
+  }
+
+  onAtsPageChange(event: PageEvent): void {
+    this.atsPage = event.pageIndex + 1;
+    this.atsPageSize = event.pageSize;
+    this.loadAtsApplications();
+  }
+
+  toggleAtsRow(app: JobApplicationDto): void {
+    const id = app.jobApplyId;
+    if (this.atsExpandedId === id) {
+      this.atsExpandedId = null;
+      return;
+    }
+    this.atsExpandedId = id;
+    // Lazy-load details if not already cached
+    if (!this.atsParsedResumes.has(id) && !this.atsDetailLoading.get(id)) {
+      this.atsDetailLoading.set(id, true);
+      forkJoin({
+        resume: this.questionBankService.getParsedResume(id),
+        answers: this.questionBankService.getCandidateAnswers(id)
+      }).subscribe({
+        next: ({ resume, answers }) => {
+          this.atsParsedResumes.set(id, resume);
+          this.atsAnswers.set(id, answers ?? []);
+          this.atsDetailLoading.set(id, false);
+        },
+        error: () => {
+          this.atsParsedResumes.set(id, null);
+          this.atsAnswers.set(id, []);
+          this.atsDetailLoading.set(id, false);
+        }
+      });
+    }
+  }
+
+  enterToStage(app: JobApplicationDto, event: Event): void {
+    event.stopPropagation();
+    this.jobsService.enterApplicationToStage(app.jobApplyId).subscribe({
+      next: (success) => {
+        if (success) {
+          this.notification.showSuccess(`${app.candidateName || 'Candidate'} has been entered into the hiring pipeline!`);
+          this.atsApplications = this.atsApplications.filter(a => a.jobApplyId !== app.jobApplyId);
+          this.atsTotalCount--;
+          if (this.atsExpandedId === app.jobApplyId) this.atsExpandedId = null;
+          // Refresh the kanban boards so the app appears there
+          if (this.canSeeReceivedByMyJobPost) this.loadPostedByMeApplications();
+          if (this.canSeeAllApplications) this.loadReceivedApplications();
+        }
+      },
+      error: () => { /* already handled */ }
+    });
+  }
+
+  getAtsParsedSkills(app: JobApplicationDto): string[] {
+    const id = app.jobApplyId;
+    const pr = this.atsParsedResumes.get(id);
+    if (!pr?.skills) return [];
+    
+    let candidateSkills: string[] = [];
+    try { 
+      candidateSkills = JSON.parse(pr.skills); 
+    } catch { 
+      candidateSkills = pr.skills.split(',').map(s => s.trim()); 
+    }
+
+    // Look up job in loaded job openings as a fallback to avoid depending on backend restart
+    const job = this.allJobs.find(j => j.jobId === app.jobId);
+    const mandatorySkillsStr = job?.mandatorySkills || app.mandatorySkills;
+    if (!mandatorySkillsStr) {
+      return [];
+    }
+
+    let mandatorySkills: string[] = [];
+    try {
+      mandatorySkills = JSON.parse(mandatorySkillsStr);
+    } catch {
+      mandatorySkills = mandatorySkillsStr.split(',').map(s => s.trim());
+    }
+
+    const normalizedMandatory = mandatorySkills.map(s => s.toLowerCase().trim()).filter(s => !!s);
+    if (normalizedMandatory.length === 0) return [];
+
+    // Substring match (case-insensitive) just like the backend scorer:
+    // Match is successful if the candidate skill contains or is contained in any mandatory skill.
+    return candidateSkills.filter(cs => {
+      const normalizedCs = cs.toLowerCase().trim();
+      if (!normalizedCs) return false;
+      return normalizedMandatory.some(ms => normalizedCs.includes(ms) || ms.includes(normalizedCs));
+    });
+  }
+
+  getAtsExperience(id: string): any[] {
+    const pr = this.atsParsedResumes.get(id);
+    if (!pr?.workExperience) return [];
+    try { return JSON.parse(pr.workExperience); } catch { return []; }
+  }
+
+  getAtsEducation(id: string): any[] {
+    const pr = this.atsParsedResumes.get(id);
+    if (!pr?.education) return [];
+    try { return JSON.parse(pr.education); } catch { return []; }
+  }
+
+  // ATS multi-select job filter
+  toggleAtsJobDropdown(event: Event): void {
+    event.stopPropagation();
+    this.atsJobDropdownOpen = !this.atsJobDropdownOpen;
+  }
+
+  toggleAtsJobSelection(jobId: string): void {
+    const idx = this.atsSelectedJobIds.indexOf(jobId);
+    if (idx === -1) {
+      this.atsSelectedJobIds = [...this.atsSelectedJobIds, jobId];
+    } else {
+      this.atsSelectedJobIds = this.atsSelectedJobIds.filter(id => id !== jobId);
+    }
+  }
+
+  areAllAtsJobsSelected(): boolean {
+    return this.jobOptions.length > 0 && this.atsSelectedJobIds.length === this.jobOptions.length;
+  }
+
+  toggleSelectAllAtsJobs(): void {
+    if (this.areAllAtsJobsSelected()) {
+      this.atsSelectedJobIds = [];
+    } else {
+      this.atsSelectedJobIds = this.jobOptions.map(j => j.value);
+    }
+  }
+
+  isAtsJobSelected(jobId: string): boolean {
+    return this.atsSelectedJobIds.includes(jobId);
+  }
+
+  getAtsSelectedJobsDisplayText(): string {
+    if (this.atsSelectedJobIds.length === 0) return 'Select Jobs';
+    if (this.areAllAtsJobsSelected()) return 'All Jobs';
+    if (this.atsSelectedJobIds.length === 1) {
+      const job = this.jobOptions.find(j => j.value === this.atsSelectedJobIds[0]);
+      return job ? job.label : '1 Job';
+    }
+    return `${this.atsSelectedJobIds.length} Jobs Selected`;
+  }
+
   // ==================== Multi-select Job Filter Helpers ====================
+
 
   toggleJobSelection(jobId: string): void {
     const idx = this.selectedJobIds.indexOf(jobId);
@@ -504,6 +732,7 @@ export class AppliedJobsComponent implements OnInit {
   closeAllDropdowns(): void {
     this.postedByMeJobDropdownOpen = false;
     this.receivedJobDropdownOpen = false;
+    this.atsJobDropdownOpen = false;
   }
 
   /** Order-aware visible manager tabs (used to map tab index -> permission key) */

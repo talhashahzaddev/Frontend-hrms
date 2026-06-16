@@ -84,21 +84,23 @@
       </div>
 
       <!-- Content Tabs -->
-      <div class="content-tabs" *ngIf="application.coverLetter || parsedResume">
+      <div class="content-tabs" *ngIf="application.coverLetter || parsedResume || candidateAnswers.length > 0">
         <div class="tab-headers flex gap-4 border-b border-gray-200 mb-4">
           <button *ngIf="parsedResume" 
                   class="tab-btn px-4 py-2 font-medium" 
-                  [class.text-blue-600]="activeTab === 'resumeInfo'" 
-                  [class.border-b-2]="activeTab === 'resumeInfo'" 
-                  [class.border-blue-600]="activeTab === 'resumeInfo'"
+                  [class.active]="activeTab === 'resumeInfo'"
                   (click)="activeTab = 'resumeInfo'">
             Parsed Resume Info
           </button>
+          <button *ngIf="candidateAnswers.length > 0" 
+                  class="tab-btn px-4 py-2 font-medium" 
+                  [class.active]="activeTab === 'screeningAnswers'"
+                  (click)="activeTab = 'screeningAnswers'">
+            Screening Answers
+          </button>
           <button *ngIf="application.coverLetter" 
                   class="tab-btn px-4 py-2 font-medium" 
-                  [class.text-blue-600]="activeTab === 'coverLetter'" 
-                  [class.border-b-2]="activeTab === 'coverLetter'" 
-                  [class.border-blue-600]="activeTab === 'coverLetter'"
+                  [class.active]="activeTab === 'coverLetter'"
                   (click)="activeTab = 'coverLetter'">
             Cover Letter
           </button>
@@ -108,23 +110,72 @@
           <!-- Parsed Resume Panel -->
           <div *ngIf="activeTab === 'resumeInfo' && parsedResume" class="parsed-resume-panel space-y-6">
             
-            <div *ngIf="parsedResume.skills" class="resume-section">
+            <!-- Skills -->
+            <div *ngIf="getParsedSkills().length > 0" class="resume-section">
               <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Extracted Skills</h3>
-              <div class="flex flex-wrap gap-2">
-                <span *ngFor="let skill of parsedResume.skills.split(',')" class="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded-md">{{ skill.trim() }}</span>
+              <div class="ats-skills-list">
+                <span *ngFor="let skill of getParsedSkills()" class="ats-skill-chip">{{ skill }}</span>
               </div>
             </div>
 
-            <div *ngIf="parsedResume.workExperience" class="resume-section">
+            <!-- Experience -->
+            <div *ngIf="getExperience().length > 0" class="resume-section">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Experience Overview</h3>
+              <div class="ats-exp-list">
+                <div class="ats-exp-item" *ngFor="let exp of getExperience()">
+                  <p class="ats-exp-role">{{ exp?.title || exp?.position || exp?.role || 'Role' }}</p>
+                  <p class="ats-exp-company">{{ exp?.company || exp?.organization || '' }}
+                    <span *ngIf="exp?.duration || exp?.years"> · {{ exp?.duration || exp?.years }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <!-- Fallback Experience -->
+            <div *ngIf="getExperience().length === 0 && parsedResume.workExperience" class="resume-section">
               <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Experience Overview</h3>
               <p class="text-gray-800 whitespace-pre-line">{{ parsedResume.workExperience }}</p>
             </div>
 
-            <div *ngIf="parsedResume.education" class="resume-section">
+            <!-- Education -->
+            <div *ngIf="getEducation().length > 0" class="resume-section">
+              <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Education</h3>
+              <div class="ats-edu-list">
+                <div class="ats-edu-item" *ngFor="let edu of getEducation()">
+                  <p class="ats-edu-degree">{{ edu?.degree || edu?.qualification || edu?.level || 'Degree' }}</p>
+                  <p class="ats-edu-inst">{{ edu?.institution || edu?.school || edu?.university || '' }}
+                    <span *ngIf="edu?.year"> · {{ edu?.year }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <!-- Fallback Education -->
+            <div *ngIf="getEducation().length === 0 && parsedResume.education" class="resume-section">
               <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Education</h3>
               <p class="text-gray-800 whitespace-pre-line">{{ parsedResume.education }}</p>
             </div>
 
+          </div>
+
+          <!-- Screening Answers Panel -->
+          <div *ngIf="activeTab === 'screeningAnswers' && candidateAnswers.length > 0" class="screening-answers-panel space-y-6">
+            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Screening Questions & Answers</h3>
+            <div class="ats-answers-grid">
+              <div class="ats-answer-card" *ngFor="let ans of candidateAnswers"
+                   [class.answer-pass]="ans.passed === true" [class.answer-fail]="ans.passed === false">
+                <div class="ats-answer-header">
+                  <span class="ats-answer-q">{{ ans.questionText }}</span>
+                  <span class="ats-answer-status" *ngIf="ans.isKnockout">
+                    <mat-icon *ngIf="ans.passed === true">check_circle</mat-icon>
+                    <mat-icon *ngIf="ans.passed === false">cancel</mat-icon>
+                    <span>{{ ans.isKnockout ? 'Knockout' : '' }}</span>
+                  </span>
+                </div>
+                <div class="ats-answer-body">
+                  <p class="ats-answer-given"><strong>Answer:</strong> {{ ans.answerText || '(No answer)' }}</p>
+                  <p class="ats-answer-expected" *ngIf="ans.expectedAnswer"><strong>Expected:</strong> {{ ans.expectedAnswer }}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Cover Letter Panel -->

@@ -133,6 +133,8 @@ export interface JobApplicationDto {
   updatedDate?: string | null;
   passedKnockout?: boolean | null;
   matchScore?: number | null;
+  enteredToStage?: boolean;
+  mandatorySkills?: string | null;
 }
 
 export interface CreateJobApplicationRequest {
@@ -160,10 +162,16 @@ export interface ApplyForMySelfRequest {
 }
 
 export interface CandidateAnswerDto {
-  candidateAnswerId: string;
+  candidateAnswerId?: string;
+  answerId?: string;
   jobApplyId: string;
   questionId: string;
-  answerText: string;
+  questionText?: string;
+  questionType?: string;
+  isKnockout?: boolean;
+  expectedAnswer?: string | null;
+  answerText?: string | null;
+  passed?: boolean | null;
 }
 
 export interface UpdateJobApplicationRequest {
@@ -215,6 +223,15 @@ export interface ReceivedJobApplicationsFilterParams {
   applyDateFrom?: string | null; // ISO date string
   applyDateTo?: string | null;   // ISO date string
   stageId?: string | null;
+  jobIds?: string[] | null;
+}
+
+export interface AtsFilterParams {
+  page?: number;
+  pageSize?: number;
+  search?: string | null;
+  applyDateFrom?: string | null;
+  applyDateTo?: string | null;
   jobIds?: string[] | null;
 }
 
