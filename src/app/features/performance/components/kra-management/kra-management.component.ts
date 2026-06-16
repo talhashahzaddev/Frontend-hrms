@@ -29,6 +29,7 @@ import { CreateKRADialogComponent } from './create-kra-dialog.component';
 import { KRADetailsDialogComponent } from './kra-details-dialog.component';
 import { CreateGoalDialogComponent } from './create-goals-dialog';
 import { AssignGoalsDialogComponent } from './assiged-goals-dialog';
+import { GoalsViewDetailDialogComponent } from './gaols-view-detail-dialog';
 import { SelfAssessmentDialogComponent } from '../appraisals/self-assessment-dialog.component';
 
 
@@ -641,8 +642,14 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   viewGoalDetails(goal: Goal): void {
-    // TODO: Implement view goal details dialog if needed
-    this.notificationService.showInfo(`Goal: ${goal.title}`);
+    this.dialog.open(GoalsViewDetailDialogComponent, {
+      width: '580px',
+      maxWidth: '90vw',
+      data: {
+        goal: goal
+      },
+      disableClose: false
+    });
   }
 
   onGoalPageChange(event: PageEvent): void {
@@ -831,7 +838,14 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   viewEmployeeGoalDetails(goal: Goal): void {
-    this.notificationService.showInfo(`Goal: ${goal.title}`);
+    this.dialog.open(GoalsViewDetailDialogComponent, {
+      width: '580px',
+      maxWidth: '90vw',
+      data: {
+        goal: goal
+      },
+      disableClose: false
+    });
   }
 
   openSelfAssessmentDialog(goal: Goal): void {

@@ -40,8 +40,8 @@
         </div>
 
         <!-- Create Category Button -->
-        <div class="filter-field" *ngIf="hasPermission('CREATE_TICKETCATEGORY_BUTTON')">
-          <button mat-raised-button color="primary" class="btn-create" (click)="openCreateCategoryDialog()">
+        <div class="add-btn-wrap" *ngIf="hasPermission('CREATE_TICKETCATEGORY_BUTTON')">
+          <button mat-raised-button color="primary" class="add-btn" (click)="openCreateCategoryDialog()">
             <mat-icon>add</mat-icon>
             <span>Create Category</span>
           </button>
