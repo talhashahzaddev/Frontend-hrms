@@ -72,8 +72,10 @@
         <tbody>
           <tr *ngFor="let q of questions" class="table-row">
             <td class="font-semibold text-slate-700">
-              {{ q.questionText }}
-              <div class="text-xs text-slate-500 mt-1" *ngIf="q.options">Options: {{ q.options }}</div>
+              <div style="margin-bottom: 4px;">{{ q.questionText }}</div>
+              <div class="options-wrapper" *ngIf="q.options" style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                <span *ngFor="let opt of parseOptions(q.options)" class="badge badge-neutral" style="font-size: 11px; padding: 2px 6px; font-weight: normal; background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 4px;">{{ opt }}</span>
+              </div>
             </td>
             <td>
               <span class="badge badge-neutral">{{ q.questionType }}</span>

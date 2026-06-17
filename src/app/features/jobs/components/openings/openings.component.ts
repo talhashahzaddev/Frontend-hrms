@@ -63,12 +63,12 @@ export class OpeningsComponent implements OnInit {
   totalPages = 0;
 
   get canManageJobs(): boolean {
-    return this.hasPermission('manage_job_openings');
+    return this.hasPermission('opnongs_close');
   }
 
-  /** Apply button is shown to Manager and Employee only (not Super Admin, HR Manager). */
+  /** Apply button is shown to users with the apply_for_myself permission. */
   get canApplyForSelf(): boolean {
-    return !this.hasPermission('manage_job_openings');
+    return this.authService.hasMenuPermission('Jobs', 'Job Applications', 'apply_for_myself');
   }
 
   hasPermission(actionKey: string): boolean {
@@ -104,6 +104,7 @@ export class OpeningsComponent implements OnInit {
   }
 
   loadStats(): void {
+    if (!this.hasPermission('opnings_view_overall_details')) return;
     this.jobsService.getOpeningOverallDetails().subscribe({
       next: (res) => {
         this.stats = res;
@@ -115,6 +116,10 @@ export class OpeningsComponent implements OnInit {
   }
 
   loadOpenings(): void {
+    if (!this.hasPermission('opnings_view_all')) {
+      this.isLoading = false;
+      return;
+    }
     this.isLoading = true;
     const search = this.filterForm.get('search')?.value;
     const status = this.filterForm.get('status')?.value;

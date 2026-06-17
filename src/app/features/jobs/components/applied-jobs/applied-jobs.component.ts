@@ -193,9 +193,19 @@ export class AppliedJobsComponent implements OnInit {
     return this.hasPermission('all_job_application');
   }
 
+  /** Show ATS Inbox tab */
+  get canSeeAtsInbox(): boolean {
+    return this.hasPermission('ats_inbox_view');
+  }
+
+  /** Show My Applications (Self) tab */
+  get canSeeMySelfApplications(): boolean {
+    return this.hasPermission('my_self_application');
+  }
+
   /** Any manager-level tab visible? */
   get canSeeAnyManagerTabs(): boolean {
-    return this.canSeeMyReferenced || this.canSeeReceivedByMyJobPost || this.canSeeAllApplications;
+    return this.canSeeMyReferenced || this.canSeeReceivedByMyJobPost || this.canSeeAllApplications || this.canSeeAtsInbox;
   }
 
   /** Permission helper for this component (delegates to AuthService) */
@@ -205,58 +215,58 @@ export class AppliedJobsComponent implements OnInit {
 
   // --- Summary Dashboards for Super Admin ---
   get inProgressStat(): number {
-    return this.receivedApplications.filter(a => 
+    return this.receivedApplications.filter(a =>
       !['Rejected', 'Selected', 'Hired'].includes(a.status || '') &&
       !['Rejected', 'Selected', 'Hired'].includes(a.currentStageName || '')
     ).length;
   }
 
   get selectedStat(): number {
-    return this.receivedApplications.filter(a => 
-      ['Selected', 'Hired'].includes(a.status || '') || 
+    return this.receivedApplications.filter(a =>
+      ['Selected', 'Hired'].includes(a.status || '') ||
       ['Selected', 'Hired'].includes(a.currentStageName || '')
     ).length;
   }
 
   get rejectedStat(): number {
-    return this.receivedApplications.filter(a => 
-      a.status === 'Rejected' || 
+    return this.receivedApplications.filter(a =>
+      a.status === 'Rejected' ||
       a.currentStageName === 'Rejected'
     ).length;
   }
 
   ngOnInit(): void {
-    this.jobsService.getStages().subscribe({
-      next: (list) => {
-        this.stages = list ?? [];
-        this.stageOptions = [
-          { value: '', label: 'All stages' },
-          ...this.stages.map((s) => ({ value: s.stageId, label: s.stageName }))
-        ];
-      }
-    });
+    if (this.authService.hasPermissionByActionKey('stage_view_all')) {
+      this.jobsService.getStages().subscribe({
+        next: (list) => {
+          this.stages = list ?? [];
+          this.stageOptions = [
+            { value: '', label: 'All stages' },
+            ...this.stages.map((s) => ({ value: s.stageId, label: s.stageName }))
+          ];
+        }
+      });
+    } else {
+      this.stages = [];
+      this.stageOptions = [{ value: '', label: 'All stages' }];
+    }
 
     this.jobsService.getJobOpeningsPaged({ pageSize: 100 }).subscribe({
       next: (result) => {
-        this.allJobs = result.data ?? [];
+      this.allJobs = result.data ?? [];
         this.jobOptions = this.allJobs.map((j) => ({ value: j.jobId, label: j.jobRoleName, status: j.status || 'Open' }));
       }
     });
-    this.loadApplications();
 
     if (!this.canSeeAnyManagerTabs) {
       this.loadMySelfApplications();
-    }
-
-    if (this.canSeeAllApplications) {
-      this.loadReceivedApplications();
-    }
-
-    // Load ATS inbox whenever any manager-level tab is visible
-    if (this.canSeeAnyManagerTabs) {
-      this.loadAtsApplications();
+    } else {
+      // Load the first visible tab's data
+      this.onTabChange(0);
     }
   }
+
+
 
   loadApplications(): void {
     this.isLoading = true;
@@ -489,7 +499,7 @@ export class AppliedJobsComponent implements OnInit {
     const v = this.atsFilterForm.value;
     const applyDateFrom = v.applyDateFrom instanceof Date ? v.applyDateFrom.toISOString().slice(0, 10) : (v.applyDateFrom || null);
     const applyDateTo = v.applyDateTo instanceof Date ? v.applyDateTo.toISOString().slice(0, 10) : (v.applyDateTo || null);
-    
+
     let passedKnockout: boolean | null = null;
     if (v.passedKnockout === 'pass') passedKnockout = true;
     else if (v.passedKnockout === 'fail') passedKnockout = false;
@@ -595,12 +605,12 @@ export class AppliedJobsComponent implements OnInit {
     const id = app.jobApplyId;
     const pr = this.atsParsedResumes.get(id);
     if (!pr?.skills) return [];
-    
+
     let candidateSkills: string[] = [];
-    try { 
-      candidateSkills = JSON.parse(pr.skills); 
-    } catch { 
-      candidateSkills = pr.skills.split(',').map(s => s.trim()); 
+    try {
+      candidateSkills = JSON.parse(pr.skills);
+    } catch {
+      candidateSkills = pr.skills.split(',').map(s => s.trim());
     }
 
     // Look up job in loaded job openings as a fallback to avoid depending on backend restart
@@ -747,7 +757,8 @@ export class AppliedJobsComponent implements OnInit {
     const ordered = [
       'my_referenced_application',
       'received_application_by_my_job_post',
-      'all_job_application'
+      'all_job_application',
+      'ats_inbox_view'
     ];
     return ordered.filter((k) => this.hasPermission(k));
   }
@@ -763,6 +774,8 @@ export class AppliedJobsComponent implements OnInit {
         this.loadReceivedApplications();
       } else if (key === 'my_referenced_application') {
         this.loadApplications();
+      } else if (key === 'ats_inbox_view') {
+        this.loadAtsApplications();
       }
       return;
     }

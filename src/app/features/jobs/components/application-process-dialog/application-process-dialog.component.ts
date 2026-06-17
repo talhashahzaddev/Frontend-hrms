@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { JobApplicationDto, StageMasterDto, ApplicationStageDto } from '@core/models/jobs.models';
 import { JobsService } from '@features/jobs/services/jobs.service';
+import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import { EditApplicationStageDialogComponent } from '../edit-application-stage-dialog/edit-application-stage-dialog.component';
 import {
@@ -62,8 +63,13 @@ export class ApplicationProcessDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<ApplicationProcessDialogComponent>,
     private dialog: MatDialog,
     private jobsService: JobsService,
+    private authService: AuthService,
     private notification: NotificationService
   ) { }
+
+  hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Jobs', 'Job Applications', actionKey);
+  }
 
   ngOnInit(): void {
     this.jobsService.getJobApplicationById(this.data.jobApplyId).subscribe({
@@ -76,16 +82,21 @@ export class ApplicationProcessDialogComponent implements OnInit {
         this.isLoading = false;
       }
     });
-    this.jobsService.getStages().subscribe({
-      next: (list) => {
-        this.stages = list ?? [];
-        this.stagesLoading = false;
-        this.setDefaultStage();
-      },
-      error: () => {
-        this.stagesLoading = false;
-      }
-    });
+    if (this.authService.hasPermissionByActionKey('stage_view_all')) {
+      this.jobsService.getStages().subscribe({
+        next: (list) => {
+          this.stages = list ?? [];
+          this.stagesLoading = false;
+          this.setDefaultStage();
+        },
+        error: () => {
+          this.stagesLoading = false;
+        }
+      });
+    } else {
+      this.stages = [];
+      this.stagesLoading = false;
+    }
     this.loadApplicationStages();
   }
 
@@ -108,10 +119,10 @@ export class ApplicationProcessDialogComponent implements OnInit {
 
   setDefaultStage(): void {
     if (this.stagesLoading || this.applicationStagesLoading || !this.stages.length) return;
-    
+
     const completedStageIds = new Set(this.applicationStages.map(s => s.stageId));
     const nextStage = this.stages.find(s => !completedStageIds.has(s.stageId));
-    
+
     if (nextStage) {
       this.selectedStageId.setValue(nextStage.stageId);
     } else {

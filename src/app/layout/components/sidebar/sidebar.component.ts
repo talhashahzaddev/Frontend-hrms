@@ -262,10 +262,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: 'work',
       menuName: 'Jobs',
       children: [
-        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings' },
-        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications' },
-        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage' },
-        { label: 'Question Bank', icon: 'quiz', route: '/jobs/question-bank', menuName: 'Jobs', subMenuName: 'Question Bank' }
+        { label: 'Openings', icon: 'work_outline', route: '/jobs/openings', menuName: 'Jobs', subMenuName: 'Openings', actionKey: 'opnings_view_all' },
+        { label: 'Job Applications', icon: 'how_to_reg', route: '/jobs/applied', menuName: 'Jobs', subMenuName: 'Job Applications', anyOfActionKeys: ['all_job_application', 'received_application_by_my_job_post', 'my_referenced_application', 'ats_inbox_view', 'my_self_application'] },
+        { label: 'Stage', icon: 'label', route: '/jobs/stage', menuName: 'Jobs', subMenuName: 'Stage', actionKey: 'stage_view_all' },
+        { label: 'Question Bank', icon: 'quiz', route: '/jobs/question-bank', menuName: 'Jobs', subMenuName: 'Question Bank', actionKey: 'question_bank_view' }
       ]
     },
     {

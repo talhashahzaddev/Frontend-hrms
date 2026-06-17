@@ -192,8 +192,17 @@ export class QuestionBankComponent implements OnInit {
   }
 
   hasPermission(permission: string): boolean {
-    // Modify based on actual permissions required
-    // return this.authService.hasPermissionByActionKey(permission);
-    return true; // Bypassing for now as it's a new feature
+    return this.authService.hasPermissionByActionKey(permission);
+  }
+
+  parseOptions(optionsStr: string | undefined): string[] {
+    if (!optionsStr) return [];
+    try {
+      const parsed = JSON.parse(optionsStr);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Not JSON, might be comma-separated
+    }
+    return optionsStr.split(',').map(s => s.trim()).filter(s => !!s);
   }
 }

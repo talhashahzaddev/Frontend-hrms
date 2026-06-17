@@ -288,7 +288,7 @@
                         </div>
                       </div>
 
-                      <button class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
+                      <button *ngIf="hasPermission('app_stage_view_by_application')" class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
                         Application &rarr;</button>
                     </article>
 
@@ -438,7 +438,7 @@
                         </div>
                       </div>
 
-                      <button class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
+                      <button *ngIf="hasPermission('app_stage_view_by_application')" class="st-process-btn" (click)="openProcessDialog(app); $event.stopPropagation()">Process
                         Application &rarr;</button>
                     </article>
 
@@ -480,7 +480,7 @@
       <!-- ============================================================ -->
       <!-- ATS INBOX TAB: Received applications (enteredtostage = false) -->
       <!-- ============================================================ -->
-      <mat-tab *ngIf="canSeeAnyManagerTabs">
+      <mat-tab *ngIf="canSeeAtsInbox">
         <ng-template mat-tab-label>
           <span class="tab-label">
             <mat-icon class="ats-tab-icon">psychology</mat-icon>
@@ -700,7 +700,7 @@
                         <button class="ats-view-btn" (click)="viewJobDetails(app); $event.stopPropagation()">
                           <mat-icon>visibility</mat-icon> Full Profile
                         </button>
-                        <button class="ats-enter-stage-btn" (click)="enterToStage(app, $event)">
+                        <button *ngIf="hasPermission('job_application_enter_stage')" class="ats-enter-stage-btn" (click)="enterToStage(app, $event)">
                           <mat-icon>rocket_launch</mat-icon>
                           Enter to Stage
                         </button>
@@ -881,7 +881,7 @@
       </mat-tab>
 
       <!-- Tab 2: My Applications (Self) -->
-      <mat-tab>
+      <mat-tab *ngIf="canSeeMySelfApplications">
         <ng-template mat-tab-label>
           <span class="tab-label">My Applications</span>
         </ng-template>
