@@ -13,7 +13,11 @@
     <header class="page-header">
         <div class="title-section">
             <h1 class="title">Payslips</h1>
-            <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.</p>
+            <p class="subtitle">Generate, manage and distribute employee payslips for each payroll period.
+                @if (hasPermission('payslip_template_view')) {
+                <a routerLink="/settings/payslip-template" class="template-link">Configure payslip template</a>
+                }
+            </p>
         </div>
         <div class="header-actions">
             @if (hasPermission('mail_upload_payslip')) {
