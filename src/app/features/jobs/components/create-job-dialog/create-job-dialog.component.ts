@@ -18,6 +18,8 @@ import { JobsService } from '@features/jobs/services/jobs.service';
 import { NotificationService } from '@core/services/notification.service';
 import { EmployeeService } from '@features/employee/services/employee.service';
 import { Department } from '@core/models/employee.models';
+import { QuestionBankService } from '../../services/question-bank.service';
+import { QuestionCategoryDto, QuestionDto } from '@core/models/jobs.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 export interface CreateJobDialogData {
@@ -56,6 +58,9 @@ export class CreateJobDialogComponent implements OnInit {
     return this.data?.mode === 'edit' || !!this.editJobId;
   }
   editJobId?: string | null;
+
+  categories: QuestionCategoryDto[] = [];
+  questions: QuestionDto[] = [];
 
   /** Quill toolbar for plain-ish text (intro) */
   readonly quillBasicConfig = {
@@ -105,7 +110,8 @@ export class CreateJobDialogComponent implements OnInit {
     private notification: NotificationService,
     private employeeService: EmployeeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private qbService: QuestionBankService
   ) {
     this.jobForm = this.fb.group({
       jobRoleName: ['', [Validators.required, Validators.maxLength(200)]],
@@ -126,7 +132,10 @@ export class CreateJobDialogComponent implements OnInit {
       lastDate: [null as string | null],
       postedAs: ['Internal', [Validators.required, Validators.maxLength(20)]],
       externalLink: [''],
-      status: ['Open', Validators.maxLength(50)]
+      status: ['Open', Validators.maxLength(50)],
+      mandatorySkills: [''],
+      categoryId: [null],
+      questionIds: [[]]
     });
   }
 
@@ -148,6 +157,38 @@ export class CreateJobDialogComponent implements OnInit {
       next: (depts: Department[]) => (this.departments = depts),
       error: () => this.notification.showError('Failed to load departments')
     });
+
+    this.qbService.getCategories().subscribe(res => this.categories = res);
+
+    this.jobForm.get('categoryId')?.valueChanges.subscribe(catId => {
+      if (catId) {
+        this.qbService.getQuestionsByCategory(catId).subscribe(res => {
+          this.questions = res;
+          // select all by default
+          this.jobForm.get('questionIds')?.setValue(res.map(q => q.questionId));
+        });
+      } else {
+        this.questions = [];
+        this.jobForm.get('questionIds')?.setValue([]);
+      }
+    });
+  }
+
+  isQuestionSelected(qId: string): boolean {
+    const qIds = this.jobForm.get('questionIds')?.value || [];
+    return qIds.includes(qId);
+  }
+
+  toggleQuestion(qId: string): void {
+    const control = this.jobForm.get('questionIds');
+    if (!control) return;
+    let qIds = control.value || [];
+    if (qIds.includes(qId)) {
+      qIds = qIds.filter((id: string) => id !== qId);
+    } else {
+      qIds = [...qIds, qId];
+    }
+    control.setValue(qIds);
   }
 
   private loadJobDetails(id: string): void {
@@ -156,6 +197,26 @@ export class CreateJobDialogComponent implements OnInit {
         if (job) {
           this.data.job = job;
           this.patchFormWithJob(job);
+          
+          this.qbService.getJobQuestions(job.jobId).subscribe({
+            next: (qs) => {
+              if (qs && qs.length > 0) {
+                // If the user already has a category selected, this will just temporarily show
+                // the existing questions until they change the category.
+                // Or we could patch the categoryId if they all share one, but we'll just show them.
+                this.questions = qs as any[];
+                this.jobForm.get('questionIds')?.setValue(qs.map(q => q.questionId));
+                
+                // If they all belong to the same category, let's select it
+                const firstCat = qs.find(q => q.categoryId);
+                if (firstCat && firstCat.categoryId) {
+                  // Temporarily disable the categoryId value changes to avoid overwriting this.questions
+                  this.jobForm.get('categoryId')?.setValue(firstCat.categoryId, { emitEvent: false });
+                }
+              }
+            }
+          });
+
         } else {
           this.notification.showError('Job not found');
           this.router.navigate(['/jobs/openings']);
@@ -169,6 +230,16 @@ export class CreateJobDialogComponent implements OnInit {
   }
 
   private patchFormWithJob(job: JobOpeningDto): void {
+    let skillsString = job.mandatorySkills || '';
+    try {
+      const parsed = JSON.parse(skillsString);
+      if (Array.isArray(parsed)) {
+        skillsString = parsed.join(', ');
+      }
+    } catch (e) {
+      // ignore if not JSON
+    }
+
     this.jobForm.patchValue({
       jobRoleName: job.jobRoleName || '',
       jobCode: job.jobCode || '',
@@ -188,7 +259,8 @@ export class CreateJobDialogComponent implements OnInit {
       lastDate: job.lastDate ? new Date(job.lastDate) : null,
       postedAs: job.postedAs || 'Internal',
       externalLink: job.externalLink || '',
-      status: job.status || 'Open'
+      status: job.status || 'Open',
+      mandatorySkills: skillsString
     });
   }
 
@@ -197,6 +269,9 @@ export class CreateJobDialogComponent implements OnInit {
 
     const v = this.jobForm.value;
     const lastDateStr = v.lastDate ? new Date(v.lastDate).toISOString() : null;
+    
+    const parsedSkills = (v.mandatorySkills || '').split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const mandatorySkillsJson = parsedSkills.length > 0 ? JSON.stringify(parsedSkills) : null;
 
     if (this.isEditMode && (this.data.job?.jobId || this.editJobId)) {
       const targetId = this.data.job?.jobId || this.editJobId;
@@ -221,13 +296,16 @@ export class CreateJobDialogComponent implements OnInit {
         lastDate: lastDateStr,
         postedAs: v.postedAs,
         externalLink: v.externalLink || null,
-        status: v.status || 'Open'
+        status: v.status || 'Open',
+        mandatorySkills: mandatorySkillsJson
       };
       this.isSubmitting = true;
       this.jobsService.updateJobOpening(targetId, request).subscribe({
         next: (updated: JobOpeningDto) => {
-          this.notification.showSuccess('Job opening updated successfully');
-          this.closeComponent(updated);
+          this.attachQuestionsIfAny(updated.jobId, () => {
+            this.notification.showSuccess('Job opening updated successfully');
+            this.closeComponent(updated);
+          });
         },
         error: (err: { message?: string }) => {
           this.isSubmitting = false;
@@ -254,19 +332,34 @@ export class CreateJobDialogComponent implements OnInit {
         lastDate: lastDateStr,
         postedAs: v.postedAs,
         externalLink: v.externalLink || null,
-        status: v.status || 'Open'
+        status: v.status || 'Open',
+        mandatorySkills: mandatorySkillsJson
       };
       this.isSubmitting = true;
       this.jobsService.createJobOpening(request).subscribe({
         next: (created: JobOpeningDto) => {
-          this.notification.showSuccess('Job opening created successfully');
-          this.closeComponent(created);
+          this.attachQuestionsIfAny(created.jobId, () => {
+            this.notification.showSuccess('Job opening created successfully');
+            this.closeComponent(created);
+          });
         },
         error: (err: { message?: string }) => {
           this.isSubmitting = false;
           this.notification.showError(err?.message || 'Failed to create job opening');
         }
       });
+    }
+  }
+
+  private attachQuestionsIfAny(jobId: string, callback: () => void): void {
+    const qIds = this.jobForm.value.questionIds as string[];
+    if (qIds && qIds.length > 0) {
+      this.qbService.attachQuestionsToJob(jobId, qIds).subscribe({
+        next: () => callback(),
+        error: () => callback() // still proceed
+      });
+    } else {
+      callback();
     }
   }
 
@@ -303,6 +396,11 @@ export class CreateJobDialogComponent implements OnInit {
     if (min != null) return `${cur} ${min}+`;
     if (max != null) return `Up to ${cur} ${max}`;
     return '';
+  }
+
+  get parsedSkills(): string[] {
+    const val = this.jobForm.value.mandatorySkills || '';
+    return val.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
   }
 
   onCancel(): void {

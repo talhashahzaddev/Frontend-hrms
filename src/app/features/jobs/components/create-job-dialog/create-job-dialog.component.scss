@@ -20,17 +20,26 @@ $green-700: #15803d;
 .bp-create-job-bg {
   font-family: 'Public Sans', sans-serif;
   background-color: $slate-50;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100%;
+  overflow: hidden;
   color: $slate-900;
-  padding-bottom: 96px; // space for fixed footer
   box-sizing: border-box;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .bp-create-job-main {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 32px 40px;
+  padding: 32px 40px 0 40px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
 }
 
 // Header
@@ -39,6 +48,7 @@ $green-700: #15803d;
   align-items: flex-start;
   gap: 16px;
   margin-bottom: 32px;
+  flex-shrink: 0;
 
   .bp-back-btn {
     background: $primary;
@@ -78,6 +88,8 @@ $green-700: #15803d;
 .bp-content-grid {
   display: flex;
   gap: 32px;
+  flex: 1;
+  min-height: 0;
 }
 
 .bp-form-col {
@@ -86,6 +98,20 @@ $green-700: #15803d;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overflow-y: auto;
+  padding-right: 8px;
+  padding-bottom: 24px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: $slate-300;
+    border-radius: 10px;
+  }
 }
 
 .bp-form {
@@ -96,11 +122,23 @@ $green-700: #15803d;
 
 .bp-sidebar-col {
   flex: 0 0 320px;
+  overflow-y: auto;
+  padding-right: 8px;
+  padding-bottom: 24px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: $slate-300;
+    border-radius: 10px;
+  }
 }
 
 .bp-sticky-sidebar {
-  position: sticky;
-  top: 96px; // approx from header
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -175,12 +213,17 @@ $green-700: #15803d;
 }
 
 .bp-form-field {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   label {
     display: block;
     font-size: 14px;
     font-weight: 600;
     color: $slate-700;
-    margin-bottom: 6px;
+    margin-bottom: auto;
+    padding-bottom: 6px;
   }
 
   input,

@@ -139,6 +139,28 @@
             </div>
           </div>
 
+          <!-- ATS Configuration -->
+          <div class="bp-card">
+            <div class="bp-card-header">
+              <h3>ATS Configuration</h3>
+            </div>
+            <div class="bp-card-body">
+              <div class="bp-row bp-cols-2">
+                <div class="bp-form-field">
+                  <label>Mandatory Skills (Comma separated for CV parsing)</label>
+                  <input type="text" formControlName="mandatorySkills" placeholder="e.g. C#, Angular, SQL">
+                </div>
+                <div class="bp-form-field">
+                  <label>Question Category Template</label>
+                  <select matNativeControl formControlName="categoryId">
+                    <option [ngValue]="null">Select Category</option>
+                    <option *ngFor="let c of categories" [value]="c.categoryId">{{ c.name }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Job Content -->
           <div class="bp-card">
             <div class="bp-card-header bp-b-bottom">
@@ -268,6 +290,39 @@
                   [class.done]="jobForm.value.jobIntroduction || jobForm.value.responsibilities || jobForm.value.skillset">Job
                   Description</span>
               </div>
+            </div>
+          </div>
+
+          <!-- ATS Questions Card -->
+          <div class="bp-card" *ngIf="questions.length > 0">
+            <div class="bp-sidebar-card-header">
+              <h3>Selected Questions</h3>
+              <span class="bp-badge">{{ jobForm.value.questionIds?.length || 0 }} Selected</span>
+            </div>
+            <div class="bp-card-body bp-checklist-body" style="max-height: 250px; overflow-y: auto;">
+              <div class="bp-check-item" *ngFor="let q of questions" (click)="toggleQuestion(q.questionId)" style="cursor: pointer;">
+                <mat-icon [class.done]="isQuestionSelected(q.questionId)">
+                  {{ isQuestionSelected(q.questionId) ? 'check_box' : 'check_box_outline_blank' }}
+                </mat-icon>
+                <span [class.done]="isQuestionSelected(q.questionId)" style="display: flex; align-items: center; gap: 6px;">
+                  {{ q.questionText }} 
+                  <span *ngIf="q.isKnockout" style="color: #ef4444; font-size: 10px; font-weight: 700; text-transform: uppercase;">(Knockout)</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parsed Skills Card -->
+          <div class="bp-card" *ngIf="parsedSkills.length > 0">
+            <div class="bp-sidebar-card-header">
+              <h3>Mandatory Skills</h3>
+              <span class="bp-badge">{{ parsedSkills.length }} Skills</span>
+            </div>
+            <div class="bp-card-body" style="padding: 16px; display: flex; flex-wrap: wrap; gap: 8px; max-height: 150px; overflow-y: auto;">
+              <span *ngFor="let skill of parsedSkills" 
+                    style="background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600;">
+                {{ skill }}
+              </span>
             </div>
           </div>
 

@@ -1,0 +1,74 @@
+<div class="modal-container">
+
+  <header class="modal-header">
+    <div class="header-content">
+      <div class="icon-wrapper">
+        <mat-icon class="header-icon">{{ isEditMode ? 'edit' : 'quiz' }}</mat-icon>
+      </div>
+      <h2>{{ isEditMode ? 'Edit Question' : 'Create Question' }}</h2>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button (click)="close()" class="close-btn" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="modal-body">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-layout">
+      
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label class="form-label required">Question Text</label>
+            <textarea class="custom-input custom-textarea" formControlName="questionText" rows="2" placeholder="e.g. How many years of experience do you have in Angular?"></textarea>
+            <div class="error-text" *ngIf="form.get('questionText')?.hasError('required') && form.get('questionText')?.touched">Question text is required</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Question Type</label>
+            <select class="custom-input custom-select" formControlName="questionType">
+              <option value="" disabled>Select Type</option>
+              <option *ngFor="let type of questionTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+          
+          <div class="form-group checkbox-group">
+            <mat-checkbox formControlName="isKnockout" color="primary">
+              Mark as Knockout Question
+            </mat-checkbox>
+            <small class="hint-text text-muted" style="margin-top: 4px; display: block; font-size: 12px;">If a candidate answers a knockout question incorrectly, they will be automatically disqualified.</small>
+          </div>
+        </div>
+
+        <div class="form-row" *ngIf="showOptionsField">
+          <div class="form-group full-width">
+            <label class="form-label">Options (Comma separated)</label>
+            <input type="text" class="custom-input" formControlName="options" placeholder="e.g. Option A, Option B, Option C">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label class="form-label">Expected Correct Answer (Optional)</label>
+            <input type="text" class="custom-input" formControlName="expectedAnswer" placeholder="e.g. Option A (or Yes/No for True/False)">
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <footer class="modal-footer">
+    <button mat-button (click)="close()" class="btn-cancel" [disabled]="isSubmitting">Cancel</button>
+    <button mat-flat-button color="primary" class="btn-primary" 
+            [disabled]="form.invalid || isSubmitting" 
+            (click)="onSubmit()">
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Update Question' : 'Save Question' }}</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20" class="btn-spinner"></mat-spinner>
+    </button>
+  </footer>
+
+</div>

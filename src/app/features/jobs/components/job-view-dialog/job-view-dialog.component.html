@@ -98,7 +98,7 @@
       </div>
 
       <!-- Job Content Tabs -->
-      <div class="content-tabs" *ngIf="job.jobIntroduction || job.responsibilities || job.skillset">
+      <div class="content-tabs" *ngIf="job.jobIntroduction || job.responsibilities || job.skillset || questions.length > 0">
         <div class="tab-headers">
           <button class="tab-btn" *ngIf="job.jobIntroduction" [class.active]="activeTab === 'intro'"
             (click)="activeTab = 'intro'">Introduction</button>
@@ -106,12 +106,25 @@
             (click)="activeTab = 'resp'">Responsibilities</button>
           <button class="tab-btn" *ngIf="job.skillset" [class.active]="activeTab === 'skill'"
             (click)="activeTab = 'skill'">Skillset</button>
+          <button class="tab-btn" *ngIf="questions.length > 0" [class.active]="activeTab === 'questions'"
+            (click)="activeTab = 'questions'">Questions</button>
         </div>
 
         <div class="tab-content ql-content">
-          <div *ngIf="activeTab === 'intro'" [innerHTML]="job.jobIntroduction"></div>
-          <div *ngIf="activeTab === 'resp'" [innerHTML]="job.responsibilities"></div>
-          <div *ngIf="activeTab === 'skill'" [innerHTML]="job.skillset"></div>
+          <div *ngIf="activeTab === 'intro'" class="content-text" [innerHTML]="job.jobIntroduction"></div>
+          <div *ngIf="activeTab === 'resp'" class="content-text" [innerHTML]="job.responsibilities"></div>
+          <div *ngIf="activeTab === 'skill'" class="content-text" [innerHTML]="job.skillset"></div>
+          <div *ngIf="activeTab === 'questions'" class="questions-list">
+            <div class="question-item" *ngFor="let q of questions; let i = index">
+              <div class="q-header">
+                <span class="q-number">Q{{i + 1}}.</span>
+                <span class="q-category badge" *ngIf="q.categoryName">{{q.categoryName}}</span>
+                <span class="q-type badge">{{q.questionType}}</span>
+                <span class="q-knockout badge danger" *ngIf="q.isKnockout">Knockout</span>
+              </div>
+              <div class="q-text">{{q.questionText}}</div>
+            </div>
+          </div>
         </div>
       </div>
     </ng-container>
