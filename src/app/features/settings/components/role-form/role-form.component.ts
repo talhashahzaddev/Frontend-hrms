@@ -45,10 +45,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
 export class RoleFormComponent implements OnInit {
   roleForm!: FormGroup;
   permissionGroups: MenuPermissionGroup[] = [];
-  baseRoleTemplates = [
-    { id: 'super-admin', name: 'Super Admin' },
-    { id: 'employee', name: 'Employee' }
-  ];
+  availableRoles: Role[] = [];
   isLoadingMenus = false;
   isSaving = false;
   grantFullAccess = false;
@@ -96,10 +93,24 @@ export class RoleFormComponent implements OnInit {
         if ((this.isEditMode || this.isViewMode) && this.role?.menus) {
           this.populateExistingPermissions(this.role.menus);
         }
-        this.isLoadingMenus = false;
+        // Also load base roles for dropdown
+        this.loadBaseRoles();
       },
       error: () => {
         this.notificationService.showError('Failed to load menu permissions');
+        this.isLoadingMenus = false;
+      }
+    });
+  }
+
+  private loadBaseRoles(): void {
+    this.roleService.getRoles().subscribe({
+      next: (roles) => {
+        this.availableRoles = roles.filter(r => !r.roleId?.startsWith('temp-'));
+        this.isLoadingMenus = false;
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load base roles');
         this.isLoadingMenus = false;
       }
     });
@@ -123,63 +134,51 @@ export class RoleFormComponent implements OnInit {
     }));
   }
 
-  onBaseRoleChange(selectedTemplateId: string): void {
-    if (!selectedTemplateId) {
+  onBaseRoleChange(selectedRoleId: string): void {
+    if (!selectedRoleId) {
       // Reset permissions if no base role selected
       this.resetPermissions();
       return;
     }
 
-    if (selectedTemplateId === 'super-admin') {
-      this.applySuperAdminTemplate();
-    } else if (selectedTemplateId === 'employee') {
-      this.applyEmployeeTemplate();
+    // Find the selected role
+    const selectedRole = this.availableRoles.find(r => r.roleId === selectedRoleId);
+    if (selectedRole && selectedRole.menus) {
+      this.applyRolePermissions(selectedRole);
     }
   }
 
-  private applySuperAdminTemplate(): void {
-    // Grant all permissions
-    this.permissionGroups.forEach(group =>
-      group.subMenus.forEach(sub =>
-        sub.actions.forEach(action => action.hasPermission = true)
-      )
-    );
-  }
-
-  private applyEmployeeTemplate(): void {
+  private applyRolePermissions(role: Role): void {
+    if (!role.menus || role.menus.length === 0) {
+      this.resetPermissions();
+      return;
+    }
     // Reset first
     this.resetPermissions();
-    
-    // Grant limited permissions for Employee role
-    const employeePermissions: Record<string, string[]> = {
-      'Dashboard': ['View'],
-      'Profile': ['View', 'Edit'],
-      'Employee Dashboard' : ['Employee Dashboard'],
-      'Attendance': ['Clock In Button','Clock Out Button','View','Attendance Record Table'],
-      'Leave Management': ['View', 'Request'],
-      'Calendar': ['View'],
-      'News': ['View', 'Create'],
-      'Performance': ['View'],
-      'Expense': ['View', 'Create'],
-      'Help Desk': ['View'],
-      'Jobs': ['View'],
-      'AI Assistant':['Ai Assistant'],
-      'Subscription': ['Select Plan']
-    };
 
-    this.permissionGroups.forEach(group => {
-      const menuPermissions = employeePermissions[group.menuName];
-      if (menuPermissions) {
-        group.subMenus.forEach(sub =>
-          sub.actions.forEach(action => {
-            // Check if this action matches any permission for this menu
-            if (menuPermissions.some(perm => action.actionName.includes(perm))) {
-              action.hasPermission = true;
-            }
-          })
-        );
-      }
+    // Apply permissions from the selected role
+    role.menus.forEach(roleMenu => {
+      const group = this.permissionGroups.find(g => g.menuId === roleMenu.menuId);
+      if (!group) return;
+
+      roleMenu.subMenus?.forEach(roleSub => {
+        const sub = group.subMenus.find(s => s.subMenuId === roleSub.subMenuId);
+        if (!sub) return;
+
+        roleSub.actions?.forEach(roleAction => {
+          // Match by actionId first, then by actionKey as fallback
+          const action = sub.actions.find(
+            a => a.actionId === roleAction.actionId || a.actionKey === roleAction.actionKey
+          );
+          if (action) {
+            action.hasPermission = roleAction.hasPermission;
+          }
+        });
+      });
     });
+
+    // Force UI update
+    this.permissionGroups = [...this.permissionGroups];
   }
 
   private resetPermissions(): void {

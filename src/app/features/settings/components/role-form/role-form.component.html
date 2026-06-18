@@ -53,9 +53,9 @@
         <mat-form-field appearance="outline" class="form-field">
           <mat-icon matPrefix>layers</mat-icon>
           <mat-select formControlName="baseRole" (selectionChange)="onBaseRoleChange($event.value)">
-            <mat-option value="">Default</mat-option>
-            <mat-option *ngFor="let template of baseRoleTemplates" [value]="template.id">
-              {{ template.name }}
+            <mat-option value="">Select Base Role</mat-option>
+            <mat-option *ngFor="let role of availableRoles" [value]="role.roleId">
+              {{ role.roleName }}
             </mat-option>
           </mat-select>
           <mat-hint>Choose a base role to inherit its permissions</mat-hint>
