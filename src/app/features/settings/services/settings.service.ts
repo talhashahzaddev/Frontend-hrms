@@ -75,6 +75,15 @@ export interface PayslipTemplateFieldConfig {
   options: PayslipTemplateOptions;
 }
 
+export interface PayslipLayoutOption {
+  layoutKey: string;
+  displayName: string;
+  description?: string | null;
+  previewImageUrl?: string | null;
+  rendererKey: string;
+  sortOrder: number;
+}
+
 export interface PayslipTemplate {
   templateId?: string | null;
   organizationId: string;
@@ -90,6 +99,8 @@ export interface PayslipTemplate {
   sectionTitleColor: string;
   showGeneratedAt: boolean;
   showPayrollCalculatedAt: boolean;
+  layoutKey: string;
+  layoutConfig?: Record<string, unknown> | null;
   fieldConfig: PayslipTemplateFieldConfig;
   isCustom: boolean;
 }
@@ -106,8 +117,34 @@ export interface UpsertPayslipTemplateRequest {
   sectionTitleColor: string;
   showGeneratedAt: boolean;
   showPayrollCalculatedAt: boolean;
+  layoutKey: string;
+  layoutConfig?: Record<string, unknown> | null;
   fieldConfig: PayslipTemplateFieldConfig;
 }
+
+export const PAYSLIP_LAYOUT_FALLBACKS: PayslipLayoutOption[] = [
+  {
+    layoutKey: 'classic_stacked',
+    displayName: 'Classic stacked',
+    description: 'Traditional payslip with stacked sections.',
+    rendererKey: 'classic_stacked',
+    sortOrder: 1
+  },
+  {
+    layoutKey: 'split_columns',
+    displayName: 'Split columns',
+    description: 'Earnings and deductions shown side by side.',
+    rendererKey: 'split_columns',
+    sortOrder: 2
+  },
+  {
+    layoutKey: 'compact_corporate',
+    displayName: 'Compact corporate',
+    description: 'Summary strip with compact line items.',
+    rendererKey: 'compact_corporate',
+    sortOrder: 3
+  }
+];
 
 export function createDefaultPayslipFieldConfig(): PayslipTemplateFieldConfig {
   return {
@@ -574,8 +611,23 @@ export class SettingsService {
         if (!res.success || !res.data) {
           throw new Error(res.message || 'Failed to load payslip template');
         }
-        return res.data;
+        return {
+          ...res.data,
+          layoutKey: res.data.layoutKey || 'classic_stacked'
+        };
       })
+    );
+  }
+
+  getPayslipLayoutOptions(): Observable<PayslipLayoutOption[]> {
+    return this.http.get<ApiResponse<PayslipLayoutOption[]>>(`${this.settingsUrl}/payslip-template/layouts`).pipe(
+      map(res => {
+        if (!res.success || !res.data?.length) {
+          return PAYSLIP_LAYOUT_FALLBACKS;
+        }
+        return res.data;
+      }),
+      catchError(() => of(PAYSLIP_LAYOUT_FALLBACKS))
     );
   }
 

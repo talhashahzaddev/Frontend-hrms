@@ -63,6 +63,19 @@
       <div class="card">
         <div class="card-content">
           <div class="info">
+            <span class="label">Layout style</span>
+            <span class="value">{{ getLayoutDisplayName(savedTemplate.layoutKey) }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>view_quilt</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">PDF arrangement template</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
             <span class="label">Brand colors</span>
             <span class="value">3 configured</span>
           </div>
@@ -113,6 +126,33 @@
   <form [formGroup]="form" *ngIf="!isLoading && isEditMode" class="edit-layout" (ngSubmit)="onSave()">
     <div class="edit-columns">
       <div class="edit-main">
+        <div class="content-card section-card">
+          <div class="section-head">
+            <h2>Layout style</h2>
+            <p>Choose how earnings, deductions, and summary blocks are arranged on the PDF.</p>
+          </div>
+          <div class="layout-picker">
+            <button
+              type="button"
+              class="layout-card"
+              *ngFor="let layout of layoutOptions"
+              [class.layout-card--selected]="isLayoutSelected(layout.layoutKey)"
+              [attr.aria-pressed]="isLayoutSelected(layout.layoutKey)"
+              (click)="selectLayout(layout.layoutKey)">
+              <div class="layout-thumb-wrap">
+                <div [class]="getLayoutPreviewClass(layout.layoutKey)" aria-hidden="true"></div>
+                <span class="layout-selected-badge" *ngIf="isLayoutSelected(layout.layoutKey)" aria-hidden="true">
+                  <mat-icon>check</mat-icon>
+                </span>
+              </div>
+              <div class="layout-card-body">
+                <span class="layout-card-title">{{ layout.displayName }}</span>
+                <span class="layout-card-desc">{{ layout.description }}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <div class="content-card section-card">
           <div class="section-head">
             <h2>Branding</h2>

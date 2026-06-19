@@ -10,6 +10,7 @@ import { AuthService } from '@core/services/auth.service';
 import { NotificationService } from '@core/services/notification.service';
 import {
   createDefaultPayslipFieldConfig,
+  PayslipLayoutOption,
   PayslipTemplate,
   PayslipTemplateFieldConfig,
   SettingsService,
@@ -53,6 +54,8 @@ export class PayslipTemplateComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   fieldConfig: PayslipTemplateFieldConfig = createDefaultPayslipFieldConfig();
   savedTemplate: PayslipTemplate | null = null;
+  layoutOptions: PayslipLayoutOption[] = [];
+  selectedLayoutKey = 'classic_stacked';
 
   isLoading = false;
   isSaving = false;
@@ -154,7 +157,16 @@ export class PayslipTemplateComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.loadLayoutOptions();
     this.loadTemplate();
+  }
+
+  loadLayoutOptions(): void {
+    this.settingsService.getPayslipLayoutOptions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(options => {
+        this.layoutOptions = options;
+      });
   }
 
   ngOnDestroy(): void {
@@ -339,6 +351,24 @@ export class PayslipTemplateComponent implements OnInit, OnDestroy {
     return value?.trim() ? value.trim() : null;
   }
 
+  selectLayout(layoutKey: string): void {
+    if (!this.canEdit) return;
+    this.selectedLayoutKey = layoutKey;
+  }
+
+  isLayoutSelected(layoutKey: string): boolean {
+    return this.selectedLayoutKey === layoutKey;
+  }
+
+  getLayoutDisplayName(layoutKey?: string | null): string {
+    const key = layoutKey || 'classic_stacked';
+    return this.layoutOptions.find(l => l.layoutKey === key)?.displayName ?? 'Classic stacked';
+  }
+
+  getLayoutPreviewClass(layoutKey: string): string {
+    return `layout-thumb layout-thumb--${layoutKey.replace(/_/g, '-')}`;
+  }
+
   get usingDefaultTemplate(): boolean {
     return this.savedTemplate != null && !this.savedTemplate.isCustom;
   }
@@ -361,6 +391,7 @@ export class PayslipTemplateComponent implements OnInit, OnDestroy {
     });
 
     this.fieldConfig = this.mergeFieldConfig(template.fieldConfig);
+    this.selectedLayoutKey = template.layoutKey || 'classic_stacked';
     this.logoFileName = this.extractFileName(template.logoUrl);
   }
 
@@ -378,6 +409,7 @@ export class PayslipTemplateComponent implements OnInit, OnDestroy {
       sectionTitleColor: raw.sectionTitleColor,
       showGeneratedAt: !!raw.showGeneratedAt,
       showPayrollCalculatedAt: !!raw.showPayrollCalculatedAt,
+      layoutKey: this.selectedLayoutKey,
       fieldConfig: {
         ...this.fieldConfig,
         options: {
