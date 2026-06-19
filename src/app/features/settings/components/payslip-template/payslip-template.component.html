@@ -1,0 +1,344 @@
+<div class="payslip-template-page">
+  <header class="page-header">
+    <div class="title-section">
+      <div class="title-row">
+        <div class="icon-box">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <div>
+          <h1 class="title">Payslip Template</h1>
+          <p class="subtitle">
+            Configure branding and visible fields. Generated compliance payslips use this layout automatically.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions" *ngIf="!isLoading && !isEditMode && canEdit">
+      <button type="button" class="primary-btn" (click)="enterEditMode()">
+        <mat-icon>edit</mat-icon>
+        {{ usingDefaultTemplate ? 'Customize Template' : 'Edit Template' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="info-banner" *ngIf="!isLoading && usingDefaultTemplate && !isEditMode">
+    <mat-icon>info</mat-icon>
+    <span>Using the default payslip layout. Customize branding and fields to match your company.</span>
+  </div>
+
+  <div class="page-loading" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>Loading payslip template…</span>
+  </div>
+
+  <!-- View mode -->
+  <ng-container *ngIf="!isLoading && !isEditMode && savedTemplate">
+    <section class="summary-cards">
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Header title</span>
+            <span class="value">{{ savedTemplate.headerTitle }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>title</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">{{ savedTemplate.headerSubtitle || 'No subtitle' }}</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Template status</span>
+            <span class="value">{{ savedTemplate.isCustom ? 'Custom' : 'Default' }}</span>
+          </div>
+          <div class="icon-wrapper" [class.color-green]="savedTemplate.isCustom" [class.color-orange]="!savedTemplate.isCustom">
+            <mat-icon>{{ savedTemplate.isCustom ? 'check_circle' : 'tune' }}</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">{{ savedTemplate.name }}</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Layout style</span>
+            <span class="value">{{ getLayoutDisplayName(savedTemplate.layoutKey) }}</span>
+          </div>
+          <div class="icon-wrapper color-blue">
+            <mat-icon>view_quilt</mat-icon>
+          </div>
+        </div>
+        <p class="card-footer">PDF arrangement template</p>
+      </div>
+
+      <div class="card">
+        <div class="card-content">
+          <div class="info">
+            <span class="label">Brand colors</span>
+            <span class="value">3 configured</span>
+          </div>
+          <div class="swatch-group">
+            <span class="swatch" [style.background]="savedTemplate.primaryColor"></span>
+            <span class="swatch" [style.background]="savedTemplate.accentColor"></span>
+            <span class="swatch" [style.background]="savedTemplate.sectionTitleColor"></span>
+          </div>
+        </div>
+        <p class="card-footer">Primary · Accent · Sections</p>
+      </div>
+    </section>
+
+    <div class="content-card view-preview-card">
+      <div class="card-toolbar">
+        <h2>Template preview</h2>
+      </div>
+      <div class="view-header" [style.background]="savedTemplate.primaryColor">
+        <img *ngIf="savedTemplate.logoUrl" [src]="savedTemplate.logoUrl" alt="Logo" class="view-logo" />
+        <div>
+          <h3>{{ savedTemplate.headerTitle }}</h3>
+          <p *ngIf="savedTemplate.headerSubtitle">{{ savedTemplate.headerSubtitle }}</p>
+          <p class="view-address" *ngIf="savedTemplate.companyAddress">{{ savedTemplate.companyAddress }}</p>
+        </div>
+      </div>
+      <div class="view-meta-grid">
+        <div class="meta-item">
+          <span class="meta-label">Footer text</span>
+          <span class="meta-value">{{ savedTemplate.footerText || '—' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Show generated at</span>
+          <span class="meta-value">{{ savedTemplate.showGeneratedAt ? 'Yes' : 'No' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Show calculated at</span>
+          <span class="meta-value">{{ savedTemplate.showPayrollCalculatedAt ? 'Yes' : 'No' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Logo</span>
+          <span class="meta-value">{{ savedTemplate.logoUrl ? 'Uploaded' : 'Not set' }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Edit mode -->
+  <form [formGroup]="form" *ngIf="!isLoading && isEditMode" class="edit-layout" (ngSubmit)="onSave()">
+    <div class="edit-columns">
+      <div class="edit-main">
+        <div class="content-card section-card">
+          <div class="section-head">
+            <h2>Layout style</h2>
+            <p>Choose how earnings, deductions, and summary blocks are arranged on the PDF.</p>
+          </div>
+          <div class="layout-picker">
+            <button
+              type="button"
+              class="layout-card"
+              *ngFor="let layout of layoutOptions"
+              [class.layout-card--selected]="isLayoutSelected(layout.layoutKey)"
+              [attr.aria-pressed]="isLayoutSelected(layout.layoutKey)"
+              (click)="selectLayout(layout.layoutKey)">
+              <div class="layout-thumb-wrap">
+                <div [class]="getLayoutPreviewClass(layout.layoutKey)" aria-hidden="true"></div>
+                <span class="layout-selected-badge" *ngIf="isLayoutSelected(layout.layoutKey)" aria-hidden="true">
+                  <mat-icon>check</mat-icon>
+                </span>
+              </div>
+              <div class="layout-card-body">
+                <span class="layout-card-title">{{ layout.displayName }}</span>
+                <span class="layout-card-desc">{{ layout.description }}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="content-card section-card">
+          <div class="section-head">
+            <h2>Branding</h2>
+            <p>Company identity shown at the top of every payslip.</p>
+          </div>
+          <div class="form-grid form-grid--3">
+            <label class="form-field">
+              <span>Template name</span>
+              <input type="text" formControlName="name" class="native-input" />
+            </label>
+            <label class="form-field">
+              <span>Header title</span>
+              <input type="text" formControlName="headerTitle" class="native-input" />
+            </label>
+            <label class="form-field">
+              <span>Header subtitle</span>
+              <input type="text" formControlName="headerSubtitle" class="native-input" placeholder="Company legal name" />
+            </label>
+            <label class="form-field form-field--span-2">
+              <span>Company address</span>
+              <textarea rows="2" formControlName="companyAddress" class="native-textarea"></textarea>
+            </label>
+            <label class="form-field">
+              <span>Footer text</span>
+              <textarea rows="2" formControlName="footerText" class="native-textarea"></textarea>
+            </label>
+          </div>
+
+          <div class="logo-upload-row">
+            <div class="logo-preview-box" *ngIf="currentLogoUrl">
+              <img [src]="currentLogoUrl" alt="Logo preview" />
+            </div>
+            <div class="logo-upload-actions">
+              <span class="field-label">Company logo</span>
+              <input #logoInput type="file" [accept]="acceptedImageTypes" hidden (change)="onLogoSelected($event)" />
+              <div class="logo-buttons">
+                <button type="button" class="ghost-btn" (click)="triggerLogoInput(logoInput)" [disabled]="isUploadingLogo">
+                  <mat-icon>upload</mat-icon>
+                  {{ isUploadingLogo ? 'Uploading…' : 'Upload logo' }}
+                </button>
+                <button type="button" class="text-btn" (click)="clearLogo()" *ngIf="currentLogoUrl">Remove</button>
+              </div>
+              <small *ngIf="logoFileName">{{ logoFileName }}</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card section-card">
+          <div class="section-head">
+            <h2>Colors & display</h2>
+            <p>Match payslip colors to your company theme.</p>
+          </div>
+          <div class="form-grid form-grid--3">
+            <label class="form-field color-field">
+              <span>Header / primary</span>
+              <div class="color-input-wrap">
+                <input type="color" formControlName="primaryColor" />
+                <span>{{ form.get('primaryColor')?.value }}</span>
+              </div>
+            </label>
+            <label class="form-field color-field">
+              <span>Net pay accent</span>
+              <div class="color-input-wrap">
+                <input type="color" formControlName="accentColor" />
+                <span>{{ form.get('accentColor')?.value }}</span>
+              </div>
+            </label>
+            <label class="form-field color-field">
+              <span>Section titles</span>
+              <div class="color-input-wrap">
+                <input type="color" formControlName="sectionTitleColor" />
+                <span>{{ form.get('sectionTitleColor')?.value }}</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="subsection-label">Display options</div>
+          <div class="option-list option-list--grid">
+            <div class="option-row" *ngFor="let option of displayOptions">
+              <div class="option-leading">
+                <span class="option-icon" aria-hidden="true">
+                  <mat-icon>{{ option.icon }}</mat-icon>
+                </span>
+                <div class="option-info">
+                  <span class="option-label">{{ option.label }}</span>
+                  <span class="option-hint">{{ option.hint }}</span>
+                </div>
+              </div>
+              <label class="switch-toggle" [attr.aria-label]="option.label">
+                <input type="checkbox" [formControlName]="option.control" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-card section-card">
+          <div class="section-head">
+            <h2>Sections</h2>
+            <p>Choose which blocks appear on the payslip.</p>
+          </div>
+          <div class="option-list">
+            <div
+              class="option-row"
+              *ngFor="let section of sectionToggles"
+              [class.option-row--active]="isSectionVisible(section.key)">
+              <div class="option-leading">
+                <span class="option-icon" aria-hidden="true">
+                  <mat-icon>{{ section.icon }}</mat-icon>
+                </span>
+                <div class="option-info">
+                  <span class="option-label">{{ section.label }}</span>
+                  <span class="option-hint">{{ section.hint }}</span>
+                </div>
+              </div>
+              <label class="switch-toggle" [attr.aria-label]="section.label">
+                <input
+                  type="checkbox"
+                  [checked]="isSectionVisible(section.key)"
+                  (change)="toggleSection(section.key)" />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="fields-panels">
+          <div class="content-card fields-panel" *ngFor="let group of fieldGroups">
+            <div class="fields-panel-head">
+              <span class="fields-panel-icon">
+                <mat-icon>{{ group.icon }}</mat-icon>
+              </span>
+              <div>
+                <h2>{{ group.title }}</h2>
+                <p>{{ group.fields.length }} field{{ group.fields.length === 1 ? '' : 's' }} available</p>
+              </div>
+            </div>
+            <div class="option-list option-list--compact">
+              <div
+                class="option-row"
+                *ngFor="let field of group.fields"
+                [class.option-row--active]="isFieldVisible(group.key, field.key)">
+                <div class="option-info option-info--solo">
+                  <span class="option-label">{{ field.label }}</span>
+                </div>
+                <label class="switch-toggle" [attr.aria-label]="field.label">
+                  <input
+                    type="checkbox"
+                    [checked]="isFieldVisible(group.key, field.key)"
+                    (change)="toggleField(group.key, field.key)" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="preview-panel content-card">
+        <div class="section-head">
+          <h2>Live preview</h2>
+          <p>Generate a sample PDF with your current settings.</p>
+        </div>
+        <button type="button" class="outline-btn full-width" (click)="onPreview()" [disabled]="isPreviewing || isSaving">
+          <mat-icon>picture_as_pdf</mat-icon>
+          {{ isPreviewing ? 'Generating…' : 'Generate preview' }}
+        </button>
+        <button type="button" class="text-btn full-width" *ngIf="previewUrl" (click)="openPreviewInNewTab()">
+          Open in new tab
+        </button>
+        <div class="preview-frame-wrap" *ngIf="safePreviewUrl">
+          <iframe [src]="safePreviewUrl" class="preview-frame" title="Payslip preview"></iframe>
+        </div>
+        <div class="preview-placeholder" *ngIf="!safePreviewUrl">
+          <mat-icon>description</mat-icon>
+          <p>Click generate preview to see your payslip layout here.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="form-actions content-card">
+      <button type="button" class="ghost-btn" (click)="cancelEdit()" [disabled]="isSaving">Cancel</button>
+      <button type="submit" class="primary-btn" [disabled]="isSaving || form.invalid">
+        <mat-icon>save</mat-icon>
+        {{ isSaving ? 'Saving…' : 'Save template' }}
+      </button>
+    </footer>
+  </form>
+</div>

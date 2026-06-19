@@ -51,6 +51,146 @@ export interface UpdateCareerPageRequest {
   logoUrl?: string | null;
 }
 
+export interface PayslipTemplateSectionConfig {
+  visible: boolean;
+  title?: string | null;
+}
+
+export interface PayslipTemplateFieldItemConfig {
+  visible: boolean;
+  label?: string | null;
+}
+
+export interface PayslipTemplateOptions {
+  hideZeroAmountLines: boolean;
+  hideEmptyJsonSections: boolean;
+}
+
+export interface PayslipTemplateFieldConfig {
+  sections: Record<string, PayslipTemplateSectionConfig>;
+  employeeFields: Record<string, PayslipTemplateFieldItemConfig>;
+  earningFields: Record<string, PayslipTemplateFieldItemConfig>;
+  deductionFields: Record<string, PayslipTemplateFieldItemConfig>;
+  netPayFields: Record<string, PayslipTemplateFieldItemConfig>;
+  options: PayslipTemplateOptions;
+}
+
+export interface PayslipLayoutOption {
+  layoutKey: string;
+  displayName: string;
+  description?: string | null;
+  previewImageUrl?: string | null;
+  rendererKey: string;
+  sortOrder: number;
+}
+
+export interface PayslipTemplate {
+  templateId?: string | null;
+  organizationId: string;
+  name: string;
+  isActive: boolean;
+  logoUrl?: string | null;
+  headerTitle: string;
+  headerSubtitle?: string | null;
+  companyAddress?: string | null;
+  footerText?: string | null;
+  primaryColor: string;
+  accentColor: string;
+  sectionTitleColor: string;
+  showGeneratedAt: boolean;
+  showPayrollCalculatedAt: boolean;
+  layoutKey: string;
+  layoutConfig?: Record<string, unknown> | null;
+  fieldConfig: PayslipTemplateFieldConfig;
+  isCustom: boolean;
+}
+
+export interface UpsertPayslipTemplateRequest {
+  name: string;
+  logoUrl?: string | null;
+  headerTitle: string;
+  headerSubtitle?: string | null;
+  companyAddress?: string | null;
+  footerText?: string | null;
+  primaryColor: string;
+  accentColor: string;
+  sectionTitleColor: string;
+  showGeneratedAt: boolean;
+  showPayrollCalculatedAt: boolean;
+  layoutKey: string;
+  layoutConfig?: Record<string, unknown> | null;
+  fieldConfig: PayslipTemplateFieldConfig;
+}
+
+export const PAYSLIP_LAYOUT_FALLBACKS: PayslipLayoutOption[] = [
+  {
+    layoutKey: 'classic_stacked',
+    displayName: 'Classic stacked',
+    description: 'Traditional payslip with stacked sections.',
+    rendererKey: 'classic_stacked',
+    sortOrder: 1
+  },
+  {
+    layoutKey: 'split_columns',
+    displayName: 'Split columns',
+    description: 'Earnings and deductions shown side by side.',
+    rendererKey: 'split_columns',
+    sortOrder: 2
+  },
+  {
+    layoutKey: 'compact_corporate',
+    displayName: 'Compact corporate',
+    description: 'Summary strip with compact line items.',
+    rendererKey: 'compact_corporate',
+    sortOrder: 3
+  }
+];
+
+export function createDefaultPayslipFieldConfig(): PayslipTemplateFieldConfig {
+  return {
+    sections: {
+      employeeInfo: { visible: true, title: 'Employee Details' },
+      earnings: { visible: true, title: 'EARNINGS' },
+      deductions: { visible: true, title: 'DEDUCTIONS' },
+      netPay: { visible: true, title: 'NET PAY' },
+      footer: { visible: true }
+    },
+    employeeFields: {
+      employeeName: { visible: true, label: 'Employee' },
+      employeeCode: { visible: true, label: 'Employee code' },
+      departmentName: { visible: true, label: 'Department' },
+      payPeriod: { visible: true, label: 'Pay period' }
+    },
+    earningFields: {
+      basicSalary: { visible: true, label: 'Basic salary' },
+      totalBonuses: { visible: true, label: 'Total bonuses' },
+      performanceBonuses: { visible: true, label: 'Performance bonus' },
+      generalBonuses: { visible: true, label: 'General bonus' },
+      gratuity: { visible: true, label: 'Gratuity' },
+      overtime: { visible: true, label: 'Overtime' },
+      grossPayLine: { visible: true, label: 'GROSS PAY (basic + bonuses)' }
+    },
+    deductionFields: {
+      loanDeductions: { visible: true, label: 'Loan deductions' },
+      salaryAdvance: { visible: true, label: 'Salary advance' },
+      providentFund: { visible: true, label: 'Provident fund' },
+      socialSecurity: { visible: true, label: 'Social security' },
+      tax: { visible: true, label: 'Tax' },
+      attendance: { visible: true, label: 'Attendance' },
+      lateAttendance: { visible: true, label: 'Late attendance' },
+      leave: { visible: true, label: 'Leave' },
+      totalDeductions: { visible: true, label: 'Total deductions' }
+    },
+    netPayFields: {
+      netPayable: { visible: true, label: 'NET PAYABLE' }
+    },
+    options: {
+      hideZeroAmountLines: true,
+      hideEmptyJsonSections: true
+    }
+  };
+}
+
 export interface OnboardingFieldConfiguration {
   enabled: boolean;
   required: boolean;
@@ -462,6 +602,51 @@ export class SettingsService {
         if (!res?.url) throw new Error('Upload failed');
         return res.url;
       })
+    );
+  }
+
+  getPayslipTemplate(): Observable<PayslipTemplate> {
+    return this.http.get<ApiResponse<PayslipTemplate>>(`${this.settingsUrl}/payslip-template`).pipe(
+      map(res => {
+        if (!res.success || !res.data) {
+          throw new Error(res.message || 'Failed to load payslip template');
+        }
+        return {
+          ...res.data,
+          layoutKey: res.data.layoutKey || 'classic_stacked'
+        };
+      })
+    );
+  }
+
+  getPayslipLayoutOptions(): Observable<PayslipLayoutOption[]> {
+    return this.http.get<ApiResponse<PayslipLayoutOption[]>>(`${this.settingsUrl}/payslip-template/layouts`).pipe(
+      map(res => {
+        if (!res.success || !res.data?.length) {
+          return PAYSLIP_LAYOUT_FALLBACKS;
+        }
+        return res.data;
+      }),
+      catchError(() => of(PAYSLIP_LAYOUT_FALLBACKS))
+    );
+  }
+
+  updatePayslipTemplate(request: UpsertPayslipTemplateRequest): Observable<PayslipTemplate> {
+    return this.http.put<ApiResponse<PayslipTemplate>>(`${this.settingsUrl}/payslip-template`, request).pipe(
+      map(res => {
+        if (!res.success || !res.data) {
+          throw new Error(res.message || 'Failed to save payslip template');
+        }
+        return res.data;
+      })
+    );
+  }
+
+  previewPayslipTemplate(template?: UpsertPayslipTemplateRequest): Observable<Blob> {
+    return this.http.post(
+      `${this.settingsUrl}/payslip-template/preview`,
+      { template: template ?? null },
+      { responseType: 'blob' }
     );
   }
 }

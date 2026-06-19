@@ -380,6 +380,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       menuName: 'Settings',
       children: [
         { label: 'Company Settings', icon: 'work_outline', route: '/settings/general', menuName: 'Settings', subMenuName: 'Company Name' },
+        { label: 'Payslip Template', icon: 'receipt_long', route: '/settings/payslip-template', anyOfActionKeys: ['payslip_template_view', 'payslip_template_edit'] },
         { label: 'Manage Ips', icon: 'how_to_reg', route: '/settings/ip-address', menuName: 'Settings', subMenuName: 'Manage Ips' },
         { label: 'Career Management', icon: 'business_center', route: '/settings/career-management', menuName: 'Settings', subMenuName: 'Career management', actionKey: 'career_management_view' },
         { label: 'Roles', icon: 'admin_panel_settings', route: '/settings/roles', menuName: 'Settings', subMenuName: 'Roles' },
@@ -444,7 +445,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   hasPermission(item: MenuItem): boolean {
     // Show Company Policies and onboarding configuration to Super Admin always (if this route exists but permissions are missing)
-    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Onboarding Configuration' || item.subMenuName === 'Question Bank') {
+    if (item.subMenuName === 'Company Policies' || item.subMenuName === 'Onboarding Configuration' || item.subMenuName === 'Question Bank' || item.route === '/settings/payslip-template') {
       if (this.currentUser?.roleName?.toLowerCase() === 'super admin' || this.currentUser?.roleName?.toLowerCase() === 'admin' || this.currentUser?.roleName?.toLowerCase() === 'hr manager') {
         return true;
       }

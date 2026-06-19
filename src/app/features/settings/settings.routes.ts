@@ -78,6 +78,11 @@ export const settingsRoutes: Routes = [
     path: 'onboarding-configuration',
     loadComponent: () => import('./components/onboarding-configuration/onboarding-configuration.component').then(m => m.OnboardingConfigurationComponent),
     title: 'Onboarding Configuration - HRMS'
+  },
+  {
+    path: 'payslip-template',
+    loadComponent: () => import('./components/payslip-template/payslip-template.component').then(m => m.PayslipTemplateComponent),
+    title: 'Payslip Template - HRMS'
   }
 ];
 
