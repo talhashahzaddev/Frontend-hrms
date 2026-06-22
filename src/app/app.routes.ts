@@ -286,6 +286,38 @@ export const appRoutes: Routes = [
         loadComponent: () =>
           import('./features/platform-admin/components/payment-management/payment-management.component').then(m => m.PaymentManagementComponent),
         title: 'Payment Management - Brisk People'
+      },
+      {
+        path: 'global-roles',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-roles/global-role-list.component').then(m => m.GlobalRoleListComponent),
+            title: 'Global Roles - Brisk People'
+          },
+          {
+            path: 'add',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-role-form/global-role-form.component').then(m => m.GlobalRoleFormComponent),
+            title: 'Add Global Role - Brisk People',
+            data: { mode: 'add' }
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-role-form/global-role-form.component').then(m => m.GlobalRoleFormComponent),
+            title: 'Edit Global Role - Brisk People',
+            data: { mode: 'edit' }
+          },
+          {
+            path: ':id/view',
+            loadComponent: () =>
+              import('./features/platform-admin/components/global-role-form/global-role-form.component').then(m => m.GlobalRoleFormComponent),
+            title: 'View Global Role - Brisk People',
+            data: { mode: 'view' }
+          }
+        ]
       }
     ]
   },
