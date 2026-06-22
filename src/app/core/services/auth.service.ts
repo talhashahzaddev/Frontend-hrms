@@ -640,6 +640,23 @@ export class AuthService {
   }
 
   /**
+   * Refreshes user permissions from the backend API
+   * Called when role permissions are updated via SignalR or other triggers
+   * @returns Observable<UserPermissions | null> with the refreshed permissions
+   */
+  refreshPermissions(): Observable<UserPermissions | null> {
+    const user = this.getCurrentUserValue();
+    
+    if (!user) {
+      console.warn('⚠️ [AuthService] No user logged in, cannot refresh permissions');
+      return of(null);
+    }
+
+    console.log('🔄 [AuthService] Refreshing permissions for user:', user.userId);
+    return this.fetchAndStoreUserPermissions(user.userId);
+  }
+
+  /**
    * Checks if user has permission for a specific action under a menu/submenu
    * @param menuName - Name of the menu
    * @param subMenuName - Name of the submenu
