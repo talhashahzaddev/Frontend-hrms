@@ -399,16 +399,22 @@ export class AppComponent implements OnInit, OnDestroy {
             console.log(`📍 [AppComponent] First allowed route: ${firstAllowedRoute}`);
 
             // Check if user still has access to current page
-            // If not, redirect to first allowed route
+            // If not, redirect to first allowed route with first allowed submenu
             if (currentRoute !== firstAllowedRoute) {
-              console.log(`🔄 [AppComponent] Redirecting from ${currentRoute} to ${firstAllowedRoute}`);
+              // Get the module name from firstAllowedRoute (e.g., "attendance" from "/attendance")
+              const moduleName = firstAllowedRoute.split('/')[1];
+              
+              // Get first allowed submenu route in that module
+              const routeWithSubmenu = this.authService.getFirstAllowedRouteInModule(moduleName);
+              
+              console.log(`🔄 [AppComponent] Redirecting from ${currentRoute} to ${routeWithSubmenu}`);
               this.notificationService.showInfo(
                 'Your permissions have been updated. Redirecting...'
               );
               
               // Small delay to ensure notification is shown
               setTimeout(() => {
-                this.router.navigateByUrl(firstAllowedRoute);
+                this.router.navigateByUrl(routeWithSubmenu);
               }, 300);
             } else {
               // User still has access to current page
