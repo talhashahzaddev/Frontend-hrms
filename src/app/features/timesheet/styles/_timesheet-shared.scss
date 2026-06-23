@@ -1,0 +1,202 @@
+/* ══════════════════════════════════════════════════════════════════════════════
+   TIMESHEET SHARED STYLES — _timesheet-shared.scss
+   Date: 2026-06-23
+   ══════════════════════════════════════════════════════════════════════════════
+   Contains every class that appears in 2+ timesheet components.
+   Import via: @import '../../styles/timesheet-shared';
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══ Page Layout ═══════════════════════════════════════════════════════════ */
+.ts-page-layout {
+  padding: var(--ts-space-6);
+  max-width: 1400px;
+}
+
+
+/* ═══ Section ════════════════════════════════════════════════════════════════ */
+.ts-section {
+  margin-bottom: var(--ts-space-6);
+}
+
+.ts-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ts-text);
+  margin: 0 0 var(--ts-space-3) 0;
+}
+
+
+/* ═══ Loading ════════════════════════════════════════════════════════════════ */
+.ts-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--ts-space-10);
+}
+
+
+/* ═══ Card ═══════════════════════════════════════════════════════════════════ */
+.ts-card {
+  background: var(--ts-card);
+  border: 1px solid var(--ts-border);
+  border-radius: var(--ts-radius-lg);
+  padding: var(--ts-space-5);
+  box-shadow: var(--ts-shadow-sm);
+}
+
+.ts-table-card {
+  background: var(--ts-card);
+  border: 1px solid var(--ts-border);
+  border-radius: var(--ts-radius-lg);
+  padding: var(--ts-space-5);
+  box-shadow: var(--ts-shadow-sm);
+  margin-bottom: var(--ts-space-5);
+}
+
+
+/* ═══ Buttons ════════════════════════════════════════════════════════════════ */
+.ts-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--ts-radius);
+  border: none;
+  background: var(--ts-primary);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { background: var(--ts-primary-dark); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.ts-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--ts-radius);
+  border: 1px solid var(--ts-border);
+  background: var(--ts-card);
+  color: var(--ts-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { border-color: var(--ts-primary-light); color: var(--ts-primary-light); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+
+/* ═══ Form Elements ══════════════════════════════════════════════════════════ */
+.ts-form-row {
+  display: flex;
+  gap: var(--ts-space-3);
+  align-items: flex-end;
+}
+
+.ts-form-group {
+  &.ts-half {
+    flex: 1;
+  }
+
+  &.ts-third {
+    flex: 1;
+  }
+}
+
+
+/* ═══ Switch Row ═════════════════════════════════════════════════════════════ */
+.ts-switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--ts-space-3) 0;
+  border-bottom: 1px solid var(--ts-border-light);
+
+  &:last-child { border-bottom: none; }
+}
+
+.ts-switch-label {
+  font-size: 14px;
+  color: var(--ts-text);
+  font-weight: 500;
+}
+
+
+/* ═══ Empty State ════════════════════════════════════════════════════════════ */
+.ts-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ts-space-10) var(--ts-space-4);
+  gap: var(--ts-space-2);
+}
+
+.ts-empty-state-icon {
+  font-size: 24px;
+  color: var(--ts-text-subtle);
+}
+
+.ts-empty-state-text {
+  font-size: 13px;
+  color: var(--ts-text-muted);
+}
+
+
+/* ═══ Summary Bar ════════════════════════════════════════════════════════════ */
+.ts-summary-bar {
+  display: flex;
+  gap: 20px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.ts-summary-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-summary-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.ts-summary-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+
+  &.balanced { color: #16a34a; }
+  &.over { color: #dc2626; }
+  &.under { color: #d97706; }
+}
+
+
+/* ═══ Shared Animations ══════════════════════════════════════════════════════ */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

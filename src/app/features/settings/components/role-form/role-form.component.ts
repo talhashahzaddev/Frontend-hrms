@@ -251,6 +251,7 @@ export class RoleFormComponent implements OnInit {
     const iconMap: Record<string, string> = {
       'Employee Management': 'people',
       'Attendance': 'schedule',
+      'Timesheet': 'date_range',
       'Leave Management': 'event_available',
       'Assets Management': 'inventory_2',
       'Performance': 'trending_up',

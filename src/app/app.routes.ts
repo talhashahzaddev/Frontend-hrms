@@ -85,6 +85,13 @@ export const appRoutes: Routes = [
     loadChildren: () =>
       import('./features/attendance/attendance.routes').then(m => m.attendanceRoutes)
   },
+  // Timesheet Module
+  {
+    path: "timesheet",
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import("./features/timesheet/timesheet.routes").then(m => m.timesheetRoutes)
+  },
   // Assets Management Routes
   {
     path: 'assets',

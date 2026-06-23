@@ -1,0 +1,97 @@
+// ═══ Card Styles ══════════════════════════════════════════════════════════════
+.ts-card {
+  background: var(--ts-card);
+  border-radius: var(--ts-radius-lg);
+  box-shadow: var(--ts-shadow-sm);
+  border: 1px solid var(--ts-border);
+  padding: var(--ts-space-6);
+}
+
+.ts-card-body {
+  padding: var(--ts-space-6);
+}
+
+// Stat Card
+.ts-stat-card {
+  background: var(--ts-card);
+  border-radius: var(--ts-radius-lg);
+  box-shadow: var(--ts-shadow-sm);
+  border: 1px solid var(--ts-border);
+  padding: var(--ts-space-5);
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  gap: var(--ts-space-4);
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: var(--ts-shadow);
+  }
+
+  .ts-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--ts-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+
+    &.ts-primary { background: var(--ts-primary-bg); color: var(--ts-primary-light); }
+    &.ts-success { background: var(--ts-success-bg); color: var(--ts-success); }
+    &.ts-warning { background: var(--ts-warning-bg); color: var(--ts-warning); }
+    &.ts-danger  { background: var(--ts-danger-bg); color: var(--ts-danger); }
+  }
+
+  .ts-stat-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ts-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ts-text);
+    line-height: 1.2;
+  }
+
+  .ts-stat-label {
+    font-size: 13px;
+    color: var(--ts-text-muted);
+    font-weight: 500;
+  }
+
+  .ts-stat-trend {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+
+    &.ts-trend-up { color: var(--ts-success); }
+    &.ts-trend-down { color: var(--ts-danger); }
+    &.ts-trend-flat { color: var(--ts-text-subtle); }
+  }
+}
+
+// PrimeNG p-card override
+.p-card {
+  border-radius: var(--ts-radius-lg) !important;
+  box-shadow: var(--ts-shadow-sm) !important;
+  border: 1px solid var(--ts-border) !important;
+
+  .p-card-header {
+    padding: var(--ts-space-5) var(--ts-space-6);
+    border-bottom: 1px solid var(--ts-border-light);
+  }
+
+  .p-card-body {
+    padding: var(--ts-space-6);
+  }
+
+  .p-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ts-text);
+    margin: 0;
+  }
+}

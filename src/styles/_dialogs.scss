@@ -1,0 +1,147 @@
+// ═══ Timesheet Dialog Styles ═══════════════════════════════════════════════════
+// Scoped to timesheet dialog containers.
+// Matches the Shift Management module's create-shift dialog styling.
+
+// ── PrimeNG Dialog Overrides (timesheet-scoped) ──────────────────────────────
+// The global .p-dialog override in styles.scss already handles general styling.
+// These additions ensure timesheet dialogs match the shift module exactly.
+
+.ts-page-layout .p-dialog,
+app-timesheet-correction-dialog .p-dialog,
+.p-dialog.ts-dialog {
+  .p-dialog-header {
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+
+    .p-dialog-title {
+      margin: 0 !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      color: #0f172a !important;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 24px !important;
+    overflow-y: auto;
+  }
+
+  .p-dialog-footer {
+    padding: 16px 24px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    background: #f8fafc !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+
+    .p-button {
+      height: 42px !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      padding: 0 24px !important;
+    }
+  }
+}
+
+// ── Angular Material Dialog Overrides (for correction/allocation dialogs) ─────
+:host ::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+
+  .mat-mdc-dialog-surface {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-dialog-content {
+    padding: 0 !important;
+  }
+}
+
+// ── Dialog Header Pattern (icon + title + close button) ──────────────────────
+// Used in the correction dialog and any future MD dialog in the timesheet module.
+
+.ts-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+
+  .ts-dialog-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ts-dialog-header-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(91, 91, 230, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: #6c5ce7;
+    }
+
+    i.pi {
+      font-size: 18px;
+      color: #6c5ce7;
+    }
+  }
+
+  .ts-dialog-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .ts-dialog-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    mat-icon, i {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+// ── Dialog Body ──────────────────────────────────────────────────────────────
+.ts-dialog-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+// ── Dialog Footer ────────────────────────────────────────────────────────────
+.ts-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+}

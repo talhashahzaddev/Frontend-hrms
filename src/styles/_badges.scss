@@ -1,0 +1,44 @@
+// ═══ Status Badges ════════════════════════════════════════════════════════════
+.ts-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--ts-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+
+  &.ts-draft        { background: #F3F4F6; color: var(--ts-status-draft); }
+  &.ts-inprogress   { background: #DBEAFE; color: var(--ts-status-inprogress); }
+  &.ts-submitted    { background: var(--ts-warning-bg); color: var(--ts-warning); }
+  &.ts-underreview  { background: #EDE9FE; color: var(--ts-status-underreview); }
+  &.ts-approved     { background: var(--ts-success-bg); color: var(--ts-success); }
+  &.ts-finalized    { background: var(--ts-success-bg); color: var(--ts-success); }
+  &.ts-locked       { background: var(--ts-danger-bg); color: var(--ts-danger); }
+  &.ts-archived     { background: #F3F4F6; color: var(--ts-text-subtle); }
+
+  // Semantic aliases
+  &.ts-pending      { background: var(--ts-warning-bg); color: #92400E; }
+  &.ts-active       { background: var(--ts-success-bg); color: var(--ts-success); }
+  &.ts-inactive     { background: #F3F4F6; color: var(--ts-text-subtle); }
+  &.ts-error        { background: var(--ts-danger-bg); color: var(--ts-danger); }
+
+  // Day status pills for daily grid
+  &.ts-present      { background: var(--ts-success-bg); color: #16A34A; }
+  &.ts-late         { background: var(--ts-danger-bg); color: var(--ts-danger); }
+  &.ts-absent       { background: var(--ts-danger-bg); color: var(--ts-danger); }
+  &.ts-on-leave     { background: #DBEAFE; color: #2563EB; }
+  &.ts-half-day     { background: #F3E8FF; color: #7C3AED; }
+}
+
+// PrimeNG p-tag overrides
+.p-tag {
+  border-radius: var(--ts-radius-full) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 3px 10px !important;
+}

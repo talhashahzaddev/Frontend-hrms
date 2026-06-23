@@ -96,8 +96,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           permissionAliases: ['TimeTracker']
         },
         { label: 'Team Attendance', icon: 'groups', route: '/attendance/team-attendance', menuName: 'Attendance', subMenuName: 'Team Attendance' },
-        { label: 'Timesheet', icon: 'date_range', route: '/attendance/timesheet', menuName: 'Attendance', subMenuName: 'Timesheet' },
-        { label: 'Timesheet Dashboard', icon: 'pending_actions', route: '/attendance/approvals', menuName: 'Attendance', subMenuName: 'Timesheet Dashboard' },
+
         { label: 'Reports', icon: 'assessment', route: '/attendance/reports', menuName: 'Attendance', subMenuName: 'Reports' },
         { label: 'Shifts', icon: 'access_time', route: '/attendance/shift', menuName: 'Attendance', subMenuName: 'Shifts' },
         { label: 'overtime', icon: 'access_time', route: '/attendance/overtime', menuName: 'Attendance', subMenuName: 'Overtime' },
@@ -118,6 +117,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
           subMenuName: 'Geo Violations',
           permissionAliases: ['Geo-Fence Violations', 'GeoFence Violations', 'Geofence Violations']
         },
+      ]
+    },
+    {
+      label: 'Timesheet',
+      icon: 'date_range',
+      menuName: 'Timesheet',
+      children: [
+        { label: 'Dashboard', icon: 'dashboard', route: '/timesheet/dashboard', menuName: 'Timesheet', subMenuName: 'Dashboard' },
+        { label: 'Periods', icon: 'view_list', route: '/timesheet/periods', menuName: 'Timesheet', subMenuName: 'Periods' },
+        { label: 'Approvals', icon: 'check_circle', route: '/timesheet/approvals', menuName: 'Timesheet', subMenuName: 'Approvals' },
+        { label: 'Projects', icon: 'work', route: '/timesheet/projects', menuName: 'Timesheet', subMenuName: 'Projects' },
+        { label: 'Config', icon: 'settings', route: '/timesheet/config', menuName: 'Timesheet', subMenuName: 'Config' },
+        { label: 'Rate Cards', icon: 'attach_money', route: '/timesheet/rate-cards', menuName: 'Timesheet', subMenuName: 'Rate Cards' },
+        { label: 'Comp Time', icon: 'hourglass_empty', route: '/timesheet/comp-time', menuName: 'Timesheet', subMenuName: 'Comp Time' },
+        { label: 'Delegation', icon: 'swap_horiz', route: '/timesheet/delegation', menuName: 'Timesheet', subMenuName: 'Delegation' },
+        { label: 'Payroll Export', icon: 'payments', route: '/timesheet/payroll-export', menuName: 'Timesheet', subMenuName: 'Payroll Export' },
       ]
     },
     {
