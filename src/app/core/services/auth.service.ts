@@ -819,6 +819,68 @@ export class AuthService {
     return '/dashboard'; // absolute fallback
   }
 
+  /**
+   * Gets the first allowed submenu route in a given module
+   * @param moduleName - The module name (e.g., 'attendance', 'leave')
+   * @returns Route with first allowed submenu (e.g., '/leave/dashboard') or just module (e.g., '/leave')
+   */
+  getFirstAllowedRouteInModule(moduleName: string): string {
+    const permissions = this.permissionsSubject.value;
+    if (!permissions) return `/${moduleName}`;
+
+    // Map submenu names to their actual routes
+    const submenuRouteMap: { [key: string]: { [key: string]: string } } = {
+      'Leave Management': {
+        'My Leaves': 'dashboard',
+        'Team Leaves': 'team',
+        'Team Requests': 'team-requests',
+        'Leave Types': 'types'
+      },
+      'Attendance': {
+        'Daily Report': 'daily-report',
+        'Summary': 'summary',
+        'Analytics': 'analytics'
+      },
+      'Employee Management': {
+        'All Employees': 'list',
+        'Add Employee': 'add'
+      },
+      'Performance': {
+        'Performance Reviews': 'reviews',
+        'Goals': 'goals'
+      }
+    };
+
+    const menu = permissions.menus.find(m => 
+      m.menuName.toLowerCase() === moduleName.toLowerCase() || 
+      m.menuName === Object.keys(submenuRouteMap).find(key => submenuRouteMap[key])
+    );
+    
+    if (!menu) return `/${moduleName}`;
+
+    // Find first submenu with allowed permission
+    for (const subMenu of menu.subMenus) {
+      const hasPermission = subMenu.actions.some(action => action.hasPermission);
+      if (hasPermission) {
+        // Try to find mapped route first
+        const mappedRoute = submenuRouteMap[menu.menuName]?.[subMenu.subMenuName];
+        
+        if (mappedRoute) {
+          return `/${moduleName}/${mappedRoute}`;
+        }
+        
+        // Fallback to converting submenu name to route format
+        const subMenuRoute = subMenu.subMenuName
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-z0-9-]/g, '');
+        return `/${moduleName}/${subMenuRoute}`;
+      }
+    }
+
+    return `/${moduleName}`;
+  }
+
   private isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
