@@ -1,0 +1,88 @@
+// ═══ Design Tokens ═══════════════════════════════════════════════════════════
+:root {
+  // Primary
+  --ts-primary: #1E3A5F;
+  --ts-primary-light: #2D7DD2;
+  --ts-primary-hover: #162D4A;
+  --ts-primary-bg: #EBF2FA;
+  --ts-primary-bg-light: #EFF6FF;
+
+  // Semantic
+  --ts-success: #16A34A;
+  --ts-success-bg: #DCFCE7;
+  --ts-warning: #D97706;
+  --ts-warning-bg: #FEF3C7;
+  --ts-danger: #DC2626;
+  --ts-danger-bg: #FEE2E2;
+
+  // Neutrals
+  --ts-bg: #F4F6F9;
+  --ts-card: #FFFFFF;
+  --ts-border: #E0E4EA;
+  --ts-border-light: #F3F4F6;
+  --ts-border-focus: #2D7DD2;
+
+  // Text
+  --ts-text: #1F2937;
+  --ts-text-secondary: #374151;
+  --ts-text-muted: #6B7280;
+  --ts-text-subtle: #9CA3AF;
+  --ts-text-inverse: #FFFFFF;
+
+  // Spacing (8px grid)
+  --ts-space-1: 4px;
+  --ts-space-2: 8px;
+  --ts-space-3: 12px;
+  --ts-space-4: 16px;
+  --ts-space-5: 20px;
+  --ts-space-6: 24px;
+  --ts-space-8: 32px;
+  --ts-space-10: 40px;
+  --ts-space-12: 48px;
+
+  // Radius
+  --ts-radius-sm: 4px;
+  --ts-radius: 6px;
+  --ts-radius-lg: 8px;
+  --ts-radius-xl: 10px;
+  --ts-radius-full: 9999px;
+
+  // Shadows
+  --ts-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --ts-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --ts-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  // Status colors (mapped to spec)
+  --ts-status-draft: #6B7280;
+  --ts-status-inprogress: #2D7DD2;
+  --ts-status-submitted: #D97706;
+  --ts-status-underreview: #7C3AED;
+  --ts-status-approved: #16A34A;
+  --ts-status-finalized: #16A34A;
+  --ts-status-locked: #DC2626;
+  --ts-status-archived: #9CA3AF;
+
+  // ═══ Timesheet Module Scoped Colors ════════════════════════════════════════
+  // These override the defaults above ONLY within .ts-page-layout containers
+  // so the timesheet module uses the same purple as the Shift Management module
+  // while the sidebar and other modules keep the original --ts-primary.
+
+  // Layout
+  --ts-header-height: 56px;
+  --ts-sidebar-width: 260px;
+}
+
+// ═══ Timesheet Module Color Scope ══════════════════════════════════════════════
+// Override --ts-primary ONLY inside timesheet pages so PrimeNG buttons/dialogs
+// in this module use the same purple (#5b5be6) as the Shift Management module.
+// Other modules (sidebar, attendance dashboard, etc.) keep --ts-primary: #1E3A5F.
+.ts-page-layout,
+app-timesheet-correction-dialog,
+app-time-allocation-dialog {
+  --ts-primary: #5b5be6;
+  --ts-primary-light: #6C5CE7;
+  --ts-primary-hover: #4a4ad4;
+  --ts-primary-bg: #f0eefe;
+  --ts-primary-bg-light: #f5f3ff;
+  --ts-border-focus: #6C5CE7;
+}

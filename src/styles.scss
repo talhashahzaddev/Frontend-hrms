@@ -1,18 +1,18 @@
-/* Hubstaff-inspired Global Styles */
+/* ═══ HRMS Global Styles ═════════════════════════════════════════════════════ */
 
 @use './leave-colors';
+@use './styles/variables';
+@use './styles/typography';
+@use './styles/tables';
+@use './styles/forms';
+@use './styles/cards';
+@use './styles/badges';
+@use './styles/buttons';
+@use './styles/dialogs';
 
-// Import Google Fonts
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-
-
-
-
-
-
-
-// Hubstaff Color Palette
+// ═══ Original App Variables (sidebar + non-timesheet modules depend on these) ═══
 :root {
   // Primary Colors (Blue/Purple theme like Hubstaff)
   --primary-50: #f0f9ff;
@@ -63,7 +63,7 @@
   // Gradients (like Hubstaff)
   --gradient-primary: linear-gradient(135deg, var(--primary-600) 0%, var(--purple-600) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--purple-500) 0%, var(--primary-500) 100%);
-  --gradient-background: white; //linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-background: white;
 
   // Shadows
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -90,7 +90,7 @@
   --spacing-2xl: 3rem;
 }
 
-// Reset and Base Styles
+// ═══ Reset (preserving original) ═══════════════════════════════════════════
 * {
   margin: 0;
   padding: 0;
@@ -112,42 +112,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-// Typography
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+// ═══ Typography (preserving original) ══════════════════════════════════════
+h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: 1.4;
   color: var(--gray-900);
   margin: 0;
 }
 
-h1 {
-  font-size: 2.25rem;
-}
-
-h2 {
-  font-size: 1.875rem;
-}
-
-h3 {
-  font-size: 1.5rem;
-}
-
-h4 {
-  font-size: 1.25rem;
-}
-
-h5 {
-  font-size: 1.125rem;
-}
-
-h6 {
-  font-size: 1rem;
-}
+h1 { font-size: 2.25rem; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
 
 p {
   margin: 0;
@@ -164,100 +142,92 @@ a {
   }
 }
 
-// Utility Classes
-.text-primary {
-  color: var(--primary-600) !important;
+// ═══ Timesheet Utilities ════════════════════════════════════════════════════
+.ts-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--ts-space-6) var(--ts-space-8);
 }
 
-.text-secondary {
-  color: var(--gray-600) !important;
+.ts-page-layout {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--ts-space-6) var(--ts-space-8);
 }
 
-.text-success {
-  color: var(--success) !important;
+.ts-flex { display: flex; }
+.ts-flex-col { flex-direction: column; }
+.ts-items-center { align-items: center; }
+.ts-justify-between { justify-content: space-between; }
+.ts-gap-2 { gap: var(--ts-space-2); }
+.ts-gap-3 { gap: var(--ts-space-3); }
+.ts-gap-4 { gap: var(--ts-space-4); }
+.ts-gap-6 { gap: var(--ts-space-6); }
+.ts-w-full { width: 100%; }
+
+.ts-empty-state {
+  text-align: center;
+  padding: var(--ts-space-12) var(--ts-space-6);
+  color: var(--ts-text-subtle);
+
+  .ts-empty-icon {
+    font-size: 40px;
+    color: #D1D5DB;
+    margin-bottom: var(--ts-space-4);
+  }
+
+  .ts-empty-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: var(--ts-space-2);
+  }
+
+  .ts-empty-message {
+    font-size: 13px;
+    color: var(--ts-text-subtle);
+    margin-bottom: var(--ts-space-6);
+  }
 }
 
-.text-warning {
-  color: var(--warning) !important;
+.ts-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--ts-space-12);
+  color: var(--ts-text-muted);
+  font-size: 14px;
 }
 
-.text-error {
-  color: var(--error) !important;
-}
+// ═══ Utility Classes (preserving original) ══════════════════════════════════
+.text-primary { color: var(--primary-600) !important; }
+.text-secondary { color: var(--gray-600) !important; }
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-error { color: var(--error) !important; }
+.text-white { color: white !important; }
 
-.text-white {
-  color: white !important;
-}
+.bg-primary { background-color: var(--primary-600) !important; }
+.bg-secondary { background-color: var(--gray-100) !important; }
+.bg-success { background-color: var(--success) !important; }
+.bg-warning { background-color: var(--warning) !important; }
+.bg-error { background-color: var(--error) !important; }
+.bg-white { background-color: white !important; }
+.bg-gradient { background: var(--gradient-primary) !important; }
 
-.bg-primary {
-  background-color: var(--primary-600) !important;
-}
+.shadow-sm { box-shadow: var(--shadow-sm) !important; }
+.shadow-md { box-shadow: var(--shadow-md) !important; }
+.shadow-lg { box-shadow: var(--shadow-lg) !important; }
+.shadow-xl { box-shadow: var(--shadow-xl) !important; }
 
-.bg-secondary {
-  background-color: var(--gray-100) !important;
-}
+.rounded-sm { border-radius: var(--radius-sm) !important; }
+.rounded-md { border-radius: var(--radius-md) !important; }
+.rounded-lg { border-radius: var(--radius-lg) !important; }
+.rounded-xl { border-radius: var(--radius-xl) !important; }
+.rounded-2xl { border-radius: var(--radius-2xl) !important; }
+.rounded-full { border-radius: var(--radius-full) !important; }
 
-.bg-success {
-  background-color: var(--success) !important;
-}
-
-.bg-warning {
-  background-color: var(--warning) !important;
-}
-
-.bg-error {
-  background-color: var(--error) !important;
-}
-
-.bg-white {
-  background-color: white !important;
-}
-
-.bg-gradient {
-  background: var(--gradient-primary) !important;
-}
-
-.shadow-sm {
-  box-shadow: var(--shadow-sm) !important;
-}
-
-.shadow-md {
-  box-shadow: var(--shadow-md) !important;
-}
-
-.shadow-lg {
-  box-shadow: var(--shadow-lg) !important;
-}
-
-.shadow-xl {
-  box-shadow: var(--shadow-xl) !important;
-}
-
-.rounded-sm {
-  border-radius: var(--radius-sm) !important;
-}
-
-.rounded-md {
-  border-radius: var(--radius-md) !important;
-}
-
-.rounded-lg {
-  border-radius: var(--radius-lg) !important;
-}
-
-.rounded-xl {
-  border-radius: var(--radius-xl) !important;
-}
-
-.rounded-2xl {
-  border-radius: var(--radius-2xl) !important;
-}
-
-.rounded-full {
-  border-radius: var(--radius-full) !important;
-}
-
-// Layout Classes
+// ═══ Layout Classes (preserving original) ═══════════════════════════════════
 .container {
   width: 100%;
   max-width: 1280px;
@@ -265,95 +235,30 @@ a {
   padding: 0 var(--spacing-lg);
 }
 
-.flex {
-  display: flex;
-}
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: var(--spacing-sm); }
+.gap-4 { gap: var(--spacing-md); }
+.gap-6 { gap: var(--spacing-lg); }
+.gap-8 { gap: var(--spacing-xl); }
+.p-2 { padding: var(--spacing-sm); }
+.p-4 { padding: var(--spacing-md); }
+.p-6 { padding: var(--spacing-lg); }
+.p-8 { padding: var(--spacing-xl); }
+.m-2 { margin: var(--spacing-sm); }
+.m-4 { margin: var(--spacing-md); }
+.m-6 { margin: var(--spacing-lg); }
+.m-8 { margin: var(--spacing-xl); }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
 
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.gap-2 {
-  gap: var(--spacing-sm);
-}
-
-.gap-4 {
-  gap: var(--spacing-md);
-}
-
-.gap-6 {
-  gap: var(--spacing-lg);
-}
-
-.gap-8 {
-  gap: var(--spacing-xl);
-}
-
-.p-2 {
-  padding: var(--spacing-sm);
-}
-
-.p-4 {
-  padding: var(--spacing-md);
-}
-
-.p-6 {
-  padding: var(--spacing-lg);
-}
-
-.p-8 {
-  padding: var(--spacing-xl);
-}
-
-.m-2 {
-  margin: var(--spacing-sm);
-}
-
-.m-4 {
-  margin: var(--spacing-md);
-}
-
-.m-6 {
-  margin: var(--spacing-lg);
-}
-
-.m-8 {
-  margin: var(--spacing-xl);
-}
-
-.w-full {
-  width: 100%;
-}
-
-.h-full {
-  height: 100%;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
-}
-
-// Button Styles (Hubstaff-inspired)
+// ═══ Button Styles (preserving original) ════════════════════════════════════
 .btn {
   display: inline-flex;
   align-items: center;
@@ -436,11 +341,7 @@ a {
   }
 }
 
-
-.cdk-overlay-container {
-  z-index: 2000 !important;
-}
-// Card Styles (Hubstaff-inspired)
+// ═══ Card Styles (preserving original) ══════════════════════════════════════
 .card {
   background: white;
   border-radius: var(--radius-xl);
@@ -466,9 +367,7 @@ a {
     }
   }
 
-  .card-body {
-    padding: 1.5rem;
-  }
+  .card-body { padding: 1.5rem; }
 
   .card-footer {
     padding: 1.5rem;
@@ -477,7 +376,7 @@ a {
   }
 }
 
-// Form Styles
+// ═══ Form Styles (preserving original) ══════════════════════════════════════
 .form-group {
   margin-bottom: 1.5rem;
 
@@ -504,9 +403,7 @@ a {
       box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
     }
 
-    &.error {
-      border-color: var(--error);
-    }
+    &.error { border-color: var(--error); }
   }
 
   .error-message {
@@ -516,22 +413,15 @@ a {
   }
 }
 
-.custom-dialog {
-  padding: 20px;
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-
+.custom-dialog { padding: 20px; }
+.form-row { display: flex; gap: 16px; }
 .form-actions {
   margin-top: 16px;
   display: flex;
   gap: 10px;
 }
 
-// Table Styles
+// ═══ Table Styles (preserving original) ═════════════════════════════════════
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -540,8 +430,7 @@ a {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 
-  th,
-  td {
+  th, td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid var(--gray-200);
@@ -559,12 +448,10 @@ a {
     color: var(--gray-600);
   }
 
-  tr:hover {
-    background: var(--gray-50);
-  }
+  tr:hover { background: var(--gray-50); }
 }
 
-// Status Badges
+// ═══ Badge Styles (preserving original) ═════════════════════════════════════
 .badge {
   display: inline-flex;
   align-items: center;
@@ -573,33 +460,14 @@ a {
   font-weight: 500;
   border-radius: var(--radius-full);
 
-  &.badge-success {
-    background: var(--success-light);
-    color: var(--success);
-  }
-
-  &.badge-warning {
-    background: var(--warning-light);
-    color: var(--warning);
-  }
-
-  &.badge-error {
-    background: var(--error-light);
-    color: var(--error);
-  }
-
-  &.badge-info {
-    background: var(--info-light);
-    color: var(--info);
-  }
-
-  &.badge-primary {
-    background: var(--primary-100);
-    color: var(--primary-700);
-  }
+  &.badge-success { background: var(--success-light); color: var(--success); }
+  &.badge-warning { background: var(--warning-light); color: var(--warning); }
+  &.badge-error { background: var(--error-light); color: var(--error); }
+  &.badge-info { background: var(--info-light); color: var(--info); }
+  &.badge-primary { background: var(--primary-100); color: var(--primary-700); }
 }
 
-// Loading Spinner
+// ═══ Spinner (preserving original) ══════════════════════════════════════════
 .spinner {
   display: inline-block;
   width: 1rem;
@@ -610,81 +478,11 @@ a {
   animation: spin 1s ease-in-out infinite;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-// Responsive Design
-@media (max-width: 768px) {
-  .container {
-    padding: 0 var(--spacing-md);
-  }
-
-  .btn {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.875rem;
-  }
-
-  .card {
-
-    .card-header,
-    .card-body,
-    .card-footer {
-      padding: 1rem;
-    }
-  }
-
-  .table {
-    font-size: 0.75rem;
-
-    th,
-    td {
-      padding: 0.75rem;
-    }
-  }
-}
-
-// Custom Scrollbar
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--gray-100);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--gray-300);
-  border-radius: var(--radius-full);
-
-  &:hover {
-    background: var(--gray-400);
-  }
-}
-
-// PrimeNG Customizations
-.p-button {
-  background: var(--gradient-primary);
-  border: none;
-  border-radius: var(--radius-lg);
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
-  }
-}
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.settings-title {
-  margin: 0;
+// ═══ CDK Overlay ═════════════════════════════════════════════════════════════
+.cdk-overlay-container {
+  z-index: 2000 !important;
 }
 
 // CDK Overlay Container - Critical for zoom functionality
@@ -703,8 +501,17 @@ a {
 
 
 
+// ═══ Scrollbar ═══════════════════════════════════════════════════════════════
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--gray-100); }
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--radius-full);
+  &:hover { background: var(--gray-400); }
+}
 
-// Add this in your styles.scss
+
+// ═══ Button Wrapper ═════════════════════════════════════════════════════════
 .add-btn-wrap {
   flex-shrink: 0;
 
@@ -754,39 +561,149 @@ a {
    - Preserves the existing color scheme
 ======================================================= */
 .empty-state {
-
   // Ensure buttons within empty states are compact and centered
   button {
-    // Force compact button width (not full-width)
     width: auto !important;
     max-width: fit-content !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-
-    // Standard button padding
     padding: 0 24px !important;
     height: 44px !important;
-
-    // Typography
     font-weight: 600 !important;
     font-size: 14px !important;
     line-height: 1 !important;
-
-    // Preserve purple/gradient background (do NOT change color)
-    // Individual components may override with their own gradient
-    // This ensures consistency across all empty states
     background: #004ac6;
     color: white !important;
-
-    // Spacing & Styling
     border-radius: 12px !important;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
     gap: 8px !important;
     margin: 0 auto !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 
-    // Icon styling
+    mat-icon {
+      font-size: 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      margin: 0 !important;
+      color: white !important;
+    }
+  }
+}
+
+// ═══ Header / Settings Utilities ═════════════════════════════════════════════
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-title {
+  margin: 0;
+}
+
+// ═══ PrimeNG Button Overrides (global baseline) ═══════════════════════════════
+// Timesheet-specific geometry overrides live in _buttons.scss scoped under
+// .ts-page-layout. These are safe global defaults that won't conflict.
+.p-button {
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// ═══ PrimeNG Dialog Overrides ════════════════════════════════════════════════
+.p-dialog {
+  border-radius: var(--ts-radius-xl) !important;
+  box-shadow: var(--ts-shadow-lg) !important;
+
+  .p-dialog-header {
+    padding: 20px 24px !important;
+    border-bottom: 1px solid var(--ts-border) !important;
+    border-radius: var(--ts-radius-xl) var(--ts-radius-xl) 0 0 !important;
+
+    .p-dialog-title {
+      font-size: 17px !important;
+      font-weight: 600 !important;
+      color: var(--ts-text) !important;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 24px !important;
+  }
+
+  .p-dialog-footer {
+    padding: 16px 24px !important;
+    border-top: 1px solid var(--ts-border) !important;
+    border-radius: 0 0 var(--ts-radius-xl) var(--ts-radius-xl) !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+  }
+}
+
+// ═══ PrimeNG Message Overrides ═══════════════════════════════════════════════
+.p-message {
+  border-radius: var(--ts-radius) !important;
+  border-left-width: 4px !important;
+}
+
+// ═══ PrimeNG Steps Overrides ═══════════════════════════════════════════════
+.p-steps .p-steps-item .p-menuitem-link {
+  border-radius: var(--ts-radius-sm);
+  background: transparent;
+}
+
+// ═══ PrimeNG Menu Overrides ══════════════════════════════════════════════════
+.p-menu {
+  border-radius: var(--ts-radius) !important;
+  box-shadow: var(--ts-shadow) !important;
+  border: 1px solid var(--ts-border) !important;
+}
+
+// ═══ PrimeNG ProgressSpinner ═══════════════════════════════════════════════
+.p-progressspinner-circle {
+  stroke: var(--ts-primary-light) !important;
+}
+
+// ═══ PrimeNG ConfirmDialog ════════════════════════════════════════════════
+.p-confirm-dialog .p-dialog-content {
+  font-size: 14px;
+  color: var(--ts-text);
+}
+
+// ═══ Page Header Shared Component ════════════════════════════════════════════
+app-page-header {
+  display: block;
+  margin-bottom: var(--ts-space-6);
+}
+
+// ═══ Global Empty State Button Styling (preserving original) ════════════════
+.empty-state {
+  button {
+    width: auto !important;
+    max-width: fit-content !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 24px !important;
+    height: 44px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    background: #004ac6;
+    color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+    gap: 8px !important;
+    margin: 0 auto !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
     mat-icon {
       font-size: 20px !important;
       width: 20px !important;
@@ -795,7 +712,6 @@ a {
       color: white !important;
     }
 
-    // Hover effect
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
@@ -803,7 +719,7 @@ a {
   }
 }
 
-// Timesheet Detail Dialog - Fix scrolling issue
+// ═══ Timesheet Detail Dialog (preserving original) ═══════════════════════════
 .timesheet-detail-dialog-panel {
   .mat-mdc-dialog-container {
     padding: 0 !important;
@@ -827,7 +743,7 @@ a {
   }
 }
 
-/* ── Timesheet sidebar filter dropdown menus ── */
+// ═══ Timesheet Sidebar Filter Dropdown (preserving original) ═════════════════
 .ss-dropdown-menu {
   .mat-mdc-menu-panel {
     min-width: 110px !important;
@@ -839,9 +755,7 @@ a {
     overflow: hidden !important;
   }
 
-  .mat-mdc-menu-content {
-    padding: 0 !important;
-  }
+  .mat-mdc-menu-content { padding: 0 !important; }
 
   .mat-mdc-menu-item {
     display: flex !important;
@@ -863,23 +777,15 @@ a {
       color: #374151 !important;
     }
 
-    &:hover {
-      background: #f8f9fb !important;
-    }
+    &:hover { background: #f8f9fb !important; }
 
     &.ss-menu-active {
       background: #f0f6ff !important;
       font-weight: 600 !important;
       color: #2563eb !important;
 
-      .mdc-list-item__primary-text {
-        color: #2563eb !important;
-      }
-
-      .ss-menu-count {
-        background: #dbeafe !important;
-        color: #1d4ed8 !important;
-      }
+      .mdc-list-item__primary-text { color: #2563eb !important; }
+      .ss-menu-count { background: #dbeafe !important; color: #1d4ed8 !important; }
     }
   }
 
@@ -896,5 +802,30 @@ a {
     font-size: 9.5px;
     font-weight: 600;
     margin-left: 8px;
+  }
+}
+
+// ═══ Responsive ══════════════════════════════════════════════════════════════
+@media (max-width: 768px) {
+  .container { padding: 0 var(--spacing-md); }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .card {
+    .card-header, .card-body, .card-footer { padding: 1rem; }
+  }
+
+  .table {
+    font-size: 0.75rem;
+    th, td { padding: 0.75rem; }
+  }
+}
+
+@media (max-width: 1280px) {
+  .ts-page-layout, .ts-container {
+    padding: var(--ts-space-4);
   }
 }

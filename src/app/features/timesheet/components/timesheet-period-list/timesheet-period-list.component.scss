@@ -1,0 +1,109 @@
+@use '../../styles/timesheet-shared';
+
+.ts-period-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: var(--ts-space-4);
+}
+
+.ts-period-card {
+  background: var(--ts-card);
+  border: 1px solid var(--ts-border);
+  border-radius: var(--ts-radius-lg);
+  padding: var(--ts-space-5);
+  box-shadow: var(--ts-shadow-sm);
+  transition: box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  min-height: 160px;
+}
+
+.ts-period-card:hover { box-shadow: var(--ts-shadow); }
+.ts-period-card.ts-finalized { border-left: 4px solid var(--ts-success); }
+
+.ts-pc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ts-space-3);
+}
+
+.ts-pc-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ts-text);
+}
+
+.ts-pc-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ts-text-muted);
+  font-size: 13px;
+  margin-bottom: var(--ts-space-3);
+}
+
+.ts-pc-count { color: var(--ts-text-muted); }
+.ts-pc-scope { margin-bottom: var(--ts-space-3); }
+
+.ts-scope-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--ts-bg);
+  color: var(--ts-text-secondary);
+  border: 1px solid var(--ts-border);
+}
+
+.ts-scope-dept { border-color: var(--ts-primary-light); color: var(--ts-primary); background: var(--ts-primary-bg); }
+.ts-scope-emp  { border-color: var(--ts-success); color: var(--ts-success); background: var(--ts-success-bg); }
+
+.ts-pc-actions {
+  display: flex;
+  gap: var(--ts-space-2);
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.ts-scope-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--ts-bg);
+  border-radius: var(--ts-radius);
+  font-size: 13px;
+  color: var(--ts-text-secondary);
+  margin-top: var(--ts-space-3);
+}
+
+.ts-scope-preview i { color: var(--ts-primary); }
+
+:host ::ng-deep .ts-pc-actions .p-button-label {
+  min-width: 120px;
+  text-align: center;
+}
+
+:host ::ng-deep .p-selectbutton {
+  display: flex;
+  gap: 0;
+}
+
+:host ::ng-deep .p-selectbutton .p-button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid var(--ts-border) !important;
+  border-radius: var(--ts-radius) !important;
+  background: var(--ts-card) !important;
+  color: var(--ts-text-secondary) !important;
+  margin-right: 4px;
+}
+
+:host ::ng-deep .p-selectbutton .p-button.p-highlight {
+  background: var(--ts-primary) !important;
+  color: white !important;
+  border-color: var(--ts-primary) !important;
+}

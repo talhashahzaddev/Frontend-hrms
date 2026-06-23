@@ -1,0 +1,240 @@
+@use '../../styles/timesheet-shared';
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MATCHED TO: create-shift.component.scss
+   All values copied from the Create Shift dialog.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dialog Shell ─────────────────────────────────────────────────────────────── */
+::ng-deep .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  max-width: 520px !important;
+  background: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  max-height: 95vh !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+::ng-deep .mat-mdc-dialog-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: calc(95vh - 140px) !important;
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+/* ── Header (identical to Create Shift) ─────────────────────────────────────── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .header-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(108, 92, 231, 0.1);
+    display: flex; align-items: center; justify-content: center;
+
+    mat-icon { font-size: 20px; width: 20px; height: 20px; color: #6C5CE7; }
+  }
+
+  .header-title { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; }
+  .close-button { color: #94a3b8; }
+}
+
+/* ── Body (identical padding/scroll to Create Shift) ────────────────────────── */
+.dialog-body {
+  padding: 20px !important;
+  max-height: calc(95vh - 140px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Field Labels (identical to Create Shift) ──────────────────────────────── */
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  line-height: 1;
+
+  .required { color: #ef4444; margin-left: 2px; }
+}
+
+/* ── Form Layout (identical to Create Shift) ───────────────────────────────── */
+.form-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.form-row-grid {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 14px;
+
+  .form-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+}
+
+/* ── Mat-Field (identical to Create Shift) ─────────────────────────────────── */
+.mat-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: #f1f5f9 !important;
+      border-radius: 10px !important;
+      padding: 0 !important;
+    }
+
+    .mdc-notched-outline { display: none !important; }
+
+    .mat-mdc-form-field-infix {
+      min-height: 40px !important;
+      padding: 0 12px !important;
+      display: flex;
+      align-items: center;
+      border: none !important;
+    }
+
+    input.mat-mdc-input-element {
+      font-size: 13.5px;
+      height: 40px !important;
+      padding: 0;
+      color: #0f172a;
+    }
+
+    textarea.mat-mdc-input-element {
+      font-size: 13.5px;
+      padding: 8px 0 !important;
+      color: #0f172a;
+      min-height: 36px;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+
+    .mat-mdc-form-field-icon-prefix {
+      margin-right: 8px;
+
+      mat-icon { font-size: 18px; width: 18px; height: 18px; color: #64748b; }
+    }
+  }
+}
+
+/* ── Stepper (EXACT copy of Create Shift Break Min stepper) ─────────────────── */
+.stepper-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 10px;
+  height: 40px;
+  overflow: hidden;
+
+  .stepper-btn {
+    width: 38px; height: 40px; border: none; background: transparent;
+    color: #64748b; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+
+    &:hover { color: #6C5CE7; background: rgba(108, 92, 231, 0.05); }
+    mat-icon { font-size: 18px; }
+  }
+
+  .stepper-input {
+    flex: 1; text-align: center; font-size: 13.5px; font-weight: 700;
+    border: none; background: transparent; color: #0f172a; width: 100%;
+  }
+
+  /* Hide number input spinner arrows */
+  .stepper-input::-webkit-outer-spin-button,
+  .stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+
+  .stepper-input[type=number] { -moz-appearance: textfield; }
+}
+
+/* ── Section Divider ────────────────────────────────────────────────────────── */
+.section-divider {
+  font-weight: 600; font-size: 13px; color: #6C5CE7;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;
+}
+
+/* ── Rejection Banner ───────────────────────────────────────────────────────── */
+.rejection-banner {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px; background: #FEF2F2; border: 1px solid #FECACA;
+  border-radius: 10px; margin-bottom: 14px; color: #991B1B;
+}
+
+.rejection-icon { color: #DC2626; font-size: 18px; width: 18px; height: 18px; margin-top: 2px; }
+.rejection-text { display: flex; flex-direction: column; gap: 2px; }
+.rejection-text strong { font-size: 13px; color: #991B1B; }
+.rejection-text span { font-size: 13px; color: #7F1D1D; line-height: 1.4; }
+
+/* ── State Card ─────────────────────────────────────────────────────────────── */
+.state-card {
+  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+  padding: 16px; margin-bottom: 14px;
+}
+
+.state-card-title {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 12px; font-weight: 600; font-size: 13px; color: #475569;
+}
+
+.state-icon { font-size: 14px; width: 14px; height: 14px; color: #6C5CE7; }
+
+.state-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+}
+
+.state-item { display: flex; flex-direction: column; }
+.state-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+.state-value { font-size: 14px; font-weight: 600; color: #1f2937; }
+
+/* ── Error Text ──────────────────────────────────────────────────────────────── */
+.error-text { color: #DC2626; font-size: 13px; margin-top: 8px; }
+
+/* ── Footer (identical structure to Create Shift) ───────────────────────────── */
+.dialog-footer {
+  display: flex; justify-content: flex-end; gap: 12px;
+  padding: 16px 20px; border-top: 1px solid #f1f5f9;
+  flex-shrink: 0;
+
+  .btn-cancel {
+    height: 40px; border-radius: 10px; font-weight: 600; color: #64748b;
+  }
+
+  .btn-draft {
+    height: 40px; border-radius: 10px; font-weight: 600; color: #475569;
+  }
+
+  .btn-save {
+    height: 40px; border-radius: 10px; font-weight: 700;
+    background: #6C5CE7 !important; color: #ffffff !important;
+    padding: 0 24px !important;
+  }
+}

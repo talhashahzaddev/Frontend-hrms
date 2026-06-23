@@ -1,0 +1,71 @@
+@use '../../styles/timesheet-shared';
+
+.ts-delegation-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ts-space-2);
+  padding: var(--ts-space-4);
+}
+
+.ts-detail-row {
+  display: flex;
+  gap: var(--ts-space-2);
+  align-items: center;
+}
+
+.ts-detail-row .ts-label {
+  font-weight: 600;
+  min-width: 70px;
+  color: var(--ts-text-secondary);
+}
+
+.ts-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--ts-space-3);
+}
+
+.ts-form-group.ts-half { flex: 1; }
+
+/* Delegation page input styling — match shift module form fields */
+:host ::ng-deep .p-inputtext {
+  height: 38px !important;
+  padding: 0 12px !important;
+  border: 1px solid #E0E4EA !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  color: #1F2937 !important;
+  background: white !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:host ::ng-deep .p-inputtext::placeholder {
+  color: #9CA3AF !important;
+  font-size: 14px !important;
+}
+
+:host ::ng-deep .p-inputtext:hover:not(.p-disabled) {
+  border-color: #B0B7C3 !important;
+}
+
+:host ::ng-deep .p-inputtext:focus:not(.p-disabled),
+:host ::ng-deep .p-inputtext.p-focus {
+  border-color: #6C5CE7 !important;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1) !important;
+  outline: none !important;
+}
+
+:host ::ng-deep app-employee-search .search-input {
+  height: 38px !important;
+  padding: 0 12px !important;
+  border: 1px solid #E0E4EA !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  color: #1F2937 !important;
+  background: white !important;
+}
+
+:host ::ng-deep app-employee-search .search-input::placeholder {
+  color: #9CA3AF !important;
+  font-size: 14px !important;
+}

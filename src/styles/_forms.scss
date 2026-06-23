@@ -1,0 +1,89 @@
+// ═══ Form Overrides ═══════════════════════════════════════════════════════════
+.p-inputtext,
+.p-dropdown,
+.p-calendar,
+.p-inputnumber,
+.p-inputtextarea {
+  border: 1px solid var(--ts-border) !important;
+  border-radius: var(--ts-radius) !important;
+  font-size: 14px !important;
+  color: var(--ts-text) !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+
+  &:not(.p-disabled):hover {
+    border-color: var(--ts-border-focus) !important;
+  }
+
+  &:not(.p-disabled).p-focus,
+  &:focus {
+    border-color: var(--ts-border-focus) !important;
+    box-shadow: 0 0 0 3px rgba(45, 125, 210, 0.1) !important;
+    outline: none !important;
+  }
+}
+
+.p-dropdown {
+  min-height: 38px !important;
+  height: 38px !important;
+
+  .p-dropdown-label {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+
+  .p-dropdown-trigger {
+    width: 36px;
+  }
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background: var(--ts-primary-bg-light) !important;
+}
+
+.p-calendar {
+  .p-inputtext {
+    padding: 6px 12px;
+    height: 38px;
+  }
+}
+
+.p-inputnumber {
+  .p-inputtext {
+    padding: 6px 12px;
+    height: 38px;
+  }
+}
+
+.p-inputSwitch {
+  .p-inputswitch-slider {
+    background: var(--ts-border);
+    border-radius: 12px;
+  }
+
+  &.p-highlight .p-inputswitch-slider {
+    background: var(--ts-border-focus);
+  }
+}
+
+.p-inputtextarea {
+  min-height: 38px;
+}
+
+// Label styling for form groups
+.ts-form-group {
+  margin-bottom: var(--ts-space-4);
+
+  label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: var(--ts-space-1);
+    font-size: 13px;
+    color: var(--ts-text-muted);
+  }
+
+  .ts-form-error {
+    font-size: 12px;
+    color: var(--ts-danger);
+    margin-top: var(--ts-space-1);
+  }
+}

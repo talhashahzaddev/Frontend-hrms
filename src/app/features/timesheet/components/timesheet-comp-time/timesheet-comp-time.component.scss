@@ -1,0 +1,16 @@
+@use '../../styles/timesheet-shared';
+
+.ts-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--ts-space-4);
+}
+
+.ts-meta {
+  display: flex;
+  gap: var(--ts-space-4);
+}
+
+@media (max-width: 768px) {
+  .ts-metrics-grid { grid-template-columns: 1fr; }
+}
