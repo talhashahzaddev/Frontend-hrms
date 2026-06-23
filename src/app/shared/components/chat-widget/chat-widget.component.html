@@ -1,20 +1,24 @@
 <div class="chat-widget-container">
-  <!-- Chat Window -->
   <div class="chat-window" [class.open]="isOpen" *ngIf="isOpen">
     <div class="chat-header">
       <div class="chat-header-content">
         <div class="chat-title">
-          <i class="pi pi-comments" style="margin-right: 8px;"></i>
-          <span>AI Assistant</span>
+          <span class="header-avatar">
+            <i class="pi pi-comments"></i>
+          </span>
+          <div class="header-text">
+            <span class="title">AI Assistant</span>
+            <span class="subtitle"><span class="status-dot"></span>Online</span>
+          </div>
         </div>
         <div class="header-actions">
-          <button class="clear-button" (click)="clearChat()" *ngIf="messages.length > 0" aria-label="Clear chat" title="Clear chat">
+          <button class="header-icon-btn" (click)="clearChat()" *ngIf="messages.length > 0" aria-label="Clear chat" title="Clear chat">
             <i class="pi pi-trash"></i>
           </button>
-          <button class="expand-button" (click)="navigateToAiAssistant()" aria-label="Open full page" title="Open in full page">
+          <button class="header-icon-btn" (click)="navigateToAiAssistant()" aria-label="Open full page" title="Open in full page">
             <i class="pi pi-external-link"></i>
           </button>
-          <button class="close-button" (click)="closeChat()" aria-label="Close chat">
+          <button class="header-icon-btn close-button" (click)="closeChat()" aria-label="Close chat">
             <i class="pi pi-times"></i>
           </button>
         </div>
@@ -23,12 +27,17 @@
 
     <div class="chat-messages" id="chat-messages">
       <div *ngIf="messages.length === 0" class="empty-state">
-        <i class="pi pi-comments" style="font-size: 3rem; color: var(--gray-400); margin-bottom: 1rem;"></i>
-        <p>Start a conversation with AI Assistant</p>
-        <p class="hint">Begin chatting with the AI Assistant to get help with your HRMS questions.</p>
+        <div class="empty-icon">
+          <i class="pi pi-comments"></i>
+        </div>
+        <p class="empty-title">Ask me anything</p>
+        <p class="hint">Leave, payroll, attendance, policies, and more.</p>
       </div>
 
       <div *ngFor="let message of messages" class="message" [class.user]="message.sender === 'user'" [class.ai]="message.sender === 'ai'">
+        <div class="message-avatar" *ngIf="message.sender === 'ai'">
+          <i class="pi pi-comments"></i>
+        </div>
         <div class="message-content">
           <div class="message-text">
             <ng-container *ngIf="message.sender === 'ai'">
@@ -36,12 +45,12 @@
                 <ng-container [ngSwitch]="part.type">
                   <span *ngSwitchCase="'text'">{{ part.content }}</span>
                   <br *ngSwitchCase="'linebreak'" />
-                  <button 
+                  <button
                     *ngSwitchCase="'url'"
                     class="message-link-button"
                     (click)="navigateToUrl(part.url!)"
                     type="button">
-                    <i class="pi pi-external-link"></i>
+                    <i class="pi pi-arrow-up-right"></i>
                     <span>{{ part.content }}</span>
                   </button>
                 </ng-container>
@@ -49,12 +58,15 @@
             </ng-container>
             <span *ngIf="message.sender === 'user'">{{ message.text }}</span>
           </div>
-          <div class="message-time">{{ message.timestamp | localizedDate:'short' }}</div>
+          <div class="message-time">{{ message.timestamp | localizedDate:'h:mm a' }}</div>
         </div>
       </div>
 
       <div *ngIf="isLoading" class="message ai">
-        <div class="message-content">
+        <div class="message-avatar">
+          <i class="pi pi-comments"></i>
+        </div>
+        <div class="message-content typing-wrap">
           <div class="typing-indicator">
             <span></span>
             <span></span>
@@ -65,27 +77,29 @@
     </div>
 
     <div class="chat-input-container">
-      <textarea
-        class="chat-input"
-        [(ngModel)]="newMessage"
-        (keydown)="onKeyPress($event)"
-        placeholder="Type your message..."
-        rows="1"
-        [disabled]="isLoading">
-      </textarea>
-      <button 
-        class="send-button" 
-        (click)="sendMessage()" 
-        [disabled]="!newMessage.trim() || isLoading"
-        aria-label="Send message">
-        <i class="pi pi-send"></i>
-      </button>
+      <div class="input-shell">
+        <textarea
+          class="chat-input"
+          [(ngModel)]="newMessage"
+          (keydown)="onKeyPress($event)"
+          placeholder="Message AI Assistant..."
+          rows="1"
+          [disabled]="isLoading">
+        </textarea>
+        <button
+          class="send-button"
+          (click)="sendMessage()"
+          [disabled]="!newMessage.trim() || isLoading"
+          [class.active]="newMessage.trim()"
+          aria-label="Send message">
+          <i class="pi" [ngClass]="isLoading ? 'pi-spin pi-spinner' : 'pi-send'"></i>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Floating Chat Button -->
-  <button 
-    class="chat-button" 
+  <button
+    class="chat-button"
     (click)="toggleChat()"
     [class.open]="isOpen"
     aria-label="Open chat">
@@ -93,5 +107,3 @@
     <i class="pi pi-times" *ngIf="isOpen"></i>
   </button>
 </div>
-
-

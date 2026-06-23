@@ -1,139 +1,149 @@
 <div class="ai-assistant-page">
-  <section class="assistant-panel">
-    <header class="assistant-header">
-      <div class="assistant-headline">
-        <p class="system-status"><span class="status-dot"></span>System Online</p>
-        <h1>AI Assistant</h1>
-        <p class="assistant-subtitle">Intelligent co-pilot for policy, payroll, and employee insights.</p>
+  <div class="page-header">
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>smart_toy</mat-icon>
       </div>
+      <div>
+        <h2 class="page-title">AI Assistant</h2>
+        <p class="page-subtitle">Ask about leave, payroll, attendance, timesheets, and HR policies.</p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <span class="status-badge"><span class="status-dot"></span>Online</span>
       @if (messages.length > 0) {
-        <button class="clear-chat-btn" (click)="clearChat()" aria-label="Clear chat">
-          <i class="pi pi-trash"></i>
-          <span>Clear Chat</span>
+        <button class="btn-clear" (click)="clearChat()" aria-label="Clear chat">
+          <mat-icon>delete_outline</mat-icon>
+          Clear Chat
         </button>
       }
-    </header>
+    </div>
+  </div>
 
-    <div class="chat-shell">
-      <div class="chat-messages" id="chat-messages" [class.empty-chat]="messages.length === 0 && !isLoading">
-        @if (messages.length === 0) {
-          <div class="empty-state">
-            <div class="empty-badge"><mat-icon class="ai-symbol" aria-hidden="true">smart_toy</mat-icon></div>
-            <h2>Start a strategic conversation</h2>
-            <p>Ask about attendance, leave, payroll, policies, and team insights.</p>
-            <div class="suggestions">
-              <button class="suggestion-chip" type="button" (click)="newMessage = 'Show my expense status'; sendMessage()">Show my expense status</button>
-              <button class="suggestion-chip" type="button" (click)="newMessage = 'Any latest company news?'; sendMessage()">Any latest company news?</button>
-              <button class="suggestion-chip" type="button" (click)="newMessage = 'Is my timesheet finalized?'; sendMessage()">Is my timesheet finalized?</button>
+  <div class="chat-card">
+    <div class="chat-messages" id="chat-messages" [class.empty-chat]="messages.length === 0 && !isLoading">
+      @if (messages.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon-box">
+            <mat-icon>forum</mat-icon>
+          </div>
+          <h3 class="empty-title">How can I help you today?</h3>
+          <p class="empty-text">Choose a suggestion below or type your question in the message box.</p>
+
+          <div class="suggestions">
+            @for (suggestion of starterSuggestions; track suggestion) {
+              <button class="suggestion-chip" type="button" (click)="sendSuggestion(suggestion)">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <span>{{ suggestion }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @for (message of messages; track message.timestamp) {
+        <article class="chat-row" [class.user-row]="message.sender === 'user'" [class.ai-row]="message.sender === 'ai'">
+          <div class="avatar" [class.user-avatar]="message.sender === 'user'" [class.ai-avatar]="message.sender === 'ai'">
+            @if (message.sender === 'user') {
+              <mat-icon>person</mat-icon>
+            } @else {
+              <mat-icon>smart_toy</mat-icon>
+            }
+          </div>
+
+          <div class="bubble-wrap">
+            <div class="chat-bubble" [class.user-bubble]="message.sender === 'user'" [class.ai-bubble]="message.sender === 'ai'">
+              <div class="message-text">
+                @if (message.sender === 'ai') {
+                  @for (part of formatMessage(message.text); track $index) {
+                    <ng-container [ngSwitch]="part.type">
+                      <span *ngSwitchCase="'text'">{{ part.content }}</span>
+                      <br *ngSwitchCase="'linebreak'" />
+                      <button
+                        *ngSwitchCase="'url'"
+                        class="message-link-button"
+                        (click)="navigateToUrl(part.url!)"
+                        type="button">
+                        <mat-icon>open_in_new</mat-icon>
+                        <span>{{ part.content }}</span>
+                      </button>
+                    </ng-container>
+                  }
+                }
+                @if (message.sender === 'user') {
+                  <span>{{ message.text }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="meta-row" [class.user-meta]="message.sender === 'user'">
+              <span>{{ message.sender === 'user' ? 'You' : 'Assistant' }}</span>
+              <span class="meta-sep">·</span>
+              <span>{{ message.timestamp | localizedDate:'h:mm a' }}</span>
             </div>
           </div>
-        }
+        </article>
+      }
 
-        @for (message of messages; track message.timestamp) {
-          <article class="chat-row" [class.user-row]="message.sender === 'user'" [class.ai-row]="message.sender === 'ai'">
-            <div class="avatar" [class.user-avatar]="message.sender === 'user'" [class.ai-avatar]="message.sender === 'ai'">
-              @if (message.sender === 'user') {
-                <i class="pi pi-user"></i>
-              } @else {
-                <mat-icon class="ai-symbol" aria-hidden="true">smart_toy</mat-icon>
-              }
-            </div>
-
-            <div class="bubble-wrap">
-              <div class="chat-bubble" [class.user-bubble]="message.sender === 'user'" [class.ai-bubble]="message.sender === 'ai'">
-                <div class="message-text">
-                  @if (message.sender === 'ai') {
-                    @for (part of formatMessage(message.text); track $index) {
-                      <ng-container [ngSwitch]="part.type">
-                        <span *ngSwitchCase="'text'">{{ part.content }}</span>
-                        <br *ngSwitchCase="'linebreak'" />
-                        <button
-                          *ngSwitchCase="'url'"
-                          class="message-link-button"
-                          (click)="navigateToUrl(part.url!)"
-                          type="button">
-                          <i class="pi pi-external-link"></i>
-                          <span>{{ part.content }}</span>
-                        </button>
-                      </ng-container>
-                    }
-                  }
-                  @if (message.sender === 'user') {
-                    <span>{{ message.text }}</span>
-                  }
-                </div>
+      @if (isLoading) {
+        <article class="chat-row ai-row">
+          <div class="avatar ai-avatar">
+            <mat-icon>smart_toy</mat-icon>
+          </div>
+          <div class="bubble-wrap">
+            <div class="chat-bubble ai-bubble typing-bubble">
+              <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
               </div>
+              <span class="typing-label">Thinking...</span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
 
-              <div class="meta-row" [class.user-meta]="message.sender === 'user'" [class.ai-meta]="message.sender === 'ai'">
-                <span>{{ message.sender === 'user' ? 'You' : 'Assistant' }}</span>
-                <span>{{ message.timestamp | localizedDate:'h:mm a' }}</span>
-              </div>
-            </div>
-          </article>
-        }
+    <footer class="composer-area">
+      @if (messages.length > 0) {
+        <div class="quick-actions">
+          @for (action of quickActions; track action) {
+            <button class="quick-action-chip" type="button" (click)="sendSuggestion(action)">
+              {{ action }}
+            </button>
+          }
+        </div>
+      }
 
-        @if (isLoading) {
-          <article class="chat-row ai-row">
-            <div class="avatar ai-avatar">
-              <mat-icon class="ai-symbol" aria-hidden="true">smart_toy</mat-icon>
-            </div>
-            <div class="bubble-wrap">
-              <div class="chat-bubble ai-bubble">
-                <div class="typing-indicator">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-          </article>
-        }
+      <div class="composer-shell" [class.composer-focused]="composerFocused">
+        <textarea
+          #chatInput
+          class="chat-input"
+          [(ngModel)]="newMessage"
+          (keydown)="onKeyPress($event)"
+          (input)="adjustTextareaHeight()"
+          (focus)="composerFocused = true"
+          (blur)="composerFocused = false"
+          placeholder="Type your message..."
+          rows="1"
+          [disabled]="isLoading"
+          aria-label="Type your message">
+        </textarea>
+
+        <button
+          class="btn-send"
+          (click)="sendMessage()"
+          [disabled]="!newMessage.trim() || isLoading"
+          aria-label="Send message">
+          <mat-icon>{{ isLoading ? 'hourglass_top' : 'send' }}</mat-icon>
+        </button>
       </div>
 
-      <footer class="composer-area">
-        @if (messages.length > 0) {
-          <div class="quick-actions">
-            <button class="quick-action-chip" type="button" (click)="newMessage = 'Export adjustment PDF'">Export Adjustment PDF</button>
-            <button class="quick-action-chip" type="button" (click)="newMessage = 'Compare with market data'">Compare with Market Data</button>
-            <button class="quick-action-chip" type="button" (click)="newMessage = 'Email the selected employee summary'">Email Employee Summary</button>
-            <button class="quick-action-chip" type="button" (click)="newMessage = 'View performance log'">View Performance Log</button>
-          </div>
-        }
-
-        <div class="composer-shell">
-          <button class="icon-btn attach-btn" type="button" aria-label="Attach">
-            <i class="pi pi-plus-circle"></i>
-          </button>
-
-          <textarea
-            #chatInput
-            class="chat-input"
-            [(ngModel)]="newMessage"
-            (keydown)="onKeyPress($event)"
-            (input)="adjustTextareaHeight()"
-            placeholder="Ask about payroll, policies, or employee data..."
-            rows="1"
-            [disabled]="isLoading"
-            aria-label="Type your message">
-          </textarea>
-
-          <button class="icon-btn mic-btn" type="button" aria-label="Voice input">
-            <i class="pi pi-microphone"></i>
-          </button>
-
-          <button
-            class="send-btn"
-            (click)="sendMessage()"
-            [disabled]="!newMessage.trim() || isLoading"
-            aria-label="Send message"
-            [class.active]="newMessage.trim()">
-            <i class="pi" [ngClass]="isLoading ? 'pi-spin pi-spinner' : 'pi-send'"></i>
-          </button>
-        </div>
-
-        <p class="compliance-note">AI-generated insights should be verified for compliance and policy standards.</p>
-      </footer>
-    </div>
-  </section>
+      <p class="compliance-note">
+        <mat-icon>info_outline</mat-icon>
+        AI responses are for guidance only — verify against official HR policy.
+      </p>
+    </footer>
+  </div>
 </div>
-
