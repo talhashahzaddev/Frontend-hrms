@@ -1,65 +1,54 @@
 <!-- Position List Container -->
 <div class="position-list-container">
 
-  <!-- Header Section (flat, no card — mirrors employee-list) -->
+  <!-- Header Section -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Position Management</h1>
-      <p class="page-subtitle">Manage and organize job positions</p>
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>work</mat-icon>
+      </div>
+      <div>
+        <h2 class="page-title">Position Management</h2>
+        <p class="page-subtitle">Manage and organize job positions</p>
+      </div>
     </div>
-    <div class="add-btn-wrap">
-      <button mat-flat-button *ngIf="hasPermission('add_position')" (click)="openCreateDialog()" class="add-btn">
+    <div class="header-right">
+      <button class="btn-primary" *ngIf="hasPermission('add_position')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Position
       </button>
     </div>
   </div>
 
-  <!-- Toolbar Row (tabs + search — mirrors employee-list .toolbar-row) -->
-  <div class="toolbar-row">
-    <div class="tab-group">
-      <button class="tab-btn active">All Positions</button>
-    </div>
-    <div class="toolbar-right">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="searchControl" placeholder="Search positions...">
-      </mat-form-field>
-    </div>
-  </div>
-
-  <!-- Filters Row (mirrors employee-list .filters-row) -->
+  <!-- Filters Row -->
   <div class="filters-row">
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Department</mat-label>
-      <mat-select [formControl]="departmentControl">
-        <mat-option value="">All Departments</mat-option>
-        <mat-option *ngFor="let department of departments" [value]="department.departmentId">
-          {{ department.departmentName }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" [formControl]="searchControl" placeholder="Search positions...">
+    </div>
 
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Status</mat-label>
-      <mat-select [formControl]="statusControl">
-        <mat-option *ngFor="let status of statusOptions" [value]="status.value">
-          {{ status.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <select class="filter-select" [formControl]="departmentControl">
+      <option value="">All Departments</option>
+      <option *ngFor="let department of departments" [value]="department.departmentId">
+        {{ department.departmentName }}
+      </option>
+    </select>
 
-    <button mat-stroked-button
-            (click)="clearFilters()"
-            [disabled]="!hasFiltersApplied()"
-            class="clear-btn">
-      <mat-icon>clear</mat-icon>
-      Clear
-    </button>
+    <select class="filter-select" [formControl]="statusControl">
+      <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}</option>
+    </select>
+
+    <div class="filter-actions">
+      <button class="clear-btn" mat-stroked-button
+              (click)="clearFilters()"
+              [disabled]="!hasFiltersApplied()">
+        <mat-icon>clear</mat-icon> Clear
+      </button>
+    </div>
   </div>
 
-  <!-- Table Card (mirrors employee-list .table-card) -->
-  <div class="table-card">
+  <!-- Table Card -->
+  <div class="content-card">
 
     <!-- Meta Row -->
     <div class="table-meta">
@@ -67,22 +56,30 @@
     </div>
 
     <!-- Loading Spinner -->
-    <div *ngIf="isLoading" class="loading-container">
+    <div *ngIf="isLoading" class="loading-state">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading positions...</p>
     </div>
 
     <!-- Position Table -->
-    <div *ngIf="!isLoading" class="table-container">
-      <table mat-table [dataSource]="positions" class="position-table">
+    <div *ngIf="!isLoading" class="table-responsive">
+      <table mat-table [dataSource]="positions" class="custom-table">
 
         <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox></mat-checkbox>
+            <mat-checkbox (change)="$event ? toggleAllRows() : null" 
+                          [checked]="selection.hasValue() && isAllSelected()"
+                          [indeterminate]="selection.hasValue() && !isAllSelected()" 
+                          [aria-label]="checkboxLabel()">
+            </mat-checkbox>
           </th>
           <td mat-cell *matCellDef="let position">
-            <mat-checkbox></mat-checkbox>
+            <mat-checkbox (click)="$event.stopPropagation()" 
+                          (change)="$event ? selection.toggle(position) : null"
+                          [checked]="selection.isSelected(position)" 
+                          [aria-label]="checkboxLabel(position)">
+            </mat-checkbox>
           </td>
         </ng-container>
 
@@ -108,7 +105,7 @@
         <ng-container matColumnDef="department">
           <th mat-header-cell *matHeaderCellDef>Department</th>
           <td mat-cell *matCellDef="let position">
-            <span *ngIf="position.departmentName" class="badge badge-dept">
+            <span *ngIf="position.departmentName" class="badge badge-success">
               {{ position.departmentName }}
             </span>
             <span *ngIf="!position.departmentName" class="no-value">Not Assigned</span>
@@ -119,7 +116,7 @@
         <ng-container matColumnDef="role">
           <th mat-header-cell *matHeaderCellDef>Role</th>
           <td mat-cell *matCellDef="let position">
-            <span *ngIf="position.roleName" class="badge badge-role">
+            <span *ngIf="position.roleName" class="badge badge-warn">
               {{ position.roleName }}
             </span>
             <span *ngIf="!position.roleName" class="no-value">Not Assigned</span>
@@ -138,9 +135,9 @@
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let position">
-            <mat-chip [class]="position.isActive ? 'status-active' : 'status-inactive'">
+            <span class="badge" [ngClass]="position.isActive ? 'status-active' : 'status-inactive'">
               {{ position.isActive ? 'Active' : 'Inactive' }}
-            </mat-chip>
+            </span>
           </td>
         </ng-container>
 
@@ -154,8 +151,8 @@
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let position">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+          <td mat-cell *matCellDef="let position" class="action-cell">
             <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-menu-btn">
               <mat-icon>more_horiz</mat-icon>
             </button>
@@ -199,25 +196,23 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let position; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let position; columns: displayedColumns;" [class.selected-row]="selection.isSelected(position)"></tr>
 
       </table>
 
       <!-- Empty State -->
-      <div *ngIf="positions.length === 0" class="empty-state">
-        <div class="empty-icon">
-          <mat-icon>work</mat-icon>
-        </div>
-        <h3>No Positions Found</h3>
-        <p>No positions match your current filters.</p>
-        <button mat-flat-button *ngIf="hasPermission('add_position')" (click)="openCreateDialog()" class="add-first-position">
+      <div *ngIf="positions.length === 0" class="empty-state-simple">
+        <mat-icon>work</mat-icon>
+        <p>No Positions Found</p>
+        <span>No positions match your current filters.</span>
+        <button class="btn-primary mt-3" *ngIf="hasPermission('add_position')" (click)="openCreateDialog()">
           <mat-icon>add</mat-icon>
           Add Your First Position
         </button>
       </div>
     </div>
 
-    <!-- Pagination — mat-paginator same as employee-list -->
+    <!-- Pagination -->
     <mat-paginator
       *ngIf="!isLoading && positions.length > 0"
       [length]="totalCount"

@@ -1,65 +1,54 @@
 <!-- Department List Container -->
 <div class="department-list-container">
 
-  <!-- Header Section (flat, no card — mirrors employee-list) -->
+  <!-- Header Section -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Department Management</h1>
-      <p class="page-subtitle">Manage and organize your departments</p>
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>apartment</mat-icon>
+      </div>
+      <div>
+        <h2 class="page-title">Department Management</h2>
+        <p class="page-subtitle">Manage and organize your departments</p>
+      </div>
     </div>
-    <div class="add-btn-wrap">
-      <button mat-flat-button *ngIf="hasPermission('add_department')" (click)="openCreateDialog()" class="add-btn">
+    <div class="header-right">
+      <button class="btn-primary" *ngIf="hasPermission('add_department')" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Department
       </button>
     </div>
   </div>
 
-  <!-- Toolbar Row (tabs + search — mirrors employee-list .toolbar-row) -->
-  <div class="toolbar-row">
-    <div class="tab-group">
-      <button class="tab-btn active">All Departments</button>
-    </div>
-    <div class="toolbar-right">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="searchControl" placeholder="Search departments...">
-      </mat-form-field>
-    </div>
-  </div>
-
-  <!-- Filters Row (mirrors employee-list .filters-row) -->
+  <!-- Filters Row -->
   <div class="filters-row">
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Status</mat-label>
-      <mat-select [formControl]="statusControl">
-        <mat-option *ngFor="let status of statusOptions" [value]="status.value">
-          {{ status.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" [formControl]="searchControl" placeholder="Search departments...">
+    </div>
 
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Manager</mat-label>
-      <mat-select [formControl]="managerControl">
-        <mat-option value="">All Managers</mat-option>
-        <mat-option *ngFor="let manager of managers" [value]="manager.employeeId">
-          {{ manager.fullName }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <select class="filter-select" [formControl]="statusControl">
+      <option *ngFor="let status of statusOptions" [value]="status.value">{{ status.label }}</option>
+    </select>
 
-    <button mat-stroked-button
-            (click)="clearFilters()"
-            [disabled]="!hasFiltersApplied()"
-            class="clear-btn">
-      <mat-icon>clear</mat-icon>
-      Clear
-    </button>
+    <select class="filter-select" [formControl]="managerControl">
+      <option value="">All Managers</option>
+      <option *ngFor="let manager of managers" [value]="manager.employeeId">
+        {{ manager.fullName }}
+      </option>
+    </select>
+
+    <div class="filter-actions">
+      <button class="clear-btn" mat-stroked-button
+              (click)="clearFilters()"
+              [disabled]="!hasFiltersApplied()">
+        <mat-icon>clear</mat-icon> Clear
+      </button>
+    </div>
   </div>
 
-  <!-- Table Card (mirrors employee-list .table-card) -->
-  <div class="table-card">
+  <!-- Table Card -->
+  <div class="content-card">
 
     <!-- Meta Row -->
     <div class="table-meta">
@@ -67,22 +56,30 @@
     </div>
 
     <!-- Loading Spinner -->
-    <div *ngIf="isLoading" class="loading-container">
+    <div *ngIf="isLoading" class="loading-state">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading departments...</p>
     </div>
 
     <!-- Department Table -->
-    <div *ngIf="!isLoading" class="table-container">
-      <table mat-table [dataSource]="departments" class="department-table">
+    <div *ngIf="!isLoading" class="table-responsive">
+      <table mat-table [dataSource]="departments" class="custom-table">
 
         <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef>
-            <mat-checkbox></mat-checkbox>
+            <mat-checkbox (change)="$event ? toggleAllRows() : null" 
+                          [checked]="selection.hasValue() && isAllSelected()"
+                          [indeterminate]="selection.hasValue() && !isAllSelected()" 
+                          [aria-label]="checkboxLabel()">
+            </mat-checkbox>
           </th>
           <td mat-cell *matCellDef="let department">
-            <mat-checkbox></mat-checkbox>
+            <mat-checkbox (click)="$event.stopPropagation()" 
+                          (change)="$event ? selection.toggle(department) : null"
+                          [checked]="selection.isSelected(department)" 
+                          [aria-label]="checkboxLabel(department)">
+            </mat-checkbox>
           </td>
         </ng-container>
 
@@ -108,7 +105,7 @@
         <ng-container matColumnDef="manager">
           <th mat-header-cell *matHeaderCellDef>Manager</th>
           <td mat-cell *matCellDef="let department">
-            <span *ngIf="department.managerName" class="badge badge-manager">
+            <span *ngIf="department.managerName" class="badge badge-success">
               {{ department.managerName }}
             </span>
             <span *ngIf="!department.managerName" class="no-value">Not Assigned</span>
@@ -127,9 +124,9 @@
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let department">
-            <mat-chip [class]="department.isActive ? 'status-active' : 'status-inactive'">
+            <span class="badge" [ngClass]="department.isActive ? 'status-active' : 'status-inactive'">
               {{ department.isActive ? 'Active' : 'Inactive' }}
-            </mat-chip>
+            </span>
           </td>
         </ng-container>
 
@@ -143,8 +140,8 @@
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let department">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+          <td mat-cell *matCellDef="let department" class="action-cell">
             <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-menu-btn">
               <mat-icon>more_horiz</mat-icon>
             </button>
@@ -188,25 +185,23 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let department; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let department; columns: displayedColumns;" [class.selected-row]="selection.isSelected(department)"></tr>
 
       </table>
 
       <!-- Empty State -->
-      <div *ngIf="departments.length === 0" class="empty-state">
-        <div class="empty-icon">
-          <mat-icon>apartment</mat-icon>
-        </div>
-        <h3>No Departments Found</h3>
-        <p>No departments match your current filters.</p>
-        <button mat-flat-button *ngIf="hasPermission('add_department')" (click)="openCreateDialog()" class="add-first-department">
+      <div *ngIf="departments.length === 0" class="empty-state-simple">
+        <mat-icon>apartment</mat-icon>
+        <p>No Departments Found</p>
+        <span>No departments match your current filters.</span>
+        <button class="btn-primary mt-3" *ngIf="hasPermission('add_department')" (click)="openCreateDialog()">
           <mat-icon>add</mat-icon>
           Add Your First Department
         </button>
       </div>
     </div>
 
-    <!-- Pagination — mat-paginator same as employee-list -->
+    <!-- Pagination -->
     <mat-paginator
       *ngIf="!isLoading && departments.length > 0"
       [length]="totalCount"

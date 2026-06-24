@@ -1,0 +1,244 @@
+<div class="employee-detail-wrapper">
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading employee details...</p>
+  </div>
+
+  <div *ngIf="!isLoading && employee" class="employee-content">
+    
+    <!-- ── Profile Header ─────────────────────────────────────── -->
+    <div class="profile-header">
+      <div class="header-main">
+        <div class="profile-avatar">
+          <img *ngIf="employee.profilePictureUrl" 
+               [src]="employee.profilePictureUrl" 
+               [alt]="employee.firstName + ' ' + employee.lastName">
+          <div *ngIf="!employee.profilePictureUrl" class="avatar-placeholder">
+            {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
+          </div>
+        </div>
+        
+        <div class="profile-info">
+          <h1 class="profile-name">{{ employee.firstName }} {{ employee.lastName }}</h1>
+          <div class="profile-meta">
+            <span class="emp-code">{{ employee.employeeCode }}</span>
+            <span class="dot">·</span>
+            <span class="emp-title">{{ employee.position?.positionTitle || 'No Position' }}</span>
+            <span class="dot">·</span>
+            <span class="emp-department">{{ employee.department?.departmentName || 'No Department' }}</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <span class="status-pill" [ngClass]="employee.status === 'active' ? 'pill-active' : 'pill-inactive'">
+            <span class="pill-dot"></span>
+            {{ employee.status | titlecase }}
+          </span>
+
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="action-menu-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu" xPosition="before">
+            <button mat-menu-item *ngIf="hasPermission('edit_employee')" (click)="editEmployee()">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Employee</span>
+            </button>
+            <button mat-menu-item *ngIf="hasPermission('activate/deactivate_employee') && employee.status !== 'active'" (click)="activateEmployee()" class="success-action">
+              <mat-icon>check_circle</mat-icon>
+              <span>Activate</span>
+            </button>
+            <button mat-menu-item *ngIf="hasPermission('activate/deactivate_employee') && employee.status === 'active'" (click)="deactivateEmployee()" class="warning-action">
+              <mat-icon>block</mat-icon>
+              <span>Deactivate</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item *ngIf="hasPermission('delete_employee')" (click)="deleteEmployee()" class="danger-action">
+              <mat-icon>delete</mat-icon>
+              <span>Delete Employee</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <!-- Quick Info Strip -->
+      <div class="info-strip">
+        <div class="strip-item">
+          <mat-icon>email</mat-icon>
+          <span>{{ employee.email }}</span>
+        </div>
+        <div class="strip-divider"></div>
+        <div class="strip-item">
+          <mat-icon>phone</mat-icon>
+          <span>{{ employee.phone || 'No phone' }}</span>
+        </div>
+        <div class="strip-divider"></div>
+        <div class="strip-item">
+          <mat-icon>event</mat-icon>
+          <span>Joined {{ employee.hireDate | localizedDate:'mediumDate' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Content Grid ───────────────────────────────────────── -->
+    <div class="content-grid">
+      
+      <!-- Left Column: Details -->
+      <div class="main-column">
+        
+        <!-- Personal Information Block -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>person</mat-icon></div>
+            <span>Personal Information</span>
+          </div>
+          <div class="block-grid">
+            <div class="cell">
+              <span class="cell-label">Date of Birth</span>
+              <span class="cell-value">{{ (employee.dateOfBirth | localizedDate:'mediumDate') || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Gender</span>
+              <span class="cell-value">{{ employee.gender || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Marital Status</span>
+              <span class="cell-value">{{ employee.maritalStatus || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Nationality</span>
+              <span class="cell-value">{{ employee.nationality || '—' }}</span>
+            </div>
+            <div class="cell cell-wide" *ngIf="employee.address">
+              <span class="cell-label">Address</span>
+              <span class="cell-value">
+                {{ employee.address.street }}<br>
+                {{ employee.address.city }}, {{ employee.address.state }} {{ employee.address.zip }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Employment Details Block -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>work</mat-icon></div>
+            <span>Employment Details</span>
+          </div>
+          <div class="block-grid">
+            <div class="cell">
+              <span class="cell-label">Department</span>
+              <span class="cell-value">{{ employee.department?.departmentName || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Position</span>
+              <span class="cell-value">{{ employee.position?.positionTitle || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Employment Type</span>
+              <span class="cell-value badge badge-blue">{{ (employee.employmentDetails?.employmentType | titlecase) || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Basic Salary</span>
+              <span class="cell-value salary">{{ (employee.employmentDetails?.baseSalary | currency) || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Reporting Manager</span>
+              <span class="cell-value">
+                {{ employee.manager ? (employee.manager.firstName + ' ' + employee.manager.lastName) : '—' }}
+              </span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Work Location</span>
+              <span class="cell-value">{{ employee.employmentDetails?.workLocation || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact Block -->
+        <div class="info-block" *ngIf="employee.emergencyContact">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>contact_emergency</mat-icon></div>
+            <span>Emergency Contact</span>
+          </div>
+          <div class="block-grid">
+            <div class="cell">
+              <span class="cell-label">Name</span>
+              <span class="cell-value">{{ employee.emergencyContact.name || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Relationship</span>
+              <span class="cell-value badge badge-orange">{{ employee.emergencyContact.relationship || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Phone</span>
+              <span class="cell-value code">{{ employee.emergencyContact.phone || '—' }}</span>
+            </div>
+            <div class="cell">
+              <span class="cell-label">Email</span>
+              <span class="cell-value">{{ employee.emergencyContact.email || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Documents/Performance -->
+      <div class="side-column">
+        
+        <!-- Documents Block -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>folder</mat-icon></div>
+            <span>Documents</span>
+            <button class="btn-icon-small ml-auto" matTooltip="Upload Document">
+              <mat-icon>upload</mat-icon>
+            </button>
+          </div>
+          <div class="block-content empty-state">
+            <mat-icon class="empty-icon">description</mat-icon>
+            <p>No documents uploaded yet</p>
+          </div>
+        </div>
+
+        <!-- Performance Block -->
+        <div class="info-block">
+          <div class="block-header">
+            <div class="block-icon"><mat-icon>trending_up</mat-icon></div>
+            <span>Performance Overview</span>
+          </div>
+          <div class="block-content empty-state">
+            <mat-icon class="empty-icon">analytics</mat-icon>
+            <p>Performance data will be displayed here</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="action-card">
+          <button class="btn-primary w-full mb-3" *ngIf="hasPermission('edit_employee')" (click)="editEmployee()">
+            <mat-icon>edit</mat-icon>
+            Edit Employee Details
+          </button>
+          <button class="btn-secondary w-full" (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Back to List
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !employee" class="empty-state-simple">
+    <mat-icon>error_outline</mat-icon>
+    <p>Employee Not Found</p>
+    <span>The employee you're looking for doesn't exist or has been removed.</span>
+    <button class="btn-primary mt-3" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Employees
+    </button>
+  </div>
+
+</div>
