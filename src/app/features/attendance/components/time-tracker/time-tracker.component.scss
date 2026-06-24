@@ -1,3 +1,4 @@
+@use "sass:color";
 // ============================================================
 // Time Tracker — Reference Design Mirror
 // Color palette: white cards, slate text, #5a4ee4 primary,
@@ -274,7 +275,7 @@ $radius-md:     0.5rem;
         box-shadow: 0 4px 12px rgba($orange, 0.25);
 
         &:not(:disabled):hover {
-          background: darken($orange, 6%);
+          background: color.adjust($orange, $lightness: -6%);
           transform: translateY(-1px);
           box-shadow: 0 6px 16px rgba($orange, 0.3);
         }
@@ -507,7 +508,7 @@ $radius-md:     0.5rem;
     transition: all 0.2s ease;
 
     &:hover {
-      background: darken($primary, 6%);
+      background: color.adjust($primary, $lightness: -6%);
       transform: translateY(-1px);
     }
   }
@@ -776,7 +777,7 @@ $radius-md:     0.5rem;
 // ─── Status badge colours ────────────────────────────────────
 .badge-present {
   background: rgba($green, 0.1);
-  color: darken($green, 10%);
+  color: color.adjust($green, $lightness: -10%);
 }
 
 .badge-absent {
@@ -786,7 +787,7 @@ $radius-md:     0.5rem;
 
 .badge-late {
   background: rgba($orange, 0.1);
-  color: darken($orange, 8%);
+  color: color.adjust($orange, $lightness: -8%);
 }
 
 .badge-half_day {

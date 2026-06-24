@@ -1,4 +1,5 @@
-﻿// ── Variables ────────────────────────────────────────────────
+@use "sass:color";
+// ── Variables ────────────────────────────────────────────────
 $primary: #5e37f0;
 $primary-light: rgba(94, 55, 240, 0.08);
 $success: #10b981;
@@ -64,7 +65,7 @@ $radius-chip: 8px;
   }
 
   &:hover {
-    background: darken($primary, 8%) !important;
+    background: color.adjust($primary, $lightness: -8%) !important;
     box-shadow: 0 6px 20px rgba($primary, 0.35) !important;
   }
 }

@@ -12,6 +12,19 @@
     "src/**/*.d.ts"
   ],
   "exclude": [
-    "src/**/*.spec.ts"
+    "src/**/*.spec.ts",
+    "src/app/core/services/api-integration.service.ts",
+    "src/app/core/services/date-utils.service.ts",
+    "src/app/features/attendance/components/manage-office-ips-dialog/edit-ips-dialoguebox.ts",
+    "src/app/features/payroll/components/dialogs/add-gratuity-config-dialog/add-gratuity-config-dialog.component.ts",
+    "src/app/features/payroll/components/dialogs/add-provident-fund-payment-dialog/add-provident-fund-payment-dialog.component.ts",
+    "src/app/features/payroll/components/dialogs/add-social-security-config-dialog/add-social-security-config-dialog.component.ts",
+    "src/app/features/payroll/components/dialogs/add-tax-slab-dialog/add-tax-slab-dialog.component.ts",
+    "src/app/features/payroll/components/loan-request-compliance/loan-request-compliance.component.ts",
+    "src/app/features/payroll/components/loans-advances/loans-advances.component.ts",
+    "src/app/features/performance/components/self-assessment/self-assessment.component.ts",
+    "src/app/shared/components/day-details-dialogs/day-details-dialog.component.ts",
+    "src/environments/environment.prod.ts",
+    "src/environments/environment.production.ts"
   ]
 }
