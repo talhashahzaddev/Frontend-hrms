@@ -15,12 +15,12 @@
       </div>
 
       <div class="card two-col-card">
-        <div class="photo-panel">
+        <div class="photo-panel" *ngIf="isFieldEnabled('Personal Information', 'Profile Photo')">
           <div class="photo-circle" (click)="triggerFileInput()">
             <img *ngIf="photoPreview" [src]="photoPreview" class="photo-img" alt="Profile" />
             <span *ngIf="!photoPreview" class="photo-icon">👤</span>
           </div>
-          <p class="photo-label">Profile Photo</p>
+          <p class="photo-label">Profile Photo <span class="req" *ngIf="isFieldRequired('Personal Information', 'Profile Photo')">*</span></p>
           <p class="photo-hint">Please upload a professional headshot.</p>
           <input type="file" #photoInput accept="image/*" (change)="onFileSelected($event)" hidden />
           <button type="button" class="upload-btn" (click)="triggerFileInput()">Upload Image</button>
@@ -28,32 +28,32 @@
 
         <div class="fields-panel">
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">FULL NAME <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Full Name')">
+              <label class="field-label">FULL NAME <span class="req" *ngIf="isFieldRequired('Personal Information', 'Full Name')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. Alexander Graham"
                      [(ngModel)]="form.fullName" name="fullName" />
             </div>
-            <div class="field-group">
-              <label class="field-label">JOB TITLE</label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Job Title')">
+              <label class="field-label">JOB TITLE <span class="req" *ngIf="isFieldRequired('Personal Information', 'Job Title')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. Senior UX Designer"
                      [(ngModel)]="form.jobTitle" name="jobTitle" />
             </div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">EMAIL ADDRESS <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Email Address')">
+              <label class="field-label">EMAIL ADDRESS <span class="req" *ngIf="isFieldRequired('Personal Information', 'Email Address')">*</span></label>
               <input class="field-input" type="email" placeholder="e.g. alex@company.com"
                      [(ngModel)]="form.email" name="email" />
             </div>
-            <div class="field-group">
-              <label class="field-label">PHONE NUMBER <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Phone Number')">
+              <label class="field-label">PHONE NUMBER <span class="req" *ngIf="isFieldRequired('Personal Information', 'Phone Number')">*</span></label>
               <input class="field-input" type="tel" placeholder="+1 (555) 000-0000"
                      [(ngModel)]="form.phone" name="phone" />
             </div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">DEPARTMENT <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Department')">
+              <label class="field-label">DEPARTMENT <span class="req" *ngIf="isFieldRequired('Personal Information', 'Department')">*</span></label>
               <div class="select-wrapper">
                 <select class="field-input" [(ngModel)]="form.department" name="department">
                   <option value="" disabled>Select Department</option>
@@ -66,8 +66,8 @@
                 </select>
               </div>
             </div>
-            <div class="field-group">
-              <label class="field-label">GENDER <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Gender')">
+              <label class="field-label">GENDER <span class="req" *ngIf="isFieldRequired('Personal Information', 'Gender')">*</span></label>
               <div class="select-wrapper">
                 <select class="field-input" [(ngModel)]="form.gender" name="gender">
                   <option value="" disabled>Select Gender</option>
@@ -80,8 +80,8 @@
             </div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">NATIONALITY <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'Nationality')">
+              <label class="field-label">NATIONALITY <span class="req" *ngIf="isFieldRequired('Personal Information', 'Nationality')">*</span></label>
               <div class="select-wrapper">
                 <select class="field-input" [(ngModel)]="form.nationality" name="nationality">
                   <option value="" disabled>Select Nationality</option>
@@ -95,19 +95,20 @@
                 </select>
               </div>
             </div>
-            <div class="field-group">
-              <label class="field-label">NATIONAL ID / CNIC <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Personal Information', 'National ID/CNIC')">
+              <label class="field-label">NATIONAL ID / CNIC <span class="req" *ngIf="isFieldRequired('Personal Information', 'National ID/CNIC')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. 35202-1234567-8"
                      [(ngModel)]="form.idNumber" name="idNumber" />
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isFieldEnabled('Personal Information', 'Resume/CV')">
             <div class="field-group full-span">
-              <label class="field-label">RESUME / CV (OPTIONAL)</label>
+              <label class="field-label">RESUME / CV <span class="req" *ngIf="isFieldRequired('Personal Information', 'Resume/CV')">*</span></label>
               <div class="file-input-wrapper">
                 <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" (change)="onResumeSelected($event)" />
                 <label for="resumeFile" class="file-label-btn">📄 Choose File</label>
-                <span class="file-name">{{ form.resumeFileName || 'No file selected' }}</span>
+                <span class="file-name">{{ form.resumeFileName || (form.resumeUrl ? 'Resume already uploaded' : 'No file selected') }}</span>
+                <a *ngIf="form.resumeUrl" class="file-link" [href]="form.resumeUrl" target="_blank" rel="noopener noreferrer">Open</a>
               </div>
             </div>
           </div>
@@ -161,12 +162,12 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" *ngIf="isSectionEnabled('Qualification Details')">
         <h3 class="card-title">{{ editingEducationIndex !== null ? '✎ Edit Qualification' : '+ Add Qualification' }}</h3>
         <div class="fields-panel">
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">DEGREE LEVEL <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'Degree Level')">
+              <label class="field-label">DEGREE LEVEL <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Degree Level')">*</span></label>
               <div class="select-wrapper">
                 <select class="field-input" [(ngModel)]="education.degree" name="degree">
                   <option value="" disabled>Select Level</option>
@@ -178,37 +179,42 @@
                 </select>
               </div>
             </div>
-            <div class="field-group">
-              <label class="field-label">INSTITUTION NAME <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'Institute Name')">
+              <label class="field-label">INSTITUTION NAME <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Institute Name')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. Harvard University"
                      [(ngModel)]="education.institution" name="institution" />
             </div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">FIELD OF STUDY <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'Field of Study')">
+              <label class="field-label">FIELD OF STUDY <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Field of Study')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. Business Administration"
                      [(ngModel)]="education.field" name="field" />
             </div>
-            <div class="field-group">
-              <label class="field-label">GPA (OPTIONAL)</label>
+            <div class="field-group" *ngIf="isFieldEnabled('Qualification Details', 'GPA')">
+              <label class="field-label">GPA <span class="req" *ngIf="isFieldRequired('Qualification Details', 'GPA')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. 3.8 / 4.0"
                      [(ngModel)]="education.gpa" name="gpa" />
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isFieldEnabled('Qualification Details', 'ATTACH DOCOMENT')">
             <div class="field-group full-span">
-              <label class="field-label">ATTACH CERTIFICATE (OPTIONAL)</label>
+              <label class="field-label">ATTACH CERTIFICATE <span class="req" *ngIf="isFieldRequired('Qualification Details', 'ATTACH DOCOMENT')">*</span></label>
               <div class="file-input-wrapper">
                 <input type="file" id="eduFile" (change)="onEducationFileSelected($event)" />
                 <label for="eduFile" class="file-label-btn">📎 Choose File</label>
-                <span class="file-name">{{ education.fileName || 'No file selected' }}</span>
+                <span class="file-name">
+                  <ng-container *ngIf="isUploadingEducationFile">Uploading...</ng-container>
+                  <ng-container *ngIf="!isUploadingEducationFile">
+                    {{ education.fileUrl ? 'Uploaded: ' + education.fileName : (education.fileName || 'No file selected') }}
+                  </ng-container>
+                </span>
               </div>
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isFieldEnabled('Qualification Details', 'Discription')">
             <div class="field-group full-span">
-              <label class="field-label">DESCRIPTION (OPTIONAL)</label>
+              <label class="field-label">DESCRIPTION <span class="req" *ngIf="isFieldRequired('Qualification Details', 'Discription')">*</span></label>
               <textarea class="field-input" rows="3" placeholder="Thesis, major projects, academic honours…"
                         [(ngModel)]="education.description" name="description"></textarea>
             </div>
@@ -216,19 +222,19 @@
         </div>
         <div class="form-actions">
           <button class="btn-cancel" type="button" *ngIf="editingEducationIndex !== null" (click)="cancelEducationEdit()">Cancel</button>
-          <button class="btn-prev" type="button" (click)="step = 1" *ngIf="editingEducationIndex === null">← Back</button>
+          <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(2)" *ngIf="editingEducationIndex === null">← Back</button>
           <div style="flex:1"></div>
           <button class="btn-primary" type="button" *ngIf="editingEducationIndex === null"
-                  [disabled]="isSavingEducation || !education.degree || !education.institution || !education.field"
+                  [disabled]="isSavingEducation || !isEducationFormValid()"
                   (click)="addEducation()">{{ isSavingEducation ? '⏳ Saving…' : '+ Add Education' }}</button>
           <button class="btn-primary" type="button" *ngIf="editingEducationIndex !== null"
-                  [disabled]="!education.degree || !education.institution || !education.field"
+                  [disabled]="!isEducationFormValid()"
                   (click)="updateEducation()">✓ Update Education</button>
         </div>
       </div>
 
       <div class="nav-actions">
-        <button class="btn-prev" type="button" (click)="step = 1" *ngIf="editingEducationIndex === null">← Back</button>
+        <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(2)" *ngIf="editingEducationIndex === null">← Back</button>
         <div style="flex:1"></div>
         <span *ngIf="educationList.length === 0" class="minor-note">No entries added. You can continue and add later.</span>
         <button class="btn-next" type="button" (click)="continueToWorkExperience()" *ngIf="editingEducationIndex === null">Continue →</button>
@@ -274,24 +280,24 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" *ngIf="isSectionEnabled('Work Experience')">
         <h3 class="card-title">{{ editingExperienceIndex !== null ? '✎ Edit Experience' : '+ Add Experience' }}</h3>
         <div class="fields-panel">
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">JOB TITLE <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'JOB TITTLE')">
+              <label class="field-label">JOB TITLE <span class="req" *ngIf="isFieldRequired('Work Experience', 'JOB TITTLE')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. Lead Developer"
                      [(ngModel)]="workExperience.jobTitle" name="jobTitle" />
             </div>
-            <div class="field-group">
-              <label class="field-label">COMPANY <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'COMPANY')">
+              <label class="field-label">COMPANY <span class="req" *ngIf="isFieldRequired('Work Experience', 'COMPANY')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. Google"
                      [(ngModel)]="workExperience.company" name="company" />
             </div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">EMPLOYMENT TYPE <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'EMPLOYMENT TYPE')">
+              <label class="field-label">EMPLOYMENT TYPE <span class="req" *ngIf="isFieldRequired('Work Experience', 'EMPLOYMENT TYPE')">*</span></label>
               <div class="select-wrapper">
                 <select class="field-input" [(ngModel)]="workExperience.employmentType" name="employmentType">
                   <option value="" disabled>Select Type</option>
@@ -303,24 +309,24 @@
                 </select>
               </div>
             </div>
-            <div class="field-group">
-              <label class="field-label">LOCATION</label>
+            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'LOCATION')">
+              <label class="field-label">LOCATION <span class="req" *ngIf="isFieldRequired('Work Experience', 'LOCATION')">*</span></label>
               <input class="field-input" type="text" placeholder="e.g. San Francisco, CA"
                      [(ngModel)]="workExperience.location" name="location" />
             </div>
           </div>
           <div class="field-row">
-            <div class="field-group">
-              <label class="field-label">START DATE <span class="req">*</span></label>
+            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'SATRT DATE')">
+              <label class="field-label">START DATE <span class="req" *ngIf="isFieldRequired('Work Experience', 'SATRT DATE')">*</span></label>
               <input class="field-input" type="date" [(ngModel)]="workExperience.startDate" name="startDate" />
             </div>
-            <div class="field-group">
-              <label class="field-label">END DATE</label>
+            <div class="field-group" *ngIf="isFieldEnabled('Work Experience', 'END DATE')">
+              <label class="field-label">END DATE <span class="req" *ngIf="isFieldRequired('Work Experience', 'END DATE')">*</span></label>
               <input class="field-input" type="date" [(ngModel)]="workExperience.endDate" name="endDate"
                      [disabled]="workExperience.currentlyWorking" />
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isFieldEnabled('Work Experience', 'Currently working here')">
             <div class="field-group full-span">
               <label class="checkbox-label">
                 <input type="checkbox" [(ngModel)]="workExperience.currentlyWorking" name="currentlyWorking" />
@@ -328,21 +334,26 @@
               </label>
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isFieldEnabled('Work Experience', 'KEY RESPONSIBILTIES')">
             <div class="field-group full-span">
-              <label class="field-label">KEY RESPONSIBILITIES</label>
+              <label class="field-label">KEY RESPONSIBILITIES <span class="req" *ngIf="isFieldRequired('Work Experience', 'KEY RESPONSIBILTIES')">*</span></label>
               <textarea class="field-input" rows="3" placeholder="Describe your main achievements and roles…"
                         [(ngModel)]="workExperience.responsibilities" name="responsibilities"></textarea>
             </div>
           </div>
-          <div class="field-row">
+          <div class="field-row" *ngIf="isFieldEnabled('Work Experience', 'ATTACH DOCOMENT')">
             <div class="field-group full-span">
-              <label class="field-label">ATTACH DOCUMENT (OPTIONAL)</label>
+              <label class="field-label">ATTACH DOCUMENT <span class="req" *ngIf="isFieldRequired('Work Experience', 'ATTACH DOCOMENT')">*</span></label>
               <div class="file-input-wrapper">
                 <input type="file" id="workExpFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                        (change)="onWorkExperienceFileSelected($event)" />
                 <label for="workExpFile" class="file-label-btn">📎 Choose File</label>
-                <span class="file-name">{{ workExperience.fileName || 'No file selected' }}</span>
+                <span class="file-name">
+                  <ng-container *ngIf="isUploadingWorkExpFile">Uploading...</ng-container>
+                  <ng-container *ngIf="!isUploadingWorkExpFile">
+                    {{ workExperience.fileUrl ? 'Uploaded: ' + workExperience.fileName : (workExperience.fileName || 'No file selected') }}
+                  </ng-container>
+                </span>
               </div>
             </div>
           </div>
@@ -350,19 +361,19 @@
         <div *ngIf="workExperienceError" class="alert-error" style="margin: 0 0 12px;">❌ {{ workExperienceError }}</div>
         <div class="form-actions">
           <button class="btn-cancel" type="button" *ngIf="editingExperienceIndex !== null" (click)="cancelExperienceEdit()">Cancel</button>
-          <button class="btn-prev" type="button" (click)="step = 2" *ngIf="editingExperienceIndex === null">← Back</button>
+          <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(3)" *ngIf="editingExperienceIndex === null">← Back</button>
           <div style="flex:1"></div>
           <button class="btn-primary" type="button" *ngIf="editingExperienceIndex === null"
-                  [disabled]="isSavingWorkExperience || !workExperience.jobTitle || !workExperience.company || !workExperience.employmentType || !workExperience.startDate"
+                  [disabled]="isSavingWorkExperience || !isWorkExperienceFormValid()"
                   (click)="addWorkExperience()">{{ isSavingWorkExperience ? '⏳ Saving…' : '+ Add Experience' }}</button>
           <button class="btn-primary" type="button" *ngIf="editingExperienceIndex !== null"
-                  [disabled]="!workExperience.jobTitle || !workExperience.company"
+                  [disabled]="!isWorkExperienceFormValid()"
                   (click)="updateWorkExperience()">✓ Update Experience</button>
         </div>
       </div>
 
       <div class="nav-actions">
-        <button class="btn-prev" type="button" (click)="step = 2" *ngIf="editingExperienceIndex === null">← Back</button>
+        <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(3)" *ngIf="editingExperienceIndex === null">← Back</button>
         <div style="flex:1"></div>
         <span *ngIf="workExperienceList.length === 0" class="minor-note">No entries added. You can continue and add later.</span>
         <button class="btn-next" type="button" (click)="continueFromWorkExperience()" *ngIf="editingExperienceIndex === null">Continue →</button>
@@ -418,7 +429,7 @@
 
       <p *ngIf="isLoadingBankDetails" class="minor-note" style="margin: 0 0 12px;">Loading saved bank details…</p>
 
-      <div class="card bank-card" *ngIf="!bankDetailsSaved && !isLoadingBankDetails">
+      <div class="card bank-card" *ngIf="!bankDetailsSaved && !isLoadingBankDetails && isSectionEnabled('BANK DETAILS')">
 
         <!-- Hero block -->
         <div class="bank-hero">
@@ -433,20 +444,20 @@
         <!-- Bank form fields — hidden when noBankAccount -->
         <ng-container *ngIf="!bankForm.noBankAccount">
 
-          <div class="bank-section-divider"><span>ACCOUNT INFORMATION</span></div>
+          <div class="bank-section-divider" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT HOLDER NAME') || isFieldEnabled('BANK DETAILS', 'PAYMENT METHOD') || isFieldEnabled('BANK DETAILS', 'ACCOUNT NUMBER') || isFieldEnabled('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')"><span>ACCOUNT INFORMATION</span></div>
 
           <div class="fields-panel">
             <div class="field-row">
-              <div class="field-group">
-                <label class="field-label">ACCOUNT HOLDER NAME <span class="req">*</span></label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT HOLDER NAME')">
+                <label class="field-label">ACCOUNT HOLDER NAME <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'ACCOUNT HOLDER NAME')">*</span></label>
                 <input class="field-input" type="text" placeholder="Full legal name"
                        [(ngModel)]="bankForm.accountHolderName" name="accountHolderName"
                        [class.field-error]="bankErrors['accountHolderName']"
                        (input)="clearBankError('accountHolderName')" />
                 <span class="inline-error" *ngIf="bankErrors['accountHolderName']">{{ bankErrors['accountHolderName'] }}</span>
               </div>
-              <div class="field-group">
-                <label class="field-label">PAYMENT METHOD <span class="req">*</span></label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'PAYMENT METHOD')">
+                <label class="field-label">PAYMENT METHOD <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'PAYMENT METHOD')">*</span></label>
                 <div class="select-wrapper">
                   <select class="field-input" [(ngModel)]="bankForm.paymentMethod" name="paymentMethod"
                           [class.field-error]="bankErrors['paymentMethod']"
@@ -463,16 +474,16 @@
             </div>
 
             <div class="field-row">
-              <div class="field-group">
-                <label class="field-label">ACCOUNT NUMBER <span class="req">*</span></label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT NUMBER')">
+                <label class="field-label">ACCOUNT NUMBER <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'ACCOUNT NUMBER')">*</span></label>
                 <input class="field-input" type="password" placeholder="••••••••••••"
                        [(ngModel)]="bankForm.accountNumber" name="accountNumber"
                        [class.field-error]="bankErrors['accountNumber']"
                        (input)="clearBankError('accountNumber')" />
                 <span class="inline-error" *ngIf="bankErrors['accountNumber']">{{ bankErrors['accountNumber'] }}</span>
               </div>
-              <div class="field-group">
-                <label class="field-label">CONFIRM ACCOUNT NUMBER <span class="req">*</span></label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')">
+                <label class="field-label">CONFIRM ACCOUNT NUMBER <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'CONFIRM ACCOUNT NUMBER')">*</span></label>
                 <input class="field-input" type="text" placeholder="Re-enter account number"
                        [(ngModel)]="bankForm.confirmAccountNumber" name="confirmAccountNumber"
                        [class.field-error]="bankErrors['confirmAccountNumber']"
@@ -482,12 +493,12 @@
             </div>
           </div>
 
-          <div class="bank-section-divider"><span>BANK &amp; BRANCH</span></div>
+          <div class="bank-section-divider" *ngIf="isFieldEnabled('BANK DETAILS', 'BANK NAME') || isFieldEnabled('BANK DETAILS', 'IBN/SWIFT CODE') || isFieldEnabled('BANK DETAILS', 'BRANCH NAME') || isFieldEnabled('BANK DETAILS', 'BRANCH CODE')"><span>BANK &amp; BRANCH</span></div>
 
           <div class="fields-panel">
             <div class="field-row">
-              <div class="field-group">
-                <label class="field-label">BANK NAME <span class="req">*</span></label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'BANK NAME')">
+                <label class="field-label">BANK NAME <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'BANK NAME')">*</span></label>
                 <div class="select-wrapper">
                   <select class="field-input" [(ngModel)]="bankForm.bankName" name="bankName"
                           [class.field-error]="bankErrors['bankName']"
@@ -516,8 +527,8 @@
                 </div>
                 <span class="inline-error" *ngIf="bankErrors['bankName']">{{ bankErrors['bankName'] }}</span>
               </div>
-              <div class="field-group">
-                <label class="field-label">IBAN / SWIFT CODE</label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'IBN/SWIFT CODE')">
+                <label class="field-label">IBAN / SWIFT CODE <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'IBN/SWIFT CODE')">*</span></label>
                 <input class="field-input" type="text" placeholder="Optional for domestic transfers"
                        [(ngModel)]="bankForm.iban" name="iban"
                        [class.field-error]="bankErrors['iban']"
@@ -527,13 +538,13 @@
             </div>
 
             <div class="field-row">
-              <div class="field-group">
-                <label class="field-label">BRANCH NAME</label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH NAME')">
+                <label class="field-label">BRANCH NAME <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'BRANCH NAME')">*</span></label>
                 <input class="field-input" type="text" placeholder="e.g. Downtown Manhattan"
                        [(ngModel)]="bankForm.branchName" name="branchName" />
               </div>
-              <div class="field-group">
-                <label class="field-label">BRANCH CODE</label>
+              <div class="field-group" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH CODE')">
+                <label class="field-label">BRANCH CODE <span class="req" *ngIf="isFieldRequired('BANK DETAILS', 'BRANCH CODE')">*</span></label>
                 <input class="field-input" type="text" placeholder="Routing number or Sort code"
                        [(ngModel)]="bankForm.branchCode" name="branchCode" />
               </div>
@@ -552,43 +563,18 @@
           </button>
         </div>
 
-        <!-- Trust badges -->
-        <!-- <div class="bank-trust-row">
-          <div class="trust-item">
-            <div class="trust-icon-wrap secure">🔒</div>
-            <div>
-              <p class="trust-title">Secure Storage</p>
-              <p class="trust-desc">Your data is encrypted using 256-bit AES protocols.</p>
-            </div>
-          </div>
-          <div class="trust-item">
-            <div class="trust-icon-wrap verify">✅</div>
-            <div>
-              <p class="trust-title">Verification</p>
-              <p class="trust-desc">Details are verified by our payroll team within 24 hours.</p>
-            </div>
-          </div>
-          <div class="trust-item">
-            <div class="trust-icon-wrap help">❓</div>
-            <div>
-              <p class="trust-title">Need Help?</p>
-              <p class="trust-desc">Contact your HR representative for assistance.</p>
-            </div>
-          </div>
-        </div> -->
-
       </div><!-- /bank-card -->
 
       <div *ngIf="bankDetailsError" class="alert-error">❌ {{ bankDetailsError }}</div>
 
       <div class="nav-actions">
-        <button class="btn-prev" type="button" (click)="step = 3">← Back</button>
+        <button class="btn-prev" type="button" (click)="step = getPreviousEnabledStep(4)">← Back</button>
         <div style="flex:1"></div>
-        <span *ngIf="!bankDetailsSaved && !bankForm.noBankAccount" class="minor-note">
+        <span *ngIf="!bankDetailsSaved && !bankForm.noBankAccount && isSectionEnabled('BANK DETAILS')" class="minor-note">
           Please save your bank details before continuing.
         </span>
         <button class="btn-next" type="button" (click)="continueFromBankDetails()"
-                [disabled]="!bankDetailsSaved && !bankForm.noBankAccount">
+                [disabled]="!isBankDetailsCompleted()">
           Continue →
         </button>
       </div>
@@ -622,19 +608,19 @@
                 <button type="button" class="btn-edit-small" (click)="editPersonalFromVerification()">✎ Edit</button>
               </div>
               <div class="details-grid">
-                <div class="detail-item"><label>Full Name</label><p>{{ form.fullName }}</p></div>
-                <div class="detail-item"><label>Job Title</label><p>{{ form.jobTitle || '—' }}</p></div>
-                <div class="detail-item"><label>Email</label><p>{{ form.email }}</p></div>
-                <div class="detail-item"><label>Phone</label><p>{{ form.phone }}</p></div>
-                <div class="detail-item"><label>Department</label><p>{{ form.department | titlecase }}</p></div>
-                <div class="detail-item"><label>Gender</label><p>{{ form.gender | titlecase }}</p></div>
-                <div class="detail-item"><label>Nationality</label><p>{{ form.nationality | titlecase }}</p></div>
-                <div class="detail-item"><label>CNIC / ID</label><p>{{ form.idNumber }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Full Name')"><label>Full Name</label><p>{{ form.fullName }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Job Title')"><label>Job Title</label><p>{{ form.jobTitle || '—' }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Email Address')"><label>Email</label><p>{{ form.email }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Phone Number')"><label>Phone</label><p>{{ form.phone }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Department')"><label>Department</label><p>{{ form.department | titlecase }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Gender')"><label>Gender</label><p>{{ form.gender | titlecase }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'Nationality')"><label>Nationality</label><p>{{ form.nationality | titlecase }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('Personal Information', 'National ID/CNIC')"><label>CNIC / ID</label><p>{{ form.idNumber }}</p></div>
               </div>
             </div>
 
             <!-- Education -->
-            <div class="review-section" *ngIf="educationList.length > 0">
+            <div class="review-section" *ngIf="isSectionEnabled('Qualification Details') && educationList.length > 0">
               <div class="review-section-header">
                 <h4>Qualification Background</h4>
                 <button type="button" class="btn-edit-small" (click)="step = 2">+ Add</button>
@@ -655,7 +641,7 @@
             </div>
 
             <!-- Work Experience -->
-            <div class="review-section" *ngIf="workExperienceList.length > 0">
+            <div class="review-section" *ngIf="isSectionEnabled('Work Experience') && workExperienceList.length > 0">
               <div class="review-section-header">
                 <h4>Work Experience</h4>
                 <button type="button" class="btn-edit-small" (click)="step = 3">+ Add</button>
@@ -679,32 +665,25 @@
             </div>
 
             <!-- Bank Details summary -->
-            <div class="review-section">
+            <div class="review-section" *ngIf="isSectionEnabled('BANK DETAILS')">
               <div class="review-section-header">
                 <h4>Bank Details</h4>
                 <button type="button" class="btn-edit-small" (click)="step = 4">✎ Edit</button>
               </div>
               <div class="details-grid" *ngIf="!bankForm.noBankAccount && bankDetailsSaved">
-                <div class="detail-item"><label>Bank</label><p>{{ bankForm.bankName || '—' }}</p></div>
-                <div class="detail-item"><label>Account Holder</label><p>{{ bankForm.accountHolderName || '—' }}</p></div>
-                <div class="detail-item"><label>Account Number</label><p>•••• {{ bankForm.accountNumber | slice:-4 }}</p></div>
-                <div class="detail-item"><label>Payment Method</label><p>{{ bankForm.paymentMethod || '—' }}</p></div>
-                <div class="detail-item" *ngIf="bankForm.branchName"><label>Branch</label><p>{{ bankForm.branchName }}</p></div>
-                <div class="detail-item" *ngIf="bankForm.iban"><label>IBAN / SWIFT</label><p>{{ bankForm.iban }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'BANK NAME')"><label>Bank</label><p>{{ bankForm.bankName || '—' }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT HOLDER NAME')"><label>Account Holder</label><p>{{ bankForm.accountHolderName || '—' }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'ACCOUNT NUMBER')"><label>Account Number</label><p>•••• {{ bankForm.accountNumber | slice:-4 }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'PAYMENT METHOD')"><label>Payment Method</label><p>{{ bankForm.paymentMethod || '—' }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'BRANCH NAME') && bankForm.branchName"><label>Branch</label><p>{{ bankForm.branchName }}</p></div>
+                <div class="detail-item" *ngIf="isFieldEnabled('BANK DETAILS', 'IBN/SWIFT CODE') && bankForm.iban"><label>IBAN / SWIFT</label><p>{{ bankForm.iban }}</p></div>
               </div>
-              <!-- <div class="no-bank-badge" *ngIf="bankForm.noBankAccount">
-                🚫 No bank account — manual / cash payment arranged
-              </div>
-              <div class="pending-bank" *ngIf="!bankDetailsSaved && !bankForm.noBankAccount">
-                ⊘ Bank details not saved.
-                <button class="btn-link" (click)="step = 4">Go back to add →</button>
-              </div> -->
             </div>
 
             <!-- Documents -->
-            <div class="review-section">
+            <div class="review-section" *ngIf="isFieldEnabled('Personal Information', 'Resume/CV') || isSectionEnabled('Qualification Details')">
               <h4>Documents</h4>
-              <div class="doc-item">
+              <div class="doc-item" *ngIf="isFieldEnabled('Personal Information', 'Resume/CV')">
                 <div class="doc-icon">📄</div>
                 <div class="doc-info">
                   <p>Resume</p>
@@ -715,7 +694,7 @@
                   {{ (form.resume || hasSavedResume) ? '✓ Uploaded' : '⊘ Pending' }}
                 </span>
               </div>
-              <div class="doc-item">
+              <div class="doc-item" *ngIf="isSectionEnabled('Qualification Details')">
                 <div class="doc-icon">🎓</div>
                 <div class="doc-info">
                   <p>Education Certificates</p>
@@ -758,28 +737,28 @@
               </span>
               <button class="btn-sm" (click)="editPersonalFromVerification()">Edit</button>
             </div>
-            <div class="summary-item">
+            <div class="summary-item" *ngIf="isSectionEnabled('Qualification Details')">
               <span>Education</span>
               <span class="badge" [class.ok]="isEducationCompleted()" [class.todo]="!isEducationCompleted()">
                 {{ isEducationCompleted() ? 'Complete' : 'Pending' }}
               </span>
               <button class="btn-sm" (click)="step = 2">{{ isEducationCompleted() ? 'Edit' : 'Add' }}</button>
             </div>
-            <div class="summary-item">
+            <div class="summary-item" *ngIf="isSectionEnabled('Work Experience')">
               <span>Experience</span>
               <span class="badge" [class.ok]="isWorkExperienceCompleted()" [class.todo]="!isWorkExperienceCompleted()">
                 {{ isWorkExperienceCompleted() ? 'Complete' : 'Pending' }}
               </span>
               <button class="btn-sm" (click)="step = 3">{{ isWorkExperienceCompleted() ? 'Edit' : 'Add' }}</button>
             </div>
-            <div class="summary-item">
+            <div class="summary-item" *ngIf="isSectionEnabled('BANK DETAILS')">
               <span>Bank Details</span>
               <span class="badge" [class.ok]="isBankDetailsCompleted()" [class.todo]="!isBankDetailsCompleted()">
                 {{ isBankDetailsCompleted() ? 'Complete' : 'Pending' }}
               </span>
               <button class="btn-sm" (click)="step = 4">Edit</button>
             </div>
-            <div class="summary-item">
+            <div class="summary-item" *ngIf="isFieldEnabled('Personal Information', 'Resume/CV')">
               <span>Resume</span>
               <span class="badge" [class.ok]="isResumeUploaded()" [class.todo]="!isResumeUploaded()">
                 {{ isResumeUploaded() ? 'Uploaded' : 'Pending' }}
@@ -798,7 +777,7 @@
       </div>
 
       <div class="nav-actions">
-        <button class="btn-prev" (click)="step = 4">← Back</button>
+        <button class="btn-prev" (click)="step = getPreviousEnabledStep(5)">← Back</button>
         <div style="flex:1"></div>
         <button class="btn-next" (click)="proceedFromVerification()">Continue to Policies →</button>
       </div>
@@ -849,11 +828,23 @@
         <div class="nav-actions" style="margin-top:24px; margin-bottom:0;">
           <button class="btn-prev" (click)="step = 5">← Back</button>
           <div style="flex:1"></div>
-          <button class="btn-next" [disabled]="(!policyAccepted && policies.length > 0) || isSubmitting"
-                  (click)="finishOnboarding()">
-            <span *ngIf="!isSubmitting">Complete Onboarding ✓</span>
-            <span *ngIf="isSubmitting">⏳ Submitting…</span>
-          </button>
+
+          <!-- Show finish button when not completed -->
+          <ng-container *ngIf="!onboardingCompleted">
+            <button class="btn-next" [disabled]="(!policyAccepted && policies.length > 0) || isSubmitting"
+                    (click)="finishOnboarding()">
+              <span *ngIf="!isSubmitting">Complete Onboarding ✓</span>
+              <span *ngIf="isSubmitting">⏳ Submitting…</span>
+            </button>
+          </ng-container>
+
+          <!-- Professional completed state -->
+          <div *ngIf="onboardingCompleted" class="completed-state" style="display:flex;align-items:center;gap:12px;">
+            <div style="display:flex;flex-direction:column;align-items:flex-end;">
+              <div class="completed-badge" style="font-size:18px;color:#4caf50;font-weight:600;">✓ Completed</div>
+              <div class="minor-note" style="font-size:13px;color:#666;margin-top:6px;">Thank you — your onboarding is complete.</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
