@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
@@ -77,6 +78,9 @@ export class PositionListComponent implements OnInit, OnDestroy {
 
   // Loading state
   isLoading = false;
+
+  // Selection
+  selection = new SelectionModel<Position>(true, []);
 
   // Search and Filters
   searchControl = new FormControl('');
@@ -195,6 +199,27 @@ export class PositionListComponent implements OnInit, OnDestroy {
       this.departmentControl.value ||
       this.statusControl.value
     );
+  }
+
+  isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.positions.length;
+    return numSelected === numRows && numRows > 0;
+  }
+
+  toggleAllRows(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+    this.selection.select(...this.positions);
+  }
+
+  checkboxLabel(row?: Position): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.positionTitle}`;
   }
 
   hasPermission(actionKey: string): boolean {

@@ -1,38 +1,45 @@
-<!-- Attendance Reports Container - Redesigned -->
+<!-- Attendance Reports Container -->
 <div class="reports-container">
   <div class="reports-wrapper">
-    
+
+    <div class="page-header">
+      <div class="header-left">
+        <div class="icon-box">
+          <mat-icon>assessment</mat-icon>
+        </div>
+        <div>
+          <h2 class="page-title">Attendance Reports</h2>
+          <p class="page-subtitle">Generate comprehensive attendance reports and analytics</p>
+        </div>
+      </div>
+    </div>
+
     <!-- BEGIN: Report Configuration Card -->
     <section class="report-config-card">
       <!-- Title & Subtitle Section -->
       <div class="config-header">
-        <h1 class="config-title">Attendance Reports</h1>
-        <p class="config-subtitle">Generate comprehensive attendance reports and analytics</p>
+        <h3 class="config-title">Report Configuration</h3>
+        <p class="config-subtitle">Select date range and filters, then generate your report</p>
       </div>
 
       <div class="config-content">
         <!-- Date Range Selection -->
         <div class="date-range-section">
-          <label class="section-label">Date Range Selection</label>
-          
+
+
           <!-- Date Inputs -->
           <div class="date-inputs-row">
             <mat-form-field appearance="outline" class="date-input-field">
               <mat-label>Start Date</mat-label>
-              <input matInput 
-                     [matDatepicker]="startPicker" 
-                     [formControl]="startDateControl"
-                     placeholder="Select start date">
+              <input matInput [matDatepicker]="startPicker" [formControl]="startDateControl"
+                placeholder="Select start date">
               <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
               <mat-datepicker #startPicker></mat-datepicker>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="date-input-field">
               <mat-label>End Date</mat-label>
-              <input matInput 
-                     [matDatepicker]="endPicker" 
-                     [formControl]="endDateControl"
-                     placeholder="Select end date">
+              <input matInput [matDatepicker]="endPicker" [formControl]="endDateControl" placeholder="Select end date">
               <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
               <mat-datepicker #endPicker></mat-datepicker>
             </mat-form-field>
@@ -40,27 +47,19 @@
 
           <!-- Quick Date Buttons -->
           <div class="quick-dates-row">
-            <button class="quick-date-btn" 
-                    [class.active]="selectedDateRange === 'today'"
-                    (click)="setDateRange('today')">Today</button>
-            <button class="quick-date-btn" 
-                    [class.active]="selectedDateRange === 'week'"
-                    (click)="setDateRange('week')">This Week</button>
-            <button class="quick-date-btn" 
-                    [class.active]="selectedDateRange === 'month'"
-                    (click)="setDateRange('month')">This Month</button>
-            <button class="quick-date-btn" 
-                    [class.active]="selectedDateRange === 'quarter'"
-                    (click)="setDateRange('quarter')">This Quarter</button>
+            <button class="quick-date-btn" [class.active]="selectedDateRange === 'today'"
+              (click)="setDateRange('today')">Today</button>
+            <button class="quick-date-btn" [class.active]="selectedDateRange === 'week'"
+              (click)="setDateRange('week')">This Week</button>
+            <button class="quick-date-btn" [class.active]="selectedDateRange === 'month'"
+              (click)="setDateRange('month')">This Month</button>
+            <button class="quick-date-btn" [class.active]="selectedDateRange === 'quarter'"
+              (click)="setDateRange('quarter')">This Quarter</button>
           </div>
         </div>
 
         <!-- Filters & Action -->
         <div class="filters-section">
-          <div class="filters-header-row">
-            <label class="section-label">Filters</label>
-            <button class="clear-filters-btn">Clear all filters</button>
-          </div>
 
           <div class="filters-action-row">
             <!-- Filter Dropdowns -->
@@ -98,17 +97,18 @@
               </mat-form-field>
             </div>
 
-            <!-- Generate Report Button -->
-            <button 
-              class="generate-report-btn" 
-              (click)="generateReport()" 
-              [disabled]="isLoading"
-              *ngIf="hasPermission('reports_genrate_report')">
-              Generate Report
-              <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-              </svg>
-            </button>
+            <!-- Generate Report & Clear Button -->
+            <div class="action-buttons-col">
+              <button class="clear-filters-btn">Clear all filters</button>
+              <button class="generate-report-btn" (click)="generateReport()" [disabled]="isLoading"
+                *ngIf="hasPermission('reports_genrate_report')">
+                Generate Report
+                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                  </path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -159,14 +159,20 @@
           <span class="count-bold">{{ reportData.records.totalCount }}</span> records found
         </span>
         <div class="export-buttons">
-          <button class="export-btn" (click)="exportToCSV()" title="Export to CSV" *ngIf="hasPermission('reports_export')">
+          <button class="export-btn" (click)="exportToCSV()" title="Export to CSV"
+            *ngIf="hasPermission('reports_export')">
             <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              <path
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
             </svg>
           </button>
-          <button class="export-btn" (click)="exportToExcel()" title="Export to Excel" *ngIf="hasPermission('reports_export')">
+          <button class="export-btn" (click)="exportToExcel()" title="Export to Excel"
+            *ngIf="hasPermission('reports_export')">
             <svg class="export-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+              <path
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
             </svg>
           </button>
         </div>
@@ -192,8 +198,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let record of reportData.records.data; let even = even" 
-                [class.row-even]="even">
+            <tr *ngFor="let record of reportData.records.data; let even = even" [class.row-even]="even">
               <!-- Employee -->
               <td class="employee-cell">{{ record.employeeName }}</td>
 
@@ -218,8 +223,7 @@
 
               <!-- Total Hours -->
               <td class="hours-cell">
-                <span class="hours-badge" 
-                      [ngClass]="{
+                <span class="hours-badge" [ngClass]="{
                         'hours-present': record.status === 'present',
                         'hours-late': record.status === 'late',
                         'hours-absent': record.status === 'absent' || record.status === 'on_leave'
@@ -230,8 +234,7 @@
 
               <!-- Status -->
               <td class="status-cell">
-                <span class="status-badge" 
-                      [ngClass]="{
+                <span class="status-badge" [ngClass]="{
                         'status-present': record.status === 'present',
                         'status-absent': record.status === 'absent',
                         'status-late': record.status === 'late',
@@ -247,7 +250,9 @@
         <!-- Empty State -->
         <div *ngIf="reportData.records.data.length === 0" class="empty-state">
           <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+            </path>
           </svg>
           <h3 class="empty-title">No Records Found</h3>
           <p class="empty-text">No attendance records found for the selected criteria.</p>
@@ -256,29 +261,22 @@
 
       <!-- Table Pagination -->
       <div *ngIf="reportData.records.totalCount > 0 && !isLoading" class="table-pagination">
-        <button 
-          class="pagination-btn" 
+        <button class="pagination-btn"
           (click)="onPageChange({pageIndex: pageIndex - 1, pageSize: pageSize, length: reportData.records.totalCount})"
           [disabled]="pageIndex === 0">
           Previous
         </button>
 
         <div class="pagination-numbers">
-          <button 
-            class="page-number" 
-            [class.active]="pageIndex === 0"
+          <button class="page-number" [class.active]="pageIndex === 0"
             (click)="onPageChange({pageIndex: 0, pageSize: pageSize, length: reportData.records.totalCount})">
             1
           </button>
-          <button 
-            class="page-number"
-            [class.active]="pageIndex === 1"
+          <button class="page-number" [class.active]="pageIndex === 1"
             (click)="onPageChange({pageIndex: 1, pageSize: pageSize, length: reportData.records.totalCount})">
             2
           </button>
-          <button 
-            class="page-number"
-            [class.active]="pageIndex === 2"
+          <button class="page-number" [class.active]="pageIndex === 2"
             (click)="onPageChange({pageIndex: 2, pageSize: pageSize, length: reportData.records.totalCount})">
             3
           </button>
@@ -286,8 +284,7 @@
           <!-- <button class="page-number">{{ Math.ceil(reportData.records.totalCount / pageSize) }}</button> -->
         </div>
 
-        <button 
-          class="pagination-btn"
+        <button class="pagination-btn"
           (click)="onPageChange({pageIndex: pageIndex + 1, pageSize: pageSize, length: reportData.records.totalCount})"
           [disabled]="(pageIndex + 1) * pageSize >= reportData.records.totalCount">
           Next
@@ -299,11 +296,14 @@
     <!-- No Report Generated State -->
     <section *ngIf="!reportData && !isLoading" class="no-report-state">
       <svg class="no-report-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+        </path>
       </svg>
       <h3 class="no-report-title">Generate Your First Report</h3>
       <p class="no-report-text">
-        Select your date range and filters above, then click "Generate Report" to create comprehensive attendance analytics.
+        Select your date range and filters above, then click "Generate Report" to create comprehensive attendance
+        analytics.
       </p>
     </section>
 

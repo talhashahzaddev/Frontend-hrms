@@ -282,8 +282,8 @@ ngOnDestroy(): void {
       this.selectedFence.centerLongitude
     ], {
       radius: this.selectedFence.radiusMeters || 200,
-      color: '#6C5CE7',
-      fillColor: '#6C5CE7',
+      color: '#2563eb',
+      fillColor: '#2563eb',
       fillOpacity: 0.2,
       weight: 2
     }).addTo(this.fencePreviewMap);

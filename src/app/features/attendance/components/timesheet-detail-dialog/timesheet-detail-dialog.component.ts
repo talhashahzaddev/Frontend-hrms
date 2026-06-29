@@ -762,7 +762,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
       },
 
-      panelClass: 'attendance-request-dialog-panel'
+      panelClass: ['attendance-dialog-panel', 'attendance-request-dialog-panel']
 
     });
 
@@ -826,6 +826,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Finalize Employee Records',
         message: `Are you sure you want to finalize all records for ${employee.employeeName}? This will lock them for payroll.`,
@@ -939,6 +940,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef2 = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Submit All Draft Edits',
         message: `Are you sure you want to submit all ${draftCount} draft edit${draftCount > 1 ? 's' : ''} for approval? They will be sent to your manager.`,
@@ -1272,6 +1274,8 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(ManagerOverrideDialogComponent, {
       width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel',
       disableClose: true,
       data: {
         record:       reviewRecord,
@@ -1624,6 +1628,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef3 = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Approve All Pending Corrections',
         message: `Are you sure you want to approve all ${pendingCount} pending corrections for ${scope} in this period?`,
@@ -1681,6 +1686,7 @@ export class TimesheetDetailDialogComponent implements OnInit, OnDestroy {
 
     const confirmDialogRef4 = this.dialog.open(ConfirmationDialogComponent, {
       width: '480px',
+      panelClass: 'attendance-dialog-panel',
       data: {
         title: 'Finalize Monthly Timesheet',
         message: 'Are you sure you want to finalize the entire monthly timesheet? This will lock all records for payroll and prevent further changes.',

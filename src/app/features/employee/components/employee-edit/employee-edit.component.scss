@@ -1,29 +1,31 @@
-// Employee Edit Dialog — matches system design (#1a1f2e, #6366f1, #f5f6fa)
+// Employee Edit Dialog — matches system design (#f8fafc bg, #2563eb primary)
 
-// ─── Dialog container override ────────────────────────────────
+// ─── Dialog container override ──────────────────────────────────
 ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 14px !important;
+  border-radius: 0.75rem !important;
   padding: 0 !important;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.14) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
 }
 
 .dialog-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  font-family: 'Inter', 'DM Sans', sans-serif;
-  background: #f5f6fa;
+  font-family: 'Public Sans', 'Inter', sans-serif;
+  background: #f8fafc;
 
   // ─── Header ───────────────────────────────────────────────
   .dialog-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 22px;
-    background: #ffffff;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #e2e8f0;
     flex-shrink: 0;
-    gap: 12px;
+    gap: 1rem;
 
     .header-left {
       display: flex;
@@ -32,20 +34,21 @@
       min-width: 0;
 
       .header-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
 
         mat-icon {
-          color: white;
-          font-size: 19px;
-          width: 19px;
-          height: 19px;
+          color: #2563eb;
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
         }
       }
 
@@ -54,16 +57,16 @@
 
         .header-title {
           margin: 0 0 2px;
-          font-size: 16px;
+          font-size: 1.125rem;
           font-weight: 700;
-          color: black;
+          color: #0f172a;
           line-height: 1.2;
         }
 
         .header-sub {
           margin: 0;
-          font-size: 11.5px;
-          color: black;
+          font-size: 0.8125rem;
+          color: #64748b;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -75,10 +78,10 @@
 
   // ─── Scrollable body ──────────────────────────────────────
   .dialog-body {
-    padding: 14px 16px !important;
+    padding: 1rem 1.5rem !important;
     flex: 1;
     overflow-y: auto;
-    background: #f5f6fa;
+    background: #f8fafc;
     max-height: 65vh;
 
     &::-webkit-scrollbar { width: 4px; }
@@ -109,20 +112,21 @@
       border-bottom: 1px solid #f0f1f5;
 
       .section-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 7px;
-        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        width: 2rem;
+        height: 2rem;
+        border-radius: 0.5rem;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
 
         mat-icon {
-          color: white;
-          font-size: 15px;
-          width: 15px;
-          height: 15px;
+          color: #2563eb;
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
         }
       }
 
@@ -194,7 +198,7 @@
             .mat-mdc-text-field-wrapper { background: white; }
             .mdc-notched-outline__leading,
             .mdc-notched-outline__notch,
-            .mdc-notched-outline__trailing { border-color: #c4b5fd !important; }
+            .mdc-notched-outline__trailing { border-color: #94a3b8 !important; }
           }
 
           &.mat-focused {
@@ -202,10 +206,10 @@
             .mdc-notched-outline__leading,
             .mdc-notched-outline__notch,
             .mdc-notched-outline__trailing {
-              border-color: #6366f1 !important;
+              border-color: #2563eb !important;
               border-width: 2px !important;
             }
-            label { color: #6366f1 !important; }
+            label { color: #2563eb !important; }
           }
 
           &.mat-form-field-invalid {
@@ -234,7 +238,7 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          background: #2563eb;
           color: white;
           font-size: 13px;
           font-weight: 700;
@@ -263,7 +267,7 @@
               .mat-mdc-text-field-wrapper { background: white; }
               .mdc-notched-outline__leading,
               .mdc-notched-outline__notch,
-              .mdc-notched-outline__trailing { border-color: #c4b5fd !important; }
+              .mdc-notched-outline__trailing { border-color: #93c5fd !important; }
             }
 
             &.mat-focused {
@@ -271,10 +275,10 @@
               .mdc-notched-outline__leading,
               .mdc-notched-outline__notch,
               .mdc-notched-outline__trailing {
-                border-color: #6366f1 !important;
+                border-color: #2563eb !important;
                 border-width: 2px !important;
               }
-              label { color: #6366f1 !important; }
+              label { color: #2563eb !important; }
             }
 
             mat-error { font-size: 11.5px; font-weight: 500; color: #dc2626; }
@@ -289,28 +293,32 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
-    padding: 12px 18px;
-    background: white;
-    border-top: 1px solid #eaecf0;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
     flex-shrink: 0;
 
     .btn-cancel {
-      height: 38px;
-      padding: 0 18px !important;
-      border-radius: 8px !important;
-      font-size: 13.5px !important;
-      font-weight: 500 !important;
-      color: #6b7280 !important;
-      border-color: #e5e7eb !important;
-      transition: all 0.18s ease !important;
+      height: 2.5rem;
+      padding: 0 1.25rem !important;
+      border-radius: 0.5rem !important;
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
+      color: #475569 !important;
+      border-color: #e2e8f0 !important;
+      background: white !important;
+      transition: all 0.2s !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
 
-      mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 5px; }
+      mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
 
       &:hover:not([disabled]) {
-        background: #f9fafb !important;
-        border-color: #9ca3af !important;
-        color: #374151 !important;
+        background: #f1f5f9 !important;
+        border-color: #94a3b8 !important;
+        color: #0f172a !important;
       }
 
       &[disabled] {
@@ -319,30 +327,31 @@
       }
     }
 
-    .btn-save {
-      height: 38px;
-      padding: 0 22px !important;
-      border-radius: 8px !important;
-      font-size: 13.5px !important;
+    .btn-save, .add-btn {
+      height: 2.5rem;
+      padding: 0 1.25rem !important;
+      border-radius: 0.5rem !important;
+      font-size: 0.875rem !important;
       font-weight: 600 !important;
-      background: #1a1f2e !important;
+      background: #2563eb !important;
       color: white !important;
-      box-shadow: 0 2px 6px rgba(26, 31, 46, 0.2) !important;
-      transition: all 0.18s ease !important;
-      letter-spacing: 0.1px;
+      border: none !important;
+      box-shadow: none !important;
+      transition: all 0.2s !important;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
 
-      mat-icon { font-size: 17px; width: 17px; height: 17px; margin-right: 5px; }
+      mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
 
       &:hover:not([disabled]) {
-        background: #2d3348 !important;
-        box-shadow: 0 4px 12px rgba(26, 31, 46, 0.3) !important;
+        background: #1d4ed8 !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
       }
 
       &[disabled] {
-        background: #e5e7eb !important;
-        color: #9ca3af !important;
-        box-shadow: none !important;
-        cursor: not-allowed;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
       }
     }
   }
@@ -487,11 +496,11 @@
     padding: 0 12px !important;
     font-size: 13.5px !important;
 
-    &:hover { background: #f5f3ff !important; }
+    &:hover { background: #eff6ff !important; }
     &.mdc-list-item--selected,
     &.mat-mdc-option-active {
-      background: #eef2ff !important;
-      color: #6366f1 !important;
+      background: #dbeafe !important;
+      color: #2563eb !important;
     }
 
     .opt-flag {
@@ -533,8 +542,8 @@
       margin-left: auto;
       font-size: 12px;
       font-weight: 600;
-      color: #6366f1;
-      background: #eef2ff;
+      color: #2563eb;
+      background: #eff6ff;
       padding: 2px 7px;
       border-radius: 5px;
       flex-shrink: 0;
@@ -543,11 +552,11 @@
   }
 }
 
-// ─── Select Panel ─────────────────────────────────────────────
+// ─── Select Panel ──────────────────────────────────────────────────
 ::ng-deep .mat-mdc-select-panel {
   border-radius: 10px !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
-  border: 1px solid #f0f1f5 !important;
+  border: 1px solid #e2e8f0 !important;
 
   .mat-mdc-option {
     border-radius: 6px !important;
@@ -556,28 +565,28 @@
     height: 38px !important;
     min-height: 38px !important;
 
-    &:hover { background: #f5f3ff !important; }
+    &:hover { background: #eff6ff !important; }
 
     &.mat-mdc-option-active,
     &.mdc-list-item--selected {
-      background: #eef2ff !important;
-      color: #6366f1 !important;
+      background: #dbeafe !important;
+      color: #2563eb !important;
     }
   }
 }
 
-// ─── Datepicker ───────────────────────────────────────────────
+// ─── Datepicker ──────────────────────────────────────────────────
 ::ng-deep .mat-datepicker-content {
   border-radius: 12px !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
 
   .mat-calendar-body-selected {
-    background: #6366f1 !important;
+    background: #2563eb !important;
     color: white !important;
   }
 
   .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover {
-    .mat-calendar-body-cell-content { background: #eef2ff !important; }
+    .mat-calendar-body-cell-content { background: #eff6ff !important; }
   }
 }
 

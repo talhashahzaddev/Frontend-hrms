@@ -1,20 +1,21 @@
-<div class="attendance-request-dialog">
+<div class="dialog-container attendance-request-dialog">
 
-  <!-- ── Dialog Header ────────────────────────────────────────────── -->
-  <div class="request-dialog-header">
-    <div class="header-icon-wrap">
-      <mat-icon>{{ isCreateMode ? 'add_circle' : 'rate_review' }}</mat-icon>
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>{{ isCreateMode ? 'add_circle' : 'rate_review' }}</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-title">{{ isCreateMode ? 'Add Attendance Record' : 'Request Attendance Correction' }}</h2>
+        <p class="header-subtitle">{{ data.employeeName }} &bull; {{ data.workDate | localizedDate:'mediumDate' }}</p>
+      </div>
     </div>
-    <div class="header-text">
-      <h2 class="dialog-title">{{ isCreateMode ? 'Add Attendance Record' : 'Request Attendance Correction' }}</h2>
-      <span class="record-date">{{ data.employeeName }} &bull; {{ data.workDate | localizedDate:'mediumDate' }}</span>
-    </div>
-    <button mat-icon-button class="close-btn" (click)="cancel()" [disabled]="isSubmitting" aria-label="Close">
+    <button mat-icon-button class="close-button" (click)="cancel()" [disabled]="isSubmitting" aria-label="Close">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <mat-dialog-content class="request-content">
+  <div class="dialog-body request-content">
 
     <!-- ── Original Record Panel (edit mode only) ─────────────────── -->
     @if (!isCreateMode) {
@@ -161,14 +162,13 @@
       </mat-form-field>
 
     </form>
-  </mat-dialog-content>
+  </div>
 
-  <!-- ── Dialog Actions ───────────────────────────────────────────── -->
-  <mat-dialog-actions align="end" class="request-actions">
-    <button mat-stroked-button (click)="cancel()" [disabled]="isSubmitting">
+  <div class="dialog-footer request-actions">
+    <button mat-stroked-button class="btn-cancel" (click)="cancel()" [disabled]="isSubmitting">
       Cancel
     </button>
-    <button mat-flat-button (click)="onSubmit()"
+    <button mat-flat-button class="btn-save submit-btn" (click)="onSubmit()"
             [disabled]="isSubmitting || requestForm.invalid" class="submit-btn">
       @if (isSubmitting) {
         <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
@@ -177,5 +177,5 @@
       }
       {{ isSubmitting ? (isCreateMode ? 'Creating...' : 'Submitting...') : (isCreateMode ? 'Create Record' : 'Submit Request') }}
     </button>
-  </mat-dialog-actions>
+  </div>
 </div>

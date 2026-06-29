@@ -2,15 +2,15 @@
 // SHIFT DASHBOARD — Matches reference Figma design
 // ══════════════════════════════════════════════════════════════
 .shift-dashboard-container {
-  padding: 32px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
   background: #f8fafc;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  box-sizing: border-box;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -27,27 +27,27 @@
     gap: 16px;
 
     .header-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(91, 91, 230, 0.1);
-      border-radius: 12px;
+      width: 3rem;
+      height: 3rem;
+      background: rgba(37, 99, 235, 0.1);
+      border-radius: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
 
       mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
-        color: #5b5be6;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        color: #2563eb;
       }
     }
   }
 
   .page-title {
     margin: 0 0 2px;
-    font-size: 28px;
+    font-size: 1.75rem;
     font-weight: 700;
     color: #0f172a;
     letter-spacing: -0.5px;
@@ -63,14 +63,14 @@
 
   .add-button {
     height: 42px;
-    padding: 0 20px !important;
-    border-radius: 12px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    background: #5b5be6 !important;
+    padding: 0 1.25rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    background: #2563eb !important;
     color: white !important;
     transition: all 0.2s ease !important;
-    box-shadow: 0 4px 14px rgba(91, 91, 230, 0.3) !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px;
@@ -78,8 +78,8 @@
     mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
     &:hover {
-      background: rgba(91, 91, 230, 0.9) !important;
-      box-shadow: 0 6px 18px rgba(91, 91, 230, 0.4) !important;
+      background: rgba(37, 99, 235, 0.9) !important;
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4) !important;
     }
   }
 }
@@ -166,12 +166,12 @@
     mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
     &.action-btn-primary {
-      color: #5b5be6 !important;
-      border: 2px solid #5b5be6 !important;
+      color: #2563eb !important;
+      border: 2px solid #2563eb !important;
       background: white !important;
 
       &:hover {
-        background: #5b5be6 !important;
+        background: #2563eb !important;
         color: white !important;
       }
     }
@@ -303,7 +303,7 @@
 
     .edit-btn {
       color: #94a3b8;
-      &:hover { color: #5b5be6; }
+      &:hover { color: #2563eb; }
     }
   }
 }
@@ -363,17 +363,17 @@
       transition: all 0.12s ease;
 
       &:hover:not(:disabled) {
-        color: #5b5be6;
+        color: #2563eb;
         background: #f5f3ff;
-        border-color: #5b5be6;
+        border-color: #2563eb;
       }
 
       &:disabled { opacity: 0.4; cursor: not-allowed; }
 
       &.page-btn-active {
-        background: #5b5be6;
+        background: #2563eb;
         color: white;
-        border-color: #5b5be6;
+        border-color: #2563eb;
         font-weight: 700;
         width: 32px;
         padding: 0;
@@ -407,7 +407,7 @@
     position: absolute;
     top: 0; left: 0; bottom: 0;
     width: 4px;
-    background: linear-gradient(180deg, #5b5be6, #6c5ce7);
+    background: linear-gradient(180deg, #2563eb, #1d4ed8);
   }
 
   .card-header {
@@ -551,8 +551,8 @@
         }
 
         &.shift-badge-purple {
-          background: rgba(91, 91, 230, 0.15);
-          color: #5b5be6;
+          background: rgba(37, 99, 235, 0.15);
+          color: #2563eb;
         }
       }
 
@@ -747,7 +747,7 @@
       }
     }
 
-    &.stat-card-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    &.stat-card-primary { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }
     &.stat-card-success  { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
   }
 }

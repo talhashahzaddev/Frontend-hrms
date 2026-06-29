@@ -307,7 +307,9 @@ rejectRequest(swap: PendingShiftSwap): void {
 
   const dialogRef = this.dialog.open(ShiftRejectDialogComponent, {
     width: '450px',
+    maxHeight: '90vh',
     disableClose: true,
+    panelClass: 'attendance-dialog-panel',
     data: {
       title: 'Reject Shift Swap',
       message: 'Are you sure you want to reject shift swap request for',
@@ -409,7 +411,7 @@ rejectRequest(swap: PendingShiftSwap): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '450px',
       data: dialogData,
-      panelClass: 'confirm-delete-dialog-panel'
+      panelClass: ['attendance-dialog-panel', 'confirm-delete-dialog-panel']
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -432,9 +434,10 @@ rejectRequest(swap: PendingShiftSwap): void {
     const dialogRef = this.dialog.open(CreateShiftComponent, {
       width: '600px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container',
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container', 'create-shift-dialog'],
       data: {
         shiftId: shift.shiftId,
         shiftName: shift.shiftName,
@@ -460,9 +463,10 @@ rejectRequest(swap: PendingShiftSwap): void {
     const dialogRef = this.dialog.open(CreateShiftComponent, {
       width: '600px',
       maxWidth: '95vw',
+      maxHeight: '90vh',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container'
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container']
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -477,7 +481,7 @@ rejectRequest(swap: PendingShiftSwap): void {
       maxHeight: 'none',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container',
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container', 'create-shift-dialog'],
       data: {
         isManager: false
       }
@@ -495,7 +499,7 @@ rejectRequest(swap: PendingShiftSwap): void {
       maxWidth: '95vw',
       disableClose: true,
       autoFocus: false,
-      panelClass: 'custom-dialog-container'
+      panelClass: ['attendance-dialog-panel', 'custom-dialog-container']
     });
 
     dialogRef.afterClosed().subscribe(result => {

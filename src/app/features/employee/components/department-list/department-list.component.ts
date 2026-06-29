@@ -14,6 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, combineLatest, startWith } from 'rxjs';
@@ -78,6 +79,9 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
 
   // Loading state
   isLoading = false;
+
+  // Selection
+  selection = new SelectionModel<Department>(true, []);
 
   // Search and Filters
   searchControl = new FormControl('');
@@ -192,6 +196,27 @@ export class DepartmentListComponent implements OnInit, OnDestroy {
       this.statusControl.value ||
       this.managerControl.value
     );
+  }
+
+  isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.departments.length;
+    return numSelected === numRows && numRows > 0;
+  }
+
+  toggleAllRows(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+    this.selection.select(...this.departments);
+  }
+
+  checkboxLabel(row?: Department): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.departmentName}`;
   }
 
   hasPermission(actionKey: string): boolean {

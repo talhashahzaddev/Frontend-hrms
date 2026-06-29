@@ -407,6 +407,7 @@ export class TimeTrackerComponent implements OnInit, OnDestroy {
   private doStandardClockOut(): void {
     const dialogRef = this.dialog.open(CommentDialogComponent, {
       width: '400px',
+      panelClass: 'attendance-dialog-panel',
       data: { title: 'Clock Out', label: 'Day Updates / Comments', placeholder: 'E.g., completed API integration...', required: false }
     });
     dialogRef.afterClosed().subscribe(comment => {

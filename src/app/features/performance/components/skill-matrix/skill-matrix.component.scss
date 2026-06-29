@@ -1,3 +1,4 @@
+@use "sass:color";
 // skill-matrix.component.scss
 // ══════════════════════════════════════════════════════════════════════
 // Design system: Clean enterprise — matches employee-list aesthetic
@@ -543,7 +544,7 @@ $color-expert:       #10b981;
 
   &.prof--expert       { color: $color-expert; }
   &.prof--advanced     { color: $color-advanced; }
-  &.prof--intermediate { color: darken($color-intermediate, 15%); }
+  &.prof--intermediate { color: color.adjust($color-intermediate, $lightness: -15%); }
   &.prof--beginner     { color: $color-beginner; }
   &.prof--novice       { color: $color-novice; }
 }

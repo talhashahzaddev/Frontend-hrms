@@ -1,20 +1,21 @@
-<div class="manager-override-dialog">
+<div class="dialog-container manager-override-dialog">
 
-  <!-- ── Dialog Header ────────────────────────────────────────────── -->
-  <div class="override-dialog-header">
-    <div class="header-icon-wrap">
-      <mat-icon>manage_accounts</mat-icon>
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>manage_accounts</mat-icon>
+      </div>
+      <div class="header-info">
+        <h2 class="header-title">{{ data.employeeName }}</h2>
+        <p class="header-subtitle">{{ formatDate(data.record.date) }}</p>
+      </div>
     </div>
-    <div class="header-text">
-      <h2 class="employee-name">{{ data.employeeName }}</h2>
-      <span class="record-date">{{ formatDate(data.record.date) }}</span>
-    </div>
-    <button mat-icon-button class="close-btn" (click)="onCancel()" [disabled]="isSubmitting" aria-label="Close">
+    <button mat-icon-button class="close-button" (click)="onCancel()" [disabled]="isSubmitting" aria-label="Close">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <mat-dialog-content class="override-content">
+  <div class="dialog-body override-content">
 
     <!-- ── Before Panel ──────────────────────────────────────────── -->
     <div class="before-panel">
@@ -137,7 +138,7 @@
         <mat-icon matPrefix>sticky_note_2</mat-icon>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width reason-field">
+      <mat-form-field appearance="outline" class="mat-field full-width reason-field">
         <mat-label>Reason for Override (Optional)</mat-label>
         <textarea matInput formControlName="reason" rows="3"
           placeholder="Optionally describe why you are overriding this record..."></textarea>
@@ -145,14 +146,13 @@
       </mat-form-field>
 
     </form>
-  </mat-dialog-content>
+  </div>
 
-  <!-- ── Dialog Actions ───────────────────────────────────────────── -->
-  <mat-dialog-actions align="end" class="override-actions">
-    <button mat-stroked-button (click)="onCancel()" [disabled]="isSubmitting">
+  <div class="dialog-footer override-actions">
+    <button mat-stroked-button class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting">
       Cancel
     </button>
-    <button mat-flat-button (click)="onSubmit()" [disabled]="isSubmitting || overrideForm.invalid" class="submit-btn">
+    <button mat-flat-button class="btn-save submit-btn" (click)="onSubmit()" [disabled]="isSubmitting || overrideForm.invalid">
       @if (isSubmitting) {
         <mat-spinner diameter="18" class="button-spinner"></mat-spinner>
       } @else {
@@ -160,5 +160,5 @@
       }
       Apply Override
     </button>
-  </mat-dialog-actions>
+  </div>
 </div>

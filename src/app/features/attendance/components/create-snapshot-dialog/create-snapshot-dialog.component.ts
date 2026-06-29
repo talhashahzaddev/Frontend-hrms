@@ -37,16 +37,23 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
     MatNativeDateModule
   ],
   template: `
-    <div class="create-snapshot-dialog">
-      <h2 mat-dialog-title>
-        <mat-icon class="dialog-icon">add_circle</mat-icon>
-        Create Timesheet Period
-      </h2>
+    <div class="dialog-container create-snapshot-dialog">
+      <div class="dialog-header">
+        <div class="title-section">
+          <div class="icon-wrapper">
+            <mat-icon>add_circle</mat-icon>
+          </div>
+          <div>
+            <h2 class="title">Create Timesheet Period</h2>
+            <p class="subtitle">Define a date range for the new attendance snapshot</p>
+          </div>
+        </div>
+      </div>
 
-      <mat-dialog-content>
+      <div class="dialog-body">
         <form [formGroup]="snapshotForm" class="snapshot-form">
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="mat-field full-width">
             <mat-label>Timesheet Name</mat-label>
             <input matInput formControlName="timesheetName"
                    placeholder="e.g., April 2026 Payroll Period" required>
@@ -61,7 +68,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
           </mat-form-field>
 
           <div class="form-row" formGroupName="dateRange">
-            <mat-form-field appearance="outline" class="half-width">
+            <mat-form-field appearance="outline" class="mat-field half-width">
               <mat-label>Period Start Date</mat-label>
               <input matInput [matDatepicker]="startPicker" formControlName="startDate" required>
               <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
@@ -71,7 +78,7 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
               </mat-error>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="half-width">
+            <mat-form-field appearance="outline" class="mat-field half-width">
               <mat-label>Period End Date</mat-label>
               <input matInput [matDatepicker]="endPicker" formControlName="endDate" required>
               <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
@@ -99,45 +106,18 @@ function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
                After review, the timesheet can be finalized and locked for payroll.</p>
           </div>
         </form>
-      </mat-dialog-content>
+      </div>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary"
-                (click)="onSubmit()"
-                [disabled]="!snapshotForm.valid">
+      <div class="dialog-footer">
+        <button class="btn-cancel cancel-btn" mat-stroked-button (click)="onCancel()">Cancel</button>
+        <button class="btn-save submit-btn" (click)="onSubmit()" [disabled]="!snapshotForm.valid">
           <mat-icon>add</mat-icon>
           Create Timesheet Period
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
-  styles: [`
-    .create-snapshot-dialog {
-      min-width: 520px;
-      h2 { display: flex; align-items: center; gap: 12px; color: #667eea; margin: 0;
-        .dialog-icon { font-size: 28px; width: 28px; height: 28px; } }
-      mat-dialog-content { padding: 20px 24px; min-height: 280px; }
-      .snapshot-form { display: flex; flex-direction: column; gap: 16px; }
-      .full-width { width: 100%; }
-      .form-row { display: flex; gap: 16px; .half-width { flex: 1; } }
-      .range-error { display: flex; align-items: center; gap: 8px; color: #f44336; font-size: 13px; margin-top: -8px;
-        mat-icon { font-size: 16px; width: 16px; height: 16px; } }
-      .period-preview { display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-        background: #f3e5f5; border-radius: 8px; border-left: 4px solid #9c27b0;
-        font-size: 13px; color: #6a1b9a;
-        mat-icon { color: #9c27b0; flex-shrink: 0; font-size: 18px; width: 18px; height: 18px; } }
-      .info-box { display: flex; gap: 12px; padding: 12px; background: #e3f2fd;
-        border-radius: 8px; border-left: 4px solid #2196f3;
-        mat-icon { color: #2196f3; flex-shrink: 0; }
-        p { margin: 0; font-size: 13px; color: #1976d2; line-height: 1.5; } }
-      mat-dialog-actions { gap: 8px; padding: 16px 24px; margin: 0; border-top: 1px solid #e0e0e0; }
-    }
-    @media (max-width: 600px) {
-      .create-snapshot-dialog { min-width: auto; width: 100%;
-        .form-row { flex-direction: column; .half-width { width: 100%; } } }
-    }
-  `]
+  styleUrls: ['./create-snapshot-dialog.component.scss']
 })
 export class CreateSnapshotDialogComponent implements OnInit {
   snapshotForm: FormGroup;

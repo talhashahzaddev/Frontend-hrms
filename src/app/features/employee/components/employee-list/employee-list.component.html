@@ -3,21 +3,26 @@
 
   <!-- Header Section -->
   <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Employee Management</h1>
-      <p class="page-subtitle">Manage and organize your workforce</p>
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div>
+        <h2 class="page-title">Employee Management</h2>
+        <p class="page-subtitle">Manage and organize your workforce</p>
+      </div>
     </div>
 
-    <div class="add-btn-wrap">
+    <div class="header-right">
       <ng-container *ngIf="hasPermission('add_employee')">
-        <button mat-flat-button *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeAction"
-        (click)="onAddEmployeeClick()" class="add-btn">
+        <button class="btn-primary" *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeAction"
+        (click)="onAddEmployeeClick()">
         <mat-icon>person_add</mat-icon>
         Add Employee
       </button>
       </ng-container>
       <ng-template #upgradeAction>
-        <button mat-flat-button routerLink="/subscription" class="upgrade-button" [class.renew]="isSubscriptionExpired">
+        <button class="btn-upgrade" routerLink="/subscription" [class.renew]="isSubscriptionExpired">
           <mat-icon>{{ isSubscriptionExpired ? 'history' : 'workspace_premium' }}</mat-icon>
           {{ isSubscriptionExpired ? 'Renew your plan' : 'Upgrade your plan' }}
         </button>
@@ -29,67 +34,53 @@
   <div class="toolbar-row">
     <div class="tab-group">
       <button class="tab-btn active">All Employees</button>
-      <!-- <button class="tab-btn">Active</button>
-      <button class="tab-btn">Inactive</button> -->
     </div>
 
     <div class="toolbar-right">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="searchControl" placeholder="Search employees...">
-      </mat-form-field>
-
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input type="text" [formControl]="searchControl" placeholder="Search employees...">
+      </div>
     </div>
   </div>
 
-  <!-- Filters Row (collapsible or always visible) -->
+  <!-- Filters Row -->
   <div class="filters-row">
     <!-- Department Filter -->
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Department</mat-label>
-      <mat-select [formControl]="departmentControl">
-        <mat-option value="">All Departments</mat-option>
-        <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-          {{ dept.departmentName }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <select class="filter-select" [formControl]="departmentControl">
+      <option value="">All Departments</option>
+      <option *ngFor="let dept of departments" [value]="dept.departmentId">
+        {{ dept.departmentName }}
+      </option>
+    </select>
 
     <!-- Position Filter -->
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Position</mat-label>
-      <mat-select [formControl]="positionControl">
-        <mat-option value="">All Positions</mat-option>
-        <mat-option *ngFor="let position of positions" [value]="position.positionId">
-          {{ position.positionTitle }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <select class="filter-select" [formControl]="positionControl">
+      <option value="">All Positions</option>
+      <option *ngFor="let position of positions" [value]="position.positionId">
+        {{ position.positionTitle }}
+      </option>
+    </select>
 
     <!-- Status Filter -->
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Status</mat-label>
-      <mat-select [formControl]="statusControl">
-        <mat-option *ngFor="let status of statusOptions" [value]="status.value">
-          {{ status.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <select class="filter-select" [formControl]="statusControl">
+      <option *ngFor="let status of statusOptions" [value]="status.value">
+        {{ status.label }}
+      </option>
+    </select>
 
     <!-- Employment Type Filter -->
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>Employment Type</mat-label>
-      <mat-select [formControl]="employmentTypeControl">
-        <mat-option *ngFor="let type of employmentTypeOptions" [value]="type.value">
-          {{ type.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <select class="filter-select" [formControl]="employmentTypeControl">
+      <option *ngFor="let type of employmentTypeOptions" [value]="type.value">
+        {{ type.label }}
+      </option>
+    </select>
 
-    <button mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()" class="clear-btn">
-      <mat-icon>clear</mat-icon>
-      Clear
-    </button>
+    <div class="filter-actions">
+      <button class="clear-btn" mat-stroked-button (click)="clearFilters()" [disabled]="!hasFiltersApplied()">
+        <mat-icon>clear</mat-icon> Clear
+      </button>
+    </div>
   </div>
 
   <!-- Bulk Actions -->
@@ -114,7 +105,7 @@
   </div>
 
   <!-- Table Card -->
-  <div class="table-card">
+  <div class="content-card">
     <div class="table-meta">
       <span class="total-count">{{ totalCount }} employees</span>
       <button mat-stroked-button (click)="exportEmployees()" class="export-btn">
@@ -124,14 +115,14 @@
     </div>
 
     <!-- Loading Spinner -->
-    <div *ngIf="isLoading" class="loading-container">
+    <div *ngIf="isLoading" class="loading-state">
       <mat-spinner diameter="40"></mat-spinner>
       <p>Loading employees...</p>
     </div>
 
     <!-- Employee Table -->
-    <div *ngIf="!isLoading" class="table-container">
-      <table mat-table [dataSource]="employees" class="employee-table">
+    <div *ngIf="!isLoading" class="table-responsive">
+      <table mat-table [dataSource]="employees" class="custom-table">
 
         <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
@@ -170,7 +161,7 @@
               </div>
               <div class="employee-details">
                 <div class="employee-name">{{ employee.fullName }}</div>
-                <div class="employee-email">{{ employee.roleName }}</div>
+                <div class="employee-role">{{ employee.roleName }}</div>
               </div>
             </div>
           </td>
@@ -214,16 +205,16 @@
         <ng-container matColumnDef="status">
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let employee">
-            <mat-chip [class]="getStatusChipClass(employee.status)">
+            <span class="badge" [ngClass]="getStatusChipClass(employee.status)">
               {{ employee.status | titlecase }}
-            </mat-chip>
+            </span>
           </td>
         </ng-container>
 
         <!-- Actions Column -->
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let employee">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
+          <td mat-cell *matCellDef="let employee" class="action-cell">
             <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-menu-btn">
               <mat-icon>more_horiz</mat-icon>
             </button>
@@ -258,20 +249,17 @@
       </table>
 
       <!-- Empty State -->
-      <div *ngIf="employees.length === 0" class="empty-state">
-        <div class="empty-icon">
-          <mat-icon>groups</mat-icon>
-        </div>
-        <h3>No Employees Found</h3>
-        <p>No employees match your current filters.</p>
-        <button mat-flat-button *ngIf="hasPermission('add_employee') && hasActiveSubscription && !isSubscriptionExpired; else upgradeActionEmpty"
-          routerLink="/employees/add" class="add-first-employee">
+      <div *ngIf="employees.length === 0" class="empty-state-simple">
+        <mat-icon>groups</mat-icon>
+        <p>No Employees Found</p>
+        <span>No employees match your current filters.</span>
+        <button class="btn-primary mt-3" *ngIf="hasPermission('add_employee') && hasActiveSubscription && !isSubscriptionExpired; else upgradeActionEmpty"
+          (click)="onAddEmployeeClick()">
           <mat-icon>person_add</mat-icon>
           Add Your First Employee
         </button>
         <ng-template #upgradeActionEmpty>
-          <button mat-flat-button routerLink="/subscription" class="upgrade-button-empty"
-            [class.renew]="isSubscriptionExpired">
+          <button class="btn-upgrade mt-3" routerLink="/subscription" [class.renew]="isSubscriptionExpired">
             <mat-icon>{{ isSubscriptionExpired ? 'history' : 'workspace_premium' }}</mat-icon>
             {{ isSubscriptionExpired ? 'Renew your plan to add employees' : 'Upgrade your plan to add employees' }}
           </button>
@@ -284,4 +272,5 @@
       [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="onPageChange($event)" showFirstLastButtons>
     </mat-paginator>
   </div>
+
 </div>

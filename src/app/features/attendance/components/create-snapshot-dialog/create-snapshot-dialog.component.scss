@@ -1,0 +1,59 @@
+@use '../../styles/attendance-dialog';
+
+:host {
+  @include attendance-dialog.ad-scroll-host;
+}
+
+@include attendance-dialog.ad-panel-shell;
+
+.create-snapshot-dialog {
+  min-width: 520px;
+}
+
+.snapshot-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+
+  .half-width { flex: 1; }
+}
+
+.range-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ef4444;
+  font-size: 0.8125rem;
+
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+
+.period-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1rem;
+  background: #eff6ff;
+  border-radius: 0.5rem;
+  border-left: 4px solid attendance-dialog.$ad-primary;
+  font-size: 0.8125rem;
+  color: #1e40af;
+
+  mat-icon { color: attendance-dialog.$ad-primary; flex-shrink: 0; }
+}
+
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .create-snapshot-dialog { min-width: auto; width: 100%; }
+  .form-row { flex-direction: column; }
+}

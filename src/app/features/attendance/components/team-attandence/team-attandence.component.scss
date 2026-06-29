@@ -1,10 +1,58 @@
-// Team Attendance Component - Professional & Beautiful Styling
+// Team Attendance Component - Synced with Attendance Dashboard Design
+$primary: #2563eb;
+$slate-50: #f8fafc;
+$slate-200: #e2e8f0;
+$slate-400: #94a3b8;
+$slate-500: #64748b;
+$slate-900: #0f172a;
+
 .team-attendance-container {
-  padding: 24px;
-  max-width: 1600px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  padding: 2rem;
+  width: 100%;
+  background: $slate-50;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .icon-box {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+        background-color: rgba($primary, 0.1);
+        color: $primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon { font-size: 28px; width: 28px; height: 28px; }
+      }
+
+      .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.25;
+        color: $slate-900;
+      }
+
+      .page-subtitle {
+        color: $slate-500;
+        font-size: 0.875rem;
+        margin: 0;
+      }
+    }
+  }
 
   .filters-topbar {
     display: flex;
@@ -25,7 +73,7 @@
         content: '';
         width: 4px;
         height: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         border-radius: 2px;
       }
     }
@@ -54,178 +102,188 @@
 }
 
 
-  // Filters Card
-  .filters-card {
-    margin-bottom: 24px;
-    border-radius: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-    border: none !important;
-    overflow: hidden;
+  // Filters Section — compact single row
+  .filters-section {
+    background: white;
+    border: 1px solid $slate-200;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
-    .filters-header {
+    .filters-row {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
       align-items: center;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      gap: 0.875rem;
+    }
 
-      h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: #1f2937;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    .search-box {
+      position: relative;
+      width: 260px;
+      flex-shrink: 0;
 
-        &::before {
-          content: '';
-          width: 4px;
-          height: 20px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 2px;
-        }
+      mat-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $slate-400;
+        font-size: 1.125rem;
+        width: 1.125rem;
+        height: 1.125rem;
+        pointer-events: none;
       }
 
-      .clear-filters-btn {
-        border-radius: 8px !important;
-        font-weight: 500 !important;
-        color: #667eea !important;
-        border-color: rgba(102, 126, 234, 0.3) !important;
+      input {
+        width: 100%;
+        height: 42px;
+        padding: 0 1rem 0 2.5rem;
+        background-color: $slate-50;
+        border: 1px solid $slate-200;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        color: #334155;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s, box-shadow 0.2s;
 
-        &:hover {
-          background: rgba(102, 126, 234, 0.1) !important;
-          border-color: rgba(102, 126, 234, 0.5) !important;
+        &::placeholder { color: $slate-400; }
+
+        &:focus {
+          border-color: $primary;
+          box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+          background: white;
         }
       }
     }
 
-    .filters-content {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      padding: 24px;
+    .filter-field {
+      margin-bottom: 0 !important;
+      flex-shrink: 0;
 
-      ::ng-deep mat-form-field {
-        &.date-field {
-          grid-column: span 1;
+      &.date-field { width: 210px; }
+      &.select-field { width: 200px; }
+      &.select-field-sm { width: 170px; }
+
+      ::ng-deep {
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none !important;
+          height: 0 !important;
         }
 
         .mat-mdc-text-field-wrapper {
-          background: white;
-          border-radius: 12px;
+          background: $slate-50;
+          border-radius: 0.5rem;
         }
 
         .mat-mdc-form-field-flex {
-          padding: 0 16px;
+          height: 42px;
+          align-items: center;
+          padding: 0 0.875rem;
         }
 
-        .mat-mdc-notch-piece {
-          border-color: #e5e7eb !important;
+        .mat-mdc-form-field-infix {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          min-height: 42px;
+          display: flex;
+          align-items: center;
         }
 
-        &:hover .mat-mdc-notch-piece {
-          border-color: #667eea !important;
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: $slate-200 !important;
         }
 
-        &.mat-focused .mat-mdc-notch-piece {
-          border-color: #667eea !important;
-          border-width: 2px !important;
-        }
-
-        .mat-mdc-form-field-label {
-          color: #6b7280;
-        }
-
-        mat-icon {
-          &.mat-icon-prefix,
-          &[matprefix] {
-            margin-right: 8px;
-            color: #667eea !important;
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
+        &:hover {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: $primary !important;
           }
         }
 
-        .mat-datepicker-toggle button mat-icon {
-          color: #667eea !important;
+        &.mat-focused {
+          .mdc-notched-outline__leading,
+          .mdc-notched-outline__notch,
+          .mdc-notched-outline__trailing {
+            border-color: $primary !important;
+            border-width: 2px !important;
+          }
         }
 
+        .mat-mdc-form-field-label,
+        .mat-mdc-floating-label {
+          font-size: 0.875rem !important;
+        }
+
+        input.mat-mdc-input-element,
+        .mat-mdc-select-value {
+          font-size: 0.875rem !important;
+        }
+
+        .mat-datepicker-toggle button mat-icon,
         .mat-mdc-select-arrow {
-          color: #667eea !important;
+          color: $slate-500 !important;
         }
       }
     }
 
-    // Filter Actions (outside filters-content)
     .filter-actions {
       display: flex;
-      gap: 12px;
       align-items: center;
-      justify-content: flex-end;
-      padding: 0 24px 24px 24px;
+      gap: 0.5rem;
+      margin-left: auto;
+      flex-shrink: 0;
 
-      .apply-filter-btn {
-        height: 48px;
-        padding: 0 28px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
+      .clear-filters-btn {
+        height: 42px !important;
+        padding: 0 0.875rem !important;
+        border-radius: 0.5rem !important;
+        font-size: 0.8125rem !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        color: white !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        text-transform: none !important;
+        color: $slate-500 !important;
+        border-color: $slate-200 !important;
 
         mat-icon {
-          margin-right: 8px;
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+          margin-right: 4px;
         }
 
-        &:hover:not([disabled]) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
-        }
-
-        &[disabled] {
-          background: #f3f4f6 !important;
-          color: #9ca3af !important;
-          box-shadow: none !important;
-          transform: none !important;
+        &:hover {
+          background: $slate-50 !important;
+          color: #ef4444 !important;
+          border-color: #fca5a5 !important;
         }
       }
 
-      .clear-filters-btn {
-        height: 48px;
-        padding: 0 24px !important;
-        border-radius: 12px !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        text-transform: none !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        border-color: rgba(102, 126, 234, 0.3) !important;
-        color: #667eea !important;
+      .export-button {
+        height: 42px !important;
+        padding: 0 1rem !important;
+        border-radius: 0.5rem !important;
+        font-size: 0.8125rem !important;
+        font-weight: 700 !important;
+        background: $primary !important;
+        color: white !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3) !important;
 
         mat-icon {
-          margin-right: 6px;
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+          margin-right: 4px;
         }
 
         &:hover:not([disabled]) {
-          background: rgba(102, 126, 234, 0.1) !important;
-          border-color: rgba(102, 126, 234, 0.5) !important;
+          background: #1d4ed8 !important;
         }
 
         &[disabled] {
-          background: #f3f4f6 !important;
-          color: #9ca3af !important;
-          border-color: #e5e7eb !important;
+          opacity: 0.5;
         }
       }
     }
@@ -464,7 +522,7 @@
 
       // Primary Card (Attendance Rate - Purple Gradient)
       &.stat-card-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white;
 
         .stat-item {
@@ -548,7 +606,7 @@
             transition: all 0.2s ease;
 
             &:hover {
-              background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.02) 100%);
+              background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
             }
 
             .mat-mdc-cell {
@@ -572,7 +630,7 @@
 
             .employee-id {
               font-size: 12px;
-              color: #667eea;
+              color: #2563eb;
               font-family: 'Courier New', monospace;
               font-weight: 600;
             }
@@ -597,8 +655,8 @@
           display: inline-block;
           padding: 6px 12px;
           border-radius: 8px;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
-          color: #667eea;
+          background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(29, 78, 216, 0.05) 100%);
+          color: #2563eb;
           font-weight: 700;
           font-family: 'Courier New', monospace;
         }
@@ -664,9 +722,9 @@
               }
 
               &.status-on_leave {
-                background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%) !important;
-                color: #8b5cf6 !important;
-                border: 1px solid rgba(139, 92, 246, 0.3) !important;
+                background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(29, 78, 216, 0.1) 100%) !important;
+                color: #2563eb !important;
+                border: 1px solid rgba(37, 99, 235, 0.3) !important;
               }
 
               &.status-pending_approval {
@@ -737,10 +795,10 @@
 
     button {
       &:not([disabled]) {
-        color: #667eea;
+        color: #2563eb;
 
         &:hover {
-          background: rgba(102, 126, 234, 0.1);
+          background: rgba(37, 99, 235, 0.1);
         }
       }
     }
@@ -774,12 +832,12 @@
         height: 44px !important;
 
         &:hover {
-          background: rgba(102, 126, 234, 0.1) !important;
+          background: rgba(37, 99, 235, 0.1) !important;
         }
 
         mat-icon {
           margin-right: 12px;
-          color: #667eea;
+          color: #2563eb;
         }
 
         &.danger-action {
@@ -812,37 +870,59 @@
 
 // Spinner Styling
 ::ng-deep mat-spinner circle {
-  stroke: #667eea !important;
+  stroke: #2563eb !important;
 }
 
 // Responsive Design
 @media (max-width: 1200px) {
   .team-attendance-container {
-    .filters-card .filters-content {
-      grid-template-columns: repeat(2, 1fr);
+    .filters-section {
+      .search-box { width: 220px; }
+
+      .filter-field {
+        &.date-field { width: 190px; }
+        &.select-field { width: 180px; }
+        &.select-field-sm { width: 160px; }
+      }
     }
   }
 }
 
 @media (max-width: 768px) {
   .team-attendance-container {
-    padding: 16px;
+    padding: 1rem;
 
-    .page-header {
-      flex-direction: column;
-      gap: 16px;
+    .filters-section {
+      padding: 0.875rem 1rem;
 
-      .header-actions {
-        width: 100%;
+      .filters-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
 
-        .export-button {
-          width: 100%;
+      .search-box {
+        width: 100% !important;
+      }
+
+      .filter-field {
+        width: 100% !important;
+
+        &.date-field,
+        &.select-field,
+        &.select-field-sm {
+          width: 100% !important;
         }
       }
-    }
 
-    .filters-card .filters-content {
-      grid-template-columns: 1fr;
+      .filter-actions {
+        margin-left: 0;
+        width: 100%;
+
+        .clear-filters-btn,
+        .export-button {
+          flex: 1;
+        }
+      }
     }
   }
 }

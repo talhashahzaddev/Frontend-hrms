@@ -1,0 +1,420 @@
+// Attendance Module — shared dialog design system (create-shift reference)
+$ad-primary: #2563eb;
+$ad-primary-hover: #1d4ed8;
+$ad-text-primary: #0f172a;
+$ad-text-secondary: #64748b;
+$ad-text-label: #475569;
+$ad-text-muted: #94a3b8;
+$ad-border: #e2e8f0;
+$ad-border-hover: #94a3b8;
+$ad-surface: #f8fafc;
+$ad-input-bg: #ffffff;
+$ad-danger: #dc2626;
+$ad-danger-bg: #fef2f2;
+
+@mixin ad-scroll-host {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  min-height: 0;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+@mixin ad-panel-shell {
+  $panels: '.attendance-dialog-panel', '.create-shift-dialog', '.custom-dialog-container';
+
+  @each $panel in $panels {
+    ::ng-deep #{$panel} .mat-mdc-dialog-container,
+    ::ng-deep #{$panel} .mdc-dialog__surface {
+      padding: 0 !important;
+      border-radius: 0.75rem !important;
+      overflow: hidden !important;
+      max-height: 90vh !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    ::ng-deep #{$panel} .mdc-dialog__surface {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+  }
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: 90vh;
+  overflow: hidden;
+  background: $ad-input-bg;
+  font-family: 'Inter', sans-serif;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid $ad-border;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+
+  .header-left,
+  .title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .header-info { min-width: 0; }
+
+  .header-icon,
+  .icon-wrapper {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      color: $ad-primary;
+    }
+
+    &.warn {
+      background: $ad-danger-bg;
+      mat-icon { color: $ad-danger; }
+    }
+  }
+
+  .header-title,
+  .title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: $ad-text-primary;
+  }
+
+  .header-subtitle,
+  .subtitle {
+    margin: 0.125rem 0 0;
+    font-size: 0.8125rem;
+    color: $ad-text-secondary;
+  }
+
+  .close-button,
+  .close-btn {
+    flex-shrink: 0;
+    color: $ad-text-muted;
+    margin-left: 0.5rem;
+
+    &:hover {
+      color: $ad-text-label;
+      background: $ad-surface !important;
+    }
+  }
+}
+
+.dialog-body,
+.dialog-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  background: $ad-surface;
+  -webkit-overflow-scrolling: touch;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $ad-text-label;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+
+  .required { color: #ef4444; margin-left: 2px; }
+
+  .field-hint {
+    display: block;
+    font-weight: 400;
+    font-size: 0.6875rem;
+    color: $ad-text-muted;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+  }
+}
+
+.mat-field,
+.full-width {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      background: $ad-input-bg !important;
+      border-radius: 0.5rem !important;
+      padding: 0 !important;
+      border: 1px solid $ad-border !important;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .mdc-notched-outline { display: none !important; }
+
+    .mat-mdc-form-field-infix {
+      min-height: 40px !important;
+      padding: 0 12px !important;
+      display: flex;
+      align-items: center;
+      border: none !important;
+    }
+
+    input.mat-mdc-input-element,
+    textarea.mat-mdc-input-element,
+    .mat-mdc-select-value {
+      font-size: 0.875rem;
+      color: $ad-text-primary;
+    }
+
+    input.mat-mdc-input-element {
+      height: 40px !important;
+      padding: 0;
+    }
+
+    textarea.mat-mdc-input-element {
+      padding: 8px 0 !important;
+      min-height: 80px;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+  }
+
+  &:hover ::ng-deep .mat-mdc-text-field-wrapper {
+    border-color: $ad-border-hover !important;
+  }
+
+  &.mat-focused ::ng-deep .mat-mdc-text-field-wrapper {
+    border-color: $ad-primary !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid $ad-border;
+  background: $ad-surface;
+  flex-shrink: 0;
+
+  .btn-cancel,
+  .cancel-btn,
+  .srd-cancel,
+  .cdd-cancel {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem;
+    min-width: 100px;
+    height: 2.5rem !important;
+    line-height: 1 !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap;
+    color: $ad-text-label !important;
+    border-color: $ad-border !important;
+    background: $ad-input-bg !important;
+    padding: 0 1.25rem !important;
+
+    &:hover {
+      background: #f1f5f9 !important;
+      color: $ad-text-primary !important;
+    }
+  }
+
+  .btn-save,
+  .btn-submit,
+  .submit-btn,
+  .srd-reject:not(.warn),
+  .cdd-confirm:not(.warn) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem;
+    min-width: 100px;
+    height: 2.5rem !important;
+    line-height: 1 !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    background: $ad-primary !important;
+    color: $ad-input-bg !important;
+    padding: 0 1.25rem !important;
+    box-shadow: none !important;
+    border: none;
+    cursor: pointer;
+
+    &:hover:not([disabled]) {
+      background: $ad-primary-hover !important;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    &[disabled] {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+    }
+
+    mat-spinner {
+      display: inline-block;
+      ::ng-deep circle { stroke: white !important; }
+    }
+  }
+
+  .submit-btn.warn,
+  .srd-reject,
+  .cdd-confirm {
+    background: $ad-danger !important;
+
+    &:hover:not([disabled]) {
+      background: #b91c1c !important;
+      box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2) !important;
+    }
+  }
+}
+
+::ng-deep .mat-mdc-select-panel {
+  border-radius: 0.625rem !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10) !important;
+  border: 1px solid $ad-border !important;
+
+  .mat-mdc-option {
+    border-radius: 0.375rem !important;
+    margin: 2px 6px !important;
+    font-size: 0.875rem !important;
+    height: 40px !important;
+    min-height: 40px !important;
+
+    &:hover { background: #eff6ff !important; }
+
+    &.mat-mdc-option-active,
+    &.mdc-list-item--selected {
+      background: #dbeafe !important;
+      color: $ad-primary !important;
+    }
+  }
+}
+
+// Native inputs (overtime dialogs, etc.)
+.field-input,
+.field-select,
+.field-textarea,
+input.form-control,
+select.form-control,
+textarea.form-control {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: $ad-input-bg;
+  border: 1px solid $ad-border;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: $ad-text-primary;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &::placeholder { color: $ad-text-muted; }
+
+  &:focus {
+    border-color: $ad-primary;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+.field-input,
+.field-select {
+  height: 2.5rem;
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.select-wrap {
+  position: relative;
+
+  .select-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $ad-text-secondary;
+    pointer-events: none;
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .field-select { appearance: none; padding-right: 2.5rem; }
+}
+
+.info-box {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #eff6ff;
+  border-radius: 0.5rem;
+  border-left: 4px solid $ad-primary;
+
+  mat-icon, .info-icon { color: $ad-primary; flex-shrink: 0; }
+
+  p, .info-text {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: $ad-text-label;
+    line-height: 1.5;
+  }
+}
+
+.employee-info {
+  background: $ad-input-bg;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid $ad-border;
+  margin-bottom: 1rem;
+
+  p {
+    margin: 4px 0;
+    font-size: 0.875rem;
+    color: $ad-text-label;
+  }
+
+  strong { color: $ad-text-secondary; font-weight: 600; }
+}
+
+.message {
+  margin: 0;
+  font-size: 0.875rem;
+  color: $ad-text-label;
+  line-height: 1.6;
+}

@@ -6,6 +6,7 @@
       </div>
       <div class="header-info">
         <h2 class="header-title">{{ isEditMode ? 'Edit Shift' : 'Create Shift' }}</h2>
+        <p class="header-subtitle">{{ isEditMode ? 'Update shift schedule and settings' : 'Define a new shift schedule for your team' }}</p>
       </div>
     </div>
     <button mat-icon-button mat-dialog-close class="close-button">
@@ -13,7 +14,7 @@
     </button>
   </div>
 
-  <mat-dialog-content class="dialog-body">
+  <div class="dialog-body">
     <form [formGroup]="shiftForm" autocomplete="off">
       
       <div class="form-row">
@@ -133,7 +134,7 @@
       </div>
 
     </form>
-  </mat-dialog-content>
+  </div>
 
   <div class="dialog-footer">
     <button mat-stroked-button type="button" mat-dialog-close class="btn-cancel">Cancel</button>

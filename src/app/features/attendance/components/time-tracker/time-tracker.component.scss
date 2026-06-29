@@ -1,13 +1,14 @@
+@use "sass:color";
 // ============================================================
 // Time Tracker — Reference Design Mirror
 // Color palette: white cards, slate text, #5a4ee4 primary,
 // #22c55e accent-green, #f97316 accent-orange
 // ============================================================
 
-$primary:       #5a4ee4;
+$primary:       #2563eb;
 $green:         #22c55e;
 $orange:        #f97316;
-$bg:            #f4f5f7;
+$bg:            #f8fafc;
 $white:         #ffffff;
 $slate-900:     #0f172a;
 $slate-700:     #334155;
@@ -18,7 +19,7 @@ $slate-300:     #cbd5e1;
 $slate-200:     #e2e8f0;
 $slate-100:     #f1f5f9;
 $slate-50:      #f8fafc;
-$border:        #e5e7eb;
+$border:        $slate-200;
 $radius-xl:     1rem;
 $radius-lg:     0.75rem;
 $radius-md:     0.5rem;
@@ -36,10 +37,10 @@ $radius-md:     0.5rem;
 
 // ─── Container ──────────────────────────────────────────────
 .time-tracker-container {
-  padding: 10px;
-  max-width: 98%;
-  margin: 0 auto;
-  // background: $bg;
+  padding: 2rem;
+  box-sizing: border-box;
+  width: 100%;
+  background: $slate-50;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -49,13 +50,11 @@ $radius-md:     0.5rem;
 
 // ─── 1. Header ──────────────────────────────────────────────
 .tracker-header {
-  background: $white;
-  border-radius: $radius-xl;
-  border: 1px solid $border;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  padding: 16px 20px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
   gap: 20px;
   flex-wrap: wrap;
 
@@ -276,7 +275,7 @@ $radius-md:     0.5rem;
         box-shadow: 0 4px 12px rgba($orange, 0.25);
 
         &:not(:disabled):hover {
-          background: darken($orange, 6%);
+          background: color.adjust($orange, $lightness: -6%);
           transform: translateY(-1px);
           box-shadow: 0 6px 16px rgba($orange, 0.3);
         }
@@ -509,7 +508,7 @@ $radius-md:     0.5rem;
     transition: all 0.2s ease;
 
     &:hover {
-      background: darken($primary, 6%);
+      background: color.adjust($primary, $lightness: -6%);
       transform: translateY(-1px);
     }
   }
@@ -712,7 +711,7 @@ $radius-md:     0.5rem;
       min-width: 44px;
       height: 40px;
       border-radius: $radius-md;
-      background: $primary;
+      background: $slate-100;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -723,14 +722,14 @@ $radius-md:     0.5rem;
       .day {
         font-size: 14px;
         font-weight: 800;
-        color: $white;
+        color: $slate-700;
         line-height: 1;
       }
 
       .month {
         font-size: 8px;
         font-weight: 700;
-        color: rgba($white, 0.8);
+        color: $slate-500;
         text-transform: uppercase;
         letter-spacing: 0.04em;
         line-height: 1;
@@ -739,10 +738,10 @@ $radius-md:     0.5rem;
       }
 
       &.inactive {
-        background: $slate-200;
+        background: $slate-50;
 
-        .day { color: $slate-600; }
-        .month { color: $slate-400; }
+        .day { color: $slate-400; }
+        .month { color: $slate-300; }
       }
     }
 
@@ -778,7 +777,7 @@ $radius-md:     0.5rem;
 // ─── Status badge colours ────────────────────────────────────
 .badge-present {
   background: rgba($green, 0.1);
-  color: darken($green, 10%);
+  color: color.adjust($green, $lightness: -10%);
 }
 
 .badge-absent {
@@ -788,7 +787,7 @@ $radius-md:     0.5rem;
 
 .badge-late {
   background: rgba($orange, 0.1);
-  color: darken($orange, 8%);
+  color: color.adjust($orange, $lightness: -8%);
 }
 
 .badge-half_day {
@@ -797,8 +796,8 @@ $radius-md:     0.5rem;
 }
 
 .badge-on_leave {
-  background: rgba(#8b5cf6, 0.1);
-  color: #7c3aed;
+  background: rgba(#2563eb, 0.1);
+  color: #2563eb;
 }
 // ── Overlay backdrop 
 .geo-gate-overlay {

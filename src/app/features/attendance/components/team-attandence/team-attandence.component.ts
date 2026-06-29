@@ -348,7 +348,7 @@ export class TeamAttandenceComponent implements OnInit, OnDestroy {
   viewAttendanceDetails(attendance: Attendance): void {
     this.dialog.open(ViewDetailsDialogueComponent, {
       width: '600px',
-      panelClass: 'attendance-details-dialog',
+      panelClass: ['attendance-dialog-panel', 'attendance-details-dialog'],
       data: {
         employeeId: attendance.employeeId,
         employeeName: attendance.employeeName,

@@ -1,3 +1,4 @@
+@use "sass:color";
 // Font and basic vars
 $brand-blue: #1D7DFC;
 $bg-body: #F8F9FB;
@@ -250,7 +251,7 @@ $border: #E5E7EB;
     gap: 8px;
 
     &:hover {
-        background-color: darken($brand-blue, 10%);
+        background-color: color.adjust($brand-blue, $lightness: -10%);
     }
 }
 
@@ -549,7 +550,7 @@ $border: #E5E7EB;
 
         &:hover {
             transform: translateY(-1px);
-            background-color: darken($brand-blue, 5%);
+            background-color: color.adjust($brand-blue, $lightness: -5%);
         }
 
         &.linkedin {

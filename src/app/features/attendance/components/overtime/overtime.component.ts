@@ -68,7 +68,11 @@ export class OvertimeComponent implements OnInit {
   }
 
   openManagerOvertime(): void {
-    const ref = this.dialog.open(CreateManagerOvertimeDialogComponent, { width: '520px' });
+    const ref = this.dialog.open(CreateManagerOvertimeDialogComponent, {
+      width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel'
+    });
     ref.afterClosed().pipe(take(1)).subscribe(result => {
       if (result) {
         // manager overtime created — refresh list or show notification as needed
@@ -77,7 +81,11 @@ export class OvertimeComponent implements OnInit {
   }
 
   openEmployeeOvertime(): void {
-    const ref = this.dialog.open(CreateEmployeeOvertimeDialogComponent, { width: '520px' });
+    const ref = this.dialog.open(CreateEmployeeOvertimeDialogComponent, {
+      width: '520px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel'
+    });
     ref.afterClosed().pipe(take(1)).subscribe(result => {
       if (result) {
         // employee overtime created — refresh list or show notification as needed
