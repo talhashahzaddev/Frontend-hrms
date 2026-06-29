@@ -1,99 +1,98 @@
-<div class="onboarding-config-page" *ngIf="!unauthorized; else denied">
+<div class="onboarding-config-page" >
   <div class="page-header">
     <div>
-      <p class="eyebrow">Settings / Company Policies</p>
+      <p class="eyebrow">Settings / Onboarding Configuration</p>
       <h1>Onboarding Configuration</h1>
-      <p>Configure the fields and document requirements used during onboarding for the selected organization.</p>
+      <p>Configure the fields and document requirements used during onboarding. Toggle a field <strong>off</strong> to hide it entirely, or mark it as <strong>Required</strong> to make it mandatory for employees.</p>
     </div>
-    <button class="save-button" [disabled]="isSaving" (click)="saveConfiguration()">
-      {{ isSaving ? 'Saving...' : 'Save configuration' }}
-    </button>
   </div>
 
-  <div class="config-grid">
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-icon class="spin-icon">sync</mat-icon>
+    <p>Loading configuration…</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="loadError && !isLoading" class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>Could not load configuration from server. Showing defaults — changes will still be saved.</span>
+    <button class="retry-btn" (click)="loadConfiguration()">Retry</button>
+  </div>
+
+  <div class="config-grid" *ngIf="!isLoading">
     <section class="detail-panel">
       <div class="detail-header">
         <div>
-          <h2>Field configuration</h2>
-          <p>Configure the required fields and documents for onboarding.</p>
+          <h2>Field Configuration</h2>
+          <p>Each field can be individually toggled on/off and marked as required. A <strong>Required</strong> toggle is only active when the field is enabled.</p>
+        </div>
+        <div class="legend">
+          <span class="legend-pill enabled-pill">Enabled</span>
+          <span class="legend-pill required-pill">Required</span>
         </div>
       </div>
 
-      <div class="config-section">
+      <!-- ── Sections ─────────────────────────────────────────────────── -->
+      <div class="config-section" *ngFor="let section of sections">
         <div class="section-header">
-          <mat-icon class="section-icon">person</mat-icon>
+          <mat-icon class="section-icon">{{ section.icon }}</mat-icon>
           <div class="section-title">
-            <h3>Personal information</h3>
-            <p>Toggle required status for onboarding personal fields.</p>
+            <h3>{{ section.displayName }}</h3>
+            <p>{{ section.description }}</p>
           </div>
         </div>
 
-        <div class="field-row" *ngFor="let field of personalFields">
+        <!-- Column headers -->
+        <div class="fields-table-header">
+          <span class="col-field-name">Field</span>
+          <span class="col-toggle">Enabled</span>
+          <span class="col-toggle">Required</span>
+        </div>
+
+        <!-- Field rows -->
+        <div class="field-row" *ngFor="let field of section.fields" [class.field-disabled]="!field.enabled">
           <div class="field-label">
-            <span>{{ field === 'name' ? 'Name' : field === 'idNumber' ? 'ID' : 'Resume' }}</span>
-            <p>{{ field === 'idNumber' ? 'Employee ID or unique identifier' : field === 'resume' ? 'Candidate resume upload' : 'Full legal name' }}</p>
+            <mat-icon class="field-icon" [class.icon-disabled]="!field.enabled">
+              {{ !field.enabled ? 'visibility_off' : field.required ? 'star' : 'check_circle_outline' }}
+            </mat-icon>
+            <span>{{ field.label }}</span>
+            <span *ngIf="field.required && field.enabled" class="req-badge">Required</span>
           </div>
-          <div class="toggles">
-            <label class="switch-toggle">
-              <input type="checkbox" [checked]="configuration.personalInformation[field].enabled" (change)="toggleField('personalInformation', field)" />
+
+          <!-- Enabled toggle -->
+          <div class="col-toggle">
+            <label class="switch-toggle" [title]="field.enabled ? 'Click to disable' : 'Click to enable'">
+              <input type="checkbox" [checked]="field.enabled" (change)="toggleEnabled(field)" />
               <span class="slider"></span>
             </label>
           </div>
-        </div>
-      </div>
 
-      <div class="config-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">school</mat-icon>
-          <div class="section-title">
-            <h3>Educational details</h3>
-            <p>Choose whether university and documents should be requested.</p>
-          </div>
-        </div>
-
-        <div class="field-row" *ngFor="let field of educationFields">
-          <div class="field-label">
-            <span>{{ field === 'university' ? 'University' : 'Documents' }}</span>
-            <p>{{ field === 'university' ? 'University name or college details' : 'Education documents and certificates' }}</p>
-          </div>
-          <div class="toggles">
-            <label class="switch-toggle">
-              <input type="checkbox" [checked]="configuration.educationDetails[field].enabled" (change)="toggleField('educationDetails', field)" />
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="config-section">
-        <div class="section-header">
-          <mat-icon class="section-icon">work</mat-icon>
-          <div class="section-title">
-            <h3>Work experience</h3>
-            <p>Manage work history requirements for onboarding.</p>
-          </div>
-        </div>
-
-        <div class="field-row" *ngFor="let field of experienceFields">
-          <div class="field-label">
-            <span>{{ field === 'endDate' ? 'End date' : 'Documents' }}</span>
-            <p>{{ field === 'endDate' ? 'End time or completion date' : 'Work experience documents' }}</p>
-          </div>
-          <div class="toggles">
-            <label class="switch-toggle">
-              <input type="checkbox" [checked]="configuration.workExperience[field].enabled" (change)="toggleField('workExperience', field)" />
-              <span class="slider"></span>
+          <!-- Required toggle — disabled if field is not enabled -->
+          <div class="col-toggle">
+            <label class="switch-toggle required-switch"
+                   [class.toggle-inactive]="!field.enabled"
+                   [title]="!field.enabled ? 'Enable the field first' : field.required ? 'Click to make optional' : 'Click to make required'">
+              <input type="checkbox" [checked]="field.required" [disabled]="!field.enabled" (change)="toggleRequired(field)" />
+              <span class="slider slider-required"></span>
             </label>
           </div>
         </div>
       </div>
     </section>
   </div>
+
+  <div class="config-actions" style="margin-top: 24px; display: flex; justify-content: flex-end;">
+    <button class="save-button" [disabled]="isSaving || isLoading" (click)="saveConfiguration()">
+      {{ isSaving ? 'Saving...' : 'Save Configuration' }}
+    </button>
+  </div>
 </div>
 
 <ng-template #denied>
   <div class="unauthorized-panel">
-    <h2>Access denied</h2>
+    <mat-icon class="denied-icon">lock</mat-icon>
+    <h2>Access Denied</h2>
     <p>Only Super Admin users can access onboarding configuration.</p>
   </div>
 </ng-template>

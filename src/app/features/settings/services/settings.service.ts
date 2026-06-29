@@ -213,6 +213,15 @@ export interface OnboardingConfiguration {
   };
 }
 
+/** Flat item returned by GET /api/onboarding-config/org/{orgId} */
+export interface OrgOnboardingConfigItem {
+  organizationId: string;
+  section: string;
+  fieldKey: string;
+  enabled: boolean;
+  required: boolean;
+}
+
 export interface OrganizationSummary {
   id: string;
   name: string;
@@ -339,6 +348,43 @@ export class SettingsService {
     ).pipe(
       catchError(err => {
         console.error('Failed to save onboarding config:', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /** GET /api/onboarding-config/getOrganizationConfiguration — returns flat array of field configs */
+  getOrgOnboardingConfig(): Observable<OrgOnboardingConfigItem[]> {
+    return this.http.get<{ success: boolean; data: OrgOnboardingConfigItem[] }>(
+      `${environment.apiUrl}/onboarding-config/getOrganizationConfiguration`
+    ).pipe(
+      map(res => {
+        if (!res.success) throw new Error('Failed to load onboarding config');
+        return res.data || [];
+      }),
+      catchError(err => {
+        console.error('Failed to fetch org onboarding config:', err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  /** PUT /api/onboarding-config/update/onboardingConfiguration — saves flat array of field configs */
+  updateOrgOnboardingConfig(items: OrgOnboardingConfigItem[]): Observable<any> {
+    const payload = {
+      fields: items.map(item => ({
+        section: item.section,
+        fieldKey: item.fieldKey,
+        enabled: item.enabled,
+        required: item.required
+      }))
+    };
+    return this.http.put<any>(
+      `${environment.apiUrl}/onboarding-config/update/onboardingConfiguration`,
+      payload
+    ).pipe(
+      catchError(err => {
+        console.error('Failed to save org onboarding config:', err);
         return throwError(() => err);
       })
     );

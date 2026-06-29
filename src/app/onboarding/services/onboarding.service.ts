@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface FieldConfig {
-  enabled:  boolean;
+  enabled: boolean;
   required: boolean;
 }
 
@@ -15,100 +15,100 @@ export interface OnboardingFieldConfig {
   organizationId: string;
   sections: {
     personalInformation: Record<string, FieldConfig>;
-    educationDetails:    Record<string, FieldConfig>;
-    workExperience:      Record<string, FieldConfig>;
+    educationDetails: Record<string, FieldConfig>;
+    workExperience: Record<string, FieldConfig>;
   };
 }
 
 export interface OnboardingEducation {
-  degree:      string;
+  degree: string;
   institution: string;
-  field:       string;
-  gpa:         string;
-  fileName:    string;
+  field: string;
+  gpa: string;
+  fileName: string;
   description: string;
 }
 
 export interface OnboardingWorkExperience {
-  jobTitle:         string;
-  company:          string;
-  employmentType:   string;
-  location:         string;
-  startDate:        string;
-  endDate:          string;
+  jobTitle: string;
+  company: string;
+  employmentType: string;
+  location: string;
+  startDate: string;
+  endDate: string;
   currentlyWorking: boolean;
   responsibilities: string;
-  fileName:         string;
+  fileName: string;
 }
 
 export interface OnboardingRequest {
-  firstName:         string;
-  lastName:          string;
-  email:             string;
-  phone:             string;
-  jobTitle:          string;
-  department:        string;
-  gender:            string;
-  nationality:       string;
-  idNumber:          string;
-  resumeFileName:    string;
-  education:         OnboardingEducation[];
-  workExperience:    OnboardingWorkExperience[];
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  department: string;
+  gender: string;
+  nationality: string;
+  idNumber: string;
+  resumeFileName: string;
+  education: OnboardingEducation[];
+  workExperience: OnboardingWorkExperience[];
   selectedModuleIds: string[];
-  policyAccepted:    boolean;
-  documentNotes:     string;
+  policyAccepted: boolean;
+  documentNotes: string;
 }
 
 export interface OnboardingStatusResponse {
-  onboardingId:     string;
-  employeeId:       string;
-  currentStep:      number;
-  status:           string;
+  onboardingId: string;
+  employeeId: string;
+  currentStep: number;
+  status: string;
   isPolicyAccepted: boolean;
-  completionRate:   number;
-  documentNotes?:   string;
+  completionRate: number;
+  documentNotes?: string;
   personalInfo?: {
-    onboardingId:    string;
-    employeeId:      string;
-    fullName:        string;
-    jobTitle:        string;
-    email:           string;
-    phone:           string;
-    department:      string;
-    gender:          string;
-    nationality:     string;
-    idNumber:        string;
-    photoUrl?:       string;
-    resumeUrl?:      string;
+    onboardingId: string;
+    employeeId: string;
+    fullName: string;
+    jobTitle: string;
+    email: string;
+    phone: string;
+    department: string;
+    gender: string;
+    nationality: string;
+    idNumber: string;
+    photoUrl?: string;
+    resumeUrl?: string;
     resumeFileName?: string;
-    currentStep:     number;
+    currentStep: number;
   };
-  educationList:      any[];
+  educationList: any[];
   workExperienceList: any[];
   bankDetails?: {
-    bankDetailsId:      string;
-    noBankAccount:      boolean;
+    bankDetailsId: string;
+    noBankAccount: boolean;
     accountHolderName?: string;
-    accountNumber?:     string;
-    bankName?:          string;
-    paymentMethod?:     string;
-    iban?:              string;
-    branchName?:        string;
-    branchCode?:        string;
+    accountNumber?: string;
+    bankName?: string;
+    paymentMethod?: string;
+    iban?: string;
+    branchName?: string;
+    branchCode?: string;
   };
 }
 
 export interface SaveBankDetailsRequest {
-  onboardingId:       string;
-  bankDetailsId?:     string;
-  noBankAccount:      boolean;
+  onboardingId: string;
+  bankDetailsId?: string;
+  noBankAccount: boolean;
   accountHolderName?: string | null;
-  accountNumber?:     string | null;
-  bankName?:          string | null;
-  paymentMethod?:     string | null;
-  iban?:              string | null;
-  branchName?:        string | null;
-  branchCode?:        string | null;
+  accountNumber?: string | null;
+  bankName?: string | null;
+  paymentMethod?: string | null;
+  iban?: string | null;
+  branchName?: string | null;
+  branchCode?: string | null;
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -117,36 +117,47 @@ export interface SaveBankDetailsRequest {
 export class OnboardingService {
 
   private readonly apiUrl = environment.apiUrl;
+  private readonly uploadsUrl = `${environment.apiUrl}/uploads`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  // ── File Upload ───────────────────────────────────────────────────────────
+
+  /** Upload a file to the uploads API and return the hosted URL. */
+  uploadFile(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ url: string }>(`${this.uploadsUrl}/files`, formData).pipe(
+      map((res) => {
+        if (!res?.url) throw new Error('Upload failed');
+        return res.url;
+      })
+    );
+  }
 
   // ── Personal Info ─────────────────────────────────────────────────────────
 
   savePersonalInfo(
-    fullName:    string,
-    jobTitle:    string,
-    email:       string,
-    phone:       string,
-    department:  string,
-    gender:      string,
+    fullName: string,
+    jobTitle: string,
+    email: string,
+    phone: string,
+    department: string,
+    gender: string,
     nationality: string,
-    idNumber:    string,
-    photo?:  File | null,
-    resume?: File | null
+    idNumber: string,
+    photoUrl?: string | null,
+    resumeUrl?: string | null,
+    resumeFileName?: string | null
   ): Observable<any> {
-    const formData = new FormData();
-    formData.append('fullName',    fullName);
-    formData.append('jobTitle',    jobTitle);
-    formData.append('email',       email);
-    formData.append('phone',       phone);
-    formData.append('department',  department);
-    formData.append('gender',      gender);
-    formData.append('nationality', nationality);
-    formData.append('idNumber',    idNumber);
-    if (photo)  formData.append('photo',  photo,  photo.name);
-    if (resume) formData.append('resume', resume, resume.name);
+    const body: Record<string, any> = {
+      fullName, jobTitle, email, phone, department, gender, nationality, idNumber
+    };
+    if (photoUrl) body['photoUrl'] = photoUrl;
+    if (resumeUrl) body['resumeUrl'] = resumeUrl;
+    if (resumeFileName) body['resumeFileName'] = resumeFileName;
 
-    return this.http.put<any>(`${this.apiUrl}/onboarding/personal-info`, formData).pipe(
+    return this.http.put<any>(`${this.apiUrl}/onboarding/personal-info`, body).pipe(
       map(response => {
         if (!response?.success) throw new Error(response?.message || 'Failed to save personal information');
         return response;
@@ -172,43 +183,21 @@ export class OnboardingService {
   // ── Education ─────────────────────────────────────────────────────────────
 
   addEducation(
-    education:     OnboardingEducation,
-    attachment?:   File | null,
+    education: OnboardingEducation,
+    fileUrl?: string | null,
     onboardingId?: string | null
   ): Observable<any> {
-    const requestBody = {
-      degree:        education.degree,
-      institution:   education.institution,
-      field:         education.field,
-      gpa:           education.gpa || '',
-      fileName:      education.fileName || '',
-      description:   education.description || '',
-      onboardingId:  onboardingId || undefined,
+    const requestBody: Record<string, any> = {
+      degree: education.degree,
+      institution: education.institution,
+      field: education.field,
+      gpa: education.gpa || '',
+      fileName: education.fileName || '',
+      description: education.description || '',
+      onboardingId: onboardingId || undefined,
       onboarding_id: onboardingId || undefined
     };
-
-    if (attachment) {
-      const formData = new FormData();
-      formData.append('degree',       requestBody.degree);
-      formData.append('institution',  requestBody.institution);
-      formData.append('field',        requestBody.field);
-      formData.append('gpa',          requestBody.gpa);
-      formData.append('fileName',     requestBody.fileName);
-      formData.append('description',  requestBody.description);
-      if (onboardingId) {
-        formData.append('onboardingId',  onboardingId);
-        formData.append('onboarding_id', onboardingId);
-      }
-      formData.append('file', attachment, attachment.name);
-
-      return this.http.post<any>(`${this.apiUrl}/onboarding/education`, formData).pipe(
-        map(response => {
-          if (!response?.success) throw new Error(response?.message || 'Failed to save education detail');
-          return response;
-        }),
-        catchError(error => { console.error('Education save error:', error); return throwError(() => error); })
-      );
-    }
+    if (fileUrl) requestBody['fileUrl'] = fileUrl;
 
     return this.http.post<any>(`${this.apiUrl}/onboarding/education`, requestBody).pipe(
       map(response => {
@@ -219,52 +208,42 @@ export class OnboardingService {
     );
   }
 
+  deleteEducation(educationId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/onboarding/education/${educationId}`).pipe(
+      map(response => {
+        if (response?.success === false) {
+          throw new Error(response?.message || 'Failed to delete education record');
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Education delete error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   // ── Work Experience ───────────────────────────────────────────────────────
 
   addWorkExperience(
     workExperience: OnboardingWorkExperience,
-    attachment?:    File | null,
-    onboardingId?:  string | null
+    fileUrl?: string | null,
+    onboardingId?: string | null
   ): Observable<any> {
-    const requestBody = {
-      jobTitle:         workExperience.jobTitle,
-      company:          workExperience.company,
-      employmentType:   workExperience.employmentType,
-      location:         workExperience.location || '',
-      startDate:        workExperience.startDate,
-      endDate:          workExperience.endDate || '',
+    const requestBody: Record<string, any> = {
+      jobTitle: workExperience.jobTitle,
+      company: workExperience.company,
+      employmentType: workExperience.employmentType,
+      location: workExperience.location || '',
+      startDate: workExperience.startDate,
+      endDate: workExperience.endDate || '',
       currentlyWorking: workExperience.currentlyWorking,
       responsibilities: workExperience.responsibilities || '',
-      fileName:         workExperience.fileName || '',
-      onboardingId:     onboardingId || undefined,
-      onboarding_id:    onboardingId || undefined
+      fileName: workExperience.fileName || '',
+      onboardingId: onboardingId || undefined,
+      onboarding_id: onboardingId || undefined
     };
-
-    if (attachment) {
-      const formData = new FormData();
-      formData.append('jobTitle',         requestBody.jobTitle);
-      formData.append('company',          requestBody.company);
-      formData.append('employmentType',   requestBody.employmentType);
-      formData.append('location',         requestBody.location);
-      formData.append('startDate',        requestBody.startDate);
-      formData.append('endDate',          requestBody.endDate);
-      formData.append('currentlyWorking', String(requestBody.currentlyWorking));
-      formData.append('responsibilities', requestBody.responsibilities);
-      formData.append('fileName',         requestBody.fileName);
-      if (onboardingId) {
-        formData.append('onboardingId',  onboardingId);
-        formData.append('onboarding_id', onboardingId);
-      }
-      formData.append('file', attachment, attachment.name);
-
-      return this.http.post<any>(`${this.apiUrl}/onboarding/work-experience`, formData).pipe(
-        map(response => {
-          if (!response?.success) throw new Error(response?.message || 'Failed to save work experience detail');
-          return response;
-        }),
-        catchError(error => { console.error('Work experience save error:', error); return throwError(() => error); })
-      );
-    }
+    if (fileUrl) requestBody['fileUrl'] = fileUrl;
 
     return this.http.post<any>(`${this.apiUrl}/onboarding/work-experience`, requestBody).pipe(
       map(response => {
@@ -272,6 +251,21 @@ export class OnboardingService {
         return response;
       }),
       catchError(error => { console.error('Work experience save error:', error); return throwError(() => error); })
+    );
+  }
+
+  deleteWorkExperience(experienceId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/onboarding/work-experience/${experienceId}`).pipe(
+      map(response => {
+        if (response?.success === false) {
+          throw new Error(response?.message || 'Failed to delete work experience record');
+        }
+        return response;
+      }),
+      catchError(error => {
+        console.error('Work experience delete error:', error);
+        return throwError(() => error);
+      })
     );
   }
 
@@ -293,7 +287,8 @@ export class OnboardingService {
   }
 
   updateBankDetails(request: SaveBankDetailsRequest): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/onboarding/bank-details`, request).pipe(
+    // Backend currently exposes POST for /onboarding/bank-details for save/update.
+    return this.saveBankDetails(request).pipe(
       map(response => {
         if (response?.success === false) {
           throw new Error(response?.message || 'Failed to update bank details');
@@ -308,9 +303,11 @@ export class OnboardingService {
   }
 
   deleteBankDetails(bankDetailsId?: string | null): Observable<any> {
-    const url = bankDetailsId
-      ? `${this.apiUrl}/onboarding/bank-details/${bankDetailsId}`
-      : `${this.apiUrl}/onboarding/bank-details`;
+    if (!bankDetailsId) {
+      return throwError(() => new Error('Bank details id is required to delete bank details'));
+    }
+
+    const url = `${this.apiUrl}/onboarding/bank-details/${bankDetailsId}`;
     return this.http.delete<any>(url).pipe(
       map(response => {
         if (response?.success === false) {
@@ -362,17 +359,8 @@ export class OnboardingService {
 
   // ── Final Submit ──────────────────────────────────────────────────────────
 
-  submitOnboarding(
-    request: OnboardingRequest,
-    photo?:  File | null,
-    resume?: File | null
-  ): Observable<any> {
-    const formData = new FormData();
-    formData.append('payload', JSON.stringify(request));
-    if (photo)  formData.append('photo',  photo,  photo.name);
-    if (resume) formData.append('resume', resume, resume.name);
-
-    return this.http.post<any>(`${this.apiUrl}/onboarding`, formData).pipe(
+  submitOnboarding(request: OnboardingRequest): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/onboarding`, request).pipe(
       map(response => {
         if (!response?.success) throw new Error(response?.message || 'Onboarding submission failed');
         return response;
@@ -381,11 +369,7 @@ export class OnboardingService {
     );
   }
 
-  saveOnboardingProgress(
-    request: OnboardingRequest,
-    photo?:  File | null,
-    resume?: File | null
-  ): Observable<any> {
-    return this.submitOnboarding(request, photo, resume);
+  saveOnboardingProgress(request: OnboardingRequest): Observable<any> {
+    return this.submitOnboarding(request);
   }
 }
