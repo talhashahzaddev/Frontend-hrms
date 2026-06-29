@@ -4,7 +4,7 @@
   border-radius: 8px !important;
   font-size: 14px !important;
   font-weight: 600 !important;
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+  background: #2563eb !important;
   color: white !important;
   letter-spacing: 0.1px;
   transition: all 0.2s ease !important;
@@ -18,13 +18,13 @@
   }
 
   &:hover {
-    background: #2d3348 !important;
-    box-shadow: 0 4px 12px rgba(26, 31, 46, 0.3) !important;
+    background: #1d4ed8 !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
   }
 }
 .profile-container {
-  padding: 24px;
-  background: #f5f6fa;
+  padding: 2rem;
+  background: #f8fafc;
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
 
@@ -85,7 +85,7 @@
         height: 52px; // Matches Angular Material Outline height
         padding: 0 24px !important;
         border-radius: 8px !important;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
+        background: #2563eb !important;
         color: white !important;
         font-weight: 600 !important;
       }
@@ -127,7 +127,7 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        .ip-icon { color: #6366f1; }
+        .ip-icon { color: #2563eb; }
         .ip-text { font-family: monospace; font-weight: 600; }
       }
 

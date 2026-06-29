@@ -1,45 +1,44 @@
 <!-- Team Attendance Container -->
 <div class="team-attendance-container">
 
-  <mat-card class="filters-card">
-    <div class="filters-header">
-      <h3>Filters & Search</h3>
-      <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
-        <mat-icon>clear</mat-icon>
-        Clear Filters
-      </button>
+  <div class="page-header">
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div>
+        <h2 class="page-title">Team Attendance</h2>
+        <p class="page-subtitle">Monitor and review your team's attendance records</p>
+      </div>
     </div>
+  </div>
 
-    <div class="filters-content">
-      <!-- Search Employee -->
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Search Employee</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="search-box search-field">
+        <mat-icon>search</mat-icon>
         <input
-          matInput
+          type="text"
           placeholder="Search by employee name"
           [formControl]="searchTermControl">
-      </mat-form-field>
-      
-      <!-- Date Range -->
-      <mat-form-field appearance="outline" class="date-field">
+      </div>
+
+      <mat-form-field appearance="outline" class="filter-field date-field">
         <mat-label>Start Date</mat-label>
-        <input matInput [matDatepicker]="startPicker" [formControl]="startDateControl" placeholder="Select start date">
+        <input matInput [matDatepicker]="startPicker" [formControl]="startDateControl" placeholder="Start date">
         <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="date-field">
+      <mat-form-field appearance="outline" class="filter-field date-field">
         <mat-label>End Date</mat-label>
-        <input matInput [matDatepicker]="endPicker" [formControl]="endDateControl" placeholder="Select end date">
+        <input matInput [matDatepicker]="endPicker" [formControl]="endDateControl" placeholder="End date">
         <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
       </mat-form-field>
 
-      <!-- Department Filter -->
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="filter-field select-field">
         <mat-label>Department</mat-label>
-        <mat-icon matPrefix>domain</mat-icon>
         <mat-select [formControl]="departmentControl">
           <mat-option value="">All Departments</mat-option>
           <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
@@ -48,30 +47,31 @@
         </mat-select>
       </mat-form-field>
 
-      <!-- Status Filter -->
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="filter-field select-field select-field-sm">
         <mat-label>Status</mat-label>
-        <mat-icon matPrefix>check_circle</mat-icon>
         <mat-select [formControl]="statusControl">
           <mat-option *ngFor="let status of statusOptions" [value]="status.value">
             {{ status.label }}
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
 
-    <!-- Filter Actions -->
-    <div class="filter-actions">
-      <button mat-flat-button 
-        (click)="exportReport()" 
-        class="export-button" 
-        [disabled]="isLoading"
-        *ngIf="hasPermission('team_attendance_export')">
-        <mat-icon>download</mat-icon>
-        Export
-      </button>
+      <div class="filter-actions">
+        <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+          Clear
+        </button>
+        <button mat-flat-button
+          (click)="exportReport()"
+          class="export-button"
+          [disabled]="isLoading"
+          *ngIf="hasPermission('team_attendance_export')">
+          <mat-icon>download</mat-icon>
+          Export
+        </button>
+      </div>
     </div>
-  </mat-card>
+  </div>
 
   <!-- Daily Stats Cards - Dashboard Style -->
   <div class="statistics-cards" *ngIf="dailyStats && (hasPermission('team_attendance_summary') || hasPermission('Team_Attendance_Summary'))">

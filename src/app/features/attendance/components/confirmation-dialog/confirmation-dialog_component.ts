@@ -23,76 +23,31 @@ export interface ConfirmationDialogData {
   imports: [
     SharedCommonModule,CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   template: `
-    <div class="confirmation-dialog">
-      <h2 mat-dialog-title>
-        @if (data.icon) {
-          <mat-icon class="dialog-icon" [class.warn]="data.confirmColor === 'warn'">
-            {{ data.icon }}
-          </mat-icon>
-        }
-        {{ data.title }}
-      </h2>
+    <div class="dialog-container confirmation-dialog">
+      <div class="dialog-header">
+        <div class="title-section">
+          <div class="icon-wrapper" [class.warn]="data.confirmColor === 'warn'">
+            <mat-icon>{{ data.icon || 'help_outline' }}</mat-icon>
+          </div>
+          <div>
+            <h2 class="title">{{ data.title }}</h2>
+          </div>
+        </div>
+      </div>
 
-      <mat-dialog-content>
+      <div class="dialog-body">
         <p class="message">{{ data.message }}</p>
-      </mat-dialog-content>
+      </div>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="cancel()">Cancel</button>
-        <button
-          mat-raised-button
-          [color]="data.confirmColor || 'primary'"
-          (click)="confirm()">
+      <div class="dialog-footer">
+        <button class="btn-cancel cancel-btn" mat-stroked-button (click)="cancel()">Cancel</button>
+        <button class="btn-save submit-btn" [class.warn]="data.confirmColor === 'warn'" (click)="confirm()">
           {{ data.confirmLabel || 'Confirm' }}
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
-  styles: [`
-    .confirmation-dialog {
-      min-width: 380px;
-      max-width: 480px;
-
-      h2 {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 18px;
-        margin: 0;
-
-        .dialog-icon {
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-          color: #667eea;
-
-          &.warn { color: #d32f2f; }
-        }
-      }
-
-      mat-dialog-content {
-        padding: 16px 24px;
-
-        .message {
-          margin: 0;
-          font-size: 14px;
-          color: #555;
-          line-height: 1.6;
-        }
-      }
-
-      mat-dialog-actions {
-        gap: 8px;
-        padding: 12px 24px 16px;
-        margin: 0;
-        border-top: 1px solid #e0e0e0;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .confirmation-dialog { min-width: auto; width: 100%; }
-    }
-  `]
+  styleUrls: ['./confirmation-dialog.component.scss']
 })
 export class ConfirmationDialogComponent {
   constructor(

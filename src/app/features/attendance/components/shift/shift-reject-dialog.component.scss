@@ -1,0 +1,15 @@
+@use '../../styles/attendance-dialog';
+
+:host {
+  @include attendance-dialog.ad-scroll-host;
+}
+
+@include attendance-dialog.ad-panel-shell;
+
+.srd-message {
+  margin: 0 0 1rem;
+}
+
+.reason-field {
+  width: 100%;
+}

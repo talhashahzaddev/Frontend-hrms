@@ -1,15 +1,17 @@
 <div class="monitoring-root">
 
-  <!-- Header -->
-  <div class="mon-header">
-    <div class="mon-title-wrap">
-      <mat-icon class="mon-title-icon">monitor_heart</mat-icon>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="icon-box">
+        <mat-icon>monitor_heart</mat-icon>
+      </div>
       <div>
-        <h2 class="mon-title">Team Live Stream</h2>
-        <p class="mon-subtitle">Real-time employee location monitoring</p>
+        <h2 class="page-title">Team Live Stream</h2>
+        <p class="page-subtitle">Real-time employee location monitoring</p>
       </div>
     </div>
-    <div class="mon-header-right">
+    <div class="header-right">
       <span class="last-updated" *ngIf="lastUpdated">
         Updated {{ lastUpdated | localizedDate:'HH:mm:ss' }}
       </span>

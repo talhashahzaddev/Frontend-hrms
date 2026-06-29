@@ -25,36 +25,46 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatDialogModule
   ],
   template: `
-  <h2 mat-dialog-title>Edit Office IP</h2>
-  <mat-dialog-content>
-    <form [formGroup]="ipForm" (ngSubmit)="onSubmit()">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>IP Address</mat-label>
-        <input matInput formControlName="ipAddressValue">
-        <mat-error *ngIf="ipForm.get('ipAddressValue')?.invalid && ipForm.get('ipAddressValue')?.touched">
-          Please enter a valid IP
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name">
-        <mat-error *ngIf="ipForm.get('name')?.invalid && ipForm.get('name')?.touched">
-          Name is required
-        </mat-error>
-      </mat-form-field>
-
-      <div class="actions">
-        <button mat-stroked-button type="button" (click)="close()">Cancel</button>
-        <button mat-flat-button color="primary" type="submit" [disabled]="ipForm.invalid">Save</button>
+  <div class="dialog-container edit-ip-dialog">
+    <div class="dialog-header">
+      <div class="title-section">
+        <div class="icon-wrapper">
+          <mat-icon>lan</mat-icon>
+        </div>
+        <div>
+          <h2 class="title">Edit Office IP</h2>
+          <p class="subtitle">Update the office IP address details</p>
+        </div>
       </div>
-    </form>
-  </mat-dialog-content>
+    </div>
+
+    <div class="dialog-body">
+      <form [formGroup]="ipForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="mat-field full-width">
+          <mat-label>IP Address</mat-label>
+          <input matInput formControlName="ipAddressValue">
+          <mat-error *ngIf="ipForm.get('ipAddressValue')?.invalid && ipForm.get('ipAddressValue')?.touched">
+            Please enter a valid IP
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="mat-field full-width">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name">
+          <mat-error *ngIf="ipForm.get('name')?.invalid && ipForm.get('name')?.touched">
+            Name is required
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </div>
+
+    <div class="dialog-footer">
+      <button class="btn-cancel cancel-btn" mat-stroked-button type="button" (click)="close()">Cancel</button>
+      <button class="btn-save submit-btn" type="button" (click)="onSubmit()" [disabled]="ipForm.invalid">Save</button>
+    </div>
+  </div>
   `,
-  styles: [`
-    .full-width { width: 100%; }
-    .actions { margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
-  `]
+  styleUrls: ['./edit-ips-dialog.component.scss']
 })
 export class EditOfficeIPDialogComponent {
   ipForm: FormGroup;

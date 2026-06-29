@@ -389,6 +389,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(RejectRequestDialogComponent, {
       width: '550px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel',
       data: { employeeName: pkg.employeeName, workDate: this.formatDate(record.date) }
     });
 
@@ -415,6 +417,8 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(ManagerOverrideDialogComponent, {
       width: '550px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel',
       data: dialogData
     });
 
@@ -526,7 +530,7 @@ export class AttendanceApprovalsComponent implements OnInit, OnDestroy {
       width: '90vw',
       maxWidth: '1200px',
       maxHeight: '90vh',
-      panelClass: 'review-detail-dialog-panel',
+      panelClass: ['attendance-dialog-panel', 'review-detail-dialog-panel'],
       data: dialogData,
       autoFocus: false
     });

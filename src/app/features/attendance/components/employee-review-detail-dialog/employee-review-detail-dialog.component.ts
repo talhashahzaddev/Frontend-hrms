@@ -408,6 +408,8 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
 
     const dialogRef = this.dialog.open(RejectRequestDialogComponent, {
       width: '550px',
+      maxHeight: '90vh',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName: this.pkg.employeeName,
         workDate: this.formatDisplayDate(record.date)
@@ -456,6 +458,8 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
       const dialogRef = this.dialog.open(AttendanceRequestDialogComponent, {
         width: '520px',
         maxWidth: '95vw',
+        maxHeight: '90vh',
+        panelClass: ['attendance-dialog-panel', 'attendance-request-dialog-panel'],
         data: {
           mode: 'edit',
           attendanceId: hasAttendanceId ? id : null,
@@ -467,7 +471,6 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
           originalCheckOut: record.originalCheckOut,
           originalStatus: record.originalStatus
         },
-        panelClass: 'attendance-request-dialog-panel'
       });
 
       dialogRef.afterClosed().subscribe(result => {
@@ -501,6 +504,8 @@ export class EmployeeReviewDetailDialogComponent implements OnInit, OnDestroy {
 
       const dialogRef = this.dialog.open(ManagerOverrideDialogComponent, {
         width: '550px',
+        maxHeight: '90vh',
+        panelClass: 'attendance-dialog-panel',
         data: dialogData
       });
 

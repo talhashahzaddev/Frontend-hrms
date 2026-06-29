@@ -28,20 +28,27 @@ export interface RejectRequestDialogData {
     MatIconModule
   ],
   template: `
-    <div class="reject-dialog">
-      <h2 mat-dialog-title>
-        <mat-icon class="dialog-icon">cancel</mat-icon>
-        Reject Attendance Correction Request
-      </h2>
+    <div class="dialog-container reject-dialog">
+      <div class="dialog-header">
+        <div class="title-section">
+          <div class="icon-wrapper warn">
+            <mat-icon>cancel</mat-icon>
+          </div>
+          <div>
+            <h2 class="title">Reject Attendance Correction Request</h2>
+            <p class="subtitle">Provide a reason for rejecting this request</p>
+          </div>
+        </div>
+      </div>
 
-      <mat-dialog-content>
+      <div class="dialog-body">
         <div class="employee-info">
           <p><strong>Employee:</strong> {{ data.employeeName }}</p>
           <p><strong>Work Date:</strong> {{ data.workDate }}</p>
         </div>
 
         <form [formGroup]="rejectForm">
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" class="mat-field full-width">
             <mat-label>Rejection Reason</mat-label>
             <textarea
               matInput
@@ -58,75 +65,18 @@ export interface RejectRequestDialogData {
             </mat-error>
           </mat-form-field>
         </form>
-      </mat-dialog-content>
+      </div>
 
-      <mat-dialog-actions align="end">
-        <button mat-stroked-button (click)="onCancel()">
-          Cancel
-        </button>
-        <button
-          mat-raised-button
-          color="warn"
-          (click)="onConfirm()"
-          [disabled]="!rejectForm.valid">
+      <div class="dialog-footer">
+        <button class="btn-cancel cancel-btn" mat-stroked-button (click)="onCancel()">Cancel</button>
+        <button class="btn-save submit-btn warn" (click)="onConfirm()" [disabled]="!rejectForm.valid">
           <mat-icon>cancel</mat-icon>
           Reject Request
         </button>
-      </mat-dialog-actions>
+      </div>
     </div>
   `,
-  styles: [`
-    .reject-dialog {
-      min-width: 500px;
-
-      h2 {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: #d32f2f;
-
-        .dialog-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-        }
-      }
-
-      .employee-info {
-        background: #f5f5f5;
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-
-        p {
-          margin: 4px 0;
-          font-size: 14px;
-          color: #333;
-
-          strong {
-            color: #666;
-          }
-        }
-      }
-
-      .full-width {
-        width: 100%;
-      }
-
-      mat-dialog-actions {
-        gap: 8px;
-        padding: 16px 0 0;
-        margin: 0;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .reject-dialog {
-        min-width: auto;
-        width: 100%;
-      }
-    }
-  `]
+  styleUrls: ['./reject-request-dialog.component.scss']
 })
 export class RejectRequestDialogComponent {
   rejectForm: FormGroup;

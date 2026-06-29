@@ -5,9 +5,9 @@
 // .overtime-actions { margin-bottom: 16px; }
 
 // // Unified theme tokens (match KRA management)
-// $color-primary: #6366f1;
+// $color-primary: #2563eb;
 // $color-primary-dark: #4f46e5;
-// $color-primary-light: rgba(99, 102, 241, 0.1);
+// $color-primary-light: rgba(29, 78, 216, 0.1);
 // $color-bg: #f5f6fa;
 // $color-surface: #ffffff;
 // $color-border: #e9eaf0;
@@ -45,7 +45,7 @@
 // 		width: 44px;
 // 		height: 44px;
 // 		border-radius: 10px;
-// 		background: linear-gradient(135deg, $color-primary 0%, #8b5cf6 100%);
+// 		background: linear-gradient(135deg, $color-primary 0%, #2563eb 100%);
 // 		display: flex;
 // 		align-items: center;
 // 		justify-content: center;
@@ -142,9 +142,9 @@
 // Overtime Management — Unified with KRA Management Design System
 // ══════════════════════════════════════════════════════════════════════
 
-$color-primary:       #6366f1;
+$color-primary:       #2563eb;
 $color-primary-dark:  #4f46e5;
-$color-primary-light: rgba(99, 102, 241, 0.1);
+$color-primary-light: rgba(29, 78, 216, 0.1);
 $color-bg:            #f5f6fa;
 $color-surface:       #ffffff;
 $color-border:        #e9eaf0;
@@ -157,10 +157,10 @@ $color-warning:       #f59e0b;
 $color-error:         #ef4444;
 
 $indigo:              #4f46e5;
-$indigo-mid:          #6366f1;
+$indigo-mid:          #2563eb;
 $indigo-dark:         #4f46e5;
 $indigo-light:        #eef2ff;
-$violet:              #8b5cf6;
+$violet:              #2563eb;
 $slate-900:           #111827;
 $slate-700:           #374151;
 $slate-600:           #6b7280;
@@ -189,10 +189,10 @@ $red-border:          #fecaca;
 
 // ─── Container ─────────────────────────────────────────────────────────────
 .overtime-management-container {
-  padding: 12px 16px;
+  padding: 2rem;
   max-width: 1600px;
   margin: 0 auto;
-  background: $slate-100;
+  background: #f8fafc;
   min-height: 100vh;
   font-family: 'Inter', 'DM Sans', sans-serif;
   display: flex;
@@ -216,26 +216,26 @@ $red-border:          #fecaca;
   }
 
   .header-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, $color-primary 0%, #8b5cf6 100%);
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    background: rgba(37, 99, 235, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 
     mat-icon {
-      color: white;
-      font-size: 22px;
-      width: 22px;
-      height: 22px;
+      color: #2563eb;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
     }
   }
 
   .page-title {
     margin: 0 0 2px;
-    font-size: 24px;
+    font-size: 1.75rem;
     font-weight: 700;
     color: $slate-900;
     letter-spacing: -0.3px;
@@ -256,24 +256,24 @@ $red-border:          #fecaca;
 
 // ─── Primary Button ────────────────────────────────────────────────────────
 .btn-primary {
-  background: linear-gradient(135deg, $violet 0%, $indigo-mid 100%);
+  background: #2563eb;
   color: $white;
   border: none;
-  border-radius: 8px;
-  padding: 0 20px;
+  border-radius: 0.5rem;
+  padding: 0 1.25rem;
   height: 42px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
-  letter-spacing: 0.1px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
     transform: translateY(-1px);
   }
 

@@ -1,4 +1,4 @@
-﻿// 
+// 
 // Root Container
 // 
 .review-detail-dialog {
@@ -19,34 +19,34 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
-  color: white;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
   flex-shrink: 0;
   gap: 12px;
 
   .header-left {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 1rem;
     min-width: 0;
   }
 
   .avatar-circle {
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2.5px solid rgba(255, 255, 255, 0.5);
-    color: white;
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    border-radius: 0.75rem;
+    background: #eff6ff;
+    border: none;
+    color: #2563eb;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 1rem;
     font-weight: 800;
     text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .header-info {
@@ -58,18 +58,17 @@
 
   .employee-name {
     margin: 0;
-    font-size: 16px;
+    font-size: 1.125rem;
     font-weight: 700;
-    color: white;
+    color: #0f172a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    letter-spacing: -0.2px;
   }
 
   .employee-meta {
-    font-size: 11.5px;
-    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.8125rem;
+    color: #64748b;
     font-weight: 400;
     white-space: nowrap;
     overflow: hidden;
@@ -266,7 +265,7 @@
     transition: background 0.12s;
   }
 
-  .mat-mdc-row:hover td { background: rgba(99, 102, 241, 0.03) !important; }
+  .mat-mdc-row:hover td { background: rgba(29, 78, 216, 0.03) !important; }
 }
 
 //  Row variants 
@@ -506,14 +505,14 @@
   gap: 4px;
   font-size: 10.5px;
   font-weight: 600;
-  color: #6d28d9;
+  color: #1d4ed8;
   background: #ede9fe;
   border: 1.5px solid #c4b5fd;
   padding: 2px 9px 2px 6px;
   border-radius: 20px;
   white-space: nowrap;
 
-  mat-icon { font-size: 12px; width: 12px; height: 12px; color: #7c3aed; }
+  mat-icon { font-size: 12px; width: 12px; height: 12px; color: #2563eb; }
 }
 
 //  Row Action Buttons 
@@ -599,7 +598,7 @@
     &.absent  { color: #b91c1c; mat-icon { color: #dc2626; } }
     &.late    { color: #b45309; mat-icon { color: #d97706; } }
     &.hours   { color: #4338ca; mat-icon { color: #4f46e5; } }
-    &.rate    { color: #6d28d9; mat-icon { color: #7c3aed; } }
+    &.rate    { color: #1d4ed8; mat-icon { color: #2563eb; } }
   }
 
   .bar-sep {
@@ -647,12 +646,12 @@
   }
 
   &.finalize {
-    background: var(--gradient-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+    background: var(--gradient-primary, linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%));
     color: white;
     border-color: transparent;
-    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
     &:hover:not(:disabled) {
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
       transform: translateY(-1px);
     }
     &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
