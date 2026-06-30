@@ -1,232 +1,141 @@
-// ═══ Timesheet Button Styles ═══════════════════════════════════════════════════
-// Scoped to .ts-page-layout so they only affect the timesheet module.
-// All geometry values match the Shift Management module's create-shift button.
+// Timesheet buttons — matches Attendance (42px page CTAs, 40px dialog footer)
 
-// ── Geometry Reset — kill PrimeNG defaults so our values win ──────────────────
-.ts-page-layout {
+.ts-page-layout,
+.period-detail-layout {
   .p-button {
-    // Reset PrimeNG's own padding/radius so our overrides stick
     padding: unset !important;
     border-radius: unset !important;
-
-    // Standard geometry for all buttons (filled, outlined, text)
-    height: 38px !important;
-    padding: 0 18px !important;
-    border-radius: 6px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
+    height: 42px !important;
+    padding: 0 1.25rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 6px !important;
+    gap: 0.5rem !important;
     white-space: nowrap !important;
     cursor: pointer !important;
-    transition: background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
+    transition: background 0.15s, box-shadow 0.15s, border-color 0.15s !important;
     letter-spacing: 0 !important;
 
-    // Fix PrimeNG icon — match text size, remove default margin
     .p-button-icon {
-      font-size: 14px !important;
-      width: 14px !important;
-      height: 14px !important;
-      margin: 0 !important;          // gap handles spacing now
+      font-size: 0.875rem !important;
+      width: 0.875rem !important;
+      height: 0.875rem !important;
+      margin: 0 !important;
     }
 
-    // Prevent label from stretching
     .p-button-label {
-      font-size: 14px !important;
-      font-weight: 500 !important;
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
       flex: 0 0 auto !important;
     }
 
-    &:focus {
-      box-shadow: none !important;
-    }
+    &:focus { box-shadow: none !important; }
   }
 
-  // ── Primary Filled (default — no modifier class) ──────────────────────────
+  // Primary filled
   .p-button:not(.p-button-text):not(.p-button-outlined):not(.p-button-danger):not(.p-button-success):not(.p-button-warning):not([styleClass*="danger"]):not([styleClass*="success"]):not([styleClass*="warning"]) {
-    background: var(--ts-primary) !important;
+    background: #2563eb !important;
     border: none !important;
     color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
 
     &:hover:not(:disabled) {
-      background: var(--ts-primary-hover) !important;
+      background: #1d4ed8 !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
     }
 
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 
-  // ── Outlined / Secondary ──────────────────────────────────────────────────
+  // Outlined
   .p-button.p-button-outlined {
-    background: transparent !important;
-    border: 1px solid var(--ts-border, #d1d5db) !important;
-    color: var(--ts-text-secondary, #374151) !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+    box-shadow: none !important;
 
     &:hover:not(:disabled) {
-      background: var(--ts-border-light, #f9fafb) !important;
-      border-color: #b0b7c3 !important;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      background: #f8fafc !important;
+      border-color: #2563eb !important;
+      color: #2563eb !important;
     }
   }
 
-  // ── Text / Ghost ──────────────────────────────────────────────────────────
+  // Text / ghost
   .p-button.p-button-text {
-    height: 38px !important;
-    padding: 0 12px !important;
+    height: 42px !important;
+    padding: 0 0.75rem !important;
     background: transparent !important;
     border: none !important;
-    color: var(--ts-text-muted, #6b7280) !important;
+    color: #64748b !important;
+    box-shadow: none !important;
 
     &:hover:not(:disabled) {
-      background: var(--ts-border-light, #f3f4f6) !important;
-      color: var(--ts-text, #1f2937) !important;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
     }
   }
 
-  // ── Small button ──────────────────────────────────────────────────────────
+  .p-button.p-button-info.p-button-text {
+    color: #2563eb !important;
+    &:hover:not(:disabled) { background: #eff6ff !important; }
+  }
+
+  // Danger
+  .p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined) {
+    background: #dc2626 !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2) !important;
+    &:hover:not(:disabled) { background: #b91c1c !important; }
+  }
+
+  .p-button.p-button-danger.p-button-text {
+    color: #dc2626 !important;
+    &:hover:not(:disabled) { background: #fef2f2 !important; }
+  }
+
+  // Success
+  .p-button.p-button-success:not(.p-button-text) {
+    background: #16a34a !important;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2) !important;
+    &:hover:not(:disabled) { background: #15803d !important; }
+  }
+
+  // Small
   .p-button.p-button-sm {
-    height: 32px !important;
-    padding: 0 14px !important;
-    font-size: 13px !important;
-    border-radius: 6px !important;
+    height: 36px !important;
+    padding: 0 1rem !important;
+    font-size: 0.8125rem !important;
+    border-radius: 0.5rem !important;
 
-    .p-button-icon {
-      font-size: 13px !important;
-      width: 13px !important;
-      height: 13px !important;
-    }
-
-    .p-button-label {
-      font-size: 13px !important;
-    }
+    .p-button-icon,
+    .p-button-label { font-size: 0.8125rem !important; }
   }
 
-  // ── Custom class variants (for dialogs / non-PrimeNG buttons) ─────────────
-  .ts-btn-primary {
+  // Native attendance-style buttons
+  .btn-primary {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 18px;
-    background: var(--ts-primary);
-    border: none;
+    gap: 0.5rem;
+    height: 42px;
+    padding: 0 1.25rem;
+    background: #2563eb;
     color: #ffffff;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    white-space: nowrap;
-
-    i { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; }
-
-    &:hover:not(:disabled) { background: var(--ts-primary-hover); }
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-  }
-
-  .ts-btn-outline {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 16px;
-    background: transparent;
-    border: 1px solid var(--ts-border, #d1d5db);
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--ts-text-secondary, #374151);
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-    white-space: nowrap;
-
-    i { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; }
-
-    &:hover:not(:disabled) { background: var(--ts-border-light, #f9fafb); border-color: #b0b7c3; }
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-  }
-
-  .ts-btn-danger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 16px;
-    background: transparent;
-    border: 1px solid #dc2626;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #dc2626;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    white-space: nowrap;
-
-    i { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; }
-
-    &:hover:not(:disabled) { background: #fef2f2; }
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-  }
-
-  .ts-btn-success {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 16px;
-    background: transparent;
-    border: 1px solid #16a34a;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #16a34a;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    white-space: nowrap;
-
-    i { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; }
-
-    &:hover:not(:disabled) { background: #f0fdf4; }
-    &:disabled { opacity: 0.5; cursor: not-allowed; }
-  }
-
-  .ts-btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 12px;
-    background: transparent;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--ts-text-muted, #6b7280);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
-    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: background 0.15s, box-shadow 0.15s;
 
-    i { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; }
+    &:hover:not(:disabled) {
+      background: #1d4ed8;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
 
-    &:hover:not(:disabled) { background: var(--ts-border-light, #f3f4f6); color: var(--ts-text, #1f2937); }
     &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 }

@@ -15,12 +15,14 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   imports: [CommonModule, FormsModule, DropdownModule, TableModule, ProgressSpinnerModule, StatCardComponent, PageHeaderComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Timesheet Analytics">
-        <div actions style="display: flex; gap: 8px; align-items: center;">
+      <app-page-header matIcon="analytics" title="Timesheet Analytics" subtitle="Organization-wide utilization and overtime insights"></app-page-header>
+
+      <div class="filters-section">
+        <div class="filters-row">
           <p-dropdown [options]="periodOptions()" [(ngModel)]="selectedPeriodId" optionLabel="label" optionValue="value"
             placeholder="All Periods" [showClear]="true" (onChange)="loadDashboard()" styleClass="ts-period-filter"></p-dropdown>
         </div>
-      </app-page-header>
+      </div>
 
       @if (loading) {
         <div class="ts-loading"><p-progressSpinner></p-progressSpinner></div>

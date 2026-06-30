@@ -1,86 +1,133 @@
-@use '../../styles/timesheet-shared';
+@use '../../../attendance/styles/attendance-dialog';
 
-/* ═══════════════════════════════════════════════════════════════════════════════
-   MATCHED TO: create-shift.component.scss
-   Footer styles match correction dialog footer.
-   ═══════════════════════════════════════════════════════════════════════════════ */
-
-.ts-summary-bar {
-  display: flex; gap: 20px; padding: 12px 16px;
-  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 20px;
+:host {
+  @include attendance-dialog.ad-scroll-host;
 }
-.ts-summary-item { display: flex; flex-direction: column; }
-.ts-summary-label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
-.ts-summary-value { font-size: 15px; font-weight: 600; color: #1f2937; }
-.ts-summary-value.balanced { color: #16a34a; }
-.ts-summary-value.over { color: #dc2626; }
-.ts-summary-value.under { color: #d97706; }
+
+@include attendance-dialog.ad-panel-shell;
+
+.ts-day-card {
+  border: 1px solid attendance-dialog.$ad-border;
+  border-radius: 0.75rem;
+  margin-bottom: 12px;
+  overflow: hidden;
+  background: attendance-dialog.$ad-input-bg;
+}
+
+.ts-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid attendance-dialog.$ad-border;
+}
+
+.ts-day-date {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: attendance-dialog.$ad-text-primary;
+}
 
 .ts-days-list { max-height: 450px; overflow-y: auto; }
 
-.ts-day-card {
-  border: 1px solid #e2e8f0; border-radius: 10px;
-  margin-bottom: 12px; background: white; overflow: hidden;
-}
-.ts-day-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #f3f4f6;
-}
 .ts-day-info { display: flex; align-items: center; gap: 8px; }
-.ts-day-date { font-weight: 600; font-size: 13px; color: #1f2937; }
-.ts-day-hours-info { display: flex; gap: 12px; font-size: 13px; }
-.ts-day-allocated { font-weight: 600; }
-.ts-day-allocated.balanced { color: #16a34a; }
-.ts-day-allocated.over { color: #dc2626; }
-.ts-day-allocated.under { color: #d97706; }
-.ts-day-allocated.none { color: #6b7280; }
 
-.ts-day-skip { padding: 12px; font-size: 13px; text-align: center; color: #6b7280; }
+.ts-day-hours-info {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8125rem;
+}
+
+.ts-day-allocated {
+  font-weight: 600;
+
+  &.balanced { color: #16a34a; }
+  &.over { color: #dc2626; }
+  &.under { color: #d97706; }
+  &.none { color: attendance-dialog.$ad-text-muted; }
+}
+
+.ts-day-skip {
+  padding: 12px;
+  font-size: 0.8125rem;
+  text-align: center;
+  color: attendance-dialog.$ad-text-muted;
+}
 
 .ts-allocation-rows { padding: 8px 12px; }
+
 .ts-alloc-row {
-  display: flex; align-items: center; gap: 8px; padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
 }
+
 .ts-alloc-hours {
-  width: 60px; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px;
-  font-size: 13px; text-align: center;
+  width: 60px;
+  padding: 6px 8px;
+  font-size: 0.8125rem;
+  text-align: center;
 }
+
 .ts-billable-toggle {
-  display: flex; align-items: center; gap: 4px; font-size: 12px;
-  cursor: pointer; white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+  color: attendance-dialog.$ad-text-secondary;
+
+  input { width: auto; }
 }
-.ts-billable-toggle input { width: auto; }
+
 .ts-alloc-desc {
-  flex: 1; padding: 6px 8px; border: 1px solid #e2e8f0; border-radius: 6px;
-  font-size: 13px; min-width: 100px;
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 0.8125rem;
+  min-width: 100px;
 }
+
 .ts-icon-btn {
-  background: none; border: none; cursor: pointer; font-size: 12px;
-  padding: 4px 6px; border-radius: 4px; color: #6b7280;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: attendance-dialog.$ad-text-muted;
+
+  &:hover { background: #f1f5f9; color: attendance-dialog.$ad-text-primary; }
 }
-.ts-icon-btn:hover { background: #f3f4f6; color: #1f2937; }
-.ts-remove-btn:hover { background: #fef2f2; color: #dc2626; }
+
+.ts-remove-btn:hover { background: #fef2f2 !important; color: #dc2626 !important; }
 
 .ts-btn-add-row {
-  background: none; border: 1px dashed #d1d5db; padding: 6px 12px;
-  border-radius: 6px; cursor: pointer; font-size: 13px; color: #6b7280;
-  margin: 8px 12px 12px; display: inline-flex; align-items: center; gap: 4px;
+  background: none;
+  border: 1px dashed attendance-dialog.$ad-border;
+  padding: 6px 12px;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: attendance-dialog.$ad-text-secondary;
+  margin: 8px 12px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    border-color: attendance-dialog.$ad-primary;
+    color: attendance-dialog.$ad-primary;
+    background: #eff6ff;
+  }
 }
-.ts-btn-add-row:hover { border-color: #6c5ce7; color: #6c5ce7; }
 
-/* ── Footer (component-scoped, matches correction dialog footer) ──────── */
-.dialog-footer {
-  display: flex; justify-content: flex-end; gap: 12px;
-  padding: 16px 20px; border-top: 1px solid #f1f5f9;
-  flex-shrink: 0;
-
-  .btn-cancel {
-    height: 40px; border-radius: 10px; font-weight: 600; color: #64748b;
-  }
-
-  .btn-save {
-    height: 40px; border-radius: 10px; font-weight: 700;
-    background: #6C5CE7 !important; color: #ffffff !important;
-    padding: 0 24px !important;
-  }
+:host ::ng-deep .p-dropdown {
+  min-height: 36px !important;
+  height: 36px !important;
+  background: attendance-dialog.$ad-input-bg !important;
+  border: 1px solid attendance-dialog.$ad-border !important;
+  border-radius: 0.5rem !important;
 }

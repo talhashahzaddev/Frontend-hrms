@@ -13,7 +13,7 @@
   &.ts-draft        { background: #F3F4F6; color: var(--ts-status-draft); }
   &.ts-inprogress   { background: #DBEAFE; color: var(--ts-status-inprogress); }
   &.ts-submitted    { background: var(--ts-warning-bg); color: var(--ts-warning); }
-  &.ts-underreview  { background: #EDE9FE; color: var(--ts-status-underreview); }
+  &.ts-underreview  { background: #eff6ff; color: var(--ts-status-underreview); }
   &.ts-approved     { background: var(--ts-success-bg); color: var(--ts-success); }
   &.ts-finalized    { background: var(--ts-success-bg); color: var(--ts-success); }
   &.ts-locked       { background: var(--ts-danger-bg); color: var(--ts-danger); }
@@ -30,7 +30,7 @@
   &.ts-late         { background: var(--ts-danger-bg); color: var(--ts-danger); }
   &.ts-absent       { background: var(--ts-danger-bg); color: var(--ts-danger); }
   &.ts-on-leave     { background: #DBEAFE; color: #2563EB; }
-  &.ts-half-day     { background: #F3E8FF; color: #7C3AED; }
+  &.ts-half-day     { background: #eff6ff; color: #2563eb; }
 }
 
 // PrimeNG p-tag overrides

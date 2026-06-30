@@ -14,74 +14,126 @@
     max-height: 90vh !important;
   }
 
-  .mat-mdc-dialog-content {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-height: none !important;
-  }
+  // Close (X) — muted slate, same as create-shift / attendance dialogs
+  .close-button {
+    color: #94a3b8 !important;
+    --mdc-icon-button-icon-color: #94a3b8;
 
-  .mat-mdc-dialog-actions {
-    padding: 0 !important;
-    margin: 0 !important;
-    min-height: unset !important;
-  }
-
-  // Material-native dialogs (comment dialog) when opened from attendance
-  [mat-dialog-title] {
-    margin: 0 !important;
-    padding: 1.5rem !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    background: rgba(255, 255, 255, 0.8) !important;
-    font-size: 1.125rem !important;
-    font-weight: 700 !important;
-    color: #0f172a !important;
-  }
-
-  mat-dialog-content {
-    padding: 1.5rem !important;
-    background: #f8fafc !important;
-
-    .mat-mdc-text-field-wrapper {
-      background: #ffffff !important;
+    mat-icon {
+      color: #94a3b8 !important;
     }
 
-    .mdc-notched-outline__leading,
-    .mdc-notched-outline__notch,
-    .mdc-notched-outline__trailing {
-      border-color: #e2e8f0 !important;
-    }
+    &:hover {
+      color: #475569 !important;
+      background: #f8fafc !important;
+      --mdc-icon-button-icon-color: #475569;
 
-    .mat-focused {
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: #2563eb !important;
+      mat-icon {
+        color: #475569 !important;
       }
     }
   }
 
-  mat-dialog-actions {
-    padding: 1.25rem 1.5rem !important;
-    border-top: 1px solid #e2e8f0 !important;
-    background: #f8fafc !important;
-    gap: 0.75rem !important;
-
-    button {
-      height: 2.5rem !important;
-      border-radius: 0.5rem !important;
-      font-size: 0.875rem !important;
-      font-weight: 600 !important;
+  // Custom-structured dialogs manage their own internal spacing
+  &:has(.dialog-container),
+  &:has(.cdd) {
+    .mat-mdc-dialog-content {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-height: none !important;
     }
 
-    button[mat-button]:not([color]) {
-      color: #475569 !important;
+    .mat-mdc-dialog-actions {
+      padding: 0 !important;
+      margin: 0 !important;
+      min-height: unset !important;
+    }
+  }
+
+  // Comment dialog (clock out, etc.)
+  &:has(.comment-dialog) {
+    .comment-dialog-body {
+      padding: 1.25rem 1.5rem 1.5rem !important;
     }
 
-    button[mat-raised-button],
-    button[color='primary'] {
-      background: #2563eb !important;
-      color: #ffffff !important;
-      box-shadow: none !important;
+    .mat-mdc-dialog-content {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-height: none !important;
+    }
+
+    .mat-mdc-dialog-actions {
+      padding: 0 !important;
+      margin: 0 !important;
+      min-height: unset !important;
+    }
+  }
+
+  // Material-native dialogs (legacy mat-dialog-title / mat-dialog-actions layout)
+  &:not(:has(.dialog-container)):not(:has(.cdd)):not(:has(.comment-dialog)) {
+    .mat-mdc-dialog-title,
+    [mat-dialog-title] {
+      margin: 0 !important;
+      padding: 1.5rem !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      background: rgba(255, 255, 255, 0.8) !important;
+      font-size: 1.125rem !important;
+      font-weight: 700 !important;
+      color: #0f172a !important;
+    }
+
+    .mat-mdc-dialog-content,
+    mat-dialog-content {
+      padding: 1.5rem !important;
+      margin: 0 !important;
+      max-height: none !important;
+      background: #f8fafc !important;
+
+      .mat-mdc-text-field-wrapper {
+        background: #ffffff !important;
+      }
+
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #e2e8f0 !important;
+      }
+
+      .mat-focused {
+        .mdc-notched-outline__leading,
+        .mdc-notched-outline__notch,
+        .mdc-notched-outline__trailing {
+          border-color: #2563eb !important;
+        }
+      }
+    }
+
+    .mat-mdc-dialog-actions,
+    mat-dialog-actions {
+      padding: 1.25rem 1.5rem !important;
+      margin: 0 !important;
+      min-height: unset !important;
+      border-top: 1px solid #e2e8f0 !important;
+      background: #f8fafc !important;
+      gap: 0.75rem !important;
+
+      button {
+        height: 2.5rem !important;
+        border-radius: 0.5rem !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+      }
+
+      button[mat-button]:not([color]) {
+        color: #475569 !important;
+      }
+
+      button[mat-raised-button],
+      button[color='primary'] {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        box-shadow: none !important;
+      }
     }
   }
 

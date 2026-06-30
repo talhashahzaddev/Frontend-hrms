@@ -41,7 +41,7 @@ import { SelectItem } from 'primeng/api';
       </div>
 
       <!-- BODY — same padding/scroll as Create Shift -->
-      <mat-dialog-content class="dialog-body">
+      <div class="dialog-body">
         <!-- Rejection Reason Banner -->
         @if (day.rejectionReason) {
           <div class="rejection-banner">
@@ -210,7 +210,7 @@ import { SelectItem } from 'primeng/api';
         @if (error()) {
           <div class="error-text">{{ error() }}</div>
         }
-      </mat-dialog-content>
+      </div>
 
       <!-- FOOTER — Cancel (stroked) + Save Draft (stroked) + Submit (flat) like shift's Cancel + Create -->
       <div class="dialog-footer">

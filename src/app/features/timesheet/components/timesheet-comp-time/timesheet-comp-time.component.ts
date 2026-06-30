@@ -17,7 +17,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   imports: [CommonModule, FormsModule, EmployeeSearchComponent, ButtonModule, InputNumberModule, ProgressSpinnerModule, StatCardComponent, PageHeaderComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Comp Time / Overtime Bank"></app-page-header>
+      <app-page-header matIcon="schedule" title="Comp Time / Overtime Bank" subtitle="Check employee comp time and overtime balances"></app-page-header>
 
       <div class="ts-card" style="margin-bottom: var(--ts-space-5);">
         <div class="ts-form-row">

@@ -19,7 +19,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
   imports: [CommonModule, FormsModule, RouterModule, MatSnackBarModule, TableModule, ButtonModule, DropdownModule, ProgressSpinnerModule, PageHeaderComponent, StatusBadgeComponent, EmptyStateComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Payroll Export">
+      <app-page-header matIcon="download" title="Payroll Export" subtitle="Export finalized period data for payroll processing">
         <div actions>
           @if (summary()) {
             <p-button label="Export CSV" icon="pi pi-download" styleClass="p-button-success" (click)="exportCSV()"></p-button>
@@ -27,10 +27,14 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
         </div>
       </app-page-header>
 
-      <div class="ts-form-group" style="max-width: 480px; margin-bottom: var(--ts-space-5);">
-        <label class="ts-label">Select Finalized Period</label>
-        <p-dropdown [options]="periodOptions()" [(ngModel)]="selectedPeriodId" optionLabel="label" optionValue="value"
-          placeholder="— Choose a period —" (onChange)="loadSummary()" styleClass="ts-payroll-dropdown"></p-dropdown>
+      <div class="filters-section">
+        <div class="filters-row">
+          <div class="ts-form-group" style="margin: 0; min-width: 280px; flex: 1;">
+            <label class="field-label">Select Finalized Period</label>
+            <p-dropdown class="ts-field-full" [options]="periodOptions()" [(ngModel)]="selectedPeriodId" optionLabel="label" optionValue="value"
+              placeholder="— Choose a period —" (onChange)="loadSummary()" styleClass="ts-payroll-dropdown"></p-dropdown>
+          </div>
+        </div>
       </div>
 
       @if (loading) {

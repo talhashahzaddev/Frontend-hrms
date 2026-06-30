@@ -1,147 +1,222 @@
-// ═══ Timesheet Dialog Styles ═══════════════════════════════════════════════════
-// Scoped to timesheet dialog containers.
-// Matches the Shift Management module's create-shift dialog styling.
+// PrimeNG dialogs in Timesheet — matches Attendance MatDialog (create-shift reference)
 
-// ── PrimeNG Dialog Overrides (timesheet-scoped) ──────────────────────────────
-// The global .p-dialog override in styles.scss already handles general styling.
-// These additions ensure timesheet dialogs match the shift module exactly.
+$ad-primary: #2563eb;
+$ad-primary-hover: #1d4ed8;
+$ad-text-primary: #0f172a;
+$ad-text-secondary: #64748b;
+$ad-text-label: #475569;
+$ad-border: #e2e8f0;
+$ad-surface: #f8fafc;
+$ad-danger: #dc2626;
+$ad-text-muted: #94a3b8;
 
-.ts-page-layout .p-dialog,
-app-timesheet-correction-dialog .p-dialog,
-.p-dialog.ts-dialog {
+// Full-viewport mask — must sit above sidebar/header (dialogs append to body)
+.p-dialog-mask.p-component-overlay {
+  z-index: 1999 !important;
+  background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+// ── Attendance-style PrimeNG dialog shell ─────────────────────────────────────
+.p-dialog.ts-attendance-dialog {
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  font-family: 'Inter', sans-serif !important;
+
   .p-dialog-header {
-    padding: 16px 20px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 1.5rem !important;
+    border-bottom: 1px solid $ad-border !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
 
     .p-dialog-title {
-      margin: 0 !important;
-      font-size: 16px !important;
+      font-size: 1.125rem !important;
       font-weight: 700 !important;
-      color: #0f172a !important;
+      color: $ad-text-primary !important;
+      line-height: 1.3 !important;
+    }
+
+    .p-dialog-header-icons .p-dialog-header-icon,
+    .p-dialog-header-icons .p-dialog-header-close {
+      width: 2rem !important;
+      height: 2rem !important;
+      color: $ad-text-muted !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0.5rem !important;
+      box-shadow: none !important;
+      transition: background 0.15s, color 0.15s;
+
+      .p-dialog-header-close-icon,
+      .p-icon,
+      svg {
+        color: $ad-text-muted !important;
+        fill: currentColor;
+      }
+
+      &:hover,
+      &:enabled:hover {
+        background: $ad-surface !important;
+        color: $ad-text-label !important;
+
+        .p-dialog-header-close-icon,
+        .p-icon,
+        svg {
+          color: $ad-text-label !important;
+        }
+      }
+
+      &:focus,
+      &:focus-visible {
+        box-shadow: none !important;
+        outline: none !important;
+      }
     }
   }
 
   .p-dialog-content {
-    padding: 24px !important;
-    overflow-y: auto;
+    padding: 1.5rem !important;
+    background: $ad-surface !important;
+    overflow-y: auto !important;
+    max-height: calc(90vh - 140px) !important;
   }
 
   .p-dialog-footer {
-    padding: 16px 24px !important;
-    border-top: 1px solid #f1f5f9 !important;
-    background: #f8fafc !important;
     display: flex !important;
     justify-content: flex-end !important;
-    gap: 10px !important;
-
-    .p-button {
-      height: 42px !important;
-      border-radius: 10px !important;
-      font-weight: 600 !important;
-      font-size: 14px !important;
-      padding: 0 24px !important;
-    }
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 1.25rem 1.5rem !important;
+    border-top: 1px solid $ad-border !important;
+    background: $ad-surface !important;
   }
 }
 
-// ── Angular Material Dialog Overrides (for correction/allocation dialogs) ─────
-:host ::ng-deep .mat-mdc-dialog-container {
-  border-radius: 16px !important;
-  overflow: hidden !important;
-
-  .mat-mdc-dialog-surface {
-    border-radius: 16px !important;
-    overflow: hidden !important;
-  }
-
-  .mat-mdc-dialog-content {
-    padding: 0 !important;
+.p-dialog.ts-attendance-dialog .p-dialog-header {
+  .p-dialog-header-icons {
+    align-self: flex-start;
+    margin-top: 0.125rem;
   }
 }
 
-// ── Dialog Header Pattern (icon + title + close button) ──────────────────────
-// Used in the correction dialog and any future MD dialog in the timesheet module.
-
-.ts-dialog-header {
+// Custom header block inside pTemplate="header"
+.ts-dialog-header-block {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f1f5f9;
+  gap: 1rem;
+  width: 100%;
 
-  .ts-dialog-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .ts-dialog-header-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: rgba(91, 91, 230, 0.1);
+  .header-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: #eff6ff;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #6c5ce7;
-    }
-
-    i.pi {
-      font-size: 18px;
-      color: #6c5ce7;
+    i, mat-icon {
+      font-size: 1.125rem;
+      color: $ad-primary;
     }
   }
 
-  .ts-dialog-title {
+  .header-info { min-width: 0; }
+
+  .header-title {
     margin: 0;
-    font-size: 16px;
+    font-size: 1.125rem;
     font-weight: 700;
-    color: #0f172a;
+    color: $ad-text-primary;
   }
 
-  .ts-dialog-close {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .header-subtitle {
+    margin: 0.125rem 0 0;
+    font-size: 0.8125rem;
+    color: $ad-text-secondary;
+  }
+}
+
+// Dialog footer buttons — same as attendance _attendance-dialog.scss
+.p-dialog.ts-attendance-dialog .p-dialog-footer,
+.dialog-footer {
+  .btn-cancel,
+  .btn-save,
+  .btn-submit,
+  .btn-delete {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem;
+    min-width: 100px;
+    height: 2.5rem !important;
+    line-height: 1 !important;
+    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap;
+    padding: 0 1.25rem !important;
     cursor: pointer;
-    color: #94a3b8;
-    transition: all 0.15s ease;
+    font-family: inherit;
+    transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
 
-    &:hover {
-      background: #f1f5f9;
-      color: #475569;
+  .btn-cancel {
+    color: $ad-text-label !important;
+    border: 1px solid $ad-border !important;
+    background: #ffffff !important;
+
+    &:hover:not(:disabled) {
+      background: #f1f5f9 !important;
+      color: $ad-text-primary !important;
+    }
+  }
+
+  .btn-save,
+  .btn-submit {
+    background: $ad-primary !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    &:hover:not(:disabled) {
+      background: $ad-primary-hover !important;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2) !important;
     }
 
-    mat-icon, i {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+
+  .btn-delete {
+    background: $ad-danger !important;
+    color: #ffffff !important;
+    border: none !important;
+
+    &:hover:not(:disabled) {
+      background: #b91c1c !important;
+      box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2) !important;
     }
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 }
 
-// ── Dialog Body ──────────────────────────────────────────────────────────────
-.ts-dialog-body {
-  padding: 24px;
-  overflow-y: auto;
-}
-
-// ── Dialog Footer ────────────────────────────────────────────────────────────
-.ts-dialog-footer {
+// Scope preview info box in period create dialog
+.ts-scope-preview {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 16px 24px;
-  border-top: 1px solid #f1f5f9;
-  background: #f8fafc;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #eff6ff;
+  border-radius: 0.5rem;
+  border-left: 4px solid $ad-primary;
+  font-size: 0.8125rem;
+  color: $ad-text-label;
+  margin-top: 0.5rem;
+
+  i { color: $ad-primary; flex-shrink: 0; margin-top: 1px; }
 }

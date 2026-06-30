@@ -579,6 +579,41 @@ $slate-900: #0f172a;
     .table-container {
       overflow-x: auto;
 
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        background: rgba(248, 250, 252, 0.5);
+        border-bottom: 1px solid $slate-200;
+
+        .section-title {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 700;
+          color: $slate-900;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          mat-icon {
+            color: $primary;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .results-badge {
+          font-size: 12px;
+          font-weight: 600;
+          padding: 4px 12px;
+          border-radius: 9999px;
+          background: rgba(37, 99, 235, 0.1);
+          color: $primary;
+        }
+      }
+
       .attendance-table {
         width: 100%;
         .location-line {

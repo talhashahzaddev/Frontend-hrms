@@ -18,7 +18,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   imports: [CommonModule, FormsModule, RouterModule, ButtonModule, InputNumberModule, InputSwitchModule, ProgressSpinnerModule, MessageModule, PageHeaderComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Timesheet Configuration"></app-page-header>
+      <app-page-header matIcon="settings" title="Timesheet Configuration" subtitle="Workflow rules, thresholds, and overtime multipliers"></app-page-header>
 
       @if (loading) {
         <div class="ts-loading"><p-progressSpinner></p-progressSpinner></div>

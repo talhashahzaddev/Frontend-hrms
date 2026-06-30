@@ -1,11 +1,11 @@
-// ═══ Design Tokens ═══════════════════════════════════════════════════════════
+// ═══ Design Tokens — aligned with Attendance module (blue #2563eb / slate) ═══
 :root {
   // Primary
-  --ts-primary: #1E3A5F;
-  --ts-primary-light: #2D7DD2;
-  --ts-primary-hover: #162D4A;
-  --ts-primary-bg: #EBF2FA;
-  --ts-primary-bg-light: #EFF6FF;
+  --ts-primary: #2563eb;
+  --ts-primary-light: #2563eb;
+  --ts-primary-hover: #1d4ed8;
+  --ts-primary-bg: #eff6ff;
+  --ts-primary-bg-light: #f8fafc;
 
   // Semantic
   --ts-success: #16A34A;
@@ -15,18 +15,18 @@
   --ts-danger: #DC2626;
   --ts-danger-bg: #FEE2E2;
 
-  // Neutrals
-  --ts-bg: #F4F6F9;
+  // Neutrals (slate palette)
+  --ts-bg: #f8fafc;
   --ts-card: #FFFFFF;
-  --ts-border: #E0E4EA;
-  --ts-border-light: #F3F4F6;
-  --ts-border-focus: #2D7DD2;
+  --ts-border: #e2e8f0;
+  --ts-border-light: #f1f5f9;
+  --ts-border-focus: #2563eb;
 
   // Text
-  --ts-text: #1F2937;
-  --ts-text-secondary: #374151;
-  --ts-text-muted: #6B7280;
-  --ts-text-subtle: #9CA3AF;
+  --ts-text: #0f172a;
+  --ts-text-secondary: #475569;
+  --ts-text-muted: #64748b;
+  --ts-text-subtle: #94a3b8;
   --ts-text-inverse: #FFFFFF;
 
   // Spacing (8px grid)
@@ -44,7 +44,7 @@
   --ts-radius-sm: 4px;
   --ts-radius: 6px;
   --ts-radius-lg: 8px;
-  --ts-radius-xl: 10px;
+  --ts-radius-xl: 12px;
   --ts-radius-full: 9999px;
 
   // Shadows
@@ -52,37 +52,32 @@
   --ts-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --ts-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.1);
 
-  // Status colors (mapped to spec)
-  --ts-status-draft: #6B7280;
-  --ts-status-inprogress: #2D7DD2;
+  // Status colors
+  --ts-status-draft: #64748b;
+  --ts-status-inprogress: #2563eb;
   --ts-status-submitted: #D97706;
-  --ts-status-underreview: #7C3AED;
+  --ts-status-underreview: #2563eb;
   --ts-status-approved: #16A34A;
   --ts-status-finalized: #16A34A;
   --ts-status-locked: #DC2626;
-  --ts-status-archived: #9CA3AF;
+  --ts-status-archived: #94a3b8;
 
-  // ═══ Timesheet Module Scoped Colors ════════════════════════════════════════
-  // These override the defaults above ONLY within .ts-page-layout containers
-  // so the timesheet module uses the same purple as the Shift Management module
-  // while the sidebar and other modules keep the original --ts-primary.
-
-  // Layout
   --ts-header-height: 56px;
   --ts-sidebar-width: 260px;
 }
 
-// ═══ Timesheet Module Color Scope ══════════════════════════════════════════════
-// Override --ts-primary ONLY inside timesheet pages so PrimeNG buttons/dialogs
-// in this module use the same purple (#5b5be6) as the Shift Management module.
-// Other modules (sidebar, attendance dashboard, etc.) keep --ts-primary: #1E3A5F.
+// Timesheet pages + employee grid + MatDialog hosts
 .ts-page-layout,
+.period-detail-layout,
 app-timesheet-correction-dialog,
 app-time-allocation-dialog {
-  --ts-primary: #5b5be6;
-  --ts-primary-light: #6C5CE7;
-  --ts-primary-hover: #4a4ad4;
-  --ts-primary-bg: #f0eefe;
-  --ts-primary-bg-light: #f5f3ff;
-  --ts-border-focus: #6C5CE7;
+  --ts-primary: #2563eb;
+  --ts-primary-light: #2563eb;
+  --ts-primary-hover: #1d4ed8;
+  --ts-primary-bg: #eff6ff;
+  --ts-primary-bg-light: #f8fafc;
+  --ts-border-focus: #2563eb;
+  --ts-bg: #f8fafc;
+  --ts-border: #e2e8f0;
+  --ts-border-light: #f1f5f9;
 }

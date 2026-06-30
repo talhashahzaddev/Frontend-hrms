@@ -107,11 +107,11 @@ export class TimesheetAuditTimelineComponent implements OnInit {
   loading = signal(true);
 
   private actionConfig: Record<string, { icon: string; iconClass: string; label: string; colorVar: string }> = {
-    'transition':          { icon: 'pi-arrow-right-arrow-left', iconClass: '', label: 'Status Transition', colorVar: '#4D7DF5' },
+    'transition':          { icon: 'pi-arrow-right-arrow-left', iconClass: '', label: 'Status Transition', colorVar: '#2563eb' },
     'CorrectionApproved':  { icon: 'pi-check-circle',          iconClass: '', label: 'Correction Approved', colorVar: '#16A34A' },
     'CorrectionRejected':  { icon: 'pi-times-circle',          iconClass: '', label: 'Correction Rejected', colorVar: '#DC2626' },
     'OverrideApplied':     { icon: 'pi-pencil',                iconClass: '', label: 'Manager Override', colorVar: '#D97706' },
-    'Finalized':           { icon: 'pi-lock',                  iconClass: '', label: 'Timesheet Finalized', colorVar: '#7C3AED' },
+    'Finalized':           { icon: 'pi-lock',                  iconClass: '', label: 'Timesheet Finalized', colorVar: '#2563eb' },
     'Locked':              { icon: 'pi-lock',                  iconClass: '', label: 'Timesheet Locked', colorVar: '#DC2626' },
     'ReopenRequested':     { icon: 'pi-undo',                  iconClass: '', label: 'Reopen Requested', colorVar: '#D97706' },
   };

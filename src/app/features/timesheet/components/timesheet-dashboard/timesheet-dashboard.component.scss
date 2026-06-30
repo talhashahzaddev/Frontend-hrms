@@ -8,6 +8,12 @@
   margin-bottom: var(--ts-space-6);
 }
 
+@media (min-width: 1920px) {
+  .ts-metrics-grid {
+    gap: 1.5rem;
+  }
+}
+
 .ts-util-bar {
   display: flex;
   align-items: center;

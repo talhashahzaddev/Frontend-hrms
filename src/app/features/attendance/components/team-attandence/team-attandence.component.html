@@ -349,7 +349,15 @@
     </div>
 
     <div *ngIf="!isLoading" class="table-container">
-      <h3 class="table-title">Team Attendance</h3>
+      <div class="section-header">
+        <h3 class="section-title">
+          <mat-icon>list_alt</mat-icon>
+          Attendance Records
+        </h3>
+        <span class="results-badge" *ngIf="filteredTeamAttendance.length > 0">
+          Showing {{ filteredTeamAttendance.length }} results
+        </span>
+      </div>
       <table mat-table [dataSource]="filteredTeamAttendance" class="attendance-table">
 
         <!-- Employee Column -->

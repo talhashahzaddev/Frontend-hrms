@@ -230,11 +230,22 @@ import { AuthService } from '../../../../core/services/auth.service';
       </div>
     </div>
 
-    <!-- Audit Timeline Dialog — content is lazy to avoid API call on page load -->
-    <p-dialog header="Audit History" [(visible)]="showAuditTimeline" [modal]="true" [style]="{width: '640px', 'max-height': '80vh', 'border-radius': '10px'}">
+    <p-dialog [(visible)]="showAuditTimeline" [modal]="true" [draggable]="false" appendTo="body" [style]="{width: '640px', 'max-width': '95vw'}" styleClass="ts-attendance-dialog">
+      <ng-template pTemplate="header">
+        <div class="ts-dialog-header-block">
+          <div class="header-icon"><i class="pi pi-history"></i></div>
+          <div class="header-info">
+            <h2 class="header-title">Audit History</h2>
+            <p class="header-subtitle">Timeline of changes for this period</p>
+          </div>
+        </div>
+      </ng-template>
       @if (showAuditTimeline) {
         <app-timesheet-audit-timeline [timesheetId]="periodId"></app-timesheet-audit-timeline>
       }
+      <ng-template pTemplate="footer">
+        <button type="button" class="btn-cancel" (click)="showAuditTimeline = false">Close</button>
+      </ng-template>
     </p-dialog>
   `,
   styleUrls: ['./timesheet-employee-grid.component.scss']
@@ -251,7 +262,7 @@ export class TimesheetEmployeeGridComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   periodId = '';
 
-  readonly avatarColors = ['#DBEAFE', '#DCFCE7', '#FEF3C7', '#FCE7F3', '#EDE9FE', '#FFE4E6'];
+  readonly avatarColors = ['#DBEAFE', '#DCFCE7', '#FEF3C7', '#FCE7F3', '#EFF6FF', '#FFE4E6'];
 
   private authService = inject(AuthService);
 
@@ -336,6 +347,8 @@ export class TimesheetEmployeeGridComponent implements OnInit {
     if (this.isPeriodLocked()) return;  // can't correct locked periods
     const dialogRef = this.dialog.open(TimesheetCorrectionDialog, {
       width: '480px',
+      maxHeight: '90vh',
+      panelClass: ['attendance-dialog-panel'],
       data: { day, periodId: this.periodId }
     });
     dialogRef.afterClosed().subscribe((result: { submitted: boolean; status: string } | undefined) => {
@@ -363,6 +376,8 @@ export class TimesheetEmployeeGridComponent implements OnInit {
     if (!emp) return;
     const dialogRef = this.dialog.open(TimeAllocationDialog, {
       width: '800px',
+      maxHeight: '90vh',
+      panelClass: ['attendance-dialog-panel'],
       data: {
         timesheetId: this.periodId,
         employeeId: emp.employeeId,
