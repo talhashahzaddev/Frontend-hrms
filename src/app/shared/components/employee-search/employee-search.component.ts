@@ -34,12 +34,13 @@ import { Employee } from '../../../core/models/employee.models';
     </div>
   `,
   styles: [`
-    .employee-search { position: relative; }
+    :host { display: block; width: 100%; }
+    .employee-search { position: relative; width: 100%; }
     .search-input {
-      width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px;
-      font-size: 0.875rem; box-sizing: border-box;
+      width: 100%; padding: 8px 12px; border: 1px solid var(--ts-border, #e2e8f0); border-radius: 6px;
+      font-size: 0.875rem; box-sizing: border-box; height: 40px;
     }
-    .search-input:focus { border-color: #1976d2; outline: none; box-shadow: 0 0 0 2px rgba(25,118,210,0.1); }
+    .search-input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
     .dropdown {
       position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
       background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;

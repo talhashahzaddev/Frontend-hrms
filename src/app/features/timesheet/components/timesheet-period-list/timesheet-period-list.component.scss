@@ -115,3 +115,19 @@
   flex: 1;
   height: 40px !important;
 }
+
+:host ::ng-deep .p-selectbutton .p-button.p-highlight,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight:hover,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .p-selectbutton .p-button.p-highlight .pi,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight .p-button-label,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight span {
+  color: #2563eb !important;
+}

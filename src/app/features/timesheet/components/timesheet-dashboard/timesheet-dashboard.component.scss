@@ -14,6 +14,12 @@
   }
 }
 
+:host ::ng-deep .ts-period-filter {
+  min-width: 260px !important;
+  width: 100%;
+  max-width: 320px;
+}
+
 .ts-util-bar {
   display: flex;
   align-items: center;
@@ -36,4 +42,19 @@
 
 @media (max-width: 1280px) {
   .ts-metrics-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+:host ::ng-deep .ts-dashboard-table {
+  .p-datatable-thead > tr > th {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    background: transparent !important;
+  }
+  .p-datatable-tbody > tr > td {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: none !important;
+  }
 }

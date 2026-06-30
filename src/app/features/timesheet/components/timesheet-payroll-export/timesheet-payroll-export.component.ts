@@ -49,10 +49,10 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 
         <div class="ts-card ts-table-card">
           <p-table [value]="summary()?.employees ?? []" [tableStyle]="{'width': '100%'}" [paginator]="true" [rows]="20" [rowsPerPageOptions]="[10,20,50]"
-                   styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines">
+                   styleClass="ts-payroll-table">
             <ng-template pTemplate="header">
               <tr>
-                <th>Employee</th>
+                <th style="padding-left: 1.5rem;">Employee</th>
                 <th style="text-align: center;">Present</th>
                 <th style="text-align: center;">Absent</th>
                 <th style="text-align: center;">Late</th>
@@ -63,30 +63,46 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
                 <th style="text-align: center;">OT Hol</th>
                 <th style="text-align: center;">Hours</th>
                 <th style="text-align: center;">Att %</th>
-                <th>Consumed</th>
+                <th style="padding-right: 1.5rem;">Consumed</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-emp>
               <tr>
-                <td>
-                  <span class="ts-emp-name">{{ emp.employeeName }}</span>
-                  <span class="ts-emp-code">{{ emp.employeeCode }}</span>
+                <td style="padding-left: 1.5rem;">
+                  <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 600; color: #1e293b;">
+                      <i class="pi pi-user" style="color: #94a3b8; font-size: 0.8rem; margin-right: 6px;"></i>{{ emp.employeeName }}
+                    </span>
+                    <span style="font-size: 0.75rem; color: #64748b; margin-left: 18px;">{{ emp.employeeCode }}</span>
+                  </div>
                 </td>
-                <td style="text-align: center;" class="ts-present">{{ emp.presentDays }}</td>
-                <td style="text-align: center;" class="ts-absent">{{ emp.absentDays }}</td>
-                <td style="text-align: center;" class="ts-late">{{ emp.lateDays }}</td>
-                <td style="text-align: center;">{{ emp.halfDays }}</td>
-                <td style="text-align: center;" class="ts-leave">{{ emp.leaveDaysTotal }}</td>
-                <td style="text-align: center;">{{ emp.regularOvertimeHours }}</td>
-                <td style="text-align: center;">{{ emp.weekendOvertimeHours }}</td>
-                <td style="text-align: center;">{{ emp.holidayOvertimeHours }}</td>
-                <td style="text-align: center; font-weight: 500;">{{ emp.totalHoursWorked }}</td>
-                <td style="text-align: center; font-weight: 600;">{{ emp.attendancePercentage }}%</td>
-                <td>{{ emp.isConsumedByPayroll ? '✓ Yes' : '—' }}</td>
+                <td style="text-align: center; color: #0f172a; font-weight: 500;">{{ emp.presentDays }}</td>
+                <td style="text-align: center; color: #dc2626; font-weight: 500;">{{ emp.absentDays }}</td>
+                <td style="text-align: center; color: #d97706; font-weight: 500;">{{ emp.lateDays }}</td>
+                <td style="text-align: center; color: #0f172a;">{{ emp.halfDays }}</td>
+                <td style="text-align: center; color: #0284c7; font-weight: 500;">{{ emp.leaveDaysTotal }}</td>
+                <td style="text-align: center; color: #475569;">{{ emp.regularOvertimeHours }}h</td>
+                <td style="text-align: center; color: #475569;">{{ emp.weekendOvertimeHours }}h</td>
+                <td style="text-align: center; color: #475569;">{{ emp.holidayOvertimeHours }}h</td>
+                <td style="text-align: center; font-weight: 600; color: #0f172a;">{{ emp.totalHoursWorked }}</td>
+                <td style="text-align: center;">
+                  <span [style.color]="emp.attendancePercentage < 80 ? '#dc2626' : (emp.attendancePercentage < 100 ? '#d97706' : '#16a34a')" style="font-weight: 600; padding: 4px 8px; background: #f8fafc; border-radius: 6px; font-size: 0.8125rem;">
+                    {{ emp.attendancePercentage }}%
+                  </span>
+                </td>
+                <td style="padding-right: 1.5rem;">
+                  @if (emp.isConsumedByPayroll) {
+                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #dcfce7; color: #16a34a; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                      <i class="pi pi-check-circle" style="font-size: 0.7rem;"></i> Yes
+                    </span>
+                  } @else {
+                    <span style="color: #94a3b8;">—</span>
+                  }
+                </td>
               </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
-              <tr><td colspan="12" style="text-align: center; padding: var(--ts-space-8);">No payroll data available</td></tr>
+              <tr><td colspan="12" style="text-align: center; padding: 4rem; color: #94a3b8; font-size: 0.9rem;">No payroll data available</td></tr>
             </ng-template>
           </p-table>
         </div>

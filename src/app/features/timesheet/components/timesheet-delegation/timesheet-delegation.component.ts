@@ -51,7 +51,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 
       <div class="ts-section">
         <h3 class="ts-section-title">Create Delegation</h3>
-        <div class="ts-card">
+        <div class="ts-card" style="max-width: 600px;">
           <div class="ts-form-group">
             <label class="field-label">Delegate To</label>
             <app-employee-search (employeeSelected)="onEmployeeSelected($event)"></app-employee-search>
