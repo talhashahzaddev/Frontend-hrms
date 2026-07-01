@@ -14,13 +14,14 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   standalone: true,
   imports: [CommonModule, FormsModule, DropdownModule, TableModule, ProgressSpinnerModule, StatCardComponent, PageHeaderComponent],
   template: `
-    <div class="ts-page-layout">
+    <div class="ts-page-layout ts-dashboard-compact">
       <app-page-header matIcon="analytics" title="Timesheet Analytics" subtitle="Organization-wide utilization and overtime insights"></app-page-header>
 
       <div class="filters-section">
         <div class="filters-row">
           <p-dropdown [options]="periodOptions()" [(ngModel)]="selectedPeriodId" optionLabel="label" optionValue="value"
-            placeholder="All Periods" [showClear]="true" (onChange)="loadDashboard()" styleClass="ts-period-filter"></p-dropdown>
+            placeholder="All Periods" [showClear]="!!selectedPeriodId" (onChange)="loadDashboard()"
+            appendTo="body" styleClass="ts-period-filter"></p-dropdown>
         </div>
       </div>
 
@@ -40,20 +41,20 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
             <p-table [value]="dashboard()?.departmentUtilization ?? []" [tableStyle]="{'width': '100%'}" styleClass="ts-dashboard-table">
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="padding-left: 1rem;">Department</th>
+                  <th>Department</th>
                   <th pSortableColumn="scheduled">Scheduled <p-sortIcon field="scheduled"></p-sortIcon></th>
                   <th pSortableColumn="actual">Actual <p-sortIcon field="actual"></p-sortIcon></th>
-                  <th pSortableColumn="utilizationPercent" style="padding-right: 1rem;">Utilization <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
+                  <th pSortableColumn="utilizationPercent">Utilization <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-d>
                 <tr>
-                  <td style="padding-left: 1rem; font-weight: 600; color: #1e293b;">
-                    <i class="pi pi-building" style="color: #94a3b8; margin-right: 8px;"></i>{{ d.department }}
+                  <td class="ts-cell-dept">
+                    <i class="pi pi-building"></i>{{ d.department }}
                   </td>
-                  <td style="color: #64748b;">{{ d.scheduled }}h</td>
-                  <td style="color: #64748b;">{{ d.actual }}h</td>
-                  <td style="padding-right: 1rem;">
+                  <td class="ts-cell-muted">{{ d.scheduled }}h</td>
+                  <td class="ts-cell-muted">{{ d.actual }}h</td>
+                  <td>
                     <div class="ts-util-bar">
                       <div class="ts-util-fill" [style.width.%]="d.utilizationPercent" [style.background]="utilColor(d.utilizationPercent)"></div>
                       <span class="ts-util-label" [style.color]="utilColor(d.utilizationPercent)">{{ d.utilizationPercent }}%</span>
@@ -62,7 +63,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
-                <tr><td colspan="4" style="text-align: center; padding: 3rem; color: #94a3b8;">No utilization data available</td></tr>
+                <tr class="ts-empty-row"><td colspan="4">No utilization data available</td></tr>
               </ng-template>
             </p-table>
           </div>
@@ -74,23 +75,23 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
             <p-table [value]="dashboard()?.utilizationTrend ?? []" [tableStyle]="{'width': '100%'}" styleClass="ts-dashboard-table">
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="padding-left: 1rem;">Period</th>
+                  <th>Period</th>
                   <th pSortableColumn="utilizationPercent">Utilization <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
-                  <th pSortableColumn="overtimePercent" style="padding-right: 1rem;">Overtime <p-sortIcon field="overtimePercent"></p-sortIcon></th>
+                  <th pSortableColumn="overtimePercent">Overtime <p-sortIcon field="overtimePercent"></p-sortIcon></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-t>
                 <tr>
-                  <td style="padding-left: 1rem; font-weight: 500; color: #334155;">
-                    <i class="pi pi-calendar" style="color: #cbd5e1; margin-right: 8px;"></i>{{ t.period }}
+                  <td class="ts-cell-period">
+                    <i class="pi pi-calendar"></i>{{ t.period }}
                   </td>
                   <td>
-                    <span [style.color]="t.utilizationPercent < 80 ? '#d97706' : '#16a34a'" style="font-weight: 600;">
+                    <span class="ts-pct-good" [style.color]="t.utilizationPercent < 80 ? '#d97706' : '#16a34a'">
                       {{ t.utilizationPercent }}%
                     </span>
                   </td>
-                  <td style="padding-right: 1rem;">
-                    <span [style.color]="t.overtimePercent > 0 ? '#dc2626' : '#64748b'" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #f8fafc; border-radius: 6px; font-size: 0.8125rem;">
+                  <td>
+                    <span class="ts-ot-badge" [style.color]="t.overtimePercent > 0 ? '#dc2626' : '#64748b'">
                       <i class="pi" [ngClass]="t.overtimePercent > 0 ? 'pi-arrow-up' : 'pi-minus'"></i>
                       {{ t.overtimePercent }}%
                     </span>
@@ -98,7 +99,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
-                <tr><td colspan="3" style="text-align: center; padding: 3rem; color: #94a3b8;">No trend data available</td></tr>
+                <tr class="ts-empty-row"><td colspan="3">No trend data available</td></tr>
               </ng-template>
             </p-table>
           </div>
@@ -110,26 +111,26 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
             <p-table [value]="dashboard()?.overtimeReasons ?? []" [tableStyle]="{'width': '100%'}" styleClass="ts-dashboard-table">
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="padding-left: 1rem;">Reason</th>
+                  <th>Reason</th>
                   <th>Total Hours</th>
-                  <th style="padding-right: 1rem;">Employees</th>
+                  <th>Employees</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-r>
                 <tr>
-                  <td style="padding-left: 1rem;">
-                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #eff6ff; color: #2563eb; border-radius: 20px; font-size: 0.8125rem; font-weight: 500; border: 1px solid #dbeafe;">
-                      <i class="pi pi-tag" style="font-size: 0.75rem;"></i> {{ r.reason }}
+                  <td>
+                    <span class="ts-reason-chip">
+                      <i class="pi pi-tag"></i> {{ r.reason }}
                     </span>
                   </td>
-                  <td style="font-weight: 600; color: #334155;">{{ r.totalHours }} <span style="font-weight: normal; color: #94a3b8; font-size: 0.8125rem;">hrs</span></td>
-                  <td style="padding-right: 1rem; color: #64748b;">
-                    <i class="pi pi-users" style="margin-right: 6px; color: #cbd5e1;"></i>{{ r.employeeCount }}
+                  <td class="ts-hours-val">{{ r.totalHours }} <span class="ts-hours-unit">hrs</span></td>
+                  <td class="ts-emp-count">
+                    <i class="pi pi-users"></i>{{ r.employeeCount }}
                   </td>
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
-                <tr><td colspan="3" style="text-align: center; padding: 3rem; color: #94a3b8;">No overtime data available</td></tr>
+                <tr class="ts-empty-row"><td colspan="3">No overtime data available</td></tr>
               </ng-template>
             </p-table>
           </div>
@@ -142,7 +143,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 export class TimesheetDashboardComponent implements OnInit {
   periods = signal<TimesheetPeriod[]>([]);
   dashboard = signal<TimesheetDashboard | null>(null);
-  selectedPeriodId = '';
+  selectedPeriodId: string | null = null;
   loading = true;
 
   constructor(private api: TimesheetService) {}

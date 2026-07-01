@@ -1,5 +1,99 @@
 @use '../../styles/timesheet-shared';
 
 .ts-table-card {
-  margin-bottom: var(--ts-space-5);
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+:host ::ng-deep .ts-rate-cards-table {
+  .p-datatable-thead > tr > th {
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.6875rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #e2e8f0 !important;
+    background: #f8fafc !important;
+    color: #64748b !important;
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr > td {
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.8125rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    vertical-align: middle;
+    color: #334155;
+  }
+
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: none !important;
+  }
+
+  .p-datatable-tbody > tr:hover > td {
+    background: #f8fafc !important;
+  }
+
+  // Remove striped / gridline defaults
+  &.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) > td,
+  &.p-datatable-gridlines .p-datatable-tbody > tr > td,
+  &.p-datatable-gridlines .p-datatable-thead > tr > th {
+    background: inherit;
+    border-width: 0 0 1px 0 !important;
+  }
+
+  &.p-datatable-gridlines .p-datatable-thead > tr > th {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+
+  .ts-col-num {
+    text-align: right;
+  }
+
+  .ts-cell-name {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.8125rem;
+  }
+
+  .ts-cell-code {
+    color: #64748b;
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .ts-cell-rate {
+    text-align: right;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ts-cell-date {
+    color: #64748b;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
+  .ts-empty-row td {
+    text-align: center;
+    padding: 2rem !important;
+    color: #94a3b8 !important;
+    font-size: 0.8125rem !important;
+  }
+
+  .p-paginator {
+    padding: 0.5rem 0.875rem !important;
+    border-top: 1px solid #f1f5f9;
+    background: #fafafa;
+    font-size: 0.8125rem;
+
+    .p-paginator-element,
+    .p-dropdown-label {
+      font-size: 0.8125rem !important;
+    }
+  }
 }
