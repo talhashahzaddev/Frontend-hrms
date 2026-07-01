@@ -1,28 +1,21 @@
-<div class="restricted-holiday-picker">
-  <!-- Header -->
-  <div class="picker-header">
-    <div class="header-content">
-      <div class="header-text">
-        <h2>My Restricted Holidays</h2>
-        <p class="subtitle">
-          Select from the available restricted holidays for {{ currentYear }}.
-          These are optional holidays you can choose to observe.
-        </p>
+<div class="ts-page-layout">
+
+  <app-page-header
+    matIcon="beach_access"
+    title="My Restricted Holidays"
+    subtitle="Select from the available restricted holidays for {{ currentYear }}. These are optional holidays you can choose to observe.">
+    <div actions class="header-stat-chips">
+      <div class="stat-chip selected">
+        <mat-icon>check_circle</mat-icon>
+        <span>{{ selectedCount() }} Selected</span>
       </div>
-      <div class="header-stats">
-        <div class="stat-chip selected">
-          <mat-icon>check_circle</mat-icon>
-          <span>{{ selectedCount() }} Selected</span>
-        </div>
-        <div class="stat-chip available">
-          <mat-icon>event_available</mat-icon>
-          <span>{{ availableHolidays().length }} Available</span>
-        </div>
+      <div class="stat-chip available">
+        <mat-icon>event_available</mat-icon>
+        <span>{{ availableHolidays().length }} Available</span>
       </div>
     </div>
-  </div>
+  </app-page-header>
 
-  <!-- Loading -->
   @if (loading()) {
     <div class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>
@@ -30,27 +23,28 @@
     </div>
   }
 
-  <!-- Empty State -->
   @if (!loading() && availableHolidays().length === 0) {
-    <div class="empty-state">
-      <mat-icon>beach_access</mat-icon>
+    <div class="empty-state ts-section">
+      <div class="empty-icon-box">
+        <mat-icon>beach_access</mat-icon>
+      </div>
       <h3>No Restricted Holidays</h3>
       <p>There are no restricted holidays available for selection this year.</p>
     </div>
   }
 
-  <!-- Holiday List -->
   @if (!loading() && availableHolidays().length > 0) {
-    <!-- Upcoming Holidays -->
     @if (upcomingHolidays().length > 0) {
-      <div class="section">
-        <h3 class="section-title">
-          <mat-icon>upcoming</mat-icon>
-          Upcoming Holidays
-        </h3>
+      <div class="holiday-section ts-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <mat-icon>upcoming</mat-icon>
+            Upcoming Holidays
+          </h2>
+        </div>
         <div class="holiday-cards">
           @for (holiday of upcomingHolidays(); track holiday.holidayId) {
-            <mat-card class="holiday-card" [class.selected]="isSelected(holiday.holidayId)">
+            <div class="holiday-card" [class.selected]="isSelected(holiday.holidayId)">
               <div class="card-left">
                 <div class="date-badge">
                   <span class="day">{{ holiday.holidayDate | localizedDate:'dd' }}</span>
@@ -82,7 +76,7 @@
                 @if (isSelected(holiday.holidayId)) {
                   <button
                     mat-stroked-button
-                    color="warn"
+                    class="btn-cancel-holiday"
                     (click)="cancelHoliday(getSelectionId(holiday.holidayId)!)"
                     [disabled]="actionLoading() === getSelectionId(holiday.holidayId)">
                     @if (actionLoading() === getSelectionId(holiday.holidayId)) {
@@ -96,8 +90,8 @@
                   </button>
                 } @else {
                   <button
-                    mat-flat-button
-                    color="primary"
+                    mat-raised-button
+                    class="btn-primary"
                     (click)="selectHoliday(holiday.holidayId)"
                     [disabled]="actionLoading() === holiday.holidayId">
                     @if (actionLoading() === holiday.holidayId) {
@@ -111,22 +105,23 @@
                   </button>
                 }
               </div>
-            </mat-card>
+            </div>
           }
         </div>
       </div>
     }
 
-    <!-- Past Holidays -->
     @if (pastHolidays().length > 0) {
-      <div class="section past-section">
-        <h3 class="section-title">
-          <mat-icon>history</mat-icon>
-          Past Holidays
-        </h3>
+      <div class="holiday-section ts-section past-section">
+        <div class="section-header">
+          <h2 class="section-title muted">
+            <mat-icon>history</mat-icon>
+            Past Holidays
+          </h2>
+        </div>
         <div class="holiday-cards">
           @for (holiday of pastHolidays(); track holiday.holidayId) {
-            <mat-card class="holiday-card past" [class.selected]="isSelected(holiday.holidayId)">
+            <div class="holiday-card past" [class.selected]="isSelected(holiday.holidayId)">
               <div class="card-left">
                 <div class="date-badge past">
                   <span class="day">{{ holiday.holidayDate | localizedDate:'dd' }}</span>
@@ -148,7 +143,7 @@
               <div class="card-actions">
                 <span class="past-label">Past</span>
               </div>
-            </mat-card>
+            </div>
           }
         </div>
       </div>
