@@ -26,6 +26,7 @@ import {
 } from '../../../../core/models/leave.models';
 import { User } from '../../../../core/models/auth.models';
 import { ApplyLeaveComponent } from '../apply-leave/apply-leave.component';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 
 
 @Component({
@@ -44,6 +45,7 @@ import { ApplyLeaveComponent } from '../apply-leave/apply-leave.component';
     MatTooltipModule,
     MatMenuModule,
     MatDialogModule,
+    PageHeaderComponent,
   ],
   templateUrl: './leave-dashboard.component.html',
   styleUrls: ['./leave-dashboard.component.scss'],
@@ -117,9 +119,9 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   openLeaveRequestDialog(): void {
     const dialogRef = this.dialog.open(ApplyLeaveComponent, {
       width: '600px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
       disableClose: true,
-      panelClass: 'custom-dialog-container',
+      panelClass: 'attendance-dialog-panel',
       data: { userId: this.currentUser?.userId }
     });
 
@@ -131,9 +133,9 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   editRequest(request: LeaveRequest): void {
     const dialogRef = this.dialog.open(ApplyLeaveComponent, {
       width: '600px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
       disableClose: true,
-      panelClass: 'custom-dialog-container',
+      panelClass: 'attendance-dialog-panel',
       data: { requestId: request.requestId, userId: this.currentUser?.userId }
     });
 
@@ -146,8 +148,8 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
   cancelRequest(request: LeaveRequest): void {
     const dialogRef = this.dialog.open(CancelLeaveDialogComponent, {
       width: '520px',
-      maxWidth: '90vw',
-      panelClass: 'custom-dialog-container',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         leaveTypeName:  request.leaveTypeName,
         leaveTypeColor: this.getLeaveTypeColor(request.leaveTypeId),
@@ -180,7 +182,9 @@ export class LeaveDashboardComponent implements OnInit, OnDestroy {
 
   openDetailsDialog(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         leaveTypeName:   request.leaveTypeName,
         leaveTypeColor:  this.getLeaveTypeColor(request.leaveTypeId),

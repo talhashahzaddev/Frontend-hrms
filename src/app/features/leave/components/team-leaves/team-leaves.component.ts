@@ -33,6 +33,7 @@ import {
 } from '../../../../core/models/leave.models';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 // ── Employee model (from GetEmployeebyOrganization) ──────────────
 export interface EmployeeOption {
   employeeId: string;
@@ -66,7 +67,8 @@ export interface EmployeeOption {
     MatMenuModule,
     MatTabsModule,
     MatDialogModule,
-    MatExpansionModule
+    MatExpansionModule,
+    PageHeaderComponent,
   ],
   templateUrl: './team-leaves.component.html',
   styleUrls: ['./team-leaves.component.scss']
@@ -374,7 +376,9 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open(ApproveLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
@@ -416,7 +420,9 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
@@ -452,7 +458,9 @@ export class TeamLeavesComponent implements OnInit, OnDestroy {
 
   openDetailsDialog(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:    request.employeeName,
         leaveTypeName:   request.leaveTypeName,

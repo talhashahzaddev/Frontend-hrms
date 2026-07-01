@@ -1,15 +1,9 @@
-<div class="team-leaves-container">
+<div class="ts-page-layout">
 
-  <!-- Header Section -->
-  <div class="page-header">
-    <div class="header-content">
-      <h1 class="page-title">Team Leave Management</h1>
-      <p class="page-subtitle">Review and manage your team's leave requests</p>
-    </div>
-  </div>
+  <app-page-header matIcon="groups" title="Team Leave Management" subtitle="Review and manage your team's leave requests">
+  </app-page-header>
 
-  <form [formGroup]="filterForm">
-    <!-- Filters Row -->
+  <form [formGroup]="filterForm" class="ts-section team-leaves-filters">
     <div class="filters-row single-line-filters">
 
       <!-- ── Employee Select2 Dropdown ── -->
@@ -115,7 +109,7 @@
   
 
   <!-- Table Card -->
-  <div class="table-card" style="margin-top: 24px;">
+  <div class="table-card ts-section">
     <div class="table-meta">
       <span class="total-count">{{ totalCount }} leave requests</span>
     </div>
@@ -165,7 +159,7 @@
           <th mat-header-cell *matHeaderCellDef>Duration</th>
           <td mat-cell *matCellDef="let request" class="date-cell">
             {{ request.startDate | localizedDate:'dd-MM-yyyy' }} &ndash; {{ request.endDate | localizedDate:'dd-MM-yyyy' }}
-            <span style="color: #6366f1; font-weight: 600; font-size: 11px; margin-left: 4px;">({{ request.daysRequested }} days)</span>
+            <span class="days-count">({{ request.daysRequested }} days)</span>
           </td>
         </ng-container>
 

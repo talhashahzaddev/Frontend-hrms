@@ -1,0 +1,229 @@
+// Shared styles for approve / reject leave dialogs — matches attendance-dialog (create-shift)
+@use '../../attendance/styles/attendance-dialog' as ad;
+
+:host {
+  @include ad.ad-scroll-host;
+}
+
+@include ad.ad-panel-shell;
+
+.dialog-header .header-icon {
+  &.success {
+    background: #dcfce7;
+    mat-icon { color: #16a34a; }
+  }
+}
+
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.leave-detail-card {
+  background: ad.$ad-input-bg;
+  border: 1px solid ad.$ad-border;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: ad.$ad-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+      color: ad.$ad-primary;
+    }
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem 1rem;
+
+  .detail-field-full { grid-column: 1 / -1; }
+}
+
+.field-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: ad.$ad-text-label;
+  margin-bottom: 0.375rem;
+
+  .required {
+    color: #ef4444;
+    margin-left: 2px;
+  }
+}
+
+.field-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ad.$ad-text-primary;
+  line-height: 1.4;
+}
+
+.field-value-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  background: ad.$ad-surface;
+  border: 1px solid ad.$ad-border;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: ad.$ad-text-primary;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: ad.$ad-text-muted;
+    flex-shrink: 0;
+  }
+}
+
+.leave-type-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: #eff6ff;
+  color: ad.$ad-primary;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.days-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.days-badge.approve {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.days-badge.reject {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid ad.$ad-border;
+  background: ad.$ad-input-bg;
+
+  mat-icon {
+    flex-shrink: 0;
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.125rem;
+  }
+
+  p, span {
+    margin: 0;
+    font-size: 0.875rem;
+    color: ad.$ad-text-label;
+    line-height: 1.55;
+  }
+
+  strong { color: ad.$ad-text-primary; font-weight: 600; }
+
+  &.success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    mat-icon { color: #16a34a; }
+  }
+
+  &.reason {
+    background: ad.$ad-surface;
+    border-left: 3px solid ad.$ad-primary;
+    mat-icon { color: ad.$ad-primary; }
+  }
+}
+
+.form-field-group {
+  margin-bottom: 1rem;
+
+  .mat-field,
+  .textarea-field {
+    width: 100%;
+  }
+}
+
+.quick-reasons {
+  .quick-label {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: ad.$ad-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .quick-chip {
+    height: 2rem;
+    padding: 0 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid ad.$ad-border;
+    background: ad.$ad-input-bg;
+    color: ad.$ad-text-label;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+    &:hover {
+      border-color: ad.$ad-primary;
+      color: ad.$ad-primary;
+      background: #eff6ff;
+    }
+  }
+}
+
+.dialog-footer .btn-save.success {
+  background: #16a34a !important;
+
+  &:hover:not([disabled]) {
+    background: #15803d !important;
+    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+
+    .detail-field-full { grid-column: 1; }
+  }
+}

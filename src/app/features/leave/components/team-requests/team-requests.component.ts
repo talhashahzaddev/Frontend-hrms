@@ -31,6 +31,7 @@ import {
 
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 @Component({
   selector: 'app-team-requests',
   standalone: true,
@@ -48,6 +49,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
     MatFormFieldModule,
     MatInputModule,
     MatPaginatorModule,
+    PageHeaderComponent,
   ],
   templateUrl: './team-requests.component.html',
   styleUrls: ['./team-requests.component.scss'],
@@ -218,7 +220,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   // ✅ Opens ApproveLeaveDialogComponent — API is called only after confirmation
   approveRequest(request: LeaveRequest): void {
     const dialogRef = this.dialog.open(ApproveLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
@@ -251,7 +255,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
   rejectRequest(request: LeaveRequest): void {
     const dialogRef = this.dialog.open(RejectLeaveDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:  request.employeeName,
         leaveTypeName: request.leaveTypeName,
@@ -281,7 +287,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
 
   viewRequestDetails(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:    request.employeeName,
         leaveTypeName:   request.leaveTypeName,
@@ -302,7 +310,9 @@ export class TeamRequestsComponent implements OnInit, OnDestroy {
   // ✅ View Details — always available regardless of status
   openDetailsDialog(request: LeaveRequest): void {
     this.dialog.open(LeaveRequestDetailsDialogComponent, {
-      width: '650px',
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeName:    request.employeeName,
         leaveTypeName:   request.leaveTypeName,

@@ -1,25 +1,11 @@
-<div class="team-requests-container">
+<div class="ts-page-layout">
 
-  <!-- ══ PAGE HEADER — changes based on active tab ══ -->
-  <div class="dashboard-header">
-    <div class="header-left">
-      <div class="header-icon-box" [class.balance-icon]="activeTab === 'balance'">
-        <mat-icon>{{ activeTab === 'balance' ? 'people' : 'pending_actions' }}</mat-icon>
-      </div>
-      <div class="header-text">
-        <h1 class="page-title">
-          {{ activeTab === 'balance' ? 'Team Leave Balance' : 'Pending Approvals' }}
-        </h1>
-        <p class="page-subtitle">
-          {{ activeTab === 'balance'
-            ? 'View remaining leave balances across your team'
-            : 'Review and action your team\'s pending leave requests' }}
-        </p>
-      </div>
-    </div>
-  </div>
+  <app-page-header
+    [matIcon]="activeTab === 'balance' ? 'people' : 'pending_actions'"
+    [title]="activeTab === 'balance' ? 'Team Leave Balance' : 'Pending Approvals'"
+    [subtitle]="activeTab === 'balance' ? 'View remaining leave balances across your team' : 'Review and action your team\'s pending leave requests'">
+  </app-page-header>
 
-  <!-- ══ LOADING STATE ══ -->
   <div *ngIf="isLoading" class="loading-container">
     <mat-spinner diameter="48"></mat-spinner>
     <p>Loading team data...</p>
@@ -27,7 +13,7 @@
 
   <!-- ══ TABS ══ -->
   <ng-container *ngIf="!isLoading">
-    <div class="tabs-wrapper">
+    <div class="tabs-wrapper ts-section">
 
       <!-- Tab Headers -->
       <div class="tab-header-row">
@@ -46,6 +32,7 @@
       <div class="tab-panel" *ngIf="activeTab === 'pending'">
 
         <ng-container *ngIf="pendingApprovals.length > 0; else noPending">
+          <div class="approval-cards-grid">
           <div *ngFor="let request of pendingApprovals" class="approval-card">
 
             <div class="approval-header">
@@ -100,6 +87,7 @@
               </button>
             </div>
 
+          </div>
           </div>
         </ng-container>
 
