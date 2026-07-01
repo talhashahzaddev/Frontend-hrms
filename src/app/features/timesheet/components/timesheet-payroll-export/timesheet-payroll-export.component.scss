@@ -41,3 +41,18 @@
     min-height: 36px !important;
   }
 }
+
+:host ::ng-deep .ts-payroll-table {
+  .p-datatable-thead > tr > th {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    background: transparent !important;
+  }
+  .p-datatable-tbody > tr > td {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: none !important;
+  }
+}

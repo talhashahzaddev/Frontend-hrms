@@ -22,7 +22,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [CommonModule, FormsModule, MatSnackBarModule, ButtonModule, DialogModule, InputTextModule, InputNumberModule, InputSwitchModule, ProgressSpinnerModule, TagModule, PageHeaderComponent, StatusBadgeComponent, EmptyStateComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Projects & Tasks">
+      <app-page-header matIcon="work" title="Projects & Tasks" subtitle="Manage billable projects and task breakdowns">
         <div actions>
           <p-button label="New Project" icon="pi pi-plus" (click)="openProjectDialog(null)"></p-button>
         </div>
@@ -107,40 +107,48 @@ import { AuthService } from '../../../../core/services/auth.service';
       }
     </div>
 
-    <!-- Project Dialog -->
-    <p-dialog [header]="editingProject ? 'Edit Project' : 'New Project'" [(visible)]="showProjectDialog" [modal]="true" [style]="{width: '520px', 'border-radius': '10px'}">
+    <p-dialog [(visible)]="showProjectDialog" [modal]="true" [draggable]="false" appendTo="body" [style]="{width: '600px', 'max-width': '95vw'}" styleClass="ts-attendance-dialog">
+      <ng-template pTemplate="header">
+        <div class="ts-dialog-header-block">
+          <div class="header-icon"><i class="pi pi-briefcase"></i></div>
+          <div class="header-info">
+            <h2 class="header-title">{{ editingProject ? 'Edit Project' : 'New Project' }}</h2>
+            <p class="header-subtitle">Configure project details and billing codes</p>
+          </div>
+        </div>
+      </ng-template>
       <div class="ts-form-group">
-        <label class="ts-label">Project Name *</label>
-        <input pInputText [(ngModel)]="projectForm.projectName" placeholder="e.g. Website Redesign" style="width: 100%" />
+        <label class="field-label">Project Name <span class="required">*</span></label>
+        <input pInputText class="ts-field-full" [(ngModel)]="projectForm.projectName" placeholder="e.g. Website Redesign" />
       </div>
       <div class="ts-form-row">
         <div class="ts-form-group ts-half">
-          <label class="ts-label">Project Code</label>
-          <input pInputText [(ngModel)]="projectForm.projectCode" placeholder="e.g. WEB-001" style="width: 100%" />
+          <label class="field-label">Project Code</label>
+          <input pInputText class="ts-field-full" [(ngModel)]="projectForm.projectCode" placeholder="e.g. WEB-001" />
         </div>
         <div class="ts-form-group ts-half">
-          <label class="ts-label">Client Name</label>
-          <input pInputText [(ngModel)]="projectForm.clientName" placeholder="e.g. Acme Corp" style="width: 100%" />
-        </div>
-      </div>
-      <div class="ts-form-row">
-        <div class="ts-form-group ts-half">
-          <label class="ts-label">Cost Center</label>
-          <input pInputText [(ngModel)]="projectForm.costCenterCode" placeholder="e.g. CC-100" style="width: 100%" />
-        </div>
-        <div class="ts-form-group ts-half">
-          <label class="ts-label">GL Account</label>
-          <input pInputText [(ngModel)]="projectForm.glAccountCode" placeholder="e.g. GL-2000" style="width: 100%" />
+          <label class="field-label">Client Name</label>
+          <input pInputText class="ts-field-full" [(ngModel)]="projectForm.clientName" placeholder="e.g. Acme Corp" />
         </div>
       </div>
       <div class="ts-form-row">
         <div class="ts-form-group ts-half">
-          <label class="ts-label">Start Date</label>
-          <input type="date" [(ngModel)]="projectForm.startDate" pInputText style="width: 100%" />
+          <label class="field-label">Cost Center</label>
+          <input pInputText class="ts-field-full" [(ngModel)]="projectForm.costCenterCode" placeholder="e.g. CC-100" />
         </div>
         <div class="ts-form-group ts-half">
-          <label class="ts-label">End Date</label>
-          <input type="date" [(ngModel)]="projectForm.endDate" pInputText style="width: 100%" />
+          <label class="field-label">GL Account</label>
+          <input pInputText class="ts-field-full" [(ngModel)]="projectForm.glAccountCode" placeholder="e.g. GL-2000" />
+        </div>
+      </div>
+      <div class="ts-form-row">
+        <div class="ts-form-group ts-half">
+          <label class="field-label">Start Date</label>
+          <input type="date" class="ts-field-full" [(ngModel)]="projectForm.startDate" pInputText />
+        </div>
+        <div class="ts-form-group ts-half">
+          <label class="field-label">End Date</label>
+          <input type="date" class="ts-field-full" [(ngModel)]="projectForm.endDate" pInputText />
         </div>
       </div>
       <div class="ts-form-group">
@@ -150,20 +158,28 @@ import { AuthService } from '../../../../core/services/auth.service';
         </div>
       </div>
       <ng-template pTemplate="footer">
-        <p-button label="Cancel" [text]="true" (click)="closeProjectDialog()"></p-button>
-        <p-button [label]="editingProject ? 'Update' : 'Create'" [loading]="saving()" (click)="saveProject()"></p-button>
+        <button type="button" class="btn-cancel" (click)="closeProjectDialog()">Cancel</button>
+        <button type="button" class="btn-save" [disabled]="saving()" (click)="saveProject()">{{ saving() ? 'Saving...' : (editingProject ? 'Update' : 'Create') }}</button>
       </ng-template>
     </p-dialog>
 
-    <!-- Task Dialog -->
-    <p-dialog [header]="editingTask ? 'Edit Task' : 'New Task'" [(visible)]="showTaskDialog" [modal]="true" [style]="{width: '520px', 'border-radius': '10px'}">
+    <p-dialog [(visible)]="showTaskDialog" [modal]="true" [draggable]="false" appendTo="body" [style]="{width: '600px', 'max-width': '95vw'}" styleClass="ts-attendance-dialog">
+      <ng-template pTemplate="header">
+        <div class="ts-dialog-header-block">
+          <div class="header-icon"><i class="pi pi-list"></i></div>
+          <div class="header-info">
+            <h2 class="header-title">{{ editingTask ? 'Edit Task' : 'New Task' }}</h2>
+            <p class="header-subtitle">Define task name and billing defaults</p>
+          </div>
+        </div>
+      </ng-template>
       <div class="ts-form-group">
-        <label class="ts-label">Task Name *</label>
-        <input pInputText [(ngModel)]="taskForm.taskName" placeholder="e.g. Frontend Development" style="width: 100%" />
+        <label class="field-label">Task Name <span class="required">*</span></label>
+        <input pInputText class="ts-field-full" [(ngModel)]="taskForm.taskName" placeholder="e.g. Frontend Development" />
       </div>
       <div class="ts-form-group">
-        <label class="ts-label">Hourly Rate</label>
-        <p-inputNumber [(ngModel)]="taskForm.hourlyRate" [min]="0" mode="currency" currency="USD" locale="en-US" [style]="{'width': '100%'}"></p-inputNumber>
+        <label class="field-label">Hourly Rate</label>
+        <p-inputNumber class="ts-field-full" [(ngModel)]="taskForm.hourlyRate" [min]="0" mode="currency" currency="USD" locale="en-US" [style]="{'width': '100%'}"></p-inputNumber>
       </div>
       <div class="ts-form-group">
         <div class="ts-switch-row">
@@ -172,17 +188,25 @@ import { AuthService } from '../../../../core/services/auth.service';
         </div>
       </div>
       <ng-template pTemplate="footer">
-        <p-button label="Cancel" [text]="true" (click)="closeTaskDialog()"></p-button>
-        <p-button [label]="editingTask ? 'Update' : 'Create'" [loading]="saving()" (click)="saveTask()"></p-button>
+        <button type="button" class="btn-cancel" (click)="closeTaskDialog()">Cancel</button>
+        <button type="button" class="btn-save" [disabled]="saving()" (click)="saveTask()">{{ saving() ? 'Saving...' : (editingTask ? 'Update' : 'Create') }}</button>
       </ng-template>
     </p-dialog>
 
-    <!-- Delete Confirmation Dialog -->
-    <p-dialog header="Confirm Delete" [(visible)]="showDeleteDialog" [modal]="true" [style]="{width: '520px', 'border-radius': '10px'}">
-      <p>{{ deleteMessage }}</p>
+    <p-dialog [(visible)]="showDeleteDialog" [modal]="true" [draggable]="false" appendTo="body" [style]="{width: '480px', 'max-width': '95vw'}" styleClass="ts-attendance-dialog">
+      <ng-template pTemplate="header">
+        <div class="ts-dialog-header-block">
+          <div class="header-icon"><i class="pi pi-exclamation-triangle"></i></div>
+          <div class="header-info">
+            <h2 class="header-title">Confirm Delete</h2>
+            <p class="header-subtitle">This action cannot be undone</p>
+          </div>
+        </div>
+      </ng-template>
+      <p style="margin: 0; font-size: 0.875rem; color: #475569; line-height: 1.6;">{{ deleteMessage }}</p>
       <ng-template pTemplate="footer">
-        <p-button label="Cancel" [text]="true" (click)="showDeleteDialog = false"></p-button>
-        <p-button label="Delete" styleClass="p-button-danger" [loading]="saving()" (click)="executeDelete()"></p-button>
+        <button type="button" class="btn-cancel" (click)="showDeleteDialog = false">Cancel</button>
+        <button type="button" class="btn-delete" [disabled]="saving()" (click)="executeDelete()">{{ saving() ? 'Deleting...' : 'Delete' }}</button>
       </ng-template>
     </p-dialog>
   `,

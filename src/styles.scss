@@ -145,16 +145,12 @@ a {
 
 // ═══ Timesheet Utilities ════════════════════════════════════════════════════
 .ts-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: var(--ts-space-6) var(--ts-space-8);
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 
-.ts-page-layout {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: var(--ts-space-6) var(--ts-space-8);
-}
+// ts-page-layout shell defined in _timesheet-shared.scss (full-width, 2rem padding)
 
 .ts-flex { display: flex; }
 .ts-flex-col { flex-direction: column; }
@@ -577,7 +573,7 @@ a {
     background: #004ac6;
     color: white !important;
     border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
     gap: 8px !important;
     margin: 0 auto !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -678,10 +674,9 @@ a {
   color: var(--ts-text);
 }
 
-// ═══ Page Header Shared Component ════════════════════════════════════════════
+// ═══ Page Header (timesheet module) ════════════════════════════════════════════
 app-page-header {
   display: block;
-  margin-bottom: var(--ts-space-6);
 }
 
 // ═══ Global Empty State Button Styling (preserving original) ════════════════
@@ -700,7 +695,7 @@ app-page-header {
     background: #004ac6;
     color: white !important;
     border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
     gap: 8px !important;
     margin: 0 auto !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -715,7 +710,7 @@ app-page-header {
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4) !important;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
     }
   }
 }

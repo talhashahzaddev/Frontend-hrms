@@ -2,6 +2,14 @@
 
 /* ═══ Period Grid ═════════════════════════════════════════════════════════════ */
 .ts-period-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--ts-space-4); }
+
+@media (min-width: 1600px) {
+  .ts-period-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+}
+
+@media (min-width: 1920px) {
+  .ts-period-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+}
 .ts-period-card { cursor: pointer; transition: box-shadow 0.15s; }
 .ts-period-card:hover { box-shadow: var(--ts-shadow-lg); border-color: var(--ts-primary-light); }
 .ts-pc-name { font-weight: 600; font-size: 15px; color: var(--ts-text); display: block; margin-bottom: var(--ts-space-1); }
@@ -14,7 +22,7 @@
 .ts-queue-filters { display: flex; gap: var(--ts-space-2); flex-wrap: wrap; }
 .ts-filter-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--ts-radius-full); border: 1px solid var(--ts-border); background: var(--ts-card); font-size: 13px; font-weight: 500; color: var(--ts-text-secondary); cursor: pointer; transition: all 0.15s; }
 .ts-filter-chip:hover { border-color: var(--ts-primary-light); color: var(--ts-primary-light); }
-.ts-filter-chip.active { background: var(--ts-primary-light); border-color: var(--ts-primary-light); color: white; }
+.ts-filter-chip.active { background: #2563eb; border-color: #2563eb; color: white; }
 .ts-filter-chip i { font-size: 11px; }
 .ts-chip-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--ts-radius-full); background: rgba(0,0,0,0.08); font-size: 11px; font-weight: 600; }
 .ts-filter-chip.active .ts-chip-count { background: rgba(255,255,255,0.25); }
@@ -50,7 +58,7 @@
 .ts-queue-name { display: block; font-size: 14px; font-weight: 600; color: var(--ts-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ts-queue-date { display: block; font-size: 12px; color: var(--ts-text-muted); }
 .ts-change-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: var(--ts-radius-full); font-size: 12px; font-weight: 500; white-space: nowrap; }
-.ts-chip-status { background: #EDE9FE; color: #6D28D9; }
+.ts-chip-status { background: #eff6ff; color: #2563eb; }
 .ts-chip-time { background: #DBEAFE; color: #1D4ED8; }
 .ts-chip-ot { background: #FEF3C7; color: #92400E; }
 .ts-chip-late { background: #FEE2E2; color: #991B1B; }
@@ -87,7 +95,7 @@
 .ts-expand-footer { display: flex; justify-content: flex-end; margin-top: var(--ts-space-3); }
 
 /* ═══ Bulk Action Bar ══════════════════════════════════════════════════════════ */
-.ts-bulk-bar { position: sticky; bottom: 0; z-index: 50; background: #1E3A5F; color: white; padding: 14px 24px; margin: 0 calc(-1 * var(--ts-space-8)); display: flex; align-items: center; justify-content: space-between; gap: var(--ts-space-4); flex-wrap: wrap; border-radius: var(--ts-radius-lg) var(--ts-radius-lg) 0 0; box-shadow: 0 -4px 16px rgba(0,0,0,0.15); }
+.ts-bulk-bar { position: sticky; bottom: 0; z-index: 50; background: #0f172a; color: white; padding: 14px 2rem; margin: 0 -2rem; display: flex; align-items: center; justify-content: space-between; gap: var(--ts-space-4); flex-wrap: wrap; border-radius: 0.75rem 0.75rem 0 0; box-shadow: 0 -4px 16px rgba(0,0,0,0.15); }
 .ts-bulk-left { display: flex; align-items: center; gap: var(--ts-space-3); }
 .ts-bulk-count { font-size: 14px; font-weight: 600; }
 .ts-link-light { color: rgba(255,255,255,0.7) !important; font-size: 13px; }

@@ -34,7 +34,7 @@ interface QueueItem extends PendingCorrection {
   template: `
     @if (!selectedPeriodId()) {
       <div class="ts-page-layout">
-        <app-page-header title="Pending Corrections" subtitle="Select a period to review pending corrections"></app-page-header>
+        <app-page-header matIcon="fact_check" title="Pending Corrections" subtitle="Select a period to review pending corrections"></app-page-header>
         @if (loadingPeriods) {
           <div class="ts-loading"><p-progressSpinner></p-progressSpinner></div>
         } @else {
@@ -51,7 +51,7 @@ interface QueueItem extends PendingCorrection {
       </div>
     } @else {
       <div class="ts-page-layout">
-        <app-page-header [title]="'Pending Corrections'" [subtitle]="selectedPeriodName() ? 'Period: ' + selectedPeriodName() : ''">
+        <app-page-header matIcon="fact_check" [title]="'Pending Corrections'" [subtitle]="selectedPeriodName() ? 'Period: ' + selectedPeriodName() : ''">
           <button actions class="ts-btn-text" (click)="deselectPeriod()"><i class="pi pi-arrow-left"></i> Back to Periods</button>
         </app-page-header>
         @if (loading) {
@@ -484,7 +484,7 @@ export class TimesheetApprovalPanelComponent implements OnInit {
   }
 
   getAvatarColor(name: string): string {
-    const colors = ['#4D7DF5', '#E74C3C', '#2ECC71', '#F39C12', '#9B59B6', '#1ABC9C', '#E67E22', '#3498DB'];
+    const colors = ['#2563eb', '#E74C3C', '#2ECC71', '#F39C12', '#3b82f6', '#1ABC9C', '#E67E22', '#3498DB'];
     let hash = 0;
     for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
     return colors[Math.abs(hash) % colors.length];

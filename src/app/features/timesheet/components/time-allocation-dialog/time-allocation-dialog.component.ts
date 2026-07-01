@@ -30,20 +30,22 @@ interface AllocationRow {
   standalone: true,
   imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule, DropdownModule],
   template: `
-    <!-- Dialog Header matching shift module pattern -->
-    <div class="ts-dialog-header">
-      <div class="ts-dialog-header-left">
-        <div class="ts-dialog-header-icon">
-          <i class="pi pi-clock"></i>
+    <div class="dialog-container">
+    <div class="dialog-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <mat-icon>schedule</mat-icon>
         </div>
-        <h2 class="ts-dialog-title">Time Allocation — {{ data.employeeName }}</h2>
+        <div class="header-info">
+          <h2 class="header-title">Time Allocation — {{ data.employeeName }}</h2>
+        </div>
       </div>
-      <button class="ts-dialog-close" (click)="dialogRef.close()">
-        <i class="pi pi-times"></i>
+      <button mat-icon-button type="button" class="close-button" (click)="dialogRef.close()">
+        <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <div class="ts-dialog-body">
+    <div class="dialog-body">
       @if (loading()) {
         <div style="display: flex; justify-content: center; padding: 40px;">
           <p style="color: #6b7280;">Loading allocations...</p>
@@ -121,12 +123,13 @@ interface AllocationRow {
       }
     </div>
 
-    <!-- Dialog Footer — mat-stroked / mat-flat matching correction dialog -->
+    <!-- Dialog Footer -->
     <div class="dialog-footer">
       <button mat-stroked-button type="button" mat-dialog-close class="btn-cancel">Cancel</button>
       <button mat-flat-button class="btn-save" [disabled]="saving() || loading()" (click)="save()">
         {{ saving() ? 'Saving...' : 'Save Allocations' }}
       </button>
+    </div>
     </div>
   `,
   styleUrls: ['./time-allocation-dialog.component.scss']

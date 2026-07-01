@@ -2,108 +2,132 @@
 
 .ts-period-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: var(--ts-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 1600px) {
+  .ts-period-grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .ts-period-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
 }
 
 .ts-period-card {
-  background: var(--ts-card);
-  border: 1px solid var(--ts-border);
-  border-radius: var(--ts-radius-lg);
-  padding: var(--ts-space-5);
-  box-shadow: var(--ts-shadow-sm);
-  transition: box-shadow 0.15s;
+  background: #ffffff;
+  border: 1px solid #eef0f3;
+  border-radius: 0.875rem;
+  padding: 0;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.18s, transform 0.18s;
   display: flex;
   flex-direction: column;
-  min-height: 160px;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
+    transform: translateY(-2px);
+  }
 }
 
-.ts-period-card:hover { box-shadow: var(--ts-shadow); }
-.ts-period-card.ts-finalized { border-left: 4px solid var(--ts-success); }
+.ts-period-card.ts-finalized { border-left: 4px solid #16a34a; }
 
 .ts-pc-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--ts-space-3);
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.25rem 1.125rem 0.875rem;
 }
 
 .ts-pc-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--ts-text);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #0f172a;
+  line-height: 1.3;
 }
 
 .ts-pc-meta {
   display: flex;
-  justify-content: space-between;
-  color: var(--ts-text-muted);
-  font-size: 13px;
-  margin-bottom: var(--ts-space-3);
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #64748b;
+  font-size: 0.8125rem;
+  padding: 0 1.125rem 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.ts-pc-count { color: var(--ts-text-muted); }
-.ts-pc-scope { margin-bottom: var(--ts-space-3); }
+.ts-pc-count { color: #64748b; }
+.ts-pc-scope { padding: 0.75rem 1.125rem; border-bottom: 1px solid #f1f5f9; }
 
 .ts-scope-tag {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: var(--ts-bg);
-  color: var(--ts-text-secondary);
-  border: 1px solid var(--ts-border);
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
 }
 
-.ts-scope-dept { border-color: var(--ts-primary-light); color: var(--ts-primary); background: var(--ts-primary-bg); }
-.ts-scope-emp  { border-color: var(--ts-success); color: var(--ts-success); background: var(--ts-success-bg); }
+.ts-scope-dept { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+.ts-scope-emp  { background: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
 
 .ts-pc-actions {
   display: flex;
-  gap: var(--ts-space-2);
+  gap: 0.5rem;
   flex-wrap: wrap;
+  padding: 0.875rem 1.125rem;
+  background: #fafafa;
   margin-top: auto;
 }
 
-.ts-scope-preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  background: var(--ts-bg);
-  border-radius: var(--ts-radius);
-  font-size: 13px;
-  color: var(--ts-text-secondary);
-  margin-top: var(--ts-space-3);
+.ts-blocker-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #dc2626;
+  font-size: 0.875rem;
+
+  li { margin-bottom: 0.375rem; }
 }
 
-.ts-scope-preview i { color: var(--ts-primary); }
-
-:host ::ng-deep .ts-pc-actions .p-button-label {
-  min-width: 120px;
-  text-align: center;
+.ts-blocker-ok {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
 }
 
 :host ::ng-deep .p-selectbutton {
   display: flex;
-  gap: 0;
+  gap: 0.375rem;
+  width: 100%;
 }
 
 :host ::ng-deep .p-selectbutton .p-button {
   flex: 1;
-  padding: 8px 12px;
-  font-size: 13px;
-  border: 1px solid var(--ts-border) !important;
-  border-radius: var(--ts-radius) !important;
-  background: var(--ts-card) !important;
-  color: var(--ts-text-secondary) !important;
-  margin-right: 4px;
+  height: 40px !important;
 }
 
-:host ::ng-deep .p-selectbutton .p-button.p-highlight {
-  background: var(--ts-primary) !important;
-  color: white !important;
-  border-color: var(--ts-primary) !important;
+:host ::ng-deep .p-selectbutton .p-button.p-highlight,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight:hover,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .p-selectbutton .p-button.p-highlight .pi,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight .p-button-label,
+:host ::ng-deep .p-selectbutton .p-button.p-highlight span {
+  color: #2563eb !important;
 }

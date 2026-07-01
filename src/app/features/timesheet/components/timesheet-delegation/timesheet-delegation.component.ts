@@ -17,7 +17,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
   imports: [CommonModule, FormsModule, EmployeeSearchComponent, DatePipe, ButtonModule, InputTextModule, MessageModule, PageHeaderComponent, EmptyStateComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Approval Delegation"></app-page-header>
+      <app-page-header matIcon="swap_horiz" title="Approval Delegation" subtitle="Temporarily delegate approval authority to another user"></app-page-header>
 
       <div class="ts-section">
         <h3 class="ts-section-title">Active Delegation</h3>
@@ -51,24 +51,24 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 
       <div class="ts-section">
         <h3 class="ts-section-title">Create Delegation</h3>
-        <div class="ts-card">
+        <div class="ts-card" style="max-width: 600px;">
           <div class="ts-form-group">
-            <label class="ts-label">Delegate To</label>
+            <label class="field-label">Delegate To</label>
             <app-employee-search (employeeSelected)="onEmployeeSelected($event)"></app-employee-search>
           </div>
           <div class="ts-form-row">
             <div class="ts-form-group ts-half">
-              <label class="ts-label">Start Date</label>
-              <input type="date" [(ngModel)]="newDelegate.startDate" pInputText style="width: 100%" />
+              <label class="field-label">Start Date</label>
+              <input type="date" class="ts-field-full" [(ngModel)]="newDelegate.startDate" pInputText />
             </div>
             <div class="ts-form-group ts-half">
-              <label class="ts-label">End Date</label>
-              <input type="date" [(ngModel)]="newDelegate.endDate" pInputText style="width: 100%" />
+              <label class="field-label">End Date</label>
+              <input type="date" class="ts-field-full" [(ngModel)]="newDelegate.endDate" pInputText />
             </div>
           </div>
           <div class="ts-form-group">
-            <label class="ts-label">Reason</label>
-            <input [(ngModel)]="newDelegate.reason" pInputText placeholder="Optional reason..." style="width: 100%" />
+            <label class="field-label">Reason</label>
+            <input class="ts-field-full" [(ngModel)]="newDelegate.reason" pInputText placeholder="Optional reason..." />
           </div>
           <p-button label="Create Delegation" icon="pi pi-plus" (click)="createDelegation()"></p-button>
           @if (successMsg) { <p-message severity="success" [text]="successMsg" [ngStyle]="{'margin-top': 'var(--ts-space-3)'}"></p-message> }

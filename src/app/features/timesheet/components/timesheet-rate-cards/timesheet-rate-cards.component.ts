@@ -13,7 +13,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
   imports: [CommonModule, CurrencyPipe, DatePipe, TableModule, ProgressSpinnerModule, PageHeaderComponent, EmptyStateComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Employee Rate Cards"></app-page-header>
+      <app-page-header matIcon="attach_money" title="Employee Rate Cards" subtitle="View employee billing rates by project"></app-page-header>
 
       @if (loading) {
         <div class="ts-loading"><p-progressSpinner></p-progressSpinner></div>

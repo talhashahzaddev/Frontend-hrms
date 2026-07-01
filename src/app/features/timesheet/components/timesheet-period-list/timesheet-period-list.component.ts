@@ -24,25 +24,36 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [CommonModule, FormsModule, RouterModule, ButtonModule, DialogModule, InputTextModule, TagModule, MessageModule, ProgressSpinnerModule, SelectButtonModule, MultiSelectModule, PageHeaderComponent, StatusBadgeComponent, EmptyStateComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Timesheet Periods">
-        <button actions pButton label="Create Period" icon="pi pi-plus" (click)="showCreateDialog = true" *ngIf="canCreate"></button>
+      <app-page-header matIcon="date_range" title="Timesheet Periods" subtitle="Create, manage, and lock attendance periods for payroll">
+        <p-button actions label="Create Period" icon="pi pi-plus" (click)="showCreateDialog = true" *ngIf="canCreate"></p-button>
       </app-page-header>
 
-      <p-dialog header="Create Timesheet Period" [(visible)]="showCreateDialog" [modal]="true" [style]="{width: '580px', 'border-radius': '10px'}">
+      <p-dialog [(visible)]="showCreateDialog" [modal]="true" [draggable]="false" appendTo="body" [style]="{width: '600px', 'max-width': '95vw'}" styleClass="ts-attendance-dialog">
+        <ng-template pTemplate="header">
+          <div class="ts-dialog-header-block">
+            <div class="header-icon"><i class="pi pi-calendar-plus"></i></div>
+            <div class="header-info">
+              <h2 class="header-title">Create Timesheet Period</h2>
+              <p class="header-subtitle">Define dates and employee scope for this period</p>
+            </div>
+          </div>
+        </ng-template>
         <div class="ts-form-group">
-          <label>Period Name</label>
-          <input pInputText [(ngModel)]="newPeriod.name" placeholder="e.g. June 2026 Timesheet" style="width: 100%" />
+          <label class="field-label">Period Name <span class="required">*</span></label>
+          <input pInputText class="ts-field-full" [(ngModel)]="newPeriod.name" placeholder="e.g. June 2026 Timesheet" />
+        </div>
+        <div class="ts-form-row">
+          <div class="ts-form-group ts-half">
+            <label class="field-label">Start Date <span class="required">*</span></label>
+            <input type="date" class="ts-field-full" [(ngModel)]="newPeriod.start" pInputText />
+          </div>
+          <div class="ts-form-group ts-half">
+            <label class="field-label">End Date <span class="required">*</span></label>
+            <input type="date" class="ts-field-full" [(ngModel)]="newPeriod.end" pInputText />
+          </div>
         </div>
         <div class="ts-form-group">
-          <label>Start Date</label>
-          <input type="date" [(ngModel)]="newPeriod.start" pInputText style="width: 100%" />
-        </div>
-        <div class="ts-form-group">
-          <label>End Date</label>
-          <input type="date" [(ngModel)]="newPeriod.end" pInputText style="width: 100%" />
-        </div>
-        <div class="ts-form-group">
-          <label>Scope</label>
+          <label class="field-label">Scope</label>
           <p-selectButton [options]="scopeOptions" [(ngModel)]="newPeriod.scopeType" optionLabel="label" optionValue="value" styleClass="w-full">
             <ng-template let-item>
               <span><i class="pi" [ngClass]="{'pi-users': item.value === 'all', 'pi-building': item.value === 'department', 'pi-user': item.value === 'employees'}" style="margin-right: 6px;"></i>{{ item.label }}</span>
@@ -51,19 +62,17 @@ import { AuthService } from '../../../../core/services/auth.service';
         </div>
         @if (newPeriod.scopeType === 'department') {
           <div class="ts-form-group">
-            <label>Select Department(s)</label>
+            <label class="field-label">Select Department(s)</label>
             <p-multiSelect [options]="departments()" [(ngModel)]="newPeriod.departmentIds" optionLabel="name" optionValue="id"
-              placeholder="Choose departments" [filter]="true" filterBy="name" styleClass="w-full"
-              [style]="{'min-height': '38px'}">
+              placeholder="Choose departments" [filter]="true" filterBy="name" styleClass="w-full ts-field-full">
             </p-multiSelect>
           </div>
         }
         @if (newPeriod.scopeType === 'employees') {
           <div class="ts-form-group">
-            <label>Select Employee(s)</label>
+            <label class="field-label">Select Employee(s)</label>
             <p-multiSelect [options]="employees()" [(ngModel)]="newPeriod.employeeIds" optionLabel="name" optionValue="id"
-              placeholder="Choose employees" [filter]="true" filterBy="name" styleClass="w-full"
-              [style]="{'min-height': '38px'}">
+              placeholder="Choose employees" [filter]="true" filterBy="name" styleClass="w-full ts-field-full">
             </p-multiSelect>
           </div>
         }
@@ -87,23 +96,32 @@ import { AuthService } from '../../../../core/services/auth.service';
         </div>
         @if (createError) { <p-message severity="error" [text]="createError"></p-message> }
         <ng-template pTemplate="footer">
-          <p-button label="Cancel" [text]="true" (click)="showCreateDialog = false"></p-button>
-          <p-button label="Create" [loading]="creating" (click)="createPeriod()"></p-button>
+          <button type="button" class="btn-cancel" (click)="showCreateDialog = false">Cancel</button>
+          <button type="button" class="btn-save" [disabled]="creating" (click)="createPeriod()">{{ creating ? 'Creating...' : 'Create Period' }}</button>
         </ng-template>
       </p-dialog>
 
-      <p-dialog [header]="blockersDialog?.canLock ? 'Ready to Lock' : 'Cannot Lock — Blockers Found'" [(visible)]="showBlockersDialog" [modal]="true" [style]="{width: '520px', 'border-radius': '10px'}">
+      <p-dialog [(visible)]="showBlockersDialog" [modal]="true" [draggable]="false" appendTo="body" [style]="{width: '520px', 'max-width': '95vw'}" styleClass="ts-attendance-dialog">
+        <ng-template pTemplate="header">
+          <div class="ts-dialog-header-block">
+            <div class="header-icon"><i class="pi pi-lock"></i></div>
+            <div class="header-info">
+              <h2 class="header-title">{{ blockersDialog?.canLock ? 'Ready to Lock' : 'Cannot Lock — Blockers Found' }}</h2>
+              <p class="header-subtitle">Review blockers before finalizing this period</p>
+            </div>
+          </div>
+        </ng-template>
         @if (blockersDialog?.blockers?.length) {
-          <ul style="padding-left: 20px; color: var(--ts-danger);">
-            @for (b of blockersDialog!.blockers; track b) { <li style="margin-bottom: 6px;">{{ b }}</li> }
+          <ul class="ts-blocker-list">
+            @for (b of blockersDialog!.blockers; track b) { <li>{{ b }}</li> }
           </ul>
         } @else {
-          <p>No blockers. This period is ready to lock.</p>
+          <p class="ts-blocker-ok">No blockers. This period is ready to lock.</p>
         }
         <ng-template pTemplate="footer">
-          <p-button label="Close" [text]="true" (click)="showBlockersDialog = false"></p-button>
+          <button type="button" class="btn-cancel" (click)="showBlockersDialog = false">Close</button>
           @if (blockersDialog?.canLock) {
-            <p-button label="Lock Now" (click)="confirmLock()"></p-button>
+            <button type="button" class="btn-save" (click)="confirmLock()">Lock Now</button>
           }
         </ng-template>
       </p-dialog>

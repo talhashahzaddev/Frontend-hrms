@@ -17,15 +17,15 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   imports: [CommonModule, FormsModule, EmployeeSearchComponent, ButtonModule, InputNumberModule, ProgressSpinnerModule, StatCardComponent, PageHeaderComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Comp Time / Overtime Bank"></app-page-header>
+      <app-page-header matIcon="schedule" title="Comp Time / Overtime Bank" subtitle="Check employee comp time and overtime balances"></app-page-header>
 
       <div class="ts-card" style="margin-bottom: var(--ts-space-5);">
         <div class="ts-form-row">
-          <div class="ts-form-group" style="flex: 2;">
+          <div class="ts-form-group" style="flex: 0 0 320px;">
             <label class="ts-label">Employee</label>
             <app-employee-search placeholder="Search employee by name..." (employeeSelected)="onEmployeeSelected($event)"></app-employee-search>
           </div>
-          <div class="ts-form-group" style="flex: 1;">
+          <div class="ts-form-group" style="flex: 0 0 160px;">
             <label class="ts-label">Year</label>
             <p-inputNumber [(ngModel)]="year" [min]="2020" [max]="2099" mode="decimal" [useGrouping]="false" [style]="{'width': '100%'}"></p-inputNumber>
           </div>

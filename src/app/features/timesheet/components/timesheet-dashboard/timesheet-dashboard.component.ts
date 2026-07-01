@@ -15,12 +15,14 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
   imports: [CommonModule, FormsModule, DropdownModule, TableModule, ProgressSpinnerModule, StatCardComponent, PageHeaderComponent],
   template: `
     <div class="ts-page-layout">
-      <app-page-header title="Timesheet Analytics">
-        <div actions style="display: flex; gap: 8px; align-items: center;">
+      <app-page-header matIcon="analytics" title="Timesheet Analytics" subtitle="Organization-wide utilization and overtime insights"></app-page-header>
+
+      <div class="filters-section">
+        <div class="filters-row">
           <p-dropdown [options]="periodOptions()" [(ngModel)]="selectedPeriodId" optionLabel="label" optionValue="value"
             placeholder="All Periods" [showClear]="true" (onChange)="loadDashboard()" styleClass="ts-period-filter"></p-dropdown>
         </div>
-      </app-page-header>
+      </div>
 
       @if (loading) {
         <div class="ts-loading"><p-progressSpinner></p-progressSpinner></div>
@@ -35,30 +37,32 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
         <div class="ts-section">
           <h3 class="ts-section-title">Department Utilization</h3>
           <div class="ts-card">
-            <p-table [value]="dashboard()?.departmentUtilization ?? []" [tableStyle]="{'width': '100%'}" styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines">
+            <p-table [value]="dashboard()?.departmentUtilization ?? []" [tableStyle]="{'width': '100%'}" styleClass="ts-dashboard-table">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Department</th>
-                  <th pSortableColumn="scheduled">Scheduled Hours <p-sortIcon field="scheduled"></p-sortIcon></th>
-                  <th pSortableColumn="actual">Actual Hours <p-sortIcon field="actual"></p-sortIcon></th>
-                  <th pSortableColumn="utilizationPercent">Utilization % <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
+                  <th style="padding-left: 1rem;">Department</th>
+                  <th pSortableColumn="scheduled">Scheduled <p-sortIcon field="scheduled"></p-sortIcon></th>
+                  <th pSortableColumn="actual">Actual <p-sortIcon field="actual"></p-sortIcon></th>
+                  <th pSortableColumn="utilizationPercent" style="padding-right: 1rem;">Utilization <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-d>
                 <tr>
-                  <td>{{ d.department }}</td>
-                  <td>{{ d.scheduled }}</td>
-                  <td>{{ d.actual }}</td>
-                  <td>
+                  <td style="padding-left: 1rem; font-weight: 600; color: #1e293b;">
+                    <i class="pi pi-building" style="color: #94a3b8; margin-right: 8px;"></i>{{ d.department }}
+                  </td>
+                  <td style="color: #64748b;">{{ d.scheduled }}h</td>
+                  <td style="color: #64748b;">{{ d.actual }}h</td>
+                  <td style="padding-right: 1rem;">
                     <div class="ts-util-bar">
                       <div class="ts-util-fill" [style.width.%]="d.utilizationPercent" [style.background]="utilColor(d.utilizationPercent)"></div>
-                      <span class="ts-util-label">{{ d.utilizationPercent }}%</span>
+                      <span class="ts-util-label" [style.color]="utilColor(d.utilizationPercent)">{{ d.utilizationPercent }}%</span>
                     </div>
                   </td>
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
-                <tr><td colspan="4" style="text-align: center; padding: 24px; color: var(--ts-text-muted);">No utilization data</td></tr>
+                <tr><td colspan="4" style="text-align: center; padding: 3rem; color: #94a3b8;">No utilization data available</td></tr>
               </ng-template>
             </p-table>
           </div>
@@ -67,23 +71,34 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
         <div class="ts-section">
           <h3 class="ts-section-title">Utilization Trend</h3>
           <div class="ts-card">
-            <p-table [value]="dashboard()?.utilizationTrend ?? []" [tableStyle]="{'width': '100%'}" styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines">
+            <p-table [value]="dashboard()?.utilizationTrend ?? []" [tableStyle]="{'width': '100%'}" styleClass="ts-dashboard-table">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Period</th>
-                  <th pSortableColumn="utilizationPercent">Utilization % <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
-                  <th pSortableColumn="overtimePercent">Overtime % <p-sortIcon field="overtimePercent"></p-sortIcon></th>
+                  <th style="padding-left: 1rem;">Period</th>
+                  <th pSortableColumn="utilizationPercent">Utilization <p-sortIcon field="utilizationPercent"></p-sortIcon></th>
+                  <th pSortableColumn="overtimePercent" style="padding-right: 1rem;">Overtime <p-sortIcon field="overtimePercent"></p-sortIcon></th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-t>
                 <tr>
-                  <td>{{ t.period }}</td>
-                  <td>{{ t.utilizationPercent }}%</td>
-                  <td>{{ t.overtimePercent }}%</td>
+                  <td style="padding-left: 1rem; font-weight: 500; color: #334155;">
+                    <i class="pi pi-calendar" style="color: #cbd5e1; margin-right: 8px;"></i>{{ t.period }}
+                  </td>
+                  <td>
+                    <span [style.color]="t.utilizationPercent < 80 ? '#d97706' : '#16a34a'" style="font-weight: 600;">
+                      {{ t.utilizationPercent }}%
+                    </span>
+                  </td>
+                  <td style="padding-right: 1rem;">
+                    <span [style.color]="t.overtimePercent > 0 ? '#dc2626' : '#64748b'" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: #f8fafc; border-radius: 6px; font-size: 0.8125rem;">
+                      <i class="pi" [ngClass]="t.overtimePercent > 0 ? 'pi-arrow-up' : 'pi-minus'"></i>
+                      {{ t.overtimePercent }}%
+                    </span>
+                  </td>
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
-                <tr><td colspan="3" style="text-align: center; padding: 24px; color: var(--ts-text-muted);">No trend data</td></tr>
+                <tr><td colspan="3" style="text-align: center; padding: 3rem; color: #94a3b8;">No trend data available</td></tr>
               </ng-template>
             </p-table>
           </div>
@@ -92,23 +107,29 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
         <div class="ts-section">
           <h3 class="ts-section-title">Overtime Reasons</h3>
           <div class="ts-card">
-            <p-table [value]="dashboard()?.overtimeReasons ?? []" [tableStyle]="{'width': '100%'}" styleClass="p-datatable-sm p-datatable-striped p-datatable-gridlines">
+            <p-table [value]="dashboard()?.overtimeReasons ?? []" [tableStyle]="{'width': '100%'}" styleClass="ts-dashboard-table">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>Reason</th>
+                  <th style="padding-left: 1rem;">Reason</th>
                   <th>Total Hours</th>
-                  <th>Employees</th>
+                  <th style="padding-right: 1rem;">Employees</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-r>
                 <tr>
-                  <td>{{ r.reason }}</td>
-                  <td>{{ r.totalHours }}h</td>
-                  <td>{{ r.employeeCount }}</td>
+                  <td style="padding-left: 1rem;">
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #eff6ff; color: #2563eb; border-radius: 20px; font-size: 0.8125rem; font-weight: 500; border: 1px solid #dbeafe;">
+                      <i class="pi pi-tag" style="font-size: 0.75rem;"></i> {{ r.reason }}
+                    </span>
+                  </td>
+                  <td style="font-weight: 600; color: #334155;">{{ r.totalHours }} <span style="font-weight: normal; color: #94a3b8; font-size: 0.8125rem;">hrs</span></td>
+                  <td style="padding-right: 1rem; color: #64748b;">
+                    <i class="pi pi-users" style="margin-right: 6px; color: #cbd5e1;"></i>{{ r.employeeCount }}
+                  </td>
                 </tr>
               </ng-template>
               <ng-template pTemplate="emptymessage">
-                <tr><td colspan="3" style="text-align: center; padding: 24px; color: var(--ts-text-muted);">No overtime data</td></tr>
+                <tr><td colspan="3" style="text-align: center; padding: 3rem; color: #94a3b8;">No overtime data available</td></tr>
               </ng-template>
             </p-table>
           </div>
