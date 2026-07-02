@@ -1,0 +1,398 @@
+// Assets Module — aligned with Holiday / Leave / Attendance / Timesheet (slate + blue #2563eb)
+// Imports timesheet-shared which provides: ts-page-layout, filters-section, ts-card,
+// btn-primary, clear-btn, ts-section-title, ts-label, ts-form-row, etc.
+@use '../../timesheet/styles/timesheet-shared' as ts;
+
+$as-primary:        #2563eb;
+$as-primary-hover:  #1d4ed8;
+$as-border:         #e2e8f0;
+$as-surface:        #f8fafc;
+$as-text:           #0f172a;
+$as-text-secondary: #64748b;
+$as-text-muted:     #94a3b8;
+
+/* ═══ Status badges ══════════════════════════════════════════════════════════ */
+.as-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  &.status-available {
+    background: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+  }
+
+  &.status-assigned {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+  }
+
+  &.status-maintenance {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+  }
+
+  &.status-retired {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 1px solid $as-border;
+  }
+}
+
+/* ═══ Asset type badge ════════════════════════════════════════════════════════ */
+.as-type-badge {
+  display: inline-block;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #eff6ff;
+  color: $as-primary;
+  border: 1px solid #dbeafe;
+}
+
+/* ═══ Asset name cell ════════════════════════════════════════════════════════ */
+.as-name-cell {
+  display: flex;
+  flex-direction: column;
+
+  .asset-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #0f172a;
+  }
+
+  .asset-code {
+    font-size: 0.75rem;
+    color: $as-text-secondary;
+  }
+}
+
+/* ═══ Assigned-to cell ═══════════════════════════════════════════════════════ */
+.as-assigned-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: #334155;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: $as-text-muted;
+  }
+}
+
+/* ═══ Table — consistent with dashboard / payroll tables ════════════════════ */
+.ts-page-layout .as-table {
+  ::ng-deep {
+    .mat-mdc-header-row {
+      background: #f8fafc;
+
+      .mat-mdc-header-cell {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #e2e8f0 !important;
+        padding: 1rem 1.25rem !important;
+      }
+    }
+
+    .mat-mdc-row {
+      height: auto;
+      transition: background 0.12s ease;
+
+      &:hover { background: #f8faff; }
+
+      .mat-mdc-cell {
+        padding: 1rem 1.25rem !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        font-size: 0.875rem;
+        color: #334155;
+      }
+
+      &:last-child .mat-mdc-cell {
+        border-bottom: none !important;
+      }
+    }
+  }
+}
+
+/* ═══ Empty state ═══════════════════════════════════════════════════════════ */
+.as-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem;
+  text-align: center;
+
+  .as-empty-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 1rem;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+
+    mat-icon {
+      font-size: 2rem;
+      width: 2rem;
+      height: 2rem;
+      color: $as-text-muted;
+    }
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0 0 1.5rem;
+    font-size: 0.875rem;
+    color: $as-text-muted;
+    max-width: 26rem;
+  }
+}
+
+/* ═══ Action menu — matches all other modules ════════════════════════════════ */
+::ng-deep .as-action-menu.mat-mdc-menu-panel {
+  border-radius: 0.625rem !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #f0f1f5 !important;
+  min-width: 10rem !important;
+
+  .mat-mdc-menu-content {
+    padding: 0.375rem !important;
+
+    .mat-mdc-menu-item {
+      border-radius: 0.375rem !important;
+      margin: 1px 0 !important;
+      height: 2.375rem !important;
+      min-height: 2.375rem !important;
+      font-size: 0.84375rem !important;
+      color: #374151;
+
+      &:hover { background: #f5f6fa !important; }
+
+      mat-icon {
+        margin-right: 0.625rem;
+        font-size: 1.125rem;
+        width: 1.125rem;
+        height: 1.125rem;
+        color: #6b7280;
+      }
+
+      &.danger-action {
+        color: #dc2626 !important;
+        mat-icon { color: #dc2626 !important; }
+        &:hover { background: #fff5f5 !important; }
+      }
+    }
+
+    mat-divider {
+      margin: 0.25rem 0 !important;
+      border-color: #f0f1f5 !important;
+    }
+  }
+}
+
+/* ═══ Dialog — matches holiday/leave dialog pattern ══════════════════════════ */
+.as-dialog {
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+
+  .as-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.125rem 1.5rem;
+    background: #ffffff;
+    border-bottom: 1px solid $as-border;
+    flex-shrink: 0;
+
+    .as-dialog-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: #eff6ff;
+      border-radius: 0.625rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        color: $as-primary;
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+
+    .as-dialog-titles {
+      .as-dialog-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+      .as-dialog-subtitle {
+        margin: 0.125rem 0 0;
+        font-size: 0.8125rem;
+        color: $as-text-secondary;
+      }
+    }
+  }
+
+  .as-dialog-content {
+    padding: 1.5rem !important;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .as-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: #ffffff;
+    border-top: 1px solid $as-border;
+    flex-shrink: 0;
+  }
+}
+
+/* ═══ Form sections inside dialogs ══════════════════════════════════════════ */
+.as-form-section {
+  background: #ffffff;
+  border: 1px solid $as-border;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+
+  &:last-child { margin-bottom: 0; }
+
+  .as-form-section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: $as-surface;
+    border-bottom: 1px solid $as-border;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $as-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    mat-icon {
+      font-size: 1rem;
+      width: 1rem;
+      height: 1rem;
+      color: $as-primary;
+    }
+  }
+
+  .as-form-grid {
+    display: grid;
+    gap: 1rem;
+    padding: 1.25rem 1rem 0.5rem;
+
+    &.grid-1 { grid-template-columns: 1fr; }
+    &.grid-2 { grid-template-columns: 1fr 1fr; }
+    &.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  }
+}
+
+/* ═══ Mat-form-field sync to blue focus ══════════════════════════════════════ */
+.as-dialog {
+  ::ng-deep mat-form-field {
+    width: 100%;
+
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: $as-primary !important;
+        border-width: 2px !important;
+      }
+      label { color: $as-primary !important; }
+    }
+  }
+}
+
+/* ═══ Paginator — consistent ═════════════════════════════════════════════════ */
+.ts-page-layout ::ng-deep mat-paginator {
+  background: $as-surface;
+  border-top: 1px solid $as-border;
+
+  .mat-mdc-paginator-container {
+    padding: 0.5rem 1.25rem;
+    min-height: 3rem;
+    justify-content: flex-start;
+    gap: 1rem;
+    flex-wrap: nowrap;
+  }
+
+  .mat-mdc-paginator-range-label {
+    font-size: 0.8125rem;
+    color: $as-text-secondary;
+  }
+
+  .mat-mdc-paginator-navigation { margin-left: auto; }
+}
+.as-info-block {
+  margin-bottom: 0;
+  .as-info-label {
+    margin: 0 0 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a0a8b8;
+    line-height: 1;
+  }
+  .as-info-value {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+  }
+}
+.as-info-row {
+  display: flex;
+  .as-info-block {
+    padding-right: 20px;
+    margin-right: 20px;
+    border-right: 1px solid #dde0e8;
+    &:last-child {
+      border-right: none;
+      margin-right: 0;
+      padding-right: 0;
+    }
+  }
+}
+.as-divider {
+  height: 1px;
+  background: #e2e4ea;
+  margin: 16px 0 18px;
+}
+
+.as-asset-meta { padding: 4px 0 0; }
+
