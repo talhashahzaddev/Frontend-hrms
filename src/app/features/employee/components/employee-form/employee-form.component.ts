@@ -20,6 +20,7 @@ import { PaymentService } from '../../../../core/services/payment.service';
 import { PayrollService } from 'src/app/features/payroll/services/payroll.service';
 import { TaxCategoryDto } from 'src/app/features/payroll/services/payroll.service';
 import { CountryCode } from 'src/app/core/models/countyphonecode.models';
+import { AuthService } from '../../../../core/services/auth.service';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
 @Component({
@@ -84,6 +85,7 @@ export class EmployeeFormComponent implements OnInit, OnDestroy {
     private settingsService: SettingsService,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
     private payrollService: PayrollService
   ) {
     this.initializeForm();
@@ -485,6 +487,11 @@ onCountryPanelOpen(isOpen: boolean) {
       control.setValue(digits);
     }
   }
+
+    hasPermission(actionKey: string): boolean {
+    return this.authService.hasMenuPermission('Employee Management', 'Add Employee', actionKey);
+  }
+
 
 
 

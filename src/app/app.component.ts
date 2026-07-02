@@ -210,12 +210,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
         const currentPath = (event as NavigationEnd).urlAfterRedirects.split('?')[0];
 
-      // // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
-      // if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
-      //   this.router.navigate(['/employee/dashboard']);
-      // }
-    });
-}
+        // // ✅ Employee manually trying to access /dashboard → redirect to /performance/dashboard
+        // if (!isAdmin && currentPath === '/dashboard' ||currentPath==='/') {
+        //   this.router.navigate(['/employee/dashboard']);
+        // }
+      });
+  }
 
 
 
@@ -340,12 +340,27 @@ export class AppComponent implements OnInit, OnDestroy {
         // Join the role group
         try {
           await this.roleHubService.joinRole(organizationId, roleId);
+          // After joining role group, refresh permissions and notify
+          this.refreshUserPermissions();
           const groupName = `role_${organizationId.trim()}_${roleId.trim()}`;
           console.log(`✅ [AppComponent] Joined role group: ${groupName}`);
         } catch (joinError) {
           console.error('❌ [AppComponent] Failed to join role group:', joinError);
           this.notificationService.showError('Failed to join role group for notifications');
           return;
+        }
+
+        // Join the employee-specific group so this client receives EmployeeUpdated events
+        try {
+          const currentUser = this.authService.getCurrentUserValue();
+          const userId = currentUser?.userId;
+          if (userId) {
+            await this.roleHubService.joinEmployee(organizationId, userId);
+            // After joining employee group, refresh permissions and notify
+            this.refreshUserPermissions();
+          }
+        } catch (joinEmpErr) {
+          console.error('❌ [AppComponent] Failed to join employee group:', joinEmpErr);
         }
       } catch (jwtError) {
         console.error('❌ [AppComponent] Error decoding JWT token:', jwtError);
@@ -369,6 +384,25 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         });
 
+      // Listen for employee position updates
+      this.roleHubService.employeeUpdated$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (payload) => {
+            console.log('📢 [AppComponent] Employee Updated Event received:', payload);
+            // Show a notification explaining the position change
+            // this.notificationService.showInfo(payload.Message || 'Your position has been updated.');
+
+            // Refresh permissions and let `refreshUserPermissions()` handle redirect to first allowed
+            this.refreshUserPermissions();
+          },
+          error: (err) => {
+            console.error('❌ [AppComponent] Error listening to employee updates:', err);
+          }
+        });
+
+
+
       console.log('✅ [AppComponent] Subscribed to role updates');
     } catch (error) {
       console.error('❌ [AppComponent] Unexpected error setting up SignalR notifications:', error);
@@ -387,7 +421,7 @@ export class AppComponent implements OnInit, OnDestroy {
         next: (permissions) => {
           if (permissions) {
             console.log('✅ [AppComponent] Permissions refreshed successfully');
-            
+
             // Get the current route
             const currentUrl = this.router.url.split('?')[0];
             const currentRoute = currentUrl || '/dashboard';
@@ -402,19 +436,23 @@ export class AppComponent implements OnInit, OnDestroy {
             // If not, redirect to first allowed route with first allowed submenu
             if (currentRoute !== firstAllowedRoute) {
               // Get the module name from firstAllowedRoute (e.g., "attendance" from "/attendance")
-              const moduleName = firstAllowedRoute.split('/')[1];
-              
+              const moduleName = firstAllowedRoute.split('/')[1] || 'dashboard';
+
               // Get first allowed submenu route in that module
               const routeWithSubmenu = this.authService.getFirstAllowedRouteInModule(moduleName);
-              
+
               console.log(`🔄 [AppComponent] Redirecting from ${currentRoute} to ${routeWithSubmenu}`);
               this.notificationService.showInfo(
                 'Your permissions have been updated. Redirecting...'
               );
-              
+
               // Small delay to ensure notification is shown
               setTimeout(() => {
-                this.router.navigateByUrl(routeWithSubmenu);
+                if (routeWithSubmenu && routeWithSubmenu !== '/undefined') {
+                  this.router.navigateByUrl(routeWithSubmenu, { replaceUrl: true });
+                } else {
+                  this.router.navigateByUrl(firstAllowedRoute || '/dashboard', { replaceUrl: true });
+                }
               }, 300);
             } else {
               // User still has access to current page

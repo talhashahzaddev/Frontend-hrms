@@ -76,7 +76,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       menuName: 'Employee Management',
       children: [
         { label: 'All Employees', icon: 'group', route: '/employees', menuName: 'Employee Management', subMenuName: 'All Employees', exact: true },
-        { label: 'Add Employee', icon: 'person_add', route: '/employees/add', menuName: 'Employee Management', subMenuName: 'All Employees' },
+        { label: 'Add Employee', icon: 'person_add', route: '/employees/add', menuName: 'Employee Management', subMenuName: 'Add Employee' },
         { label: 'Departments', icon: 'apartment', route: '/employees/departments', menuName: 'Employee Management', subMenuName: 'Department' },
         { label: 'Positions', icon: 'work', route: '/employees/positions', menuName: 'Employee Management', subMenuName: 'Positions' }
       ]
