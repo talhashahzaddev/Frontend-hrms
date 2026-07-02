@@ -819,6 +819,91 @@ export class AuthService {
     return '/dashboard'; // absolute fallback
   }
 
+  private normalizeRouteToken(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  private getModuleRouteName(moduleName: string): string | null {
+    const normalizedModule = this.normalizeRouteToken(moduleName);
+
+    const moduleAliases: { [key: string]: string } = {
+      'employee': 'Employee Dashboard',
+      'employees': 'Employee Management',
+      'attendance': 'Attendance',
+      'leave': 'Leave Management',
+      'performance': 'Performance',
+      'holiday': 'Holidays',
+      'holidays': 'Holidays',
+      'news': 'News',
+      'expense': 'Expense',
+      'timesheet': 'Timesheet',
+      'assets': 'Assets Management',
+      'subscription': 'Subscription',
+      'billing': 'Billings',
+      'jobs': 'Jobs',
+      'payroll': 'Payroll',
+      'settings': 'Settings',
+      'help desk': 'Help Desk',
+      'help-desk': 'Help Desk'
+    };
+
+    return moduleAliases[normalizedModule] ?? null;
+  }
+
+  private getMappedSubmenuRoute(menuName: string, subMenuName: string): string | null {
+    const routeMap: Array<{ menuName: string; subMenuName: string; route: string }> = [
+      { menuName: 'Leave Management', subMenuName: 'My Leaves', route: '/leave/dashboard' },
+      { menuName: 'Leave Management', subMenuName: 'Team Leaves', route: '/leave/team' },
+      { menuName: 'Leave Management', subMenuName: 'Team Requests', route: '/leave/team-requests' },
+      { menuName: 'Leave Management', subMenuName: 'Leave Types', route: '/leave/types' },
+      { menuName: 'Attendance', subMenuName: 'My Attendance', route: '/attendance/dashboard' },
+      { menuName: 'Attendance', subMenuName: 'Time Tracker', route: '/attendance/time-tracker' },
+      { menuName: 'Attendance', subMenuName: 'Team Attendance', route: '/attendance/team-attendance' },
+      { menuName: 'Attendance', subMenuName: 'Reports', route: '/attendance/reports' },
+      { menuName: 'Attendance', subMenuName: 'Shifts', route: '/attendance/shift' },
+      { menuName: 'Attendance', subMenuName: 'Overtime', route: '/attendance/overtime' },
+      { menuName: 'Attendance', subMenuName: 'Geo-Fences', route: '/attendance/geo-fences' },
+      { menuName: 'Attendance', subMenuName: 'Geo Violations', route: '/attendance/geo-violations' },
+      { menuName: 'Employee Management', subMenuName: 'All Employees', route: '/employees' },
+      { menuName: 'Employee Management', subMenuName: 'Add Employee', route: '/employees/add' },
+      { menuName: 'Employee Management', subMenuName: 'Department', route: '/employees/departments' },
+      { menuName: 'Employee Management', subMenuName: 'Positions', route: '/employees/positions' },
+      { menuName: 'Performance', subMenuName: 'My Performance', route: '/performance/dashboard' },
+      { menuName: 'Performance', subMenuName: 'Performance', route: '/performance/dashboard' },
+      { menuName: 'Performance', subMenuName: 'Appraisal Cycles', route: '/performance/cycles' },
+      { menuName: 'Performance', subMenuName: 'Appraisals', route: '/performance/appraisals' },
+      { menuName: 'Performance', subMenuName: 'Skill Matrix', route: '/performance/skills' },
+      { menuName: 'Performance', subMenuName: 'Goals & KRAs', route: '/performance/goals' },
+      { menuName: 'Performance', subMenuName: 'Performance Reports', route: '/performance/reports' },
+      { menuName: 'Holidays', subMenuName: 'Holiday Management', route: '/holidays' },
+      { menuName: 'Holidays', subMenuName: 'My Holidays', route: '/holidays/my-holidays' },
+      { menuName: 'News', subMenuName: 'News Dashboard', route: '/news/dashboard' },
+      { menuName: 'News', subMenuName: 'Create News', route: '/news/create-news' },
+      { menuName: 'Expense', subMenuName: 'Category', route: '/expense/categories' },
+      { menuName: 'Expense', subMenuName: 'Claims', route: '/expense/claims' },
+      { menuName: 'Expense', subMenuName: 'Recurring Expenses', route: '/expense/recurring' },
+      { menuName: 'Expense', subMenuName: 'Reports', route: '/expense/expense-report' },
+      { menuName: 'Timesheet', subMenuName: 'Dashboard', route: '/timesheet/dashboard' },
+      { menuName: 'Timesheet', subMenuName: 'Periods', route: '/timesheet/periods' },
+      { menuName: 'Timesheet', subMenuName: 'Approvals', route: '/timesheet/approvals' },
+      { menuName: 'Timesheet', subMenuName: 'Projects', route: '/timesheet/projects' },
+      { menuName: 'Timesheet', subMenuName: 'Config', route: '/timesheet/config' },
+      { menuName: 'Timesheet', subMenuName: 'Rate Cards', route: '/timesheet/rate-cards' },
+      { menuName: 'Timesheet', subMenuName: 'Comp Time', route: '/timesheet/comp-time' },
+      { menuName: 'Timesheet', subMenuName: 'Delegation', route: '/timesheet/delegation' },
+      { menuName: 'Timesheet', subMenuName: 'Payroll Export', route: '/timesheet/payroll-export' },
+      { menuName: 'Assets Management', subMenuName: 'Type of Assets', route: '/assets/types' },
+      { menuName: 'Assets Management', subMenuName: 'Assets', route: '/assets/create' },
+      { menuName: 'Subscription', subMenuName: 'Subscription', route: '/subscription' },
+      { menuName: 'Billings', subMenuName: 'Billing', route: '/subscription/billing' }
+    ];
+
+    return routeMap.find(entry =>
+      this.normalizeRouteToken(entry.menuName) === this.normalizeRouteToken(menuName) &&
+      this.normalizeRouteToken(entry.subMenuName) === this.normalizeRouteToken(subMenuName)
+    )?.route ?? null;
+  }
+
   /**
    * Gets the first allowed submenu route in a given module
    * @param moduleName - The module name (e.g., 'attendance', 'leave')
@@ -828,57 +913,56 @@ export class AuthService {
     const permissions = this.permissionsSubject.value;
     if (!permissions) return `/${moduleName}`;
 
-    // Map submenu names to their actual routes
-    const submenuRouteMap: { [key: string]: { [key: string]: string } } = {
-      'Leave Management': {
-        'My Leaves': 'dashboard',
-        'Team Leaves': 'team',
-        'Team Requests': 'team-requests',
-        'Leave Types': 'types'
-      },
-      'Attendance': {
-        'Daily Report': 'daily-report',
-        'Summary': 'summary',
-        'Analytics': 'analytics'
-      },
-      'Employee Management': {
-        'All Employees': 'list',
-        'Add Employee': 'add'
-      },
-      'Performance': {
-        'Performance Reviews': 'reviews',
-        'Goals': 'goals'
-      }
-    };
-
-    const menu = permissions.menus.find(m => 
-      m.menuName.toLowerCase() === moduleName.toLowerCase() || 
-      m.menuName === Object.keys(submenuRouteMap).find(key => submenuRouteMap[key])
+    const menuName = this.getModuleRouteName(moduleName) ?? moduleName;
+    const menu = permissions.menus.find(m =>
+      this.normalizeRouteToken(m.menuName) === this.normalizeRouteToken(menuName)
     );
-    
-    if (!menu) return `/${moduleName}`;
 
-    // Find first submenu with allowed permission
+    if (!menu) {
+      const baseRoute = this.getFirstAllowedRoute();
+      return baseRoute.startsWith(`/${moduleName}`) ? baseRoute : `/${moduleName}`;
+    }
+
+    // Find the first submenu with allowed permission and a known route
     for (const subMenu of menu.subMenus) {
       const hasPermission = subMenu.actions.some(action => action.hasPermission);
-      if (hasPermission) {
-        // Try to find mapped route first
-        const mappedRoute = submenuRouteMap[menu.menuName]?.[subMenu.subMenuName];
-        
-        if (mappedRoute) {
-          return `/${moduleName}/${mappedRoute}`;
-        }
-        
-        // Fallback to converting submenu name to route format
-        const subMenuRoute = subMenu.subMenuName
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '');
-        return `/${moduleName}/${subMenuRoute}`;
+      if (!hasPermission) continue;
+
+      const mappedRoute = this.getMappedSubmenuRoute(menu.menuName, subMenu.subMenuName);
+      if (mappedRoute) {
+        return mappedRoute;
+      }
+
+      const fallbackRoute = `/${moduleName}/${subMenu.subMenuName
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')}`;
+
+      if (fallbackRoute !== `/${moduleName}/`) {
+        return fallbackRoute;
       }
     }
 
-    return `/${moduleName}`;
+    const baseRouteByMenu: { [key: string]: string } = {
+      'Employee Dashboard': '/employee/dashboard',
+      'Employee Management': '/employees',
+      'Attendance': '/attendance',
+      'Leave Management': '/leave',
+      'Holidays': '/holidays',
+      'Performance': '/performance',
+      'News': '/news',
+      'Expense': '/expense',
+      'Timesheet': '/timesheet',
+      'Assets Management': '/assets',
+      'Subscription': '/subscription',
+      'Billings': '/subscription/billing',
+      'Help Desk': '/help-desk',
+      'Jobs': '/jobs',
+      'Payroll': '/payroll',
+      'Settings': '/settings'
+    };
+
+    return baseRouteByMenu[menu.menuName] ?? `/${moduleName}`;
   }
 
   private isTokenExpired(token: string): boolean {

@@ -362,7 +362,7 @@
       </button>
 
       <button mat-flat-button type="submit"
-        *ngIf="hasActiveSubscription && !isSubscriptionExpired; else upgradeActionForm"
+        *ngIf="hasPermission('Add_Employee_Button') && hasActiveSubscription && !isSubscriptionExpired; else upgradeActionForm"
         [disabled]="employeeForm.invalid || isSubmitting"
         class="btn-submit">
         <mat-icon>{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
