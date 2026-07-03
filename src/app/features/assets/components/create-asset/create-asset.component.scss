@@ -48,38 +48,6 @@
   color: #2563eb;
 }
 
-// ─── Page header Create Asset button — blue ──────────────────────────────────
-.btn-submit {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px;
-  height: 40px !important;
-  padding: 0 18px !important;
-  border-radius: 8px !important;
-  font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  background: #2563eb !important;
-  color: #ffffff !important;
-  border: none !important;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.28) !important;
-  cursor: pointer;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover:not([disabled]) {
-    background: #1d4ed8 !important;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35) !important;
-  }
-
-  &[disabled] {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
-  }
-}
 
 // ─── Compact Filter Controls ─────────────────────────────────────────────────
 

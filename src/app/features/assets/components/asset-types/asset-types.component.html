@@ -2,7 +2,7 @@
 
   <!-- ── Page Header ─────────────────────────────────────────── -->
   <app-page-header matIcon="inventory_2" title="Asset Types" subtitle="Manage your asset categories and types">
-    <button *ngIf="hasPermission('type_of_asset_Craete')" actions mat-raised-button class="btn-primary" (click)="openCreateDialog()">
+    <button *ngIf="hasPermission('type_of_asset_Craete')" actions mat-flat-button class="btn-submit" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
       Create Asset Type
     </button>

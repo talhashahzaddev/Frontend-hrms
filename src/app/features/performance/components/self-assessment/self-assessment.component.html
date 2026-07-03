@@ -1,29 +1,37 @@
-<div class="self-assessment-container">
-  <!-- Header -->
-  <div class="page-header">
-    <h1 class="page-title">
-      <mat-icon>rate_review</mat-icon>
-      Self-Assessment
-    </h1>
-    <div class="header-info" *ngIf="activeCycle">
-      <mat-chip color="primary">{{ activeCycle.cycleName }}</mat-chip>
-      <span class="cycle-dates">
-        {{ activeCycle.startDate | localizedDate:'mediumDate' }} - {{ activeCycle.endDate | localizedDate:'mediumDate' }}
-      </span>
+<div class="ts-page-layout">
+
+  <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <mat-icon style="color:white;font-size:22px;width:22px;height:22px;">rate_review</mat-icon>
+      </div>
+      <div>
+        <h1 style="margin:0 0 2px;font-size:1.375rem;font-weight:700;color:#0f172a;letter-spacing:-0.3px;">Self-Assessment</h1>
+        <p style="margin:0;font-size:0.8125rem;color:#64748b;">
+          <ng-container *ngIf="activeCycle">
+            {{ activeCycle.cycleName }} &nbsp;·&nbsp;
+            {{ activeCycle.startDate | localizedDate:'mediumDate' }} – {{ activeCycle.endDate | localizedDate:'mediumDate' }}
+          </ng-container>
+        </p>
+      </div>
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="loading-container">
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="pm-loading" style="padding:4rem;">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Loading assessment data...</p>
   </div>
 
+  <!-- No active cycle -->
   <div *ngIf="!isLoading && !activeCycle" class="no-cycle">
     <mat-icon>info</mat-icon>
     <h2>No Active Appraisal Cycle</h2>
     <p>There is no active appraisal cycle at the moment. Please contact your HR manager.</p>
   </div>
 
+  <!-- Submitted info -->
   <div *ngIf="!isLoading && activeCycle && isSubmitted()" class="submitted-info">
     <mat-card>
       <mat-card-content>
@@ -36,174 +44,147 @@
     </mat-card>
   </div>
 
+  <!-- Assessment Form -->
   <div *ngIf="!isLoading && activeCycle && !isSubmitted()">
-    <mat-card class="assessment-card">
-      <mat-card-header>
-        <mat-card-title>Complete Your Self-Assessment</mat-card-title>
-        <mat-card-subtitle>Rate yourself on KRAs and Skills for the current appraisal cycle</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <form [formGroup]="assessmentForm">
-          <mat-stepper [selectedIndex]="selectedStep" #stepper>
-            
-            <!-- Step 1: KRA Assessments -->
-            <mat-step label="KRA Assessments">
-              <div class="step-content">
-                <h3>Key Result Areas (KRAs)</h3>
-                <p class="step-description">Rate your performance on each KRA (1-5 scale)</p>
-                
-                <div formArrayName="kraAssessments" *ngIf="kraAssessments.length > 0">
-                  <mat-expansion-panel *ngFor="let kraGroup of kraAssessments.controls; let i = index" [formGroupName]="i" class="assessment-panel">
-                    <mat-expansion-panel-header>
-                      <mat-panel-title>
-                        {{ getKraTitle(kraGroup.get('kraId')?.value) }}
-                      </mat-panel-title>
-                    </mat-expansion-panel-header>
-                    
-                    <div class="assessment-fields">
-                      <mat-form-field appearance="outline" class="rating-field">
-                        <mat-label>Rating (1-5)</mat-label>
-                        <mat-slider 
-                          formControlName="rating"
-                          min="1" 
-                          max="5" 
-                          step="1"
-                          discrete
-                          [displayWith]="formatLabel">
-                          <input matSliderThumb formControlName="rating">
-                        </mat-slider>
-                        <span class="rating-value">{{ kraGroup.get('rating')?.value || 0 }}</span>
-                      </mat-form-field>
+    <div class="assessment-card">
+      <div class="pm-sub-section">
+        <h3>Complete Your Self-Assessment</h3>
+        <p style="font-size:0.875rem;color:#64748b;margin:0;">Rate yourself on KRAs and Skills for the current appraisal cycle</p>
+      </div>
 
-                      <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Comments</mat-label>
-                        <textarea matInput formControlName="comments" rows="3" placeholder="Add your comments..."></textarea>
-                      </mat-form-field>
-                    </div>
-                  </mat-expansion-panel>
-                </div>
+      <form [formGroup]="assessmentForm">
+        <mat-stepper [selectedIndex]="selectedStep" #stepper>
 
-                <div *ngIf="kraAssessments.length === 0" class="no-items">
-                  <mat-icon>info</mat-icon>
-                  <p>No KRAs available for assessment</p>
-                </div>
-              </div>
-            </mat-step>
+          <!-- Step 1: KRA Assessments -->
+          <mat-step label="KRA Assessments">
+            <div class="step-content">
+              <h3>Key Result Areas (KRAs)</h3>
+              <p class="step-description">Rate your performance on each KRA (1-5 scale)</p>
 
-            <!-- Step 2: Skill Assessments -->
-            <mat-step label="Skill Assessments">
-              <div class="step-content">
-                <h3>Skills</h3>
-                <p class="step-description">Rate your proficiency level for each skill (1-5 scale)</p>
-                
-                <div formArrayName="skillAssessments" *ngIf="skillAssessments.length > 0">
-                  <mat-expansion-panel *ngFor="let skillGroup of skillAssessments.controls; let i = index" [formGroupName]="i" class="assessment-panel">
-                    <mat-expansion-panel-header>
-                      <mat-panel-title>
-                        {{ getSkillName(skillGroup.get('skillId')?.value) }}
-                      </mat-panel-title>
-                    </mat-expansion-panel-header>
-                    
-                    <div class="assessment-fields">
-                      <mat-form-field appearance="outline" class="rating-field">
-                        <mat-label>Rating (1-5)</mat-label>
-                        <mat-slider 
-                          formControlName="rating"
-                          min="1" 
-                          max="5" 
-                          step="1"
-                          discrete
-                          [displayWith]="formatLabel">
-                          <input matSliderThumb formControlName="rating">
-                        </mat-slider>
-                        <span class="rating-value">{{ skillGroup.get('rating')?.value || 0 }}</span>
-                      </mat-form-field>
+              <div formArrayName="kraAssessments" *ngIf="kraAssessments.length > 0">
+                <mat-expansion-panel *ngFor="let kraGroup of kraAssessments.controls; let i = index"
+                                     [formGroupName]="i" class="assessment-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>{{ getKraTitle(kraGroup.get('kraId')?.value) }}</mat-panel-title>
+                  </mat-expansion-panel-header>
 
-                      <mat-form-field appearance="outline" class="full-width">
-                        <mat-label>Comments</mat-label>
-                        <textarea matInput formControlName="comments" rows="3" placeholder="Add your comments..."></textarea>
-                      </mat-form-field>
-                    </div>
-                  </mat-expansion-panel>
-                </div>
+                  <div class="assessment-fields">
+                    <mat-form-field appearance="outline" class="rating-field">
+                      <mat-label>Rating (1-5)</mat-label>
+                      <mat-slider formControlName="rating" min="1" max="5" step="1" discrete [displayWith]="formatLabel">
+                        <input matSliderThumb formControlName="rating">
+                      </mat-slider>
+                      <span class="rating-value">{{ kraGroup.get('rating')?.value || 0 }}</span>
+                    </mat-form-field>
 
-                <div *ngIf="skillAssessments.length === 0" class="no-items">
-                  <mat-icon>info</mat-icon>
-                  <p>No skills available for assessment</p>
-                </div>
-              </div>
-            </mat-step>
-
-            <!-- Step 3: Review & Submit -->
-            <mat-step label="Review & Submit">
-              <div class="step-content">
-                <h3>Review Your Assessment</h3>
-                <p class="step-description">Review your ratings before submitting</p>
-                
-                <div class="review-summary">
-                  <div class="summary-item">
-                    <strong>KRA Assessments:</strong>
-                    <span>{{ kraAssessments.length }}</span>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Comments</mat-label>
+                      <textarea matInput formControlName="comments" rows="3" placeholder="Add your comments..."></textarea>
+                    </mat-form-field>
                   </div>
-                  <div class="summary-item">
-                    <strong>Skill Assessments:</strong>
-                    <span>{{ skillAssessments.length }}</span>
-                  </div>
-                </div>
-
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Additional Comments</mat-label>
-                  <textarea matInput formControlName="comments" rows="4" placeholder="Any additional comments or achievements..."></textarea>
-                </mat-form-field>
+                </mat-expansion-panel>
               </div>
-            </mat-step>
-          </mat-stepper>
 
-          <div class="form-actions">
-            <button mat-stroked-button (click)="saveDraft()" [disabled]="isSubmitting">
-              <mat-icon>save</mat-icon>
-              Save Draft
-            </button>
-            <button mat-raised-button color="primary" (click)="submitAssessment()" [disabled]="isSubmitting || assessmentForm.invalid">
-              <mat-icon>send</mat-icon>
-              {{ isSubmitting ? 'Submitting...' : 'Submit Assessment' }}
-            </button>
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
+              <div *ngIf="kraAssessments.length === 0" class="no-items">
+                <mat-icon>info</mat-icon>
+                <p>No KRAs available for assessment</p>
+              </div>
+            </div>
+          </mat-step>
 
-    <!-- Submitted Assessments View -->
-    <mat-card class="submitted-assessments-card" *ngIf="existingAssessments.length > 0">
-      <mat-card-header>
-        <mat-card-title>Your Assessments</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="assessments-list">
-          <div *ngFor="let assessment of existingAssessments" class="assessment-item">
-            <div class="assessment-header">
-              <strong>{{ assessment.kraId ? getKraTitle(assessment.kraId) : getSkillName(assessment.skillId || '') }}</strong>
-              <mat-chip [color]="assessment.status === 'submitted' ? 'primary' : undefined">
-                {{ assessment.status | titlecase }}
-              </mat-chip>
+          <!-- Step 2: Skill Assessments -->
+          <mat-step label="Skill Assessments">
+            <div class="step-content">
+              <h3>Skills</h3>
+              <p class="step-description">Rate your proficiency level for each skill (1-5 scale)</p>
+
+              <div formArrayName="skillAssessments" *ngIf="skillAssessments.length > 0">
+                <mat-expansion-panel *ngFor="let skillGroup of skillAssessments.controls; let i = index"
+                                     [formGroupName]="i" class="assessment-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>{{ getSkillName(skillGroup.get('skillId')?.value) }}</mat-panel-title>
+                  </mat-expansion-panel-header>
+
+                  <div class="assessment-fields">
+                    <mat-form-field appearance="outline" class="rating-field">
+                      <mat-label>Rating (1-5)</mat-label>
+                      <mat-slider formControlName="rating" min="1" max="5" step="1" discrete [displayWith]="formatLabel">
+                        <input matSliderThumb formControlName="rating">
+                      </mat-slider>
+                      <span class="rating-value">{{ skillGroup.get('rating')?.value || 0 }}</span>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Comments</mat-label>
+                      <textarea matInput formControlName="comments" rows="3" placeholder="Add your comments..."></textarea>
+                    </mat-form-field>
+                  </div>
+                </mat-expansion-panel>
+              </div>
+
+              <div *ngIf="skillAssessments.length === 0" class="no-items">
+                <mat-icon>info</mat-icon>
+                <p>No skills available for assessment</p>
+              </div>
             </div>
-            <div class="assessment-details">
-              <span class="rating">Rating: {{ assessment.rating }}/5</span>
-              <span class="date">{{ assessment.updatedAt | localizedDate:'short' }}</span>
+          </mat-step>
+
+          <!-- Step 3: Review & Submit -->
+          <mat-step label="Review & Submit">
+            <div class="step-content">
+              <h3>Review Your Assessment</h3>
+              <p class="step-description">Review your ratings before submitting</p>
+
+              <div class="review-summary">
+                <div class="summary-item">
+                  <strong>KRA Assessments:</strong>
+                  <span>{{ kraAssessments.length }}</span>
+                </div>
+                <div class="summary-item">
+                  <strong>Skill Assessments:</strong>
+                  <span>{{ skillAssessments.length }}</span>
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Additional Comments</mat-label>
+                <textarea matInput formControlName="comments" rows="4" placeholder="Any additional comments or achievements..."></textarea>
+              </mat-form-field>
             </div>
-            <p *ngIf="assessment.comments" class="comments">{{ assessment.comments }}</p>
-          </div>
+          </mat-step>
+        </mat-stepper>
+
+        <div class="form-actions">
+          <button mat-stroked-button (click)="saveDraft()" [disabled]="isSubmitting">
+            <mat-icon>save</mat-icon> Save Draft
+          </button>
+          <button class="btn-submit" (click)="submitAssessment()" [disabled]="isSubmitting || assessmentForm.invalid">
+            <mat-icon>send</mat-icon>
+            {{ isSubmitting ? 'Submitting...' : 'Submit Assessment' }}
+          </button>
         </div>
-      </mat-card-content>
-    </mat-card>
+      </form>
+    </div>
   </div>
+
+  <!-- Submitted Assessments View -->
+  <div *ngIf="!isLoading && activeCycle && existingAssessments.length > 0" class="ts-card" style="margin-top:1.25rem;">
+    <div class="pm-sub-section">
+      <h3>Your Assessments <span class="pm-count-badge">{{ existingAssessments.length }}</span></h3>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;">
+      <div *ngFor="let assessment of existingAssessments" style="padding:0.875rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:0.625rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <strong style="font-size:0.875rem;color:#0f172a;">{{ assessment.kraId ? getKraTitle(assessment.kraId) : getSkillName(assessment.skillId || '') }}</strong>
+          <mat-chip [color]="assessment.status === 'submitted' ? 'primary' : undefined">{{ assessment.status | titlecase }}</mat-chip>
+        </div>
+        <div style="display:flex;gap:1rem;font-size:0.8125rem;">
+          <span style="font-weight:600;color:#2563eb;">Rating: {{ assessment.rating }}/5</span>
+          <span style="color:#94a3b8;">{{ assessment.updatedAt | localizedDate:'short' }}</span>
+        </div>
+        <p *ngIf="assessment.comments" style="font-size:0.8125rem;color:#64748b;margin:0.5rem 0 0;font-style:italic;">{{ assessment.comments }}</p>
+      </div>
+    </div>
+  </div>
+
 </div>
-
-
-
-
-
-
-
-
-

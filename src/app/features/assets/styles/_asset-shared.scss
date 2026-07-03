@@ -396,3 +396,37 @@ $as-text-muted:     #94a3b8;
 
 .as-asset-meta { padding: 4px 0 0; }
 
+.btn-submit {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px;
+  height: 40px !important;
+  padding: 0 18px !important;
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.28) !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0 !important;
+  }
+
+  &:hover:not([disabled]) {
+    background: #1d4ed8 !important;
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.38) !important;
+  }
+
+  &[disabled] {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+  }
+}
+
