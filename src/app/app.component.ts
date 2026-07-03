@@ -316,6 +316,41 @@ export class AppComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Subscribe to role update notifications before joining groups so any immediate server events are caught
+      this.roleHubService.roleUpdated$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (payload) => {
+            console.log('📢 [AppComponent] Role Updated Event received:', payload);
+
+            // Refresh user permissions immediately
+            this.refreshUserPermissions();
+          },
+          error: (err) => {
+            console.error('❌ [AppComponent] Error listening to role updates:', err);
+            this.notificationService.showError('Failed to listen to role updates');
+          }
+        });
+
+      // Listen for employee position updates before joining employee group
+      this.roleHubService.employeeUpdated$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (payload) => {
+            console.log('📢 [AppComponent] Employee Updated Event received:', payload);
+            // Show a notification explaining the position change
+            // this.notificationService.showInfo(payload.Message || 'Your position has been updated.');
+
+            // Refresh permissions and let `refreshUserPermissions()` handle redirect to first allowed
+            this.refreshUserPermissions();
+          },
+          error: (err) => {
+            console.error('❌ [AppComponent] Error listening to employee updates:', err);
+          }
+        });
+
+      console.log('✅ [AppComponent] Subscribed to role updates');
+
       // Get organizationId and roleId from JWT token
       const token = this.authService.getToken();
       if (!token) {
@@ -340,8 +375,6 @@ export class AppComponent implements OnInit, OnDestroy {
         // Join the role group
         try {
           await this.roleHubService.joinRole(organizationId, roleId);
-          // After joining role group, refresh permissions and notify
-          this.refreshUserPermissions();
           const groupName = `role_${organizationId.trim()}_${roleId.trim()}`;
           console.log(`✅ [AppComponent] Joined role group: ${groupName}`);
         } catch (joinError) {
@@ -356,8 +389,6 @@ export class AppComponent implements OnInit, OnDestroy {
           const userId = currentUser?.userId;
           if (userId) {
             await this.roleHubService.joinEmployee(organizationId, userId);
-            // After joining employee group, refresh permissions and notify
-            this.refreshUserPermissions();
           }
         } catch (joinEmpErr) {
           console.error('❌ [AppComponent] Failed to join employee group:', joinEmpErr);
@@ -367,43 +398,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.notificationService.showError('Error reading user credentials for notifications');
         return;
       }
-
-      // Subscribe to role update notifications
-      this.roleHubService.roleUpdated$
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (payload) => {
-            console.log('📢 [AppComponent] Role Updated Event received:', payload);
-
-            // Refresh user permissions immediately
-            this.refreshUserPermissions();
-          },
-          error: (err) => {
-            console.error('❌ [AppComponent] Error listening to role updates:', err);
-            this.notificationService.showError('Failed to listen to role updates');
-          }
-        });
-
-      // Listen for employee position updates
-      this.roleHubService.employeeUpdated$
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (payload) => {
-            console.log('📢 [AppComponent] Employee Updated Event received:', payload);
-            // Show a notification explaining the position change
-            // this.notificationService.showInfo(payload.Message || 'Your position has been updated.');
-
-            // Refresh permissions and let `refreshUserPermissions()` handle redirect to first allowed
-            this.refreshUserPermissions();
-          },
-          error: (err) => {
-            console.error('❌ [AppComponent] Error listening to employee updates:', err);
-          }
-        });
-
-
-
-      console.log('✅ [AppComponent] Subscribed to role updates');
     } catch (error) {
       console.error('❌ [AppComponent] Unexpected error setting up SignalR notifications:', error);
       this.notificationService.showError('Failed to setup real-time notifications');
