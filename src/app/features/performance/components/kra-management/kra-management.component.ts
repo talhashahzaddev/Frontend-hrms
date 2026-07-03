@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild } from '@angular/core';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -39,6 +40,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -252,8 +254,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(CreateKRADialogComponent, {
-      width: '480px',
-      maxWidth: '90vw',
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         positions: this.positions,
         isEditMode: false
@@ -274,8 +277,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   openEditDialog(kra: KRA): void {
     const dialogRef = this.dialog.open(CreateKRADialogComponent, {
-      width: '480px',
-      maxWidth: '90vw',
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         positions: this.positions,
         kra: kra,
@@ -401,7 +405,8 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
           if (response.success && response.data) {
             const dialogRef = this.dialog.open(KRADetailsDialogComponent, {
               width: '700px',
-              maxWidth: '90vw',
+              maxWidth: '95vw',
+              panelClass: 'attendance-dialog-panel',
               data: {
                 kra: response.data,
                 hasEditPermission: true
@@ -500,8 +505,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   openCreateGoalDialog(): void {
     const dialogRef = this.dialog.open(CreateGoalDialogComponent, {
-      width: '350px',
-      maxWidth: '90vw',
+      width: '580px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         isEditMode: false
       },
@@ -521,8 +527,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   openEditGoalDialog(goal: Goal): void {
     const dialogRef = this.dialog.open(CreateGoalDialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
+      width: '700px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         goal: goal,
         isEditMode: true
@@ -541,8 +548,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   openAssignGoalDialog(goal: Goal): void {
     const dialogRef = this.dialog.open(AssignGoalsDialogComponent, {
-      width: '500px',
-      maxWidth: '90vw',
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         isManager: false,
         goal: goal
@@ -643,8 +651,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   viewGoalDetails(goal: Goal): void {
     this.dialog.open(GoalsViewDetailDialogComponent, {
-      width: '580px',
-      maxWidth: '90vw',
+      width: '620px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         goal: goal
       },
@@ -839,8 +848,9 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
 
   viewEmployeeGoalDetails(goal: Goal): void {
     this.dialog.open(GoalsViewDetailDialogComponent, {
-      width: '580px',
-      maxWidth: '90vw',
+      width: '620px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         goal: goal
       },
@@ -858,7 +868,7 @@ export class KRAManagementComponent implements OnInit, OnDestroy, AfterViewInit 
         selectedGoal: goal
       },
       disableClose: false,
-      panelClass: 'self-assessment-dialog'
+      panelClass: ['attendance-dialog-panel', 'self-assessment-dialog']
     });
 
     dialogRef.afterClosed()

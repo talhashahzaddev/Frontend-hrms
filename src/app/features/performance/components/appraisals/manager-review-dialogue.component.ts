@@ -59,457 +59,152 @@ export interface ManagerReviewRequest {
     MatCardModule
   ],
   template: `
-    <div class="dialog-header">
-      <h2 mat-dialog-title>Manager Review</h2>
-      <button mat-icon-button mat-dialog-close class="close-button">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
-      <mat-dialog-content class="dialog-content">
-
-        <!-- Info Cards Grid -->
-        <div class="info-cards">
-          <div class="info-card">
-            <p class="info-label">Employee Name</p>
-            <p class="info-value">{{ data.employeeName }}</p>
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <div class="header-left">
+          <div class="header-icon">
+            <mat-icon>rate_review</mat-icon>
           </div>
-          <div class="info-card">
-            <p class="info-label">Appraisal Cycle Name</p>
-            <p class="info-value">{{ data.cycleName }}</p>
-          </div>
-          <div class="info-card">
-            <p class="info-label">KRA Name</p>
-            <p class="info-value">{{ data.kraName }}</p>
-          </div>
-          <div class="info-card">
-            <p class="info-label">Goal Name</p>
-            <p class="info-value">{{ data.goalName }}</p>
+          <div>
+            <h2 class="header-title">Manager Review</h2>
+            <p class="header-subtitle">Evaluate and provide feedback</p>
           </div>
         </div>
-
-        <!-- Input Section -->
-        <div class="input-section">
-
-          <!-- Rating -->
-          <div class="field-group">
-            <label class="field-label">Rating</label>
-            <div class="rating-row">
-              <div class="rating-input-wrapper">
-                <input
-                  type="number"
-                  formControlName="rating"
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  placeholder="0.0"
-                  class="rating-input" />
-                <span class="rating-suffix">/ 5.0</span>
-              </div>
-              <div class="rating-badge" *ngIf="reviewForm.get('rating')?.value >= 4">
-                <mat-icon class="star-icon">star</mat-icon>
-                <span>Excellent</span>
-              </div>
-            </div>
-            <span class="field-error" *ngIf="reviewForm.get('rating')?.touched && reviewForm.get('rating')?.hasError('required')">Rating is required</span>
-            <span class="field-error" *ngIf="reviewForm.get('rating')?.touched && reviewForm.get('rating')?.hasError('min')">Rating must be at least 0</span>
-            <span class="field-error" *ngIf="reviewForm.get('rating')?.touched && reviewForm.get('rating')?.hasError('max')">Rating must be at most 5</span>
-          </div>
-
-          <!-- Feedback -->
-          <div class="field-group">
-            <label class="field-label">Feedback</label>
-            <textarea
-              formControlName="feedback"
-              rows="3"
-              placeholder="Provide detailed performance feedback..."
-              class="field-textarea"></textarea>
-          </div>
-
-          <!-- Improvement Area -->
-          <div class="field-group">
-            <label class="field-label">Improvement Area</label>
-            <textarea
-              formControlName="improvementArea"
-              rows="2"
-              placeholder="Identify specific areas for growth and development..."
-              class="field-textarea"></textarea>
-          </div>
-
-          <!-- Status -->
-          <div class="field-group">
-            <label class="field-label">Status</label>
-            <mat-form-field appearance="outline" class="status-field">
-              <mat-select formControlName="status">
-                <mat-option value="SUBMITTED">Submitted</mat-option>
-                <mat-option value="DRAFT">Draft</mat-option>
-                <mat-option value="APPROVED">Approved</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-        </div>
-      </mat-dialog-content>
-
-      <div class="dialog-actions">
-        <button mat-button type="button" mat-dialog-close class="btn-cancel" [disabled]="isSubmitting">
-          Cancel
-        </button>
-        <button
-          mat-raised-button
-          type="submit"
-          class="btn-submit"
-          [disabled]="reviewForm.invalid || isSubmitting">
-          <mat-spinner diameter="16" *ngIf="isSubmitting"></mat-spinner>
-          {{ isSubmitting ? 'Submitting...' : 'Submit Review' }}
+        <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
+          <mat-icon>close</mat-icon>
         </button>
       </div>
-    </form>
+
+      <form [formGroup]="reviewForm" (ngSubmit)="onSubmit()">
+        <mat-dialog-content class="dialog-body">
+
+          <!-- Info Section -->
+          <div class="assign-section">
+            <div class="assign-section-header">
+              <mat-icon>info</mat-icon>
+              <span>Review Details</span>
+            </div>
+            <div class="assign-section-body">
+              <div class="assign-dates-grid">
+                <div class="assign-field-group">
+                  <label class="field-label">Employee Name</label>
+                  <div class="readonly-value">{{ data.employeeName }}</div>
+                </div>
+                <div class="assign-field-group">
+                  <label class="field-label">Appraisal Cycle Name</label>
+                  <div class="readonly-value">{{ data.cycleName }}</div>
+                </div>
+              </div>
+              <div class="assign-dates-grid">
+                <div class="assign-field-group">
+                  <label class="field-label">KRA Name</label>
+                  <div class="readonly-value">{{ data.kraName }}</div>
+                </div>
+                <div class="assign-field-group">
+                  <label class="field-label">Goal Name</label>
+                  <div class="readonly-value">{{ data.goalName }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input Section -->
+          <div class="assign-section">
+            <div class="assign-section-header">
+              <mat-icon>edit_note</mat-icon>
+              <span>Manager Evaluation</span>
+            </div>
+            <div class="assign-section-body">
+
+              <div class="assign-dates-grid">
+                <div class="assign-field-group">
+                  <label class="field-label">Rating (0 - 5) <span class="required">*</span></label>
+                  
+                  <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="display:flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:8px 12px; width:140px;">
+                      <input type="number" formControlName="rating" min="0" max="5" step="0.1" placeholder="0.0" style="width:100%; border:none; background:transparent; outline:none; font-size:14px; font-weight:600; color:#334155;">
+                      <span style="font-size:14px; font-weight:500; color:#94a3b8; white-space:nowrap;">/ 5.0</span>
+                    </div>
+
+                    <div *ngIf="reviewForm.get('rating')?.value >= 4" style="display:flex; align-items:center; gap:6px; background:#fffbeb; border:1px solid #fde68a; border-radius:16px; padding:6px 12px;">
+                      <mat-icon style="font-size:16px; width:16px; height:16px; color:#f59e0b;">star</mat-icon>
+                      <span style="font-size:12px; font-weight:700; color:#92400e;">Excellent</span>
+                    </div>
+                  </div>
+                  
+                  <div *ngIf="reviewForm.get('rating')?.touched" style="margin-top:4px;">
+                    <span class="error-text" *ngIf="reviewForm.get('rating')?.hasError('required')">Rating is required</span>
+                    <span class="error-text" *ngIf="reviewForm.get('rating')?.hasError('min')">Rating must be at least 0</span>
+                    <span class="error-text" *ngIf="reviewForm.get('rating')?.hasError('max')">Rating must be at most 5</span>
+                  </div>
+                </div>
+
+                <div class="assign-field-group">
+                  <label class="field-label">Status <span class="required">*</span></label>
+                  <mat-form-field appearance="outline" class="mat-field">
+                    <mat-select formControlName="status">
+                      <mat-option value="SUBMITTED">Submitted</mat-option>
+                      <mat-option value="DRAFT">Draft</mat-option>
+                      <mat-option value="APPROVED">Approved</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="assign-field-group">
+                <label class="field-label">Feedback</label>
+                <mat-form-field appearance="outline" class="mat-field">
+                  <textarea matInput formControlName="feedback" rows="3" placeholder="Provide detailed performance feedback..."></textarea>
+                </mat-form-field>
+              </div>
+
+              <div class="assign-field-group">
+                <label class="field-label">Improvement Area</label>
+                <mat-form-field appearance="outline" class="mat-field">
+                  <textarea matInput formControlName="improvementArea" rows="2" placeholder="Identify specific areas for growth and development..."></textarea>
+                </mat-form-field>
+              </div>
+
+            </div>
+          </div>
+        </mat-dialog-content>
+
+        <div class="dialog-footer">
+          <button mat-stroked-button class="btn-cancel" type="button" mat-dialog-close [disabled]="isSubmitting">Cancel</button>
+          <button mat-flat-button class="btn-submit" type="submit" [disabled]="reviewForm.invalid || isSubmitting">
+            <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+            <mat-spinner diameter="16" *ngIf="isSubmitting" style="margin-right:8px;"></mat-spinner>
+            <span *ngIf="!isSubmitting">Submit Review</span>
+            <span *ngIf="isSubmitting">Submitting...</span>
+          </button>
+        </div>
+      </form>
+    </div>
   `,
   styles: [`
-    /* ── Dialog Container ── */
-    ::ng-deep .mat-mdc-dialog-container {
-      border-radius: 16px !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.08) !important;
-      max-width: 580px !important;
-      width: 90vw !important;
-    }
+    @use '../../styles/performance-shared';
 
-    /* ── Header ── */
-    .dialog-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
-      border-bottom: 1px solid #e2e8f0;
-      background: #ffffff;
-
-      h2 {
-        margin: 0;
-        font-size: 17px;
-        font-weight: 700;
-        color: #0f172a;
-        letter-spacing: -0.01em;
-      }
-
-      .close-button {
-        color: #94a3b8;
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        border-radius: 50%;
-        transition: background 0.2s;
-
-        &:hover {
-          background: #f1f5f9;
-          color: #64748b;
-        }
-
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-    }
-
-    /* ── Content ── */
-    .dialog-content {
-      padding: 16px 24px !important;
-      overflow: hidden !important;
-      background: #ffffff;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    /* ── Info Cards Grid ── */
-    .info-cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .info-card {
-      padding: 10px 12px;
-      background: #f8fafc;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-
-      .info-label {
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #94a3b8;
-        margin: 0 0 3px;
-      }
-
-      .info-value {
-        font-size: 13px;
-        font-weight: 600;
-        color: #334155;
-        margin: 0;
-        word-break: break-word;
-        line-height: 1.3;
-      }
-    }
-
-    /* ── Input Section ── */
-    .input-section {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* ── Field Group ── */
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .field-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #64748b;
-    }
-
-    /* ── Rating ── */
-    .rating-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .rating-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #f1f5f9;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      border-radius: 10px;
-      padding: 7px 12px;
-      width: 120px;
-      transition: all 0.2s;
-
-      &:focus-within {
-        border-color: #6764f2;
-        box-shadow: 0 0 0 2px rgba(103, 100, 242, 0.12);
-        background: #ffffff;
-      }
-
-      .rating-input {
-        width: 100%;
-        background: transparent;
-        border: none;
-        outline: none;
-        font-size: 13px;
-        font-weight: 600;
-        color: #334155;
-        padding: 0;
-
-        &::placeholder { color: #94a3b8; }
-
-        &::-webkit-outer-spin-button,
-        &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        -moz-appearance: textfield;
-      }
-
-      .rating-suffix {
-        font-size: 13px;
-        font-weight: 500;
-        color: #94a3b8;
-        white-space: nowrap;
-      }
-    }
-
-    .rating-badge {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 9999px;
-      padding: 4px 10px;
-
-      .star-icon {
-        font-size: 15px;
-        width: 15px;
-        height: 15px;
-        color: #f59e0b;
-      }
-
-      span {
-        font-size: 11px;
-        font-weight: 700;
-        color: #92400e;
-      }
-    }
-
-    /* ── Textarea ── */
-    .field-textarea {
-      width: 100%;
-      background: #f1f5f9;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      border-radius: 10px;
-      font-size: 13px;
-      color: #334155;
-      padding: 10px 12px;
-      resize: none;
-      font-family: inherit;
-      transition: all 0.2s;
-      box-sizing: border-box;
-      line-height: 1.5;
-
-      &::placeholder { color: #94a3b8; }
-
-      &:focus {
-        outline: none;
-        border-color: #6764f2;
-        box-shadow: 0 0 0 2px rgba(103, 100, 242, 0.12);
-        background: #ffffff;
-      }
-    }
-
-    /* ── Status Select ── */
-    .status-field {
-      width: 100%;
-
-      ::ng-deep {
-        .mat-mdc-text-field-wrapper {
-          background: #f1f5f9 !important;
-          border-radius: 10px !important;
-          padding: 0 12px !important;
-        }
-
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: rgba(148, 163, 184, 0.5) !important;
-        }
-
-        &.mat-focused {
-          .mdc-notched-outline__leading,
-          .mdc-notched-outline__notch,
-          .mdc-notched-outline__trailing { border-color: #6764f2 !important; }
-
-          .mat-mdc-text-field-wrapper {
-            background: #ffffff !important;
-            box-shadow: 0 0 0 2px rgba(103, 100, 242, 0.12) !important;
-          }
-        }
-
-        .mat-mdc-select-value-text {
-          font-size: 13px;
-          font-weight: 500;
-          color: #334155;
-        }
-
-        .mat-mdc-form-field-infix {
-          min-height: 36px;
-          padding-top: 7px;
-          padding-bottom: 7px;
-        }
-
-        .mat-mdc-form-field-subscript-wrapper {
-          display: none;
-        }
-      }
-    }
-
-    /* ── Field Error ── */
-    .field-error {
-      font-size: 11px;
+    .readonly-value {
+      font-size: 14px;
+      color: #1e293b;
       font-weight: 500;
+      padding: 8px 12px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      min-height: 20px;
+    }
+
+    .error-text {
+      font-size: 11px;
       color: #ef4444;
+      display: block;
     }
 
-    /* ── Dialog Actions / Footer ── */
-    .dialog-actions {
-      padding: 14px 24px !important;
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 10px;
-      margin: 0 !important;
-
-      .btn-cancel {
-        height: 36px;
-        padding: 0 18px !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        color: #475569 !important;
-        background: transparent !important;
-        border: none !important;
-        text-transform: none !important;
-        transition: background 0.15s !important;
-        letter-spacing: 0 !important;
-
-        &:hover:not([disabled]) { background: #f1f5f9 !important; }
-      }
-
-      .btn-draft {
-        height: 36px;
-        padding: 0 18px !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        color: #6764f2 !important;
-        border: 1px solid #6764f2 !important;
-        background: transparent !important;
-        text-transform: none !important;
-        letter-spacing: 0 !important;
-        transition: all 0.15s !important;
-
-        &:hover:not([disabled]) { background: rgba(103, 100, 242, 0.05) !important; }
-        &:active { transform: scale(0.97); }
-      }
-
-      .btn-submit {
-        height: 36px;
-        padding: 0 24px !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        color: #ffffff !important;
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%) !important;
-        border: none !important;
-        text-transform: none !important;
-        letter-spacing: 0 !important;
-        box-shadow: 0 3px 10px rgba(99, 102, 241, 0.35) !important;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.15s !important;
-
-        &:hover:not([disabled]) { box-shadow: 0 5px 16px rgba(99, 102, 241, 0.45) !important; }
-        &:active { transform: scale(0.97); }
-
-        &[disabled] {
-          background: #e2e8f0 !important;
-          color: #94a3b8 !important;
-          box-shadow: none !important;
-        }
-      }
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 600px) {
-      .info-cards { grid-template-columns: 1fr; }
-
-      ::ng-deep .mat-mdc-dialog-container {
-        width: 95vw !important;
-        max-width: 95vw !important;
-      }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

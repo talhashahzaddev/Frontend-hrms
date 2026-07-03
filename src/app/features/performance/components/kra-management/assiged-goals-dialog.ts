@@ -46,262 +46,147 @@ export interface AssignGoalPayload {
     MatDialogModule
   ],
   template: `
-    <div class="assign-goals-container">
-
-      <!-- Header -->
+    <div class="dialog-container">
       <div class="dialog-header">
-        <div class="header-icon">
-          <mat-icon>flag</mat-icon>
+        <div class="header-left">
+          <div class="header-icon">
+            <mat-icon>flag</mat-icon>
+          </div>
+          <div>
+            <h2 class="header-title">Assign Goal</h2>
+            <p class="header-subtitle">Assign a goal to a team member</p>
+          </div>
         </div>
-        <div class="header-text">
-          <h2 mat-dialog-title>Assign Goal</h2>
-          <p class="header-subtitle">Assign a goal to a team member</p>
-        </div>
-        <button class="close-btn" mat-icon-button (click)="dialogRef.close()">
+        <button mat-icon-button mat-dialog-close class="close-btn" aria-label="Close">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <form [formGroup]="assignGoalsForm" (ngSubmit)="onSubmit()" class="assign-goals-form">
-        <mat-dialog-content>
+      <mat-dialog-content class="dialog-body">
+        <form [formGroup]="assignGoalsForm" (ngSubmit)="onSubmit()">
 
-          <!-- Goal Display (read-only text) -->
-          <div class="field-section">
-            <label class="field-label">Goal</label>
-            <div class="goal-display-card">
-              <div class="goal-display-text">
-                <span class="goal-title">{{ getGoalTitle(assignGoalsForm.get('goalId')?.value) || 'No goal selected' }}</span>
-              </div>
+          <div class="assign-section">
+            <div class="assign-section-header">
+              <mat-icon>person_add</mat-icon>
+              <span>Assignment Details</span>
             </div>
-          </div>
+            <div class="assign-section-body">
 
-          <!-- Department Dropdown (only for non-managers) -->
-          <div class="field-section" *ngIf="!isManager">
-            <label class="field-label">Filter by Department</label>
-            <mat-form-field appearance="outline" class="full-width styled-select">
-              <mat-select [formControl]="departmentControl" placeholder="All Departments">
-                <mat-option value="">All Departments</mat-option>
-                <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-                  {{ dept.departmentName }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <!-- Employee Selection -->
-          <div class="field-section">
-            <label class="field-label">
-              Assign To <span class="required-dot">*</span>
-            </label>
-
-            <!-- Search input -->
-            <div class="employee-search-box" [class.open]="employeeDropdownOpen" [class.has-error]="assignGoalsForm.get('selectedEmployee')?.hasError('required') && submitted">
-              <mat-icon class="search-icon">search</mat-icon>
-              <input
-                type="text"
-                class="employee-search-input"
-                placeholder="Search by name or code..."
-                [(ngModel)]="employeeFilter"
-                (ngModelChange)="onEmployeeSearch($event)"
-                (focus)="openEmployeeDropdown()"
-                [ngModelOptions]="{standalone: true}"
-              />
-              <button type="button" class="search-clear-btn" *ngIf="employeeFilter" (click)="employeeFilter = ''; cdr.markForCheck()">
-                <mat-icon>close</mat-icon>
-              </button>
-              <mat-icon class="chevron" [class.rotated]="employeeDropdownOpen">expand_more</mat-icon>
-            </div>
-
-            <!-- Dropdown Panel -->
-            <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
-              <div class="dropdown-header" *ngIf="filteredEmployees.length > 0">
-                <span class="dropdown-count">{{ filteredEmployees.length }} employee{{ filteredEmployees.length !== 1 ? 's' : '' }}</span>
-              </div>
-              <div class="employee-list" *ngIf="filteredEmployees.length > 0">
-                <div
-                  class="employee-option"
-                  *ngFor="let emp of filteredEmployees"
-                  (click)="selectEmployee(emp)"
-                  [class.is-selected]="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId"
-                >
-                  <div class="emp-avatar"
-                       [style.backgroundColor]="getAvatarBg(emp)"
-                       [style.color]="getAvatarColor(emp)">
-                    {{ getInitials(emp) }}
+              <!-- Goal Display (read-only text) -->
+              <div class="assign-field-group">
+                <label class="field-label">Goal</label>
+                <div class="goal-display-card">
+                  <div class="goal-display-text">
+                    <span class="goal-title">{{ getGoalTitle(assignGoalsForm.get('goalId')?.value) || 'No goal selected' }}</span>
                   </div>
-                  <div class="emp-info">
-                    <span class="emp-name">{{ displayName(emp) }}</span>
-                    <span class="emp-code">{{ emp.employeeCode }}</span>
-                  </div>
-                  <mat-icon class="check-icon" *ngIf="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId">check_circle</mat-icon>
                 </div>
               </div>
-              <div class="empty-state" *ngIf="filteredEmployees.length === 0">
-                <mat-icon>person_search</mat-icon>
-                <p>No employees found</p>
-              </div>
-            </div>
 
-            <!-- Selected Employee Chip -->
-            <div class="selected-employee-chip" *ngIf="getSelectedEmployee() && !employeeDropdownOpen">
-              <div class="emp-avatar chip-avatar"
-                   [style.backgroundColor]="getAvatarBg(getSelectedEmployee()!)"
-                   [style.color]="getAvatarColor(getSelectedEmployee()!)">
-                {{ getInitials(getSelectedEmployee()!) }}
+              <!-- Department Dropdown (only for non-managers) -->
+              <div class="assign-field-group" *ngIf="!isManager">
+                <label class="field-label">Filter by Department</label>
+                <mat-form-field appearance="outline" class="mat-field">
+                  <mat-select [formControl]="departmentControl" placeholder="All Departments">
+                    <mat-option value="">All Departments</mat-option>
+                    <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
+                      {{ dept.departmentName }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
-              <div class="emp-info">
-                <span class="emp-name">{{ displayName(getSelectedEmployee()!) }}</span>
-                <span class="emp-code">{{ getSelectedEmployee()?.employeeCode }}</span>
-              </div>
-              <button type="button" class="chip-remove" (click)="resetEmployeeSelection()">
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
 
-            <span class="field-error" *ngIf="assignGoalsForm.get('selectedEmployee')?.hasError('required') && submitted">
-              Please select an employee
-            </span>
+              <!-- Employee Selection -->
+              <div class="assign-field-group">
+                <label class="field-label">Assign To <span class="required">*</span></label>
+
+                <!-- Search input -->
+                <div class="employee-search-box" [class.open]="employeeDropdownOpen" [class.has-error]="assignGoalsForm.get('selectedEmployee')?.hasError('required') && submitted">
+                  <mat-icon class="search-icon">search</mat-icon>
+                  <input
+                    type="text"
+                    class="employee-search-input"
+                    placeholder="Search by name or code..."
+                    [(ngModel)]="employeeFilter"
+                    (ngModelChange)="onEmployeeSearch($event)"
+                    (focus)="openEmployeeDropdown()"
+                    [ngModelOptions]="{standalone: true}"
+                  />
+                  <button type="button" class="search-clear-btn" *ngIf="employeeFilter" (click)="employeeFilter = ''; cdr.markForCheck()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                  <mat-icon class="chevron" [class.rotated]="employeeDropdownOpen">expand_more</mat-icon>
+                </div>
+
+                <!-- Dropdown Panel -->
+                <div class="employee-dropdown-panel" *ngIf="employeeDropdownOpen">
+                  <div class="dropdown-header" *ngIf="filteredEmployees.length > 0">
+                    <span class="dropdown-count">{{ filteredEmployees.length }} employee{{ filteredEmployees.length !== 1 ? 's' : '' }}</span>
+                  </div>
+                  <div class="employee-list" *ngIf="filteredEmployees.length > 0">
+                    <div
+                      class="employee-option"
+                      *ngFor="let emp of filteredEmployees"
+                      (click)="selectEmployee(emp)"
+                      [class.is-selected]="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId"
+                    >
+                      <div class="emp-avatar"
+                           [style.backgroundColor]="getAvatarBg(emp)"
+                           [style.color]="getAvatarColor(emp)">
+                        {{ getInitials(emp) }}
+                      </div>
+                      <div class="emp-info">
+                        <span class="emp-name">{{ displayName(emp) }}</span>
+                        <span class="emp-code">{{ emp.employeeCode }}</span>
+                      </div>
+                      <mat-icon class="check-icon" *ngIf="assignGoalsForm.get('selectedEmployee')?.value === emp.employeeId">check_circle</mat-icon>
+                    </div>
+                  </div>
+                  <div class="empty-state" *ngIf="filteredEmployees.length === 0">
+                    <mat-icon>person_search</mat-icon>
+                    <p>No employees found</p>
+                  </div>
+                </div>
+
+                <!-- Selected Employee Chip -->
+                <div class="selected-employee-chip" *ngIf="getSelectedEmployee() && !employeeDropdownOpen">
+                  <div class="emp-avatar chip-avatar"
+                       [style.backgroundColor]="getAvatarBg(getSelectedEmployee()!)"
+                       [style.color]="getAvatarColor(getSelectedEmployee()!)">
+                    {{ getInitials(getSelectedEmployee()!) }}
+                  </div>
+                  <div class="emp-info">
+                    <span class="emp-name">{{ displayName(getSelectedEmployee()!) }}</span>
+                    <span class="emp-code">{{ getSelectedEmployee()?.employeeCode }}</span>
+                  </div>
+                  <button type="button" class="chip-remove" (click)="resetEmployeeSelection()">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+
+                <span class="field-error" *ngIf="assignGoalsForm.get('selectedEmployee')?.hasError('required') && submitted" style="color: #ef4444; font-size: 11px; margin-top: 4px;">
+                  Please select an employee
+                </span>
+              </div>
+
+            </div>
           </div>
 
-        </mat-dialog-content>
+        </form>
+      </mat-dialog-content>
 
-        <!-- Actions -->
-        <mat-dialog-actions class="dialog-actions">
-          <button type="button" mat-stroked-button class="cancel-btn" (click)="dialogRef.close()" [disabled]="isSubmitting">
-            Cancel
-          </button>
-          <button mat-raised-button color="primary" type="submit" class="submit-btn" [disabled]="isSubmitting">
-            <mat-spinner *ngIf="isSubmitting" diameter="16" class="btn-spinner"></mat-spinner>
-            <mat-icon *ngIf="!isSubmitting">assignment_turned_in</mat-icon>
-            <span>{{ isSubmitting ? 'Assigning...' : 'Assign Goal' }}</span>
-          </button>
-        </mat-dialog-actions>
-      </form>
+      <div class="dialog-footer">
+        <button mat-stroked-button class="btn-cancel" mat-dialog-close [disabled]="isSubmitting">Cancel</button>
+        <button mat-flat-button class="btn-submit" (click)="onSubmit()" [disabled]="isSubmitting">
+          <mat-icon *ngIf="!isSubmitting">assignment_turned_in</mat-icon>
+          <mat-spinner diameter="16" *ngIf="isSubmitting" style="margin-right:8px;"></mat-spinner>
+          <span *ngIf="!isSubmitting">Assign Goal</span>
+          <span *ngIf="isSubmitting">Assigning...</span>
+        </button>
+      </div>
     </div>
   `,
   styles: [`
-    :host {
-      display: block;
-    }
-
-    /* ── Container ─────────────────────────────────────── */
-    .assign-goals-container {
-      width: 480px;
-      max-width: 100%;
-      background: #ffffff;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    /* ── Header ─────────────────────────────────────────── */
-    .dialog-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      position: relative;
-    }
-
-    .header-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .header-icon mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #3f51b5;
-    }
-
-    .header-text {
-      flex: 1;
-    }
-
-    .header-text h2 {
-      margin: 0;
-      font-size: 17px;
-      font-weight: 600;
-      color: #1a1a2e;
-      line-height: 1.3;
-    }
-
-    .header-subtitle {
-      margin: 2px 0 0;
-      font-size: 12px;
-      color: #9e9e9e;
-    }
-
-    .close-btn {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #9e9e9e;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .close-btn:hover {
-      background: #f5f5f5;
-      color: #424242;
-    }
-
-    .close-btn mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    /* ── Form ────────────────────────────────────────────── */
-    .assign-goals-form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    mat-dialog-content {
-      padding: 20px 24px !important;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-
-    /* ── Field Section ───────────────────────────────────── */
-    .field-section {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .field-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #616161;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-    }
-
-    .required-dot {
-      color: #f44336;
-      margin-left: 2px;
-    }
+    @use '../../styles/performance-shared';
 
     /* ── Goal Display Card ──────────────────────────────── */
     .goal-display-card {
@@ -312,14 +197,6 @@ export interface AssignGoalPayload {
       background: #f8f9ff;
       border: 1px solid #e8eaf6;
       border-radius: 8px;
-    }
-
-    .goal-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #5c6bc0;
-      flex-shrink: 0;
     }
 
     .goal-display-text {
@@ -337,36 +214,6 @@ export interface AssignGoalPayload {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .goal-id {
-      font-size: 11px;
-      color: #bdbdbd;
-      font-family: 'Courier New', monospace;
-    }
-
-    .goal-badge {
-      font-size: 11px;
-      font-weight: 600;
-      color: #2e7d32;
-      background: #e8f5e9;
-      padding: 3px 8px;
-      border-radius: 20px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ── Styled Select ───────────────────────────────────── */
-    .styled-select {
-      width: 100%;
-    }
-
-    .styled-select ::ng-deep .mat-mdc-form-field-outline {
-      border-radius: 8px;
-    }
-
-    .full-width {
-      width: 100%;
     }
 
     /* ── Employee Search Box ─────────────────────────────── */
@@ -417,10 +264,6 @@ export interface AssignGoalPayload {
       min-width: 0;
     }
 
-    .employee-search-input::placeholder {
-      color: #bdbdbd;
-    }
-
     .search-clear-btn {
       background: none;
       border: none;
@@ -430,16 +273,6 @@ export interface AssignGoalPayload {
       color: #9e9e9e;
       padding: 0;
       flex-shrink: 0;
-    }
-
-    .search-clear-btn mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    .search-clear-btn:hover {
-      color: #424242;
     }
 
     .chevron {
@@ -464,6 +297,8 @@ export interface AssignGoalPayload {
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       max-height: 240px;
       overflow-y: auto;
+      position: absolute;
+      width: calc(100% - 48px);
       z-index: 200;
     }
 
@@ -496,21 +331,12 @@ export interface AssignGoalPayload {
       border-bottom: 1px solid #fafafa;
     }
 
-    .employee-option:last-child {
-      border-bottom: none;
-    }
-
     .employee-option:hover {
       background: #f5f6ff;
     }
 
     .employee-option.is-selected {
       background: #ede7f6;
-    }
-
-    .employee-option.is-selected .emp-name {
-      color: #5c6bc0;
-      font-weight: 600;
     }
 
     .check-icon {
@@ -529,18 +355,6 @@ export interface AssignGoalPayload {
       justify-content: center;
       padding: 28px 16px;
       gap: 8px;
-    }
-
-    .empty-state mat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-      color: #e0e0e0;
-    }
-
-    .empty-state p {
-      margin: 0;
-      font-size: 13px;
       color: #bdbdbd;
     }
 
@@ -614,108 +428,10 @@ export interface AssignGoalPayload {
       margin-left: auto;
       flex-shrink: 0;
       border-radius: 4px;
-      transition: color 0.15s, background 0.15s;
     }
 
     .chip-remove:hover {
       color: #f44336;
-    }
-
-    .chip-remove mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    /* ── Validation Error ────────────────────────────────── */
-    .field-error {
-      font-size: 11px;
-      color: #f44336;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ── Actions ─────────────────────────────────────────── */
-    .dialog-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      padding: 14px 24px 20px !important;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    .cancel-btn {
-      height: 40px;
-      padding: 0 20px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #616161;
-      border-radius: 8px;
-      border-color: #e0e0e0;
-    }
-
-    .cancel-btn:hover {
-      background: #f5f5f5;
-    }
-
-    .submit-btn {
-      height: 40px;
-      padding: 0 20px;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .submit-btn mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    .btn-spinner {
-      display: inline-block;
-    }
-
-    /* ── Scrollbar ───────────────────────────────────────── */
-    mat-dialog-content::-webkit-scrollbar,
-    .employee-dropdown-panel::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    mat-dialog-content::-webkit-scrollbar-track,
-    .employee-dropdown-panel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    mat-dialog-content::-webkit-scrollbar-thumb,
-    .employee-dropdown-panel::-webkit-scrollbar-thumb {
-      background: #e0e0e0;
-      border-radius: 4px;
-    }
-
-    /* ── Responsive ──────────────────────────────────────── */
-    @media (max-width: 560px) {
-      .assign-goals-container {
-        width: 100%;
-      }
-
-      mat-dialog-content {
-        padding: 16px 16px !important;
-      }
-
-      .dialog-actions {
-        padding: 12px 16px 16px !important;
-      }
-
-      .dialog-header {
-        padding: 16px 16px 14px;
-      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

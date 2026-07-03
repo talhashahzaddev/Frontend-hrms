@@ -1,25 +1,14 @@
 <div class="ts-page-layout">
 
   <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
-  <div class="ts-page-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <mat-icon style="color:white;font-size:22px;width:22px;height:22px;">business</mat-icon>
-      </div>
-      <div>
-        <h1 style="margin:0 0 2px;font-size:1.375rem;font-weight:700;color:#0f172a;letter-spacing:-0.3px;">Performance Management</h1>
-        <p style="margin:0;font-size:0.8125rem;color:#64748b;">Manage KRAs and goals for organizational performance tracking</p>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button *ngIf="selectedTab === 0 && hasPermission('CREATE_KRA_BUTTON')" (click)="openCreateDialog()" class="btn-submit">
-        <mat-icon>add</mat-icon> New KRA
-      </button>
-      <button *ngIf="selectedTab === 1 && hasPermission('CREATE_GOAL_BUTTON')" (click)="openCreateGoalDialog()" class="btn-submit">
-        <mat-icon>add</mat-icon> Add Goal
-      </button>
-    </div>
-  </div>
+  <app-page-header matIcon="business" title="Performance Management" subtitle="Manage KRAs and goals for organizational performance tracking">
+    <button *ngIf="selectedTab === 0 && hasPermission('CREATE_KRA_BUTTON')" actions (click)="openCreateDialog()" class="btn-submit">
+      <mat-icon>add</mat-icon> New KRA
+    </button>
+    <button *ngIf="selectedTab === 1 && hasPermission('CREATE_GOAL_BUTTON')" actions (click)="openCreateGoalDialog()" class="btn-submit">
+      <mat-icon>add</mat-icon> Add Goal
+    </button>
+  </app-page-header>
 
   <!-- ═══ TABS ══════════════════════════════════════════════════════════ -->
   <div class="perf-tabs">

@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, AfterViewInit } from '@angular/core';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -54,6 +55,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -618,10 +620,9 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   viewAppraisal(appraisal: EmployeeAppraisal): void {
     console.log('Opening view dialog for appraisal:', appraisal);
     const dialogRef = this.dialog.open(ViewAppraisalDialogComponent, {
-      width: '520px',
+      width: '560px',
       maxWidth: '95vw',
-      height: 'auto',
-      maxHeight: '80vh',
+      panelClass: 'attendance-dialog-panel',
       data: {
         appraisal: appraisal
       },
@@ -708,7 +709,8 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   private openCreateFormWithEmployees(employeesList: Employee[]): void {
     const dialogRef = this.dialog.open(CreateAppraisalDialogComponent, {
       width: '900px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         appraisalCycles: this.appraisalCycles,
         employees: employeesList,
@@ -729,7 +731,8 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   openSelfAssessmentDialog(): void {
     const dialogRef = this.dialog.open(SelfAssessmentDialogComponent, {
       width: '900px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         appraisalCycles: this.appraisalCycles
       },
@@ -748,8 +751,9 @@ onAllManagerReviewPageChange(event: PageEvent): void {
 
   openManagerReviewDialog(assessment: SelfAssessment): void {
     const dialogRef = this.dialog.open(ManagerReviewDialogueComponent, {
-      width: '450px',
-      maxWidth: '90vw',
+      width: '620px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         employeeId: assessment.employeeId || '',
         employeeName: assessment.employeeName || '',
@@ -774,8 +778,9 @@ onAllManagerReviewPageChange(event: PageEvent): void {
 
   openHrReviewDialog(): void {
     const dialogRef = this.dialog.open(HrReviewDialogComponent, {
-      width: '500px',
-      maxWidth: '90vw',
+      width: '580px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         appraisalCycles: this.appraisalCycles
       },
@@ -794,10 +799,9 @@ onAllManagerReviewPageChange(event: PageEvent): void {
 
   openAllTablesViewDetails(data: any): void {
     const dialogRef = this.dialog.open(AppraisalAllTablesViewDetailsComponent, {
-      width: '520px',
+      width: '600px',
       maxWidth: '95vw',
-      height: 'auto',
-      maxHeight: '80vh',
+      panelClass: 'attendance-dialog-panel',
       data: data,
       disableClose: false
     });
@@ -1111,7 +1115,8 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   openCreateAppraisalForEmployee(assessment: SelfAssessment): void {
     const dialogRef = this.dialog.open(CreateAppraisalDialogComponent, {
       width: '900px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         appraisalCycles: this.appraisalCycles,
         employees: this.employees,
@@ -1331,7 +1336,8 @@ onAllManagerReviewPageChange(event: PageEvent): void {
   openEditCycleDialog(cycle: AppraisalCycle): void {
     const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
       width: '700px',
-      maxWidth: '90vw',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       data: {
         cycle: cycle
       },

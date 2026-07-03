@@ -4,6 +4,7 @@
 // Imports timesheet-shared for: ts-page-layout, ts-card, filters-section, etc.
 // ══════════════════════════════════════════════════════════════════════════════
 @use '../../timesheet/styles/timesheet-shared' as ts;
+@use '../../attendance/styles/attendance-dialog' as ad;
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 $pm-primary:          #2563eb;

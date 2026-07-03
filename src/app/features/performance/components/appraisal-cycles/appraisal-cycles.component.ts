@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -37,6 +38,7 @@ import { SharedCommonModule } from '@shared/shared-common.module';
   standalone: true,
   imports: [
     SharedCommonModule,
+    PageHeaderComponent,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
@@ -150,7 +152,9 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '600px',
+      width: '700px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       disableClose: true,
       data: {}
     });
@@ -165,7 +169,9 @@ export class AppraisalCyclesComponent implements OnInit, OnDestroy {
 
   openEditDialog(cycle: AppraisalCycle): void {
     const dialogRef = this.dialog.open(AppraisalCycleFormComponent, {
-      width: '600px',
+      width: '700px',
+      maxWidth: '95vw',
+      panelClass: 'attendance-dialog-panel',
       disableClose: true,
       data: { cycle: cycle }
     });
