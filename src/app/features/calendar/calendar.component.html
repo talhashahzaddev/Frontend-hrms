@@ -1,92 +1,69 @@
-<div class="calendar-container">
+<div class="ts-page-layout">
 
-    <!-- Header -->
-    <div class="calendar-header">
-        <!-- Top Row: Title + Navigation -->
-        <div class="header-top">
-            <h1 class="page-title">
-                <mat-icon>calendar_month</mat-icon>
-                Calendar
-            </h1>
-            <div class="calendar-controls">
-                <button mat-icon-button (click)="previousMonth()" [disabled]="isLoading">
+    <!-- ═══ PAGE HEADER ═══════════════════════════════════════════════════ -->
+    <app-page-header matIcon="calendar_month" title="Calendar" subtitle="View your attendance, leaves, and schedule">
+        <div actions style="display:flex; gap:16px; align-items:center;">
+            <div class="calendar-controls" style="display:flex; align-items:center; gap:12px; background:#f1f5f9; padding:6px; border-radius:12px;">
+                <button mat-icon-button (click)="previousMonth()" [disabled]="isLoading" style="background:white; color:#0f172a;">
                     <mat-icon>chevron_left</mat-icon>
                 </button>
-                <h2 class="month-year">{{ currentMonthYear }}</h2>
-                <button mat-icon-button (click)="nextMonth()" [disabled]="isLoading">
+                <h2 class="month-year" style="font-size:16px; font-weight:700; color:#0f172a; margin:0; min-width:160px; text-align:center;">
+                    {{ currentMonthYear }}
+                </h2>
+                <button mat-icon-button (click)="nextMonth()" [disabled]="isLoading" style="background:white; color:#0f172a;">
                     <mat-icon>chevron_right</mat-icon>
                 </button>
-                <button mat-stroked-button (click)="goToToday()" [disabled]="isLoading">
-                    <mat-icon>today</mat-icon>
-                    Today
+                <button mat-stroked-button (click)="goToToday()" [disabled]="isLoading" style="background:white; color:#2563eb; border:none; font-weight:600;">
+                    <mat-icon>today</mat-icon> Today
                 </button>
             </div>
         </div>
+    </app-page-header>
 
-        <!-- Bottom Row: Legend + Filter -->
-        <div class="header-bottom">
-            <!-- Color Legend -->
-            <div class="calendar-legend">
-                <!-- Attendance Icons -->
-                <div class="legend-section">
-                    <span class="legend-section-title">Attendance:</span>
-                    <div class="legend-item">
-                        <mat-icon class="legend-icon present">check_circle</mat-icon>
-                        <span class="legend-label">Present</span>
-                    </div>
-                    <div class="legend-item">
-                        <mat-icon class="legend-icon absent">cancel</mat-icon>
-                        <span class="legend-label">Absent</span>
-                    </div>
-                    <div class="legend-item">
-                        <mat-icon class="legend-icon late">schedule</mat-icon>
-                        <span class="legend-label">Late or Half Day</span>
-                    </div>
+    <!-- ═══ TOOLBAR / LEGEND ══════════════════════════════════════════════ -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:white; padding:12px 20px; border-radius:12px; border:1px solid #e2e8f0; box-shadow:0 1px 3px rgba(0,0,0,0.05); gap:20px; flex-wrap:wrap;">
+        <!-- Color Legend -->
+        <div class="calendar-legend" style="display:flex; flex-wrap:wrap; gap:24px; flex:1;">
+            <!-- Attendance Icons -->
+            <div class="legend-section" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <span style="font-size:12px; text-transform:uppercase; font-weight:700; color:#64748b;">Attendance:</span>
+                <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
+                    <mat-icon style="font-size:18px; width:18px; height:18px; color:#22c55e;">check_circle</mat-icon>
+                    <span style="font-size:13px; color:#64748b; font-weight:500;">Present</span>
                 </div>
-
-                <!-- Leave Status - Status Examples -->
-                <div class="legend-section">
-                    <span class="legend-section-title">Leave Statuses: </span>
-                    <!-- Approved: Blue Bar (No Icon) -->
-                    <div class="legend-item">
-                        <div class="legend-badge-example approved">
-                            <span class="badge-text">Approved</span>
-                        </div>
-                    </div>
-                    <!-- Pending: Blue Bar + Hourglass -->
-                    <div class="legend-item">
-                        <div class="legend-badge-example pending">
-                            <span class="badge-text">Pending</span>
-                            <mat-icon class="status-icon">hourglass_empty</mat-icon>
-                        </div>
-                    </div>
-                    <!-- Rejected: Blue Bar + Red Block -->
-                    <div class="legend-item">
-                        <div class="legend-badge-example rejected">
-                            <span class="badge-text">Rejected</span>
-                            <mat-icon class="status-icon">block</mat-icon>
-                        </div>
-                    </div>
+                <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
+                    <mat-icon style="font-size:18px; width:18px; height:18px; color:#ef4444;">cancel</mat-icon>
+                    <span style="font-size:13px; color:#64748b; font-weight:500;">Absent</span>
                 </div>
-
-                <!-- Holiday -->
-                <div class="legend-section">
-                    <span class="legend-section-title">Special:</span>
-                    <div class="legend-item">
-                        <span class="legend-badge holiday">Holiday</span>
-                    </div>
+                <div class="legend-item" style="display:flex; align-items:center; gap:6px;">
+                    <mat-icon style="font-size:18px; width:18px; height:18px; color:#f97316;">schedule</mat-icon>
+                    <span style="font-size:13px; color:#64748b; font-weight:500;">Late/Half Day</span>
                 </div>
             </div>
 
-            <!-- Filter Dropdown -->
-            <mat-form-field class="filter-field" appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Filter Events</mat-label>
-                <mat-select [(value)]="eventFilter" (selectionChange)="onFilterChange()">
-                    <mat-option *ngFor="let option of filterOptions" [value]="option.value">
-                        {{ option.label }}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
+            <!-- Leave Statuses -->
+            <div class="legend-section" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <span style="font-size:12px; text-transform:uppercase; font-weight:700; color:#64748b;">Leaves:</span>
+                <div style="padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; border-left:3px solid #22c55e; background:#f0fdf4; color:#15803d;">Approved</div>
+                <div style="padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px; border-left:3px solid #64748b; background:#f9fafb; color:#4b5563;">Pending <mat-icon style="font-size:14px; width:14px; height:14px;">hourglass_empty</mat-icon></div>
+                <div style="padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px; border-left:3px solid #ef4444; background:#fef2f2; color:#b91c1c;">Rejected <mat-icon style="font-size:14px; width:14px; height:14px;">block</mat-icon></div>
+            </div>
+
+            <!-- Special -->
+            <div class="legend-section" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <span style="font-size:12px; text-transform:uppercase; font-weight:700; color:#64748b;">Special:</span>
+                <div style="background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">Holiday</div>
+            </div>
+        </div>
+
+        <!-- Filter Dropdown -->
+        <div class="filter-select-wrap" style="width:180px;">
+            <mat-icon class="filter-select-icon">tune</mat-icon>
+            <select class="filter-select" [(ngModel)]="eventFilter" (ngModelChange)="onFilterChange()">
+                <option *ngFor="let option of filterOptions" [value]="option.value">
+                    {{ option.label }}
+                </option>
+            </select>
         </div>
     </div>
 
