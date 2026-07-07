@@ -263,13 +263,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
     },
     {
       label: 'Help Desk',
-      icon: 'event_available',
+      icon: 'support_agent',
       menuName: 'Help Desk',
       children: [
-        { label: 'Tickets Dashbaord', icon: 'event', menuName: 'Help Desk', subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
-        { label: 'Agent Group', icon: 'event', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
-        { label: 'Ticket Involvement', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Involvement', route: '/help-desk/ticket-involvement' },
-        { label: 'Ticket Category', icon: 'event', menuName: 'Help Desk', subMenuName: 'Ticket Category', route: '/help-desk/ticket-category', exact: true }
+        { label: 'Tickets Dashboard', icon: 'confirmation_number', menuName: 'Help Desk', subMenuName: 'Tickets Dashboard', route: '/help-desk/tickets' },
+        { label: 'Agent Group', icon: 'groups', menuName: 'Help Desk', subMenuName: 'Agent Group', route: '/help-desk/agent-group' },
+        { label: 'Ticket Involvement', icon: 'assignment_ind', menuName: 'Help Desk', subMenuName: 'Ticket Involvement', route: '/help-desk/ticket-involvement' },
+        { label: 'Ticket Category', icon: 'category', menuName: 'Help Desk', subMenuName: 'Ticket Category', route: '/help-desk/ticket-category', exact: true }
       ]
     },
     {

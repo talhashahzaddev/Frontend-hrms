@@ -1,3 +1,4 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -21,6 +22,7 @@ import { ViewGroupAgentDetailsComponent } from './view-Group-agent-details';
 import { ConfirmDeleteDialogComponent, ConfirmDeleteData } from '../../../../shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
 
 import { SharedCommonModule } from '@shared/shared-common.module';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 interface Department {
   departmentId: string;
   departmentName: string;
@@ -43,7 +45,9 @@ interface Department {
     MatDialogModule,
     MatMenuModule,
     MatIconModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    PageHeaderComponent,
+    MatProgressSpinnerModule
   ],
   templateUrl: './agent-group-dashboard.component.html',
   styleUrls: ['./agent-group-dashboard.component.scss'],
@@ -231,3 +235,5 @@ export class AgentGroupDashboardComponent implements OnInit, OnDestroy {
     return this.authService.hasMenuPermission('Help Desk', 'Agent Group', actionKey);
   }
 }
+
+

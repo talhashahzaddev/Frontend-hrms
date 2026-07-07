@@ -1,7 +1,7 @@
-<div class="ticket-page">
+<div class="ts-page-layout">
 
   <!-- Loader -->
-  <div *ngIf="loading" class="loading">
+  <div *ngIf="loading" class="hd-loader">
     <div class="loader-spinner"></div>
     <p>Loading ticket details...</p>
   </div>
@@ -99,7 +99,7 @@
       <div class="action-buttons">
         <button
           *ngIf="!isEditMode && hasPermission('Invlove_Ticket_View_Edit_Button')"
-          class="btn btn-primary"
+          class="hd-btn-create"
           (click)="enableEditMode()">
           <span class="material-icons">edit</span>
           Edit Ticket
@@ -107,14 +107,14 @@
 
         <div *ngIf="isEditMode" class="edit-actions">
           <button
-            class="btn btn-secondary"
+            class="hd-btn-cancel"
             (click)="cancelEdit()"
             [disabled]="updating">
             Cancel
           </button>
 
           <button
-            class="btn btn-primary"
+            class="hd-btn-create"
             (click)="updateTicket()"
             [disabled]="updating">
             <span class="material-icons">check</span>
@@ -124,7 +124,7 @@
       </div>
 
       <!-- Details Card -->
-      <div class="card details-card">
+      <div class="ts-card" style="padding:1.25rem 1.5rem; margin-bottom:1rem;">
         <div class="card-header">
           <h3>Ticket Details</h3>
           <span class="material-icons">info</span>
@@ -288,7 +288,7 @@
       </div>
 
       <!-- Description Card -->
-      <div class="card description-card">
+      <div class="ts-card" style="padding:1.25rem 1.5rem; margin-bottom:1rem;">
         <div class="card-header">
           <span class="material-icons">notes</span>
           <h3>Description</h3>
@@ -300,7 +300,7 @@
       </div>
 
       <!-- Attachment Card -->
-      <div class="card attachment-card">
+      <div class="ts-card" style="padding:1.25rem 1.5rem;">
         <div class="card-header">
           <div class="header-left">
             <span class="material-icons">attach_file</span>

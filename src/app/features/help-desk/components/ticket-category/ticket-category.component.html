@@ -1,82 +1,64 @@
-<div class="ticket-categories-page">
+<div class="ts-page-layout">
 
-  <!-- ===== MAIN CONTENT CARD ===== -->
-  <section class="main-card">
+  <!-- Page Header -->
+  <app-page-header matIcon="category" title="Ticket Categories" subtitle="Manage and view all helpdesk ticket categories">
+    <button actions class="hd-btn-create" *ngIf="hasPermission('CREATE_TICKETCATEGORY_BUTTON')" (click)="openCreateCategoryDialog()">
+      <mat-icon>add</mat-icon>
+      <span>Create Category</span>
+    </button>
+  </app-page-header>
 
-    <!-- Header Section -->
-    <div class="card-header">
-      <div class="header-text">
-        <h1 class="page-title">Ticket Categories</h1>
-        <p class="page-subtitle">Manage and view all helpdesk ticket categories</p>
-      </div>
-    </div>
-
-    <!-- Filters Section -->
-    <div class="filters-section">
-      <div class="filters-grid">
-        <!-- Search Input -->
-        <div class="filter-field">
-          <label class="filter-label">Search</label>
-          <div class="search-input-wrapper">
-            <mat-icon class="search-icon">search</mat-icon>
-            <input
-              type="text"
-              class="filter-input with-icon"
-              placeholder="Search categories..."
-              [formControl]="searchControl"
-            />
-          </div>
-        </div>
-
-        <!-- Department Dropdown -->
-        <div class="filter-field">
-          <label class="filter-label">Department</label>
-          <select class="filter-select" [formControl]="departmentControl">
-            <option value="">--ALL--</option>
-            <option *ngFor="let dept of departments" [value]="dept.departmentId">
-              {{ dept.departmentName }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Create Category Button -->
-        <div class="add-btn-wrap" *ngIf="hasPermission('CREATE_TICKETCATEGORY_BUTTON')">
-          <button mat-raised-button color="primary" class="add-btn" (click)="openCreateCategoryDialog()">
-            <mat-icon>add</mat-icon>
-            <span>Create Category</span>
-          </button>
+  <!-- Filters Card -->
+  <div class="ts-card" style="padding: 1.25rem 1.5rem;">
+    <div class="hd-filter-row">
+      <div class="hd-filter-group">
+        <label>Search</label>
+        <div class="hd-search-wrap">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input type="text" class="hd-input" placeholder="Search categories..." [formControl]="searchControl" />
         </div>
       </div>
+      <div class="hd-filter-group">
+        <label>Department</label>
+        <select class="hd-select" [formControl]="departmentControl">
+          <option value="">-- All --</option>
+          <option *ngFor="let dept of departments" [value]="dept.departmentId">
+            {{ dept.departmentName }}
+          </option>
+        </select>
+      </div>
     </div>
-  </section>
+  </div>
 
-  <!-- ===== LOADER ===== -->
-  <div *ngIf="loading" class="loader-wrapper">
-    <div class="spinner-border"></div>
+  <!-- Loader -->
+  <div *ngIf="loading" class="hd-loader">
+    <mat-spinner diameter="36"></mat-spinner>
     <p>Loading categories...</p>
   </div>
 
-  <!-- ===== TABLE SECTION ===== -->
-  <section class="table-card" *ngIf="!loading && categories.length > 0">
-    <div class="table-wrapper">
-      <table class="categories-table">
+  <!-- Table Card -->
+  <div class="ts-card" *ngIf="!loading && categories.length > 0" style="overflow: hidden;">
+    <div class="hd-table-wrap">
+      <table class="hd-table">
         <thead>
           <tr>
-            <th>CATEGORY NAME</th>
-            <th>DEPARTMENT</th>
-            <th>STATUS</th>
-            <th>CREATED AT</th>
-            <th class="text-center">ACTIONS</th>
+            <th>Category Name</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let category of paginatedCategories; let even = even; let odd = odd"
-              [class.row-even]="even"
-              [class.row-odd]="odd">
-            <td>{{ category.categoryName }}</td>
+          <tr *ngFor="let category of paginatedCategories">
+            <td class="td-title">{{ category.categoryName }}</td>
             <td>{{ category.departmentName || 'N/A' }}</td>
-            <td>{{ category.status ? 'Active' : 'Inactive' }}</td>
-            <td>{{ category.createdAt | localizedDate:'short' }}</td>
+            <td>
+              <span class="hd-badge" [ngClass]="category.status ? 'badge-active' : 'badge-inactive'">
+                {{ category.status ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="td-date">{{ category.createdAt | localizedDate:'short' }}</td>
             <td class="text-center">
               <button
                 mat-icon-button
@@ -85,8 +67,7 @@
                 aria-label="Actions menu">
                 <mat-icon>more_vert</mat-icon>
               </button>
-
-              <mat-menu #actionMenu="matMenu" class="custom-action-menu">
+              <mat-menu #actionMenu="matMenu">
                 <button mat-menu-item *ngIf="hasPermission('EDIT_TICKETCategory_BUTTON')" (click)="editCategory(category)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
@@ -102,7 +83,7 @@
       </table>
     </div>
 
-    <!-- Material Paginator -->
+    <!-- Paginator -->
     <mat-paginator
       [length]="totalCategories"
       [pageSize]="pageSize"
@@ -110,12 +91,17 @@
       [pageIndex]="pageIndex"
       (page)="onPageChange($event)"
       showFirstLastButtons
-      class="custom-paginator">
+      class="hd-paginator">
     </mat-paginator>
-  </section>
-
-  <!-- ===== NO DATA ===== -->
-  <div *ngIf="!loading && categories.length === 0" class="no-data">
-    <p>No categories found.</p>
   </div>
+
+  <!-- No Data -->
+  <div *ngIf="!loading && categories.length === 0" class="ts-card">
+    <div class="hd-empty-state">
+      <mat-icon>category</mat-icon>
+      <h3>No categories found</h3>
+      <p>Create a new ticket category to get started</p>
+    </div>
+  </div>
+
 </div>

@@ -1,3 +1,5 @@
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Component, OnInit, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -39,7 +41,7 @@ export interface Category {
     MatSelectModule,
     MatButtonModule,
     MatDialogModule
-  ],
+  , MatIconModule, MatProgressSpinnerModule],
   templateUrl: './create-ticket-category-dialog.component.html',
   styleUrls: ['./create-ticket-category-dialog.component.scss']
 })
@@ -174,3 +176,4 @@ export class CreateTicketCategoryDialogComponent implements OnInit {
     this.dialogRef.close(false);
   }
 }
+

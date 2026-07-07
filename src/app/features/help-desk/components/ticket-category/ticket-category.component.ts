@@ -1,3 +1,5 @@
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PageHeaderComponent } from '@shared/components/page-header/page-header.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -49,6 +51,7 @@ interface Category {
     MatIconModule,
     MatPaginatorModule,
     MatMenuModule
+    ,PageHeaderComponent, MatProgressSpinnerModule
   ],
   templateUrl: './ticket-category.component.html',
   styleUrls: ['./ticket-category.component.scss']
@@ -220,3 +223,5 @@ export class TicketCategoryComponent implements OnInit, OnDestroy {
 // Permission helper
 // Uses sidebar naming: Menu = 'Help Desk', SubMenu = 'Ticket Category'
 export interface _TicketCategoryPermissionHelper {}
+
+

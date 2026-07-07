@@ -1,33 +1,20 @@
-<!-- tickets-dashboard.component.html -->
+<div class="ts-page-layout">
 
-<div class="tickets-page">
+  <!-- Page Header -->
+  <app-page-header matIcon="confirmation_number" title="Ticket Requests" subtitle="View and manage all support tickets">
+    <button actions class="hd-btn-create" *ngIf="hasPermission('Create_Ticket_Button')" (click)="openCreateTicketDialog()">
+      <mat-icon>add</mat-icon>
+      <span>Create Request Ticket</span>
+    </button>
+  </app-page-header>
 
-  <!-- ===================================================
-       FILTER CARD
-       =================================================== -->
-  <section class="filter-section">
-
-    <div class="filter-header" >
-     
-      <h1 class="page-title"
-      *ngIf="!loading">Ticket Request</h1>
-      <div class="add-btn-wrap">
-        <button class="btn-create" *ngIf="hasPermission('Create_Ticket_Button')" (click)="openCreateTicketDialog()" class="add-btn">
-          <mat-icon>add</mat-icon>
-          <span>Create Request Ticket</span>
-        </button>
-
-      </div>
-      
-    </div>
-
-    <!-- 3 filters: Status | Department | Ticket Type -->
-    <div class="filters-grid">
-
-      <div class="filter-field-group">
-        <label class="filter-label" for="statusSelect">Status</label>
-        <select class="filter-select" id="statusSelect" [formControl]="statusControl">
-          <option value="">--ALL--</option>
+  <!-- Filters Card -->
+  <div class="ts-card" style="padding: 1.25rem 1.5rem;">
+    <div class="hd-filter-row">
+      <div class="hd-filter-group">
+        <label>Status</label>
+        <select class="hd-select" id="statusSelect" [formControl]="statusControl">
+          <option value="">-- All --</option>
           <option value="In Progress">In Progress</option>
           <option value="Pending">Pending</option>
           <option value="Resolved">Resolved</option>
@@ -36,47 +23,38 @@
         </select>
       </div>
 
-      <div class="filter-field-group">
-        <label class="filter-label" for="departmentSelect">Department</label>
-        <select class="filter-select" id="departmentSelect" [formControl]="departmentControl">
-          <option [value]="''">--ALL--</option>
+      <div class="hd-filter-group">
+        <label>Department</label>
+        <select class="hd-select" id="departmentSelect" [formControl]="departmentControl">
+          <option [value]="''">-- All --</option>
           <option *ngFor="let dept of departments" [value]="dept.departmentId">
             {{ dept.departmentName }}
           </option>
         </select>
       </div>
 
-      <div class="filter-field-group">
-        <label class="filter-label" for="ticketTypeSelect">Ticket Type</label>
-        <select class="filter-select" id="ticketTypeSelect" [formControl]="ticketTypeControl">
-          <option value="">--ALL--</option>
+      <div class="hd-filter-group">
+        <label>Ticket Type</label>
+        <select class="hd-select" id="ticketTypeSelect" [formControl]="ticketTypeControl">
+          <option value="">-- All --</option>
           <option value="Request">Request</option>
           <option value="Complaint">Complaint</option>
           <option value="Issue">Issue</option>
         </select>
       </div>
-
     </div>
+  </div>
 
-  </section>
-
-
-  <!-- ===================================================
-       LOADER
-       =================================================== -->
-  <div *ngIf="loading" class="loader-wrapper">
-    <div class="spinner-border"></div>
+  <!-- Loader -->
+  <div *ngIf="loading" class="hd-loader">
+    <mat-spinner diameter="36"></mat-spinner>
     <p>Loading tickets...</p>
   </div>
 
-
-  <!-- ===================================================
-       TABLE + PAGINATION — single white card
-       =================================================== -->
-  <div class="table-container" *ngIf="!loading && tickets.length > 0">
-
-    <div class="table-scroll">
-      <table class="tickets-table">
+  <!-- Table Card -->
+  <div class="ts-card" *ngIf="!loading && tickets.length > 0" style="overflow: hidden;">
+    <div class="hd-table-wrap">
+      <table class="hd-table">
         <thead>
           <tr>
             <th>Title</th>
@@ -90,114 +68,104 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let ticket of tickets; let even = even"
-            [class.row-alt]="even"
-          >
+          <tr *ngFor="let ticket of tickets">
             <td class="td-title">{{ ticket.ticketTitle }}</td>
             <td>
               <span class="ticket-type-text">{{ ticket.ticketType || 'N/A' }}</span>
             </td>
             <td>{{ ticket.category }}</td>
             <td class="text-center">
-              <span class="badge" [ngClass]="{
-                'badge-status-open':        ticket.status === 'Open',
-                'badge-status-inprogress':  ticket.status === 'In Progress',
-                'badge-status-resolved':    ticket.status === 'Resolved',
-                'badge-status-pending':     ticket.status === 'Pending',
-                'badge-status-closed':      ticket.status === 'Closed',
-                'badge-status-default':     ticket.status !== 'Open'
-                                         && ticket.status !== 'In Progress'
-                                         && ticket.status !== 'Resolved'
-                                         && ticket.status !== 'Pending'
-                                         && ticket.status !== 'Closed'
+              <span class="hd-badge" [ngClass]="{
+                'status-open':        ticket.status === 'Open',
+                'status-inprogress':  ticket.status === 'In Progress',
+                'status-resolved':    ticket.status === 'Resolved',
+                'status-pending':     ticket.status === 'Pending',
+                'status-closed':      ticket.status === 'Closed',
+                'status-default':     ticket.status !== 'Open'
+                                   && ticket.status !== 'In Progress'
+                                   && ticket.status !== 'Resolved'
+                                   && ticket.status !== 'Pending'
+                                   && ticket.status !== 'Closed'
               }">{{ ticket.status }}</span>
             </td>
             <td>{{ ticket.departmentName }}</td>
             <td class="text-center">
-              <span class="badge" [ngClass]="{
-                'badge-priority-high':    ticket.priority === 'High',
-                'badge-priority-medium':  ticket.priority === 'Medium',
-                'badge-priority-low':     ticket.priority === 'Low',
-                'badge-priority-default': !ticket.priority
-                                       || (ticket.priority !== 'High'
-                                        && ticket.priority !== 'Medium'
-                                        && ticket.priority !== 'Low')
+              <span class="hd-badge" [ngClass]="{
+                'priority-high':    ticket.priority === 'High',
+                'priority-medium':  ticket.priority === 'Medium',
+                'priority-low':     ticket.priority === 'Low',
+                'priority-default': !ticket.priority
+                                 || (ticket.priority !== 'High'
+                                  && ticket.priority !== 'Medium'
+                                  && ticket.priority !== 'Low')
               }">{{ ticket.priority || 'N/A' }}</span>
             </td>
             <td class="td-date">{{ ticket.createdat | localizedDate: 'MM/dd/yy' }}</td>
 
-            <!-- Three-dot action menu (hidden if no permissions) -->
+            <!-- Three-dot action menu -->
             <td class="text-center">
-              <ng-container>
-                <button
-                  mat-icon-button
-                  [matMenuTriggerFor]="menu"
-                  class="btn-action"
-                  title="Actions">
-                  <mat-icon>more_vert</mat-icon>
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="menu"
+                class="action-menu-btn"
+                title="Actions">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item *ngIf="hasPermission('Ticket_View_Button')" (click)="viewTicket(ticket)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View</span>
                 </button>
-                <mat-menu #menu="matMenu">
-                  <button mat-menu-item *ngIf="hasPermission('Ticket_View_Button')" (click)="viewTicket(ticket)">
-                    <mat-icon>visibility</mat-icon>
-                    <span>View</span>
-                  </button>
-                  <button mat-menu-item *ngIf="hasPermission('Ticket_Delete_Button')" (click)="deleteTicket(ticket)">
-                    <mat-icon>delete</mat-icon>
-                    <span>Delete</span>
-                  </button>
-                </mat-menu>
-              </ng-container>
+                <button mat-menu-item *ngIf="hasPermission('Ticket_Delete_Button')" (click)="deleteTicket(ticket)">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pagination — fused inside same card -->
-    <div class="pagination-section">
+    <!-- Pagination -->
+    <div class="hd-pagination">
       <div class="pagination-left">
         <span class="pagination-label">Show Records</span>
-        <select class="pagination-select">
+        <select class="hd-select" style="width:70px; height:32px; font-size:0.8rem;">
           <option>10</option>
           <option>25</option>
           <option>50</option>
         </select>
       </div>
-      <div class="pagination-right">
-        <div class="pagination-buttons">
-          <button
-            class="btn-page"
-            (click)="searchModel.page = searchModel.page! - 1; getTickets()"
-            [disabled]="searchModel.page === 1"
-            title="Previous">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-          </button>
-          <button
-            class="btn-page"
-            (click)="searchModel.page = searchModel.page! + 1; getTickets()"
-            title="Next">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-            </svg>
-          </button>
-        </div>
+      <div class="pagination-buttons">
+        <button
+          class="btn-page"
+          (click)="searchModel.page = searchModel.page! - 1; getTickets()"
+          [disabled]="searchModel.page === 1"
+          title="Previous">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+        </button>
+        <button
+          class="btn-page"
+          (click)="searchModel.page = searchModel.page! + 1; getTickets()"
+          title="Next">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          </svg>
+        </button>
       </div>
     </div>
-
   </div>
 
-
-  <!-- ===================================================
-       NO DATA
-       =================================================== -->
-  <div *ngIf="!loading && tickets.length === 0" class="no-data">
-    <p>No tickets found.</p>
+  <!-- No Data -->
+  <div *ngIf="!loading && tickets.length === 0" class="ts-card">
+    <div class="hd-empty-state">
+      <mat-icon>confirmation_number</mat-icon>
+      <h3>No tickets found</h3>
+      <p>Try adjusting your filters or create a new ticket</p>
+    </div>
   </div>
 
 </div>
-
-<!-- Global click to close any open menu -->
-<!-- Add (click)="closeAllMenus()" on the host or a global listener in TS -->

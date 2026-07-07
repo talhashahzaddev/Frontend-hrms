@@ -1,82 +1,76 @@
-<!-- <h2 mat-dialog-title>
-  {{ dialogTitle }}
-  <button type="button" class="dialog-close-btn" (click)="cancel()" aria-label="Close">
-    &times;
-  </button>
-</h2> -->
-<div class="ticket-category-modal"> <h2 mat-dialog-title>
-    {{ dialogTitle }}
-    <button type="button" class="dialog-close-btn" (click)="cancel()" aria-label="Close">
-      &times;
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <mat-icon>category</mat-icon>
+      </div>
+      <div>
+        <h2 class="header-title">{{ dialogTitle }}</h2>
+        <p class="header-subtitle">Configure ticket category settings</p>
+      </div>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-btn" type="button" (click)="cancel()">
+      <mat-icon>close</mat-icon>
     </button>
-  </h2>
+  </div>
 
-  <form [formGroup]="categoryForm" (ngSubmit)="submit()">
-     </form>
+  <mat-dialog-content class="dialog-body">
+    <form [formGroup]="categoryForm" (ngSubmit)="submit()">
+      <div class="assign-section">
+        <div class="assign-section-header">
+          <mat-icon>info</mat-icon>
+          <span>Category Details</span>
+        </div>
+        <div class="assign-section-body">
+
+          <!-- Category Name -->
+          <div class="assign-field-group">
+            <label class="field-label">Category Name <span class="required">*</span></label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <input matInput formControlName="name" placeholder="e.g., Software Issues">
+              <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">Category Name is required</mat-error>
+              <mat-error *ngIf="categoryForm.get('name')?.hasError('minlength')">Minimum 2 characters</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Department -->
+          <div class="assign-field-group">
+            <label class="field-label">Department</label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <mat-select formControlName="departmentId" placeholder="Select department..." [disabled]="loadingDepartments">
+                <mat-option *ngIf="loadingDepartments" disabled>Loading departments...</mat-option>
+                <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">{{ dept.departmentName }}</mat-option>
+                <mat-option *ngIf="!loadingDepartments && departments.length === 0" disabled>No departments available</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Status -->
+          <div class="assign-field-group">
+            <label class="field-label">Status</label>
+            <mat-form-field appearance="outline" class="mat-field">
+              <mat-select formControlName="status">
+                <mat-option [value]="true">Active</mat-option>
+                <mat-option [value]="false">Inactive</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button mat-stroked-button class="btn-cancel" type="button" (click)="cancel()">
+      Cancel
+    </button>
+    <button mat-flat-button class="btn-submit" type="button" (click)="submit()" [disabled]="categoryForm.invalid || loading">
+      <mat-icon *ngIf="!loading">save</mat-icon>
+      <mat-spinner diameter="16" *ngIf="loading" style="margin-right:8px;"></mat-spinner>
+      <span *ngIf="!loading">{{ submitButtonLabel }}</span>
+      <span *ngIf="loading">Saving...</span>
+    </button>
+  </div>
 </div>
-
-<form class="ticket-category-modal" [formGroup]="categoryForm" (ngSubmit)="submit()">
-
-  <!-- Category Name -->
-  <div class="field-group">
-    <label class="field-label">Category Name <span class="required">*</span></label>
-    <input
-      matInput
-      class="field-input"
-      formControlName="name"
-      placeholder="e.g., Software Issues"
-    />
-    <span class="field-error" *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.hasError('required')">
-      Category Name is required
-    </span>
-    <span class="field-error" *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.hasError('minlength')">
-      Minimum 2 characters
-    </span>
-  </div>
-
-  <!-- Department -->
-  <div class="field-group">
-    <label class="field-label">Department</label>
-    <div class="select-wrapper">
-      <mat-select
-        class="field-select"
-        formControlName="departmentId"
-        [disabled]="loadingDepartments"
-      >
-        <mat-option *ngIf="loadingDepartments" disabled>
-          Loading departments...
-        </mat-option>
-        <mat-option *ngFor="let dept of departments" [value]="dept.departmentId">
-          {{ dept.departmentName }}
-        </mat-option>
-        <mat-option *ngIf="!loadingDepartments && departments.length === 0" disabled>
-          No departments available
-        </mat-option>
-      </mat-select>
-    </div>
-    <span class="field-error" *ngIf="categoryForm.get('departmentId')?.touched && categoryForm.get('departmentId')?.hasError('required')">
-      Department is required
-    </span>
-  </div>
-
-  <!-- Status -->
-  <div class="field-group">
-    <label class="field-label">Status</label>
-    <div class="select-wrapper">
-      <mat-select class="field-select" formControlName="status">
-        <mat-option [value]="true">Active</mat-option>
-        <mat-option [value]="false">Inactive</mat-option>
-      </mat-select>
-    </div>
-  </div>
-
-  <!-- Actions -->
-  <div class="actions">
-    <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
-    <button type="submit" class="btn-submit" [disabled]="loading">
-      {{ submitButtonLabel }}
-      <span class="spinner" *ngIf="loading"></span>
-    </button>
-  </div>
-
-</form>
