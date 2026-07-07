@@ -2,11 +2,11 @@
   <div class="forbidden-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; text-align: center; gap: 1rem;">
     <mat-icon style="font-size: 4rem; width: 4rem; height: 4rem; color: #ef4444;">lock</mat-icon>
     <h2 style="font-size: 1.5rem; font-weight: 600; color: #1e293b; margin: 0;">Access Denied</h2>
-    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view social security rules. Please contact your system administrator.</p>
+    <p style="color: #64748b; max-width: 400px; margin: 0;">You do not have permission to view social security authorities. Please contact your system administrator.</p>
     <button class="create-rule-btn" (click)="goBack()" style="margin-top: 1rem; width: auto;">Go Back</button>
   </div>
 } @else {
-  <div class="ss-rules-container">
+  <div class="ss-page-container">
     <div class="page-header-wrapper">
       <div class="page-header">
         <div class="title-section">
@@ -19,9 +19,9 @@
           </div>
         </div>
         @if (hasPermission('social_security_rule_add')) {
-          <button class="create-rule-btn" (click)="openRuleDialog()">
+          <button class="create-rule-btn" (click)="openCreateDialog()">
             <mat-icon>add</mat-icon>
-            <span>Add Social Security Rule</span>
+            <span>Add Authority</span>
           </button>
         }
       </div>
@@ -29,7 +29,7 @@
 
     <div class="tab-navigation">
       @for (tab of ssTabs; track tab.key) {
-      <button class="tab" [class.active]="tab.key === 'rules'" (click)="navigateToTab(tab.route)">
+      <button class="tab" [class.active]="tab.key === 'authorities'" (click)="navigateToTab(tab.route)">
         {{ tab.label }}
       </button>
       }
@@ -40,59 +40,55 @@
       <div class="loading-state">
         <mat-spinner diameter="34"></mat-spinner>
       </div>
-      } @else if (rules().length === 0) {
+      } @else if (authorities().length === 0) {
       <div class="empty-state">
-        <h3>No social security rules configured yet.</h3>
+        <h3>No social security authorities configured yet.</h3>
         @if (hasPermission('social_security_rule_add')) {
-          <button class="create-rule-btn" (click)="openRuleDialog()" style="width: auto;">
+          <button class="create-rule-btn" (click)="openCreateDialog()" style="width: auto;">
             <mat-icon>add</mat-icon>
-            <span>Create rule</span>
+            <span>Create authority</span>
           </button>
         }
       </div>
       } @else {
-      <div class="rules-grid">
-        @for (rule of rules(); track rule.ruleId) {
-        <article class="rule-card" [class.inactive-card]="!(rule.isActive ?? true)">
+      <div class="authority-grid">
+        @for (authority of authorities(); track authority.authorityId) {
+        <article class="authority-card">
           <div class="card-head">
             <div class="rule-name-with-icon">
               <div class="rule-icon-box">
-                <mat-icon>policy</mat-icon>
+                <mat-icon>account_balance</mat-icon>
               </div>
               <div class="card-title-wrap">
-                <h3>{{ rule.ruleName || '-' }}</h3>
-                <p>{{ getSchemeName(rule.schemeId) }}</p>
+                <h3>{{ authority.authorityName || '-' }}</h3>
+                <p>{{ authority.authorityCode || '-' }}</p>
               </div>
             </div>
-            <span class="badge" [ngClass]="(rule.isActive ?? true) ? 'status-active' : 'status-inactive'">
-              {{ (rule.isActive ?? true) ? 'Active' : 'Inactive' }}
-            </span>
           </div>
 
           <div class="card-body">
             <div class="meta-item">
-              <span class="meta-label">Employee %</span>
-              <span class="meta-value">{{ (rule.employeeDefaultPct ?? 0) | number:'1.2-2' }}%</span>
+              <span class="meta-label">Jurisdiction</span>
+              <span class="meta-value">{{ getJurisdictionName(authority.jurisdictionId) }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">Employer %</span>
-              <span class="meta-value">{{ (rule.employerDefaultPct ?? 0) | number:'1.2-2' }}%</span>
+              <span class="meta-label">Portal URL</span>
+              <span class="meta-value">{{ authority.portalUrl || '-' }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Remittance Frequency</span>
+              <span class="meta-value">{{ authority.remittanceFrequency || '-' }}</span>
             </div>
           </div>
 
           <div class="card-actions">
             @if (hasPermission('social_security_rule_edit')) {
-              <button mat-icon-button class="action-btn hover-primary" title="Edit Rule" (click)="editRule(rule)" [disabled]="!isRuleActive(rule)">
+              <button mat-icon-button class="action-btn hover-primary" title="Edit Authority" (click)="editAuthority(authority)">
                 <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button class="action-btn hover-primary"
-                [title]="(rule.isActive ?? true) ? 'Deactivate' : 'Activate'"
-                (click)="onToggleStatus(rule)">
-                <mat-icon>{{ (rule.isActive ?? true) ? 'toggle_on' : 'toggle_off' }}</mat-icon>
               </button>
             }
             @if (hasPermission('social_security_rule_delete')) {
-              <button mat-icon-button class="action-btn hover-danger" title="Delete Rule" (click)="onDelete(rule)">
+              <button mat-icon-button class="action-btn hover-danger" title="Delete Authority" (click)="deleteAuthority(authority)">
                 <mat-icon>delete</mat-icon>
               </button>
             }
@@ -103,7 +99,7 @@
       }
 
       <div class="table-footer">
-        <p>Showing {{ rules().length }} of {{ rules().length }} social security rules</p>
+        <p>Showing {{ authorities().length }} of {{ authorities().length }} social security authorities</p>
       </div>
     </div>
   </div>

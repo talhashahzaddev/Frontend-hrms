@@ -23,44 +23,34 @@
   </div>
 
   <!-- Enrollment status panel -->
-  @if (!enrollmentLoading) {
-    <div class="status-panel" [class.no-enrollment]="!enrollment">
-      @if (enrollment) {
-        <div class="status-grid">
-          <div class="status-cell">
-            <span class="label">Enrollment status</span>
-            <span class="status-pill" [ngClass]="statusBadgeClass">{{ enrollment.enrollmentStatus }}</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Rule</span>
-            <span class="value">{{ enrollment.ruleName || '-' }}</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Scheme</span>
-            <span class="value">{{ enrollment.schemeName || '-' }}</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Employee %</span>
-            <span class="value">{{ effectiveEmployeePct ?? 0 | number:'1.0-2' }}%</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Employer %</span>
-            <span class="value">{{ effectiveEmployerPct ?? 0 | number:'1.0-2' }}%</span>
-          </div>
-          <div class="status-cell">
-            <span class="label">Effective from</span>
-            <span class="value">{{ enrollment.effectiveDate | localizedDate:'mediumDate' }}</span>
-          </div>
+  @if (!enrollmentLoading && enrollment) {
+    <div class="status-panel">
+      <div class="status-grid">
+        <div class="status-cell">
+          <span class="label">Enrollment status</span>
+          <span class="status-pill" [ngClass]="statusBadgeClass">{{ enrollment.enrollmentStatus }}</span>
         </div>
-      } @else {
-        <div class="empty-state">
-          <mat-icon>info</mat-icon>
-          <div>
-            <strong>You're not currently enrolled in social security.</strong>
-            <p>Click "Request enrollment" to submit a request to HR.</p>
-          </div>
+        <div class="status-cell">
+          <span class="label">Rule</span>
+          <span class="value">{{ enrollment.ruleName || '-' }}</span>
         </div>
-      }
+        <div class="status-cell">
+          <span class="label">Scheme</span>
+          <span class="value">{{ enrollment.schemeName || '-' }}</span>
+        </div>
+        <div class="status-cell">
+          <span class="label">Employee %</span>
+          <span class="value">{{ effectiveEmployeePct ?? 0 | number:'1.0-2' }}%</span>
+        </div>
+        <div class="status-cell">
+          <span class="label">Employer %</span>
+          <span class="value">{{ effectiveEmployerPct ?? 0 | number:'1.0-2' }}%</span>
+        </div>
+        <div class="status-cell">
+          <span class="label">Effective from</span>
+          <span class="value">{{ enrollment.effectiveDate | localizedDate:'mediumDate' }}</span>
+        </div>
+      </div>
     </div>
   }
 
@@ -70,39 +60,6 @@
       <p>Loading your social security records...</p>
     </div>
   } @else {
-    <div class="section-tabs with-tools">
-      <div>
-        <button type="button" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">My requests</button>
-        <button type="button" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">My claims</button>
-        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
-      </div>
-
-      @if (currentTab === 'transactions') {
-        <div class="filters-row">
-          <div class="search-box">
-            <mat-icon>search</mat-icon>
-            <input type="text" placeholder="Search rule or period..." [(ngModel)]="searchTerm" />
-          </div>
-
-          <select class="filter-select" [(ngModel)]="selectedPeriodId">
-            <option value="">All periods</option>
-            @for (period of periodOptions; track period.id) {
-              <option [value]="period.id">{{ period.name }}</option>
-            }
-          </select>
-
-          <select class="filter-select" [(ngModel)]="selectedStatus">
-            <option value="all">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="deducted">Deducted</option>
-            <option value="rejected">Rejected</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </div>
-      }
-    </div>
-
     <div class="summary-cards">
       <div class="card">
         <div class="card-content">
@@ -147,6 +104,39 @@
         </div>
         <p class="card-footer">periods with enrollment</p>
       </div>
+    </div>
+
+    <div class="section-tabs with-tools">
+      <div>
+        <button type="button" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">My requests</button>
+        <button type="button" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">My claims</button>
+        <button type="button" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
+      </div>
+
+      @if (currentTab === 'transactions') {
+        <div class="filters-row">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search rule or period..." [(ngModel)]="searchTerm" />
+          </div>
+
+          <select class="filter-select" [(ngModel)]="selectedPeriodId">
+            <option value="">All periods</option>
+            @for (period of periodOptions; track period.id) {
+              <option [value]="period.id">{{ period.name }}</option>
+            }
+          </select>
+
+          <select class="filter-select" [(ngModel)]="selectedStatus">
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="deducted">Deducted</option>
+            <option value="rejected">Rejected</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      }
     </div>
 
     @if (currentTab === 'transactions') {

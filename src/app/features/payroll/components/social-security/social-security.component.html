@@ -6,34 +6,6 @@
     </div>
 
     <div class="header-actions">
-      @if (currentTab === 'jurisdictions') {
-        <button class="add-btn" type="button" (click)="openCreateJurisdictionDialog()">
-          <mat-icon>add</mat-icon>
-          Add jurisdiction
-        </button>
-      }
-
-      @if (currentTab === 'authorities') {
-        <button class="add-btn" type="button" (click)="openCreateAuthorityDialog()">
-          <mat-icon>add</mat-icon>
-          Add authority
-        </button>
-      }
-
-      @if (currentTab === 'schemes') {
-        <button class="add-btn" type="button" (click)="openCreateSchemeDialog()">
-          <mat-icon>add</mat-icon>
-          Add scheme
-        </button>
-      }
-
-      @if (currentTab === 'rules') {
-        <button class="add-btn" type="button" (click)="openCreateRuleDialog()">
-          <mat-icon>add</mat-icon>
-          Add rule
-        </button>
-      }
-
       @if (currentTab === 'transactions') {
         <button class="add-btn" type="button" (click)="openAddTransactionDialog()">
           <mat-icon>add</mat-icon>
@@ -55,39 +27,13 @@
   </div>
 
   <div class="tab-navigation">
-    <button class="tab" [class.active]="currentTab === 'jurisdictions'" (click)="setTab('jurisdictions')">Jurisdictions</button>
-    <button class="tab" [class.active]="currentTab === 'authorities'" (click)="setTab('authorities')">Authorities</button>
-    <button class="tab" [class.active]="currentTab === 'schemes'" (click)="setTab('schemes')">Schemes</button>
-    <button class="tab" [class.active]="currentTab === 'rules'" (click)="setTab('rules')">Rules</button>
+    <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
     <button class="tab" [class.active]="currentTab === 'requests'" (click)="setTab('requests')">Requests</button>
     <button class="tab" [class.active]="currentTab === 'enrollments'" (click)="setTab('enrollments')">Enrollments</button>
     <button class="tab" [class.active]="currentTab === 'claims'" (click)="setTab('claims')">Claims</button>
-    <button class="tab" [class.active]="currentTab === 'transactions'" (click)="setTab('transactions')">Transactions</button>
   </div>
 
   <div class="summary-cards">
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Jurisdictions</span>
-          <span class="value">{{ jurisdictionsCount }}</span>
-        </div>
-        <div class="icon-wrapper color-blue"><mat-icon>public</mat-icon></div>
-      </div>
-      <p class="card-footer">configured regions</p>
-    </div>
-
-    <div class="card">
-      <div class="card-content">
-        <div class="info">
-          <span class="label">Authorities</span>
-          <span class="value">{{ authoritiesCount }}</span>
-        </div>
-        <div class="icon-wrapper color-green"><mat-icon>apartment</mat-icon></div>
-      </div>
-      <p class="card-footer">registered authorities</p>
-    </div>
-
     <div class="card">
       <div class="card-content">
         <div class="info">
@@ -110,185 +56,6 @@
       <p class="card-footer">current page total</p>
     </div>
   </div>
-
-  @if (isMasterLoading && currentTab !== 'transactions') {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Loading social security masters...</p>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'jurisdictions') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Country</th>
-              <th>Currency</th>
-              <th>Default</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (jurisdictions.length === 0) {
-              <tr>
-                <td colspan="6" class="empty-row">No jurisdictions found.</td>
-              </tr>
-            } @else {
-              @for (item of jurisdictions; track item.jurisdictionId) {
-                <tr>
-                  <td>{{ item.jurisdictionCode }}</td>
-                  <td>{{ item.jurisdictionName }}</td>
-                  <td>{{ item.countryCode || '-' }}</td>
-                  <td>{{ item.currency || '-' }}</td>
-                  <td>{{ item.isDefault ? 'Yes' : 'No' }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditJurisdictionDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteJurisdiction(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'authorities') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Jurisdiction</th>
-              <th>Portal</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (authorities.length === 0) {
-              <tr>
-                <td colspan="5" class="empty-row">No authorities found.</td>
-              </tr>
-            } @else {
-              @for (item of authorities; track item.authorityId) {
-                <tr>
-                  <td>{{ item.authorityCode }}</td>
-                  <td>{{ item.authorityName }}</td>
-                  <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
-                  <td>{{ item.portalUrl || '-' }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditAuthorityDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteAuthority(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'schemes') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Jurisdiction</th>
-              <th>Authority</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (schemes.length === 0) {
-              <tr>
-                <td colspan="5" class="empty-row">No schemes found.</td>
-              </tr>
-            } @else {
-              @for (item of schemes; track item.schemeId) {
-                <tr>
-                  <td>{{ item.schemeCode }}</td>
-                  <td>{{ item.schemeName }}</td>
-                  <td>{{ getJurisdictionName(item.jurisdictionId) }}</td>
-                  <td>{{ getAuthorityName(item.authorityId) }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditSchemeDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteScheme(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  @if (!isMasterLoading && currentTab === 'rules') {
-    <div class="content-card master-card">
-      <div class="table-responsive">
-        <table class="compact-table">
-          <thead>
-            <tr>
-              <th>Rule</th>
-              <th>Scheme</th>
-              <th class="text-right">Employee %</th>
-              <th class="text-right">Employer %</th>
-              <th class="text-right">Max salary</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (rules.length === 0) {
-              <tr>
-                <td colspan="6" class="empty-row">No rules found.</td>
-              </tr>
-            } @else {
-              @for (item of rules; track item.ruleId) {
-                <tr>
-                  <td>{{ item.ruleName }}</td>
-                  <td>{{ getSchemeName(item.schemeId) }}</td>
-                  <td class="text-right">{{ item.employeeDefaultPct ?? 0 | number:'1.0-2' }}%</td>
-                  <td class="text-right">{{ item.employerDefaultPct ?? 0 | number:'1.0-2' }}%</td>
-                  <td class="text-right">{{ item.maxSalaryLimit ?? '-' }}</td>
-                  <td class="text-right action-cell">
-                    <button class="action-btn hover-primary" type="button" (click)="openEditRuleDialog(item)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button class="action-btn hover-danger" type="button" (click)="deleteRule(item)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
 
   @if (currentTab === 'transactions') {
     <div class="content-card">
